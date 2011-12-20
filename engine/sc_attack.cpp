@@ -47,18 +47,6 @@ void attack_t::init_attack_t_()
 
   // Prevent melee from being scheduled when player is moving
   if ( range < 0 ) range = 5;
-
-  if ( p -> meta_gem == META_AGILE_SHADOWSPIRIT         ||
-       p -> meta_gem == META_BURNING_SHADOWSPIRIT       ||
-       p -> meta_gem == META_CHAOTIC_SKYFIRE            ||
-       p -> meta_gem == META_CHAOTIC_SKYFLARE           ||
-       p -> meta_gem == META_CHAOTIC_SHADOWSPIRIT       ||
-       p -> meta_gem == META_RELENTLESS_EARTHSIEGE      ||
-       p -> meta_gem == META_RELENTLESS_EARTHSTORM      ||
-       p -> meta_gem == META_REVERBERATING_SHADOWSPIRIT )
-  {
-    crit_multiplier *= 1.03;
-  }
 }
 
 attack_t::attack_t( const active_spell_t& s, int t, bool special ) :

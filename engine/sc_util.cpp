@@ -292,17 +292,6 @@ const char* util_t::profession_type_string( int type )
   switch ( type )
   {
   case PROFESSION_NONE:     return "none";
-  case PROF_ALCHEMY:        return "alchemy";
-  case PROF_BLACKSMITHING:  return "blacksmithing";
-  case PROF_ENCHANTING:     return "enchanting";
-  case PROF_ENGINEERING:    return "engineering";
-  case PROF_HERBALISM:      return "herbalism";
-  case PROF_INSCRIPTION:    return "inscription";
-  case PROF_JEWELCRAFTING:  return "jewelcrafting";
-  case PROF_LEATHERWORKING: return "leatherworking";
-  case PROF_MINING:         return "mining";
-  case PROF_SKINNING:       return "skinning";
-  case PROF_TAILORING:      return "tailoring";
   }
   return "unknown";
 }
@@ -324,17 +313,6 @@ profession_type util_t::translate_profession_id( int skill_id )
 {
   switch ( skill_id )
   {
-  case 164: return PROF_BLACKSMITHING;
-  case 165: return PROF_LEATHERWORKING;
-  case 171: return PROF_ALCHEMY;
-  case 182: return PROF_HERBALISM;
-  case 186: return PROF_MINING;
-  case 197: return PROF_TAILORING;
-  case 202: return PROF_ENGINEERING;
-  case 333: return PROF_ENCHANTING;
-  case 393: return PROF_SKINNING;
-  case 755: return PROF_JEWELCRAFTING;
-  case 773: return PROF_INSCRIPTION;
   }
   return PROFESSION_NONE;
 }
@@ -486,59 +464,7 @@ const char* util_t::meta_gem_type_string( int type )
 {
   switch ( type )
   {
-  case META_AGILE_SHADOWSPIRIT:         return "agile_shadowspirit";
-  case META_AUSTERE_EARTHSIEGE:         return "austere_earthsiege";
-  case META_AUSTERE_SHADOWSPIRIT:       return "austere_shadowspirit";
-  case META_BEAMING_EARTHSIEGE:         return "beaming_earthsiege";
-  case META_BRACING_EARTHSIEGE:         return "bracing_earthsiege";
-  case META_BRACING_EARTHSTORM:         return "bracing_earthstorm";
-  case META_BRACING_SHADOWSPIRIT:       return "bracing_shadowspirit";
-  case META_BURNING_SHADOWSPIRIT:       return "burning_shadowspirit";
-  case META_CHAOTIC_SHADOWSPIRIT:       return "chaotic_shadowspirit";
-  case META_CHAOTIC_SKYFIRE:            return "chaotic_skyfire";
-  case META_CHAOTIC_SKYFLARE:           return "chaotic_skyflare";
-  case META_DESTRUCTIVE_SHADOWSPIRIT:   return "destructive_shadowspirit";
-  case META_EFFULGENT_SHADOWSPIRIT:     return "effulgent_shadowspirit";
-  case META_EMBER_SHADOWSPIRIT:         return "ember_shadowspirit";
-  case META_EMBER_SKYFLARE:             return "ember_skyflare";
-  case META_ENIGMATIC_SHADOWSPIRIT:     return "enigmatic_shadowspirit";
-  case META_ENIGMATIC_SKYFLARE:         return "enigmatic_skyflare";
-  case META_ENIGMATIC_STARFLARE:        return "enigmatic_starflare";
-  case META_ENIGMATIC_SKYFIRE:          return "enigmatic_skyfire";
-  case META_ETERNAL_EARTHSIEGE:         return "eternal_earthsiege";
-  case META_ETERNAL_EARTHSTORM:         return "eternal_earthstorm";
-  case META_ETERNAL_SHADOWSPIRIT:       return "eternal_shadowspirit";
-  case META_FLEET_SHADOWSPIRIT:         return "fleet_shadowspirit";
-  case META_FORLORN_SHADOWSPIRIT:       return "forlorn_shadowspirit";
-  case META_FORLORN_SKYFLARE:           return "forlorn_skyflare";
-  case META_FORLORN_STARFLARE:          return "forlorn_starflare";
-  case META_IMPASSIVE_SHADOWSPIRIT:     return "impassive_shadowspirit";
-  case META_IMPASSIVE_SKYFLARE:         return "impassive_skyflare";
-  case META_IMPASSIVE_STARFLARE:        return "impassive_starflare";
-  case META_INSIGHTFUL_EARTHSIEGE:      return "insightful_earthsiege";
-  case META_INSIGHTFUL_EARTHSTORM:      return "insightful_earthstorm";
-  case META_INVIGORATING_EARTHSIEGE:    return "invigorating_earthsiege";
-  case META_MYSTICAL_SKYFIRE:           return "mystical_skyfire";
-  case META_PERSISTENT_EARTHSHATTER:    return "persistent_earthshatter";
-  case META_PERSISTENT_EARTHSIEGE:      return "persistent_earthsiege";
-  case META_POWERFUL_EARTHSHATTER:      return "powerful_earthshatter";
-  case META_POWERFUL_EARTHSIEGE:        return "powerful_earthsiege";
-  case META_POWERFUL_EARTHSTORM:        return "powerful_earthstorm";
-  case META_POWERFUL_SHADOWSPIRIT:      return "powerful_shadowspirit";
-  case META_RELENTLESS_EARTHSIEGE:      return "relentless_earthsiege";
-  case META_RELENTLESS_EARTHSTORM:      return "relentless_earthstorm";
-  case META_REVERBERATING_SHADOWSPIRIT: return "reverberating_shadowspirit";
-  case META_REVITALIZING_SHADOWSPIRIT:  return "revitalizing_shadowspirit";
-  case META_REVITALIZING_SKYFLARE:      return "revitalizing_skyflare";
-  case META_SWIFT_SKYFIRE:              return "swift_skyfire";
-  case META_SWIFT_SKYFLARE:             return "swift_skyflare";
-  case META_SWIFT_STARFIRE:             return "swift_starfire";
-  case META_SWIFT_STARFLARE:            return "swift_starflare";
-  case META_THUNDERING_SKYFIRE:         return "thundering_skyfire";
-  case META_THUNDERING_SKYFLARE:        return "thundering_skyflare";
-  case META_TIRELESS_STARFLARE:         return "tireless_starflare";
-  case META_TRENCHANT_EARTHSHATTER:     return "trenchant_earthshatter";
-  case META_TRENCHANT_EARTHSIEGE:       return "trenchant_earthsiege";
+    case META_GEM_NONE:         return "none";
   }
   return "unknown";
 }
@@ -597,16 +523,7 @@ const char* util_t::resource_type_string( int type )
   case RESOURCE_RAGE:         return "rage";
   case RESOURCE_ENERGY:       return "energy";
   case RESOURCE_FOCUS:        return "focus";
-  case RESOURCE_RUNIC:        return "runic_power";
-  case RESOURCE_RUNE:         return "all_runes";
-  case RESOURCE_RUNE_BLOOD:   return "blood_runes";
-  case RESOURCE_RUNE_UNHOLY:  return "unholy_runes";
-  case RESOURCE_RUNE_FROST:   return "frost_runes";
-  case RESOURCE_SOUL_SHARDS:  return "soul_shards";
-  case RESOURCE_HOLY_POWER:   return "holy_power";
   case RESOURCE_FORCE:        return "force";
-  case RESOURCE_LIGHT_FORCE:  return "light_force";
-  case RESOURCE_DARK_FORCE:   return "dark_Force";
   }
   return "unknown";
 }
@@ -916,22 +833,6 @@ const char* util_t::flask_type_string( int flask )
   switch ( flask )
   {
   case FLASK_NONE:               return "none";
-  case FLASK_BLINDING_LIGHT:     return "blinding_light";
-  case FLASK_DISTILLED_WISDOM:   return "distilled_wisdom";
-  case FLASK_DRACONIC_MIND:      return "draconic_mind";
-  case FLASK_ENDLESS_RAGE:       return "endless_rage";
-  case FLASK_ENHANCEMENT:        return "enhancement";
-  case FLASK_FLOWING_WATER:      return "flowing_water";
-  case FLASK_FROST_WYRM:         return "frost_wyrm";
-  case FLASK_MIGHTY_RESTORATION: return "mighty_restoration";
-  case FLASK_NORTH:              return "north";
-  case FLASK_PURE_DEATH:         return "pure_death";
-  case FLASK_PURE_MOJO:          return "pure_mojo";
-  case FLASK_RELENTLESS_ASSAULT: return "relentless_assault";
-  case FLASK_SUPREME_POWER:      return "supreme_power";
-  case FLASK_STEELSKIN:          return "steelskin";
-  case FLASK_TITANIC_STRENGTH:   return "titanic_strength";
-  case FLASK_WINDS:              return "winds";
   }
   return "unknown";
 }
@@ -954,36 +855,6 @@ const char* util_t::food_type_string( int food )
   switch ( food )
   {
   case FOOD_NONE:                     return "none";
-  case FOOD_BAKED_ROCKFISH:           return "baked_rockfish";
-  case FOOD_BASILISK_LIVERDOG:        return "basilisk_liverdog";
-  case FOOD_BEER_BASTED_CROCOLISK:    return "beer_basted_crocolisk";
-  case FOOD_BLACKBELLY_SUSHI:         return "blackbelly_sushi";
-  case FOOD_BLACKENED_BASILISK:       return "blackened_basilisk";
-  case FOOD_BLACKENED_DRAGONFIN:      return "blackened_dragonfin";
-  case FOOD_CROCOLISK_AU_GRATIN:      return "crocolisk_au_gratin";
-  case FOOD_CRUNCHY_SERPENT:          return "crunchy_serpent";
-  case FOOD_DELICIOUS_SAGEFISH_TAIL:  return "delicious_sagefish_tail";
-  case FOOD_DRAGONFIN_FILET:          return "dragonfin_filet";
-  case FOOD_FISH_FEAST:               return "fish_feast";
-  case FOOD_FORTUNE_COOKIE:           return "fortune_cookie";
-  case FOOD_GOLDEN_FISHSTICKS:        return "golden_fishsticks";
-  case FOOD_GREAT_FEAST:              return "great_feast";
-  case FOOD_GRILLED_DRAGON:           return "grilled_dragon";
-  case FOOD_HEARTY_RHINO:             return "hearty_rhino";
-  case FOOD_IMPERIAL_MANTA_STEAK:     return "imperial_manta_steak";
-  case FOOD_LAVASCALE_FILLET:         return "lavascale_fillet";
-  case FOOD_MEGA_MAMMOTH_MEAL:        return "mega_mammoth_meal";
-  case FOOD_MUSHROOM_SAUCE_MUDFISH:   return "mushroom_sauce_mudfish";
-  case FOOD_POACHED_NORTHERN_SCULPIN: return "poached_northern_sculpin";
-  case FOOD_POACHED_BLUEFISH:         return "poached_bluefish";
-  case FOOD_RHINOLICIOUS_WORMSTEAK:   return "rhinolicious_wormsteak";
-  case FOOD_SEAFOOD_MAGNIFIQUE_FEAST: return "seafood_magnifique_feast";
-  case FOOD_SEVERED_SAGEFISH_HEAD:    return "severed_sagefish_head";
-  case FOOD_SKEWERED_EEL:             return "skewered_eel";
-  case FOOD_SMOKED_SALMON:            return "smoked_salmon";
-  case FOOD_SNAPPER_EXTREME:          return "snapper_extreme";
-  case FOOD_TENDER_SHOVELTUSK_STEAK:  return "tender_shoveltusk_steak";
-  case FOOD_VERY_BURNT_WORG:          return "very_burnt_worg";
   }
   return "unknown";
 }
@@ -1117,7 +988,6 @@ const char* util_t::stat_type_string( int stat )
   case STAT_RAGE:   return "rage";
   case STAT_ENERGY: return "energy";
   case STAT_FOCUS:  return "focus";
-  case STAT_RUNIC:  return "runic";
 
   case STAT_SPELL_POWER:       return "spell_power";
   case STAT_SPELL_PENETRATION: return "spell_penetration";
@@ -1170,7 +1040,6 @@ const char* util_t::stat_type_abbrev( int stat )
   case STAT_RAGE:   return "Rage";
   case STAT_ENERGY: return "Energy";
   case STAT_FOCUS:  return "Focus";
-  case STAT_RUNIC:  return "Runic";
 
   case STAT_SPELL_POWER:       return "SP";
   case STAT_SPELL_PENETRATION: return "SPen";
@@ -1223,7 +1092,6 @@ const char* util_t::stat_type_wowhead( int stat )
   case STAT_RAGE:   return "rage";
   case STAT_ENERGY: return "energy";
   case STAT_FOCUS:  return "focus";
-  case STAT_RUNIC:  return "runic";
 
   case STAT_SPELL_POWER:       return "spellPower";
   case STAT_SPELL_PENETRATION: return "spellPen";

@@ -18,20 +18,6 @@ void spell_t::init_spell_t_()
   crit_bonus = 0.5;
   min_gcd = 1.0;
   hasted_ticks = true;
-
-  player_t* p = player;
-
-  if ( p -> meta_gem == META_AGILE_SHADOWSPIRIT         ||
-       p -> meta_gem == META_BURNING_SHADOWSPIRIT       ||
-       p -> meta_gem == META_CHAOTIC_SKYFIRE            ||
-       p -> meta_gem == META_CHAOTIC_SKYFLARE           ||
-       p -> meta_gem == META_CHAOTIC_SHADOWSPIRIT       ||
-       p -> meta_gem == META_RELENTLESS_EARTHSIEGE      ||
-       p -> meta_gem == META_RELENTLESS_EARTHSTORM      ||
-       p -> meta_gem == META_REVERBERATING_SHADOWSPIRIT )
-  {
-    crit_multiplier *= 1.03;
-  }
 }
 
 spell_t::spell_t( const active_spell_t& s, int t ) :

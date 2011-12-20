@@ -735,83 +735,6 @@ void player_t::init_meta_gem( gear_stats_t& item_stats )
 
   if ( sim -> debug ) log_t::output( sim, "Initializing meta-gem for player (%s)", name() );
 
-  if      ( meta_gem == META_AGILE_SHADOWSPIRIT         ) item_stats.attribute[ ATTR_AGILITY ] += 54;
-  else if ( meta_gem == META_AUSTERE_EARTHSIEGE         ) item_stats.attribute[ ATTR_STAMINA ] += 32;
-  else if ( meta_gem == META_AUSTERE_SHADOWSPIRIT       ) item_stats.attribute[ ATTR_STAMINA ] += 81;
-  else if ( meta_gem == META_BEAMING_EARTHSIEGE         ) item_stats.crit_rating += 21;
-  else if ( meta_gem == META_BRACING_EARTHSIEGE         ) item_stats.attribute[ ATTR_INTELLECT ] += 21;
-  else if ( meta_gem == META_BRACING_EARTHSTORM         ) item_stats.attribute[ ATTR_INTELLECT ] += 12;
-  else if ( meta_gem == META_BRACING_SHADOWSPIRIT       ) item_stats.attribute[ ATTR_INTELLECT ] += 54;
-  else if ( meta_gem == META_BURNING_SHADOWSPIRIT       ) item_stats.attribute[ ATTR_INTELLECT ] += 54;
-  else if ( meta_gem == META_CHAOTIC_SHADOWSPIRIT       ) item_stats.crit_rating += 54;
-  else if ( meta_gem == META_CHAOTIC_SKYFIRE            ) item_stats.crit_rating += 12;
-  else if ( meta_gem == META_CHAOTIC_SKYFLARE           ) item_stats.crit_rating += 21;
-  else if ( meta_gem == META_DESTRUCTIVE_SHADOWSPIRIT   ) item_stats.crit_rating += 54;
-  else if ( meta_gem == META_DESTRUCTIVE_SKYFIRE        ) item_stats.crit_rating += 12;
-  else if ( meta_gem == META_DESTRUCTIVE_SKYFLARE       ) item_stats.crit_rating += 21;
-  else if ( meta_gem == META_EFFULGENT_SHADOWSPIRIT     ) item_stats.attribute[ ATTR_STAMINA ] += 81;
-  else if ( meta_gem == META_EMBER_SHADOWSPIRIT         ) item_stats.attribute[ ATTR_INTELLECT ] += 54;
-  else if ( meta_gem == META_EMBER_SKYFIRE              ) item_stats.attribute[ ATTR_INTELLECT ] += 12;
-  else if ( meta_gem == META_EMBER_SKYFLARE             ) item_stats.attribute[ ATTR_INTELLECT ] += 21;
-  else if ( meta_gem == META_ENIGMATIC_SHADOWSPIRIT     ) item_stats.crit_rating += 54;
-  else if ( meta_gem == META_ENIGMATIC_SKYFLARE         ) item_stats.crit_rating += 21;
-  else if ( meta_gem == META_ENIGMATIC_STARFLARE        ) item_stats.crit_rating += 17;
-  else if ( meta_gem == META_ENIGMATIC_SKYFIRE          ) item_stats.crit_rating += 12;
-  else if ( meta_gem == META_ETERNAL_EARTHSIEGE         ) item_stats.dodge_rating += 21;
-  else if ( meta_gem == META_ETERNAL_SHADOWSPIRIT       ) item_stats.attribute[ ATTR_STAMINA ] += 81;
-  else if ( meta_gem == META_FLEET_SHADOWSPIRIT         ) item_stats.mastery_rating += 54;
-  else if ( meta_gem == META_FORLORN_SHADOWSPIRIT       ) item_stats.attribute[ ATTR_INTELLECT ] += 54;
-  else if ( meta_gem == META_FORLORN_SKYFLARE           ) item_stats.attribute[ ATTR_INTELLECT ] += 21;
-  else if ( meta_gem == META_FORLORN_STARFLARE          ) item_stats.attribute[ ATTR_INTELLECT ] += 17;
-  else if ( meta_gem == META_IMPASSIVE_SHADOWSPIRIT     ) item_stats.crit_rating += 54;
-  else if ( meta_gem == META_IMPASSIVE_SKYFLARE         ) item_stats.crit_rating += 21;
-  else if ( meta_gem == META_IMPASSIVE_STARFLARE        ) item_stats.crit_rating += 17;
-  else if ( meta_gem == META_INSIGHTFUL_EARTHSIEGE      ) item_stats.attribute[ ATTR_INTELLECT ] += 21;
-  else if ( meta_gem == META_INSIGHTFUL_EARTHSTORM      ) item_stats.attribute[ ATTR_INTELLECT ] += 12;
-  else if ( meta_gem == META_INVIGORATING_EARTHSIEGE    ) item_stats.haste_rating += 21;
-  else if ( meta_gem == META_PERSISTENT_EARTHSHATTER    ) item_stats.crit_rating += 21;
-  else if ( meta_gem == META_PERSISTENT_EARTHSIEGE      ) item_stats.crit_rating += 17;
-  else if ( meta_gem == META_POWERFUL_EARTHSHATTER      ) item_stats.attribute[ ATTR_STAMINA ] += 26;
-  else if ( meta_gem == META_POWERFUL_EARTHSIEGE        ) item_stats.attribute[ ATTR_STAMINA ] += 32;
-  else if ( meta_gem == META_POWERFUL_EARTHSTORM        ) item_stats.attribute[ ATTR_STAMINA ] += 18;
-  else if ( meta_gem == META_POWERFUL_SHADOWSPIRIT      ) item_stats.attribute[ ATTR_STAMINA ] += 81;
-  else if ( meta_gem == META_RELENTLESS_EARTHSIEGE      ) item_stats.attribute[ ATTR_AGILITY ] += 21;
-  else if ( meta_gem == META_RELENTLESS_EARTHSTORM      ) item_stats.attribute[ ATTR_AGILITY ] += 12;
-  else if ( meta_gem == META_REVERBERATING_SHADOWSPIRIT ) item_stats.attribute[ ATTR_STRENGTH ] += 54;
-  else if ( meta_gem == META_REVITALIZING_SHADOWSPIRIT  ) item_stats.attribute[ ATTR_SPIRIT ] += 54;
-  else if ( meta_gem == META_REVITALIZING_SKYFLARE      ) item_stats.attribute[ ATTR_SPIRIT ] += 22;
-  else if ( meta_gem == META_SWIFT_SKYFIRE              ) item_stats.crit_rating += 12;
-  else if ( meta_gem == META_SWIFT_SKYFLARE             ) item_stats.crit_rating += 21;
-  else if ( meta_gem == META_SWIFT_STARFLARE            ) item_stats.crit_rating += 17;
-  else if ( meta_gem == META_TIRELESS_STARFLARE         ) item_stats.attribute[ ATTR_INTELLECT ] += 17;
-  else if ( meta_gem == META_TIRELESS_SKYFLARE          ) item_stats.attribute[ ATTR_INTELLECT ] += 21;
-  else if ( meta_gem == META_TRENCHANT_EARTHSHATTER     ) item_stats.attribute[ ATTR_INTELLECT ] += 17;
-  else if ( meta_gem == META_TRENCHANT_EARTHSIEGE       ) item_stats.attribute[ ATTR_INTELLECT ] += 21;
-
-  if ( ( meta_gem == META_AUSTERE_EARTHSIEGE ) || ( meta_gem == META_AUSTERE_SHADOWSPIRIT ) )
-  {
-    initial_armor_multiplier *= 1.02;
-  }
-  else if ( ( meta_gem == META_EMBER_SHADOWSPIRIT ) || ( meta_gem == META_EMBER_SKYFIRE ) || ( meta_gem == META_EMBER_SKYFLARE ) )
-  {
-    mana_per_intellect *= 1.02;
-  }
-  else if ( meta_gem == META_BEAMING_EARTHSIEGE )
-  {
-    mana_per_intellect *= 1.02;
-  }
-  else if ( meta_gem == META_MYSTICAL_SKYFIRE )
-  {
-    unique_gear_t::register_stat_proc( PROC_SPELL, RESULT_HIT_MASK, "mystical_skyfire", this, STAT_HASTE_RATING, 1, 320, 0.15, 4.0, 45.0 );
-  }
-  else if ( meta_gem == META_INSIGHTFUL_EARTHSTORM )
-  {
-    unique_gear_t::register_stat_proc( PROC_SPELL, RESULT_HIT_MASK, "insightful_earthstorm", this, STAT_MANA, 1, 300, 0.05, 0, 15.0 );
-  }
-  else if ( meta_gem == META_INSIGHTFUL_EARTHSIEGE )
-  {
-    unique_gear_t::register_stat_proc( PROC_SPELL, RESULT_HIT_MASK, "insightful_earthsiege", this, STAT_MANA, 1, 600, 0.05, 0, 15.0 );
-  }
 }
 
 // player_t::init_core ======================================================
@@ -1028,10 +951,6 @@ void player_t::init_resources( bool force )
 
       if ( i == RESOURCE_MANA )
       {
-        if ( ( meta_gem == META_EMBER_SHADOWSPIRIT ) || ( meta_gem == META_EMBER_SKYFIRE ) || ( meta_gem == META_EMBER_SKYFLARE ) )
-        {
-          resource_initial[ i ] *= 1.02;
-        }
         double adjust = ( is_pet() || is_enemy() || is_add() ) ? 0 : std::min( 20, ( int ) floor( intellect() ) );
         resource_initial[ i ] += ( floor( intellect() ) - adjust ) * mana_per_intellect + adjust;
       }
@@ -1100,51 +1019,6 @@ void player_t::init_professions_bonus()
 
   // This has to be called after init_attack() and init_core()
 
-  // Miners gain additional stamina
-  if      ( profession[ PROF_MINING ] >= 525 ) attribute_initial[ ATTR_STAMINA ] += 120.0;
-  else if ( profession[ PROF_MINING ] >= 450 ) attribute_initial[ ATTR_STAMINA ] +=  60.0;
-  else if ( profession[ PROF_MINING ] >= 375 ) attribute_initial[ ATTR_STAMINA ] +=  30.0;
-  else if ( profession[ PROF_MINING ] >= 300 ) attribute_initial[ ATTR_STAMINA ] +=  10.0;
-  else if ( profession[ PROF_MINING ] >= 225 ) attribute_initial[ ATTR_STAMINA ] +=   7.0;
-  else if ( profession[ PROF_MINING ] >= 150 ) attribute_initial[ ATTR_STAMINA ] +=   5.0;
-  else if ( profession[ PROF_MINING ] >=  75 ) attribute_initial[ ATTR_STAMINA ] +=   3.0;
-
-  // Skinners gain additional crit rating
-  if      ( profession[ PROF_SKINNING ] >= 525 )
-  {
-    initial_attack_crit += 80.0 / rating.attack_crit;
-    initial_spell_crit += 80.0 / rating.spell_crit;
-  }
-  else if ( profession[ PROF_SKINNING ] >= 450 )
-  {
-    initial_attack_crit += 40.0 / rating.attack_crit;
-    initial_spell_crit += 40.0 / rating.spell_crit;
-  }
-  else if ( profession[ PROF_SKINNING ] >= 375 )
-  {
-    initial_attack_crit += 20.0 / rating.attack_crit;
-    initial_spell_crit += 20.0 / rating.spell_crit;
-  }
-  else if ( profession[ PROF_SKINNING ] >= 300 )
-  {
-    initial_attack_crit += 12.0 / rating.attack_crit;
-    initial_spell_crit += 12.0 / rating.spell_crit;
-  }
-  else if ( profession[ PROF_SKINNING ] >= 225 )
-  {
-    initial_attack_crit +=  9.0 / rating.attack_crit;
-    initial_spell_crit +=  9.0 / rating.spell_crit;
-  }
-  else if ( profession[ PROF_SKINNING ] >= 150 )
-  {
-    initial_attack_crit +=  6.0 / rating.attack_crit;
-    initial_spell_crit +=  6.0 / rating.spell_crit;
-  }
-  else if ( profession[ PROF_SKINNING ] >=  75 )
-  {
-    initial_attack_crit +=  3.0 / rating.attack_crit;
-    initial_spell_crit +=  3.0 / rating.spell_crit;
-  }
 }
 
 // Execute Pet Action =======================================================
@@ -1229,15 +1103,6 @@ std::string player_t::init_use_profession_actions( const std::string& append )
 {
   std::string buffer;
   // Lifeblood
-  if ( profession[ PROF_HERBALISM ] >= 450 )
-  {
-    buffer += "/lifeblood";
-
-    if ( ! append.empty() )
-    {
-      buffer += append;
-    }
-  }
 
   return buffer;
 }
@@ -1566,7 +1431,6 @@ void player_t::init_scaling()
     scales_with[ STAT_RAGE   ] = 0;
     scales_with[ STAT_ENERGY ] = 0;
     scales_with[ STAT_FOCUS  ] = 0;
-    scales_with[ STAT_RUNIC  ] = 0;
 
     scales_with[ STAT_SPELL_POWER       ] = spell;
     scales_with[ STAT_SPELL_PENETRATION ] = 0;
@@ -1880,11 +1744,6 @@ double player_t::composite_tank_block() const
 double player_t::composite_tank_block_reduction() const
 {
   double b = block_reduction;
-
-  if ( meta_gem == META_ETERNAL_SHADOWSPIRIT )
-  {
-    b += 0.01;
-  }
 
   return b;
 }
@@ -3017,11 +2876,6 @@ void player_t::recalculate_resource_max( int resource )
   {
   case RESOURCE_MANA:
   {
-    if ( ( meta_gem == META_EMBER_SHADOWSPIRIT ) || ( meta_gem == META_EMBER_SKYFIRE ) || ( meta_gem == META_EMBER_SKYFLARE ) )
-    {
-      resource_max[ resource ] *= 1.02;
-    }
-
     double adjust = ( is_pet() || is_enemy() || is_add() ) ? 0 : std::min( 20, ( int ) floor( intellect() ) );
     resource_max[ resource ] += ( floor( intellect() ) - adjust ) * mana_per_intellect + adjust;
     // Arcane Brilliance needs to be done here as a generic resource, otherwise override will
@@ -3162,14 +3016,12 @@ void player_t::stat_gain( int       stat,
   case STAT_RAGE:   resource_gain( RESOURCE_RAGE,   amount, gain, action ); break;
   case STAT_ENERGY: resource_gain( RESOURCE_ENERGY, amount, gain, action ); break;
   case STAT_FOCUS:  resource_gain( RESOURCE_FOCUS,  amount, gain, action ); break;
-  case STAT_RUNIC:  resource_gain( RESOURCE_RUNIC,  amount, gain, action ); break;
 
   case STAT_MAX_HEALTH: resource_max[ RESOURCE_HEALTH ] += amount; resource_gain( RESOURCE_HEALTH, amount, gain, action ); break;
   case STAT_MAX_MANA:   resource_max[ RESOURCE_MANA   ] += amount; resource_gain( RESOURCE_MANA,   amount, gain, action ); break;
   case STAT_MAX_RAGE:   resource_max[ RESOURCE_RAGE   ] += amount; resource_gain( RESOURCE_RAGE,   amount, gain, action ); break;
   case STAT_MAX_ENERGY: resource_max[ RESOURCE_ENERGY ] += amount; resource_gain( RESOURCE_ENERGY, amount, gain, action ); break;
   case STAT_MAX_FOCUS:  resource_max[ RESOURCE_FOCUS  ] += amount; resource_gain( RESOURCE_FOCUS,  amount, gain, action ); break;
-  case STAT_MAX_RUNIC:  resource_max[ RESOURCE_RUNIC  ] += amount; resource_gain( RESOURCE_RUNIC,  amount, gain, action ); break;
 
   case STAT_SPELL_POWER:       stats.spell_power       += amount; temporary.spell_power += temporary_stat * amount; spell_power[ SCHOOL_MAX ] += amount; break;
   case STAT_SPELL_PENETRATION: stats.spell_penetration += amount; spell_penetration         += amount; break;
@@ -3242,20 +3094,17 @@ void player_t::stat_loss( int       stat,
   case STAT_RAGE:   resource_loss( RESOURCE_RAGE,   amount, action ); break;
   case STAT_ENERGY: resource_loss( RESOURCE_ENERGY, amount, action ); break;
   case STAT_FOCUS:  resource_loss( RESOURCE_FOCUS,  amount, action ); break;
-  case STAT_RUNIC:  resource_loss( RESOURCE_RUNIC,  amount, action ); break;
 
   case STAT_MAX_HEALTH:
   case STAT_MAX_MANA:
   case STAT_MAX_RAGE:
   case STAT_MAX_ENERGY:
   case STAT_MAX_FOCUS:
-  case STAT_MAX_RUNIC:
   {
     int r = ( ( stat == STAT_MAX_HEALTH ) ? RESOURCE_HEALTH :
               ( stat == STAT_MAX_MANA   ) ? RESOURCE_MANA   :
               ( stat == STAT_MAX_RAGE   ) ? RESOURCE_RAGE   :
-              ( stat == STAT_MAX_ENERGY ) ? RESOURCE_ENERGY :
-              ( stat == STAT_MAX_FOCUS  ) ? RESOURCE_FOCUS  : RESOURCE_RUNIC );
+              ( stat == STAT_MAX_ENERGY ) ? RESOURCE_ENERGY : RESOURCE_FOCUS );
     recalculate_resource_max( r );
     double delta = resource_current[ r ] - resource_max[ r ];
     if ( delta > 0 ) resource_loss( r, delta, action );
@@ -5058,15 +4907,6 @@ action_expr_t* player_t::create_expression( action_t* a,
     };
     return new max_rage_expr_t( a );
   }
-  if ( name_str == "max_runic" )
-  {
-    struct max_runic_expr_t : public action_expr_t
-    {
-      max_runic_expr_t( action_t* a ) : action_expr_t( a, "max_runic", TOK_NUM ) {}
-      virtual int evaluate() { result_num = action -> player -> resource_max[ RESOURCE_RUNIC ]; return TOK_NUM; }
-    };
-    return new max_runic_expr_t( a );
-  }
   if ( name_str == "max_mana" )
   {
     struct max_mana_expr_t : public action_expr_t
@@ -5558,8 +5398,7 @@ bool player_t::create_profile( std::string& profile_str, int save_type, bool sav
     if ( enchant.resource[ RESOURCE_RAGE   ] != 0 )  profile_str += "enchant_rage="             + util_t::to_string( enchant.resource[ RESOURCE_RAGE   ] ) + term;
     if ( enchant.resource[ RESOURCE_ENERGY ] != 0 )  profile_str += "enchant_energy="           + util_t::to_string( enchant.resource[ RESOURCE_ENERGY ] ) + term;
     if ( enchant.resource[ RESOURCE_FOCUS  ] != 0 )  profile_str += "enchant_focus="            + util_t::to_string( enchant.resource[ RESOURCE_FOCUS  ] ) + term;
-    if ( enchant.resource[ RESOURCE_RUNIC  ] != 0 )  profile_str += "enchant_runic="            + util_t::to_string( enchant.resource[ RESOURCE_RUNIC  ] ) + term;
-  }
+}
 
   return true;
 }
@@ -5737,7 +5576,6 @@ void player_t::create_options()
     { "gear_rage",                            OPT_FLT,  &( gear.resource[ RESOURCE_RAGE   ]           ) },
     { "gear_energy",                          OPT_FLT,  &( gear.resource[ RESOURCE_ENERGY ]           ) },
     { "gear_focus",                           OPT_FLT,  &( gear.resource[ RESOURCE_FOCUS  ]           ) },
-    { "gear_runic",                           OPT_FLT,  &( gear.resource[ RESOURCE_RUNIC  ]           ) },
     { "gear_armor",                           OPT_FLT,  &( gear.armor                                 ) },
     { "gear_mastery_rating",                  OPT_FLT,  &( gear.mastery_rating                        ) },
     // Stat Enchants
@@ -5760,14 +5598,12 @@ void player_t::create_options()
     { "enchant_rage",                         OPT_FLT,  &( enchant.resource[ RESOURCE_RAGE   ]        ) },
     { "enchant_energy",                       OPT_FLT,  &( enchant.resource[ RESOURCE_ENERGY ]        ) },
     { "enchant_focus",                        OPT_FLT,  &( enchant.resource[ RESOURCE_FOCUS  ]        ) },
-    { "enchant_runic",                        OPT_FLT,  &( enchant.resource[ RESOURCE_RUNIC  ]        ) },
     // Regen
     { "infinite_energy",                      OPT_BOOL,   &( infinite_resource[ RESOURCE_ENERGY ]     ) },
     { "infinite_focus",                       OPT_BOOL,   &( infinite_resource[ RESOURCE_FOCUS  ]     ) },
     { "infinite_health",                      OPT_BOOL,   &( infinite_resource[ RESOURCE_HEALTH ]     ) },
     { "infinite_mana",                        OPT_BOOL,   &( infinite_resource[ RESOURCE_MANA   ]     ) },
     { "infinite_rage",                        OPT_BOOL,   &( infinite_resource[ RESOURCE_RAGE   ]     ) },
-    { "infinite_runic",                       OPT_BOOL,   &( infinite_resource[ RESOURCE_RUNIC  ]     ) },
     // Misc
     { "skip_actions",                         OPT_STRING, &( action_list_skip                         ) },
     { "modify_action",                        OPT_STRING, &( modify_action                            ) },

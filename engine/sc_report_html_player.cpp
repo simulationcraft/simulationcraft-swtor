@@ -1474,8 +1474,6 @@ static void print_html_player_resources( FILE* file, player_t* p )
            "\t\t\t\t\t\t<div class=\"charts charts-left\">\n" );
   for ( i = RESOURCE_NONE; i < RESOURCE_MAX; ++i )
   {
-    // hack hack. don't display RESOURCE_RUNE_<TYPE> yet. only shown in tabular data.  WiP
-    if ( i == RESOURCE_RUNE_BLOOD || i == RESOURCE_RUNE_UNHOLY || i == RESOURCE_RUNE_FROST ) continue;
     double total_gain=0;
     for ( gain_t* g = p -> gain_list; g; g = g -> next )
     {

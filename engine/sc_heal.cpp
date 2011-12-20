@@ -36,11 +36,6 @@ void heal_t::init_heal_t_()
   crit_bonus = 1.0;
 
   crit_multiplier = 1.0;
-
-  if ( player -> meta_gem == META_REVITALIZING_SHADOWSPIRIT )
-  {
-    crit_multiplier *= 1.03;
-  }
 }
 
 // heal_t::heal_t ======== Heal Constructor by Spell Name ===================

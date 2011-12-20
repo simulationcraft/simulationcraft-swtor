@@ -127,16 +127,7 @@ static const char* chart_resource_type_string( int type )
   case RESOURCE_RAGE:         return "Rage";
   case RESOURCE_ENERGY:       return "Energy";
   case RESOURCE_FOCUS:        return "Focus";
-  case RESOURCE_RUNIC:        return "Runic Power";
-  case RESOURCE_RUNE:         return "All Runes";
-  case RESOURCE_RUNE_BLOOD:   return "Blood Rune";
-  case RESOURCE_RUNE_UNHOLY:  return "Unholy Rune";
-  case RESOURCE_RUNE_FROST:   return "Frost Rune";
-  case RESOURCE_SOUL_SHARDS:  return "Soul Shards";
-  case RESOURCE_HOLY_POWER:   return "Holy Power";
   case RESOURCE_FORCE:        return "Force";
-  case RESOURCE_LIGHT_FORCE:  return "Light Force";
-  case RESOURCE_DARK_FORCE:   return "Dark Force";
   }
   return "Unknown";
 }
@@ -2138,27 +2129,15 @@ const char* chart_t::resource_color( int type )
 {
   switch ( type )
   {
-  case RESOURCE_HEALTH:
-  case RESOURCE_RUNE_UNHOLY: return class_color( BOUNTY_HUNTER );
+  case RESOURCE_HEALTH: return class_color( BOUNTY_HUNTER );
 
-  case RESOURCE_RUNE_FROST:
   case RESOURCE_MANA:        return class_color( SITH_INQUISITOR );
 
   case RESOURCE_ENERGY:
   case RESOURCE_FORCE:
   case RESOURCE_FOCUS:       return class_text_color( SMUGGLER );
 
-  case RESOURCE_RAGE:
-  case RESOURCE_RUNIC:
-  case RESOURCE_RUNE:
-  case RESOURCE_RUNE_BLOOD:  return class_color( SITH_WARRIOR );
-
-  case RESOURCE_HOLY_POWER:  return class_color( IMPERIAL_AGENT );
-
-  case RESOURCE_DARK_FORCE:
-  //case RESOURCE_SOUL_SHARDS: return class_color( WARLOCK );
-
-  //case RESOURCE_LIGHT_FORCE:  return class_color( MONK );
+  case RESOURCE_RAGE: return class_color( SITH_WARRIOR );
 
   case RESOURCE_NONE:
   default:                   return "000000";

@@ -277,7 +277,7 @@ void jediconsular_t::init_resources( bool force )
 
 // jediconsular_t::matching_gear_multiplier =========================================
 
-double jediconsular_t::matching_gear_multiplier( const attribute_type attr ) const
+double jediconsular_t::matching_gear_multiplier( const attribute_type /* attr */ ) const
 {
   return 0.0;
 }

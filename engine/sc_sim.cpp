@@ -2028,7 +2028,6 @@ void sim_t::create_options()
     { "default_enchant_rage",                     OPT_FLT,  &( enchant.resource[ RESOURCE_RAGE   ] ) },
     { "default_enchant_energy",                   OPT_FLT,  &( enchant.resource[ RESOURCE_ENERGY ] ) },
     { "default_enchant_focus",                    OPT_FLT,  &( enchant.resource[ RESOURCE_FOCUS  ] ) },
-    { "default_enchant_runic",                    OPT_FLT,  &( enchant.resource[ RESOURCE_RUNIC  ] ) },
     // Report
     { "report_precision",                 OPT_INT,    &( report_precision                         ) },
     { "report_pets_separately",           OPT_BOOL,   &( report_pets_separately                   ) },
