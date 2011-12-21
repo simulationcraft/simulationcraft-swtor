@@ -28,13 +28,13 @@ void gear_stats_t::add_stat( int    stat,
   case STAT_MANA:   resource[ RESOURCE_MANA   ] += value; break;
   case STAT_RAGE:   resource[ RESOURCE_RAGE   ] += value; break;
   case STAT_ENERGY: resource[ RESOURCE_ENERGY ] += value; break;
-  case STAT_FOCUS:  resource[ RESOURCE_FOCUS  ] += value; break;
+  case STAT_AMMO:   resource[ RESOURCE_AMMO   ] += value; break;
 
   case STAT_MAX_HEALTH:
   case STAT_MAX_MANA:
   case STAT_MAX_RAGE:
   case STAT_MAX_ENERGY:
-  case STAT_MAX_FOCUS:  break;
+  case STAT_MAX_AMMO:  break;
 
   case STAT_SPELL_POWER:       spell_power       += value; break;
   case STAT_SPELL_PENETRATION: spell_penetration += value; break;
@@ -91,13 +91,13 @@ void gear_stats_t::set_stat( int    stat,
   case STAT_MANA:   resource[ RESOURCE_MANA   ] = value; break;
   case STAT_RAGE:   resource[ RESOURCE_RAGE   ] = value; break;
   case STAT_ENERGY: resource[ RESOURCE_ENERGY ] = value; break;
-  case STAT_FOCUS:  resource[ RESOURCE_FOCUS  ] = value; break;
+  case STAT_AMMO:   resource[ RESOURCE_AMMO   ] = value; break;
 
   case STAT_MAX_HEALTH:
   case STAT_MAX_MANA:
   case STAT_MAX_RAGE:
   case STAT_MAX_ENERGY:
-  case STAT_MAX_FOCUS:  break;
+  case STAT_MAX_AMMO:  break;
 
   case STAT_SPELL_POWER:       spell_power       = value; break;
   case STAT_SPELL_PENETRATION: spell_penetration = value; break;
@@ -153,13 +153,13 @@ double gear_stats_t::get_stat( int stat ) const
   case STAT_MANA:   return resource[ RESOURCE_MANA   ];
   case STAT_RAGE:   return resource[ RESOURCE_RAGE   ];
   case STAT_ENERGY: return resource[ RESOURCE_ENERGY ];
-  case STAT_FOCUS:  return resource[ RESOURCE_FOCUS  ];
+  case STAT_AMMO:   return resource[ RESOURCE_AMMO   ];
 
   case STAT_MAX_HEALTH:
   case STAT_MAX_MANA:
   case STAT_MAX_RAGE:
   case STAT_MAX_ENERGY:
-  case STAT_MAX_FOCUS:  return 0;
+  case STAT_MAX_AMMO:  return 0;
 
   case STAT_SPELL_POWER:       return spell_power;
   case STAT_SPELL_PENETRATION: return spell_penetration;

@@ -239,7 +239,7 @@ player_t::player_t( sim_t*             s,
   spell_crit_per_intellect( 0 ),  initial_spell_crit_per_intellect( 0 ),
   mp5_per_intellect( 0 ),
   mana_regen_base( 0 ), mana_regen_while_casting( 0 ),
-  base_energy_regen_per_second( 0 ), base_focus_regen_per_second( 0 ), base_force_regen_per_second( 0 ),
+  base_energy_regen_per_second( 0 ), base_ammo_regen_per_second( 0 ), base_force_regen_per_second( 0 ),
   last_cast( 0 ),
   // Attack Mechanics
   base_attack_power( 0 ),       initial_attack_power( 0 ),        attack_power( 0 ),       buffed_attack_power( 0 ),
@@ -1332,9 +1332,9 @@ void player_t::init_buffs()
 
 void player_t::init_gains()
 {
-  gains.force_regen              = get_gain( "force_regen" );
+  gains.force_regen            = get_gain( "force_regen" );
   gains.energy_regen           = get_gain( "energy_regen" );
-  gains.focus_regen            = get_gain( "focus_regen" );
+  gains.ammo_regen             = get_gain( "ammo_regen" );
   gains.mana_potion            = get_gain( "mana_potion" );
   gains.mp5_regen              = get_gain( "mp5_regen" );
   gains.restore_mana           = get_gain( "restore_mana" );
@@ -1430,7 +1430,7 @@ void player_t::init_scaling()
     scales_with[ STAT_MANA   ] = 0;
     scales_with[ STAT_RAGE   ] = 0;
     scales_with[ STAT_ENERGY ] = 0;
-    scales_with[ STAT_FOCUS  ] = 0;
+    scales_with[ STAT_AMMO   ] = 0;
 
     scales_with[ STAT_SPELL_POWER       ] = spell;
     scales_with[ STAT_SPELL_PENETRATION ] = 0;
@@ -1591,21 +1591,21 @@ item_t* player_t::find_item( const std::string& str )
 
 double player_t::energy_regen_per_second() const
 {
-  double r = base_energy_regen_per_second * ( 1.0 / composite_attack_haste() );
+  double r = base_energy_regen_per_second;
 
   return r;
 }
 
-// player_t::focus_regen_per_second =========================================
+// player_t::ammo_regen_per_second =========================================
 
-double player_t::focus_regen_per_second() const
+double player_t::ammo_regen_per_second() const
 {
-  double r = base_focus_regen_per_second * ( 1.0 / composite_attack_haste() );
+  double r = base_ammo_regen_per_second;
 
   return r;
 }
 
-// player_t::chi_regen_per_second ========================================
+// player_t::force_regen_per_second ========================================
 
 double player_t::force_regen_per_second() const
 {
@@ -2717,11 +2717,11 @@ void player_t::regen( const double periodicity )
     resource_gain( RESOURCE_FORCE, force_regen, gains.force_regen );
   }
 
-  else if ( resource_type == RESOURCE_FOCUS )
+  else if ( resource_type == RESOURCE_AMMO )
   {
-    double focus_regen = periodicity * focus_regen_per_second();
+    double ammo_regen = periodicity * ammo_regen_per_second();
 
-    resource_gain( RESOURCE_FOCUS, focus_regen, gains.focus_regen );
+    resource_gain( RESOURCE_AMMO, ammo_regen, gains.ammo_regen );
   }
 
   else if ( resource_type == RESOURCE_MANA )
@@ -3015,13 +3015,13 @@ void player_t::stat_gain( int       stat,
   case STAT_MANA:   resource_gain( RESOURCE_MANA,   amount, gain, action ); break;
   case STAT_RAGE:   resource_gain( RESOURCE_RAGE,   amount, gain, action ); break;
   case STAT_ENERGY: resource_gain( RESOURCE_ENERGY, amount, gain, action ); break;
-  case STAT_FOCUS:  resource_gain( RESOURCE_FOCUS,  amount, gain, action ); break;
+  case STAT_AMMO:   resource_gain( RESOURCE_AMMO,   amount, gain, action ); break;
 
   case STAT_MAX_HEALTH: resource_max[ RESOURCE_HEALTH ] += amount; resource_gain( RESOURCE_HEALTH, amount, gain, action ); break;
   case STAT_MAX_MANA:   resource_max[ RESOURCE_MANA   ] += amount; resource_gain( RESOURCE_MANA,   amount, gain, action ); break;
   case STAT_MAX_RAGE:   resource_max[ RESOURCE_RAGE   ] += amount; resource_gain( RESOURCE_RAGE,   amount, gain, action ); break;
   case STAT_MAX_ENERGY: resource_max[ RESOURCE_ENERGY ] += amount; resource_gain( RESOURCE_ENERGY, amount, gain, action ); break;
-  case STAT_MAX_FOCUS:  resource_max[ RESOURCE_FOCUS  ] += amount; resource_gain( RESOURCE_FOCUS,  amount, gain, action ); break;
+  case STAT_MAX_AMMO:   resource_max[ RESOURCE_AMMO   ] += amount; resource_gain( RESOURCE_AMMO,   amount, gain, action ); break;
 
   case STAT_SPELL_POWER:       stats.spell_power       += amount; temporary.spell_power += temporary_stat * amount; spell_power[ SCHOOL_MAX ] += amount; break;
   case STAT_SPELL_PENETRATION: stats.spell_penetration += amount; spell_penetration         += amount; break;
@@ -3093,18 +3093,18 @@ void player_t::stat_loss( int       stat,
   case STAT_MANA:   resource_loss( RESOURCE_MANA,   amount, action ); break;
   case STAT_RAGE:   resource_loss( RESOURCE_RAGE,   amount, action ); break;
   case STAT_ENERGY: resource_loss( RESOURCE_ENERGY, amount, action ); break;
-  case STAT_FOCUS:  resource_loss( RESOURCE_FOCUS,  amount, action ); break;
+  case STAT_AMMO:   resource_loss( RESOURCE_AMMO,   amount, action ); break;
 
   case STAT_MAX_HEALTH:
   case STAT_MAX_MANA:
   case STAT_MAX_RAGE:
   case STAT_MAX_ENERGY:
-  case STAT_MAX_FOCUS:
+  case STAT_MAX_AMMO:
   {
     int r = ( ( stat == STAT_MAX_HEALTH ) ? RESOURCE_HEALTH :
               ( stat == STAT_MAX_MANA   ) ? RESOURCE_MANA   :
               ( stat == STAT_MAX_RAGE   ) ? RESOURCE_RAGE   :
-              ( stat == STAT_MAX_ENERGY ) ? RESOURCE_ENERGY : RESOURCE_FOCUS );
+              ( stat == STAT_MAX_ENERGY ) ? RESOURCE_ENERGY : RESOURCE_AMMO );
     recalculate_resource_max( r );
     double delta = resource_current[ r ] - resource_max[ r ];
     if ( delta > 0 ) resource_loss( r, delta, action );
@@ -4832,14 +4832,14 @@ action_expr_t* player_t::create_expression( action_t* a,
     };
     return new energy_regen_expr_t( a );
   }
-  if ( name_str == "focus_regen" )
+  if ( name_str == "ammo_regen" )
   {
-    struct focus_regen_expr_t : public action_expr_t
+    struct ammo_regen_expr_t : public action_expr_t
     {
-      focus_regen_expr_t( action_t* a ) : action_expr_t( a, "focus_regen", TOK_NUM ) {}
-      virtual int evaluate() { result_num = action -> player -> focus_regen_per_second(); return TOK_NUM; }
+      ammo_regen_expr_t( action_t* a ) : action_expr_t( a, "ammo_regen", TOK_NUM ) {}
+      virtual int evaluate() { result_num = action -> player -> ammo_regen_per_second(); return TOK_NUM; }
     };
-    return new focus_regen_expr_t( a );
+    return new ammo_regen_expr_t( a );
   }
   if ( name_str == "time_to_die" )
   {
@@ -4866,19 +4866,19 @@ action_expr_t* player_t::create_expression( action_t* a,
     };
     return new time_to_max_energy_expr_t( a );
   }
-  if ( name_str == "time_to_max_focus" )
+  if ( name_str == "time_to_max_ammo" )
   {
-    struct time_to_max_focus_expr_t : public action_expr_t
+    struct time_to_max_ammo_expr_t : public action_expr_t
     {
-      time_to_max_focus_expr_t( action_t* a ) : action_expr_t( a, "time_to_max_focus", TOK_NUM ) {}
+      time_to_max_ammo_expr_t( action_t* a ) : action_expr_t( a, "time_to_max_ammo", TOK_NUM ) {}
       virtual int evaluate()
       {
-        result_num = ( action -> player -> resource_max[ RESOURCE_FOCUS ] -
-                       action -> player -> resource_current[ RESOURCE_FOCUS ] ) /
-                     action -> player -> focus_regen_per_second(); return TOK_NUM;
+        result_num = ( action -> player -> resource_max[ RESOURCE_AMMO ] -
+                       action -> player -> resource_current[ RESOURCE_AMMO ] ) /
+                     action -> player -> ammo_regen_per_second(); return TOK_NUM;
       }
     };
-    return new time_to_max_focus_expr_t( a );
+    return new time_to_max_ammo_expr_t( a );
   }
   if ( name_str == "max_energy" )
   {
@@ -4889,14 +4889,14 @@ action_expr_t* player_t::create_expression( action_t* a,
     };
     return new max_energy_expr_t( a );
   }
-  if ( name_str == "max_focus" )
+  if ( name_str == "max_ammo" )
   {
-    struct max_focus_expr_t : public action_expr_t
+    struct max_ammo_expr_t : public action_expr_t
     {
-      max_focus_expr_t( action_t* a ) : action_expr_t( a, "max_focus", TOK_NUM ) {}
-      virtual int evaluate() { result_num = action -> player -> resource_max[ RESOURCE_FOCUS ]; return TOK_NUM; }
+      max_ammo_expr_t( action_t* a ) : action_expr_t( a, "max_ammo", TOK_NUM ) {}
+      virtual int evaluate() { result_num = action -> player -> resource_max[ RESOURCE_AMMO ]; return TOK_NUM; }
     };
-    return new max_focus_expr_t( a );
+    return new max_ammo_expr_t( a );
   }
   if ( name_str == "max_rage" )
   {
@@ -5397,7 +5397,7 @@ bool player_t::create_profile( std::string& profile_str, int save_type, bool sav
     if ( enchant.resource[ RESOURCE_MANA   ] != 0 )  profile_str += "enchant_mana="             + util_t::to_string( enchant.resource[ RESOURCE_MANA   ] ) + term;
     if ( enchant.resource[ RESOURCE_RAGE   ] != 0 )  profile_str += "enchant_rage="             + util_t::to_string( enchant.resource[ RESOURCE_RAGE   ] ) + term;
     if ( enchant.resource[ RESOURCE_ENERGY ] != 0 )  profile_str += "enchant_energy="           + util_t::to_string( enchant.resource[ RESOURCE_ENERGY ] ) + term;
-    if ( enchant.resource[ RESOURCE_FOCUS  ] != 0 )  profile_str += "enchant_focus="            + util_t::to_string( enchant.resource[ RESOURCE_FOCUS  ] ) + term;
+    if ( enchant.resource[ RESOURCE_AMMO   ] != 0 )  profile_str += "enchant_ammo="             + util_t::to_string( enchant.resource[ RESOURCE_AMMO   ] ) + term;
 }
 
   return true;
@@ -5575,7 +5575,7 @@ void player_t::create_options()
     { "gear_mana",                            OPT_FLT,  &( gear.resource[ RESOURCE_MANA   ]           ) },
     { "gear_rage",                            OPT_FLT,  &( gear.resource[ RESOURCE_RAGE   ]           ) },
     { "gear_energy",                          OPT_FLT,  &( gear.resource[ RESOURCE_ENERGY ]           ) },
-    { "gear_focus",                           OPT_FLT,  &( gear.resource[ RESOURCE_FOCUS  ]           ) },
+    { "gear_ammo",                            OPT_FLT,  &( gear.resource[ RESOURCE_AMMO   ]           ) },
     { "gear_armor",                           OPT_FLT,  &( gear.armor                                 ) },
     { "gear_mastery_rating",                  OPT_FLT,  &( gear.mastery_rating                        ) },
     // Stat Enchants
@@ -5597,10 +5597,10 @@ void player_t::create_options()
     { "enchant_mana",                         OPT_FLT,  &( enchant.resource[ RESOURCE_MANA   ]        ) },
     { "enchant_rage",                         OPT_FLT,  &( enchant.resource[ RESOURCE_RAGE   ]        ) },
     { "enchant_energy",                       OPT_FLT,  &( enchant.resource[ RESOURCE_ENERGY ]        ) },
-    { "enchant_focus",                        OPT_FLT,  &( enchant.resource[ RESOURCE_FOCUS  ]        ) },
+    { "enchant_ammo",                         OPT_FLT,  &( enchant.resource[ RESOURCE_AMMO   ]        ) },
     // Regen
     { "infinite_energy",                      OPT_BOOL,   &( infinite_resource[ RESOURCE_ENERGY ]     ) },
-    { "infinite_focus",                       OPT_BOOL,   &( infinite_resource[ RESOURCE_FOCUS  ]     ) },
+    { "infinite_ammo",                        OPT_BOOL,   &( infinite_resource[ RESOURCE_AMMO   ]     ) },
     { "infinite_health",                      OPT_BOOL,   &( infinite_resource[ RESOURCE_HEALTH ]     ) },
     { "infinite_mana",                        OPT_BOOL,   &( infinite_resource[ RESOURCE_MANA   ]     ) },
     { "infinite_rage",                        OPT_BOOL,   &( infinite_resource[ RESOURCE_RAGE   ]     ) },

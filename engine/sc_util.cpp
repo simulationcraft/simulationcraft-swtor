@@ -522,7 +522,7 @@ const char* util_t::resource_type_string( int type )
   case RESOURCE_MANA:         return "mana";
   case RESOURCE_RAGE:         return "rage";
   case RESOURCE_ENERGY:       return "energy";
-  case RESOURCE_FOCUS:        return "focus";
+  case RESOURCE_AMMO:         return "ammo";
   case RESOURCE_FORCE:        return "force";
   }
   return "unknown";
@@ -937,7 +937,7 @@ const char* util_t::stat_type_string( int stat )
   case STAT_MAX_MANA: return "maximum_mana";
   case STAT_RAGE:   return "rage";
   case STAT_ENERGY: return "energy";
-  case STAT_FOCUS:  return "focus";
+  case STAT_AMMO:  return "ammo";
 
   case STAT_SPELL_POWER:       return "spell_power";
   case STAT_SPELL_PENETRATION: return "spell_penetration";
@@ -989,7 +989,7 @@ const char* util_t::stat_type_abbrev( int stat )
   case STAT_MANA:   return "Mana";
   case STAT_RAGE:   return "Rage";
   case STAT_ENERGY: return "Energy";
-  case STAT_FOCUS:  return "Focus";
+  case STAT_AMMO:   return "Ammo";
 
   case STAT_SPELL_POWER:       return "SP";
   case STAT_SPELL_PENETRATION: return "SPen";
@@ -1041,7 +1041,7 @@ const char* util_t::stat_type_wowhead( int stat )
   case STAT_MANA:   return "mana";
   case STAT_RAGE:   return "rage";
   case STAT_ENERGY: return "energy";
-  case STAT_FOCUS:  return "focus";
+  case STAT_AMMO:   return "ammo";
 
   case STAT_SPELL_POWER:       return "spellPower";
   case STAT_SPELL_PENETRATION: return "spellPen";

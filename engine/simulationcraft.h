@@ -206,7 +206,7 @@ enum base_stat_type { BASE_STAT_STRENGTH=0, BASE_STAT_AGILITY, BASE_STAT_STAMINA
 enum resource_type
 {
   RESOURCE_NONE=0,
-  RESOURCE_HEALTH, RESOURCE_MANA,  RESOURCE_RAGE, RESOURCE_ENERGY, RESOURCE_FOCUS,
+  RESOURCE_HEALTH, RESOURCE_MANA,  RESOURCE_RAGE, RESOURCE_ENERGY, RESOURCE_AMMO,
   RESOURCE_FORCE,
   RESOURCE_MAX
 };
@@ -396,8 +396,8 @@ enum stat_type
 {
   STAT_NONE=0,
   STAT_STRENGTH, STAT_AGILITY, STAT_STAMINA, STAT_INTELLECT, STAT_SPIRIT,
-  STAT_HEALTH, STAT_MANA, STAT_RAGE, STAT_ENERGY, STAT_FOCUS,
-  STAT_MAX_HEALTH, STAT_MAX_MANA, STAT_MAX_RAGE, STAT_MAX_ENERGY, STAT_MAX_FOCUS,
+  STAT_HEALTH, STAT_MANA, STAT_RAGE, STAT_ENERGY, STAT_AMMO,
+  STAT_MAX_HEALTH, STAT_MAX_MANA, STAT_MAX_RAGE, STAT_MAX_ENERGY, STAT_MAX_AMMO,
   STAT_SPELL_POWER, STAT_SPELL_PENETRATION, STAT_MP5,
   STAT_ATTACK_POWER, STAT_EXPERTISE_RATING, STAT_EXPERTISE_RATING2,
   STAT_HIT_RATING, STAT_HIT_RATING2,STAT_CRIT_RATING, STAT_HASTE_RATING,STAT_MASTERY_RATING,
@@ -3401,7 +3401,7 @@ struct player_t : public noncopyable
   double mana_regen_base;
   double mana_regen_while_casting;
   double base_energy_regen_per_second;
-  double base_focus_regen_per_second;
+  double base_ammo_regen_per_second;
   double base_force_regen_per_second;
   double resource_reduction[ SCHOOL_MAX ], initial_resource_reduction[ SCHOOL_MAX ];
   double last_cast;
@@ -3618,7 +3618,7 @@ struct player_t : public noncopyable
   struct gains_t
   {
     gain_t* energy_regen;
-    gain_t* focus_regen;
+    gain_t* ammo_regen;
     gain_t* mana_potion;
     gain_t* mp5_regen;
     gain_t* restore_mana;
@@ -3700,7 +3700,7 @@ struct player_t : public noncopyable
   virtual double composite_mastery() const { return floor( ( mastery * 100.0 ) + 0.5 ) * 0.01; }
 
   virtual double energy_regen_per_second() const;
-  virtual double focus_regen_per_second() const;
+  virtual double ammo_regen_per_second() const;
   virtual double force_regen_per_second() const;
   virtual double composite_attack_haste() const;
   virtual double composite_attack_speed() const;

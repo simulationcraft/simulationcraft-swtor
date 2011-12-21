@@ -696,7 +696,7 @@ double action_t::calculate_weapon_damage()
 
   // OH penalty
   if ( weapon -> slot == SLOT_OFF_HAND )
-    total_dmg *= 0.5;
+    total_dmg *= 0.3;
 
   if ( sim -> debug )
   {

@@ -126,7 +126,7 @@ static const char* chart_resource_type_string( int type )
   case RESOURCE_MANA:         return "Mana";
   case RESOURCE_RAGE:         return "Rage";
   case RESOURCE_ENERGY:       return "Energy";
-  case RESOURCE_FOCUS:        return "Focus";
+  case RESOURCE_AMMO:         return "Ammo";
   case RESOURCE_FORCE:        return "Force";
   }
   return "Unknown";
@@ -2135,7 +2135,7 @@ const char* chart_t::resource_color( int type )
 
   case RESOURCE_ENERGY:
   case RESOURCE_FORCE:
-  case RESOURCE_FOCUS:       return class_text_color( SMUGGLER );
+  case RESOURCE_AMMO:       return class_text_color( SMUGGLER );
 
   case RESOURCE_RAGE: return class_color( SITH_WARRIOR );
 
