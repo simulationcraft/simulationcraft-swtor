@@ -606,7 +606,7 @@ school_type util_t::parse_school_type( const std::string& name )
 
 // util_t::talent_tree ======================================================
 
-int util_t::talent_tree( int tree, player_type ptype )
+int util_t::talent_tree( int /* tree */, player_type /* ptype */ )
 {
   return TREE_NONE;
 }
@@ -619,32 +619,7 @@ const char* util_t::talent_tree_string( int tree, bool armory_format )
   {
     switch ( tree )
     {
-    case TREE_BLOOD:         return "blood";
-    case TREE_UNHOLY:        return "unholy";
-    case TREE_BALANCE:       return "balance";
-    case TREE_FERAL:         return "feral";
-    case TREE_RESTORATION:   return "restoration";
-    case TREE_BEAST_MASTERY: return "beast_mastery";
-    case TREE_MARKSMANSHIP:  return "marksmanship";
-    case TREE_SURVIVAL:      return "survival";
-    case TREE_ARCANE:        return "arcane";
-    case TREE_FIRE:          return "fire";
-    case TREE_FROST:         return "frost";
-    case TREE_RETRIBUTION:   return "retribution";
-    case TREE_DISCIPLINE:    return "discipline";
-    case TREE_HOLY:          return "holy";
-    case TREE_SHADOW:        return "shadow";
-    case TREE_ASSASSINATION: return "assassination";
-    case TREE_COMBAT:        return "combat";
-    case TREE_SUBTLETY:      return "subtlety";
-    case TREE_ELEMENTAL:     return "elemental";
-    case TREE_ENHANCEMENT:   return "enhancement";
-    case TREE_AFFLICTION:    return "affliction";
-    case TREE_DEMONOLOGY:    return "demonology";
-    case TREE_DESTRUCTION:   return "destruction";
-    case TREE_ARMS:          return "arms";
-    case TREE_FURY:          return "fury";
-    case TREE_PROTECTION:    return "protection";
+
     default: return "Unknown";
     }
   }
@@ -652,32 +627,7 @@ const char* util_t::talent_tree_string( int tree, bool armory_format )
   {
     switch ( tree )
     {
-    case TREE_BLOOD:         return "Blood";
-    case TREE_UNHOLY:        return "Unholy";
-    case TREE_BALANCE:       return "Balance";
-    case TREE_FERAL:         return "Feral";
-    case TREE_RESTORATION:   return "Restoration";
-    case TREE_BEAST_MASTERY: return "Beast Mastery";
-    case TREE_MARKSMANSHIP:  return "Marksmanship";
-    case TREE_SURVIVAL:      return "Survival";
-    case TREE_ARCANE:        return "Arcane";
-    case TREE_FIRE:          return "Fire";
-    case TREE_FROST:         return "Frost";
-    case TREE_RETRIBUTION:   return "Retribution";
-    case TREE_DISCIPLINE:    return "Discipline";
-    case TREE_HOLY:          return "Holy";
-    case TREE_SHADOW:        return "Shadow";
-    case TREE_ASSASSINATION: return "Assassination";
-    case TREE_COMBAT:        return "Combat";
-    case TREE_SUBTLETY:      return "Subtlety";
-    case TREE_ELEMENTAL:     return "Elemental";
-    case TREE_ENHANCEMENT:   return "Enhancement";
-    case TREE_AFFLICTION:    return "Affliction";
-    case TREE_DEMONOLOGY:    return "Demonology";
-    case TREE_DESTRUCTION:   return "Destruction";
-    case TREE_ARMS:          return "Arms";
-    case TREE_FURY:          return "Fury";
-    case TREE_PROTECTION:    return "Protection";
+
     default: return "Unknown";
     }
   }

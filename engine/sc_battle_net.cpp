@@ -471,19 +471,6 @@ bool battle_net_t::download_guild( sim_t* sim,
         sim -> errorf( "simulationcraft: Battle.net armory failed for '%s' ...\n", character_name.c_str() );
         continue;
       }
-
-      int tree = p -> primary_tree();
-      if ( tree == TREE_RESTORATION || tree == TREE_HOLY || tree == TREE_DISCIPLINE )
-      {
-        sim -> errorf( "Setting quiet=1 on healer %s\n", character_name.c_str() );
-        p -> quiet = true;
-      }
-
-      if ( tree == TREE_PROTECTION || tree == TREE_BLOOD )
-      {
-        sim -> errorf( "Setting quiet=1 on tank %s\n", character_name.c_str() );
-        p -> quiet = true;
-      }
     }
   }
 

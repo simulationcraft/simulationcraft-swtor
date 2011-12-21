@@ -706,18 +706,6 @@ bool armory_t::download_guild( sim_t* sim,
         p = wowhead_t::download_player( sim, region, server, character_name, true, caching );
       }
       if ( ! p ) return false;
-
-      int tree = p -> primary_tree();
-      if ( tree == TREE_RESTORATION || tree == TREE_HOLY || tree == TREE_DISCIPLINE )
-      {
-        sim -> errorf( "Setting quiet=1 on healer %s\n", formatted_name.c_str() );
-        p -> quiet = true;
-      }
-      if ( tree == TREE_PROTECTION )
-      {
-        sim -> errorf( "Setting quiet=1 on tank %s\n", formatted_name.c_str() );
-        p -> quiet = true;
-      }
     }
   }
 
