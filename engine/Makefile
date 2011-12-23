@@ -88,7 +88,7 @@ SRC = \
 	sc_heal.cpp \
 	sc_http.cpp \
 	sc_item.cpp \
-	sc_jediconsular.cpp \
+	sc_jedi_consular.cpp \
 	sc_item_data.cpp \
 	sc_js.cpp \
 	sc_log.cpp \

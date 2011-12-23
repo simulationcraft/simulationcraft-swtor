@@ -123,7 +123,8 @@ struct enchant_t;
 struct event_t;
 struct gain_t;
 struct item_t;
-struct jediconsular_t;
+struct jedi_consular_t;
+struct jedi_sage_t;
 struct js_node_t;
 struct option_t;
 struct pet_t;
@@ -174,6 +175,7 @@ enum player_type
   TROOPER, SMUGGLER, JEDI_KNIGHT, JEDI_CONSULAR,
   BOUNTY_HUNTER, SITH_WARRIOR, IMPERIAL_AGENT, SITH_INQUISITOR,
   PLAYER_PET, PLAYER_GUARDIAN,
+  JEDI_SAGE,
   ENEMY, ENEMY_ADD,
   PLAYER_MAX
 };
@@ -3852,7 +3854,7 @@ struct player_t : public noncopyable
 
   static player_t* create( sim_t* sim, const std::string& type, const std::string& name, race_type r = RACE_NONE );
 
-  static player_t* create_jediconsular( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+  static player_t* create_jedi_sage( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
   static player_t* create_enemy       ( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
 
   // Raid-wide aura/buff/debuff maintenance
@@ -3861,9 +3863,9 @@ struct player_t : public noncopyable
   static void combat_end  ( sim_t* sim );
 
   // Raid-wide Jedi Consular buff maintenance
-  static void jediconsular_init        ( sim_t* sim );
-  static void jediconsular_combat_begin( sim_t* sim );
-  static void jediconsular_combat_end  ( sim_t* /* sim */ ) {}
+  static void jedi_sage_init        ( sim_t* sim );
+  static void jedi_sage_combat_begin( sim_t* sim );
+  static void jedi_sage_combat_end  ( sim_t* /* sim */ ) {}
 
 
   // Raid-wide Enemy buff maintenance
@@ -3875,7 +3877,7 @@ struct player_t : public noncopyable
   inline bool is_enemy() const { return type == ENEMY; }
   inline bool is_add() const { return type == ENEMY_ADD; }
 
-  jediconsular_t* cast_jediconsular() { assert( type == JEDI_CONSULAR ); return ( jediconsular_t* ) this; }
+  jedi_sage_t* cast_jedi_sage() { assert( type == JEDI_SAGE ); return ( jedi_sage_t* ) this; }
   pet_t         * cast_pet         () { assert( is_pet()             ); return ( pet_t         * ) this; }
   enemy_t       * cast_enemy       () { assert( type == ENEMY        ); return ( enemy_t       * ) this; }
 

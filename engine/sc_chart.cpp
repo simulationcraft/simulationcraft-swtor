@@ -18,7 +18,7 @@ static const char* class_color( int type )
   case BOUNTY_HUNTER:       return "336600";
   //case MAGE:         return "69CCF0";
   case IMPERIAL_AGENT:      return "F58CBA";
-  case JEDI_CONSULAR:       return "C0C0C0";
+  case JEDI_SAGE:       return "C0C0C0";
   case SMUGGLER:        return "FFF569";
   case SITH_INQUISITOR:       return "2459FF";
   //case WARLOCK:      return "9482C9";
@@ -36,7 +36,7 @@ static const char* class_text_color( int type )
   switch( type )
   {
   //case MAGE:         return "59ADCC"; // darker blue
-  case JEDI_CONSULAR:       return "8A8A8A"; // darker silver
+  case JEDI_SAGE:       return "8A8A8A"; // darker silver
   //case SMUGGLER:        return "C0B84F"; // darker yellow
   default:           return class_color( type );
   }
@@ -53,7 +53,7 @@ static const char* school_color( int type )
   case SCHOOL_FIRE:       	return class_color( SITH_WARRIOR );
   case SCHOOL_FROST:      	return class_color( SITH_INQUISITOR );
   case SCHOOL_FROSTFIRE:  	return class_color( SITH_INQUISITOR );
-  case SCHOOL_HOLY:       	return class_color( JEDI_CONSULAR );
+  case SCHOOL_HOLY:       	return class_color( JEDI_SAGE );
   case SCHOOL_NATURE:     	return class_color( BOUNTY_HUNTER );
   case SCHOOL_PHYSICAL:   	return class_color( JEDI_KNIGHT );
   case SCHOOL_SHADOW:     	return 0; //return class_color( WARLOCK );
@@ -75,7 +75,7 @@ static const char* stat_color( int type )
   case STAT_STRENGTH:                 return class_color( JEDI_KNIGHT );
   case STAT_AGILITY:                  return class_color( BOUNTY_HUNTER );
   case STAT_INTELLECT:                return 0; //return class_color( MAGE );
-  case STAT_SPIRIT:                   return class_color( JEDI_CONSULAR );
+  case STAT_SPIRIT:                   return class_color( JEDI_SAGE );
   case STAT_MP5:                      return 0; //return class_text_color( MAGE );
   case STAT_ATTACK_POWER:             return class_color( SMUGGLER );
   case STAT_SPELL_POWER:              return 0; //return class_color( WARLOCK );
@@ -84,7 +84,7 @@ static const char* stat_color( int type )
   case STAT_HASTE_RATING:             return class_color( SITH_INQUISITOR );
   case STAT_MASTERY_RATING:           return class_text_color( SMUGGLER );
   case STAT_EXPERTISE_RATING:         return school_color( SCHOOL_BLEED );
-  case STAT_SPELL_PENETRATION:        return class_text_color( JEDI_CONSULAR );
+  case STAT_SPELL_PENETRATION:        return class_text_color( JEDI_SAGE );
   default:                            return ( 0 );
   }
 }
@@ -1796,7 +1796,7 @@ const char* chart_t::gear_weights_lootrank( std::string& s,
   case TROOPER:        s += "&Cla=1024"; break;
   case BOUNTY_HUNTER:       s += "&Cla=4";    break;
   case IMPERIAL_AGENT:      s += "&Cla=2";    break;
-  case JEDI_CONSULAR:       s += "&Cla=16";   break;
+  case JEDI_SAGE:       s += "&Cla=16";   break;
   case SMUGGLER:        s += "&Cla=8";    break;
   case SITH_INQUISITOR:       s += "&Cla=64";   break;
   case JEDI_KNIGHT:      s += "&Cla=1";    break;
@@ -1877,7 +1877,7 @@ const char* chart_t::gear_weights_wowhead( std::string& s,
   case TROOPER:        s += "ub=11;"; break;
   case BOUNTY_HUNTER:       s += "ub=3;";  break;
   case IMPERIAL_AGENT:      s += "ub=2;";  break;
-  case JEDI_CONSULAR:       s += "ub=5;";  break;
+  case JEDI_SAGE:       s += "ub=5;";  break;
   case SMUGGLER:        s += "ub=4;";  break;
   case SITH_INQUISITOR:       s += "ub=7;";  break;
   case JEDI_KNIGHT:      s += "ub=1;";  break;
