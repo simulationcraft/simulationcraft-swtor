@@ -20,45 +20,6 @@ struct jedi_consular_t : public player_t
   // Procs
   //proc_t* procs_<procname>;
 
-  // Talents
-  struct talents_t
-  {
-    // TREE_jedi_consular_tANK
-    //talent_t* <talentname>;
-
-    // TREE_jediconsular_DAMAGE
-
-    // TREE_jediconsular_HEAL
-
-    talents_t() { memset( ( void* ) this, 0x0, sizeof( talents_t ) ); }
-  };
-  talents_t talents;
-
-  // Passives
-  struct passives_t
-  {
-    // TREE_jedi_consular_tANK
-    // spell_id_t* mastery/passive spells
-
-    // TREE_jediconsular_DAMAGE
-
-    // TREE_jediconsular_HEAL
-
-    passives_t() { memset( ( void* ) this, 0x0, sizeof( passives_t ) ); }
-  };
-  passives_t passives;
-
-  // Glyphs
-  struct glyphs_t
-  {
-    // Prime
-    //glyph_t* <glyphname>;
-
-    // Major
-
-    glyphs_t() { memset( ( void* ) this, 0x0, sizeof( glyphs_t ) ); }
-  };
-  glyphs_t glyphs;
 
 protected:
   jedi_consular_t( sim_t* sim, player_type pt, const std::string& name, race_type r ) :
@@ -126,7 +87,27 @@ struct project_t : public jedi_consular_spell_t
     parse_options( 0, options_str );
     base_dd_min=3558.0; base_dd_max=4424.0;
     base_cost = 45.0;
+    range=30.0;
+
+    cooldown -> duration = 6.0;
+  }
+};
+
+struct telekinetic_throw_t : public jedi_consular_spell_t
+{
+  telekinetic_throw_t( jedi_consular_t* p, const std::string& options_str ) :
+    jedi_consular_spell_t( "telekinetic_throw", p, RESOURCE_FORCE )
+  {
+    parse_options( 0, options_str );
+    base_td = 4089.0 / 3.0;
+    base_cost = 30.0;
     range=10.0;
+
+    num_ticks = 3;
+
+    base_tick_time = 1.0;
+
+    channeled = true;
 
     cooldown -> duration = 6.0;
   }
@@ -144,7 +125,8 @@ struct project_t : public jedi_consular_spell_t
 action_t* jedi_consular_t::create_action( const std::string& name,
                                  const std::string& options_str )
 {
-  if ( name == "project" ) return new  project_t( this, options_str );
+  if ( name == "project"           ) return new            project_t( this, options_str );
+  if ( name == "telekinetic_throw" ) return new  telekinetic_throw_t( this, options_str );
 
   return player_t::create_action( name, options_str );
 }
@@ -335,7 +317,6 @@ struct jedi_sage_spell_t : public spell_t
 
 };
 
-
 struct disturbance_t : public jedi_sage_spell_t
 {
   disturbance_t( jedi_sage_t* p, const std::string& options_str ) :
@@ -343,12 +324,28 @@ struct disturbance_t : public jedi_sage_spell_t
   {
     parse_options( 0, options_str );
     base_dd_min=698.0; base_dd_max=762.0;
+    base_execute_time = 1.5;
     base_cost = 30.0;
     range=30.0;
   }
 };
 
+struct mind_crush_t : public jedi_sage_spell_t
+{
+  mind_crush_t( jedi_sage_t* p, const std::string& options_str ) :
+    jedi_sage_spell_t( "mind_crush", p, RESOURCE_FORCE )
+  {
+    parse_options( 0, options_str );
+    base_dd_min=3160.0; base_dd_max=4199.0;
+    base_td = 5295.0 / 6.0;
+    base_tick_time = 2.0;
+    num_ticks = 6;
+    base_cost = 40.0;
+    range=30.0;
 
+    cooldown -> duration = 15.0;
+  }
+};
 
 
 } // ANONYMOUS NAMESPACE ====================================================
@@ -363,6 +360,7 @@ action_t* jedi_sage_t::create_action( const std::string& name,
                                  const std::string& options_str )
 {
   if ( name == "disturbance" ) return new  disturbance_t( this, options_str );
+  if ( name == "mind_crush"  ) return new   mind_crush_t( this, options_str );
 
   return jedi_consular_t::create_action( name, options_str );
 }
@@ -372,6 +370,7 @@ action_t* jedi_sage_t::create_action( const std::string& name,
 void jedi_sage_t::init_talents()
 {
   jedi_consular_t::init_talents();
+
 
   // TREE_jedi_consular_tANK
   //talents.<name>        = find_talent( "<talentname>" );
@@ -468,6 +467,8 @@ void jedi_sage_t::init_actions()
     // Flask
 
     action_list_str += "/snapshot_stats";
+
+    action_list_str += "/mind_crush";
 
     action_list_str += "/project";
 
