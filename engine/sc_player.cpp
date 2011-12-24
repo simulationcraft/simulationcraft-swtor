@@ -892,6 +892,8 @@ void player_t::init_defense()
   initial_stats.parry_rating   = gear.parry_rating   + enchant.parry_rating   + ( is_pet() ? 0 : sim -> enchant.parry_rating );
   initial_stats.block_rating   = gear.block_rating   + enchant.block_rating   + ( is_pet() ? 0 : sim -> enchant.block_rating );
 
+  initial_stats.willpower      = gear.willpower      + enchant.willpower      + ( is_pet() ? 0 : sim -> enchant.willpower    );
+
   initial_armor             = base_armor       + initial_stats.armor;
   initial_bonus_armor       = base_bonus_armor + initial_stats.bonus_armor;
   initial_miss              = base_miss;
@@ -899,6 +901,8 @@ void player_t::init_defense()
   initial_parry             = base_parry       + initial_stats.parry_rating / rating.parry;
   initial_block             = base_block       + initial_stats.block_rating / rating.block;
   initial_block_reduction   = base_block_reduction;
+
+  initial_willpower         = base_willpower + initial_willpower;
 
   if ( type != ENEMY && type != ENEMY_ADD )
   {
@@ -1458,6 +1462,8 @@ void player_t::init_scaling()
 
     scales_with[ STAT_BLOCK_RATING ] = 0;
 
+    scales_with[ STAT_WILLPOWER ] = 0;
+
     if ( sim -> scaling -> scale_stat != STAT_NONE && scale_player )
     {
       double v = sim -> scaling -> scale_value;
@@ -1565,6 +1571,8 @@ void player_t::init_scaling()
       case STAT_PARRY_RATING:   initial_parry       += v / rating.parry; break;
 
       case STAT_BLOCK_RATING:   initial_block       += v / rating.block; break;
+
+      case STAT_WILLPOWER:       initial_willpower    += v; break;
 
       case STAT_MAX: break;
 
@@ -1950,6 +1958,15 @@ double player_t::composite_movement_speed() const
   double speed = base_movement_speed;
 
   return speed;
+}
+
+// player_t::composite_willpower =======================================
+
+double player_t::composite_willpower() const
+{
+  double wp = base_willpower;
+
+  return wp;
 }
 
 // player_t::strength() =====================================================
@@ -3064,6 +3081,8 @@ void player_t::stat_gain( int       stat,
     mastery += amount / rating.mastery;
     break;
 
+  case STAT_WILLPOWER:   stats.willpower += amount; temporary.willpower += temporary_stat * amount; willpower       += amount;                  break;
+
   default: assert( 0 );
   }
 }
@@ -3151,6 +3170,9 @@ void player_t::stat_loss( int       stat,
     temporary.mastery_rating -= temporary_buff * amount;
     mastery -= amount / rating.mastery;
     break;
+
+  case STAT_WILLPOWER:          stats.willpower          -= amount; temporary.willpower -= temporary_buff * amount; willpower       -= amount;                  break;
+
 
   default: assert( 0 );
   }
@@ -4996,6 +5018,9 @@ action_expr_t* player_t::create_expression( action_t* a,
         case STAT_PARRY_RATING:     p_stat = &( a -> player -> temporary.parry_rating                ); break;
         case STAT_BLOCK_RATING:     p_stat = &( a -> player -> temporary.block_rating                ); break;
         case STAT_MASTERY_RATING:   p_stat = &( a -> player -> temporary.mastery_rating              ); break;
+
+        case STAT_WILLPOWER:        p_stat = &( a -> player -> temporary.willpower                   ); break;
+
         default: break;
       }
 

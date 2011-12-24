@@ -86,15 +86,15 @@ namespace { // ANONYMOUS NAMESPACE ==========================================
 // jediconsular Abilities
 // ==========================================================================
 
-struct jediconsular_attack_t : public attack_t
+struct jedi_consular_attack_t : public attack_t
 {
 
-  jediconsular_attack_t( const char* n, uint32_t id, jedi_consular_t* p, int t=TREE_NONE, bool special = true ) :
+  jedi_consular_attack_t( const char* n, uint32_t id, jedi_consular_t* p, int t=TREE_NONE, bool special = true ) :
     attack_t( n, id, p, t, special )
   {
-    _init_jediconsular_attack_t();
+    _init_jedi_consular_attack_t();
   }
-  void _init_jediconsular_attack_t()
+  void _init_jedi_consular_attack_t()
   {
     may_crit   = true;
     may_glance = false;
@@ -103,22 +103,34 @@ struct jediconsular_attack_t : public attack_t
   virtual bool   ready();
 };
 
-struct jediconsular_spell_t : public spell_t
+struct jedi_consular_spell_t : public spell_t
 {
-  jediconsular_spell_t( const char* n, jedi_consular_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_HOLY, int t=TREE_NONE ) :
+  jedi_consular_spell_t( const char* n, jedi_consular_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_HOLY, int t=TREE_NONE ) :
     spell_t( n, p, r, s, t )
   {
-    _init_jediconsular_spell_t();
+    _init_jedi_consular_spell_t();
   }
 
-  void _init_jediconsular_spell_t()
+  void _init_jedi_consular_spell_t()
   {
     may_crit   = true;
   }
 
 };
 
+struct project_t : public jedi_consular_spell_t
+{
+  project_t( jedi_consular_t* p, const std::string& options_str ) :
+    jedi_consular_spell_t( "project", p, RESOURCE_FORCE )
+  {
+    parse_options( 0, options_str );
+    base_dd_min=3558.0; base_dd_max=4424.0;
+    base_cost = 45.0;
+    range=10.0;
 
+    cooldown -> duration = 6.0;
+  }
+};
 
 
 } // ANONYMOUS NAMESPACE ====================================================
@@ -132,6 +144,7 @@ struct jediconsular_spell_t : public spell_t
 action_t* jedi_consular_t::create_action( const std::string& name,
                                  const std::string& options_str )
 {
+  if ( name == "project" ) return new  project_t( this, options_str );
 
   return player_t::create_action( name, options_str );
 }
@@ -386,7 +399,7 @@ void jedi_sage_t::init_base()
   jedi_consular_t::init_base();
 
 
-  default_distance = 30;
+  default_distance = 10;
   distance = default_distance;
 
   base_gcd = 1.5; // FIXME: assumption
@@ -455,6 +468,8 @@ void jedi_sage_t::init_actions()
     // Flask
 
     action_list_str += "/snapshot_stats";
+
+    action_list_str += "/project";
 
     action_list_str += "/disturbance";
 

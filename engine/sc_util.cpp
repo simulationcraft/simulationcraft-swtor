@@ -968,6 +968,8 @@ const char* util_t::stat_type_string( int stat )
 
   case STAT_MASTERY_RATING: return "mastery_rating";
 
+  case STAT_WILLPOWER: return "willpower";
+
   case STAT_MAX: return "all";
   }
   return "unknown";
@@ -1019,6 +1021,8 @@ const char* util_t::stat_type_abbrev( int stat )
   case STAT_BLOCK_RATING: return "BlockR";
 
   case STAT_MASTERY_RATING: return "Mastery";
+
+  case STAT_WILLPOWER: return "Willpower";
 
   case STAT_MAX: return "All";
   }

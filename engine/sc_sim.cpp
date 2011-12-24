@@ -2023,6 +2023,7 @@ void sim_t::create_options()
     { "default_enchant_mastery_rating",           OPT_FLT,  &( enchant.mastery_rating              ) },
     { "default_enchant_hit_rating",               OPT_FLT,  &( enchant.hit_rating                  ) },
     { "default_enchant_crit_rating",              OPT_FLT,  &( enchant.crit_rating                 ) },
+    { "default_enchant_willpower",                OPT_FLT,  &( enchant.willpower                   ) },
     { "default_enchant_health",                   OPT_FLT,  &( enchant.resource[ RESOURCE_HEALTH ] ) },
     { "default_enchant_mana",                     OPT_FLT,  &( enchant.resource[ RESOURCE_MANA   ] ) },
     { "default_enchant_rage",                     OPT_FLT,  &( enchant.resource[ RESOURCE_RAGE   ] ) },

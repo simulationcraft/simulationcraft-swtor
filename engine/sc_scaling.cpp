@@ -189,6 +189,7 @@ void scaling_t::init_deltas()
   if ( stats.crit_rating  == 0 ) stats.crit_rating  = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
   if ( stats.haste_rating == 0 ) stats.haste_rating = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
   if ( stats.mastery_rating == 0 ) stats.mastery_rating = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
+  if ( stats.willpower  == 0 ) stats.willpower  = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
 
   // Defensive
   if ( stats.armor == 0 ) stats.armor = smooth_scale_factors ? 1500 : 3000;

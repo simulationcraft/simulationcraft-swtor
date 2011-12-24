@@ -407,6 +407,8 @@ enum stat_type
   STAT_WEAPON_OFFHAND_DPS, STAT_WEAPON_OFFHAND_SPEED,
   STAT_ARMOR, STAT_BONUS_ARMOR, STAT_RESILIENCE_RATING, STAT_DODGE_RATING, STAT_PARRY_RATING,
   STAT_BLOCK_RATING,
+
+  STAT_WILLPOWER,
   STAT_MAX
 };
 
@@ -2235,6 +2237,7 @@ struct gear_stats_t
   double parry_rating;
   double block_rating;
   double mastery_rating;
+  double willpower;
 };
 }
 
@@ -3408,6 +3411,8 @@ struct player_t : public noncopyable
   double resource_reduction[ SCHOOL_MAX ], initial_resource_reduction[ SCHOOL_MAX ];
   double last_cast;
 
+  double base_willpower, initial_willpower, willpower, buffed_willpower;
+
   // Attack Mechanics
   double base_attack_power,       initial_attack_power,        attack_power,       buffed_attack_power;
   double base_attack_hit,         initial_attack_hit,          attack_hit,         buffed_attack_hit;
@@ -3750,6 +3755,8 @@ struct player_t : public noncopyable
   virtual double composite_player_absorb_multiplier   ( const school_type school ) const;
 
   virtual double composite_movement_speed() const;
+
+  virtual double composite_willpower() const;
 
   virtual double strength() const;
   virtual double agility() const;
