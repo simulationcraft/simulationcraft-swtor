@@ -189,7 +189,6 @@ void scaling_t::init_deltas()
   if ( stats.crit_rating  == 0 ) stats.crit_rating  = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
   if ( stats.haste_rating == 0 ) stats.haste_rating = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
   if ( stats.mastery_rating == 0 ) stats.mastery_rating = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
-  if ( stats.willpower  == 0 ) stats.willpower  = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
 
   // Defensive
   if ( stats.armor == 0 ) stats.armor = smooth_scale_factors ? 1500 : 3000;
@@ -532,6 +531,7 @@ void scaling_t::create_options()
     { "scale_stamina",                  OPT_FLT,    &( stats.attribute[ ATTR_STAMINA   ]    ) },
     { "scale_intellect",                OPT_FLT,    &( stats.attribute[ ATTR_INTELLECT ]    ) },
     { "scale_spirit",                   OPT_FLT,    &( stats.attribute[ ATTR_SPIRIT    ]    ) },
+    { "scale_willpower",                OPT_FLT,    &( stats.attribute[ ATTR_WILLPOWER ]    ) },
     { "scale_spell_power",              OPT_FLT,    &( stats.spell_power                    ) },
     { "scale_attack_power",             OPT_FLT,    &( stats.attack_power                   ) },
     { "scale_expertise_rating",         OPT_FLT,    &( stats.expertise_rating               ) },

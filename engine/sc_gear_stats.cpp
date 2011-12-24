@@ -23,6 +23,7 @@ void gear_stats_t::add_stat( int    stat,
   case STAT_STAMINA:   attribute[ ATTR_STAMINA   ] += value; break;
   case STAT_INTELLECT: attribute[ ATTR_INTELLECT ] += value; break;
   case STAT_SPIRIT:    attribute[ ATTR_SPIRIT    ] += value; break;
+  case STAT_WILLPOWER: attribute[ ATTR_WILLPOWER ] += value; break;
 
   case STAT_HEALTH: resource[ RESOURCE_HEALTH ] += value; break;
   case STAT_MANA:   resource[ RESOURCE_MANA   ] += value; break;
@@ -65,8 +66,6 @@ void gear_stats_t::add_stat( int    stat,
 
   case STAT_MASTERY_RATING: mastery_rating += value; break;
 
-  case STAT_WILLPOWER: willpower += value; break;
-
   case STAT_MAX: for ( int i=0; i < ATTRIBUTE_MAX; i++ ) { attribute[ i ] += value; }
     break;
 
@@ -88,6 +87,7 @@ void gear_stats_t::set_stat( int    stat,
   case STAT_STAMINA:   attribute[ ATTR_STAMINA   ] = value; break;
   case STAT_INTELLECT: attribute[ ATTR_INTELLECT ] = value; break;
   case STAT_SPIRIT:    attribute[ ATTR_SPIRIT    ] = value; break;
+  case STAT_WILLPOWER: attribute[ ATTR_WILLPOWER ] = value; break;
 
   case STAT_HEALTH: resource[ RESOURCE_HEALTH ] = value; break;
   case STAT_MANA:   resource[ RESOURCE_MANA   ] = value; break;
@@ -130,8 +130,6 @@ void gear_stats_t::set_stat( int    stat,
 
   case STAT_MASTERY_RATING: mastery_rating = value; break;
 
-  case STAT_WILLPOWER: willpower = value; break;
-
   case STAT_MAX: for ( int i=0; i < ATTRIBUTE_MAX; i++ ) { attribute[ i ] = value; }
     break;
 
@@ -152,6 +150,7 @@ double gear_stats_t::get_stat( int stat ) const
   case STAT_STAMINA:   return attribute[ ATTR_STAMINA   ];
   case STAT_INTELLECT: return attribute[ ATTR_INTELLECT ];
   case STAT_SPIRIT:    return attribute[ ATTR_SPIRIT    ];
+  case STAT_WILLPOWER: return attribute[ ATTR_WILLPOWER ];
 
   case STAT_HEALTH: return resource[ RESOURCE_HEALTH ];
   case STAT_MANA:   return resource[ RESOURCE_MANA   ];
@@ -193,8 +192,6 @@ double gear_stats_t::get_stat( int stat ) const
   case STAT_BLOCK_RATING: return block_rating;
 
   case STAT_MASTERY_RATING: return mastery_rating;
-
-  case STAT_WILLPOWER: return willpower;
 
   default: assert( 0 );
   }

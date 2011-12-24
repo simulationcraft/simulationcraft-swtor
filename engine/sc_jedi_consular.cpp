@@ -88,6 +88,7 @@ struct project_t : public jedi_consular_spell_t
     base_dd_min=3558.0; base_dd_max=4424.0;
     base_cost = 45.0;
     range=30.0;
+    direct_power_mod = 1.85;
 
     cooldown -> duration = 6.0;
   }
@@ -102,6 +103,7 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
     base_td = 4089.0 / 3.0;
     base_cost = 30.0;
     range=10.0;
+    tick_power_mod = 0.79;
 
     num_ticks = 3;
 
@@ -327,6 +329,7 @@ struct disturbance_t : public jedi_sage_spell_t
     base_execute_time = 1.5;
     base_cost = 30.0;
     range=30.0;
+    direct_power_mod = 1.32;
   }
 };
 
@@ -342,6 +345,8 @@ struct mind_crush_t : public jedi_sage_spell_t
     num_ticks = 6;
     base_cost = 40.0;
     range=30.0;
+    direct_power_mod = 1.23;
+    tick_power_mod = 0.295;
 
     cooldown -> duration = 15.0;
   }

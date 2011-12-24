@@ -196,7 +196,7 @@ enum stats_type { STATS_DMG, STATS_HEAL, STATS_ABSORB };
 
 enum dot_behavior_type { DOT_CLIP=0, DOT_REFRESH };
 
-enum attribute_type { ATTRIBUTE_NONE=0, ATTR_STRENGTH, ATTR_AGILITY, ATTR_STAMINA, ATTR_INTELLECT, ATTR_SPIRIT, ATTRIBUTE_MAX };
+enum attribute_type { ATTRIBUTE_NONE=0, ATTR_STRENGTH, ATTR_AGILITY, ATTR_STAMINA, ATTR_INTELLECT, ATTR_SPIRIT, ATTR_WILLPOWER, ATTRIBUTE_MAX };
 
 enum base_stat_type { BASE_STAT_STRENGTH=0, BASE_STAT_AGILITY, BASE_STAT_STAMINA, BASE_STAT_INTELLECT, BASE_STAT_SPIRIT,
                       BASE_STAT_HEALTH, BASE_STAT_MANA,
@@ -2237,7 +2237,6 @@ struct gear_stats_t
   double parry_rating;
   double block_rating;
   double mastery_rating;
-  double willpower;
 };
 }
 
@@ -3411,8 +3410,6 @@ struct player_t : public noncopyable
   double resource_reduction[ SCHOOL_MAX ], initial_resource_reduction[ SCHOOL_MAX ];
   double last_cast;
 
-  double base_willpower, initial_willpower, willpower, buffed_willpower;
-
   // Attack Mechanics
   double base_attack_power,       initial_attack_power,        attack_power,       buffed_attack_power;
   double base_attack_hit,         initial_attack_hit,          attack_hit,         buffed_attack_hit;
@@ -3756,8 +3753,7 @@ struct player_t : public noncopyable
 
   virtual double composite_movement_speed() const;
 
-  virtual double composite_willpower() const;
-
+  virtual double willpower() const;
   virtual double strength() const;
   virtual double agility() const;
   virtual double stamina() const;
