@@ -1422,11 +1422,12 @@ void player_t::init_scaling()
     int spell  = ( ( role == ROLE_SPELL  ) || ( role == ROLE_HYBRID ) || ( role == ROLE_HEAL ) ) ? 1 : 0;
     int tank   = role == ROLE_TANK ? 1 : 0;
 
-    scales_with[ STAT_STRENGTH  ] = attack;
-    scales_with[ STAT_AGILITY   ] = attack || tank;
-    scales_with[ STAT_STAMINA   ] = tank;
-    scales_with[ STAT_INTELLECT ] = spell;
-    scales_with[ STAT_SPIRIT    ] = spell;
+    scales_with[ STAT_STRENGTH  ] = 0;
+    scales_with[ STAT_AGILITY   ] = 0;
+    scales_with[ STAT_STAMINA   ] = 0;
+    scales_with[ STAT_INTELLECT ] = 0;
+    scales_with[ STAT_SPIRIT    ] = 0;
+    scales_with[ STAT_WILLPOWER ] = spell;
 
     scales_with[ STAT_HEALTH ] = 0;
     scales_with[ STAT_MANA   ] = 0;
@@ -1434,18 +1435,18 @@ void player_t::init_scaling()
     scales_with[ STAT_ENERGY ] = 0;
     scales_with[ STAT_AMMO   ] = 0;
 
-    scales_with[ STAT_SPELL_POWER       ] = spell;
+    scales_with[ STAT_SPELL_POWER       ] = 0;
     scales_with[ STAT_SPELL_PENETRATION ] = 0;
     scales_with[ STAT_MP5               ] = 0;
 
-    scales_with[ STAT_ATTACK_POWER             ] = attack;
-    scales_with[ STAT_EXPERTISE_RATING         ] = attack || tank;
-    scales_with[ STAT_EXPERTISE_RATING2        ] = ( attack || tank ) && position == POSITION_FRONT;
+    scales_with[ STAT_ATTACK_POWER             ] = 0;
+    scales_with[ STAT_EXPERTISE_RATING         ] = 0;
+    scales_with[ STAT_EXPERTISE_RATING2        ] = 0;
 
-    scales_with[ STAT_HIT_RATING                ] = 1;
-    scales_with[ STAT_CRIT_RATING               ] = 1;
-    scales_with[ STAT_HASTE_RATING              ] = 1;
-    scales_with[ STAT_MASTERY_RATING            ] = 1;
+    scales_with[ STAT_HIT_RATING                ] = 0;
+    scales_with[ STAT_CRIT_RATING               ] = 0;
+    scales_with[ STAT_HASTE_RATING              ] = 0;
+    scales_with[ STAT_MASTERY_RATING            ] = 0;
 
     scales_with[ STAT_WEAPON_DPS   ] = attack;
     scales_with[ STAT_WEAPON_SPEED ] = sim -> weapon_speed_scale_factors ? attack : 0;
@@ -1455,12 +1456,11 @@ void player_t::init_scaling()
 
     scales_with[ STAT_ARMOR          ] = tank;
     scales_with[ STAT_BONUS_ARMOR    ] = 0;
-    scales_with[ STAT_DODGE_RATING   ] = tank;
+    scales_with[ STAT_DODGE_RATING   ] = 0;
     scales_with[ STAT_PARRY_RATING   ] = 0;
 
     scales_with[ STAT_BLOCK_RATING ] = 0;
 
-    scales_with[ STAT_WILLPOWER ] = 0;
 
     if ( sim -> scaling -> scale_stat != STAT_NONE && scale_player )
     {
