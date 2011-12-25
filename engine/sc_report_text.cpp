@@ -761,44 +761,6 @@ static void print_text_reference_dps( FILE* file, sim_t* sim )
 
 namespace {
 
-struct compare_hat_donor_interval
-{
-  bool operator()( player_t* l, player_t* r ) const
-  {
-    return ( l -> procs.hat_donor -> frequency < r -> procs.hat_donor -> frequency );
-  }
-};
-
-}
-
-static void print_text_hat_donors( FILE* file, sim_t* sim )
-{
-  std::vector<player_t*> hat_donors;
-
-  int num_players = ( int ) sim -> players_by_name.size();
-  for ( int i=0; i < num_players; i++ )
-  {
-    player_t* p = sim -> players_by_name[ i ];
-    if ( p -> procs.hat_donor -> count )
-      hat_donors.push_back( p );
-  }
-
-  int num_donors = ( int ) hat_donors.size();
-  if ( num_donors )
-  {
-    range::sort( hat_donors, compare_hat_donor_interval()  );
-
-    util_t::fprintf( file, "\nHonor Among Thieves Donor Report:\n" );
-
-    for ( int i=0; i < num_donors; i++ )
-    {
-      player_t* p = hat_donors[ i ];
-      proc_t* proc = p -> procs.hat_donor;
-      util_t::fprintf( file, "  %.2fsec | %.3fcps : %s\n", proc -> frequency, ( 1.0 / proc -> frequency ), p -> name() );
-    }
-  }
-}
-
 // print_text_player ========================================================
 
 static void print_text_player( FILE* file, player_t* p )
@@ -845,8 +807,7 @@ static void print_text_player( FILE* file, player_t* p )
 
 } // ANONYMOUS NAMESPACE ====================================================
 
-
-
+}
 // report_t::print_text =====================================================
 
 void report_t::print_text( FILE* file, sim_t* sim, bool detail )
@@ -944,7 +905,6 @@ void report_t::print_text( FILE* file, sim_t* sim, bool detail )
   if ( detail )
   {
     print_text_buffs        ( file, sim );
-    print_text_hat_donors   ( file, sim );
     print_text_waiting      ( file, sim );
     print_text_performance  ( file, sim );
     print_text_scale_factors( file, sim );

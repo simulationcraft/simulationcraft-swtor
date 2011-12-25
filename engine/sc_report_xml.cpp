@@ -183,7 +183,6 @@ void print_xml_raid_events( sim_t* sim, xml_writer_t & writer );
 void print_xml_roster( sim_t* sim, xml_writer_t & writer );
 void print_xml_targets( sim_t* sim, xml_writer_t & writer );
 void print_xml_buffs( sim_t* sim, xml_writer_t & writer );
-void print_xml_hat_donors( sim_t* sim, xml_writer_t & writer );
 void print_xml_performance( sim_t* sim, xml_writer_t & writer );
 void print_xml_summary( sim_t* sim, xml_writer_t & writer );
 void print_xml_player( sim_t* sim, xml_writer_t & writer, player_t * p, player_t * owner );
@@ -916,48 +915,6 @@ void print_xml_buffs( sim_t* sim, xml_writer_t & writer )
   writer.end_tag(); // </buffs>
 }
 
-struct compare_hat_donor_interval
-{
-  bool operator()( const player_t* l, const player_t* r ) const
-  {
-    return( l -> procs.hat_donor -> frequency < r -> procs.hat_donor -> frequency );
-  }
-};
-
-void print_xml_hat_donors( sim_t* sim, xml_writer_t & writer )
-{
-  std::vector<player_t*> hat_donors;
-
-  int num_players = ( int ) sim -> players_by_name.size();
-  for ( int i=0; i < num_players; i++ )
-  {
-    player_t* p = sim -> players_by_name[ i ];
-    if ( p -> procs.hat_donor -> count )
-      hat_donors.push_back( p );
-  }
-
-  int num_donors = ( int ) hat_donors.size();
-  if ( num_donors )
-  {
-    range::sort( hat_donors, compare_hat_donor_interval()  );
-
-    writer.begin_tag( "honor_among_thieves" );
-
-    for ( int i=0; i < num_donors; i++ )
-    {
-      writer.begin_tag( "donors" );
-      player_t* p = hat_donors[ i ];
-      proc_t* proc = p -> procs.hat_donor;
-      writer.print_attribute( "name", p -> name() );
-      writer.print_attribute( "frequency_sec", util_t::to_string( proc -> frequency, 2 ) );
-      writer.print_attribute( "frequency_pct", util_t::to_string( ( 1.0 / proc -> frequency ), 3 ) );
-      writer.end_tag(); // </donors>
-    }
-
-    writer.end_tag(); // </honor_among_thieves>
-  }
-}
-
 void print_xml_performance( sim_t* sim, xml_writer_t & writer )
 {
   writer.begin_tag( "performance" );
@@ -1290,7 +1247,6 @@ void report_t::print_xml( sim_t* sim )
   print_xml_targets( sim, writer );
 
   print_xml_buffs( sim, writer );
-  print_xml_hat_donors( sim, writer );
   print_xml_performance( sim, writer );
 
   print_xml_errors( sim, writer );

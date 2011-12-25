@@ -3632,13 +3632,6 @@ struct player_t : public noncopyable
   };
   gains_t gains;
 
-  struct procs_t
-  {
-    proc_t* hat_donor;
-    void reset() { *this = procs_t(); }
-  };
-  procs_t procs;
-
   rng_t* rng_list;
 
   struct rngs_t
