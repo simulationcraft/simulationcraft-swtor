@@ -606,8 +606,21 @@ school_type util_t::parse_school_type( const std::string& name )
 
 // util_t::talent_tree ======================================================
 
-int util_t::talent_tree( int /* tree */, player_type /* ptype */ )
+int util_t::talent_tree( int tree, player_type ptype )
 {
+  switch ( ptype )
+  {
+    case JEDI_SAGE:
+      switch ( tree )
+      {
+      case JEDI_SAGE_SEER:          return TREE_SEER;
+      case JEDI_SAGE_TELEKINETICS:  return TREE_TELEKINETICS;
+      case JEDI_SAGE_BALANCE:       return TREE_BALANCE;
+      }
+    default:
+      break;
+  }
+
   return TREE_NONE;
 }
 
@@ -619,7 +632,9 @@ const char* util_t::talent_tree_string( int tree, bool armory_format )
   {
     switch ( tree )
     {
-
+    case TREE_SEER:         return "seer";
+    case TREE_TELEKINETICS: return "telekinetics";
+    case TREE_BALANCE:      return "balance";
     default: return "Unknown";
     }
   }
@@ -627,7 +642,9 @@ const char* util_t::talent_tree_string( int tree, bool armory_format )
   {
     switch ( tree )
     {
-
+    case TREE_SEER:         return "Seer";
+    case TREE_TELEKINETICS: return "Telekinetics";
+    case TREE_BALANCE:      return "Balance";
     default: return "Unknown";
     }
   }

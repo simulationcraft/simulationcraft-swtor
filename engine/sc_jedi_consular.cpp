@@ -228,17 +228,26 @@ struct jedi_sage_t : public jedi_consular_t
     // TREE_jedi_consular_tANK
     //talent_t* <talentname>;
 
-    // TREE_jediconsular_DAMAGE
+    // TREE_TELEKINETICS
     int inner_strength;
     int mental_longevity;
     int clamoring_force;
-
+    int minds_eye;
     int disturb_mind;
     int concentration;
     int telekinetic_defense;
     int blockout;
     int telekinetic_wave;
     int psychic_projection;
+    int force_wake;
+    int tidal_force;
+    int telekinetic_effusion;
+    int kinetic_collapse;
+    int tremors;
+    int telekinetic_momentum;
+    int mental_alacrity;
+    int reverberation;
+    int turbulence;
 
 
     // TREE_jediconsular_HEAL
@@ -276,6 +285,9 @@ struct jedi_sage_t : public jedi_consular_t
   jedi_sage_t( sim_t* sim, const std::string& name, race_type r = RACE_NONE ) :
     jedi_consular_t( sim, JEDI_SAGE, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
   {
+    tree_type[ JEDI_SAGE_SEER ] = TREE_SEER;
+    tree_type[ JEDI_SAGE_TELEKINETICS ] = TREE_TELEKINETICS;
+    tree_type[ JEDI_SAGE_BALANCE ] = TREE_BALANCE;
 
     create_talents();
     create_glyphs();

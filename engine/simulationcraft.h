@@ -290,14 +290,14 @@ const int64_t SCHOOL_SPELL_MASK  ( ( int64_t( 1 ) << SCHOOL_ARCANE )         | (
 enum talent_tree_type
 {
   TREE_NONE=0,
-
+  TREE_SEER,TREE_TELEKINETICS,TREE_BALANCE,
   TALENT_TREE_MAX
 };
 
 enum talent_tab_type
 {
   TALENT_TAB_NONE = -1,
-
+  JEDI_SAGE_SEER,JEDI_SAGE_TELEKINETICS,JEDI_SAGE_BALANCE
 };
 
 enum weapon_type
