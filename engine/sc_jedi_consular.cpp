@@ -75,6 +75,7 @@ struct jedi_consular_spell_t : public spell_t
   void _init_jedi_consular_spell_t()
   {
     may_crit   = true;
+    tick_may_crit = true;
   }
 
 };
@@ -102,7 +103,7 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
     parse_options( 0, options_str );
     base_td = 4089.0 / 3.0;
     base_cost = 30.0;
-    range=10.0;
+    range = 30.0;
     tick_power_mod = 0.79;
 
     num_ticks = 3;
@@ -113,8 +114,9 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
 
     cooldown -> duration = 6.0;
   }
-};
 
+  virtual double tick_time() const;
+};
 
 } // ANONYMOUS NAMESPACE ====================================================
 
@@ -211,9 +213,11 @@ struct jedi_sage_t : public jedi_consular_t
 {
 
   // Buffs
-  //buff_t* buffs_<buffname>;
+  buff_t* buffs_concentration;
+  buff_t* buffs_psychic_projection;
 
   // Gains
+  gain_t* gains_concentration;
 
   // Procs
   //proc_t* procs_<procname>;
@@ -225,6 +229,17 @@ struct jedi_sage_t : public jedi_consular_t
     //talent_t* <talentname>;
 
     // TREE_jediconsular_DAMAGE
+    int inner_strength;
+    int mental_longevity;
+    int clamoring_force;
+
+    int disturb_mind;
+    int concentration;
+    int telekinetic_defense;
+    int blockout;
+    int telekinetic_wave;
+    int psychic_projection;
+
 
     // TREE_jediconsular_HEAL
 
@@ -279,6 +294,7 @@ struct jedi_sage_t : public jedi_consular_t
   virtual void      init_rng();
   virtual void      init_actions();
   virtual int       primary_role() const;
+  virtual void      regen( const double periodicity );
 };
 
 namespace { // ANONYMOUS NAMESPACE ==========================================
@@ -315,6 +331,21 @@ struct jedi_sage_spell_t : public spell_t
   void _init_jedi_sage_spell_t()
   {
     may_crit   = true;
+    tick_may_crit = true;
+  }
+
+  virtual double cost() const
+  {
+    double c = spell_t::cost();
+
+    jedi_sage_t* p = player -> cast_jedi_sage();
+    if ( p -> talents.inner_strength > 0 )
+    {
+      c *= 1.0 - p -> talents.inner_strength * 0.03;
+      c = floor( c );
+    }
+
+    return c;
   }
 
 };
@@ -328,8 +359,22 @@ struct disturbance_t : public jedi_sage_spell_t
     base_dd_min=698.0; base_dd_max=762.0;
     base_execute_time = 1.5;
     base_cost = 30.0;
-    range=30.0;
+    range = 30.0;
     direct_power_mod = 1.32;
+
+    base_multiplier *= 1.0 + p -> talents.clamoring_force * 0.02;
+  }
+
+  virtual void impact( player_t* t, int impact_result, double travel_dmg )
+  {
+    jedi_sage_spell_t::impact( t, impact_result, travel_dmg );
+
+    if ( result_is_hit( impact_result ) )
+    {
+      jedi_sage_t* p = player -> cast_jedi_sage();
+
+      p -> buffs_concentration -> trigger();
+    }
   }
 };
 
@@ -341,10 +386,11 @@ struct mind_crush_t : public jedi_sage_spell_t
     parse_options( 0, options_str );
     base_dd_min=3160.0; base_dd_max=4199.0;
     base_td = 5295.0 / 6.0;
-    base_tick_time = 2.0;
+    base_tick_time = 1.0;
+    base_execute_time = 2.0;
     num_ticks = 6;
     base_cost = 40.0;
-    range=30.0;
+    range = 30.0;
     direct_power_mod = 1.23;
     tick_power_mod = 0.295;
 
@@ -352,7 +398,49 @@ struct mind_crush_t : public jedi_sage_spell_t
   }
 };
 
+struct weaken_mind_t : public jedi_sage_spell_t
+{
+  weaken_mind_t( jedi_sage_t* p, const std::string& options_str ) :
+    jedi_sage_spell_t( "weaken_mind", p, RESOURCE_FORCE )
+  {
+    parse_options( 0, options_str );
+    base_td = 5564.0 / 5.0;
+    base_tick_time = 3.0;
+    num_ticks = 6 + p -> talents.disturb_mind;
+    base_cost = 35.0;
+    range = 30.0;
+    tick_power_mod = 0.31;
+    may_crit = false;
+  }
 
+  virtual void tick( dot_t* d )
+  {
+    jedi_sage_spell_t::tick( d );
+
+    jedi_sage_t* p = player -> cast_jedi_sage();
+
+    if ( result == RESULT_CRIT && p -> talents.psychic_projection > 0 )
+    {
+      p -> buffs_psychic_projection -> trigger();
+    }
+  }
+};
+
+double telekinetic_throw_t::tick_time() const
+{
+  double tt = jedi_consular_spell_t::tick_time();
+
+  if ( player -> type == JEDI_SAGE )
+  {
+    jedi_sage_t* p = player -> cast_jedi_sage();
+
+    if ( p -> buffs_psychic_projection -> check() )
+      tt *= 0.5;
+
+  }
+
+  return tt;
+}
 } // ANONYMOUS NAMESPACE ====================================================
 
 // ==========================================================================
@@ -364,8 +452,9 @@ struct mind_crush_t : public jedi_sage_spell_t
 action_t* jedi_sage_t::create_action( const std::string& name,
                                  const std::string& options_str )
 {
-  if ( name == "disturbance" ) return new  disturbance_t( this, options_str );
-  if ( name == "mind_crush"  ) return new   mind_crush_t( this, options_str );
+  if ( name == "disturbance"       ) return new       disturbance_t( this, options_str );
+  if ( name == "mind_crush"        ) return new        mind_crush_t( this, options_str );
+  if ( name == "weaken_mind"       ) return new       weaken_mind_t( this, options_str );
 
   return jedi_consular_t::create_action( name, options_str );
 }
@@ -376,13 +465,15 @@ void jedi_sage_t::init_talents()
 {
   jedi_consular_t::init_talents();
 
+  // set talent ranks here for now
 
-  // TREE_jedi_consular_tANK
-  //talents.<name>        = find_talent( "<talentname>" );
+  talents.clamoring_force = 3;
+  talents.mental_longevity = 2;
+  talents.inner_strength = 3;
+  talents.disturb_mind = 2;
+  talents.concentration = 2;
+  talents.psychic_projection = 2;
 
-  // TREE_jediconsular_DAMAGE
-
-  // TREE_jediconsular_HEAL
 
 }
 
@@ -408,7 +499,7 @@ void jedi_sage_t::init_base()
 
   base_gcd = 1.5; // FIXME: assumption
 
-  resource_base[  RESOURCE_FORCE  ] = 500; // FIXME: placeholder
+  resource_base[  RESOURCE_FORCE  ] = 500 + talents.mental_longevity * 50; // FIXME: placeholder
 
   base_force_regen_per_second = 8.0; // FIXME: placeholder ( identical to rogue )
 
@@ -436,6 +527,8 @@ void jedi_sage_t::init_buffs()
   // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
 
+  buffs_concentration = new buff_t( this, "concentration", 3, 10.0, 0.5 * talents.concentration );
+  buffs_psychic_projection = new buff_t( this, "psychic_projection", 1, 0.0, 0.5 * talents.psychic_projection, 10.0 );
 }
 
 // jedi_consular_t::init_gains =======================================================
@@ -443,6 +536,8 @@ void jedi_sage_t::init_buffs()
 void jedi_sage_t::init_gains()
 {
   jedi_consular_t::init_gains();
+
+  gains_concentration = get_gain( "concentration" );
 
 }
 
@@ -475,7 +570,11 @@ void jedi_sage_t::init_actions()
 
     action_list_str += "/mind_crush";
 
+    action_list_str += "/weaken_mind,if=!ticking";
+
     action_list_str += "/project";
+
+    action_list_str += "/telekinetic_throw,if=buff.psychic_projection.react";
 
     action_list_str += "/disturbance";
 
@@ -492,6 +591,17 @@ int jedi_sage_t::primary_role() const
   return ROLE_SPELL;
 }
 
+void jedi_sage_t::regen( const double periodicity )
+{
+  jedi_consular_t::regen( periodicity );
+
+  if ( buffs_concentration -> check() > 0 )
+  {
+    double force_regen = periodicity * force_regen_per_second() * buffs_concentration -> check() * 0.10;
+
+    resource_gain( RESOURCE_FORCE, force_regen, gains_concentration );
+  }
+}
 // ==========================================================================
 // PLAYER_T EXTENSIONS
 // ==========================================================================
