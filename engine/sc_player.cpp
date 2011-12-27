@@ -202,12 +202,13 @@ static bool parse_brain_lag_stddev( sim_t* sim,
 // player_t::player_t =======================================================
 
 player_t::player_t( sim_t*             s,
+                    player_main_class  m,
                     player_type        t,
                     const std::string& n,
                     race_type          r ) :
   sim( s ), name_str( n ),
   region_str( s -> default_region_str ), server_str( s -> default_server_str ), origin_str( "unknown" ),
-  next( 0 ), index( -1 ), type( t ), role( ROLE_HYBRID ), target( 0 ), level( is_enemy() ? 53 : 50 ), use_pre_potion( 1 ),
+  next( 0 ), index( -1 ), main_class( m ), type( t ), role( ROLE_HYBRID ), target( 0 ), level( is_enemy() ? 53 : 50 ), use_pre_potion( 1 ),
   party( 0 ), member( 0 ),
   skill( 0 ), initial_skill( s -> default_skill ), distance( 0 ), default_distance( 0 ), gcd_ready( 0 ), base_gcd( 1.5 ),
   potion_used( 0 ), sleeping( 1 ), initial_sleeping( 0 ), initialized( 0 ),

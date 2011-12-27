@@ -328,7 +328,6 @@ const char* util_t::player_type_string( int type )
   case TROOPER:         return "trooper";
   case BOUNTY_HUNTER:   return "bounty_hunter";
   case IMPERIAL_AGENT:  return "imperial_agent";
-  case JEDI_CONSULAR:   return "jedi_consular";
   case SMUGGLER:        return "smuggler";
   case SITH_INQUISITOR: return "sith_inquisitor";
   case JEDI_KNIGHT:     return "jedi_knight";
@@ -336,6 +335,7 @@ const char* util_t::player_type_string( int type )
   case PLAYER_GUARDIAN: return "guardian";
   case ENEMY:           return "enemy";
   case ENEMY_ADD:       return "add";
+  case JEDI_SAGE:       return "jedi_sage";
   }
   return "unknown";
 }
@@ -349,10 +349,10 @@ int util_t::translate_class_str( std::string& s )
   else if ( fmt_s == "trooper"         ) return TROOPER;
   else if ( fmt_s == "bounty_hunter"   ) return BOUNTY_HUNTER;
   else if ( fmt_s == "imperial_agent"  ) return IMPERIAL_AGENT;
-  else if ( fmt_s == "jedi_consular"   ) return JEDI_CONSULAR;
   else if ( fmt_s == "smuggler"        ) return SMUGGLER;
   else if ( fmt_s == "sith_inquisitor" ) return SITH_INQUISITOR;
   else if ( fmt_s == "jedi_knight"     ) return JEDI_KNIGHT;
+  else if ( fmt_s == "jedi_sage"       ) return JEDI_SAGE;
   return PLAYER_NONE;
 }
 

@@ -168,11 +168,18 @@ enum race_type
   RACE_MAX
 };
 
+enum player_main_class
+{
+  PLAYER_MAIN_NONE=0,
+  JEDI_CONSULAR,
+  PLAYER_MAIN_MAX
+};
+
 enum player_type
 {
   PLAYER_SPECIAL_SCALE=-1,
   PLAYER_NONE=0,
-  TROOPER, SMUGGLER, JEDI_KNIGHT, JEDI_CONSULAR,
+  TROOPER, SMUGGLER, JEDI_KNIGHT,
   BOUNTY_HUNTER, SITH_WARRIOR, IMPERIAL_AGENT, SITH_INQUISITOR,
   PLAYER_PET, PLAYER_GUARDIAN,
   JEDI_SAGE,
@@ -3327,6 +3334,7 @@ struct player_t : public noncopyable
   std::string region_str, server_str, origin_str;
   player_t*   next;
   int         index;
+  player_main_class main_class;
   player_type type;
   role_type   role;
   player_t*   target;
@@ -3647,7 +3655,7 @@ struct player_t : public noncopyable
   };
   rngs_t rngs;
 
-  player_t( sim_t* sim, player_type type, const std::string& name, race_type race_type = RACE_NONE );
+  player_t( sim_t* sim, player_main_class m, player_type type, const std::string& name, race_type race_type = RACE_NONE );
 
   virtual ~player_t();
 
@@ -3873,9 +3881,10 @@ struct player_t : public noncopyable
   inline bool is_enemy() const { return type == ENEMY; }
   inline bool is_add() const { return type == ENEMY_ADD; }
 
-  jedi_sage_t* cast_jedi_sage() { assert( type == JEDI_SAGE ); return ( jedi_sage_t* ) this; }
-  pet_t         * cast_pet         () { assert( is_pet()             ); return ( pet_t         * ) this; }
-  enemy_t       * cast_enemy       () { assert( type == ENEMY        ); return ( enemy_t       * ) this; }
+  jedi_consular_t * cast_jedi_consular() { assert( main_class == JEDI_CONSULAR  ); return ( jedi_consular_t * ) this; }
+  jedi_sage_t     * cast_jedi_sage    () { assert( type == JEDI_SAGE            ); return ( jedi_sage_t     * ) this; }
+  pet_t           * cast_pet          () { assert( is_pet()                     ); return ( pet_t           * ) this; }
+  enemy_t         * cast_enemy        () { assert( type == ENEMY                ); return ( enemy_t         * ) this; }
 
   bool      in_gcd() const { return gcd_ready > sim -> current_time; }
   bool      recent_cast() const;

@@ -23,7 +23,7 @@ struct jedi_consular_t : public player_t
 
 protected:
   jedi_consular_t( sim_t* sim, player_type pt, const std::string& name, race_type r ) :
-    player_t( sim, pt, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
+    player_t( sim, JEDI_CONSULAR, pt, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
   {
 
     create_options();
