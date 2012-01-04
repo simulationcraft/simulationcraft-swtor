@@ -241,6 +241,10 @@ struct jedi_consular_spell_t : public spell_t
 
       if ( base_execute_time > 0 && p -> buffs_presence_of_mind -> up() )
         player_multiplier *= 1.20;
+
+      if ( p -> talents.force_suppression > 0 && base_td > 0 )
+        if ( p -> buffs_force_suppression -> up() )
+          player_td_multiplier *= 1.20;
     }
   }
 
@@ -292,6 +296,18 @@ struct jedi_consular_spell_t : public spell_t
     }
   }
 
+  virtual void tick( dot_t* d)
+  {
+    spell_t::tick( d );
+
+    if ( player -> type == JEDI_SAGE )
+    {
+      jedi_sage_t* p = player -> cast_jedi_sage();
+
+      if ( tick_dmg > 0 )
+        p -> buffs_force_suppression -> decrement();
+    }
+  }
 };
 
 struct project_t : public jedi_consular_spell_t
@@ -591,14 +607,16 @@ struct force_in_balance_t : public jedi_sage_spell_t
   force_in_balance_t( jedi_sage_t* p, const std::string& options_str ) :
     jedi_sage_spell_t( "force_in_balance", p, RESOURCE_FORCE )
   {
-    check_talent( p -> talents.turbulence );
+    check_talent( p -> talents.force_in_balance );
 
     parse_options( 0, options_str );
     base_dd_min=1198.0; base_dd_max=1309.0;
-    ability_lag=1.0;
+    ability_lag=0.2;
     base_cost = 50.0;
     range = 30.0;
     direct_power_mod = 1.87;
+
+    cooldown -> duration = 15.0;
   }
 
   virtual void calculate_result()
@@ -888,6 +906,9 @@ void jedi_sage_t::init_actions()
     action_list_str += "/mind_crush";
 
     action_list_str += "/weaken_mind,if=!ticking";
+
+    if ( talents.force_in_balance > 0 && talents.force_suppression > 0 )
+      action_list_str += "/force_in_balance";
 
     action_list_str += "/project";
 
