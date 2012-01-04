@@ -256,6 +256,7 @@ struct jedi_consular_spell_t : public spell_t
       if ( base_execute_time > 0 && p -> buffs_presence_of_mind -> up() )
         player_multiplier *= 1.20;
 
+      // FIXME: test whether channeled spells profit from it or not ( they clearly don't consume the buff, tested January 2012 )
       if ( p -> talents.force_suppression > 0 && base_td > 0 )
         if ( p -> buffs_force_suppression -> up() )
           player_td_multiplier *= 1.20;
@@ -318,7 +319,7 @@ struct jedi_consular_spell_t : public spell_t
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
 
-      if ( tick_dmg > 0 )
+      if ( tick_dmg > 0 && !channeled )
         p -> buffs_force_suppression -> decrement();
     }
   }
