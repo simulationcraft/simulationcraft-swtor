@@ -178,9 +178,8 @@ namespace { // ANONYMOUS NAMESPACE ==========================================
 
 struct jedi_consular_attack_t : public attack_t
 {
-
-  jedi_consular_attack_t( const char* n, uint32_t id, jedi_consular_t* p, int t=TREE_NONE, bool special = true ) :
-    attack_t( n, id, p, t, special )
+  jedi_consular_attack_t( const char* n, jedi_consular_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_HOLY, int t=TREE_NONE ) :
+    attack_t( n, p, r, s, t )
   {
     _init_jedi_consular_attack_t();
   }
@@ -464,9 +463,8 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
 
 struct jedi_sage_attack_t : public jedi_consular_attack_t
 {
-
-  jedi_sage_attack_t( const char* n, uint32_t id, jedi_sage_t* p, int t=TREE_NONE, bool special = true ) :
-    jedi_consular_attack_t( n, id, p, t, special )
+  jedi_sage_attack_t( const char* n, jedi_sage_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_HOLY, int t=TREE_NONE ) :
+    jedi_consular_attack_t( n, p, r, s, t )
   {
     _init_jedi_sage_attack_t();
   }

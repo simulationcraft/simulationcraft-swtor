@@ -20,26 +20,8 @@ void spell_t::init_spell_t_()
   hasted_ticks = true;
 }
 
-spell_t::spell_t( const active_spell_t& s, int t ) :
-  action_t( ACTION_SPELL, s, t, true )
-{
-  init_spell_t_();
-}
-
 spell_t::spell_t( const char* n, player_t* p, int r, const school_type s, int t ) :
   action_t( ACTION_SPELL, n, p, r, s, t, true )
-{
-  init_spell_t_();
-}
-
-spell_t::spell_t( const char* name, const char* sname, player_t* p, int t ) :
-  action_t( ACTION_SPELL, name, sname, p, t, true )
-{
-  init_spell_t_();
-}
-
-spell_t::spell_t( const char* name, const uint32_t id, player_t* p, int t ) :
-  action_t( ACTION_SPELL, name, id, p, t, true )
 {
   init_spell_t_();
 }

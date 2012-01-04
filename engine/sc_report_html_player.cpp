@@ -509,8 +509,6 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
                 "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">base_execute_time:</span>%.2f</li>\n"
                 "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">base_crit:</span>%.2f</li>\n"
                 "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">target:</span>%s</li>\n"
-                "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">tooltip:</span><span class=\"tooltip\">%s</span></li>\n"
-                "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">description:</span><span class=\"tooltip\">%s</span></li>\n"
                 "\t\t\t\t\t\t\t\t\t\t</ul>\n"
                 "\t\t\t\t\t\t\t\t\t</div>\n"
                 "\t\t\t\t\t\t\t\t\t<div class=\"float\">\n",
@@ -526,9 +524,7 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
                 a -> cooldown -> duration,
                 a -> base_execute_time,
                 a -> base_crit,
-                a -> target ? a -> target -> name() : "",
-                a -> tooltip(),
-                report_t::encode_html( a -> desc() ).c_str() );
+                a -> target ? a -> target -> name() : "" );
       if ( a -> direct_power_mod || a -> base_dd_min || a -> base_dd_max )
       {
         fprintf ( file,

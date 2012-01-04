@@ -38,18 +38,10 @@ void heal_t::init_heal_t_()
   crit_multiplier = 1.0;
 }
 
-// heal_t::heal_t ======== Heal Constructor by Spell Name ===================
-
-heal_t::heal_t( const char* n, player_t* player, const char* sname, int t ) :
-  spell_t( n, sname, player, t )
-{
-  init_heal_t_();
-}
-
 // heal_t::heal_t ======== Heal Constructor by Spell ID =====================
 
-heal_t::heal_t( const char* n, player_t* player, const uint32_t id, int t ) :
-  spell_t( n, id, player, t )
+heal_t::heal_t( const char* n, player_t* p, int r, const school_type s, int t ) :
+  spell_t( n, p, r, s, t )
 {
   init_heal_t_();
 }
@@ -475,18 +467,10 @@ void absorb_t::init_absorb_t_()
   stats -> type = STATS_ABSORB;
 }
 
-// absorb_t::absorb_t ======== Absorb Constructor by Spell Name =============
+// absorb_t::absorb_t =======================
 
-absorb_t::absorb_t( const char* n, player_t* player, const char* sname, int t ) :
-  spell_t( n, sname, player, t )
-{
-  init_absorb_t_();
-}
-
-// absorb_t::absorb_t ======== absorb Constructor by Spell ID ===============
-
-absorb_t::absorb_t( const char* n, player_t* player, const uint32_t id, int t ) :
-  spell_t( n, id, player, t )
+absorb_t::absorb_t( const char* n, player_t* p, int r, const school_type s, int t ) :
+  spell_t( n, p, r, s, t )
 {
   init_absorb_t_();
 }

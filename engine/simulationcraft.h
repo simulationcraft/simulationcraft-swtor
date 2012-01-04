@@ -4119,7 +4119,7 @@ struct stats_t
 
 // Action ===================================================================
 
-struct action_t : public spell_id_t
+struct action_t
 {
   sim_t* sim;
   const int type;
@@ -4201,9 +4201,6 @@ private:
 
 public:
   action_t( int type, const char* name, player_t* p=0, int r=RESOURCE_NONE, const school_type s=SCHOOL_NONE, int t=TREE_NONE, bool special=false );
-  action_t( int type, const active_spell_t& s, int t=TREE_NONE, bool special=false );
-  action_t( int type, const char* name, const char* sname, player_t* p=0, int t=TREE_NONE, bool special=false );
-  action_t( int type, const char* name, const uint32_t id, player_t* p=0, int t=TREE_NONE, bool special=false );
   virtual ~action_t();
   void init_dot( const std::string& dot_name );
 
@@ -4321,10 +4318,7 @@ private:
   void init_attack_t_();
 
 public:
-  attack_t( const active_spell_t& s, int t=TREE_NONE, bool special=false );
   attack_t( const char* n=0, player_t* p=0, int r=RESOURCE_NONE, const school_type s=SCHOOL_PHYSICAL, int t=TREE_NONE, bool special=false );
-  attack_t( const char* name, const char* sname, player_t* p, int t = TREE_NONE, bool special=false );
-  attack_t( const char* name, const uint32_t id, player_t* p, int t = TREE_NONE, bool special=false );
 
   // Attack Overrides
   virtual double haste() const;
@@ -4356,10 +4350,7 @@ private:
   void init_spell_t_();
 
 public:
-  spell_t( const active_spell_t& s, int t=TREE_NONE );
   spell_t( const char* n=0, player_t* p=0, int r=RESOURCE_NONE, const school_type s=SCHOOL_PHYSICAL, int t=TREE_NONE );
-  spell_t( const char* name, const char* sname, player_t* p, int t = TREE_NONE );
-  spell_t( const char* name, const uint32_t id, player_t* p, int t = TREE_NONE );
 
   // Spell Overrides
   virtual double haste() const;
@@ -4389,8 +4380,7 @@ private:
   void init_heal_t_();
 
 public:
-  heal_t( const char* n, player_t* player, const char* sname, int t = TREE_NONE );
-  heal_t( const char* n, player_t* player, const uint32_t id, int t = TREE_NONE );
+  heal_t( const char* n=0, player_t* p=0, int r=RESOURCE_NONE, const school_type s=SCHOOL_HOLY, int t=TREE_NONE );
 
   virtual void parse_options( option_t* options, const std::string& options_str );
   virtual void player_buff();
@@ -4422,8 +4412,7 @@ private:
   void init_absorb_t_();
 
 public:
-  absorb_t( const char* n, player_t* player, const char* sname, int t = TREE_NONE );
-  absorb_t( const char* n, player_t* player, const uint32_t id, int t = TREE_NONE );
+  absorb_t( const char* n=0, player_t* p=0, int r=RESOURCE_NONE, const school_type s=SCHOOL_HOLY, int t=TREE_NONE );
 
   virtual void parse_options( option_t* options, const std::string& options_str );
   virtual void player_buff();
@@ -5191,109 +5180,6 @@ inline buff_t* buff_t::find( player_t* p, const std::string& name ) { return fin
 inline actor_pair_t::actor_pair_t( targetdata_t* td )
   : target( td->target ), source( td->source )
 {}
-
-struct gurthalak_callback_t : public action_callback_t
-{
-  double chance;
-  spell_t* spell[5];
-  rng_t* rng;
-  int slot;
-  int current_spell;
-  
-  // FIXME: This should be converted to a pet, which casts 3 Mind Flays,
-  // of 3 ticks each, with the last being 2-3 ticks
-  // Reia is working on it and it's proving difficult
-  // So until that can be done, use 5 spells to act as 5 spawns
-  // and simulate 8-9 ticks on one mind flay, with a dot refresh
-  // OH modeling of this for Fury is undervalued
-  struct gurthalak_t : public spell_t
-  {
-    gurthalak_t( player_t* p, uint32_t tick_damage, const char* name ) :
-    spell_t( name, 52586, p )
-    {
-      trigger_gcd = 0;
-      background = true;
-      tick_may_crit = true;
-      hasted_ticks = false;
-      proc = true;
-      num_ticks = 9; // Casts 3 mind flays, resulting in 8-9 ticks on average
-      base_attack_power_multiplier = 1.0;
-      base_spell_power_multiplier = 0;
-      
-      // Override stats so all 5 tentacles are merged into 1
-      stats = p -> get_stats( "gurthalak_voice_of_the_deeps" );
-      stats -> school = SCHOOL_SHADOW; // Fix for reporting
-      
-      // While this spell ID is the one used by all of the tentacles,
-      // It doesn't have a coeff and each version has static damage
-      tick_power_mod = 0;
-      base_td = tick_damage;
-      base_cost = 0; // Override this, otherwise it screws up reporting
-      
-      // Change to DOT_REFRESH in-case we somehow RNG to all holy hell and get 6 up at once
-      dot_behavior = DOT_REFRESH;
-      
-      init();
-    }
-    
-    void execute()
-    {
-      // Casts either 8 or 9 ticks, roughly equal chance for both
-      num_ticks = sim -> roll( 0.5 ) ? 9 : 8;
-      
-      spell_t::execute();
-    }
-  };
-  
-  gurthalak_callback_t( player_t* p, uint32_t tick_damage, uint32_t proc_spell_id, int slot ) :
-  action_callback_t( p -> sim, p ), chance( p -> dbc.spell( proc_spell_id ) -> proc_chance() ),
-  slot( slot ), current_spell( 0 )
-  {
-    // Init 5 Gurths to act like multiple tentacles up at once
-    spell[0] = new gurthalak_t( p, tick_damage, "gurthalak_voice_of_the_deeps0" );
-    spell[1] = new gurthalak_t( p, tick_damage, "gurthalak_voice_of_the_deeps1" );
-    spell[2] = new gurthalak_t( p, tick_damage, "gurthalak_voice_of_the_deeps2" );
-    spell[3] = new gurthalak_t( p, tick_damage, "gurthalak_voice_of_the_deeps3" );
-    spell[4] = new gurthalak_t( p, tick_damage, "gurthalak_voice_of_the_deeps4" );
-    
-    rng = p -> get_rng ( "gurthalak" );
-  }
-  
-  virtual void trigger( action_t* a, void* /* call_data */ )
-  {
-    if ( a -> proc )
-      return;
-    
-    // This currently has some odd spawning when equipped in the OH
-    // We don't currently have a way to replicate this behavior perfectly in the sim, that I'm aware of
-    // Changing to it to slot based will under value the weapon whenever it is in the OH for Fury Warriors
-    /* 
-     Bloodthirst? Yes.
-     Heroic Strike? Yes.
-     Cleave? Yes.
-     Slam? No.
-     Raging Blow? Offhand hit can proc it, main hand can't.
-     Whirlwind? Same as Raging Blow. 1 roll per offhand hit, can proc multiple times from the same ability if it hits multiple times.
-     Colossus Smash? No.
-     Thunder Clap? Yes.
-     Heroic Leap? Yes.
-     */
-    
-    if ( ! a -> weapon ) return;
-    if ( a -> weapon -> slot != slot ) return;
-    
-    if ( rng -> roll( chance ) )
-    {
-      // Control our spawns of Gurth
-      current_spell++;
-      if ( current_spell > 4 )
-        current_spell = 0;
-      
-      spell[ current_spell ] -> execute();
-    }
-  }
-  
-};
 
 #ifdef WHAT_IF
 

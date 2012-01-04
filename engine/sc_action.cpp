@@ -13,10 +13,6 @@
 
 void action_t::init_action_t_()
 {
-  sim                            = s_player->sim;
-  name_str                       = s_token;
-  player                         = s_player;
-  target                         = s_player -> target;
   id                             = 0;
   result                         = RESULT_NONE;
   aoe                            = 0;
@@ -165,14 +161,13 @@ void action_t::init_action_t_()
 
   stats = player -> get_stats( name_str, this );
 
-  id = spell_id();
-  tree = util_t::talent_tree( s_tree, player -> type );
+  tree = util_t::talent_tree( tree, player -> type );
 
   parse_data();
 
   const spell_data_t* spell = player -> dbc.spell( id );
 
-  if ( id && spell && s_type == T_CLASS && ! spell -> is_level( player -> level ) && spell -> level() <= MAX_LEVEL )
+  if ( id && spell && ! spell -> is_level( player -> level ) && spell -> level() <= MAX_LEVEL )
   {
     sim -> errorf( "Player %s attempting to execute action %s without the required level (%d < %d).\n",
                    player -> name(), name(), player -> level, spell -> level() );
@@ -195,37 +190,9 @@ action_t::action_t( int               ty,
                     const school_type s,
                     int               tr,
                     bool              sp ) :
-  spell_id_t( p, n ),
-  sim( s_player->sim ), type( ty ), name_str( s_token ),
-  player( s_player ), target( s_player -> target ), school( s ), resource( r ),
+  sim( p -> sim ), type( ty ), name_str( n ),
+  player( p ), target( p -> target ), school( s ), resource( r ),
   tree( tr ), special( sp )
-{
-  init_action_t_();
-}
-
-action_t::action_t( int ty, const char* name, const char* sname, player_t* p, int t, bool sp ) :
-  spell_id_t( p, name, sname ),
-  sim( s_player->sim ), type( ty ), name_str( s_token ),
-  player( s_player ), target( s_player -> target ), school( get_school_type() ), resource( power_type() ),
-  tree( t ), special( sp )
-{
-  init_action_t_();
-}
-
-action_t::action_t( int ty, const active_spell_t& s, int t, bool sp ) :
-  spell_id_t( s ),
-  sim( s_player->sim ), type( ty ), name_str( s_token ),
-  player( s_player ), target( s_player -> target ), school( get_school_type() ), resource( power_type() ),
-  tree( t ), special( sp )
-{
-  init_action_t_();
-}
-
-action_t::action_t( int type, const char* name, const uint32_t id, player_t* p, int t, bool sp ) :
-  spell_id_t( p, name, id ),
-  sim( s_player->sim ), type( type ), name_str( s_token ),
-  player( s_player ), target( s_player -> target ), school( get_school_type() ), resource( power_type() ),
-  tree( t ), special( sp )
 {
   init_action_t_();
 }

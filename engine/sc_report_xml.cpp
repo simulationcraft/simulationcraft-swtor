@@ -1165,11 +1165,6 @@ void print_xml_player_action_definitions( xml_writer_t & writer, player_t * p )
         {
           writer.print_tag( "target", a -> target -> name() );
         }
-        if ( a -> tooltip() )
-        {
-          writer.print_tag( "tooltip", a -> tooltip() );
-        }
-        writer.print_tag( "description", report_t::encode_html( a -> desc() ) );
 
         if ( a -> direct_power_mod || a -> base_dd_min || a -> base_dd_max )
         {
