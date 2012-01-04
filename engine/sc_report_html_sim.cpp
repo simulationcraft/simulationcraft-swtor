@@ -462,9 +462,9 @@ static void print_html_raid_summary( FILE*  file, sim_t* sim )
 
 // print_html_raid_imagemaps ==================================================
 
-static void print_html_raid_imagemap( FILE* file, sim_t* sim, int num, bool dps)
+static void print_html_raid_imagemap( FILE* file, sim_t* sim, int num, bool dps )
 {
-  std::vector<player_t*> player_list = (dps) ? sim -> players_by_dps : sim -> players_by_hps;
+  std::vector<player_t*> player_list = ( dps ) ? sim -> players_by_dps : sim -> players_by_hps;
   int start = num * MAX_PLAYERS_PER_CHART;
   unsigned int end = start + MAX_PLAYERS_PER_CHART;
 
@@ -484,14 +484,14 @@ static void print_html_raid_imagemap( FILE* file, sim_t* sim, int num, bool dps)
   for ( int i=end-1; i >= start; i-- )
   {
     fprintf( file, "\"%s\"", player_list[i] -> name_str.c_str() );
-    if (i != start) fprintf( file, ", " );
+    if ( i != start ) fprintf( file, ", " );
   }
   fprintf( file, "];\n" );
 
   char imgid[32];
-  util_t::snprintf( imgid, sizeof( imgid ), "%sIMG%d", (dps) ? "DPS" : "HPS", num );
+  util_t::snprintf( imgid, sizeof( imgid ), "%sIMG%d", ( dps ) ? "DPS" : "HPS", num );
   char mapid[32];
-  util_t::snprintf( mapid, sizeof( mapid ), "%sMAP%d", (dps) ? "DPS" : "HPS", num );
+  util_t::snprintf( mapid, sizeof( mapid ), "%sMAP%d", ( dps ) ? "DPS" : "HPS", num );
 
   fprintf( file, "\t\t\tu = document.getElementById('%s').src;\n"
                  "\t\t\tgetMap(u, n, function(mapStr) {\n"
@@ -528,13 +528,13 @@ static void print_html_raid_imagemaps( FILE*  file, sim_t* sim )
   int count = ( int ) sim -> dps_charts.size();
   for ( int i=0; i < count; i++ )
   {
-    print_html_raid_imagemap(file, sim, i, true);
+    print_html_raid_imagemap( file, sim, i, true );
   }
 
   count = ( int ) sim -> hps_charts.size();
   for ( int i=0; i < count; i++ )
   {
-    print_html_raid_imagemap(file, sim, i, false);
+    print_html_raid_imagemap( file, sim, i, false );
   }
 
   fprintf( file, "\t\t</script>\n" );
@@ -633,124 +633,6 @@ static void print_html_scale_factors( FILE*  file, sim_t* sim )
   fprintf( file,
            "\t\t\t</div>\n"
            "\t\t</div>\n\n" );
-}
-
-// print_html_auras_buffs ===================================================
-
-static void print_html_auras_buffs( FILE*  file, sim_t* sim )
-{
-  int num_players = ( int ) sim -> players_by_name.size();
-  int show_dyn = 0;
-  int show_con = 0;
-  int i;
-  for ( buff_t* b = sim -> buff_list; b; b = b -> next )
-  {
-    if ( b -> constant )
-    {
-      show_con++;
-    }
-    else
-    {
-      show_dyn++;
-    }
-  }
-
-  fprintf( file,
-           "\t\t\t\t<div id=\"auras-buffs\" class=\"section" );
-  if ( num_players == 1 )
-  {
-    fprintf( file, " grouped-first" );
-  }
-  if ( !sim -> report_targets )
-  {
-    fprintf ( file, " final grouped-last" );
-  }
-  fprintf ( file, "\">\n" );
-  fprintf ( file,
-            "\t\t\t\t\t<h2 class=\"toggle\">Auras/Buffs</h2>\n"
-            "\t\t\t\t\t\t<div class=\"toggle-content hide\">\n" );
-
-  if ( show_dyn > 0 )
-  {
-    i = 0;
-    fprintf( file,
-             "\t\t\t\t\t\t\t<table class=\"sc mb\">\n"
-             "\t\t\t\t\t\t\t\t<tr>\n"
-             "\t\t\t\t\t\t\t\t\t<th class=\"left\">Dynamic Buff</th>\n"
-             "\t\t\t\t\t\t\t\t\t<th>Start</th>\n"
-             "\t\t\t\t\t\t\t\t\t<th>Refresh</th>\n"
-             "\t\t\t\t\t\t\t\t\t<th>Interval</th>\n"
-             "\t\t\t\t\t\t\t\t\t<th>Trigger</th>\n"
-             "\t\t\t\t\t\t\t\t\t<th>Up-Time</th>\n"
-             "\t\t\t\t\t\t\t\t\t<th>Benefit</th>\n"
-             "\t\t\t\t\t\t\t\t</tr>\n" );
-    for ( buff_t* b = sim -> buff_list; b; b = b -> next )
-    {
-      if ( b -> quiet || ! b -> start_count || b -> constant )
-        continue;
-
-      fprintf( file,
-               "\t\t\t\t\t\t\t\t<tr" );
-      if ( ( i & 1 ) )
-      {
-        fprintf( file, " class=\"odd\"" );
-      }
-      fprintf( file, ">\n" );
-      fprintf( file,
-               "\t\t\t\t\t\t\t\t\t<td class=\"left\">%s</td>\n"
-               "\t\t\t\t\t\t\t\t\t<td class=\"right\">%.1f</td>\n"
-               "\t\t\t\t\t\t\t\t\t<td class=\"right\">%.1f</td>\n"
-               "\t\t\t\t\t\t\t\t\t<td class=\"right\">%.1fsec</td>\n"
-               "\t\t\t\t\t\t\t\t\t<td class=\"right\">%.1fsec</td>\n"
-               "\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f%%</td>\n"
-               "\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f%%</td>\n"
-               "\t\t\t\t\t\t\t\t</tr>\n",
-               b -> name(),
-               b -> avg_start,
-               b -> avg_refresh,
-               b -> avg_start_interval,
-               b -> avg_trigger_interval,
-               b -> uptime_pct.mean,
-               b -> benefit_pct > 0 ? b -> benefit_pct : b -> uptime_pct.mean );
-      i++;
-    }
-    fprintf( file,
-             "\t\t\t\t\t\t\t</table>\n" );
-  }
-
-  if ( show_con > 0 )
-  {
-    i = 0;
-    fprintf( file,
-             "\t\t\t\t\t\t\t<table class=\"sc\">\n"
-             "\t\t\t\t\t\t\t\t<tr>\n"
-             "\t\t\t\t\t\t\t\t\t<th class=\"left\">Constant Buff</th>\n"
-             "\t\t\t\t\t\t\t\t</tr>\n" );
-    for ( buff_t* b = sim -> buff_list; b; b = b -> next )
-    {
-      if ( b -> quiet || ! b -> start_count || ! b -> constant )
-        continue;
-
-      fprintf( file,
-               "\t\t\t\t\t\t\t\t<tr class=\"left" );
-      if ( ( i & 1 ) )
-      {
-        fprintf( file, " odd" );
-      }
-      fprintf( file, "\">\n" );
-      fprintf( file,
-               "\t\t\t\t\t\t\t\t\t<td>%s</td>\n"
-               "\t\t\t\t\t\t\t\t</tr>\n",
-               b -> name() );
-      i++;
-    }
-    fprintf( file,
-             "\t\t\t\t\t\t\t</table>\n" );
-  }
-
-  fprintf( file,
-           "\t\t\t\t\t\t</div>\n"
-           "\t\t\t\t\t</div>\n\n" );
 }
 
 // print_html_help_boxes ====================================================
@@ -1456,9 +1338,6 @@ void report_t::print_html( sim_t* sim )
       }
     }
   }
-
-  // Auras
-  print_html_auras_buffs( file, sim );
 
   // Sim Summary
   print_html_sim_summary( file, sim );

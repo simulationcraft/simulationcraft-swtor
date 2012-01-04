@@ -259,8 +259,7 @@ struct stun_event_t : public raid_event_t
       {
         // Don't schedule_ready players who are already working, like pets auto-summoned during the stun event ( ebon imp ).
         if ( ! p -> readying && ! p -> sleeping )
-          if ( p -> last_foreground_action && ! p -> last_foreground_action -> execute_event )
-            p -> schedule_ready();
+          p -> schedule_ready();
       }
     }
 
@@ -425,32 +424,32 @@ struct position_event_t : public raid_event_t
   }
 
   virtual void start()
-   {
+  {
     raid_event_t::start();
 
-     int num_affected = ( int ) affected_players.size();
-     for ( int i=0; i < num_affected; i++ )
-     {
-       player_t* p = affected_players[ i ];
-       if ( p -> position == POSITION_BACK )
-         p -> position = POSITION_FRONT;
-       else if ( p -> position == POSITION_RANGED_BACK )
-         p -> position = POSITION_RANGED_FRONT;
-     }
-   }
+    int num_affected = ( int ) affected_players.size();
+    for ( int i=0; i < num_affected; i++ )
+    {
+      player_t* p = affected_players[ i ];
+      if ( p -> position == POSITION_BACK )
+        p -> position = POSITION_FRONT;
+      else if ( p -> position == POSITION_RANGED_BACK )
+        p -> position = POSITION_RANGED_FRONT;
+    }
+  }
 
-   virtual void finish()
-   {
-     int num_affected = ( int ) affected_players.size();
-     for ( int i=0; i < num_affected; i++ )
-     {
-       player_t* p = affected_players[ i ];
+  virtual void finish()
+  {
+    int num_affected = ( int ) affected_players.size();
+    for ( int i=0; i < num_affected; i++ )
+    {
+      player_t* p = affected_players[ i ];
 
-       p -> init_position();
-     }
+      p -> init_position();
+    }
 
-     raid_event_t::finish();
-   }
+    raid_event_t::finish();
+  }
 };
 
 // raid_event_t::raid_event_t ===============================================
@@ -571,9 +570,9 @@ void raid_event_t::schedule()
     virtual void execute()
     {
       raid_event -> saved_duration = raid_event -> duration_time();
-      double ct = raid_event -> cooldown_time();
-
       raid_event -> start();
+
+      double ct = raid_event -> cooldown_time();
 
       if ( ct <= raid_event -> saved_duration ) ct = raid_event -> saved_duration + 0.01;
 

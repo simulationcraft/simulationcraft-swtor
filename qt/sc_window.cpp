@@ -588,14 +588,14 @@ void SimulationCraftWindow::createGlobalsTab()
   globalsLayout->addRow(      "World Lag",       latencyChoice = createChoice( 3, "Low", "Medium", "High" ) );
   globalsLayout->addRow(   "Length (sec)",   fightLengthChoice = createChoice( 9, "100", "150", "200", "250", "300", "350", "400", "450", "500" ) );
   globalsLayout->addRow(    "Vary Length", fightVarianceChoice = createChoice( 3, "0%", "10%", "20%" ) );
-  globalsLayout->addRow(    "Fight Style",    fightStyleChoice = createChoice( 2, "Patchwerk", "HelterSkelter" ) );
+  globalsLayout->addRow(    "Fight Style",    fightStyleChoice = createChoice( 3, "Patchwerk", "HelterSkelter", "Ultraxion" ) );
   globalsLayout->addRow(   "Target Level",   targetLevelChoice = createChoice( 3, "Raid Boss", "5-man heroic", "5-man normal" ) );
   globalsLayout->addRow(    "Target Race",    targetRaceChoice = createChoice( 7, "humanoid", "beast", "demon", "dragonkin", "elemental", "giant", "undead" ) );
   globalsLayout->addRow(   "Player Skill",   playerSkillChoice = createChoice( 4, "Elite", "Good", "Average", "Ouch! Fire is hot!" ) );
   globalsLayout->addRow(        "Threads",       threadsChoice = createChoice( 4, "1", "2", "4", "8" ) );
   globalsLayout->addRow(  "Armory Region",  armoryRegionChoice = createChoice( 5, "us", "eu", "tw", "cn", "kr" ) );
   globalsLayout->addRow(    "Armory Spec",    armorySpecChoice = createChoice( 2, "active", "inactive" ) );
-  globalsLayout->addRow(   "Default Role",   defaultRoleChoice = createChoice( 2, "auto", "dps", "tank", "heal" ) );
+  globalsLayout->addRow(   "Default Role",   defaultRoleChoice = createChoice( 4, "auto", "dps", "heal", "tank" ) );
   globalsLayout->addRow( "Generate Debug",         debugChoice = createChoice( 3, "None", "Log Only", "Gory Details" ) );
   iterationsChoice->setCurrentIndex( 1 );
   fightLengthChoice->setCurrentIndex( 7 );
@@ -692,22 +692,36 @@ void SimulationCraftWindow::createPlotsTab()
 
 void SimulationCraftWindow::createReforgePlotsTab()
 {
-  QVBoxLayout* reforgeplotsLayout = new QVBoxLayout();
+  QFormLayout* reforgePlotsLayout = new QFormLayout();
+  reforgePlotsLayout -> setFieldGrowthPolicy( QFormLayout::FieldsStayAtSizeHint );
+
+  // Create Combo Boxes
+  plotAmountChoice = createChoice( 5, "100", "200", "300", "400", "500" );
+  plotAmountChoice -> setCurrentIndex( 1 ); // Default is 200
+  reforgePlotsLayout -> addRow( "Reforge Amount", plotAmountChoice );
+
+  plotStepChoice = createChoice( 5, "10", "20", "30", "40", "50" );
+  plotStepChoice -> setCurrentIndex( 1 ); // Default is 20
+  reforgePlotsLayout -> addRow( "Step Amount", plotStepChoice );
+
+  QLabel* messageText = new QLabel( "A maximum of three stats may be ran at once." );
+  reforgePlotsLayout -> addRow( messageText );
+
   reforgeplotsButtonGroup = new ReforgeButtonGroup();
-  reforgeplotsButtonGroup->setExclusive( false );
+  reforgeplotsButtonGroup -> setExclusive( false );
   OptionEntry* reforgeplots = getReforgePlotOptions();
   for( int i=0; reforgeplots[ i ].label; i++ )
   {
     QCheckBox* checkBox = new QCheckBox( reforgeplots[ i ].label );
-    checkBox->setToolTip( reforgeplots[ i ].tooltip );
-    reforgeplotsButtonGroup->addButton( checkBox );
-    reforgeplotsLayout->addWidget( checkBox );
+    checkBox -> setToolTip( reforgeplots[ i ].tooltip );
+    reforgeplotsButtonGroup -> addButton( checkBox );
+    reforgePlotsLayout -> addWidget( checkBox );
     QObject::connect( checkBox, SIGNAL( stateChanged( int ) ),
                       reforgeplotsButtonGroup, SLOT( setSelected( int ) ) );
   }
-  reforgeplotsLayout->addStretch( 1 );
+
   QGroupBox* reforgeplotsGroupBox = new QGroupBox();
-  reforgeplotsGroupBox->setLayout( reforgeplotsLayout );
+  reforgeplotsGroupBox -> setLayout( reforgePlotsLayout );
 
   optionsTab->addTab( reforgeplotsGroupBox, "Reforge Plots" );
 }
@@ -966,7 +980,9 @@ void SimulationCraftWindow::createToolTips()
   fightStyleChoice->setToolTip( "Patchwerk: Tank-n-Spank\n"
                                 "HelterSkelter:\n"
                                 "    Movement, Stuns, Interrupts,\n"
-                                "    Target-Switching (every 2min)\n" );
+                                "    Target-Switching (every 2min)\n"
+				"Ultraxion:\n"
+                                "    Periodic Stuns, Raid Damage\n" );
 
   targetRaceChoice->setToolTip( "Race of the target and any adds." );
 
@@ -998,6 +1014,10 @@ void SimulationCraftWindow::createToolTips()
 
   backButton->setToolTip( "Backwards" );
   forwardButton->setToolTip( "Forwards" );
+
+  plotAmountChoice -> setToolTip( "The maximum amount to reforge per stat." );
+  plotStepChoice -> setToolTip( "The stat difference between two points.\n"
+                                "It's NOT the number of steps: a lower value will generate more points!" );
 }
 
 #ifdef SC_PAPERDOLL
@@ -1457,6 +1477,8 @@ QString SimulationCraftWindow::mergeOptions()
     }
   }
   options += "\n";
+  options += "reforge_plot_amount=" + plotAmountChoice -> currentText() + "\n";
+  options += "reforge_plot_step=" + plotStepChoice -> currentText() + "\n";
   options += "reforge_plot_output_file=reforge_plot.csv"; // This should be set in the gui if possible
   options += "\n";
   options += simulateText->toPlainText();

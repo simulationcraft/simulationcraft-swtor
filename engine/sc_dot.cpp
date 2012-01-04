@@ -37,7 +37,7 @@ void dot_t::extend_duration( int extra_ticks, bool cap )
   assert( tick_event );
 
   if ( sim -> log )
-    log_t::output( sim, "%s extends duration of %s, adding %d tick(s), totalling %d ticks", player -> name(), name(), extra_ticks, num_ticks + extra_ticks );
+    log_t::output( sim, "%s extends duration of %s on %s, adding %d tick(s), totalling %d ticks", action -> player -> name(), name(), player -> name(), extra_ticks, num_ticks + extra_ticks );
 
   if ( cap )
   {
@@ -89,15 +89,15 @@ void dot_t::extend_duration_seconds( double extra_seconds )
 
   if ( sim -> debug )
   {
-    log_t::output( sim, "%s extends duration of %s by %.1f second(s). h: %.2f => %.2f, num_t: %d => %d, rem_t: %d => %d",
-                   player -> name(), name(), extra_seconds,
+    log_t::output( sim, "%s extends duration of %s on %s by %.1f second(s). h: %.2f => %.2f, num_t: %d => %d, rem_t: %d => %d",
+                   action -> player -> name(), name(), player -> name(), extra_seconds,
                    old_haste_factor, ( 1.0 / action -> player_haste ),
                    old_num_ticks, num_ticks,
                    old_remaining_ticks, new_remaining_ticks );
   }
   else if ( sim -> log )
   {
-    log_t::output( sim, "%s extends duration of %s by %.1f second(s).", player -> name(), name(), extra_seconds );
+    log_t::output( sim, "%s extends duration of %s on %s by %.1f second(s).", action -> player -> name(), name(), player -> name(), extra_seconds );
   }
 
   recalculate_ready();
@@ -125,7 +125,7 @@ void dot_t::refresh_duration()
   assert( tick_event );
 
   if ( sim -> log )
-    log_t::output( sim, "%s refreshes duration of %s", player -> name(), name() );
+    log_t::output( sim, "%s refreshes duration of %s on %s", action -> player -> name(), name(), player -> name() );
 
   action -> player_buff();
 
@@ -133,6 +133,11 @@ void dot_t::refresh_duration()
   added_ticks = 0;
   added_seconds = 0;
   num_ticks = action -> hasted_num_ticks();
+
+  // tick zero dots tick when refreshed
+  if ( action -> tick_zero )
+    action -> tick( this );
+
   recalculate_ready();
 }
 
@@ -163,11 +168,10 @@ void dot_t::reset()
 void dot_t::schedule_tick()
 {
   if ( sim -> debug )
-    log_t::output( sim, "%s schedules tick for %s", player -> name(), name() );
+    log_t::output( sim, "%s schedules tick for %s on %s", action -> player -> name(), name(), player -> name() );
 
   if ( current_tick == 0 )
   {
-
     if ( action -> tick_zero )
     {
       time_to_tick = 0;
@@ -181,7 +185,7 @@ void dot_t::schedule_tick()
 
   ticking = 1;
 
-  if ( action -> channeled ) player -> channeling = action;
+  if ( action -> channeled ) action -> player -> channeling = action;
 }
 
 // dot_t::ticks =============================================================

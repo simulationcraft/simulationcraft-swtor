@@ -5,6 +5,20 @@
 
 #include "simulationcraft.h"
 
+struct jedi_sage_targetdata_t : public targetdata_t
+{
+  jedi_sage_targetdata_t( player_t* source, player_t* target )
+    : targetdata_t( source, target )
+  {
+  }
+};
+
+void register_jedi_sage_targetdata( sim_t* /* sim */ )
+{
+  /* player_type t = JEDI_SAGE; */
+  typedef jedi_sage_targetdata_t type;
+}
+
 // ==========================================================================
 // Jediconsular
 // ==========================================================================

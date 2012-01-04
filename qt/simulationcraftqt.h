@@ -30,7 +30,7 @@
 #define TAB_HISTORY    4
 #define TAB_CUSTOM     5
 
-#define HISTORY_VERSION "4.19"
+#define HISTORY_VERSION "4.20"
 
 class SimulationCraftTextEdit;
 class SimulationCraftWebView;
@@ -136,6 +136,8 @@ public:
     QButtonGroup* debuffsButtonGroup;
     QButtonGroup* scalingButtonGroup;
     QButtonGroup* plotsButtonGroup;
+    QComboBox* plotAmountChoice;
+    QComboBox* plotStepChoice;
     ReforgeButtonGroup* reforgeplotsButtonGroup;
     SimulationCraftWebView* battleNetView;
     SimulationCraftWebView* charDevView;
