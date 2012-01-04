@@ -571,13 +571,13 @@ void player_t::init()
   init_talents();
   init_spells();
   init_glyphs();
-  init_rating();
   init_race();
   init_base();
   init_racials();
   init_position();
   init_professions();
   init_items();
+  init_rating();
   init_core();
   init_spell();
   init_attack();
@@ -1275,6 +1275,11 @@ void player_t::init_rating()
                    level, util_t::player_type_string( type ) );
 
   rating.init( sim, dbc, level, type );
+
+  // Approximate implementation based on a level 50 character, formula taken from
+  // http://sithwarrior.com/forums/Thread-SWTOR-formula-list
+  rating.spell_crit = 1000.0;
+  rating.attack_crit = 1000.0;
 }
 
 // player_t::init_talents ===================================================

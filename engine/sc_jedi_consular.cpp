@@ -188,6 +188,20 @@ struct jedi_consular_spell_t : public spell_t
     _init_jedi_consular_spell_t();
   }
 
+  virtual void init()
+  {
+    spell_t::init();
+
+    if ( player -> type == JEDI_SAGE )
+    {
+      jedi_sage_t* p = player -> cast_jedi_sage();
+
+      if ( base_td > 0 )
+        crit_bonus += p -> talents.mental_scarring * 0.1;
+    }
+
+  }
+
   void _init_jedi_consular_spell_t()
   {
     may_crit   = true;
@@ -386,6 +400,8 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
 
       if ( p -> talents.telekinetic_balance > 0 )
         cooldown -> duration = 0;
+
+      crit_bonus += p -> talents.reverberation * 0.1;
     }
   }
 
@@ -431,11 +447,11 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
 // jedi_sage Abilities
 // ==========================================================================
 
-struct jedi_sage_attack_t : public attack_t
+struct jedi_sage_attack_t : public jedi_consular_attack_t
 {
 
   jedi_sage_attack_t( const char* n, uint32_t id, jedi_sage_t* p, int t=TREE_NONE, bool special = true ) :
-    attack_t( n, id, p, t, special )
+    jedi_consular_attack_t( n, id, p, t, special )
   {
     _init_jedi_sage_attack_t();
   }
@@ -449,10 +465,10 @@ struct jedi_sage_attack_t : public attack_t
   virtual bool   ready();
 };
 
-struct jedi_sage_spell_t : public spell_t
+struct jedi_sage_spell_t : public jedi_consular_spell_t
 {
   jedi_sage_spell_t( const char* n, jedi_sage_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_HOLY, int t=TREE_NONE ) :
-    spell_t( n, p, r, s, t )
+    jedi_consular_spell_t( n, p, r, s, t )
   {
     _init_jedi_sage_spell_t();
   }
@@ -557,7 +573,7 @@ struct weaken_mind_t : public jedi_sage_spell_t
     range = 30.0;
     tick_power_mod = 0.31;
     may_crit = false;
-    base_crit += p -> talents.reverberation * 0.1;
+    crit_bonus += p -> talents.reverberation * 0.1;
     base_multiplier *= 1.0 + p -> talents.drain_thoughts * 0.075;
   }
 
@@ -587,6 +603,7 @@ struct turbulence_t : public jedi_sage_spell_t
     base_cost = 45.0;
     range = 30.0;
     direct_power_mod = 1.58;
+    crit_bonus += p -> talents.reverberation * 0.1;
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force * 0.02;
   }
@@ -617,6 +634,8 @@ struct force_in_balance_t : public jedi_sage_spell_t
     direct_power_mod = 1.87;
 
     cooldown -> duration = 15.0;
+
+    crit_bonus += p -> talents.mental_scarring * 0.1;
   }
 
   virtual void calculate_result()
@@ -629,7 +648,23 @@ struct force_in_balance_t : public jedi_sage_spell_t
   }
 };
 
+struct sever_force_t : public jedi_sage_spell_t
+{
+  sever_force_t( jedi_sage_t* p, const std::string& options_str ) :
+    jedi_sage_spell_t( "sever_force", p, RESOURCE_FORCE )
+  {
+    check_talent( p -> talents.sever_force );
 
+    parse_options( 0, options_str );
+    base_td = 1457.0 / 6.0;
+    base_tick_time = 3.0;
+    num_ticks = 6;
+    base_cost = 20.0;
+    range = 30.0;
+    tick_power_mod = 0.311;
+    may_crit = false;
+  }
+};
 
 } // ANONYMOUS NAMESPACE ====================================================
 
@@ -751,6 +786,7 @@ action_t* jedi_sage_t::create_action( const std::string& name,
   if ( name == "weaken_mind"       ) return new       weaken_mind_t( this, options_str );
   if ( name == "turbulence"        ) return new        turbulence_t( this, options_str );
   if ( name == "force_in_balance"  ) return new  force_in_balance_t( this, options_str );
+  if ( name == "sever_force"       ) return new       sever_force_t( this, options_str );
 
   return jedi_consular_t::create_action( name, options_str );
 }
@@ -909,6 +945,9 @@ void jedi_sage_t::init_actions()
 
     if ( talents.force_in_balance > 0 && talents.force_suppression > 0 )
       action_list_str += "/force_in_balance";
+
+    if ( talents.sever_force > 0 )
+      action_list_str += "/sever_force,if=!ticking";
 
     action_list_str += "/project";
 
