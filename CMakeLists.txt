@@ -42,7 +42,7 @@ SET(SIMC_ENGINE_SOURCE
   "engine/sc_http.cpp"
   "engine/sc_item.cpp"
   "engine/sc_item_data.cpp"
-  "engine/sc_jediconsular.cpp"
+  "engine/sc_jedi_consular.cpp"
   "engine/sc_js.cpp"
   "engine/sc_log.cpp"
   "engine/sc_mmo_champion.cpp"
