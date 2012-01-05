@@ -610,12 +610,13 @@ void player_t::init_base()
 {
   if ( sim -> debug ) log_t::output( sim, "Initializing base for player (%s)", name() );
 
-  attribute_base[ ATTR_STRENGTH  ] = 0;
+  attribute_base[ ATTR_STRENGTH  ] = 50;
   attribute_base[ ATTR_AGILITY   ] = 0;
-  attribute_base[ ATTR_STAMINA   ] = 0;
+  attribute_base[ ATTR_STAMINA   ] = 225;
   attribute_base[ ATTR_INTELLECT ] = 0;
   attribute_base[ ATTR_SPIRIT    ] = 0;
-  resource_base[ RESOURCE_HEALTH ] = 100;
+  attribute_base[ ATTR_WILLPOWER ] = 50;
+  resource_base[ RESOURCE_HEALTH ] = 2500;
   resource_base[ RESOURCE_MANA   ] = 0;
   base_spell_crit                  = 0.05;
   base_attack_crit                 = 0.05;
@@ -635,9 +636,8 @@ void player_t::init_base()
   initial_attack_crit_per_agility  = rating_t::get_attribute_base( sim, dbc, level, type, race, BASE_STAT_MELEE_CRIT_PER_AGI );
   base_mp5                         = rating_t::get_attribute_base( sim, dbc, level, type, race, BASE_STAT_MP5 );
 */
-  if ( level <= 80 ) health_per_stamina = 10;
-  else if ( level <= 85 ) health_per_stamina = ( level - 80 ) / 5 * 4 + 10;
-  else if ( level <= MAX_LEVEL ) health_per_stamina = 14;
+  health_per_stamina = 10;
+
   if ( world_lag_stddev < 0 ) world_lag_stddev = world_lag * 0.1;
   if ( brain_lag_stddev < 0 ) brain_lag_stddev = brain_lag * 0.1;
 }

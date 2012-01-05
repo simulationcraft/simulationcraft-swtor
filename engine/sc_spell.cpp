@@ -93,15 +93,6 @@ double spell_t::miss_chance( int delta_level ) const
 {
   double miss=0;
 
-  if ( delta_level > 2 )
-  {
-    miss = 0.17 + ( delta_level - 3 ) * 0.11;
-  }
-  else
-  {
-    miss = 0.04 + delta_level * 0.01;
-  }
-
   miss -= total_hit();
 
   if ( miss < 0.00 ) miss = 0.00;

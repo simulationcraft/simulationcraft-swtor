@@ -343,7 +343,7 @@ struct project_t : public jedi_consular_spell_t
   jedi_consular_spell_t* upheaval;
 
   project_t( jedi_consular_t* p, const std::string& options_str, const char* n = "project", bool is_upheaval = false ) :
-    jedi_consular_spell_t( n, p, RESOURCE_FORCE ),
+    jedi_consular_spell_t( n, p, RESOURCE_FORCE, SCHOOL_PHYSICAL ),
     upheaval( 0 )
   {
     parse_options( 0, options_str );
@@ -388,7 +388,7 @@ struct project_t : public jedi_consular_spell_t
 struct telekinetic_throw_t : public jedi_consular_spell_t
 {
   telekinetic_throw_t( jedi_consular_t* p, const std::string& options_str ) :
-    jedi_consular_spell_t( "telekinetic_throw", p, RESOURCE_FORCE )
+    jedi_consular_spell_t( "telekinetic_throw", p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
   {
     parse_options( 0, options_str );
     base_td = 4089.0 / 3.0;
@@ -712,6 +712,9 @@ void jedi_consular_t::init_base()
   resource_base[  RESOURCE_FORCE  ] = 100;
 
   base_force_regen_per_second = 8.0;
+
+
+  attribute_base[ ATTR_WILLPOWER ] = 250;
 
   // FIXME: Add defensive constants
   //diminished_kfactor    = 0;
