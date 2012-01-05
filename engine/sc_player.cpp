@@ -866,21 +866,9 @@ void player_t::init_attack()
   initial_attack_expertise = base_attack_expertise + initial_stats.expertise_rating / rating.expertise;
 
   double a,b;
-  if ( level > 80 )
-  {
-    a = 2167.5;
-    b = -158167.5;
-  }
-  else if ( level >= 60 )
-  {
-    a = 467.5;
-    b = -22167.5;
-  }
-  else
-  {
-    a = 85.0;
-    b = 400.0;
-  }
+  a = 200.0;
+  b = 800.0;
+
   armor_coeff = a * level + b;
 }
 
