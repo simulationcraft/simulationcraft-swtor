@@ -28,6 +28,7 @@ void action_t::init_action_t_()
   harmful                        = true;
   proc                           = false;
   item_proc                      = false;
+  proc_ignores_slot              = false;
   discharge_proc                 = false;
   auto_cast                      = false;
   initialized                    = false;

@@ -176,9 +176,6 @@ struct xml_node_t;
 struct targetdata_t;
 struct jedi_sage_targetdata_t;
 
-// ...
-struct gurthalak_callback_t;
-
 void register_jedi_sage_targetdata( sim_t* sim );
 
 #define DATA_DOT 0
@@ -4130,7 +4127,7 @@ struct action_t
   school_type school;
   int resource, tree, result, aoe;
   bool dual, callbacks, special, binary, channeled, background, sequence, use_off_gcd;
-  bool direct_tick, repeating, harmful, proc, item_proc, discharge_proc, auto_cast, initialized;
+  bool direct_tick, repeating, harmful, proc, item_proc, proc_ignores_slot, discharge_proc, auto_cast, initialized;
   bool may_hit, may_miss, may_resist, may_dodge, may_parry, may_glance, may_block, may_crush, may_crit;
   bool tick_may_crit, tick_zero, hasted_ticks;
   bool no_buffs, no_debuffs;
