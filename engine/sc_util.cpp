@@ -793,26 +793,27 @@ int util_t::parse_weapon_type( const std::string& name )
   return WEAPON_NONE;
 }
 
-// util_t::flask_type_string ================================================
+// util_t::stim_type_string ================================================
 
-const char* util_t::flask_type_string( int flask )
+const char* util_t::stim_type_string( int stim )
 {
-  switch ( flask )
+  switch ( stim )
   {
-  case FLASK_NONE:               return "none";
+  case STIM_NONE:               return "none";
+  case STIM_RAKATA_RESOLVE:     return "rakata_resolve";
   }
   return "unknown";
 }
 
-// util_t::parse_flask_type =================================================
+// util_t::parse_stim_type =================================================
 
-int util_t::parse_flask_type( const std::string& name )
+int util_t::parse_stim_type( const std::string& name )
 {
-  for ( int i=0; i < FLASK_MAX; i++ )
-    if ( util_t::str_compare_ci( name, util_t::flask_type_string( i ) ) )
+  for ( int i=0; i < STIM_MAX; i++ )
+    if ( util_t::str_compare_ci( name, util_t::stim_type_string( i ) ) )
       return i;
 
-  return FLASK_NONE;
+  return STIM_NONE;
 }
 
 // util_t::food_type_string =================================================

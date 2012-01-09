@@ -1022,6 +1022,8 @@ void jedi_sage_t::init_actions()
     //{
     //case TREE_SEER:
 
+    action_list_str += "stim,type=rakata_resolve";
+
     action_list_str += "/snapshot_stats";
 
     action_list_str += "/mind_crush";
@@ -1044,6 +1046,8 @@ void jedi_sage_t::init_actions()
 
     //case TREE_TELEKINETICS:
 /*
+    action_list_str += "stim,type=rakata_resolve";
+
     action_list_str += "/snapshot_stats";
 
     action_list_str += "/mind_crush";

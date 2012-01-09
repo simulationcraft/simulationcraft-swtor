@@ -278,7 +278,7 @@ player_t::player_t( sim_t*             s,
   // Consumables
   elixir_guardian( ELIXIR_NONE ),
   elixir_battle( ELIXIR_NONE ),
-  flask( FLASK_NONE ),
+  stim( STIM_NONE ),
   food( FOOD_NONE ),
   // Events
   executing( 0 ), channeling( 0 ), readying( 0 ), off_gcd( 0 ), in_combat( false ), action_queued( false ),
@@ -2423,7 +2423,7 @@ void player_t::reset()
 
   elixir_battle   = ELIXIR_NONE;
   elixir_guardian = ELIXIR_NONE;
-  flask           = FLASK_NONE;
+  stim            = STIM_NONE;
   food            = FOOD_NONE;
 
   for ( int i=0; i < RESOURCE_MAX; i++ )
@@ -5759,7 +5759,7 @@ void player_t::create_options()
     { "skip_actions",                         OPT_STRING, &( action_list_skip                         ) },
     { "modify_action",                        OPT_STRING, &( modify_action                            ) },
     { "elixirs",                              OPT_STRING, &( elixirs_str                              ) },
-    { "flask",                                OPT_STRING, &( flask_str                                ) },
+    { "stim",                                 OPT_STRING, &( stim_str                                ) },
     { "food",                                 OPT_STRING, &( food_str                                 ) },
     { "player_resist_holy",                   OPT_INT,    &( spell_resistance[ SCHOOL_HOLY   ]        ) },
     { "player_resist_shadow",                 OPT_INT,    &( spell_resistance[ SCHOOL_SHADOW ]        ) },

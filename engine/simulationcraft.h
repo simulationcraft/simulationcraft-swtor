@@ -468,10 +468,11 @@ enum elixir_type
   ELIXIR_MAX
 };
 
-enum flask_type
+enum stim_type
 {
-  FLASK_NONE=0,
-  FLASK_MAX
+  STIM_NONE=0,
+  STIM_RAKATA_RESOLVE,
+  STIM_MAX
 };
 
 enum food_type
@@ -1843,7 +1844,7 @@ public:
   static const char* attribute_type_string     ( int type );
   static const char* dmg_type_string           ( int type );
   static const char* elixir_type_string        ( int type );
-  static const char* flask_type_string         ( int type );
+  static const char* stim_type_string         ( int type );
   static const char* food_type_string          ( int type );
   static const char* gem_type_string           ( int type );
   static const char* meta_gem_type_string      ( int type );
@@ -1874,7 +1875,7 @@ public:
   static int parse_attribute_type              ( const std::string& name );
   static int parse_dmg_type                    ( const std::string& name );
   static int parse_elixir_type                 ( const std::string& name );
-  static int parse_flask_type                  ( const std::string& name );
+  static int parse_stim_type                  ( const std::string& name );
   static int parse_food_type                   ( const std::string& name );
   static int parse_gem_type                    ( const std::string& name );
   static int parse_meta_gem_type               ( const std::string& name );
@@ -3550,10 +3551,10 @@ struct player_t : public noncopyable
   action_callback_t* dark_intent_cb;
 
   // Consumables
-  std::string flask_str, elixirs_str, food_str;
+  std::string stim_str, elixirs_str, food_str;
   int elixir_guardian;
   int elixir_battle;
-  int flask;
+  int stim;
   int food;
 
   // Events
