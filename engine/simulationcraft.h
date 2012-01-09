@@ -3456,10 +3456,6 @@ struct player_t : public noncopyable
   double initial_crit_rating, crit_rating;
   double initial_accuracy_rating, accuracy_rating;
 
-  // Haste
-  double spell_haste, buffed_spell_haste;
-  double attack_haste, buffed_attack_haste, buffed_attack_speed;
-
   // Attributes
   double attribute                   [ ATTRIBUTE_MAX ];
   double attribute_base              [ ATTRIBUTE_MAX ];
@@ -3472,6 +3468,7 @@ struct player_t : public noncopyable
 
   // Spell Mechanics
   double base_spell_power,       initial_spell_power[ SCHOOL_MAX+1 ], spell_power[ SCHOOL_MAX+1 ], buffed_spell_power;
+  double spell_haste, buffed_spell_haste;
   double base_spell_hit,         spell_hit,                   buffed_spell_hit;
   double base_spell_crit,        spell_crit,                  buffed_spell_crit;
   double base_spell_penetration, initial_spell_penetration,           spell_penetration,           buffed_spell_penetration;
@@ -3487,6 +3484,7 @@ struct player_t : public noncopyable
   double last_cast;
 
   // Attack Mechanics
+  double attack_haste, buffed_attack_haste, buffed_attack_speed;
   double base_attack_power,       initial_attack_power,        attack_power,       buffed_attack_power;
   double base_attack_hit,         attack_hit,         buffed_attack_hit;
   double base_attack_expertise,   initial_attack_expertise,    attack_expertise,   buffed_attack_expertise;

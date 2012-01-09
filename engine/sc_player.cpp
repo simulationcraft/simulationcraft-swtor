@@ -223,16 +223,15 @@ player_t::player_t( sim_t*             s,
   events( 0 ),
   dbc( s -> dbc ),
   race( r ),
-  // Haste
+  // Ratings
   initial_haste_rating( 0 ), haste_rating( 0 ),
   initial_crit_rating( 0 ), crit_rating( 0 ),
   initial_accuracy_rating( 0 ), accuracy_rating( 0 ),
-  spell_haste( 1.0 ),  buffed_spell_haste( 1.0 ),
-  attack_haste( 1.0 ), buffed_attack_haste( 1.0 ), buffed_attack_speed( 1.0 ),
   // Mastery
   mastery( 0 ), buffed_mastery ( 0 ), mastery_rating( 0 ), initial_mastery_rating ( 0 ), base_mastery ( 8.0 ),
   // Spell Mechanics
   base_spell_power( 0 ), buffed_spell_power( 0 ),
+  spell_haste( 1.0 ),  buffed_spell_haste( 1.0 ),
   base_spell_hit( 0 ), spell_hit( 0 ), buffed_spell_hit( 0 ),
   base_spell_crit( 0 ), spell_crit( 0 ), buffed_spell_crit( 0 ),
   base_spell_penetration( 0 ), initial_spell_penetration( 0 ), spell_penetration( 0 ), buffed_spell_penetration( 0 ),
@@ -243,6 +242,7 @@ player_t::player_t( sim_t*             s,
   base_energy_regen_per_second( 0 ), base_ammo_regen_per_second( 0 ), base_force_regen_per_second( 0 ),
   last_cast( 0 ),
   // Attack Mechanics
+  attack_haste( 1.0 ), buffed_attack_haste( 1.0 ), buffed_attack_speed( 1.0 ),
   base_attack_power( 0 ),       initial_attack_power( 0 ),        attack_power( 0 ),       buffed_attack_power( 0 ),
   base_attack_hit( 0 ), attack_hit( 0 ),         buffed_attack_hit( 0 ),
   base_attack_expertise( 0 ),   initial_attack_expertise( 0 ),    attack_expertise( 0 ),   buffed_attack_expertise( 0 ),
