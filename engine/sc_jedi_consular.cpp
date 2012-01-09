@@ -35,32 +35,18 @@ void register_jedi_sage_targetdata( sim_t*  sim  )
 
 struct jedi_consular_t : public player_t
 {
-
-  // Buffs
-  //buff_t* buffs_<buffname>;
-
-  // Gains
-
-  // Procs
-  //proc_t* procs_<procname>;
-
-
 protected:
   jedi_consular_t( sim_t* sim, player_type pt, const std::string& name, race_type r ) :
     player_t( sim, JEDI_CONSULAR, pt, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
   {
-
     create_options();
   }
 public:
+
   // Character Definition
   virtual action_t* create_action( const std::string& name, const std::string& options );
   virtual void      init_base();
-  virtual void      init_scaling();
   virtual void      init_buffs();
-  virtual void      init_gains();
-  virtual void      init_procs();
-  virtual void      init_rng();
   virtual void      init_resources( bool force=false );
   virtual int       primary_resource() const;
   virtual int       primary_role() const;
@@ -90,9 +76,6 @@ struct jedi_sage_t : public jedi_consular_t
 
   // Procs
   //proc_t* procs_<procname>;
-
-  // Dots
-  dot_t* dots_weaken_mind;
 
   // RNG
   rng_t* rng_psychic_barrier;
@@ -158,8 +141,6 @@ struct jedi_sage_t : public jedi_consular_t
     tree_type[ JEDI_SAGE_TELEKINETICS ] = TREE_TELEKINETICS;
     tree_type[ JEDI_SAGE_BALANCE ]      = TREE_BALANCE;
 
-    dots_weaken_mind = get_dot( "weaken_mind" );
-
     create_talents();
     create_glyphs();
     create_options();
@@ -169,7 +150,6 @@ struct jedi_sage_t : public jedi_consular_t
   virtual action_t* create_action( const std::string& name, const std::string& options );
   virtual void      init_talents();
   virtual void      init_base();
-  virtual void      init_scaling();
   virtual void      init_buffs();
   virtual void      init_gains();
   virtual void      init_procs();
@@ -201,7 +181,7 @@ struct jedi_consular_attack_t : public attack_t
     may_glance = false;
   }
 
-  virtual bool   ready();
+  virtual bool ready();
 };
 
 struct jedi_consular_spell_t : public spell_t
@@ -223,7 +203,6 @@ struct jedi_consular_spell_t : public spell_t
       if ( base_td > 0 )
         crit_bonus += p -> talents.mental_scarring * 0.1;
     }
-
   }
 
   void _init_jedi_consular_spell_t()
@@ -377,7 +356,6 @@ struct project_t : public jedi_consular_spell_t
         upheaval -> background = true;
         add_child( upheaval );
       }
-
     }
   }
 
@@ -442,7 +420,6 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
 
       if ( p -> buffs_psychic_projection -> check() )
         tt *= 0.5;
-
     }
 
     return tt;
@@ -471,7 +448,7 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
 };
 
 // ==========================================================================
-// jedi_sage Abilities
+// Jedi Sage Abilities
 // ==========================================================================
 
 struct jedi_sage_attack_t : public jedi_consular_attack_t
@@ -488,7 +465,7 @@ struct jedi_sage_attack_t : public jedi_consular_attack_t
     may_glance = false;
   }
 
-  virtual bool   ready();
+  virtual bool ready();
 };
 
 struct jedi_sage_spell_t : public jedi_consular_spell_t
@@ -688,9 +665,9 @@ struct turbulence_t : public jedi_sage_spell_t
   {
     jedi_sage_spell_t::calculate_result();
 
-    jedi_sage_t* p = player -> cast_jedi_sage();
+    jedi_sage_targetdata_t* td = targetdata() -> cast_jedi_sage();
 
-    if ( p -> dots_weaken_mind -> ticking )
+    if ( td -> dots_weaken_mind -> ticking )
       result = RESULT_CRIT;
   }
 
@@ -798,14 +775,6 @@ void jedi_consular_t::init_base()
   //diminished_parry_capi = 0;
 }
 
-// jedi_consular_t::init_scaling =====================================================
-
-void jedi_consular_t::init_scaling()
-{
-  player_t::init_scaling();
-
-}
-
 // jedi_consular_t::init_buffs =======================================================
 
 void jedi_consular_t::init_buffs()
@@ -818,36 +787,11 @@ void jedi_consular_t::init_buffs()
 
 }
 
-// jedi_consular_t::init_gains =======================================================
-
-void jedi_consular_t::init_gains()
-{
-  player_t::init_gains();
-
-}
-
-// jedi_consular_t::init_procs =======================================================
-
-void jedi_consular_t::init_procs()
-{
-  player_t::init_procs();
-
-}
-
-// jedi_consular_t::init_rng =========================================================
-
-void jedi_consular_t::init_rng()
-{
-  player_t::init_rng();
-
-}
-
 // jedi_consular_t::reset ==================================================
 
 void jedi_consular_t::init_resources( bool force )
 {
   player_t::init_resources( force);
-
 }
 
 // jedi_consular_t::primary_role ==================================================
@@ -938,7 +882,6 @@ void jedi_sage_t::init_talents()
   talents.minds_eye = 0;
   talents.disturb_mind = 2;
 
-
 }
 
 // jedi_sage_t::init_base ========================================================
@@ -956,19 +899,10 @@ void jedi_sage_t::init_base()
 
   attribute_multiplier_initial[ ATTR_WILLPOWER ] *= 1.0 + talents.will_of_the_jedi * 0.03;
 
-
   // FIXME: Add defensive constants
   //diminished_kfactor    = 0;
   //diminished_dodge_capi = 0;
   //diminished_parry_capi = 0;
-}
-
-// jedi_sage_t::init_scaling =====================================================
-
-void jedi_sage_t::init_scaling()
-{
-  jedi_consular_t::init_scaling();
-
 }
 
 // jedi_sage_t::init_buffs =======================================================
@@ -999,7 +933,6 @@ void jedi_sage_t::init_gains()
   gains_concentration   = get_gain( "concentration"   );
   gains_focused_insight = get_gain( "focused_insight" );
   gains_psychic_barrier = get_gain( "psychic_barrier" );
-
 }
 
 // jedi_sage_t::init_procs =======================================================
@@ -1007,7 +940,6 @@ void jedi_sage_t::init_gains()
 void jedi_sage_t::init_procs()
 {
   jedi_consular_t::init_procs();
-
 }
 
 // jedi_sage_t::init_rng =========================================================
@@ -1025,7 +957,6 @@ void jedi_sage_t::init_rng()
 
 void jedi_sage_t::init_actions()
 {
-
   if ( action_list_str.empty() )
   {
     //switch ( primary_tree() )
@@ -1139,7 +1070,6 @@ double jedi_sage_t::composite_spell_power( const school_type school ) const
 player_t* player_t::create_jedi_sage( sim_t* sim, const std::string& name, race_type r )
 {
   return new jedi_sage_t( sim, name, r );
-
 }
 
 // player_t::jedi_sage_init ======================================================
