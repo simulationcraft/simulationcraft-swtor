@@ -1453,8 +1453,8 @@ void player_t::init_scaling()
     scales_with[ STAT_EXPERTISE_RATING2        ] = 0;
 
     scales_with[ STAT_HIT_RATING                ] = 0;
-    scales_with[ STAT_CRIT_RATING               ] = 0;
-    scales_with[ STAT_HASTE_RATING              ] = 0;
+    scales_with[ STAT_CRIT_RATING               ] = spell || attack;
+    scales_with[ STAT_HASTE_RATING              ] = spell || attack;
     scales_with[ STAT_MASTERY_RATING            ] = 0;
 
     scales_with[ STAT_WEAPON_DPS   ] = attack;
@@ -2316,7 +2316,7 @@ void player_t::reset()
   haste_rating = initial_haste_rating;
   mastery_rating = initial_mastery_rating;
   mastery = base_mastery + mastery_rating / rating.mastery;
-  recalculate_haste();
+  recalculate_rating_stats();
 
   for ( int i=0; i < ATTRIBUTE_MAX; i++ )
   {
@@ -3089,7 +3089,7 @@ void player_t::stat_gain( int       stat,
     stats.haste_rating += amount;
     temporary.haste_rating += temporary_stat * amount;
     haste_rating       += amount;
-    recalculate_haste();
+    recalculate_rating_stats();
     break;
 
   case STAT_ARMOR:          stats.armor          += amount; temporary.armor += temporary_stat * amount; armor       += amount;                  break;
@@ -3178,7 +3178,7 @@ void player_t::stat_loss( int       stat,
     stats.haste_rating -= amount;
     temporary.haste_rating -= temporary_buff * amount;
     haste_rating       -= amount;
-    recalculate_haste();
+    recalculate_rating_stats();
     break;
 
   case STAT_ARMOR:          stats.armor          -= amount; temporary.armor -= temporary_buff * amount; armor       -= amount;                  break;
@@ -3552,12 +3552,12 @@ void player_t::register_direct_heal_callback( int64_t mask,
   }
 }
 
-// player_t::recalculate_haste ==============================================
+// player_t::recalculate_rating_stats ==============================================
 
-void player_t::recalculate_haste()
+void player_t::recalculate_rating_stats()
 {
-  spell_haste = 1.0 / ( 1.0 + haste_rating / rating. spell_haste );
-  attack_haste = 1.0 / ( 1.0 + haste_rating / rating.attack_haste );
+  spell_haste = 1.0 / ( 1.0 + 0.3 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.3 ) ), haste_rating / std::max( 20, level ) / 0.55 ) ) );
+  attack_haste = 1.0 / ( 1.0 + 0.3 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.3 ) ), haste_rating / std::max( 20, level ) / 0.55 ) ) );
 }
 
 // player_t::recent_cast ====================================================

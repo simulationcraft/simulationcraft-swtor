@@ -3918,7 +3918,7 @@ struct player_t : public noncopyable
 
   virtual int decode_set( item_t& item ) { ( void )item; assert( item.name() ); return SET_NONE; }
 
-  virtual void recalculate_haste();
+  virtual void recalculate_rating_stats();
 
   virtual void armory_extensions( const std::string& /* region */, const std::string& /* server */, const std::string& /* character */,
                                   cache::behavior_t /* behavior */=cache::players() )
