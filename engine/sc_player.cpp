@@ -224,7 +224,9 @@ player_t::player_t( sim_t*             s,
   dbc( s -> dbc ),
   race( r ),
   // Haste
-  base_haste_rating( 0 ), initial_haste_rating( 0 ), haste_rating( 0 ),
+  initial_haste_rating( 0 ), haste_rating( 0 ),
+  initial_crit_rating( 0 ), crit_rating( 0 ),
+  initial_accuracy_rating( 0 ), accuracy_rating( 0 ),
   spell_haste( 1.0 ),  buffed_spell_haste( 1.0 ),
   attack_haste( 1.0 ), buffed_attack_haste( 1.0 ), buffed_attack_speed( 1.0 ),
   // Mastery
@@ -236,8 +238,6 @@ player_t::player_t( sim_t*             s,
   base_spell_penetration( 0 ), initial_spell_penetration( 0 ), spell_penetration( 0 ), buffed_spell_penetration( 0 ),
   base_mp5( 0 ),               initial_mp5( 0 ),               mp5( 0 ),               buffed_mp5( 0 ),
   spell_power_multiplier( 1.0 ),  initial_spell_power_multiplier( 1.0 ),
-  spell_power_per_intellect( 0 ), initial_spell_power_per_intellect( 0 ),
-  spell_crit_per_intellect( 0 ),  initial_spell_crit_per_intellect( 0 ),
   mp5_per_intellect( 0 ),
   mana_regen_base( 0 ), mana_regen_while_casting( 0 ),
   base_energy_regen_per_second( 0 ), base_ammo_regen_per_second( 0 ), base_force_regen_per_second( 0 ),
@@ -619,7 +619,6 @@ void player_t::init_base()
   resource_base[ RESOURCE_MANA   ] = 0;
   base_spell_crit                  = 0.05;
   base_attack_crit                 = 0.05;
-  initial_spell_crit_per_intellect = 0;
   initial_attack_crit_per_agility  = 0;
   base_mp5                         = 0;
 
@@ -753,8 +752,10 @@ void player_t::init_core()
   initial_stats.haste_rating = gear.haste_rating + enchant.haste_rating + ( is_pet() ? 0 : sim -> enchant.haste_rating );
   initial_stats.mastery_rating = gear.mastery_rating + enchant.mastery_rating + ( is_pet() ? 0 : sim -> enchant.mastery_rating );
 
-  initial_haste_rating   = initial_stats.haste_rating;
-  initial_mastery_rating = initial_stats.mastery_rating;
+  initial_haste_rating    = initial_stats.haste_rating;
+  initial_mastery_rating  = initial_stats.mastery_rating;
+  initial_crit_rating     = initial_stats.crit_rating;
+  initial_accuracy_rating = initial_stats.hit_rating;
 
 
 
@@ -1280,10 +1281,6 @@ void player_t::init_rating()
 
   rating.init( sim, dbc, level, type );
 
-  // Approximate implementation based on a level 50 character, formula taken from
-  // http://sithwarrior.com/forums/Thread-SWTOR-formula-list
-  rating.spell_crit = 1000.0;
-  rating.attack_crit = 1000.0;
 }
 
 // player_t::init_talents ===================================================
@@ -1495,19 +1492,10 @@ void player_t::init_scaling()
         initial_attack_expertise   += v / rating.expertise;
         break;
 
-      case STAT_HIT_RATING:
-      case STAT_HIT_RATING2:
-        initial_attack_hit += v / rating.attack_hit;
-        initial_spell_hit  += v / rating.spell_hit;
-        break;
-
-      case STAT_CRIT_RATING:
-        initial_attack_crit += v / rating.attack_crit;
-        initial_spell_crit  += v / rating.spell_crit;
-        break;
-
-      case STAT_HASTE_RATING: initial_haste_rating += v; break;
-      case STAT_MASTERY_RATING: initial_mastery_rating += v; break;
+      case STAT_HIT_RATING:     initial_accuracy_rating += v; break;
+      case STAT_CRIT_RATING:    initial_crit_rating     += v; break;
+      case STAT_HASTE_RATING:   initial_haste_rating    += v; break;
+      case STAT_MASTERY_RATING: initial_mastery_rating  += v; break;
 
       case STAT_WEAPON_DPS:
         if ( main_hand_weapon.damage > 0 )
@@ -1855,8 +1843,6 @@ double player_t::composite_spell_power( const school_type school ) const
   }
   if ( school != SCHOOL_MAX ) sp += spell_power[ SCHOOL_MAX ];
 
-  sp += spell_power_per_intellect * ( intellect() - 10 ); // The spellpower is always lower by 10, cata beta build 12803
-
   sp += willpower() * 0.2;
 
   return sp;
@@ -1875,7 +1861,7 @@ double player_t::composite_spell_power_multiplier() const
 
 double player_t::composite_spell_crit() const
 {
-  double sc = spell_crit + spell_crit_per_intellect * intellect();
+  double sc = spell_crit;
 
   return sc;
 }
@@ -2316,6 +2302,8 @@ void player_t::reset()
   haste_rating = initial_haste_rating;
   mastery_rating = initial_mastery_rating;
   mastery = base_mastery + mastery_rating / rating.mastery;
+  crit_rating = initial_crit_rating;
+  accuracy_rating = initial_accuracy_rating;
   recalculate_rating_stats();
 
   for ( int i=0; i < ATTRIBUTE_MAX; i++ )
@@ -2336,8 +2324,6 @@ void player_t::reset()
     resource_reduction[ i ] = initial_resource_reduction[ i ];
   }
 
-  spell_hit         = initial_spell_hit;
-  spell_crit        = initial_spell_crit;
   spell_penetration = initial_spell_penetration;
   mp5               = initial_mp5;
 
@@ -2354,8 +2340,6 @@ void player_t::reset()
   block_reduction    = initial_block_reduction;
 
   spell_power_multiplier    = initial_spell_power_multiplier;
-  spell_power_per_intellect = initial_spell_power_per_intellect;
-  spell_crit_per_intellect  = initial_spell_crit_per_intellect;
 
   attack_power_multiplier   = initial_attack_power_multiplier;
   attack_power_per_strength = initial_attack_power_per_strength;
@@ -3074,15 +3058,15 @@ void player_t::stat_gain( int       stat,
   case STAT_HIT_RATING:
     stats.hit_rating += amount;
     temporary.hit_rating += temporary_stat * amount;
-    attack_hit       += amount / rating.attack_hit;
-    spell_hit        += amount / rating.spell_hit;
+    accuracy_rating += amount;
+    recalculate_rating_stats();
     break;
 
   case STAT_CRIT_RATING:
     stats.crit_rating += amount;
     temporary.crit_rating += temporary_stat * amount;
-    attack_crit       += amount / rating.attack_crit;
-    spell_crit        += amount / rating.spell_crit;
+    crit_rating += amount;
+    recalculate_rating_stats();
     break;
 
   case STAT_HASTE_RATING:
@@ -3163,15 +3147,15 @@ void player_t::stat_loss( int       stat,
   case STAT_HIT_RATING:
     stats.hit_rating -= amount;
     temporary.hit_rating -= temporary_buff * amount;
-    attack_hit       -= amount / rating.attack_hit;
-    spell_hit        -= amount / rating.spell_hit;
+    accuracy_rating       -= amount;
+    recalculate_rating_stats();
     break;
 
   case STAT_CRIT_RATING:
     stats.crit_rating -= amount;
     temporary.crit_rating -= temporary_buff * amount;
-    attack_crit       -= amount / rating.attack_crit;
-    spell_crit        -= amount / rating.spell_crit;
+    crit_rating       -= amount;
+    recalculate_rating_stats();
     break;
 
   case STAT_HASTE_RATING:
@@ -3558,6 +3542,12 @@ void player_t::recalculate_rating_stats()
 {
   spell_haste = 1.0 / ( 1.0 + 0.3 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.3 ) ), haste_rating / std::max( 20, level ) / 0.55 ) ) );
   attack_haste = 1.0 / ( 1.0 + 0.3 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.3 ) ), haste_rating / std::max( 20, level ) / 0.55 ) ) );
+
+  spell_crit = base_spell_crit + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), crit_rating / std::max( 20, level ) / 0.45 ) );
+  attack_crit = base_attack_crit + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), crit_rating / std::max( 20, level ) / 0.45 ) );
+
+  spell_hit  = base_spell_hit + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), accuracy_rating / std::max( 20, level ) / 0.55 ) );
+  attack_hit = base_attack_hit + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), accuracy_rating / std::max( 20, level ) / 0.55 ) );
 }
 
 // player_t::recent_cast ====================================================
@@ -5071,10 +5061,6 @@ action_expr_t* player_t::create_expression( action_t* a,
               result_num *= action -> player -> composite_attribute_multiplier( attr );
             else if ( stat_type == STAT_SPELL_POWER )
             {
-              result_num += action -> player -> temporary.attribute[ ATTR_INTELLECT ] *
-                            action -> player -> composite_attribute_multiplier( ATTR_INTELLECT ) *
-                            action -> player -> spell_power_per_intellect;
-
               result_num *= action -> player -> composite_spell_power_multiplier();
               //log_t::output( action -> sim, "temporary_bonus.spell_power=%f", result_num );
             }

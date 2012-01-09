@@ -3451,8 +3451,12 @@ struct player_t : public noncopyable
   std::string race_str;
   race_type race;
 
+  // Ratings
+  double initial_haste_rating, haste_rating;
+  double initial_crit_rating, crit_rating;
+  double initial_accuracy_rating, accuracy_rating;
+
   // Haste
-  double base_haste_rating, initial_haste_rating, haste_rating;
   double spell_haste, buffed_spell_haste;
   double attack_haste, buffed_attack_haste, buffed_attack_speed;
 
@@ -3473,8 +3477,6 @@ struct player_t : public noncopyable
   double base_spell_penetration, initial_spell_penetration,           spell_penetration,           buffed_spell_penetration;
   double base_mp5,               initial_mp5,                         mp5,                         buffed_mp5;
   double spell_power_multiplier,    initial_spell_power_multiplier;
-  double spell_power_per_intellect, initial_spell_power_per_intellect;
-  double spell_crit_per_intellect,  initial_spell_crit_per_intellect;
   double mp5_per_intellect;
   double mana_regen_base;
   double mana_regen_while_casting;
