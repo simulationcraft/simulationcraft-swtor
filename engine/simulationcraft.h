@@ -3688,7 +3688,7 @@ struct player_t : public noncopyable
     buff_t* stunned;
     buff_t* raid_movement;
     buff_t* self_movement;
-    std::vector<buff_t*> divine_aegis;
+    buff_t* power_potion;
   };
   buffs_t buffs;
 

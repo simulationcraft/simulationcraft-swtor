@@ -128,6 +128,56 @@ struct food_t : public action_t
 
 
 // ==========================================================================
+// Power Potion
+// ==========================================================================
+
+struct power_potion_t : public action_t
+{
+  power_potion_t( player_t* p, const std::string& options_str ) :
+    action_t( ACTION_USE, "power_potion", p )
+  {
+    parse_options( NULL, options_str );
+
+    trigger_gcd = 0;
+    harmful = false;
+    cooldown = p -> get_cooldown( "potion" );
+    cooldown -> duration = 180.0;
+  }
+
+  virtual void execute()
+  {
+    if ( player -> in_combat )
+    {
+      player -> buffs.power_potion -> trigger();
+    }
+    else
+    {
+      cooldown -> duration -= 5.0;
+      player -> buffs.power_potion -> buff_duration -= 5.0;
+      player -> buffs.power_potion -> trigger();
+      cooldown -> duration += 5.0;
+      player -> buffs.power_potion -> buff_duration += 5.0;
+    }
+
+    if ( sim -> log ) log_t::output( sim, "%s uses %s", player -> name(), name() );
+
+    if ( player -> in_combat ) player -> potion_used = 1;
+    update_ready();
+  }
+
+  virtual bool ready()
+  {
+    if ( ! player -> in_combat && player -> use_pre_potion <= 0 )
+      return false;
+
+    if ( player -> potion_used )
+      return false;
+
+    return action_t::ready();
+  }
+};
+
+// ==========================================================================
 // consumable_t::create_action
 // ==========================================================================
 
@@ -137,6 +187,7 @@ action_t* consumable_t::create_action( player_t*          p,
 {
   if ( name == "stim"                 ) return new                 stim_t( p, options_str );
   if ( name == "food"                 ) return new                 food_t( p, options_str );
+  if ( name == "power_potion"         ) return new         power_potion_t( p, options_str );
 
   return 0;
 }
