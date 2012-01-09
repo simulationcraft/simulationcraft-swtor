@@ -64,8 +64,6 @@ void gear_stats_t::add_stat( int    stat,
 
   case STAT_BLOCK_RATING: block_rating += value; break;
 
-  case STAT_MASTERY_RATING: mastery_rating += value; break;
-
   case STAT_POWER: power += value; break;
   case STAT_FORCE_POWER: force_power += value; break;
 
@@ -133,8 +131,6 @@ void gear_stats_t::set_stat( int    stat,
 
   case STAT_BLOCK_RATING: block_rating = value; break;
 
-  case STAT_MASTERY_RATING: mastery_rating = value; break;
-
   case STAT_POWER: power = value; break;
   case STAT_FORCE_POWER: force_power = value; break;
 
@@ -200,8 +196,6 @@ double gear_stats_t::get_stat( int stat ) const
   case STAT_PARRY_RATING:      return parry_rating;
 
   case STAT_BLOCK_RATING: return block_rating;
-
-  case STAT_MASTERY_RATING: return mastery_rating;
 
   case STAT_POWER: return power;
   case STAT_FORCE_POWER: return force_power;

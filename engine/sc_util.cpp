@@ -985,8 +985,6 @@ const char* util_t::stat_type_string( int stat )
 
   case STAT_BLOCK_RATING: return "block_rating";
 
-  case STAT_MASTERY_RATING: return "mastery_rating";
-
   case STAT_POWER: return "power";
   case STAT_FORCE_POWER: return "forcepower";
 
@@ -1043,8 +1041,6 @@ const char* util_t::stat_type_abbrev( int stat )
 
   case STAT_BLOCK_RATING: return "BlockR";
 
-  case STAT_MASTERY_RATING: return "Mastery";
-
   case STAT_POWER: return "Power";
   case STAT_FORCE_POWER: return "Force_Power";
 
@@ -1092,8 +1088,6 @@ const char* util_t::stat_type_wowhead( int stat )
   case STAT_DODGE_RATING:      return "dodgeRating";
   case STAT_PARRY_RATING:      return "parryRating";
 
-  case STAT_MASTERY_RATING: return "masteryRating";
-
   case STAT_MAX: return "__all";
   }
   return "unknown";
@@ -1124,7 +1118,6 @@ stat_type util_t::parse_stat_type( const std::string& name )
   if ( name == "exprtng"        ) return STAT_EXPERTISE_RATING;
   if ( name == "hastertng"      ) return STAT_HASTE_RATING;
   if ( name == "hitrtng"        ) return STAT_HIT_RATING;
-  if ( name == "mastrtng"       ) return STAT_MASTERY_RATING;
   if ( name == "parryrtng"      ) return STAT_PARRY_RATING;
   if ( name == "resiliencertng" ) return STAT_RESILIENCE_RATING;
   if ( name == "splpwr"         ) return STAT_SPELL_POWER;
@@ -1148,7 +1141,6 @@ stat_type util_t::parse_reforge_type( const std::string& name )
   case STAT_HIT_RATING:
   case STAT_CRIT_RATING:
   case STAT_HASTE_RATING:
-  case STAT_MASTERY_RATING:
   case STAT_SPIRIT:
   case STAT_DODGE_RATING:
   case STAT_PARRY_RATING:
@@ -1313,7 +1305,6 @@ stat_type util_t::translate_item_mod( int item_mod )
   case ITEM_MOD_ATTACK_POWER:        return STAT_ATTACK_POWER;
   case ITEM_MOD_RANGED_ATTACK_POWER: return STAT_ATTACK_POWER;
   case ITEM_MOD_SPELL_POWER:         return STAT_SPELL_POWER;
-  case ITEM_MOD_MASTERY_RATING:      return STAT_MASTERY_RATING;
   case ITEM_MOD_EXTRA_ARMOR:         return STAT_BONUS_ARMOR;
   case ITEM_MOD_RESILIENCE_RATING:   return STAT_RESILIENCE_RATING;
   }

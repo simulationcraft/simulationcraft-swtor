@@ -550,7 +550,6 @@ static const stat_type reforge_stats[] =
   STAT_CRIT_RATING,
   STAT_HASTE_RATING,
   STAT_EXPERTISE_RATING,
-  STAT_MASTERY_RATING,
   STAT_NONE
 };
 

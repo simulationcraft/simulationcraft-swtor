@@ -101,7 +101,6 @@ void action_t::init_action_t_()
   tick_dmg                       = 0.0;
   snapshot_crit                  = 0.0;
   snapshot_haste                 = 1.0;
-  snapshot_mastery               = 0.0;
   num_ticks                      = 0;
   weapon                         = NULL;
   weapon_multiplier              = 1.0;
@@ -529,7 +528,6 @@ void action_t::snapshot()
 {
   snapshot_crit    = total_crit();
   snapshot_haste   = haste();
-  snapshot_mastery = player -> composite_mastery();
 }
 
 // action_t::result_is_hit ==================================================

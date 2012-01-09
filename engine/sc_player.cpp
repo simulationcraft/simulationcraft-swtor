@@ -228,8 +228,6 @@ player_t::player_t( sim_t*             s,
   initial_crit_rating( 0 ), crit_rating( 0 ),
   initial_accuracy_rating( 0 ), accuracy_rating( 0 ),
   initial_surge_rating( 0 ), surge_rating( 0 ),
-  // Mastery
-  mastery( 0 ), buffed_mastery ( 0 ), mastery_rating( 0 ), initial_mastery_rating ( 0 ), base_mastery ( 8.0 ),
   surge_bonus( 0 ), buffed_surge( 0 ),
   // Spell Mechanics
   base_power( 0.0 ), initial_power( 0.0 ), power( 0.0 ), buffed_power( 0.0 ),
@@ -754,11 +752,9 @@ void player_t::init_core()
   initial_stats.  hit_rating = gear.  hit_rating + enchant.  hit_rating + ( is_pet() ? 0 : sim -> enchant.  hit_rating );
   initial_stats. crit_rating = gear. crit_rating + enchant. crit_rating + ( is_pet() ? 0 : sim -> enchant. crit_rating );
   initial_stats.haste_rating = gear.haste_rating + enchant.haste_rating + ( is_pet() ? 0 : sim -> enchant.haste_rating );
-  initial_stats.mastery_rating = gear.mastery_rating + enchant.mastery_rating + ( is_pet() ? 0 : sim -> enchant.mastery_rating );
   initial_stats.surge_rating = gear.surge_rating + enchant.surge_rating + ( is_pet() ? 0 : sim -> enchant.surge_rating );
 
   initial_haste_rating    = initial_stats.haste_rating;
-  initial_mastery_rating  = initial_stats.mastery_rating;
   initial_crit_rating     = initial_stats.crit_rating;
   initial_accuracy_rating = initial_stats.hit_rating;
   initial_surge_rating    = initial_stats.surge_rating;
@@ -1460,7 +1456,6 @@ void player_t::init_scaling()
     scales_with[ STAT_HIT_RATING                ] = 0;
     scales_with[ STAT_CRIT_RATING               ] = spell || attack;
     scales_with[ STAT_HASTE_RATING              ] = spell || attack;
-    scales_with[ STAT_MASTERY_RATING            ] = 0;
 
     scales_with[ STAT_WEAPON_DPS   ] = attack;
     scales_with[ STAT_WEAPON_SPEED ] = sim -> weapon_speed_scale_factors ? attack : 0;
@@ -1511,7 +1506,6 @@ void player_t::init_scaling()
       case STAT_HIT_RATING:     initial_accuracy_rating += v; break;
       case STAT_CRIT_RATING:    initial_crit_rating     += v; break;
       case STAT_HASTE_RATING:   initial_haste_rating    += v; break;
-      case STAT_MASTERY_RATING: initial_mastery_rating  += v; break;
 
       case STAT_WEAPON_DPS:
         if ( main_hand_weapon.damage > 0 )
@@ -2066,73 +2060,6 @@ double player_t::spirit() const
   return a;
 }
 
-/*
-// player_t::haste_rating() =================================================
-
-double player_t::haste_rating() const
-{
-  double a = stats.haste_rating;
-
-  return a;
-}
-
-// player_t::crit_rating() ==================================================
-
-double player_t::crit_rating() const
-{
-  double a = stats.crit_rating;
-
-  return a;
-}
-
-// player_t::mastery_rating() ===============================================
-
-double player_t::mastery_rating() const
-{
-  double a = stats.mastery_rating;
-
-  return a;
-}
-
-// player_t::hit_rating() ===================================================
-
-double player_t::hit_rating() const
-{
-  double a = stats.hit_rating;
-
-  return a;
-}
-
-// player_t::expertise_rating() =============================================
-
-double player_t::expertise_rating() const
-{
-  double a = stats.expertise_rating;
-
-  return a;
-}
-
-// player_t::dodge_rating() =================================================
-
-double player_t::dodge_rating() const
-{
-  double a = stats.dodge_rating;
-
-  return a;
-}
-
-// player_t::parry_rating() =================================================
-
-double player_t::parry_rating() const
-{
-  double a = stats.parry_rating;
-
-  a += strength() * parry_rating_per_strength;
-
-  return a;
-}
-*/
-
 // player_t::combat_begin ===================================================
 
 void player_t::combat_begin( sim_t* sim )
@@ -2341,8 +2268,6 @@ void player_t::reset()
   vengeance_damage = vengeance_value = vengeance_max = 0.0;
 
   haste_rating = initial_haste_rating;
-  mastery_rating = initial_mastery_rating;
-  mastery = base_mastery + mastery_rating / rating.mastery;
   crit_rating = initial_crit_rating;
   accuracy_rating = initial_accuracy_rating;
   surge_rating = initial_surge_rating;
@@ -3138,12 +3063,6 @@ void player_t::stat_gain( int       stat,
 
   case STAT_BLOCK_RATING: stats.block_rating += amount; temporary.block_rating += temporary_stat * amount; block       += amount / rating.block; break;
 
-  case STAT_MASTERY_RATING:
-    stats.mastery_rating += amount;
-    temporary.mastery_rating += temporary_stat * amount;
-    mastery += amount / rating.mastery;
-    break;
-
   default: assert( 0 );
   }
 }
@@ -3235,12 +3154,6 @@ void player_t::stat_loss( int       stat,
   case STAT_PARRY_RATING:   stats.parry_rating   -= amount; temporary.parry_rating -= temporary_buff * amount; parry       -= amount / rating.parry;   break;
 
   case STAT_BLOCK_RATING: stats.block_rating -= amount; temporary.block_rating -= temporary_buff * amount; block       -= amount / rating.block; break;
-
-  case STAT_MASTERY_RATING:
-    stats.mastery_rating -= amount;
-    temporary.mastery_rating -= temporary_buff * amount;
-    mastery -= amount / rating.mastery;
-    break;
 
   default: assert( 0 );
   }
@@ -4184,7 +4097,6 @@ struct snapshot_stats_t : public action_t
     p -> buffed_spell_haste  = p -> composite_spell_haste();
     p -> buffed_attack_haste = p -> composite_attack_haste();
     p -> buffed_attack_speed = p -> composite_attack_speed();
-    p -> buffed_mastery      = p -> composite_mastery();
 
     p -> attribute_buffed[ ATTR_STRENGTH  ] = floor( p -> strength()  );
     p -> attribute_buffed[ ATTR_AGILITY   ] = floor( p -> agility()   );
@@ -5128,7 +5040,6 @@ action_expr_t* player_t::create_expression( action_t* a,
         case STAT_DODGE_RATING:     p_stat = &( a -> player -> temporary.dodge_rating                ); break;
         case STAT_PARRY_RATING:     p_stat = &( a -> player -> temporary.parry_rating                ); break;
         case STAT_BLOCK_RATING:     p_stat = &( a -> player -> temporary.block_rating                ); break;
-        case STAT_MASTERY_RATING:   p_stat = &( a -> player -> temporary.mastery_rating              ); break;
         case STAT_POWER:            p_stat = &( a -> player -> temporary.power                       ); break;
         case STAT_FORCE_POWER:      p_stat = &( a -> player -> temporary.force_power                 ); break;
         case STAT_SURGE_RATING:     p_stat = &( a -> player -> temporary.surge_rating                ); break;
@@ -5540,7 +5451,6 @@ bool player_t::create_profile( std::string& profile_str, int save_type, bool sav
     if ( enchant.haste_rating                != 0 )  profile_str += "enchant_haste_rating="     + util_t::to_string( enchant.haste_rating ) + term;
     if ( enchant.hit_rating                  != 0 )  profile_str += "enchant_hit_rating="       + util_t::to_string( enchant.hit_rating ) + term;
     if ( enchant.crit_rating                 != 0 )  profile_str += "enchant_crit_rating="      + util_t::to_string( enchant.crit_rating ) + term;
-    if ( enchant.mastery_rating              != 0 )  profile_str += "enchant_mastery_rating="   + util_t::to_string( enchant.mastery_rating ) + term;
     if ( enchant.resource[ RESOURCE_HEALTH ] != 0 )  profile_str += "enchant_health="           + util_t::to_string( enchant.resource[ RESOURCE_HEALTH ] ) + term;
     if ( enchant.resource[ RESOURCE_MANA   ] != 0 )  profile_str += "enchant_mana="             + util_t::to_string( enchant.resource[ RESOURCE_MANA   ] ) + term;
     if ( enchant.resource[ RESOURCE_RAGE   ] != 0 )  profile_str += "enchant_rage="             + util_t::to_string( enchant.resource[ RESOURCE_RAGE   ] ) + term;
@@ -5728,7 +5638,6 @@ void player_t::create_options()
     { "gear_energy",                          OPT_FLT,  &( gear.resource[ RESOURCE_ENERGY ]           ) },
     { "gear_ammo",                            OPT_FLT,  &( gear.resource[ RESOURCE_AMMO   ]           ) },
     { "gear_armor",                           OPT_FLT,  &( gear.armor                                 ) },
-    { "gear_mastery_rating",                  OPT_FLT,  &( gear.mastery_rating                        ) },
     // Stat Enchants
     { "enchant_strength",                     OPT_FLT,  &( enchant.attribute[ ATTR_STRENGTH  ]        ) },
     { "enchant_agility",                      OPT_FLT,  &( enchant.attribute[ ATTR_AGILITY   ]        ) },
@@ -5746,7 +5655,6 @@ void player_t::create_options()
     { "enchant_haste_rating",                 OPT_FLT,  &( enchant.haste_rating                       ) },
     { "enchant_hit_rating",                   OPT_FLT,  &( enchant.hit_rating                         ) },
     { "enchant_crit_rating",                  OPT_FLT,  &( enchant.crit_rating                        ) },
-    { "enchant_mastery_rating",               OPT_FLT,  &( enchant.mastery_rating                     ) },
     { "enchant_health",                       OPT_FLT,  &( enchant.resource[ RESOURCE_HEALTH ]        ) },
     { "enchant_mana",                         OPT_FLT,  &( enchant.resource[ RESOURCE_MANA   ]        ) },
     { "enchant_rage",                         OPT_FLT,  &( enchant.resource[ RESOURCE_RAGE   ]        ) },

@@ -604,7 +604,6 @@ void armory_t::fuzzy_stats( std::string&       encoding_str,
   stat_search( encoding_str, splits, STAT_CRIT_RATING,          "ranged critical strike" );
   stat_search( encoding_str, splits, STAT_CRIT_RATING,          "critical strike rating" );
   stat_search( encoding_str, splits, STAT_CRIT_RATING,          "crit rating" );
-  stat_search( encoding_str, splits, STAT_MASTERY_RATING,       "mastery rating" );
 
   stat_search( encoding_str, splits, STAT_BONUS_ARMOR,    "armor !penetration" );
   stat_search( encoding_str, splits, STAT_DODGE_RATING,   "dodge rating" );

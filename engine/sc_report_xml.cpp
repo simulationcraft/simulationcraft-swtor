@@ -351,8 +351,6 @@ void print_xml_player_stats( xml_writer_t & writer, player_t * p )
                               p -> spirit(),    p -> stats.attribute[ ATTR_SPIRIT    ], p -> attribute_buffed[ ATTR_SPIRIT    ] );
   print_xml_player_attribute( writer, "willpower",
                                 p -> willpower(),    p -> stats.attribute[ ATTR_WILLPOWER    ], p -> attribute_buffed[ ATTR_WILLPOWER    ] );
-  print_xml_player_attribute( writer, "mastery",
-                              p -> composite_mastery(), p -> stats.mastery_rating, p -> buffed_mastery );
   print_xml_player_attribute( writer, "spellpower",
                               p -> composite_spell_power( SCHOOL_MAX ) * p -> composite_spell_power_multiplier(), p -> stats.spell_power, p -> buffed_spell_power );
   print_xml_player_attribute( writer, "spellhit",

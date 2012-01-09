@@ -451,7 +451,7 @@ enum stat_type
   STAT_MAX_HEALTH, STAT_MAX_MANA, STAT_MAX_RAGE, STAT_MAX_ENERGY, STAT_MAX_AMMO,
   STAT_SPELL_POWER, STAT_SPELL_PENETRATION, STAT_MP5,
   STAT_ATTACK_POWER, STAT_EXPERTISE_RATING, STAT_EXPERTISE_RATING2,
-  STAT_HIT_RATING, STAT_HIT_RATING2,STAT_CRIT_RATING, STAT_HASTE_RATING,STAT_MASTERY_RATING,
+  STAT_HIT_RATING, STAT_HIT_RATING2,STAT_CRIT_RATING, STAT_HASTE_RATING,
   STAT_WEAPON_DPS, STAT_WEAPON_SPEED,
   STAT_WEAPON_OFFHAND_DPS, STAT_WEAPON_OFFHAND_SPEED,
   STAT_ARMOR, STAT_BONUS_ARMOR, STAT_RESILIENCE_RATING, STAT_DODGE_RATING, STAT_PARRY_RATING,
@@ -2291,7 +2291,6 @@ struct gear_stats_t
   double dodge_rating;
   double parry_rating;
   double block_rating;
-  double mastery_rating;
   double power;
   double force_power;
   double surge_rating;
@@ -3013,7 +3012,7 @@ struct scaling_t
   int    debug_scale_factors;
   std::string scale_only_str;
   int    current_scaling_stat, num_scaling_stats, remaining_scaling_stats;
-  double    scale_haste_iterations, scale_expertise_iterations, scale_crit_iterations, scale_hit_iterations, scale_mastery_iterations;
+  double    scale_haste_iterations, scale_expertise_iterations, scale_crit_iterations, scale_hit_iterations;
   std::string scale_over;
   std::string scale_over_player;
 
@@ -3154,7 +3153,6 @@ struct rating_t
   double ranged_haste, ranged_hit,ranged_crit;
   double expertise;
   double dodge, parry, block;
-  double mastery;
 };
 }
 
@@ -3470,8 +3468,6 @@ struct player_t : public noncopyable
   double attribute_multiplier_initial[ ATTRIBUTE_MAX ];
   double attribute_buffed            [ ATTRIBUTE_MAX ];
 
-  double mastery, buffed_mastery, mastery_rating, initial_mastery_rating,base_mastery;
-
   double surge_bonus, buffed_surge;
 
   // Spell Mechanics
@@ -3781,8 +3777,6 @@ struct player_t : public noncopyable
   virtual void combat_begin();
   virtual void combat_end();
   virtual void merge( player_t& other );
-
-  virtual double composite_mastery() const { return floor( ( mastery * 100.0 ) + 0.5 ) * 0.01; }
 
   virtual double composite_power() const;
   virtual double composite_force_power() const;
@@ -4172,7 +4166,7 @@ struct action_t
   double player_haste;
   double resource_consumed;
   double direct_dmg, tick_dmg;
-  double snapshot_crit, snapshot_haste, snapshot_mastery;
+  double snapshot_crit, snapshot_haste;
   int num_ticks;
   weapon_t* weapon;
   double weapon_multiplier;
@@ -5206,7 +5200,6 @@ struct ticker_t // replacement for dot_t, handles any ticking buff/debuff
   dot_t stuff
   double crit;
   double haste;
-  double mastery;
 };
 
 struct sim_t
@@ -5363,7 +5356,6 @@ struct ability_t : public action_t
     ticker -> amount  = calculate_tick_amount( ticker -> target );
     ticker -> crit    = calculate_crit_chance( ticker -> target );
     ticker -> haste   = calculate_haste      ( ticker -> target );
-    ticker -> mastery = calculate_mastery    ( ticker -> target );
   }
   virtual void refresh_ticker( ticker_t* ticker )
   {
@@ -5403,13 +5395,6 @@ struct ability_t : public action_t
       return calculate_attack_haste( target );
     else
       return calculate_spell_haste( target );
-  }
-  virtual double calculate_mastery( actor_t* target )
-  {
-    if ( weapon )
-      return calculate_attack_mastery( target );
-    else
-      return calculate_spell_mastery( target );
   }
   virtual double calculate_miss_chance( actor_t* target )
   {
