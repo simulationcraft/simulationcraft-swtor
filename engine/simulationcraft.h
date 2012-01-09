@@ -3472,8 +3472,8 @@ struct player_t : public noncopyable
 
   // Spell Mechanics
   double base_spell_power,       initial_spell_power[ SCHOOL_MAX+1 ], spell_power[ SCHOOL_MAX+1 ], buffed_spell_power;
-  double base_spell_hit,         initial_spell_hit,                   spell_hit,                   buffed_spell_hit;
-  double base_spell_crit,        initial_spell_crit,                  spell_crit,                  buffed_spell_crit;
+  double base_spell_hit,         spell_hit,                   buffed_spell_hit;
+  double base_spell_crit,        spell_crit,                  buffed_spell_crit;
   double base_spell_penetration, initial_spell_penetration,           spell_penetration,           buffed_spell_penetration;
   double base_mp5,               initial_mp5,                         mp5,                         buffed_mp5;
   double spell_power_multiplier,    initial_spell_power_multiplier;
@@ -3488,9 +3488,9 @@ struct player_t : public noncopyable
 
   // Attack Mechanics
   double base_attack_power,       initial_attack_power,        attack_power,       buffed_attack_power;
-  double base_attack_hit,         initial_attack_hit,          attack_hit,         buffed_attack_hit;
+  double base_attack_hit,         attack_hit,         buffed_attack_hit;
   double base_attack_expertise,   initial_attack_expertise,    attack_expertise,   buffed_attack_expertise;
-  double base_attack_crit,        initial_attack_crit,         attack_crit,        buffed_attack_crit;
+  double base_attack_crit,        attack_crit,        buffed_attack_crit;
   double attack_power_multiplier,   initial_attack_power_multiplier;
   double attack_power_per_strength, initial_attack_power_per_strength;
   double attack_power_per_agility,  initial_attack_power_per_agility;

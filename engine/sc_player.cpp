@@ -233,8 +233,8 @@ player_t::player_t( sim_t*             s,
   mastery( 0 ), buffed_mastery ( 0 ), mastery_rating( 0 ), initial_mastery_rating ( 0 ), base_mastery ( 8.0 ),
   // Spell Mechanics
   base_spell_power( 0 ), buffed_spell_power( 0 ),
-  base_spell_hit( 0 ),         initial_spell_hit( 0 ),         spell_hit( 0 ),         buffed_spell_hit( 0 ),
-  base_spell_crit( 0 ),        initial_spell_crit( 0 ),        spell_crit( 0 ),        buffed_spell_crit( 0 ),
+  base_spell_hit( 0 ), spell_hit( 0 ), buffed_spell_hit( 0 ),
+  base_spell_crit( 0 ), spell_crit( 0 ), buffed_spell_crit( 0 ),
   base_spell_penetration( 0 ), initial_spell_penetration( 0 ), spell_penetration( 0 ), buffed_spell_penetration( 0 ),
   base_mp5( 0 ),               initial_mp5( 0 ),               mp5( 0 ),               buffed_mp5( 0 ),
   spell_power_multiplier( 1.0 ),  initial_spell_power_multiplier( 1.0 ),
@@ -244,9 +244,9 @@ player_t::player_t( sim_t*             s,
   last_cast( 0 ),
   // Attack Mechanics
   base_attack_power( 0 ),       initial_attack_power( 0 ),        attack_power( 0 ),       buffed_attack_power( 0 ),
-  base_attack_hit( 0 ),         initial_attack_hit( 0 ),          attack_hit( 0 ),         buffed_attack_hit( 0 ),
+  base_attack_hit( 0 ), attack_hit( 0 ),         buffed_attack_hit( 0 ),
   base_attack_expertise( 0 ),   initial_attack_expertise( 0 ),    attack_expertise( 0 ),   buffed_attack_expertise( 0 ),
-  base_attack_crit( 0 ),        initial_attack_crit( 0 ),         attack_crit( 0 ),        buffed_attack_crit( 0 ),
+  base_attack_crit( 0 ), attack_crit( 0 ),        buffed_attack_crit( 0 ),
   attack_power_multiplier( 1.0 ), initial_attack_power_multiplier( 1.0 ),
   attack_power_per_strength( 0 ), initial_attack_power_per_strength( 0 ),
   attack_power_per_agility( 0 ),  initial_attack_power_per_agility( 0 ),
@@ -827,10 +827,6 @@ void player_t::init_spell()
 
   initial_spell_power[ SCHOOL_MAX ] = base_spell_power + initial_stats.spell_power;
 
-  initial_spell_hit = base_spell_hit + initial_stats.hit_rating / rating.spell_hit;
-
-  initial_spell_crit = base_spell_crit + initial_stats.crit_rating / rating.spell_crit;
-
   initial_spell_penetration = base_spell_penetration + initial_stats.spell_penetration;
 
   initial_mp5 = base_mp5 + initial_stats.mp5;
@@ -862,8 +858,6 @@ void player_t::init_attack()
   initial_stats.expertise_rating = gear.expertise_rating + enchant.expertise_rating + ( is_pet() ? 0 : sim -> enchant.expertise_rating );
 
   initial_attack_power     = base_attack_power     + initial_stats.attack_power;
-  initial_attack_hit       = base_attack_hit       + initial_stats.hit_rating       / rating.attack_hit;
-  initial_attack_crit      = base_attack_crit      + initial_stats.crit_rating      / rating.attack_crit;
   initial_attack_expertise = base_attack_expertise + initial_stats.expertise_rating / rating.expertise;
 
   double a,b;
@@ -2328,9 +2322,7 @@ void player_t::reset()
   mp5               = initial_mp5;
 
   attack_power       = initial_attack_power;
-  attack_hit         = initial_attack_hit;
   attack_expertise   = initial_attack_expertise;
-  attack_crit        = initial_attack_crit;
 
   armor              = initial_armor;
   bonus_armor        = initial_bonus_armor;

@@ -759,6 +759,17 @@ static void print_html_stats ( FILE* file, player_t* a )
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Willpower</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t</tr>\n",
+             a -> attribute_buffed[ ATTR_WILLPOWER  ],
+             a -> willpower(),
+             a -> stats.attribute[ ATTR_WILLPOWER  ] );
+
+    fprintf( file,
+             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
              "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Health</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
@@ -987,17 +998,6 @@ static void print_html_stats ( FILE* file, player_t* a )
              a -> buffed_mastery,
              a -> composite_mastery(),
              a -> stats.mastery_rating );
-
-    fprintf( file,
-             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Willpower</th>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> attribute_buffed[ ATTR_WILLPOWER  ],
-             a -> willpower(),
-             a -> stats.attribute[ ATTR_WILLPOWER  ] );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t</table>\n"
