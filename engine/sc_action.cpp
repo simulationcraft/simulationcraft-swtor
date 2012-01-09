@@ -654,8 +654,7 @@ double action_t::total_power() const
 {
   double power=0;
 
-  if ( base_spell_power_multiplier  > 0 ) power += total_spell_power();
-  if ( base_attack_power_multiplier > 0 ) power += total_attack_power();
+  power += player -> composite_force_damage_bonus();
 
   return power;
 }

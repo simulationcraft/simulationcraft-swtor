@@ -948,6 +948,7 @@ const char* util_t::stat_type_string( int stat )
   case STAT_STAMINA:   return "stamina";
   case STAT_INTELLECT: return "intellect";
   case STAT_SPIRIT:    return "spirit";
+  case STAT_WILLPOWER: return "willpower";
 
   case STAT_HEALTH: return "health";
   case STAT_MANA:   return "mana";
@@ -985,7 +986,8 @@ const char* util_t::stat_type_string( int stat )
 
   case STAT_MASTERY_RATING: return "mastery_rating";
 
-  case STAT_WILLPOWER: return "willpower";
+  case STAT_POWER: return "power";
+  case STAT_FORCE_POWER: return "forcepower";
 
   case STAT_MAX: return "all";
   }
@@ -1003,6 +1005,7 @@ const char* util_t::stat_type_abbrev( int stat )
   case STAT_STAMINA:   return "Sta";
   case STAT_INTELLECT: return "Int";
   case STAT_SPIRIT:    return "Spi";
+  case STAT_WILLPOWER: return "Willpower";
 
   case STAT_HEALTH: return "Health";
   case STAT_MANA:   return "Mana";
@@ -1039,7 +1042,8 @@ const char* util_t::stat_type_abbrev( int stat )
 
   case STAT_MASTERY_RATING: return "Mastery";
 
-  case STAT_WILLPOWER: return "Willpower";
+  case STAT_POWER: return "Power";
+  case STAT_FORCE_POWER: return "Force_Power";
 
   case STAT_MAX: return "All";
   }

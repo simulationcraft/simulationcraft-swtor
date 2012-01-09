@@ -456,7 +456,7 @@ enum stat_type
   STAT_WEAPON_OFFHAND_DPS, STAT_WEAPON_OFFHAND_SPEED,
   STAT_ARMOR, STAT_BONUS_ARMOR, STAT_RESILIENCE_RATING, STAT_DODGE_RATING, STAT_PARRY_RATING,
   STAT_BLOCK_RATING,
-
+  STAT_POWER, STAT_FORCE_POWER,
   STAT_WILLPOWER,
   STAT_MAX
 };
@@ -2290,6 +2290,8 @@ struct gear_stats_t
   double parry_rating;
   double block_rating;
   double mastery_rating;
+  double power;
+  double force_power;
 };
 }
 
@@ -3467,6 +3469,8 @@ struct player_t : public noncopyable
   double mastery, buffed_mastery, mastery_rating, initial_mastery_rating,base_mastery;
 
   // Spell Mechanics
+  double base_power, initial_power, power, buffed_power;
+  double base_force_power, initial_force_power, force_power, buffed_force_power;
   double base_spell_power,       initial_spell_power[ SCHOOL_MAX+1 ], spell_power[ SCHOOL_MAX+1 ], buffed_spell_power;
   double spell_haste, buffed_spell_haste;
   double base_spell_hit,         spell_hit,                   buffed_spell_hit;
@@ -3774,6 +3778,9 @@ struct player_t : public noncopyable
 
   virtual double composite_mastery() const { return floor( ( mastery * 100.0 ) + 0.5 ) * 0.01; }
 
+  virtual double composite_power() const;
+  virtual double composite_force_power() const;
+
   virtual double energy_regen_per_second() const;
   virtual double ammo_regen_per_second() const;
   virtual double force_regen_per_second() const;
@@ -3823,6 +3830,8 @@ struct player_t : public noncopyable
   virtual double composite_player_absorb_multiplier   ( const school_type school ) const;
 
   virtual double composite_movement_speed() const;
+
+  virtual double composite_force_damage_bonus() const;
 
   virtual double willpower() const;
   virtual double strength() const;

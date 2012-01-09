@@ -87,6 +87,7 @@ struct jedi_sage_t : public jedi_consular_t
   // RNG
   rng_t* rng_psychic_barrier;
   rng_t* rng_upheaval;
+  rng_t* rng_tm;
 
 
   // Talents
@@ -347,14 +348,14 @@ struct project_t : public jedi_consular_spell_t
     upheaval( 0 )
   {
     parse_options( 0, options_str );
-    base_dd_min=3558.0; base_dd_max=4424.0;
+    base_dd_min = 219.0; base_dd_max = 283.4;
     base_cost = 45.0;
     range = 30.0;
     direct_power_mod = 1.85;
 
     cooldown -> duration = 6.0;
 
-    if ( p -> type == JEDI_SAGE && !is_upheaval)
+    if ( p -> type == JEDI_SAGE && !is_upheaval )
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
 
@@ -362,7 +363,9 @@ struct project_t : public jedi_consular_spell_t
       {
         upheaval = new project_t( p, options_str, "project_upheaval", true );
         upheaval -> base_multiplier *= 0.50;
+        upheaval -> base_cost = 0.0;
         upheaval -> background = true;
+        add_child( upheaval );
       }
 
     }
@@ -391,7 +394,7 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
     jedi_consular_spell_t( "telekinetic_throw", p, RESOURCE_FORCE )
   {
     parse_options( 0, options_str );
-    base_td = 4089.0 / 3.0;
+    base_td = 508.8;
     base_cost = 30.0;
     range = 30.0;
     tick_power_mod = 0.79;
@@ -521,11 +524,14 @@ void trigger_tidal_force( action_t* a, double pc = 0 )
 
 struct disturbance_t : public jedi_sage_spell_t
 {
-  disturbance_t( jedi_sage_t* p, const std::string& options_str ) :
-    jedi_sage_spell_t( "disturbance", p, RESOURCE_FORCE )
+  jedi_consular_spell_t* tm;
+
+  disturbance_t( jedi_sage_t* p, const std::string& options_str, const char* n = "disturbance", bool is_tm = false ) :
+    jedi_sage_spell_t( n, p, RESOURCE_FORCE ),
+    tm( 0 )
   {
     parse_options( 0, options_str );
-    base_dd_min=698.0; base_dd_max=762.0;
+    base_dd_min = 180.3; base_dd_max = 244.7;
     base_execute_time = 1.5;
     base_cost = 30.0;
     range = 30.0;
@@ -534,6 +540,20 @@ struct disturbance_t : public jedi_sage_spell_t
     base_multiplier *= 1.0 + p -> talents.clamoring_force * 0.02;
 
     base_crit += p -> talents.critical_kinsesis * 0.05;
+
+    if ( p -> type == JEDI_SAGE && !is_tm )
+    {
+      jedi_sage_t* p = player -> cast_jedi_sage();
+
+      if ( p -> talents.telekinetic_momentum > 0 )
+      {
+        tm = new disturbance_t( p, options_str, "disturbance_tm", true );
+        tm -> base_multiplier *= 0.30;
+        tm -> base_cost = 0.0;
+        tm -> background = true;
+        add_child( tm );
+      }
+    }
   }
 
   virtual void impact( player_t* t, int impact_result, double travel_dmg )
@@ -549,6 +569,22 @@ struct disturbance_t : public jedi_sage_spell_t
       trigger_tidal_force( this, 0.3 );
     }
   }
+
+  virtual void execute()
+  {
+    jedi_consular_spell_t::execute();
+
+    if ( tm )
+    {
+      if ( player -> type == JEDI_SAGE )
+      {
+        jedi_sage_t* p = player -> cast_jedi_sage();
+
+        if ( p -> rng_tm -> roll( p -> talents.telekinetic_momentum * 0.10 ) )
+          tm -> execute();
+      }
+    }
+  }
 };
 
 struct mind_crush_t : public jedi_sage_spell_t
@@ -557,8 +593,8 @@ struct mind_crush_t : public jedi_sage_spell_t
     jedi_sage_spell_t( "mind_crush", p, RESOURCE_FORCE )
   {
     parse_options( 0, options_str );
-    base_dd_min=3160.0; base_dd_max=4199.0;
-    base_td = 5295.0 / 6.0;
+    base_dd_min = 545.8; base_dd_max = 610.2;
+    base_td = 47.5;
     base_tick_time = 1.0;
     base_execute_time = 2.0;
     num_ticks = 6 + p -> talents.assertion * 1;
@@ -579,7 +615,7 @@ struct weaken_mind_t : public jedi_sage_spell_t
     jedi_sage_spell_t( "weaken_mind", p, RESOURCE_FORCE )
   {
     parse_options( 0, options_str );
-    base_td = 5564.0 / 5.0;
+    base_td = 299.5;
     base_tick_time = 3.0;
     num_ticks = 6 + p -> talents.disturb_mind;
     base_cost = 35.0;
@@ -605,13 +641,16 @@ struct weaken_mind_t : public jedi_sage_spell_t
 
 struct turbulence_t : public jedi_sage_spell_t
 {
-  turbulence_t( jedi_sage_t* p, const std::string& options_str ) :
-    jedi_sage_spell_t( "turbulence", p, RESOURCE_FORCE )
+  jedi_consular_spell_t* tm;
+
+  turbulence_t( jedi_sage_t* p, const std::string& options_str, const char* n = "turbulence", bool is_tm = false ) :
+    jedi_sage_spell_t( n, p, RESOURCE_FORCE ),
+    tm( 0 )
   {
     check_talent( p -> talents.turbulence );
 
     parse_options( 0, options_str );
-    base_dd_min=1003.0; base_dd_max=1115.0;
+    base_dd_min = 222.2; base_dd_max = 286.6;
     base_execute_time = 2.0;
     base_cost = 45.0;
     range = 30.0;
@@ -619,6 +658,20 @@ struct turbulence_t : public jedi_sage_spell_t
     crit_bonus += p -> talents.reverberation * 0.1;
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force * 0.02;
+
+    if ( p -> type == JEDI_SAGE && !is_tm )
+    {
+      jedi_sage_t* p = player -> cast_jedi_sage();
+
+      if ( p -> talents.telekinetic_momentum > 0 )
+      {
+        tm = new turbulence_t( p, options_str, "turbulence_tm", true );
+        tm -> base_multiplier *= 0.30;
+        tm -> base_cost = 0.0;
+        tm -> background = true;
+        add_child( tm );
+      }
+    }
   }
 
   virtual void calculate_result()
@@ -630,6 +683,22 @@ struct turbulence_t : public jedi_sage_spell_t
     if ( p -> dots_weaken_mind -> ticking )
       result = RESULT_CRIT;
   }
+
+  virtual void execute()
+  {
+    jedi_consular_spell_t::execute();
+
+    if ( tm )
+    {
+      if ( player -> type == JEDI_SAGE )
+      {
+        jedi_sage_t* p = player -> cast_jedi_sage();
+
+        if ( p -> rng_tm -> roll( p -> talents.telekinetic_momentum * 0.10 ) )
+          tm -> execute();
+      }
+    }
+  }
 };
 
 struct force_in_balance_t : public jedi_sage_spell_t
@@ -640,7 +709,7 @@ struct force_in_balance_t : public jedi_sage_spell_t
     check_talent( p -> talents.force_in_balance );
 
     parse_options( 0, options_str );
-    base_dd_min=1198.0; base_dd_max=1309.0;
+    base_dd_min = 268.9; base_dd_max = 333.3;
     ability_lag=0.2;
     base_cost = 50.0;
     range = 30.0;
@@ -669,7 +738,7 @@ struct sever_force_t : public jedi_sage_spell_t
     check_talent( p -> talents.sever_force );
 
     parse_options( 0, options_str );
-    base_td = 1457.0 / 6.0;
+    base_td = 349.4;
     base_tick_time = 3.0;
     num_ticks = 6;
     base_cost = 20.0;
@@ -813,7 +882,7 @@ void jedi_sage_t::init_talents()
   // set talent ranks here for now
 
   // Telekinetics Spec
-/*
+
   talents.inner_strength = 3;
   talents.mental_longevity = 2;
   talents.clamoring_force = 3;
@@ -834,10 +903,10 @@ void jedi_sage_t::init_talents()
   talents.will_of_the_jedi = 2;
   talents.upheaval = 3;
   talents.critical_kinsesis = 2;
-*/
+
 
   // Balance Spec
-
+/*
   talents.empowered_throw = 3;
   talents.will_of_the_jedi = 2;
   talents.upheaval = 3;
@@ -858,7 +927,7 @@ void jedi_sage_t::init_talents()
   talents.clamoring_force = 3;
   talents.minds_eye = 0;
   talents.disturb_mind = 2;
-
+*/
 
 }
 
@@ -939,18 +1008,20 @@ void jedi_sage_t::init_rng()
 
   rng_psychic_barrier = get_rng( "psychic_barrier" );
   rng_upheaval = get_rng( "upheaval" );
+  rng_tm = get_rng( "telekinetic_momentum" );
 }
 
 // jedi_sage_t::init_actions =====================================================
 
 void jedi_sage_t::init_actions()
 {
+
   if ( action_list_str.empty() )
   {
-
-    // Flask
-
-    action_list_str += "/snapshot_stats";
+    //switch ( primary_tree() )
+    //{
+    //case TREE_SEER:
+    /*action_list_str += "/snapshot_stats";
 
     action_list_str += "/mind_crush";
 
@@ -966,7 +1037,40 @@ void jedi_sage_t::init_actions()
 
     action_list_str += "/telekinetic_throw";
 
-    action_list_str += "/disturbance";
+    action_list_str += "/disturbance";*/
+    //break;
+
+
+    //case TREE_TELEKINETICS:
+    action_list_str += "/snapshot_stats";
+
+    action_list_str += "/mind_crush";
+
+    action_list_str += "/weaken_mind,if=!ticking";
+
+    action_list_str += "/project";
+
+    if ( talents.psychic_projection > 0)
+    {
+      action_list_str += "/telekinetic_throw,if=buff.psychic_projection";
+
+      if ( talents.psychic_projection == 1 )
+        action_list_str += ".react";
+      else
+        action_list_str += ".up";
+    }
+
+    if ( talents.turbulence > 0 )
+    {
+      action_list_str += "/disturbance,if=buff.concentration.down|buff.concentration.remains<4";
+
+      action_list_str += "/turbulence";
+    }
+
+    //break;
+
+    //default: break;
+    //}
 
     action_list_default = 1;
   }

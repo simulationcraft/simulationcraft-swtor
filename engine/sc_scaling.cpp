@@ -162,6 +162,9 @@ void scaling_t::init_deltas()
 
   if ( stats.spell_power == 0 ) stats.spell_power = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
 
+  if ( stats.power == 0 ) stats.power = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
+  if ( stats.force_power == 0 ) stats.force_power = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
+
   if ( stats.attack_power == 0 ) stats.attack_power = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
 
   if ( stats.expertise_rating == 0 )

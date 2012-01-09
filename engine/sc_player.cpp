@@ -230,6 +230,8 @@ player_t::player_t( sim_t*             s,
   // Mastery
   mastery( 0 ), buffed_mastery ( 0 ), mastery_rating( 0 ), initial_mastery_rating ( 0 ), base_mastery ( 8.0 ),
   // Spell Mechanics
+  base_power( 0.0 ), initial_power( 0.0 ), power( 0.0 ), buffed_power( 0.0 ),
+  base_force_power( 0.0 ), initial_force_power( 0.0 ), force_power( 0.0 ), buffed_force_power( 0.0 ),
   base_spell_power( 0 ), buffed_spell_power( 0 ),
   spell_haste( 1.0 ),  buffed_spell_haste( 1.0 ),
   base_spell_hit( 0 ), spell_hit( 0 ), buffed_spell_hit( 0 ),
@@ -824,6 +826,11 @@ void player_t::init_spell()
   initial_stats.spell_power       = gear.spell_power       + enchant.spell_power       + ( is_pet() ? 0 : sim -> enchant.spell_power );
   initial_stats.spell_penetration = gear.spell_penetration + enchant.spell_penetration + ( is_pet() ? 0 : sim -> enchant.spell_penetration );
   initial_stats.mp5               = gear.mp5               + enchant.mp5               + ( is_pet() ? 0 : sim -> enchant.mp5 );
+  initial_stats.power             = gear.power             + enchant.power             + ( is_pet() ? 0 : sim -> enchant.power );
+  initial_stats.force_power       = gear.force_power       + enchant.force_power       + ( is_pet() ? 0 : sim -> enchant.force_power );
+
+  initial_power = base_power + initial_stats.power;
+  initial_force_power = base_force_power + initial_stats.force_power;
 
   initial_spell_power[ SCHOOL_MAX ] = base_spell_power + initial_stats.spell_power;
 
@@ -1461,6 +1468,8 @@ void player_t::init_scaling()
 
     scales_with[ STAT_BLOCK_RATING ] = 0;
 
+    scales_with[ STAT_POWER ] = spell || attack;
+    scales_with[ STAT_FORCE_POWER ] = spell || attack;
 
     if ( sim -> scaling -> scale_stat != STAT_NONE && scale_player )
     {
@@ -1478,6 +1487,8 @@ void player_t::init_scaling()
       case STAT_SPELL_POWER:       initial_spell_power[ SCHOOL_MAX ] += v; break;
       case STAT_SPELL_PENETRATION: initial_spell_penetration         += v; break;
       case STAT_MP5:               initial_mp5                       += v; break;
+      case STAT_POWER:             initial_power                     += v; break;
+      case STAT_FORCE_POWER:       initial_force_power               += v; break;
 
       case STAT_ATTACK_POWER:      initial_attack_power              += v; break;
 
@@ -1608,6 +1619,24 @@ double player_t::force_regen_per_second() const
   double r = base_force_regen_per_second;
 
   return r;
+}
+
+// player_t::composite_power ===========================================
+
+double player_t::composite_power() const
+{
+  double pow = power;
+
+  return pow;
+}
+
+// player_t::composite_force_power ===========================================
+
+double player_t::composite_force_power() const
+{
+  double fpow = force_power;
+
+  return fpow;
 }
 
 // player_t::composite_attack_haste =========================================
@@ -1837,8 +1866,6 @@ double player_t::composite_spell_power( const school_type school ) const
   }
   if ( school != SCHOOL_MAX ) sp += spell_power[ SCHOOL_MAX ];
 
-  sp += willpower() * 0.2;
-
   return sp;
 }
 
@@ -1946,6 +1973,15 @@ double player_t::composite_movement_speed() const
   double speed = base_movement_speed;
 
   return speed;
+}
+
+// player_t::composite_force_damage_bonus() =======================================
+
+double player_t::composite_force_damage_bonus() const
+{
+  double dmg_bonus = willpower() * 0.2 + composite_power() * 0.23 + composite_force_power() * 0.23;
+
+  return dmg_bonus;
 }
 
 // player_t::willpower =======================================
@@ -2330,6 +2366,9 @@ void player_t::reset()
   parry              = initial_parry;
   block              = initial_block;
   block_reduction    = initial_block_reduction;
+
+  power              = initial_power;
+  force_power        = initial_force_power;
 
   spell_power_multiplier    = initial_spell_power_multiplier;
 
@@ -3043,6 +3082,8 @@ void player_t::stat_gain( int       stat,
   case STAT_SPELL_POWER:       stats.spell_power       += amount; temporary.spell_power += temporary_stat * amount; spell_power[ SCHOOL_MAX ] += amount; break;
   case STAT_SPELL_PENETRATION: stats.spell_penetration += amount; spell_penetration         += amount; break;
   case STAT_MP5:               stats.mp5               += amount; mp5                       += amount; break;
+  case STAT_POWER:             stats.power             += amount; power                     += amount; break;
+  case STAT_FORCE_POWER:       stats.force_power       += amount; force_power               += amount; break;
 
   case STAT_ATTACK_POWER:             stats.attack_power             += amount; temporary.attack_power += temporary_stat * amount; attack_power       += amount;                            break;
   case STAT_EXPERTISE_RATING:         stats.expertise_rating         += amount; temporary.expertise_rating += temporary_stat * amount; attack_expertise   += amount / rating.expertise;         break;
@@ -3132,6 +3173,8 @@ void player_t::stat_loss( int       stat,
   case STAT_SPELL_POWER:       stats.spell_power       -= amount; temporary.spell_power -= temporary_buff * amount; spell_power[ SCHOOL_MAX ] -= amount; break;
   case STAT_SPELL_PENETRATION: stats.spell_penetration -= amount; spell_penetration         -= amount; break;
   case STAT_MP5:               stats.mp5               -= amount; mp5                       -= amount; break;
+  case STAT_POWER:             stats.power             -= amount; power                     -= amount; break;
+  case STAT_FORCE_POWER:       stats.force_power       -= amount; force_power               -= amount; break;
 
   case STAT_ATTACK_POWER:             stats.attack_power             -= amount; temporary.attack_power -= temporary_buff * amount; attack_power       -= amount;                            break;
   case STAT_EXPERTISE_RATING:         stats.expertise_rating         -= amount; temporary.expertise_rating -= temporary_buff * amount; attack_expertise   -= amount / rating.expertise;         break;
@@ -3535,8 +3578,12 @@ void player_t::recalculate_rating_stats()
   spell_haste = 1.0 / ( 1.0 + 0.3 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.3 ) ), haste_rating / std::max( 20, level ) / 0.55 ) ) );
   attack_haste = 1.0 / ( 1.0 + 0.3 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.3 ) ), haste_rating / std::max( 20, level ) / 0.55 ) ) );
 
-  spell_crit = base_spell_crit + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), crit_rating / std::max( 20, level ) / 0.45 ) );
-  attack_crit = base_attack_crit + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), crit_rating / std::max( 20, level ) / 0.45 ) );
+  spell_crit  = base_spell_crit
+              + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), crit_rating / std::max( 20, level ) / 0.45 ) )
+              + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), willpower() / std::max( 20, level ) / 2.5 ) );
+  attack_crit = base_attack_crit
+              + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), crit_rating / std::max( 20, level ) / 0.45 ) )
+              + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), willpower() / std::max( 20, level ) / 2.5 ) );
 
   spell_hit  = base_spell_hit + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), accuracy_rating / std::max( 20, level ) / 0.55 ) );
   attack_hit = base_attack_hit + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), accuracy_rating / std::max( 20, level ) / 0.55 ) );
@@ -4106,6 +4153,8 @@ struct snapshot_stats_t : public action_t
     p -> buffed_spell_crit        = p -> composite_spell_crit();
     p -> buffed_spell_penetration = p -> composite_spell_penetration();
     p -> buffed_mp5               = p -> composite_mp5();
+    p -> buffed_power             = p -> composite_power();
+    p -> buffed_force_power       = p -> composite_force_power();
 
     p -> buffed_attack_power       = p -> composite_attack_power() * p -> composite_attack_power_multiplier();
     p -> buffed_attack_hit         = p -> composite_attack_hit();
@@ -5032,8 +5081,10 @@ action_expr_t* player_t::create_expression( action_t* a,
         case STAT_PARRY_RATING:     p_stat = &( a -> player -> temporary.parry_rating                ); break;
         case STAT_BLOCK_RATING:     p_stat = &( a -> player -> temporary.block_rating                ); break;
         case STAT_MASTERY_RATING:   p_stat = &( a -> player -> temporary.mastery_rating              ); break;
+        case STAT_POWER:            p_stat = &( a -> player -> temporary.power                       ); break;
+        case STAT_FORCE_POWER:      p_stat = &( a -> player -> temporary.force_power                 ); break;
 
-        default: break;
+        default: assert( 0 ); break;
       }
 
       if ( p_stat )
@@ -5432,6 +5483,8 @@ bool player_t::create_profile( std::string& profile_str, int save_type, bool sav
     if ( enchant.attribute[ ATTR_WILLPOWER ] != 0 )  profile_str += "enchant_willpower="        + util_t::to_string( enchant.attribute[ ATTR_WILLPOWER ] ) + term;
     if ( enchant.spell_power                 != 0 )  profile_str += "enchant_spell_power="      + util_t::to_string( enchant.spell_power ) + term;
     if ( enchant.mp5                         != 0 )  profile_str += "enchant_mp5="              + util_t::to_string( enchant.mp5 ) + term;
+    if ( enchant.power                       != 0 )  profile_str += "enchant_power="            + util_t::to_string( enchant.power ) + term;
+    if ( enchant.force_power                 != 0 )  profile_str += "enchant_force_power="      + util_t::to_string( enchant.force_power ) + term;
     if ( enchant.attack_power                != 0 )  profile_str += "enchant_attack_power="     + util_t::to_string( enchant.attack_power ) + term;
     if ( enchant.expertise_rating            != 0 )  profile_str += "enchant_expertise_rating=" + util_t::to_string( enchant.expertise_rating ) + term;
     if ( enchant.armor                       != 0 )  profile_str += "enchant_armor="            + util_t::to_string( enchant.armor ) + term;
@@ -5613,6 +5666,8 @@ void player_t::create_options()
     { "gear_willpower",                       OPT_FLT,  &( gear.attribute[ ATTR_WILLPOWER    ]           ) },
     { "gear_spell_power",                     OPT_FLT,  &( gear.spell_power                           ) },
     { "gear_mp5",                             OPT_FLT,  &( gear.mp5                                   ) },
+    { "gear_power",                           OPT_FLT,  &( gear.power                                 ) },
+    { "gear_force_power",                     OPT_FLT,  &( gear.force_power                           ) },
     { "gear_attack_power",                    OPT_FLT,  &( gear.attack_power                          ) },
     { "gear_expertise_rating",                OPT_FLT,  &( gear.expertise_rating                      ) },
     { "gear_haste_rating",                    OPT_FLT,  &( gear.haste_rating                          ) },
@@ -5634,6 +5689,8 @@ void player_t::create_options()
     { "enchant_willpower",                    OPT_FLT,  &( enchant.attribute[ ATTR_WILLPOWER    ]        ) },
     { "enchant_spell_power",                  OPT_FLT,  &( enchant.spell_power                        ) },
     { "enchant_mp5",                          OPT_FLT,  &( enchant.mp5                                ) },
+    { "enchant_power",                        OPT_FLT,  &( enchant.power                              ) },
+    { "enchant_force_power",                  OPT_FLT,  &( enchant.force_power                        ) },
     { "enchant_attack_power",                 OPT_FLT,  &( enchant.attack_power                       ) },
     { "enchant_expertise_rating",             OPT_FLT,  &( enchant.expertise_rating                   ) },
     { "enchant_armor",                        OPT_FLT,  &( enchant.armor                              ) },
