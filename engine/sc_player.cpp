@@ -3518,27 +3518,27 @@ void player_t::register_direct_heal_callback( int64_t mask,
 void player_t::recalculate_haste()
 {
   spell_haste = 1.0 / ( 1.0 + 0.3 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.3 ) ), haste_rating / std::max( 20, level ) / 0.55 ) ) );
-  attack_haste = 1.0 / ( 1.0 + 0.3 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.3 ) ), haste_rating / std::max( 20, level ) / 0.55 ) ) );
+  attack_haste = spell_haste;
 }
 
 // player_t::recalculate_crit ==============================================
 
 void player_t::recalculate_crit()
 {
-  spell_crit  = base_spell_crit
-              + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), crit_rating / std::max( 20, level ) / 0.45 ) )
-              + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), willpower() / std::max( 20, level ) / 2.5 ) );
-  attack_crit = base_attack_crit
-              + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), crit_rating / std::max( 20, level ) / 0.45 ) )
-              + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), willpower() / std::max( 20, level ) / 2.5 ) );
+  double cr = 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), crit_rating / std::max( 20, level ) / 0.45 ) )
+                  + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), willpower() / std::max( 20, level ) / 2.5 ) );
+
+  spell_crit  = base_spell_crit + cr;
+  attack_crit = base_attack_crit + cr;
 }
 
 // player_t::recalculate_accuracy ==============================================
 
 void player_t::recalculate_accuracy()
 {
-  spell_hit  = base_spell_hit + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), accuracy_rating / std::max( 20, level ) / 0.55 ) );
-  attack_hit = base_attack_hit + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), accuracy_rating / std::max( 20, level ) / 0.55 ) );
+  double acc = 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), accuracy_rating / std::max( 20, level ) / 0.55 ) );
+  spell_hit  = base_spell_hit + acc;
+  attack_hit = base_attack_hit + acc;
 }
 
 // player_t::recalculate_surge ==============================================
