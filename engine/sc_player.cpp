@@ -227,8 +227,10 @@ player_t::player_t( sim_t*             s,
   initial_haste_rating( 0 ), haste_rating( 0 ),
   initial_crit_rating( 0 ), crit_rating( 0 ),
   initial_accuracy_rating( 0 ), accuracy_rating( 0 ),
+  initial_surge_rating( 0 ), surge_rating( 0 ),
   // Mastery
   mastery( 0 ), buffed_mastery ( 0 ), mastery_rating( 0 ), initial_mastery_rating ( 0 ), base_mastery ( 8.0 ),
+  surge_bonus( 0 ), buffed_surge( 0 ),
   // Spell Mechanics
   base_power( 0.0 ), initial_power( 0.0 ), power( 0.0 ), buffed_power( 0.0 ),
   base_force_power( 0.0 ), initial_force_power( 0.0 ), force_power( 0.0 ), buffed_force_power( 0.0 ),
@@ -753,11 +755,13 @@ void player_t::init_core()
   initial_stats. crit_rating = gear. crit_rating + enchant. crit_rating + ( is_pet() ? 0 : sim -> enchant. crit_rating );
   initial_stats.haste_rating = gear.haste_rating + enchant.haste_rating + ( is_pet() ? 0 : sim -> enchant.haste_rating );
   initial_stats.mastery_rating = gear.mastery_rating + enchant.mastery_rating + ( is_pet() ? 0 : sim -> enchant.mastery_rating );
+  initial_stats.surge_rating = gear.surge_rating + enchant.surge_rating + ( is_pet() ? 0 : sim -> enchant.surge_rating );
 
   initial_haste_rating    = initial_stats.haste_rating;
   initial_mastery_rating  = initial_stats.mastery_rating;
   initial_crit_rating     = initial_stats.crit_rating;
   initial_accuracy_rating = initial_stats.hit_rating;
+  initial_surge_rating    = initial_stats.surge_rating;
 
 
 
@@ -1471,6 +1475,8 @@ void player_t::init_scaling()
     scales_with[ STAT_POWER ] = spell || attack;
     scales_with[ STAT_FORCE_POWER ] = spell || attack;
 
+    scales_with[ STAT_SURGE_RATING ] = spell || attack;
+
     if ( sim -> scaling -> scale_stat != STAT_NONE && scale_player )
     {
       double v = sim -> scaling -> scale_value;
@@ -1489,6 +1495,8 @@ void player_t::init_scaling()
       case STAT_MP5:               initial_mp5                       += v; break;
       case STAT_POWER:             initial_power                     += v; break;
       case STAT_FORCE_POWER:       initial_force_power               += v; break;
+
+      case STAT_SURGE_RATING:      initial_surge_rating              += v; break;
 
       case STAT_ATTACK_POWER:      initial_attack_power              += v; break;
 
@@ -2334,7 +2342,11 @@ void player_t::reset()
   mastery = base_mastery + mastery_rating / rating.mastery;
   crit_rating = initial_crit_rating;
   accuracy_rating = initial_accuracy_rating;
-  recalculate_rating_stats();
+  surge_rating = initial_surge_rating;
+  recalculate_haste();
+  recalculate_crit();
+  recalculate_accuracy();
+  recalculate_surge();
 
   for ( int i=0; i < ATTRIBUTE_MAX; i++ )
   {
@@ -3092,21 +3104,28 @@ void player_t::stat_gain( int       stat,
     stats.hit_rating += amount;
     temporary.hit_rating += temporary_stat * amount;
     accuracy_rating += amount;
-    recalculate_rating_stats();
+    recalculate_accuracy();
     break;
 
   case STAT_CRIT_RATING:
     stats.crit_rating += amount;
     temporary.crit_rating += temporary_stat * amount;
     crit_rating += amount;
-    recalculate_rating_stats();
+    recalculate_crit();
     break;
 
   case STAT_HASTE_RATING:
     stats.haste_rating += amount;
     temporary.haste_rating += temporary_stat * amount;
     haste_rating       += amount;
-    recalculate_rating_stats();
+    recalculate_haste();
+    break;
+
+  case STAT_SURGE_RATING:
+    stats.surge_rating += amount;
+    temporary.surge_rating += temporary_stat * amount;
+    surge_rating       += amount;
+    recalculate_surge();
     break;
 
   case STAT_ARMOR:          stats.armor          += amount; temporary.armor += temporary_stat * amount; armor       += amount;                  break;
@@ -3183,21 +3202,28 @@ void player_t::stat_loss( int       stat,
     stats.hit_rating -= amount;
     temporary.hit_rating -= temporary_buff * amount;
     accuracy_rating       -= amount;
-    recalculate_rating_stats();
+    recalculate_accuracy();
     break;
 
   case STAT_CRIT_RATING:
     stats.crit_rating -= amount;
     temporary.crit_rating -= temporary_buff * amount;
     crit_rating       -= amount;
-    recalculate_rating_stats();
+    recalculate_crit();
     break;
 
   case STAT_HASTE_RATING:
     stats.haste_rating -= amount;
     temporary.haste_rating -= temporary_buff * amount;
     haste_rating       -= amount;
-    recalculate_rating_stats();
+    recalculate_haste();
+    break;
+
+  case STAT_SURGE_RATING:
+    stats.surge_rating -= amount;
+    temporary.surge_rating -= temporary_buff * amount;
+    surge_rating       -= amount;
+    recalculate_surge();
     break;
 
   case STAT_ARMOR:          stats.armor          -= amount; temporary.armor -= temporary_buff * amount; armor       -= amount;                  break;
@@ -3571,22 +3597,40 @@ void player_t::register_direct_heal_callback( int64_t mask,
   }
 }
 
-// player_t::recalculate_rating_stats ==============================================
+// player_t::recalculate_haste ==============================================
 
-void player_t::recalculate_rating_stats()
+void player_t::recalculate_haste()
 {
   spell_haste = 1.0 / ( 1.0 + 0.3 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.3 ) ), haste_rating / std::max( 20, level ) / 0.55 ) ) );
   attack_haste = 1.0 / ( 1.0 + 0.3 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.3 ) ), haste_rating / std::max( 20, level ) / 0.55 ) ) );
+}
 
+// player_t::recalculate_crit ==============================================
+
+void player_t::recalculate_crit()
+{
   spell_crit  = base_spell_crit
               + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), crit_rating / std::max( 20, level ) / 0.45 ) )
               + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), willpower() / std::max( 20, level ) / 2.5 ) );
   attack_crit = base_attack_crit
               + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), crit_rating / std::max( 20, level ) / 0.45 ) )
               + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), willpower() / std::max( 20, level ) / 2.5 ) );
+}
 
+// player_t::recalculate_accuracy ==============================================
+
+void player_t::recalculate_accuracy()
+{
   spell_hit  = base_spell_hit + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), accuracy_rating / std::max( 20, level ) / 0.55 ) );
   attack_hit = base_attack_hit + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), accuracy_rating / std::max( 20, level ) / 0.55 ) );
+}
+
+// player_t::recalculate_surge ==============================================
+
+void player_t::recalculate_surge()
+{
+  surge_bonus = 0.5 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.5 ) ), surge_rating / std::max( 20, level ) / 0.1 ) );
+
 }
 
 // player_t::recent_cast ====================================================
@@ -4155,6 +4199,7 @@ struct snapshot_stats_t : public action_t
     p -> buffed_mp5               = p -> composite_mp5();
     p -> buffed_power             = p -> composite_power();
     p -> buffed_force_power       = p -> composite_force_power();
+    p -> buffed_surge             = p -> surge_bonus;
 
     p -> buffed_attack_power       = p -> composite_attack_power() * p -> composite_attack_power_multiplier();
     p -> buffed_attack_hit         = p -> composite_attack_hit();
@@ -5083,6 +5128,7 @@ action_expr_t* player_t::create_expression( action_t* a,
         case STAT_MASTERY_RATING:   p_stat = &( a -> player -> temporary.mastery_rating              ); break;
         case STAT_POWER:            p_stat = &( a -> player -> temporary.power                       ); break;
         case STAT_FORCE_POWER:      p_stat = &( a -> player -> temporary.force_power                 ); break;
+        case STAT_SURGE_RATING:     p_stat = &( a -> player -> temporary.surge_rating                ); break;
 
         default: assert( 0 ); break;
       }

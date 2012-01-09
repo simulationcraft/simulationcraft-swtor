@@ -95,7 +95,7 @@ scaling_t::scaling_t( sim_t* s ) :
   sim( s ), baseline_sim( 0 ), ref_sim( 0 ), delta_sim( 0 ), ref_sim2( 0 ), delta_sim2( 0 ),
   scale_stat( STAT_NONE ),
   scale_value( 0 ),
-  scale_delta_multiplier( 1.0 ),
+  scale_delta_multiplier( 0.2 ),
   calculate_scale_factors( 0 ),
   center_scale_delta( 0 ),
   positive_scale_delta( 0 ),
@@ -164,6 +164,8 @@ void scaling_t::init_deltas()
 
   if ( stats.power == 0 ) stats.power = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
   if ( stats.force_power == 0 ) stats.force_power = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
+
+  if ( stats.surge_rating == 0 ) stats.surge_rating = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
 
   if ( stats.attack_power == 0 ) stats.attack_power = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
 

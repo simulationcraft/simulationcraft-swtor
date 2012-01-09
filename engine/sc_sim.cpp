@@ -629,7 +629,7 @@ sim_t::sim_t( sim_t* p, int index ) :
   confidence( 0.95 ), confidence_estimator( 0.0 ),
   world_lag( 0.1 ), world_lag_stddev( -1.0 ),
   travel_variance( 0 ), default_skill( 1.0 ), reaction_time( 0.5 ), regen_periodicity( 0.25 ),
-  current_time( 0 ), max_time( 120 ), expected_time( 0 ), vary_combat_length( 0.2 ),
+  current_time( 0 ), max_time( 300 ), expected_time( 0 ), vary_combat_length( 0.2 ),
   last_event( 0 ), fixed_time( 0 ),
   events_remaining( 0 ), max_events_remaining( 0 ),
   events_processed( 0 ), total_events_processed( 0 ),

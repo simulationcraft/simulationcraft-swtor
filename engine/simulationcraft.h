@@ -458,6 +458,7 @@ enum stat_type
   STAT_BLOCK_RATING,
   STAT_POWER, STAT_FORCE_POWER,
   STAT_WILLPOWER,
+  STAT_SURGE_RATING,
   STAT_MAX
 };
 
@@ -2292,6 +2293,7 @@ struct gear_stats_t
   double mastery_rating;
   double power;
   double force_power;
+  double surge_rating;
 };
 }
 
@@ -3457,6 +3459,7 @@ struct player_t : public noncopyable
   double initial_haste_rating, haste_rating;
   double initial_crit_rating, crit_rating;
   double initial_accuracy_rating, accuracy_rating;
+  double initial_surge_rating, surge_rating;
 
   // Attributes
   double attribute                   [ ATTRIBUTE_MAX ];
@@ -3467,6 +3470,8 @@ struct player_t : public noncopyable
   double attribute_buffed            [ ATTRIBUTE_MAX ];
 
   double mastery, buffed_mastery, mastery_rating, initial_mastery_rating,base_mastery;
+
+  double surge_bonus, buffed_surge;
 
   // Spell Mechanics
   double base_power, initial_power, power, buffed_power;
@@ -3927,7 +3932,11 @@ struct player_t : public noncopyable
 
   virtual int decode_set( item_t& item ) { ( void )item; assert( item.name() ); return SET_NONE; }
 
-  virtual void recalculate_rating_stats();
+  virtual void recalculate_haste();
+  virtual void recalculate_crit();
+  virtual void recalculate_accuracy();
+  virtual void recalculate_surge();
+
 
   virtual void armory_extensions( const std::string& /* region */, const std::string& /* server */, const std::string& /* character */,
                                   cache::behavior_t /* behavior */=cache::players() )

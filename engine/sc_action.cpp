@@ -637,7 +637,7 @@ double action_t::resistance() const
 
 double action_t::total_crit_bonus() const
 {
-  double bonus = ( ( 1.0 + crit_bonus ) * crit_multiplier - 1.0 ) * crit_bonus_multiplier;
+  double bonus = ( ( 1.0 + crit_bonus + player -> surge_bonus ) * crit_multiplier - 1.0 ) * crit_bonus_multiplier;
 
   if ( sim -> debug )
   {

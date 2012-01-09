@@ -989,6 +989,8 @@ const char* util_t::stat_type_string( int stat )
   case STAT_POWER: return "power";
   case STAT_FORCE_POWER: return "forcepower";
 
+  case STAT_SURGE_RATING: return "surge_rating";
+
   case STAT_MAX: return "all";
   }
   return "unknown";
@@ -1044,6 +1046,8 @@ const char* util_t::stat_type_abbrev( int stat )
 
   case STAT_POWER: return "Power";
   case STAT_FORCE_POWER: return "Force_Power";
+
+  case STAT_SURGE_RATING: return "Surge";
 
   case STAT_MAX: return "All";
   }

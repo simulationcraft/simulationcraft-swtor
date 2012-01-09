@@ -344,7 +344,7 @@ struct project_t : public jedi_consular_spell_t
   jedi_consular_spell_t* upheaval;
 
   project_t( jedi_consular_t* p, const std::string& options_str, const char* n = "project", bool is_upheaval = false ) :
-    jedi_consular_spell_t( n, p, RESOURCE_FORCE ),
+    jedi_consular_spell_t( n, p, RESOURCE_FORCE, SCHOOL_PHYSICAL ),
     upheaval( 0 )
   {
     parse_options( 0, options_str );
@@ -391,7 +391,7 @@ struct project_t : public jedi_consular_spell_t
 struct telekinetic_throw_t : public jedi_consular_spell_t
 {
   telekinetic_throw_t( jedi_consular_t* p, const std::string& options_str ) :
-    jedi_consular_spell_t( "telekinetic_throw", p, RESOURCE_FORCE )
+    jedi_consular_spell_t( "telekinetic_throw", p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
   {
     parse_options( 0, options_str );
     base_td = 508.8;
@@ -527,7 +527,7 @@ struct disturbance_t : public jedi_sage_spell_t
   jedi_consular_spell_t* tm;
 
   disturbance_t( jedi_sage_t* p, const std::string& options_str, const char* n = "disturbance", bool is_tm = false ) :
-    jedi_sage_spell_t( n, p, RESOURCE_FORCE ),
+    jedi_sage_spell_t( n, p, RESOURCE_FORCE, SCHOOL_PHYSICAL ),
     tm( 0 )
   {
     parse_options( 0, options_str );
@@ -590,7 +590,7 @@ struct disturbance_t : public jedi_sage_spell_t
 struct mind_crush_t : public jedi_sage_spell_t
 {
   mind_crush_t( jedi_sage_t* p, const std::string& options_str ) :
-    jedi_sage_spell_t( "mind_crush", p, RESOURCE_FORCE )
+    jedi_sage_spell_t( "mind_crush", p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
   {
     parse_options( 0, options_str );
     base_dd_min = 545.8; base_dd_max = 610.2;
@@ -882,7 +882,7 @@ void jedi_sage_t::init_talents()
   // set talent ranks here for now
 
   // Telekinetics Spec
-
+/*
   talents.inner_strength = 3;
   talents.mental_longevity = 2;
   talents.clamoring_force = 3;
@@ -903,10 +903,10 @@ void jedi_sage_t::init_talents()
   talents.will_of_the_jedi = 2;
   talents.upheaval = 3;
   talents.critical_kinsesis = 2;
-
+*/
 
   // Balance Spec
-/*
+
   talents.empowered_throw = 3;
   talents.will_of_the_jedi = 2;
   talents.upheaval = 3;
@@ -927,7 +927,7 @@ void jedi_sage_t::init_talents()
   talents.clamoring_force = 3;
   talents.minds_eye = 0;
   talents.disturb_mind = 2;
-*/
+
 
 }
 
@@ -1021,27 +1021,29 @@ void jedi_sage_t::init_actions()
     //switch ( primary_tree() )
     //{
     //case TREE_SEER:
-    /*action_list_str += "/snapshot_stats";
+
+    action_list_str += "/snapshot_stats";
 
     action_list_str += "/mind_crush";
 
     action_list_str += "/weaken_mind,if=!ticking";
 
     if ( talents.force_in_balance > 0 && talents.force_suppression > 0 )
-      action_list_str += "/force_in_balance";
+      action_list_str += "/force_in_balance,if=!dot.mind_crush.ticking";
 
     if ( talents.sever_force > 0 )
       action_list_str += "/sever_force,if=!ticking";
 
-    action_list_str += "/project";
+    //action_list_str += "/project";
 
     action_list_str += "/telekinetic_throw";
 
-    action_list_str += "/disturbance";*/
+    action_list_str += "/disturbance";
     //break;
 
 
     //case TREE_TELEKINETICS:
+/*
     action_list_str += "/snapshot_stats";
 
     action_list_str += "/mind_crush";
@@ -1066,7 +1068,7 @@ void jedi_sage_t::init_actions()
 
       action_list_str += "/turbulence";
     }
-
+*/
     //break;
 
     //default: break;
