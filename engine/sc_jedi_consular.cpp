@@ -7,16 +7,26 @@
 
 struct jedi_sage_targetdata_t : public targetdata_t
 {
+  dot_t* dots_telekinetic_throw;
+  dot_t* dots_mind_crush;
+  dot_t* dots_weaken_mind;
+  dot_t* dots_sever_force;
+
   jedi_sage_targetdata_t( player_t* source, player_t* target )
     : targetdata_t( source, target )
   {
   }
 };
 
-void register_jedi_sage_targetdata( sim_t* /* sim */ )
+void register_jedi_sage_targetdata( sim_t*  sim  )
 {
-  /* player_type t = JEDI_SAGE; */
+  player_type t = JEDI_SAGE;
   typedef jedi_sage_targetdata_t type;
+
+  REGISTER_DOT( telekinetic_throw );
+  REGISTER_DOT( mind_crush );
+  REGISTER_DOT( weaken_mind );
+  REGISTER_DOT( sever_force );
 }
 
 // ==========================================================================
