@@ -403,10 +403,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\engine\sc_spell_info.cpp"
-			>
-		</File>
-		<File
 			RelativePath=".\engine\sc_spell_lists.inc"
 			>
 		</File>

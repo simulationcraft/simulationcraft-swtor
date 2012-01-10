@@ -424,10 +424,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\engine\sc_spell_info.cpp"
-				>
-			</File>
-			<File
 				RelativePath="engine\sc_spell_lists.inc"
 				>
 			</File>
@@ -960,10 +956,6 @@
 				>
 			</File>
 			<File
-				RelativePath="engine\sc_rawr.cpp"
-				>
-			</File>
-			<File
 				RelativePath="engine\sc_reforge_plot.cpp"
 				>
 			</File>
@@ -1041,10 +1033,6 @@
 			</File>
 			<File
 				RelativePath="engine\sc_spell_data_ptr.inc"
-				>
-			</File>
-			<File
-				RelativePath=".\engine\sc_spell_info.cpp"
 				>
 			</File>
 			<File

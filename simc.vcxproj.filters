@@ -45,7 +45,6 @@
     <ClCompile Include="engine\sc_wowhead.cpp" />
     <ClCompile Include="engine\sc_xml.cpp" />
     <ClCompile Include="engine\sc_spell_data.cpp" />
-    <ClCompile Include="engine\sc_spell_info.cpp" />
     <ClCompile Include="engine\sc_battle_net.cpp" />
     <ClCompile Include="engine\sc_heal.cpp" />
     <ClCompile Include="engine\sc_item_data.cpp" />

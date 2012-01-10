@@ -65,7 +65,6 @@ SET(SIMC_ENGINE_SOURCE
   "engine/sc_sim.cpp"
   "engine/sc_spell.cpp"
   "engine/sc_spell_data.cpp"
-  "engine/sc_spell_info.cpp"
   "engine/sc_stats.cpp"
   "engine/sc_talent.cpp"
   "engine/sc_target.cpp"

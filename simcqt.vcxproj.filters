@@ -126,9 +126,6 @@
     <ClCompile Include="engine\sc_spell_data.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="engine\sc_spell_info.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="engine\sc_stats.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

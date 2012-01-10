@@ -182,7 +182,6 @@
     <ClCompile Include="engine\sc_sim.cpp" />
     <ClCompile Include="engine\sc_spell.cpp" />
     <ClCompile Include="engine\sc_spell_data.cpp" />
-    <ClCompile Include="engine\sc_spell_info.cpp" />
     <ClCompile Include="engine\sc_stats.cpp" />
     <ClCompile Include="engine\sc_talent.cpp" />
     <ClCompile Include="engine\sc_target.cpp" />
@@ -429,7 +428,6 @@ c:\Qt\4.8.0\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_DLL -DQT_
     <ClCompile Include="engine\sc_priest.cpp" />
     <ClCompile Include="engine\sc_raid_event.cpp" />
     <ClCompile Include="engine\sc_rating.cpp" />
-    <ClCompile Include="engine\sc_rawr.cpp" />
     <ClCompile Include="engine\sc_reforge_plot.cpp" />
     <ClCompile Include="engine\sc_report.cpp" />
     <ClCompile Include="engine\sc_rng.cpp" />
@@ -441,7 +439,6 @@ c:\Qt\4.8.0\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_DLL -DQT_
     <ClCompile Include="engine\sc_sim.cpp" />
     <ClCompile Include="engine\sc_spell.cpp" />
     <ClCompile Include="engine\sc_spell_data.cpp" />
-    <ClCompile Include="engine\sc_spell_info.cpp" />
     <ClCompile Include="engine\sc_stats.cpp" />
     <ClCompile Include="engine\sc_talent.cpp" />
     <ClCompile Include="engine\sc_target.cpp" />

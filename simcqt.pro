@@ -84,7 +84,6 @@ SOURCES += engine/sc_set_bonus.cpp
 SOURCES += engine/sc_sim.cpp
 SOURCES += engine/sc_spell.cpp
 SOURCES += engine/sc_spell_data.cpp
-SOURCES += engine/sc_spell_info.cpp
 SOURCES += engine/sc_stats.cpp
 SOURCES += engine/sc_talent.cpp
 SOURCES += engine/sc_target.cpp

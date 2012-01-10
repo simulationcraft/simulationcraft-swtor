@@ -612,7 +612,7 @@ sim_t::sim_t( sim_t* p, int index ) :
   gcd_lag( 0.150 ), gcd_lag_stddev( 0 ),
   channel_lag( 0.250 ), channel_lag_stddev( 0 ),
   queue_gcd_reduction( 0.032 ), strict_gcd_queue( 0 ),
-  confidence( 0.95 ), confidence_estimator( 0.0 ),
+  confidence( 0.95 ), confidence_estimator( 1.96 ),
   world_lag( 0.1 ), world_lag_stddev( -1.0 ),
   travel_variance( 0 ), default_skill( 1.0 ), reaction_time( 0.5 ), regen_periodicity( 0.25 ),
   current_time( 0 ), max_time( 300 ), expected_time( 0 ), vary_combat_length( 0.2 ),
@@ -642,7 +642,7 @@ sim_t::sim_t( sim_t* p, int index ) :
   // Report
   report_precision( 4 ),report_pets_separately( 0 ), report_targets( 1 ), report_details( 1 ),
   report_rng( 0 ), hosted_html( 0 ), print_styles( false ), report_overheal( 0 ),
-  save_raid_summary( 0 ), statistics_level( 1 ),
+  save_raid_summary( 0 ), statistics_level( 2 ),
   // Multi-Threading
   threads( 0 ), thread_index( index ),
   spell_query( 0 )
@@ -2016,6 +2016,9 @@ void sim_t::create_options()
     { "save_prefix",                      OPT_STRING, &( save_prefix_str                          ) },
     { "save_suffix",                      OPT_STRING, &( save_suffix_str                          ) },
     { "save_talent_str",                  OPT_BOOL,   &( save_talent_str                          ) },
+    // Overrides
+    { "override.force_valor",             OPT_BOOL,   &( overrides.force_valor                     ) },
+    { "override.bleeding",                OPT_BOOL,   &( overrides.bleeding                        ) },
     // Stat Enchants
     { "default_enchant_strength",                 OPT_FLT,  &( enchant.attribute[ ATTR_STRENGTH  ] ) },
     { "default_enchant_agility",                  OPT_FLT,  &( enchant.attribute[ ATTR_AGILITY   ] ) },
