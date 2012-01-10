@@ -147,6 +147,7 @@ struct jedi_sage_t : public jedi_consular_t
   }
 
   // Character Definition
+  virtual targetdata_t* new_targetdata( player_t* source, player_t* target ) {return new jedi_sage_targetdata_t( source, target );}
   virtual action_t* create_action( const std::string& name, const std::string& options );
   virtual void      init_talents();
   virtual void      init_base();
