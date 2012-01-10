@@ -67,7 +67,6 @@ When using the armory=, wowhead=, etc. options to download a profile, the save= 
 used to generate a script: 
 simc.exe armory=us,Llane,Segv save=Segv.simc
 simc.exe wowhead=14320165 save=Paladin_T9_05_11_55.simc
-simc.exe chardev=83984325 save=Bob.simc
 
 Unix users will find that these generated script files can be marked as executable and
 then simply be invoked directly via #! magic.

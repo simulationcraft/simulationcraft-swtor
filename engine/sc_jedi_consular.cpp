@@ -390,7 +390,7 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
     num_ticks = 3;
 
     base_tick_time = 1.0;
-
+    may_crit = false;
     channeled = true;
 
     cooldown -> duration = 6.0;

@@ -84,7 +84,6 @@
 		6E392F6F1396A0AC00649B6A /* sc_attack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EC618B6139677F0006B7A89 /* sc_attack.cpp */; };
 		6E392F701396A0AC00649B6A /* sc_battle_net.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EC618B7139677F0006B7A89 /* sc_battle_net.cpp */; };
 		6E392F711396A0AC00649B6A /* sc_buff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EC618B8139677F0006B7A89 /* sc_buff.cpp */; };
-		6E392F721396A0AC00649B6A /* sc_chardev.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EC618B9139677F0006B7A89 /* sc_chardev.cpp */; };
 		6E392F731396A0AC00649B6A /* sc_chart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EC618BA139677F0006B7A89 /* sc_chart.cpp */; };
 		6E392F741396A0AC00649B6A /* sc_const_data.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EC618BB139677F0006B7A89 /* sc_const_data.cpp */; };
 		6E392F751396A0AC00649B6A /* sc_consumable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EC618BC139677F0006B7A89 /* sc_consumable.cpp */; };
@@ -182,7 +181,6 @@
 		6EC618EF139677F0006B7A89 /* sc_attack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EC618B6139677F0006B7A89 /* sc_attack.cpp */; };
 		6EC618F0139677F0006B7A89 /* sc_battle_net.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EC618B7139677F0006B7A89 /* sc_battle_net.cpp */; };
 		6EC618F1139677F0006B7A89 /* sc_buff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EC618B8139677F0006B7A89 /* sc_buff.cpp */; };
-		6EC618F2139677F0006B7A89 /* sc_chardev.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EC618B9139677F0006B7A89 /* sc_chardev.cpp */; };
 		6EC618F3139677F0006B7A89 /* sc_chart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EC618BA139677F0006B7A89 /* sc_chart.cpp */; };
 		6EC618F4139677F0006B7A89 /* sc_const_data.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EC618BB139677F0006B7A89 /* sc_const_data.cpp */; };
 		6EC618F5139677F0006B7A89 /* sc_consumable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EC618BC139677F0006B7A89 /* sc_consumable.cpp */; };
@@ -621,7 +619,6 @@
 		6EC618B6139677F0006B7A89 /* sc_attack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sc_attack.cpp; path = engine/sc_attack.cpp; sourceTree = "<group>"; };
 		6EC618B7139677F0006B7A89 /* sc_battle_net.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sc_battle_net.cpp; path = engine/sc_battle_net.cpp; sourceTree = "<group>"; };
 		6EC618B8139677F0006B7A89 /* sc_buff.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sc_buff.cpp; path = engine/sc_buff.cpp; sourceTree = "<group>"; };
-		6EC618B9139677F0006B7A89 /* sc_chardev.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sc_chardev.cpp; path = engine/sc_chardev.cpp; sourceTree = "<group>"; };
 		6EC618BA139677F0006B7A89 /* sc_chart.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sc_chart.cpp; path = engine/sc_chart.cpp; sourceTree = "<group>"; };
 		6EC618BB139677F0006B7A89 /* sc_const_data.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sc_const_data.cpp; path = engine/sc_const_data.cpp; sourceTree = "<group>"; };
 		6EC618BC139677F0006B7A89 /* sc_consumable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sc_consumable.cpp; path = engine/sc_consumable.cpp; sourceTree = "<group>"; };
@@ -1041,7 +1038,6 @@
 				6EC618B7139677F0006B7A89 /* sc_battle_net.cpp */,
 				6E1CCD7E13E89540007451E8 /* sc_bcp_api.cpp */,
 				6EC618B8139677F0006B7A89 /* sc_buff.cpp */,
-				6EC618B9139677F0006B7A89 /* sc_chardev.cpp */,
 				6EC618BA139677F0006B7A89 /* sc_chart.cpp */,
 				6EC618BB139677F0006B7A89 /* sc_const_data.cpp */,
 				6EC618BC139677F0006B7A89 /* sc_consumable.cpp */,
@@ -1443,7 +1439,6 @@
 				6E392F701396A0AC00649B6A /* sc_battle_net.cpp in Sources */,
 				6E1CCD8013E8955C007451E8 /* sc_bcp_api.cpp in Sources */,
 				6E392F711396A0AC00649B6A /* sc_buff.cpp in Sources */,
-				6E392F721396A0AC00649B6A /* sc_chardev.cpp in Sources */,
 				6E392F731396A0AC00649B6A /* sc_chart.cpp in Sources */,
 				6E392F741396A0AC00649B6A /* sc_const_data.cpp in Sources */,
 				6E392F751396A0AC00649B6A /* sc_consumable.cpp in Sources */,
@@ -1518,7 +1513,6 @@
 				6EC618F0139677F0006B7A89 /* sc_battle_net.cpp in Sources */,
 				6E1CCD8113E8956D007451E8 /* sc_bcp_api.cpp in Sources */,
 				6EC618F1139677F0006B7A89 /* sc_buff.cpp in Sources */,
-				6EC618F2139677F0006B7A89 /* sc_chardev.cpp in Sources */,
 				6EC618F3139677F0006B7A89 /* sc_chart.cpp in Sources */,
 				6EC618F4139677F0006B7A89 /* sc_const_data.cpp in Sources */,
 				6EC618F5139677F0006B7A89 /* sc_consumable.cpp in Sources */,

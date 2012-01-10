@@ -24,7 +24,6 @@
 #endif
 
 #define TAB_BATTLE_NET 0
-#define TAB_CHAR_DEV   1
 #define TAB_RAWR       2
 #define TAB_BIS        3
 #define TAB_HISTORY    4
@@ -142,11 +141,9 @@ public:
     QComboBox* reforgePlotStepChoice;
     ReforgeButtonGroup* reforgeplotsButtonGroup;
     SimulationCraftWebView* battleNetView;
-    SimulationCraftWebView* charDevView;
     SimulationCraftWebView* siteView;
     SimulationCraftWebView* helpView;
     SimulationCraftWebView* visibleWebView;
-    PersistentCookieJar* charDevCookies;
     QPushButton* rawrButton;
     QByteArray rawrDialogState;
     SimulationCraftTextEdit* rawrText;
@@ -388,7 +385,6 @@ public:
     player_t* player;
 
     void importBattleNet();
-    void importCharDev();
     void importRawr();
 
     void start( sim_t* s, int t, const QString& u ) { sim=s; tab=t; url=u; profile=""; player=0; QThread::start(); }

@@ -28,7 +28,6 @@ SET(SIMC_ENGINE_SOURCE
   "engine/sc_battle_net.cpp"
   "engine/sc_bcp_api.cpp"
   "engine/sc_buff.cpp"
-  "engine/sc_chardev.cpp"
   "engine/sc_chart.cpp"
   "engine/sc_const_data.cpp"
   "engine/sc_consumable.cpp"

@@ -5027,13 +5027,6 @@ struct wowhead_t
                          bool ptr=false, cache::behavior_t b=cache::items() );
 };
 
-// CharDev  =================================================================
-
-struct chardev_t
-{
-  static player_t* download_player( sim_t* sim, const std::string& id, cache::behavior_t b=cache::players() );
-};
-
 // MMO Champion =============================================================
 
 struct mmo_champion_t

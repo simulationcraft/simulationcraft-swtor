@@ -33,9 +33,6 @@
     <ClCompile Include="engine\sc_buff.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="engine\sc_chardev.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="engine\sc_chart.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -46,12 +43,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="engine\sc_data.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\sc_death_knight.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\sc_druid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="engine\sc_enchant.cpp">
@@ -72,13 +63,13 @@
     <ClCompile Include="engine\sc_http.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="engine\sc_hunter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="engine\sc_item.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="engine\sc_item_data.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\sc_jedi_consular.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="engine\sc_js.cpp">
@@ -87,16 +78,10 @@
     <ClCompile Include="engine\sc_log.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="engine\sc_mage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="engine\sc_mmo_champion.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="engine\sc_option.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\sc_paladin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="engine\sc_pet.cpp">
@@ -108,16 +93,10 @@
     <ClCompile Include="engine\sc_plot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="engine\sc_priest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="engine\sc_raid_event.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="engine\sc_rating.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\sc_rawr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="engine\sc_reforge_plot.cpp">
@@ -129,9 +108,6 @@
     <ClCompile Include="engine\sc_rng.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="engine\sc_rogue.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="engine\sc_scaling.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -139,9 +115,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="engine\sc_set_bonus.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\sc_shaman.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="engine\sc_sim.cpp">
@@ -172,12 +145,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="engine\sc_util.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\sc_warlock.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\sc_warrior.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="engine\sc_weapon.cpp">
@@ -217,9 +184,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="engine\sc_sample_data.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="engine\sc_monk.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

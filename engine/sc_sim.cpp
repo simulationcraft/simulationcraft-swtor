@@ -482,20 +482,6 @@ static bool parse_wowhead( sim_t*             sim,
   return sim -> active_player != 0;
 }
 
-// parse_chardev ============================================================
-
-static bool parse_chardev( sim_t*             sim,
-                           const std::string& name,
-                           const std::string& value )
-{
-  if ( name == "chardev" )
-  {
-    sim -> active_player = chardev_t::download_player( sim, value );
-  }
-
-  return sim -> active_player != 0;
-}
-
 // parse_wowreforge =========================================================
 
 static bool parse_wowreforge( sim_t*             sim,
@@ -2020,7 +2006,6 @@ void sim_t::create_options()
     { "armory",                           OPT_DEPRECATED,   ( void* ) ::parse_armory                      },
     { "guild",                            OPT_DEPRECATED,   ( void* ) ::parse_armory                      },
     { "wowhead",                          OPT_DEPRECATED,   ( void* ) ::parse_wowhead                     },
-    { "chardev",                          OPT_DEPRECATED,   ( void* ) ::parse_chardev                     },
     { "wowreforge",                       OPT_DEPRECATED,   ( void* ) ::parse_wowreforge                  },
     { "http_clear_cache",                 OPT_FUNC,   ( void* ) ::http_t::clear_cache               },
     { "cache_items",                      OPT_FUNC,   ( void* ) ::parse_cache                       },

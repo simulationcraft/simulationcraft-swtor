@@ -424,7 +424,6 @@ void SimulationCraftWindow::loadHistory()
 
 void SimulationCraftWindow::saveHistory()
 {
-  charDevCookies->save();
   http_t::cache_save();
   QFile file( "simc_history.dat" );
   if( file.open( QIODevice::WriteOnly ) )
@@ -743,13 +742,6 @@ void SimulationCraftWindow::createImportTab()
   battleNetView = new SimulationCraftWebView( this );
   battleNetView->setUrl( QUrl( "http://us.battle.net/wow/en" ) );
   importTab->addTab( battleNetView, "Battle.Net" );
-
-  charDevCookies = new PersistentCookieJar( "chardev.cookies" );
-  charDevCookies->load();
-  charDevView = new SimulationCraftWebView( this );
-  charDevView->page()->networkAccessManager()->setCookieJar( charDevCookies );
-  charDevView->setUrl( QUrl( "http://chardev.org/?planner" ) );
-  importTab->addTab( charDevView, "CharDev" );
 
   createRawrTab();
   createBestInSlotTab();
@@ -1213,18 +1205,6 @@ void ImportThread::importBattleNet()
   }
 }
 
-void ImportThread::importCharDev()
-{
-  QStringList tokens = url.split( QRegExp( "[?&=:/.]" ), QString::SkipEmptyParts );
-  int count = tokens.count();
-  if( count > 0 )
-  {
-    // Win7/x86_64 workaround
-    std::string c = tokens[ count-1 ].toUtf8().constData();
-    player = chardev_t::download_player( sim, c );
-  }
-}
-
 void ImportThread::importRawr()
 {
   // Win7/x86_64 workaround
@@ -1238,7 +1218,6 @@ void ImportThread::run()
   switch( tab )
   {
   case TAB_BATTLE_NET: importBattleNet(); break;
-  case TAB_CHAR_DEV:   importCharDev();   break;
   case TAB_RAWR:       importRawr();      break;
   default: assert( 0 );
   }
@@ -1633,11 +1612,6 @@ void SimulationCraftWindow::cmdLineReturnPressed()
       battleNetView->setUrl( QUrl::fromUserInput( cmdLine->text() ) );
       importTab->setCurrentIndex( TAB_BATTLE_NET );
     }
-    else if( cmdLine->text().count( "chardev.org" ) )
-    {
-      charDevView->setUrl( QUrl::fromUserInput( cmdLine->text() ) );
-      importTab->setCurrentIndex( TAB_CHAR_DEV );
-    }
     else
     {
       if( ! sim ) mainButtonClicked( true );
@@ -1663,7 +1637,6 @@ void SimulationCraftWindow::mainButtonClicked( bool /* checked */ )
     switch( importTab->currentIndex() )
     {
     case TAB_BATTLE_NET: startImport( TAB_BATTLE_NET, cmdLine->text() ); break;
-    case TAB_CHAR_DEV:   startImport( TAB_CHAR_DEV,   cmdLine->text() ); break;
     case TAB_RAWR:       startImport( TAB_RAWR,       "Rawr XML"      ); break;
     }
     break;
@@ -1845,11 +1818,6 @@ void SimulationCraftWindow::historyDoubleClicked( QListWidgetItem* item )
   {
     battleNetView->setUrl( QUrl::fromEncoded( url.toAscii() ) );
     importTab->setCurrentIndex( TAB_BATTLE_NET );
-  }
-  else if( url.count( "chardev.org" ) )
-  {
-    charDevView->setUrl( QUrl::fromEncoded( url.toAscii() ) );
-    importTab->setCurrentIndex( TAB_CHAR_DEV );
   }
   else
   {
