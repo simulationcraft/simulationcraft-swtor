@@ -2857,6 +2857,7 @@ struct sim_t : private thread_t
   struct overrides_t
   {
     int bleeding;
+    int force_valor;
   };
   overrides_t overrides;
 
@@ -3681,6 +3682,7 @@ struct player_t : public noncopyable
 
   struct buffs_t
   {
+    buff_t* force_valor;
     buff_t* stunned;
     buff_t* raid_movement;
     buff_t* self_movement;

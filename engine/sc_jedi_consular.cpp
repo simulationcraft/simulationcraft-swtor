@@ -329,6 +329,36 @@ struct jedi_consular_spell_t : public spell_t
   }
 };
 
+struct force_valor_t : public jedi_consular_spell_t
+{
+  force_valor_t( jedi_consular_t* p, const std::string& options_str ) :
+    jedi_consular_spell_t( "force_valor", p, RESOURCE_FORCE )
+  {
+    parse_options( 0, options_str );
+    base_cost = 0.0;
+    harmful = false;
+  }
+
+  virtual void execute()
+  {
+    jedi_consular_spell_t::execute();
+
+    for ( player_t* p = sim -> player_list; p; p = p -> next )
+    {
+      if ( p -> ooc_buffs() )
+        p -> buffs.force_valor -> override();
+    }
+  }
+
+  virtual bool ready()
+  {
+    if ( player -> buffs.force_valor -> check() )
+      return false;
+
+    return jedi_consular_spell_t::ready();
+  }
+};
+
 struct project_t : public jedi_consular_spell_t
 {
   jedi_consular_spell_t* upheaval;
@@ -748,6 +778,7 @@ struct sever_force_t : public jedi_sage_spell_t
 action_t* jedi_consular_t::create_action( const std::string& name,
                                  const std::string& options_str )
 {
+  if ( name == "force_valor"       ) return new        force_valor_t( this, options_str );
   if ( name == "project"           ) return new            project_t( this, options_str );
   if ( name == "telekinetic_throw" ) return new  telekinetic_throw_t( this, options_str );
 
@@ -968,6 +999,8 @@ void jedi_sage_t::init_actions()
 
     action_list_str += "/power_potion,if=time>10";
 
+    action_list_str += "/force_valor";
+
     action_list_str += "/snapshot_stats";
 
     action_list_str += "/mind_crush";
@@ -993,6 +1026,8 @@ void jedi_sage_t::init_actions()
     action_list_str += "stim,type=rakata_resolve";
 
     action_list_str += "/power_potion,if=time>10";
+
+    action_list_str += "/force_valor";
 
     action_list_str += "/snapshot_stats";
 
@@ -1075,17 +1110,26 @@ player_t* player_t::create_jedi_sage( sim_t* sim, const std::string& name, race_
 
 // player_t::jedi_sage_init ======================================================
 
-void player_t::jedi_sage_init( sim_t* /* sim */ )
+void player_t::jedi_sage_init( sim_t* sim )
 {
-  //for ( unsigned int i = 0; i < sim -> actor_list.size(); i++ )
-  //{}
+  for ( unsigned int i = 0; i < sim -> actor_list.size(); i++ )
+  {
+    player_t* p = sim -> actor_list[i];
+    p -> buffs.force_valor = new buff_t( p, "force_valor", 1 );
+  }
 }
 
 // player_t::jedi_sage_combat_begin ==============================================
 
-void player_t::jedi_sage_combat_begin( sim_t* /* sim */ )
+void player_t::jedi_sage_combat_begin( sim_t* sim )
 {
-  //for ( player_t* p = sim -> player_list; p; p = p -> next )
-  //{}
+  for ( player_t* p = sim -> player_list; p; p = p -> next )
+  {
+    if ( p -> ooc_buffs() )
+    {
+      if ( sim -> overrides.force_valor )
+        p -> buffs.force_valor -> override();
+    }
+  }
 }
 

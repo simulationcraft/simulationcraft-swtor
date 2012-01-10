@@ -1923,6 +1923,10 @@ double player_t::composite_attribute_multiplier( int attr ) const
 {
   double m = attribute_multiplier[ attr ];
 
+  if ( attr == ATTR_STRENGTH || attr ==  ATTR_WILLPOWER ) // TODO: Add Aim and Cunning
+    if ( buffs.force_valor -> up() )
+      m *= 1.05;
+
   return m;
 }
 
@@ -3277,6 +3281,8 @@ double player_t::target_mitigation( double            amount,
     return 0;
 
   double mitigated_amount = amount;
+
+  // TODO: Add Force Valor damage reduction for internal and elemental schools. if ( buffs.force_valor -> up() )
 
   if ( result == RESULT_BLOCK )
   {

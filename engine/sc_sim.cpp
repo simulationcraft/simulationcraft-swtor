@@ -1733,6 +1733,7 @@ void sim_t::use_optimal_buffs_and_debuffs( int value )
   optimal_raid = value;
 
   overrides.bleeding               = optimal_raid;
+  overrides.force_valor            = optimal_raid;
 }
 
 // sim_t::aura_gain =========================================================
