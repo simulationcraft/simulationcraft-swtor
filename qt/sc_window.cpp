@@ -841,7 +841,7 @@ void SimulationCraftWindow::createLogTab()
 void SimulationCraftWindow::createHelpTab()
 {
   helpView = new SimulationCraftWebView( this );
-  helpView->setUrl( QUrl( "http://code.google.com/p/simulationcraft/wiki/StartersGuide" ) );
+  helpView->setUrl( QUrl( "http://code.google.com/p/simulationcraft-swtor/" ) ); // FIXME: change back to a starters guide / help wiki page once there is one
   mainTab->addTab( helpView, "Help" );
 }
 
@@ -883,7 +883,7 @@ void SimulationCraftWindow::createResultsTab()
 void SimulationCraftWindow::createSiteTab()
 {
   siteView = new SimulationCraftWebView( this );
-  siteView->setUrl( QUrl( "http://code.google.com/p/simulationcraft/" ) );
+  siteView->setUrl( QUrl( "http://code.google.com/p/simulationcraft-swtor/" ) );
   mainTab->addTab( siteView, "Site" );
 }
 
