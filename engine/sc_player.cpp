@@ -3543,6 +3543,7 @@ void player_t::recalculate_crit()
 void player_t::recalculate_accuracy()
 {
   double acc = 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), accuracy_rating / std::max( 20, level ) / 0.55 ) );
+
   spell_hit  = base_spell_hit + acc;
   attack_hit = base_attack_hit + acc;
 }
@@ -3552,7 +3553,6 @@ void player_t::recalculate_accuracy()
 void player_t::recalculate_surge()
 {
   surge_bonus = 0.5 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.5 ) ), surge_rating / std::max( 20, level ) / 0.1 ) );
-
 }
 
 // player_t::recent_cast ====================================================
@@ -3581,7 +3581,6 @@ void player_t::aura_gain( const char* aura_name , double value )
   {
     log_t::output( sim, "%s gains %s ( value=%.2f )", name(), aura_name, value );
   }
-
 }
 
 // player_t::aura_loss ======================================================

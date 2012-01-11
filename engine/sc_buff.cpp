@@ -31,6 +31,7 @@ struct buff_delay_t : public event_t
     event_t( sim, p, b -> name() ), value( value ), buff( b ), stacks( stacks )
   {
     double delay_duration = sim -> gauss( sim -> default_aura_delay, sim -> default_aura_delay_stddev );
+
     sim -> add_event( this, delay_duration );
   }
 
@@ -39,6 +40,7 @@ struct buff_delay_t : public event_t
     // Add a Cooldown check here to avoid extra processing due to delays
     if ( buff -> cooldown -> remains() ==  0 )
       buff -> execute( stacks, value );
+
     buff -> delay = 0;
   }
 };
@@ -300,6 +302,7 @@ buff_t::buff_t( actor_pair_t       p,
   init_buff_t_();
 
   cooldown = initial_source -> get_cooldown( "buff_" + name_str );
+
   if ( cd < 0.0 )
   {
     cooldown -> duration = p.source -> dbc.spell( spell_id() ) -> cooldown();
@@ -342,6 +345,7 @@ buff_t::buff_t( actor_pair_t       p,
   init_buff_t_();
 
   cooldown = player -> get_cooldown( "buff_" + name_str );
+
   if ( cd < 0.0 )
   {
     cooldown -> duration = player -> dbc.spell( spell_id() ) -> cooldown();
@@ -479,7 +483,9 @@ bool buff_t::trigger( action_t* a,
                       double    value )
 {
   double chance = default_chance;
+
   if ( chance < 0 ) chance = a -> ppm_proc_chance( -chance );
+
   return trigger( stacks, value, chance );
 }
 

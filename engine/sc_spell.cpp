@@ -39,7 +39,7 @@ double spell_t::gcd() const
   double t = action_t::gcd();
   if ( t == 0 ) return 0;
 
-  t *= haste();
+  // t *= haste(); // According to http://sithwarrior.com/forums/Thread-SWTOR-formula-list alacrity doesn't reduce the gcd
   if ( t < min_gcd ) t = min_gcd;
 
   return t;
