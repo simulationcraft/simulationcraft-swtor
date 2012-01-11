@@ -71,7 +71,7 @@ static bool parse_talent_url( sim_t* sim,
       return p -> parse_talents_armory( url.substr( cut_pt + 1 ) );
     }
   }
-  else if ( url.find( "wowhead" ) != url.npos )
+  else if ( url.find( "wowhead" ) != url.npos || url.find( "torhead" ) != url.npos )
   {
     if ( ( cut_pt = url.find_first_of( "#=" ) ) != url.npos )
     {

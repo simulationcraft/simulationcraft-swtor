@@ -561,7 +561,7 @@ void SimulationCraftWindow::createGlobalsTab()
   globalsLayout->addRow(   "Default Role",   defaultRoleChoice = createChoice( 4, "auto", "dps", "heal", "tank" ) );
   globalsLayout->addRow( "Generate Debug",         debugChoice = createChoice( 3, "None", "Log Only", "Gory Details" ) );
   iterationsChoice->setCurrentIndex( 1 );
-  fightLengthChoice->setCurrentIndex( 7 );
+  fightLengthChoice->setCurrentIndex( 4 );
   fightVarianceChoice->setCurrentIndex( 2 );
   QGroupBox* globalsGroupBox = new QGroupBox();
   globalsGroupBox->setLayout( globalsLayout );
@@ -1311,7 +1311,7 @@ QString SimulationCraftWindow::mergeOptions()
   options += "\n";
   options += "fight_style=" + fightStyleChoice->currentText() + "\n";
 
-  static const char* const targetlevel[] = { "88", "87", "85" };
+  static const char* const targetlevel[] = { "53", "52", "51" };
   options += "target_level=";
   options += targetlevel[ targetLevelChoice->currentIndex() ];
   options += "\n";

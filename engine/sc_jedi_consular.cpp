@@ -432,6 +432,7 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
     base_tick_time = 1.0;
     may_crit = false;
     channeled = true;
+    tick_zero = true;
 
     cooldown -> duration = 6.0;
 
@@ -553,8 +554,8 @@ struct disturbance_t : public jedi_sage_spell_t
 {
   jedi_consular_spell_t* tm;
 
-  disturbance_t( jedi_sage_t* p, const std::string& options_str, bool is_tm = false ) :
-    jedi_sage_spell_t( ( std::string( p -> type == SITH_SORCERER ? "lightning_strike" : "disturbance") + std::string( is_tm ? "_tm" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL ),
+  disturbance_t( jedi_sage_t* p, const std::string& n, const std::string& options_str, bool is_tm = false ) :
+    jedi_sage_spell_t( ( n + std::string( is_tm ? "_tm" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL ),
     tm( 0 )
   {
     parse_options( 0, options_str );
@@ -572,7 +573,7 @@ struct disturbance_t : public jedi_sage_spell_t
     {
       if ( p -> talents.telekinetic_momentum > 0 )
       {
-        tm = new disturbance_t( p, options_str, true );
+        tm = new disturbance_t( p, n, options_str, true );
         tm -> base_multiplier *= 0.30;
         tm -> base_cost = 0.0;
         tm -> background = true;
@@ -611,8 +612,8 @@ struct disturbance_t : public jedi_sage_spell_t
 
 struct mind_crush_t : public jedi_sage_spell_t
 {
-  mind_crush_t( jedi_sage_t* p, const std::string& options_str ) :
-    jedi_sage_spell_t( p -> type == SITH_SORCERER ? "crushing_darkness" : "mind_crush", p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
+  mind_crush_t( jedi_sage_t* p, const std::string& n, const std::string& options_str ) :
+    jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
   {
     parse_options( 0, options_str );
     base_dd_min = 545.8; base_dd_max = 610.2;
@@ -633,8 +634,8 @@ struct mind_crush_t : public jedi_sage_spell_t
 
 struct weaken_mind_t : public jedi_sage_spell_t
 {
-  weaken_mind_t( jedi_sage_t* p, const std::string& options_str ) :
-    jedi_sage_spell_t( p -> type == SITH_SORCERER ? "affliction" : "weaken_mind", p, RESOURCE_FORCE )
+  weaken_mind_t( jedi_sage_t* p, const std::string& n, const std::string& options_str ) :
+    jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE )
   {
     parse_options( 0, options_str );
     base_td = 299.5;
@@ -665,8 +666,8 @@ struct turbulence_t : public jedi_sage_spell_t
 {
   jedi_consular_spell_t* tm;
 
-  turbulence_t( jedi_sage_t* p, const std::string& options_str, bool is_tm = false ) :
-    jedi_sage_spell_t( ( std::string( p -> type == SITH_SORCERER ? "thundering_blast" : "turbulence") + std::string( is_tm ? "_tm" : "" ) ).c_str(), p, RESOURCE_FORCE ),
+  turbulence_t( jedi_sage_t* p, const std::string& n, const std::string& options_str, bool is_tm = false ) :
+    jedi_sage_spell_t( ( n + std::string( is_tm ? "_tm" : "" ) ).c_str(), p, RESOURCE_FORCE ),
     tm( 0 )
   {
     check_talent( p -> talents.turbulence );
@@ -685,7 +686,7 @@ struct turbulence_t : public jedi_sage_spell_t
     {
       if ( p -> talents.telekinetic_momentum > 0 )
       {
-        tm = new turbulence_t( p, options_str, true );
+        tm = new turbulence_t( p, n, options_str, true );
         tm -> base_multiplier *= 0.30;
         tm -> base_cost = 0.0;
         tm -> background = true;
@@ -720,8 +721,8 @@ struct turbulence_t : public jedi_sage_spell_t
 
 struct force_in_balance_t : public jedi_sage_spell_t
 {
-  force_in_balance_t( jedi_sage_t* p, const std::string& options_str ) :
-    jedi_sage_spell_t( p -> type == SITH_SORCERER ? "death_field" : "force_in_balance", p, RESOURCE_FORCE )
+  force_in_balance_t( jedi_sage_t* p, const std::string& n, const std::string& options_str ) :
+    jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE )
   {
     check_talent( p -> talents.force_in_balance );
 
@@ -749,8 +750,8 @@ struct force_in_balance_t : public jedi_sage_spell_t
 
 struct sever_force_t : public jedi_sage_spell_t
 {
-  sever_force_t( jedi_sage_t* p, const std::string& options_str ) :
-    jedi_sage_spell_t( p -> type == SITH_SORCERER ? "creeping_terror" : "sever_force", p, RESOURCE_FORCE )
+  sever_force_t( jedi_sage_t* p, const std::string& n, const std::string& options_str ) :
+    jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE )
   {
     check_talent( p -> talents.sever_force );
 
@@ -848,12 +849,24 @@ int jedi_consular_t::primary_role() const
 action_t* jedi_sage_t::create_action( const std::string& name,
                                  const std::string& options_str )
 {
-  if ( name == "disturbance"       ) return new       disturbance_t( this, options_str );
-  if ( name == "mind_crush"        ) return new        mind_crush_t( this, options_str );
-  if ( name == "weaken_mind"       ) return new       weaken_mind_t( this, options_str );
-  if ( name == "turbulence"        ) return new        turbulence_t( this, options_str );
-  if ( name == "force_in_balance"  ) return new  force_in_balance_t( this, options_str );
-  if ( name == "sever_force"       ) return new       sever_force_t( this, options_str );
+  if ( type == JEDI_SAGE )
+  {
+    if ( name == "disturbance" || name == "lightning_strike"  ) return new       disturbance_t( this, "disturbance", options_str );
+    if ( name == "mind_crush"  || name == "crushing_darkness" ) return new        mind_crush_t( this, "mind_crush", options_str );
+    if ( name == "weaken_mind" || name == "affliction"        ) return new       weaken_mind_t( this, "weaken_mind", options_str );
+    if ( name == "turbulence"  || name == "thundering_blast"  ) return new        turbulence_t( this, "turbulence", options_str );
+    if ( name == "force_in_balance" || name == "death_field"  ) return new  force_in_balance_t( this, "force_in_balance", options_str );
+    if ( name == "sever_force" || name == "creeping_terror"   ) return new       sever_force_t( this, "sever_force", options_str );
+  }
+  else if ( type == SITH_SORCERER )
+  {
+    if ( name == "disturbance" || name == "lightning_strike"  ) return new       disturbance_t( this, "lightning_strike", options_str );
+    if ( name == "mind_crush"  || name == "crushing_darkness" ) return new        mind_crush_t( this, "crushing_darkness", options_str );
+    if ( name == "weaken_mind" || name == "affliction"        ) return new       weaken_mind_t( this, "affliction", options_str );
+    if ( name == "turbulence"  || name == "thundering_blast"  ) return new        turbulence_t( this, "thundering_blast", options_str );
+    if ( name == "force_in_balance" || name == "death_field"  ) return new  force_in_balance_t( this, "death_field", options_str );
+    if ( name == "sever_force" || name == "creeping_terror"   ) return new       sever_force_t( this, "creeping_terror", options_str );
+  }
 
   return jedi_consular_t::create_action( name, options_str );
 }

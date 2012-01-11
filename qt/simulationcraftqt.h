@@ -28,7 +28,7 @@
 #define TAB_HISTORY    2
 #define TAB_CUSTOM     3
 
-#define HISTORY_VERSION "4.20"
+#define HISTORY_VERSION "0.10"
 
 class SimulationCraftTextEdit;
 class SimulationCraftWebView;
