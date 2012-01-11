@@ -336,6 +336,7 @@ const char* util_t::player_type_string( int type )
   case ENEMY:           return "enemy";
   case ENEMY_ADD:       return "add";
   case JEDI_SAGE:       return "jedi_sage";
+  case SITH_SORCERER:   return "sith_sorcerer";
   }
   return "unknown";
 }
@@ -353,6 +354,7 @@ int util_t::translate_class_str( std::string& s )
   else if ( fmt_s == "sith_inquisitor" ) return SITH_INQUISITOR;
   else if ( fmt_s == "jedi_knight"     ) return JEDI_KNIGHT;
   else if ( fmt_s == "jedi_sage"       ) return JEDI_SAGE;
+  else if ( fmt_s == "sith_sorcerer"   ) return SITH_SORCERER;
   return PLAYER_NONE;
 }
 
@@ -613,10 +615,19 @@ int util_t::talent_tree( int tree, player_type ptype )
     case JEDI_SAGE:
       switch ( tree )
       {
-      case JEDI_SAGE_SEER:          return TREE_SEER;
-      case JEDI_SAGE_TELEKINETICS:  return TREE_TELEKINETICS;
-      case JEDI_SAGE_BALANCE:       return TREE_BALANCE;
+      case JEDI_SAGE_SEER:            return TREE_SEER;
+      case JEDI_SAGE_TELEKINETICS:    return TREE_TELEKINETICS;
+      case JEDI_SAGE_BALANCE:         return TREE_BALANCE;
       }
+    break;
+    case SITH_SORCERER:
+      switch ( tree )
+      {
+      case SITH_SORCERER_CORRUPTION:  return TREE_CORRUPTION;
+      case SITH_SORCERER_LIGHTNING:   return TREE_LIGHTNING;
+      case SITH_SORCERER_MADNESS:     return TREE_MADNESS;
+      }
+    break;
     default:
       break;
   }
@@ -632,9 +643,14 @@ const char* util_t::talent_tree_string( int tree, bool armory_format )
   {
     switch ( tree )
     {
+    // JEDI_SAGE
     case TREE_SEER:         return "seer";
     case TREE_TELEKINETICS: return "telekinetics";
     case TREE_BALANCE:      return "balance";
+    // SITH_SORCERER
+    case TREE_CORRUPTION:   return "corruption";
+    case TREE_LIGHTNING:    return "lightning";
+    case TREE_MADNESS:      return "madness";
     default: return "Unknown";
     }
   }
@@ -642,9 +658,14 @@ const char* util_t::talent_tree_string( int tree, bool armory_format )
   {
     switch ( tree )
     {
+    // JEDI_SAGE
     case TREE_SEER:         return "Seer";
     case TREE_TELEKINETICS: return "Telekinetics";
     case TREE_BALANCE:      return "Balance";
+    // SITH_SORCERER
+    case TREE_CORRUPTION:   return "Corruption";
+    case TREE_LIGHTNING:    return "Lightning";
+    case TREE_MADNESS:      return "Madness";
     default: return "Unknown";
     }
   }

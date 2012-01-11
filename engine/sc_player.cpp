@@ -5705,6 +5705,11 @@ player_t* player_t::create( sim_t*             sim,
     return player_t::create_jedi_sage( sim, name, r );
   }
 
+  else if ( type == "sith_sorcerer" )
+  {
+    return player_t::create_sith_sorcerer( sim, name, r );
+  }
+
   else if ( type == "enemy" )
   {
     return player_t::create_enemy( sim, name, r );

@@ -21,7 +21,7 @@ static const char* class_color( int type )
   case JEDI_SAGE:       return "C0C0C0";
   case SMUGGLER:        return "FFF569";
   case SITH_INQUISITOR:       return "2459FF";
-  //case WARLOCK:      return "9482C9";
+  case SITH_SORCERER:      return "9482C9";
   case JEDI_KNIGHT:      return "C79C6E";
   case ENEMY:        return "FFFFFF";
   case ENEMY_ADD:    return "FCFFFF";

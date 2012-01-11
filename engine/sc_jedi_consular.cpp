@@ -134,12 +134,21 @@ struct jedi_sage_t : public jedi_consular_t
   };
   talents_t talents;
 
-  jedi_sage_t( sim_t* sim, const std::string& name, race_type r = RACE_NONE ) :
-    jedi_consular_t( sim, JEDI_SAGE, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
+  jedi_sage_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
+    jedi_consular_t( sim, pt == SITH_SORCERER ? SITH_SORCERER : JEDI_SAGE, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
   {
-    tree_type[ JEDI_SAGE_SEER ]         = TREE_SEER;
-    tree_type[ JEDI_SAGE_TELEKINETICS ] = TREE_TELEKINETICS;
-    tree_type[ JEDI_SAGE_BALANCE ]      = TREE_BALANCE;
+    if ( pt == SITH_SORCERER )
+    {
+      tree_type[ SITH_SORCERER_CORRUPTION ] = TREE_CORRUPTION;
+      tree_type[ SITH_SORCERER_LIGHTNING ]  = TREE_LIGHTNING;
+      tree_type[ SITH_SORCERER_MADNESS ]    = TREE_MADNESS;
+    }
+    else
+    {
+      tree_type[ JEDI_SAGE_SEER ]         = TREE_SEER;
+      tree_type[ JEDI_SAGE_TELEKINETICS ] = TREE_TELEKINETICS;
+      tree_type[ JEDI_SAGE_BALANCE ]      = TREE_BALANCE;
+    }
 
     create_talents();
     create_glyphs();
@@ -197,7 +206,7 @@ struct jedi_consular_spell_t : public spell_t
   {
     spell_t::init();
 
-    if ( player -> type == JEDI_SAGE )
+    if ( player -> is_jedi_sage() )
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
 
@@ -211,7 +220,7 @@ struct jedi_consular_spell_t : public spell_t
     may_crit   = true;
     tick_may_crit = true;
 
-    if ( player -> type == JEDI_SAGE )
+    if ( player -> is_jedi_sage() )
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
 
@@ -223,7 +232,7 @@ struct jedi_consular_spell_t : public spell_t
   {
     spell_t::impact( t, impact_result, travel_dmg );
 
-    if ( player -> type == JEDI_SAGE )
+    if ( player -> is_jedi_sage() )
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
 
@@ -238,7 +247,7 @@ struct jedi_consular_spell_t : public spell_t
   {
     double et = spell_t::execute_time();
 
-    if ( player -> type == JEDI_SAGE )
+    if ( player -> is_jedi_sage() )
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
 
@@ -253,7 +262,7 @@ struct jedi_consular_spell_t : public spell_t
   {
     spell_t::player_buff();
 
-    if ( player -> type == JEDI_SAGE )
+    if ( player -> is_jedi_sage() )
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
 
@@ -271,7 +280,7 @@ struct jedi_consular_spell_t : public spell_t
   {
     double c = spell_t::cost();
 
-    if ( player -> type == JEDI_SAGE )
+    if ( player -> is_jedi_sage() )
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
       if ( p -> talents.inner_strength > 0 )
@@ -294,7 +303,7 @@ struct jedi_consular_spell_t : public spell_t
   {
     spell_t::consume_resource();
 
-    if ( player -> type == JEDI_SAGE )
+    if ( player -> is_jedi_sage() )
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
 
@@ -306,7 +315,7 @@ struct jedi_consular_spell_t : public spell_t
   {
     spell_t::execute();
 
-    if ( player -> type == JEDI_SAGE )
+    if ( player -> is_jedi_sage() )
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
 
@@ -319,7 +328,7 @@ struct jedi_consular_spell_t : public spell_t
   {
     spell_t::tick( d );
 
-    if ( player -> type == JEDI_SAGE )
+    if ( player -> is_jedi_sage() )
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
 
@@ -363,8 +372,8 @@ struct project_t : public jedi_consular_spell_t
 {
   jedi_consular_spell_t* upheaval;
 
-  project_t( jedi_consular_t* p, const std::string& options_str, const char* n = "project", bool is_upheaval = false ) :
-    jedi_consular_spell_t( n, p, RESOURCE_FORCE, SCHOOL_PHYSICAL ),
+  project_t( jedi_consular_t* p, const std::string& options_str, bool is_upheaval = false ) :
+    jedi_consular_spell_t( ( std::string( p -> type == SITH_SORCERER ? "shock" : "project") + std::string( is_upheaval ? "_upheaval" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL ),
     upheaval( 0 )
   {
     parse_options( 0, options_str );
@@ -375,13 +384,13 @@ struct project_t : public jedi_consular_spell_t
 
     cooldown -> duration = 6.0;
 
-    if ( p -> type == JEDI_SAGE && !is_upheaval )
+    if ( player -> is_jedi_sage() && !is_upheaval )
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
 
       if ( p -> talents.upheaval > 0 )
       {
-        upheaval = new project_t( p, options_str, "project_upheaval", true );
+        upheaval = new project_t( p, options_str, true );
         upheaval -> base_multiplier *= 0.50;
         upheaval -> base_cost = 0.0;
         upheaval -> background = true;
@@ -396,7 +405,7 @@ struct project_t : public jedi_consular_spell_t
 
     if ( upheaval )
     {
-      if ( player -> type == JEDI_SAGE )
+      if ( player -> is_jedi_sage() )
       {
         jedi_sage_t* p = player -> cast_jedi_sage();
 
@@ -410,7 +419,7 @@ struct project_t : public jedi_consular_spell_t
 struct telekinetic_throw_t : public jedi_consular_spell_t
 {
   telekinetic_throw_t( jedi_consular_t* p, const std::string& options_str ) :
-    jedi_consular_spell_t( "telekinetic_throw", p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
+    jedi_consular_spell_t( p -> type == SITH_SORCERER ? "force_lightning" : "telekinetic_throw", p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
   {
     parse_options( 0, options_str );
     base_td = 508.8;
@@ -426,7 +435,7 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
 
     cooldown -> duration = 6.0;
 
-    if ( p -> type == JEDI_SAGE )
+    if ( player -> is_jedi_sage() )
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
 
@@ -445,7 +454,7 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
   {
     double tt = jedi_consular_spell_t::tick_time();
 
-    if ( player -> type == JEDI_SAGE )
+    if ( player -> is_jedi_sage() )
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
 
@@ -460,7 +469,7 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
   {
     jedi_consular_spell_t::tick( d );
 
-    if ( player -> type == JEDI_SAGE )
+    if ( player -> is_jedi_sage() )
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
 
@@ -544,8 +553,8 @@ struct disturbance_t : public jedi_sage_spell_t
 {
   jedi_consular_spell_t* tm;
 
-  disturbance_t( jedi_sage_t* p, const std::string& options_str, const char* n = "disturbance", bool is_tm = false ) :
-    jedi_sage_spell_t( n, p, RESOURCE_FORCE, SCHOOL_PHYSICAL ),
+  disturbance_t( jedi_sage_t* p, const std::string& options_str, bool is_tm = false ) :
+    jedi_sage_spell_t( ( std::string( p -> type == SITH_SORCERER ? "lightning_strike" : "disturbance") + std::string( is_tm ? "_tm" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL ),
     tm( 0 )
   {
     parse_options( 0, options_str );
@@ -559,13 +568,11 @@ struct disturbance_t : public jedi_sage_spell_t
 
     base_crit += p -> talents.critical_kinsesis * 0.05;
 
-    if ( p -> type == JEDI_SAGE && !is_tm )
+    if ( !is_tm )
     {
-      jedi_sage_t* p = player -> cast_jedi_sage();
-
       if ( p -> talents.telekinetic_momentum > 0 )
       {
-        tm = new disturbance_t( p, options_str, "disturbance_tm", true );
+        tm = new disturbance_t( p, options_str, true );
         tm -> base_multiplier *= 0.30;
         tm -> base_cost = 0.0;
         tm -> background = true;
@@ -594,13 +601,10 @@ struct disturbance_t : public jedi_sage_spell_t
 
     if ( tm )
     {
-      if ( player -> type == JEDI_SAGE )
-      {
-        jedi_sage_t* p = player -> cast_jedi_sage();
+      jedi_sage_t* p = player -> cast_jedi_sage();
 
-        if ( p -> rng_tm -> roll( p -> talents.telekinetic_momentum * 0.10 ) )
-          tm -> execute();
-      }
+      if ( p -> rng_tm -> roll( p -> talents.telekinetic_momentum * 0.10 ) )
+        tm -> execute();
     }
   }
 };
@@ -608,7 +612,7 @@ struct disturbance_t : public jedi_sage_spell_t
 struct mind_crush_t : public jedi_sage_spell_t
 {
   mind_crush_t( jedi_sage_t* p, const std::string& options_str ) :
-    jedi_sage_spell_t( "mind_crush", p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
+    jedi_sage_spell_t( p -> type == SITH_SORCERER ? "crushing_darkness" : "mind_crush", p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
   {
     parse_options( 0, options_str );
     base_dd_min = 545.8; base_dd_max = 610.2;
@@ -630,7 +634,7 @@ struct mind_crush_t : public jedi_sage_spell_t
 struct weaken_mind_t : public jedi_sage_spell_t
 {
   weaken_mind_t( jedi_sage_t* p, const std::string& options_str ) :
-    jedi_sage_spell_t( "weaken_mind", p, RESOURCE_FORCE )
+    jedi_sage_spell_t( p -> type == SITH_SORCERER ? "affliction" : "weaken_mind", p, RESOURCE_FORCE )
   {
     parse_options( 0, options_str );
     base_td = 299.5;
@@ -661,8 +665,8 @@ struct turbulence_t : public jedi_sage_spell_t
 {
   jedi_consular_spell_t* tm;
 
-  turbulence_t( jedi_sage_t* p, const std::string& options_str, const char* n = "turbulence", bool is_tm = false ) :
-    jedi_sage_spell_t( n, p, RESOURCE_FORCE ),
+  turbulence_t( jedi_sage_t* p, const std::string& options_str, bool is_tm = false ) :
+    jedi_sage_spell_t( ( std::string( p -> type == SITH_SORCERER ? "thundering_blast" : "turbulence") + std::string( is_tm ? "_tm" : "" ) ).c_str(), p, RESOURCE_FORCE ),
     tm( 0 )
   {
     check_talent( p -> talents.turbulence );
@@ -677,13 +681,11 @@ struct turbulence_t : public jedi_sage_spell_t
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force * 0.02;
 
-    if ( p -> type == JEDI_SAGE && !is_tm )
+    if ( !is_tm )
     {
-      jedi_sage_t* p = player -> cast_jedi_sage();
-
       if ( p -> talents.telekinetic_momentum > 0 )
       {
-        tm = new turbulence_t( p, options_str, "turbulence_tm", true );
+        tm = new turbulence_t( p, options_str, true );
         tm -> base_multiplier *= 0.30;
         tm -> base_cost = 0.0;
         tm -> background = true;
@@ -708,13 +710,10 @@ struct turbulence_t : public jedi_sage_spell_t
 
     if ( tm )
     {
-      if ( player -> type == JEDI_SAGE )
-      {
-        jedi_sage_t* p = player -> cast_jedi_sage();
+      jedi_sage_t* p = player -> cast_jedi_sage();
 
-        if ( p -> rng_tm -> roll( p -> talents.telekinetic_momentum * 0.10 ) )
-          tm -> execute();
-      }
+      if ( p -> rng_tm -> roll( p -> talents.telekinetic_momentum * 0.10 ) )
+        tm -> execute();
     }
   }
 };
@@ -722,7 +721,7 @@ struct turbulence_t : public jedi_sage_spell_t
 struct force_in_balance_t : public jedi_sage_spell_t
 {
   force_in_balance_t( jedi_sage_t* p, const std::string& options_str ) :
-    jedi_sage_spell_t( "force_in_balance", p, RESOURCE_FORCE )
+    jedi_sage_spell_t( p -> type == SITH_SORCERER ? "death_field" : "force_in_balance", p, RESOURCE_FORCE )
   {
     check_talent( p -> talents.force_in_balance );
 
@@ -751,7 +750,7 @@ struct force_in_balance_t : public jedi_sage_spell_t
 struct sever_force_t : public jedi_sage_spell_t
 {
   sever_force_t( jedi_sage_t* p, const std::string& options_str ) :
-    jedi_sage_spell_t( "sever_force", p, RESOURCE_FORCE )
+    jedi_sage_spell_t( p -> type == SITH_SORCERER ? "creeping_terror" : "sever_force", p, RESOURCE_FORCE )
   {
     check_talent( p -> talents.sever_force );
 
@@ -1105,7 +1104,14 @@ double jedi_sage_t::composite_spell_power( const school_type school ) const
 
 player_t* player_t::create_jedi_sage( sim_t* sim, const std::string& name, race_type r )
 {
-  return new jedi_sage_t( sim, name, r );
+  return new jedi_sage_t( sim, JEDI_SAGE, name, r );
+}
+
+// player_t::create_sith_sorcerer  ===================================================
+
+player_t* player_t::create_sith_sorcerer( sim_t* sim, const std::string& name, race_type r )
+{
+  return new jedi_sage_t( sim, SITH_SORCERER, name, r );
 }
 
 // player_t::jedi_sage_init ======================================================

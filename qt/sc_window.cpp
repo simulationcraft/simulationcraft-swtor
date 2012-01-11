@@ -730,7 +730,7 @@ void SimulationCraftWindow::createBestInSlotTab()
   importTab->addTab( bisTree, "BiS" );
 
   QTreeWidgetItem* top[ PLAYER_MAX ];
-  for( int i=JEDI_SAGE; i <= JEDI_SAGE; i++ )
+  for( int i=JEDI_SAGE; i <= SITH_SORCERER; i++ )
   {
 
     top[i] = new QTreeWidgetItem( QStringList( util_t::player_type_string( i ) ) );

@@ -224,7 +224,7 @@ enum player_type
   TROOPER, SMUGGLER, JEDI_KNIGHT,
   BOUNTY_HUNTER, SITH_WARRIOR, IMPERIAL_AGENT, SITH_INQUISITOR,
   PLAYER_PET, PLAYER_GUARDIAN,
-  JEDI_SAGE,
+  JEDI_SAGE, SITH_SORCERER,
   ENEMY, ENEMY_ADD,
   PLAYER_MAX
 };
@@ -339,14 +339,17 @@ const int64_t SCHOOL_SPELL_MASK  ( ( int64_t( 1 ) << SCHOOL_ARCANE )         | (
 enum talent_tree_type
 {
   TREE_NONE=0,
-  TREE_SEER,TREE_TELEKINETICS,TREE_BALANCE,
+  TREE_SEER,         TREE_TELEKINETICS,  TREE_BALANCE,
+  TREE_CORRUPTION,   TREE_LIGHTNING,     TREE_MADNESS,
   TALENT_TREE_MAX
 };
 
 enum talent_tab_type
 {
   TALENT_TAB_NONE = -1,
-  JEDI_SAGE_SEER,JEDI_SAGE_TELEKINETICS,JEDI_SAGE_BALANCE
+  JEDI_SAGE_SEER = 0,           JEDI_SAGE_TELEKINETICS,   JEDI_SAGE_BALANCE,
+  SITH_SORCERER_CORRUPTION = 0, SITH_SORCERER_LIGHTNING,  SITH_SORCERER_MADNESS,
+
 };
 
 enum weapon_type
@@ -3944,6 +3947,7 @@ struct player_t : public noncopyable
   static player_t* create( sim_t* sim, const std::string& type, const std::string& name, race_type r = RACE_NONE );
 
   static player_t* create_jedi_sage( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+  static player_t* create_sith_sorcerer( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
   static player_t* create_enemy       ( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
 
   // Raid-wide aura/buff/debuff maintenance
@@ -3967,9 +3971,11 @@ struct player_t : public noncopyable
   inline bool is_add() const { return type == ENEMY_ADD; }
 
   jedi_consular_t * cast_jedi_consular() { assert( main_class == JEDI_CONSULAR  ); return ( jedi_consular_t * ) this; }
-  jedi_sage_t     * cast_jedi_sage    () { assert( type == JEDI_SAGE            ); return ( jedi_sage_t     * ) this; }
+  jedi_sage_t     * cast_jedi_sage    () { assert( type == JEDI_SAGE || type == SITH_SORCERER ); return ( jedi_sage_t     * ) this; }
   pet_t           * cast_pet          () { assert( is_pet()                     ); return ( pet_t           * ) this; }
   enemy_t         * cast_enemy        () { assert( type == ENEMY                ); return ( enemy_t         * ) this; }
+
+  bool is_jedi_sage() { return ( type == JEDI_SAGE || type == SITH_SORCERER ); }
 
   bool      in_gcd() const { return gcd_ready > sim -> current_time; }
   bool      recent_cast() const;
@@ -4014,7 +4020,7 @@ struct targetdata_t : public noncopyable
 
   static targetdata_t* get( player_t* source, player_t* target );
 
-  jedi_sage_targetdata_t* cast_jedi_sage() { assert( source->type == JEDI_SAGE ); return ( jedi_sage_targetdata_t* ) this; }
+  jedi_sage_targetdata_t* cast_jedi_sage() { assert( source->type == JEDI_SAGE || source->type == SITH_SORCERER ); return ( jedi_sage_targetdata_t* ) this; }
 
 protected:
   dot_t* add_dot( dot_t* d );

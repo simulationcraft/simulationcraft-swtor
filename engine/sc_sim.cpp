@@ -1999,7 +1999,8 @@ void sim_t::create_options()
     { "target_level",                     OPT_INT,    &( target_level                             ) },
     { "target_race",                      OPT_STRING, &( target_race                              ) },
     // Character Creation
-    { "jedi_sage",                    OPT_FUNC,   ( void* ) ::parse_player                      },
+    { "jedi_sage",                        OPT_FUNC,   ( void* ) ::parse_player                      },
+    { "sith_sorcerer",                    OPT_FUNC,   ( void* ) ::parse_player                      },
     { "enemy",                            OPT_FUNC,   ( void* ) ::parse_player                      },
     { "pet",                              OPT_FUNC,   ( void* ) ::parse_player                      },
     { "player",                           OPT_FUNC,   ( void* ) ::parse_player                      },
