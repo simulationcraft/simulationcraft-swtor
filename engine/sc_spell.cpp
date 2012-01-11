@@ -17,7 +17,6 @@ void spell_t::init_spell_t_()
   base_spell_power_multiplier = 1.0;
   crit_bonus = 0.5;
   min_gcd = 1.0;
-  hasted_ticks = true;
 }
 
 spell_t::spell_t( const char* n, player_t* p, int r, const school_type s, int t ) :

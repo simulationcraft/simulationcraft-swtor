@@ -43,7 +43,6 @@ void attack_t::init_attack_t_()
   crit_bonus = 1.0;
 
   min_gcd = 1.0;
-  hasted_ticks = false;
 
   // Prevent melee from being scheduled when player is moving
   if ( range < 0 ) range = 5;
