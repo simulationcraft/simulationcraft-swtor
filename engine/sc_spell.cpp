@@ -39,7 +39,12 @@ double spell_t::gcd() const
   double t = action_t::gcd();
   if ( t == 0 ) return 0;
 
-  // t *= haste(); // According to http://sithwarrior.com/forums/Thread-SWTOR-formula-list alacrity doesn't reduce the gcd
+  // According to http://sithwarrior.com/forums/Thread-SWTOR-formula-list alacrity doesn't reduce the gcd
+  // Actually it seems to be more complex, cast time spells ( eg. with 1.5s cast time ) get a reduced gcd, but instant cast spells do not
+  // http://sithwarrior.com/forums/Thread-Alacrity-and-the-GCD?pid=9152#pid9152
+  if ( base_execute_time > 0 )
+    t *= haste();
+
   if ( t < min_gcd ) t = min_gcd;
 
   return t;
