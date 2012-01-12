@@ -2864,7 +2864,10 @@ struct sim_t : private thread_t
   struct overrides_t
   {
     int bleeding;
-    int force_valor;
+    int coordination;// 5% crit. implement as buff, also add equal republic buffs
+    int force_valor; // 5% stat bonus. implement sith version
+    int shatter_shot; // -20% target armor. implement as buff, also add equal buffs
+    int unnatural_might;// 5% damage bonus. implement as buff, also add equal republic buffs
   };
   overrides_t overrides;
 
@@ -3690,10 +3693,11 @@ struct player_t : public noncopyable
   struct buffs_t
   {
     buff_t* force_valor;
-    buff_t* stunned;
+    buff_t* power_potion;
     buff_t* raid_movement;
     buff_t* self_movement;
-    buff_t* power_potion;
+    buff_t* stunned;
+    buff_t* unnatural_might;
   };
   buffs_t buffs;
 
@@ -3702,6 +3706,7 @@ struct player_t : public noncopyable
     debuff_t* bleeding;
     debuff_t* casting;
     debuff_t* invulnerable;
+    debuff_t* shatter_shot;
     debuff_t* vulnerable;
 
     bool snared();

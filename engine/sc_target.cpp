@@ -605,7 +605,11 @@ void player_t::enemy_init( sim_t* /* sim */ )
 
 // player_t::enemy_combat_begin =============================================
 
-void player_t::enemy_combat_begin( sim_t* /* sim */ )
+void player_t::enemy_combat_begin( sim_t* sim )
 {
-
+  for ( player_t* p = sim -> target_list; p; p = p -> next )
+  {
+      if ( sim -> overrides.shatter_shot )
+        p -> debuffs.shatter_shot -> override(); // move to correct class
+  }
 }

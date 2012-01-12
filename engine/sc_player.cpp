@@ -1339,6 +1339,8 @@ void player_t::init_buffs()
   debuffs.casting      = new debuff_t( this, "casting",      -1 );
   debuffs.invulnerable = new debuff_t( this, "invulnerable", -1 );
   debuffs.vulnerable   = new debuff_t( this, "vulnerable",   -1 );
+
+  debuffs.shatter_shot = new debuff_t( this, "shatter_shot", 1, 45.0 ); // TODO: move to player_t extension of correct class
 }
 
 // player_t::init_gains =====================================================
@@ -1683,6 +1685,8 @@ double player_t::composite_attack_crit() const
 {
   double ac = attack_crit + attack_crit_per_agility * agility();
 
+  ac += sim -> overrides.coordination * 0.05;
+
   return ac;
 }
 
@@ -1713,6 +1717,9 @@ double player_t::composite_armor() const
 double player_t::composite_armor_multiplier() const
 {
   double a = armor_multiplier;
+
+  if ( debuffs.shatter_shot -> up() )
+    a *= 0.8;
 
   return a;
 }
@@ -1889,6 +1896,8 @@ double player_t::composite_spell_crit() const
 {
   double sc = spell_crit;
 
+  sc += sim -> overrides.coordination * 0.05;
+
   return sc;
 }
 
@@ -1989,6 +1998,8 @@ double player_t::composite_movement_speed() const
 double player_t::composite_force_damage_bonus() const
 {
   double dmg_bonus = willpower() * 0.2 + composite_power() * 0.23 + composite_force_power() * 0.23;
+
+  dmg_bonus *= 1.0 + sim -> overrides.unnatural_might * 0.05;
 
   return dmg_bonus;
 }
