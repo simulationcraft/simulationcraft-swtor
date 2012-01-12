@@ -476,7 +476,7 @@ bool player_t::init( sim_t* sim )
     log_t::output( sim, "Initializing Auras, Buffs, and De-Buffs." );
 
   player_t::jedi_sage_init( sim );
-  player_t::enemy_init       ( sim );
+  player_t::enemy_init( sim );
 
   if ( sim -> debug )
     log_t::output( sim, "Initializing Players." );
@@ -1330,10 +1330,11 @@ void player_t::init_buffs()
 
   buffs.power_potion     = new stat_buff_t( this, "power_potion", STAT_POWER, 565.0, 1, 15.0, 180.0 );
 
-
-  buffs.raid_movement = new buff_t( this, "raid_movement", 1 );
-  buffs.self_movement = new buff_t( this, "self_movement", 1 );
-  buffs.stunned        = new   buff_t( this, "stunned",      -1 );
+  buffs.coordination    = new buff_t( this, "coordination",     1 );
+  buffs.raid_movement   = new buff_t( this, "raid_movement",    1 );
+  buffs.self_movement   = new buff_t( this, "self_movement",    1 );
+  buffs.stunned         = new buff_t( this, "stunned",         -1 );
+  buffs.unnatural_might = new buff_t( this, "unnatural_might",  1 );
 
   debuffs.bleeding     = new debuff_t( this, "bleeding",     -1 );
   debuffs.casting      = new debuff_t( this, "casting",      -1 );
@@ -1685,7 +1686,8 @@ double player_t::composite_attack_crit() const
 {
   double ac = attack_crit + attack_crit_per_agility * agility();
 
-  ac += sim -> overrides.coordination * 0.05;
+  if ( buffs.coordination -> up() )
+    ac += 0.05;
 
   return ac;
 }
@@ -1896,7 +1898,8 @@ double player_t::composite_spell_crit() const
 {
   double sc = spell_crit;
 
-  sc += sim -> overrides.coordination * 0.05;
+  if ( buffs.coordination -> up() )
+    sc += 0.05;
 
   return sc;
 }
@@ -1999,7 +2002,8 @@ double player_t::composite_force_damage_bonus() const
 {
   double dmg_bonus = willpower() * 0.2 + composite_power() * 0.23 + composite_force_power() * 0.23;
 
-  dmg_bonus *= 1.0 + sim -> overrides.unnatural_might * 0.05;
+  if ( buffs.unnatural_might -> up() )
+    dmg_bonus *= 1.05;
 
   return dmg_bonus;
 }
@@ -2081,6 +2085,19 @@ void player_t::combat_begin( sim_t* sim )
 {
   player_t::jedi_sage_combat_begin( sim );
   player_t::enemy_combat_begin( sim );
+
+  // FIXME: Move to correct classes
+  for ( player_t* p = sim -> player_list; p; p = p -> next )
+  {
+    if ( p -> ooc_buffs() )
+    {
+      if ( sim -> overrides.coordination > 0 )
+        p -> buffs.coordination -> override();
+
+      if ( sim -> overrides.unnatural_might > 0 )
+        p -> buffs.unnatural_might -> override();
+    }
+  }
 }
 
 // player_t::combat_begin ===================================================

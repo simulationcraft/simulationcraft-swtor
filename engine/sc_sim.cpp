@@ -2026,7 +2026,6 @@ void sim_t::create_options()
     { "override.force_valor",             OPT_BOOL,   &( overrides.force_valor                     ) },
     { "override.shatter_shot",            OPT_BOOL,   &( overrides.shatter_shot                    ) },
     { "override.unnatural_might",         OPT_BOOL,   &( overrides.unnatural_might                 ) },
-
     // Stat Enchants
     { "default_enchant_strength",                 OPT_FLT,  &( enchant.attribute[ ATTR_STRENGTH  ] ) },
     { "default_enchant_agility",                  OPT_FLT,  &( enchant.attribute[ ATTR_AGILITY   ] ) },

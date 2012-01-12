@@ -3692,6 +3692,7 @@ struct player_t : public noncopyable
 
   struct buffs_t
   {
+    buff_t* coordination;
     buff_t* force_valor;
     buff_t* power_potion;
     buff_t* raid_movement;
