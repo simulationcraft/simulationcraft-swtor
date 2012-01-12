@@ -373,7 +373,7 @@ struct project_t : public jedi_consular_spell_t
   jedi_consular_spell_t* upheaval;
 
   project_t( jedi_consular_t* p, const std::string& options_str, bool is_upheaval = false ) :
-    jedi_consular_spell_t( ( std::string( p -> type == SITH_SORCERER ? "shock" : "project") + std::string( is_upheaval ? "_upheaval" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL ),
+    jedi_consular_spell_t( ( std::string( p -> type == SITH_SORCERER ? "shock" : "project") + std::string( is_upheaval ? "_upheaval" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
     upheaval( 0 )
   {
     parse_options( 0, options_str );
@@ -419,7 +419,7 @@ struct project_t : public jedi_consular_spell_t
 struct telekinetic_throw_t : public jedi_consular_spell_t
 {
   telekinetic_throw_t( jedi_consular_t* p, const std::string& options_str ) :
-    jedi_consular_spell_t( p -> type == SITH_SORCERER ? "force_lightning" : "telekinetic_throw", p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
+    jedi_consular_spell_t( p -> type == SITH_SORCERER ? "force_lightning" : "telekinetic_throw", p, RESOURCE_FORCE, SCHOOL_KINETIC )
   {
     parse_options( 0, options_str );
     base_td = 508.8;
@@ -555,7 +555,7 @@ struct disturbance_t : public jedi_sage_spell_t
   jedi_consular_spell_t* tm;
 
   disturbance_t( jedi_sage_t* p, const std::string& n, const std::string& options_str, bool is_tm = false ) :
-    jedi_sage_spell_t( ( n + std::string( is_tm ? "_tm" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL ),
+    jedi_sage_spell_t( ( n + std::string( is_tm ? "_tm" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
     tm( 0 )
   {
     parse_options( 0, options_str );
@@ -613,7 +613,7 @@ struct disturbance_t : public jedi_sage_spell_t
 struct mind_crush_t : public jedi_sage_spell_t
 {
   mind_crush_t( jedi_sage_t* p, const std::string& n, const std::string& options_str ) :
-    jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
+    jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
   {
     parse_options( 0, options_str );
     base_dd_min = 545.8; base_dd_max = 610.2;
@@ -635,7 +635,7 @@ struct mind_crush_t : public jedi_sage_spell_t
 struct weaken_mind_t : public jedi_sage_spell_t
 {
   weaken_mind_t( jedi_sage_t* p, const std::string& n, const std::string& options_str ) :
-    jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE )
+    jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
   {
     parse_options( 0, options_str );
     base_td = 299.5;
@@ -667,7 +667,7 @@ struct turbulence_t : public jedi_sage_spell_t
   jedi_consular_spell_t* tm;
 
   turbulence_t( jedi_sage_t* p, const std::string& n, const std::string& options_str, bool is_tm = false ) :
-    jedi_sage_spell_t( ( n + std::string( is_tm ? "_tm" : "" ) ).c_str(), p, RESOURCE_FORCE ),
+    jedi_sage_spell_t( ( n + std::string( is_tm ? "_tm" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL ),
     tm( 0 )
   {
     check_talent( p -> talents.turbulence );
@@ -722,7 +722,7 @@ struct turbulence_t : public jedi_sage_spell_t
 struct force_in_balance_t : public jedi_sage_spell_t
 {
   force_in_balance_t( jedi_sage_t* p, const std::string& n, const std::string& options_str ) :
-    jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE )
+    jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
   {
     check_talent( p -> talents.force_in_balance );
 
@@ -751,7 +751,7 @@ struct force_in_balance_t : public jedi_sage_spell_t
 struct sever_force_t : public jedi_sage_spell_t
 {
   sever_force_t( jedi_sage_t* p, const std::string& n, const std::string& options_str ) :
-    jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE )
+    jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
   {
     check_talent( p -> talents.sever_force );
 

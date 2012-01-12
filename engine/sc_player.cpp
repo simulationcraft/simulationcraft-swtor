@@ -3296,7 +3296,7 @@ double player_t::target_mitigation( double            amount,
     if ( mitigated_amount < 0 ) return 0;
   }
 
-  if ( school == SCHOOL_PHYSICAL )
+  if ( school == SCHOOL_PHYSICAL || school == SCHOOL_KINETIC )
   {
     if ( sim -> debug && action && ! action -> target -> is_enemy() && ! action -> target -> is_add() )
       log_t::output( sim, "Damage to %s before armor mitigation is %f", action -> target -> name(), mitigated_amount );

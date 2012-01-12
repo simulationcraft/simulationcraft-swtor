@@ -14,9 +14,9 @@ static const char* class_color( int type )
   {
   case PLAYER_NONE:  return "FFFFFF";
   case SITH_WARRIOR: return "C41F3B";
-  case TROOPER:        return "FF7D0A";
+  //case TROOPER:        return "FF7D0A";
   case BOUNTY_HUNTER:       return "336600";
-  //case MAGE:         return "69CCF0";
+  case TROOPER:         return "69CCF0";
   case IMPERIAL_AGENT:      return "F58CBA";
   case JEDI_SAGE:       return "C0C0C0";
   case SMUGGLER:        return "FFF569";
@@ -47,7 +47,7 @@ static const char* school_color( int type )
 {
   switch ( type )
   {
-  case SCHOOL_ARCANE:     	return 0; //return class_color( MAGE );
+  case SCHOOL_INTERNAL:     return class_color( TROOPER );
   case SCHOOL_BLEED:      	return "C55D54"; // Half way between DK "red" and JEDI_KNIGHT "brown"
   case SCHOOL_CHAOS:      	return class_color( SITH_WARRIOR );
   case SCHOOL_FIRE:       	return class_color( SITH_WARRIOR );
@@ -56,7 +56,7 @@ static const char* school_color( int type )
   case SCHOOL_HOLY:       	return class_color( JEDI_SAGE );
   case SCHOOL_NATURE:     	return class_color( BOUNTY_HUNTER );
   case SCHOOL_PHYSICAL:   	return class_color( JEDI_KNIGHT );
-  case SCHOOL_SHADOW:     	return 0; //return class_color( WARLOCK );
+  case SCHOOL_KINETIC:     	return class_color( SITH_SORCERER );
   case SCHOOL_FROSTSTORM:   return "2C6080";
   case SCHOOL_SPELLSTORM: 	return "8AD0B1"; // Half way between BOUNTY_HUNTER "green" and Mage "blue" (spellstorm = arcane/nature damage)
   case SCHOOL_SHADOWFROST: 	return "000066"; // Shadowfrost???
@@ -712,7 +712,7 @@ const char* chart_t::action_dpet( std::string& s,
     std::string school = school_color( stats_list[ i ] -> school );
     if ( school.empty() )
     {
-      p -> sim -> errorf( "chart_t::action_dpet assertion error! School unknown, stats %s from %s.\n", stats_list[ i ] -> name_str.c_str(), p -> name() );
+      p -> sim -> errorf( "chart_t::action_dpet assertion error! School color unknown, stats %s from %s.\n", stats_list[ i ] -> name_str.c_str(), p -> name() );
       assert( 0 );
     }
     s += school;

@@ -346,15 +346,11 @@ void enemy_t::init_base()
     // For level 80+ at least it seems to pretty much follow a trend line of: armor = 280.26168*level - 12661.51713
     switch ( level )
     {
-    case 80: initial_armor = 9729; break;
-    case 81: initial_armor = 10034; break;
-    case 82: initial_armor = 10338; break;
-    case 83: initial_armor = 10643; break;
-    case 84: initial_armor = 10880; break; // Need real value
-    case 85: initial_armor = 11092; break;
-    case 86: initial_armor = 11387; break;
-    case 87: initial_armor = 11682; break;
-    case 88: initial_armor = 11977; break;
+    case 50: initial_armor = 10800; break;
+    case 51: initial_armor = 11000; break;
+    case 52: initial_armor = 11200; break;
+    case 53: initial_armor = 11400; break;
+
     default: if ( level < 80 )
         initial_armor = ( int ) floor ( ( level / 80.0 ) * 9729 ); // Need a better value here.
       break;

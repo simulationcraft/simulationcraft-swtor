@@ -591,6 +591,8 @@ const char* util_t::school_type_string( int school )
   case SCHOOL_CHROMATIC:        return "chromatic";
   case SCHOOL_MAGIC:            return "magic";
   case SCHOOL_DRAIN:            return "drain";
+  case SCHOOL_KINETIC:          return "kinetic";
+  case SCHOOL_INTERNAL:         return "internal";
   }
   return "unknown";
 }

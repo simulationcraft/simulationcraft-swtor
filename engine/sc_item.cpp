@@ -1023,6 +1023,18 @@ bool item_t::decode_special( special_effect_t& effect,
       effect.trigger_type = PROC_DAMAGE;
       effect.trigger_mask = ( int64_t( 1 ) << SCHOOL_DRAIN );
     }
+    else if ( t.full == "onkineticdamage" )
+    {
+      effect.trigger_str  = t.full;
+      effect.trigger_type = PROC_DAMAGE;
+      effect.trigger_mask = ( int64_t( 1 ) << SCHOOL_KINETIC );
+    }
+    else if ( t.full == "oninternaldamage" )
+    {
+      effect.trigger_str  = t.full;
+      effect.trigger_type = PROC_DAMAGE;
+      effect.trigger_mask = ( int64_t( 1 ) << SCHOOL_INTERNAL );
+    }
     else if ( t.full == "ontick" )
     {
       effect.trigger_str  = t.full;
