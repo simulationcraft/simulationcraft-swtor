@@ -1,0 +1,28 @@
+#!./simc 
+
+jedi_sage=Jedi_Sage
+origin="create_jedi_sage.simc"
+level=50
+race=human
+position=front
+role=spell
+use_pre_potion=0
+talents=http://www.torhead.com/talent#jedi_sage-000000000000000000000000000000000000000000000000000000000000000
+actions=stim,type=rakata_resolve
+actions+=/power_potion,if=time>10
+actions+=/force_valor
+actions+=/snapshot_stats
+actions+=/mind_crush
+actions+=/weaken_mind,if=!ticking
+actions+=/force_in_balance,if=!dot.mind_crush.ticking
+actions+=/sever_force,if=!ticking
+actions+=/telekinetic_throw
+actions+=/disturbance
+shirt=foo,stats=1575willpower_536crit_306haste_107power_1217forcepower_201surge
+# Gear Summary
+# gear_crit_rating=536
+# gear_haste_rating=306
+# gear_power=107
+# gear_forcepower=1217
+# gear_willpower=1575
+# gear_surge_rating=201
