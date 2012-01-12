@@ -27,8 +27,10 @@ static OptionEntry* getBuffOptions()
 {
   static OptionEntry options[] =
   {
-    { "Toggle All Buffs",       "",                                "Toggle all buffs on/off"                          },
-    { "Force Valor",            "override.force_valor",            "Force Valor ( Str, Aim, Cunning, Willpower )"     },
+    { "Toggle All Buffs", "",                         "Toggle all buffs on/off"                           },
+    { "Crit",             "override.coordination",    "+5% Crit"                                          },
+    { "Stats",            "override.force_valor",     "+5% Stat Buff ( Str, Aim, Cunning, Willpower )"    },
+    { "Damage Bonus",     "override.unnatural_might", "+5% Damage Bonus"                                  },
     { NULL, NULL, NULL }
   };
   return options;
@@ -54,8 +56,9 @@ static OptionEntry* getDebuffOptions()
 {
   static OptionEntry options[] =
   {
-    { "Toggle All Debuffs",     "",                    "Toggle all debuffs on/off"     },
-    { "Bleeding",               "override.bleeding",   "Rip\nRupture\nPiercing Shots"  },
+    { "Toggle All Debuffs",     "",                       "Toggle all debuffs on/off"     },
+    { "Bleeding",               "override.bleeding",      "Rip\nRupture\nPiercing Shots"  },
+    { "Armor Reduction",        "override.shatter_shot",  "-20% Armor Reduction"          },
     { NULL, NULL, NULL }
   };
   return options;
