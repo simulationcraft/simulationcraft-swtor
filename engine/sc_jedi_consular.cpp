@@ -525,7 +525,7 @@ struct jedi_sage_spell_t : public jedi_consular_spell_t
 
   virtual void tick( dot_t* d )
   {
-    spell_t::tick( d );
+    jedi_consular_spell_t::tick( d );
 
     jedi_sage_t* p = player -> cast_jedi_sage();
 
