@@ -5279,7 +5279,7 @@ bool player_t::create_profile( std::string& profile_str, int save_type, bool sav
 
   if ( save_type == SAVE_ALL || save_type == SAVE_TALENTS )
   {
-    talents_str = "http://www.torhead.com/talent#";
+    talents_str = "http://www.torhead.com/skill-calc#";
     talents_str += util_t::player_type_string( type );
     talents_str += "-";
     // This is necessary because sometimes the talent trees change shape between live/ptr.
@@ -5460,7 +5460,7 @@ void player_t::copy_from( player_t* source )
   position_str = source -> position_str;
   use_pre_potion = source -> use_pre_potion;
   professions_str = source -> professions_str;
-  talents_str = "http://www.torhead.com/talent#";
+  talents_str = "http://www.torhead.com/skill-calc#";
   talents_str += util_t::player_type_string( type );
   talents_str += "-";
   // This is necessary because sometimes the talent trees change shape between live/ptr.

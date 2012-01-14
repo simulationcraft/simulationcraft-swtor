@@ -141,7 +141,7 @@ struct jedi_sage_t : public jedi_consular_t
     talent_t* pinning_resolve;
     talent_t* upheaval;
     talent_t* focused_insight;
-    talent_t* critical_kinsesis;
+    talent_t* psychokinesis;
     talent_t* force_in_balance;
     talent_t* psychic_barrier;
     talent_t* telekinetic_balance;
@@ -410,11 +410,13 @@ struct project_t : public jedi_consular_spell_t
 
     cooldown -> duration = 6.0;
 
-    if ( player -> is_jedi_sage() && !is_upheaval )
+    if ( player -> is_jedi_sage() )
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
 
-      if ( p -> talents.upheaval -> rank() > 0 )
+      base_cost -= p -> talents.psychokinesis -> rank() * 3.0;
+
+      if ( !is_upheaval && p -> talents.upheaval -> rank() > 0 )
       {
         upheaval = new project_t( p, n, options_str, true );
         upheaval -> base_multiplier *= 0.50;
@@ -467,8 +469,6 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
       jedi_sage_t* p = player -> cast_jedi_sage();
 
       base_multiplier *= 1.0 + p -> talents.empowered_throw -> rank() * 0.04;
-
-      base_crit += p -> talents.critical_kinsesis -> rank() * 0.05;
 
       if ( p -> talents.telekinetic_balance -> rank() > 0 )
         cooldown -> duration = 0;
@@ -592,8 +592,6 @@ struct disturbance_t : public jedi_sage_spell_t
     direct_power_mod = 1.32;
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
-
-    base_crit += p -> talents.critical_kinsesis -> rank() * 0.05;
 
     if ( !is_tm )
     {
@@ -954,13 +952,13 @@ void jedi_sage_t::init_talents()
   talents.empowered_throw = find_talent( "Empowered Throw" );
   talents.jedi_resistance = find_talent( "Jedi Resistance" );
   talents.will_of_the_jedi = find_talent( "Will of the Jedi" );
-  talents.pinning_resolve = find_talent( "Pinning resolve" );
+  talents.pinning_resolve = find_talent( "Pinning Resolve" );
   talents.upheaval = find_talent( "Upheaval" );
   talents.focused_insight = find_talent( "Focused Insight" );
-  talents.critical_kinsesis = find_talent( "Critical Kinsesis" );
-  talents.force_in_balance = find_talent( "Force in Nalance" );
-  talents.psychic_barrier = find_talent( "Psychic Narrier" );
-  talents.telekinetic_balance = find_talent( "Telekinetic Nalance" );
+  talents.psychokinesis = find_talent( "Psychokinesis" );
+  talents.force_in_balance = find_talent( "Force in Balance" );
+  talents.psychic_barrier = find_talent( "Psychic Barrier" );
+  talents.telekinetic_balance = find_talent( "Telekinetic Balance" );
   talents.containment = find_talent( "Containment" );
   talents.mind_ward = find_talent( "Mind Ward" );
   talents.presence_of_mind = find_talent( "Presence of Mind" );
@@ -1290,13 +1288,13 @@ void jedi_sage_t::create_talents()
   talent_trees[ 2 ].push_back(  new talent_t( this, "Empowered Throw", 2, 3 ) );
   talent_trees[ 2 ].push_back(  new talent_t( this, "Jedi Resistance", 2, 2 ) );
   talent_trees[ 2 ].push_back(  new talent_t( this, "Will of the Jedi", 2, 2 ) );
-  talent_trees[ 2 ].push_back(  new talent_t( this, "Pinning resolve", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Pinning Resolve", 2, 2 ) );
   talent_trees[ 2 ].push_back(  new talent_t( this, "Upheaval", 2, 3 ) );
   talent_trees[ 2 ].push_back(  new talent_t( this, "Focused Insight", 2, 2 ) );
-  talent_trees[ 2 ].push_back(  new talent_t( this, "Critical Kinsesis", 2, 2 ) );
-  talent_trees[ 2 ].push_back(  new talent_t( this, "Force in Nalance", 2, 1 ) );
-  talent_trees[ 2 ].push_back(  new talent_t( this, "Psychic Narrier", 2, 3 ) );
-  talent_trees[ 2 ].push_back(  new talent_t( this, "Telekinetic Nalance", 2, 1 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Psychokinesis", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Force in Balance", 2, 1 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Psychic Barrier", 2, 3 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Telekinetic Balance", 2, 1 ) );
   talent_trees[ 2 ].push_back(  new talent_t( this, "Containment", 2, 2 ) );
   talent_trees[ 2 ].push_back(  new talent_t( this, "Mind Ward", 2, 2 ) );
   talent_trees[ 2 ].push_back(  new talent_t( this, "Presence of Mind", 2, 1 ) );

@@ -852,7 +852,7 @@ player_t* armory_t::download_player( sim_t* sim,
         sim -> errorf( "Player %s unable to parse talents '%s'.\n", p -> name(), talents_encoding.c_str() );
         return 0;
       }
-      p -> talents_str = "http://www.torhead.com/talent#";
+      p -> talents_str = "http://www.torhead.com/skill-calc#";
       p -> talents_str += util_t::player_type_string( p -> type );
       p -> talents_str += "-" + talents_encoding;
 
