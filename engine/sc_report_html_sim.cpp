@@ -913,7 +913,7 @@ static void print_html_help_boxes( FILE*  file, sim_t* sim )
            "\t\t\t\t<h3>Fight Length</h3>\n"
            "\t\t\t\t<p>Fight Length: %.0f<br />\n"
            "\t\t\t\tVary Combat Length: %.2f</p>\n"
-           "\t\t\t\t<p>Fight Length is the specified average fight duration. If vary_combat_length is set, the fight length will vary by +/- that portion of the value. See <a href=\"http://code.google.com/p/simulationcraft/wiki/Options#Combat_Length\" class=\"ext\">Combat Length</a> in the wiki for further details.</p>\n"
+           "\t\t\t\t<p>Fight Length is the specified average fight duration. If vary_combat_length is set, the fight length will vary by +/- that portion of the value. See <a href=\"http://code.google.com/p/simulationcraft-swtor/wiki/Options#Combat_Length\" class=\"ext\">Combat Length</a> in the wiki for further details.</p>\n"
            "\t\t\t</div>\n"
            "\t\t</div>\n",
            sim -> max_time,
@@ -1187,7 +1187,7 @@ static void print_html_masthead( FILE*  file, sim_t* sim )
            "\t\t<div id=\"masthead\" class=\"section section-open\">\n\n" );
 
   fprintf( file,
-           "\t\t\t<h1><a href=\"http://code.google.com/p/simulationcraft/\">SimulationCraft %s-%s</a></h1>\n"
+           "\t\t\t<h1><a href=\"http://code.google.com/p/simulationcraft-swtor/\">SimulationCraft %s-%s</a></h1>\n"
            "\t\t\t<h2>for Star Wars: The Old Republic %s %s (build level %s)</h2>\n\n",
            SC_MAJOR_VERSION, SC_MINOR_VERSION, dbc_t::wow_version( sim -> dbc.ptr ), ( sim -> dbc.ptr ? "PTR" : "Live" ), dbc_t::build_level( sim -> dbc.ptr ) );
 

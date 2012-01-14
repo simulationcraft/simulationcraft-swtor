@@ -1066,7 +1066,7 @@ static void print_html_talents( FILE* file, player_t* p )
         talent_t* t = p -> talent_trees[ i ][ j ];
 
         fprintf( file, "\t\t\t\t\t\t\t\t\t\t<tr%s>\n", ( ( j&1 ) ? " class=\"odd\"" : "" ) );
-        fprintf( file, "\t\t\t\t\t\t\t\t\t\t\t<td class=\"left\">%s</td>\n", t -> t_data -> name_cstr() );
+        fprintf( file, "\t\t\t\t\t\t\t\t\t\t\t<td class=\"left\">%s</td>\n", t -> name_cstr() );
         fprintf( file, "\t\t\t\t\t\t\t\t\t\t\t<td>%d</td>\n", t -> rank() );
         fprintf( file, "\t\t\t\t\t\t\t\t\t\t</tr>\n" );
       }

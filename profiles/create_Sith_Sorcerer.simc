@@ -1,6 +1,13 @@
-sith_sorcerer=Sith_Sorcerer
+sith_sorcerer=Sith_Sorcerer_Madness
 level=50
+talents=http://www.torhead.com/talent#jedi_sage-032001000000000000003020322131021122321
 position=front
 shirt=foo,stats=1575willpower_536crit_306haste_107power_1217forcepower_201surge
-#taking stats from http://sithwarrior.com/forums/Thread-SI-JC-General-Information-Simple-Questions-and-Answers?pid=7211#pid7211
-save=Sith_Sorcerer.simc
+save=Sith_Sorcerer_Madness.simc
+
+sith_sorcerer=Sith_Sorcerer_Lightning
+level=50
+talents=http://www.torhead.com/talent#jedi_sage-032302200120122131513020302
+position=front
+shirt=foo,stats=1575willpower_536crit_306haste_107power_1217forcepower_201surge
+save=Sith_Sorcerer_Lightning.simc

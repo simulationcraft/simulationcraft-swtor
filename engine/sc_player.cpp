@@ -11,24 +11,10 @@ namespace { // ANONYMOUS NAMESPACE ==========================================
 
 struct compare_talents
 {
-  bool operator()( const talent_t* left, const talent_t* right ) const
+  bool operator()( const talent_t* l, const talent_t* r ) const
   {
-    const talent_data_t* l = left  -> t_data;
-    const talent_data_t* r = right -> t_data;
 
-    if ( l -> tab_page() == r -> tab_page() )
-    {
-      if ( l -> row() == r -> row() )
-      {
-        if ( l -> col() == r -> col() )
-        {
-          return ( l -> id() > r -> id() ); // not a typo: Dive comes before Dash in pet talent string!
-        }
-        return ( l -> col() < r -> col() );
-      }
-      return ( l -> row() < r -> row() );
-    }
-    return ( l -> tab_page() < r -> tab_page() );
+    return ( l -> _tab_page < r -> _tab_page );
   }
 };
 
@@ -4692,41 +4678,7 @@ bool player_t::parse_talents_wowhead( const std::string& talent_string )
 
 void player_t::create_talents()
 {
-  int cid_mask = util_t::class_id_mask( type );
-  talent_data_t* talent_data = talent_data_t::list( dbc.ptr );
 
-  for ( int i=0; talent_data[ i ].name_cstr(); i++ )
-  {
-    talent_data_t& td = talent_data[ i ];
-
-    if ( cid_mask )
-    {
-      if ( cid_mask & td.mask_class() )
-      {
-        talent_t* t = new talent_t( this, &td );
-        talent_trees[ td.tab_page() ].push_back( t );
-        option_t::add( options, t -> s_token.c_str(), OPT_TALENT_RANK, ( void* ) t );
-      }
-    }
-    else if ( td.mask_pet() )
-    {
-      for ( int j=0; j < MAX_TALENT_TREES; j++ )
-      {
-        if ( td.mask_pet() & ( 1 << j ) )
-        {
-          talent_t* t = new talent_t( this, &td );
-          talent_trees[ j ].push_back( t );
-          option_t::add( options, t -> s_token.c_str(), OPT_TALENT_RANK, ( void* ) t );
-        }
-      }
-    }
-  }
-
-  for ( int i=0; i < MAX_TALENT_TREES; i++ )
-  {
-    std::vector<talent_t*>& tree = talent_trees[ i ];
-    if ( ! tree.empty() ) range::sort( tree, compare_talents() );
-  }
 }
 
 // player_t::find_talent ====================================================
@@ -4744,7 +4696,7 @@ talent_t* player_t::find_talent( const std::string& n,
     {
       talent_t* t = talent_trees[ i ][ j ];
 
-      if ( n == t -> td -> name_cstr() )
+      if ( n == t -> name_cstr() )
       {
         return t;
       }
@@ -5515,7 +5467,7 @@ void player_t::copy_from( player_t* source )
     for ( unsigned j = 0; j < talent_trees[ i ].size(); j++ )
     {
       talent_t* t = talent_trees[ i ][ j ];
-      talent_t* source_t = source -> find_talent( t -> td -> name_cstr() );
+      talent_t* source_t = source -> find_talent( t -> name_cstr() );
       if ( source_t ) t -> set_rank( source_t -> rank() );
       std::stringstream ss;
       ss << t -> rank();

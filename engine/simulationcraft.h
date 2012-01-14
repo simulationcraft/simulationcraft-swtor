@@ -175,8 +175,10 @@ struct xml_node_t;
 
 struct targetdata_t;
 struct jedi_sage_targetdata_t;
+struct sith_sorcerer_targetdata_t;
 
 void register_jedi_sage_targetdata( sim_t* sim );
+void register_sith_sorcerer_targetdata( sim_t* sim );
 
 #define DATA_DOT 0
 #define DATA_AURA 1
@@ -2140,7 +2142,29 @@ private:
 };
 
 // Talent class
+struct talent_t
+{
+  const char * _name;        // Talent name
+  unsigned     _tab_page;    // Talent tab page
+  //unsigned     _col;         // Talent column
+  //unsigned     _row;         // Talent row
+  unsigned     _max_rank;
 
+  unsigned t_rank;
+
+  talent_t( player_t* p, const char*, unsigned, unsigned );
+  virtual ~talent_t();
+
+  virtual bool set_rank( uint32_t value );
+  virtual bool ok() const;
+
+  virtual uint32_t rank() const;
+
+  virtual uint32_t max_rank() const;
+  const char*          name_cstr() const { return _name; }
+};
+
+/*
 struct talent_t : spell_id_t
 {
   const talent_data_t* t_data;
@@ -2179,7 +2203,7 @@ struct talent_t : spell_id_t
   const spelleffect_data_t& effect2() const { return sd -> effect2(); }
   const spelleffect_data_t& effect3() const { return sd -> effect3(); }
 };
-
+*/
 // Active Spell ID class
 
 struct active_spell_t : public spell_id_t
@@ -2424,10 +2448,8 @@ struct buff_t : public spell_id_t
 
   // Player Buff with extracted data
 private:
-  void init_from_talent_( player_t*, talent_t* );
   void init_from_spell_( player_t*, spell_data_t* );
 public:
-  buff_t( actor_pair_t pair, talent_t*, ... );
   buff_t( actor_pair_t pair, spell_data_t*, ... );
 
   // Player Buff as spell_id_t by name
@@ -4030,7 +4052,8 @@ struct targetdata_t : public noncopyable
 
   static targetdata_t* get( player_t* source, player_t* target );
 
-  jedi_sage_targetdata_t* cast_jedi_sage() { assert( source->type == JEDI_SAGE || source->type == SITH_SORCERER ); return ( jedi_sage_targetdata_t* ) this; }
+  jedi_sage_targetdata_t* cast_jedi_sage() { assert( source->type == JEDI_SAGE  ); return ( jedi_sage_targetdata_t* ) this; }
+  sith_sorcerer_targetdata_t* cast_sith_sorcerer() { assert( source->type == SITH_SORCERER ); return ( sith_sorcerer_targetdata_t* ) this; }
 
 protected:
   dot_t* add_dot( dot_t* d );

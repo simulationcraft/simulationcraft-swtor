@@ -1,13 +1,13 @@
 #!./simc 
 
-jedi_sage=Jedi_Sage
-origin="create_jedi_sage.simc"
+jedi_sage=Jedi_Sage_Balance
+origin="create_Jedi_Sage.simc"
 level=50
 race=human
 position=front
 role=spell
 use_pre_potion=0
-talents=http://www.torhead.com/talent#jedi_sage-000000000000000000000000000000000000000000000000000000000000000
+talents=http://www.torhead.com/talent#jedi_sage-032001000000000000003020322131021122321
 actions=stim,type=rakata_resolve
 actions+=/power_potion,if=time>10
 actions+=/force_valor
