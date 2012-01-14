@@ -492,6 +492,30 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
     return tt;
   }
 
+  virtual void last_tick( dot_t* d )
+  {
+    jedi_consular_spell_t::last_tick( d );
+
+    if ( player -> is_jedi_sage() )
+    {
+      jedi_sage_t* p = player -> cast_jedi_sage();
+
+      p -> buffs_psychic_projection -> expire();
+    }
+  }
+
+  virtual void update_ready()
+  {
+    jedi_consular_spell_t::update_ready();
+
+    if ( player -> is_jedi_sage() )
+    {
+      jedi_sage_t* p = player -> cast_jedi_sage();
+
+      p -> buffs_psychic_projection -> up();
+    }
+  }
+
   virtual void tick( dot_t* d )
   {
     jedi_consular_spell_t::tick( d );
