@@ -1795,11 +1795,12 @@ const char* chart_t::gear_weights_lootrank( std::string& s,
   case TROOPER:        s += "&Cla=1024"; break;
   case BOUNTY_HUNTER:       s += "&Cla=4";    break;
   case IMPERIAL_AGENT:      s += "&Cla=2";    break;
-  case JEDI_SAGE:       s += "&Cla=16";   break;
-  case SMUGGLER:        s += "&Cla=8";    break;
-  case SITH_INQUISITOR:       s += "&Cla=64";   break;
-  case JEDI_KNIGHT:      s += "&Cla=1";    break;
-  default: assert( 0 );
+  case JEDI_SAGE:       s += "&Cla=0";   break;
+  case SMUGGLER:        s += "&Cla=0";    break;
+  case SITH_INQUISITOR:       s += "&Cla=0";   break;
+  case JEDI_KNIGHT:      s += "&Cla=0";    break;
+  case SITH_SORCERER:  s+= "&CLA=0"; break;
+  default: s+= "&CLA=0"; break;
   }
 
   switch ( p -> race )
@@ -1879,7 +1880,7 @@ const char* chart_t::gear_weights_wowhead( std::string& s,
   case SMUGGLER:        s += "ub=4;";  break;
   case SITH_INQUISITOR:       s += "ub=7;";  break;
   case JEDI_KNIGHT:      s += "ub=1;";  break;
-  default: assert( 0 );
+  default:  s += "ub=0;";  break;
   }
 
   // Restrict wowhead to rare gems. When epic gems become available:"gm=4;gb=1;"
