@@ -106,6 +106,8 @@ struct jedi_sage_t : public jedi_consular_t
   rng_t* rng_upheaval;
   rng_t* rng_tm;
 
+  benefit_t* benefits_turbulence;
+
 
   // Talents
   struct talents_t
@@ -185,6 +187,7 @@ struct jedi_sage_t : public jedi_consular_t
   virtual action_t* create_action( const std::string& name, const std::string& options );
   virtual void      init_talents();
   virtual void      init_base();
+  virtual void      init_benefits();
   virtual void      init_buffs();
   virtual void      init_gains();
   virtual void      init_procs();
@@ -747,24 +750,31 @@ struct turbulence_t : public jedi_sage_spell_t
   {
     jedi_sage_spell_t::calculate_result();
 
+    bool t = false;
     if ( player -> type == JEDI_SAGE )
     {
       jedi_sage_targetdata_t* td = targetdata() -> cast_jedi_sage();
 
       if ( td -> dots_weaken_mind -> ticking )
+      {
+        t = true;
         result = RESULT_CRIT;
+      }
     }
     else if ( player -> type == SITH_SORCERER )
     {
       sith_sorcerer_targetdata_t* td = targetdata() -> cast_sith_sorcerer();
 
       if ( td -> dots_affliction -> ticking )
+      {
+        t = true;
         result = RESULT_CRIT;
+      }
     }
     else
       assert( 0 );
 
-
+    player -> cast_jedi_sage() -> benefits_turbulence -> update( t );
   }
 
   virtual void execute()
@@ -1017,6 +1027,17 @@ void jedi_sage_t::init_base()
   //diminished_kfactor    = 0;
   //diminished_dodge_capi = 0;
   //diminished_parry_capi = 0;
+}
+// jedi_sage_t::init_benefits =======================================================
+
+void jedi_sage_t::init_benefits()
+{
+  jedi_consular_t::init_benefits();
+
+  if ( type == SITH_SORCERER )
+    benefits_turbulence = get_benefit( "Thundering Blast automatic crit" );
+  else
+    benefits_turbulence = get_benefit( "Turbulence automatic crit" );
 }
 
 // jedi_sage_t::init_buffs =======================================================
