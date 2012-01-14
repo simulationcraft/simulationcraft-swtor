@@ -66,7 +66,7 @@ static bool parse_talent_url( sim_t* sim,
       if ( cut_pt2 != url.npos )
         return p -> parse_talents_armory( url.substr( cut_pt2 + 1 ) );
       else
-        return p -> parse_talents_wowhead( url.substr( cut_pt + 1 ) );
+        return p -> parse_talents_wowhead( url.substr( cut_pt + 4 ) );
     }
   }
   else
@@ -4603,6 +4603,7 @@ bool player_t::parse_talents_wowhead( const std::string& talent_string )
     { '\0', '\0', '\0' }
   };
 
+
   int encoding[ MAX_TALENT_SLOTS ];
   unsigned tree_count[ MAX_TALENT_TREES ];
 
@@ -4612,7 +4613,7 @@ bool player_t::parse_talents_wowhead( const std::string& talent_string )
   int tree = 0;
   size_t count = 0;
 
-  for ( unsigned int i=1; i < talent_string.length(); i++ )
+  for ( unsigned int i=0; i < talent_string.length(); i++ )
   {
     if ( tree >= MAX_TALENT_TREES )
     {
@@ -4622,7 +4623,7 @@ bool player_t::parse_talents_wowhead( const std::string& talent_string )
 
     char c = talent_string[ i ];
 
-    if ( c == ':' ) break; // glyph encoding follows
+    if ( c == '.' ) break;
 
     if ( c == 'Z' )
     {
@@ -4649,16 +4650,17 @@ bool player_t::parse_talents_wowhead( const std::string& talent_string )
       return false;
     }
 
-    encoding[ count++ ] += decode -> first - '0';
+    encoding[ count++ ] += decode -> second - '0';
     tree_count[ tree ] += 1;
+
 
     if ( tree_count[ tree ] < talent_trees[ tree ].size() )
     {
-      encoding[ count++ ] += decode -> second - '0';
+      encoding[ count++ ] += decode -> first - '0';
       tree_count[ tree ] += 1;
     }
 
-    if ( tree_count[ tree ] >= talent_trees[ tree ].size() )
+    if ( tree_count[ tree ] > talent_trees[ tree ].size() )
     {
       tree++;
     }
@@ -4668,7 +4670,7 @@ bool player_t::parse_talents_wowhead( const std::string& talent_string )
   {
     std::string str_out;
     for ( size_t i = 0; i < count; i++ ) str_out += ( char )encoding[i];
-    util_t::fprintf( sim -> output_file, "%s Wowhead talent string translation: %s\n", name(), str_out.c_str() );
+    log_t::output( sim, "%s Wowhead talent string translation: %s\n", name(), str_out.c_str() );
   }
 
   return parse_talent_trees( encoding );

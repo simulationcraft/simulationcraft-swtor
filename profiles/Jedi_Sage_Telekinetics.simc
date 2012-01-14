@@ -7,7 +7,7 @@ race=human
 position=front
 role=spell
 use_pre_potion=0
-talents=http://www.torhead.com/talent#jedi_sage-0032302200120122131513020302000000000000
+talents=http://www.torhead.com/talent#jedi_sage-000000000000000000032302200120122131513020302000000000000
 actions=stim,type=rakata_resolve
 actions+=/power_potion,if=time>10
 actions+=/force_valor

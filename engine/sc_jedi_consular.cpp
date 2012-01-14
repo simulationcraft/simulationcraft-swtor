@@ -1245,49 +1245,67 @@ double jedi_sage_t::composite_spell_power( const school_type school ) const
 void jedi_sage_t::create_talents()
 {
 
-  talent_trees[ 0 ].push_back(  new talent_t( this, "Immutable Force", 1, 2 ) );
-  talent_trees[ 0 ].push_back(  new talent_t( this, "Penetrating Light", 1, 3 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Immutable Force", 0, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Penetrating Light", 0, 3 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Wisdom", 0, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Foresight", 0, 3 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Pain Bearer", 0, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Psychic Suffusion", 0, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Conveyance", 0, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Rejuvenate", 0, 1 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Valiance", 0, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Preservation", 0, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Mend Wounds", 0, 1 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Force Shelter", 0, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Egress", 0, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Confound", 0, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Healing Trance", 0, 1 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Serenity", 0, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Resplendence", 0, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Clairvoyance", 0, 3 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Salvation", 0, 1 ) );
 
-  talent_trees[ 1 ].push_back(  new talent_t( this, "Inner Strength", 2, 3 ) );
-  talent_trees[ 1 ].push_back(  new talent_t( this, "Mental Longevity", 2, 2 ) );
-  talent_trees[ 1 ].push_back(  new talent_t( this, "Clamoring Force", 2, 3 ) );
-  talent_trees[ 1 ].push_back(  new talent_t( this, "Minds Eye", 2, 1 ) );
-  talent_trees[ 1 ].push_back(  new talent_t( this, "Disturb Mind", 2, 2 ) );
-  talent_trees[ 1 ].push_back(  new talent_t( this, "Concentration", 2, 2 ) );
-  talent_trees[ 1 ].push_back(  new talent_t( this, "Telekinetic Defense", 2,  2 ) );
-  talent_trees[ 1 ].push_back(  new talent_t( this, "Blockout", 2, 2 ) );
-  talent_trees[ 1 ].push_back(  new talent_t( this, "Telekinetic Wave", 2, 1 ) );
-  talent_trees[ 1 ].push_back(  new talent_t( this, "Psychic Projection", 2, 2 ) );
-  talent_trees[ 1 ].push_back(  new talent_t( this, "Force Wake", 2, 2 ) );
-  talent_trees[ 1 ].push_back(  new talent_t( this, "Tidal Force", 2, 1 ) );
-  talent_trees[ 1 ].push_back(  new talent_t( this, "Telekinetic Effusion", 2, 2 ) );
-  talent_trees[ 1 ].push_back(  new talent_t( this, "Kinetic Collapse", 2, 2 ) );
-  talent_trees[ 1 ].push_back(  new talent_t( this, "Tremors", 2, 1 ) );
-  talent_trees[ 1 ].push_back(  new talent_t( this, "Telekinetic Momentum", 2, 3 ) );
-  talent_trees[ 1 ].push_back(  new talent_t( this, "Mental Alacrity", 2, 1 ) );
-  talent_trees[ 1 ].push_back(  new talent_t( this, "Reverberation", 2, 5 ) );
-  talent_trees[ 1 ].push_back(  new talent_t( this, "Turbulence", 2, 1 ) );
+
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Inner Strength", 1, 3 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Mental Longevity", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Clamoring Force", 1, 3 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Minds Eye", 1, 1 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Disturb Mind", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Concentration", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Telekinetic Defense", 1,  2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Blockout", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Telekinetic Wave", 1, 1 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Psychic Projection", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Force Wake", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Tidal Force", 1, 1 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Telekinetic Effusion", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Kinetic Collapse", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Tremors", 1, 1 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Telekinetic Momentum", 1, 3 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Mental Alacrity", 1, 1 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Reverberation", 1, 5 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Turbulence", 1, 1 ) );
 
    // TREE BALANCE
-  talent_trees[ 2 ].push_back(  new talent_t( this, "Empowered Throw", 3, 3 ) );
-  talent_trees[ 2 ].push_back(  new talent_t( this, "Jedi Resistance", 3, 2 ) );
-  talent_trees[ 2 ].push_back(  new talent_t( this, "Will of the Jedi", 3, 2 ) );
-  talent_trees[ 2 ].push_back(  new talent_t( this, "Pinning resolve", 3, 2 ) );
-  talent_trees[ 2 ].push_back(  new talent_t( this, "Upheaval", 3, 3 ) );
-  talent_trees[ 2 ].push_back(  new talent_t( this, "Focused Insight", 3, 2 ) );
-  talent_trees[ 2 ].push_back(  new talent_t( this, "Critical Kinsesis", 3, 2 ) );
-  talent_trees[ 2 ].push_back(  new talent_t( this, "Force in Nalance", 3, 1 ) );
-  talent_trees[ 2 ].push_back(  new talent_t( this, "Psychic Narrier", 3, 3 ) );
-  talent_trees[ 2 ].push_back(  new talent_t( this, "Telekinetic Nalance", 3, 1 ) );
-  talent_trees[ 2 ].push_back(  new talent_t( this, "Containment", 3, 2 ) );
-  talent_trees[ 2 ].push_back(  new talent_t( this, "Mind Ward", 3, 2 ) );
-  talent_trees[ 2 ].push_back(  new talent_t( this, "Presence of Mind", 3, 1 ) );
-  talent_trees[ 2 ].push_back(  new talent_t( this, "Force Suppression", 3, 1 ) );
-  talent_trees[ 2 ].push_back(  new talent_t( this, "Drain Thoughts", 3, 2 ) );
-  talent_trees[ 2 ].push_back(  new talent_t( this, "Assertion", 3, 2 ) );
-  talent_trees[ 2 ].push_back(  new talent_t( this, "Mental Scarring", 3, 3 ) );
-  talent_trees[ 2 ].push_back(  new talent_t( this, "Psychic Absorption", 3, 2 ) );
-  talent_trees[ 2 ].push_back(  new talent_t( this, "Sever Force", 3, 1 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Empowered Throw", 2, 3 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Jedi Resistance", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Will of the Jedi", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Pinning resolve", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Upheaval", 2, 3 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Focused Insight", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Critical Kinsesis", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Force in Nalance", 2, 1 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Psychic Narrier", 2, 3 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Telekinetic Nalance", 2, 1 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Containment", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Mind Ward", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Presence of Mind", 2, 1 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Force Suppression", 2, 1 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Drain Thoughts", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Assertion", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Mental Scarring", 2, 3 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Psychic Absorption", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Sever Force", 2, 1 ) );
 
 
   jedi_consular_t::create_talents();
