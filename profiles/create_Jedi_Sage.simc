@@ -1,13 +1,13 @@
 jedi_sage=Jedi_Sage_Balance
 level=50
-talents=http://www.torhead.com/talent#jedi_sage-032001000000000000003020322131021122321
+talents=http://www.torhead.com/talent#jedi_sage-0032001000000000000003020322131021122321
 position=front
 shirt=foo,stats=1575willpower_536crit_306haste_107power_1217forcepower_201surge
 save=Jedi_Sage_Balance.simc
 
 jedi_sage=Jedi_Sage_Telekinetics
 level=50
-talents=http://www.torhead.com/talent#jedi_sage-032302200120122131513020302
+talents=http://www.torhead.com/talent#jedi_sage-0032302200120122131513020302
 position=front
 shirt=foo,stats=1575willpower_536crit_306haste_107power_1217forcepower_201surge
 save=Jedi_Sage_Telekinetics.simc

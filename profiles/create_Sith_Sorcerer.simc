@@ -1,13 +1,13 @@
 sith_sorcerer=Sith_Sorcerer_Madness
 level=50
-talents=http://www.torhead.com/talent#jedi_sage-032001000000000000003020322131021122321
+talents=http://www.torhead.com/talent#jedi_sage-0032001000000000000003020322131021122321
 position=front
 shirt=foo,stats=1575willpower_536crit_306haste_107power_1217forcepower_201surge
 save=Sith_Sorcerer_Madness.simc
 
 sith_sorcerer=Sith_Sorcerer_Lightning
 level=50
-talents=http://www.torhead.com/talent#jedi_sage-032302200120122131513020302
+talents=http://www.torhead.com/talent#jedi_sage-0032302200120122131513020302
 position=front
 shirt=foo,stats=1575willpower_536crit_306haste_107power_1217forcepower_201surge
 save=Sith_Sorcerer_Lightning.simc

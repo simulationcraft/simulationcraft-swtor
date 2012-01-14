@@ -111,6 +111,7 @@ struct jedi_sage_t : public jedi_consular_t
   struct talents_t
   {
     // TREE_SEER
+    talent_t* penetrating_light;
 
     // TREE_TELEKINETICS
     talent_t* inner_strength;
@@ -925,6 +926,8 @@ void jedi_sage_t::init_talents()
 {
   jedi_consular_t::init_talents();
 
+  talents.penetrating_light = find_talent( "Penetrating Light" );
+
 
   talents.inner_strength = find_talent( "Inner Strength" );
   talents.mental_longevity = find_talent( "Mental Longevity" );
@@ -985,6 +988,8 @@ void jedi_sage_t::init_base()
   resource_base[  RESOURCE_FORCE  ] += 400 + talents.mental_longevity -> rank() * 50;
 
   attribute_multiplier_initial[ ATTR_WILLPOWER ] *= 1.0 + talents.will_of_the_jedi -> rank() * 0.03;
+
+  base_spell_crit += talents.penetrating_light -> rank() * 0.01;
 
   // FIXME: Add defensive constants
   //diminished_kfactor    = 0;
@@ -1240,7 +1245,8 @@ double jedi_sage_t::composite_spell_power( const school_type school ) const
 void jedi_sage_t::create_talents()
 {
 
-  talent_trees[ 0 ].push_back(  new talent_t( this, "Immutable Force", 1, 3 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Immutable Force", 1, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Penetrating Light", 1, 3 ) );
 
   talent_trees[ 1 ].push_back(  new talent_t( this, "Inner Strength", 2, 3 ) );
   talent_trees[ 1 ].push_back(  new talent_t( this, "Mental Longevity", 2, 2 ) );
