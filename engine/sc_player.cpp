@@ -2963,7 +2963,7 @@ int player_t::normalize_by() const
   }
 
   if ( primary_role() == ROLE_SPELL || primary_role() == ROLE_HEAL )
-    return STAT_INTELLECT;
+    return STAT_WILLPOWER;
   else if ( primary_role() == ROLE_TANK )
     return STAT_ARMOR;
 

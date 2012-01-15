@@ -92,6 +92,7 @@ struct jedi_sage_t : public jedi_consular_t
   buff_t* buffs_tremors;
   buff_t* buffs_presence_of_mind;
   buff_t* buffs_force_suppression;
+  buff_t* buffs_mental_alacrity;
 
   // Gains
   gain_t* gains_concentration;
@@ -195,7 +196,8 @@ struct jedi_sage_t : public jedi_consular_t
   virtual void      init_actions();
   virtual int       primary_role() const;
   virtual void      regen( const double periodicity );
-  virtual double    composite_spell_power( const school_type school ) const;
+  virtual double    composite_force_damage_bonus() const;
+  virtual double    composite_spell_haste() const;
   virtual void      create_talents();
 };
 
@@ -656,7 +658,10 @@ struct disturbance_t : public jedi_sage_spell_t
       jedi_sage_t* p = player -> cast_jedi_sage();
 
       if ( p -> rng_tm -> roll( p -> talents.telekinetic_momentum -> rank() * 0.10 ) )
+      {
         tm -> execute();
+        p -> buffs_tremors -> trigger( 1 );
+      }
     }
   }
 };
@@ -717,9 +722,8 @@ struct turbulence_t : public jedi_sage_spell_t
 {
   jedi_consular_spell_t* tm;
 
-  turbulence_t( jedi_sage_t* p, const std::string& n, const std::string& options_str, bool is_tm = false ) :
-    jedi_sage_spell_t( ( n + std::string( is_tm ? "_tm" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL ),
-    tm( 0 )
+  turbulence_t( jedi_sage_t* p, const std::string& n, const std::string& options_str ) :
+    jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
   {
     check_talent( p -> talents.turbulence -> rank() );
 
@@ -732,18 +736,7 @@ struct turbulence_t : public jedi_sage_spell_t
     crit_bonus += p -> talents.reverberation -> rank() * 0.1;
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
-
-    if ( !is_tm )
-    {
-      if ( p -> talents.telekinetic_momentum -> rank() > 0 )
-      {
-        tm = new turbulence_t( p, n, options_str, true );
-        tm -> base_multiplier *= 0.30;
-        tm -> base_cost = 0.0;
-        tm -> background = true;
-        add_child( tm );
-      }
-    }
+    cooldown -> duration = 9.0;
   }
 
   virtual void calculate_result()
@@ -775,19 +768,6 @@ struct turbulence_t : public jedi_sage_spell_t
       assert( 0 );
 
     player -> cast_jedi_sage() -> benefits_turbulence -> update( t );
-  }
-
-  virtual void execute()
-  {
-    jedi_consular_spell_t::execute();
-
-    if ( tm )
-    {
-      jedi_sage_t* p = player -> cast_jedi_sage();
-
-      if ( p -> rng_tm -> roll( p -> talents.telekinetic_momentum -> rank() * 0.10 ) )
-        tm -> execute();
-    }
   }
 };
 
@@ -835,6 +815,31 @@ struct sever_force_t : public jedi_sage_spell_t
     range = 30.0;
     tick_power_mod = 0.311;
     may_crit = false;
+  }
+};
+
+struct mental_alacrity_t : public jedi_sage_spell_t
+{
+  mental_alacrity_t( jedi_sage_t* p, const std::string& n, const std::string& options_str ) :
+    jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+  {
+    check_talent( p -> talents.mental_alacrity -> rank() );
+
+    parse_options( 0, options_str );
+    base_cost = 30.0;
+    cooldown -> duration = 120.0;
+    harmful = false;
+
+    // TODO: Does it trigger a gcd?
+  }
+
+  virtual void execute()
+  {
+    jedi_sage_spell_t::execute();
+
+    jedi_sage_t* p = player -> cast_jedi_sage();
+
+    p -> buffs_mental_alacrity -> trigger();
   }
 };
 
@@ -938,6 +943,7 @@ action_t* jedi_sage_t::create_action( const std::string& name,
     if ( name == "turbulence"  || name == "thundering_blast"  ) return new        turbulence_t( this, "turbulence", options_str );
     if ( name == "force_in_balance" || name == "death_field"  ) return new  force_in_balance_t( this, "force_in_balance", options_str );
     if ( name == "sever_force" || name == "creeping_terror"   ) return new       sever_force_t( this, "sever_force", options_str );
+    if ( name == "mental_alacrity"                            ) return new   mental_alacrity_t( this, "mental_alacrity", options_str );
   }
   else if ( type == SITH_SORCERER )
   {
@@ -947,6 +953,7 @@ action_t* jedi_sage_t::create_action( const std::string& name,
     if ( name == "turbulence"  || name == "thundering_blast"  ) return new        turbulence_t( this, "thundering_blast", options_str );
     if ( name == "force_in_balance" || name == "death_field"  ) return new  force_in_balance_t( this, "death_field", options_str );
     if ( name == "sever_force" || name == "creeping_terror"   ) return new       sever_force_t( this, "creeping_terror", options_str );
+    if ( name == "polarity_shift"                             ) return new   mental_alacrity_t( this, "polarity_shift", options_str );
   }
 
   return jedi_consular_t::create_action( name, options_str );
@@ -1057,6 +1064,7 @@ void jedi_sage_t::init_buffs()
   buffs_tremors = new buff_t( this, "tremors", 3, 30.0 );
   buffs_presence_of_mind = new buff_t( this, "presence_of_mind", 1, 0.0, talents.presence_of_mind -> rank() * 0.3 );
   buffs_force_suppression = new buff_t( this, "force_suppression", 10, 30.0, talents.force_suppression -> rank() );
+  buffs_mental_alacrity = new buff_t( this, "mental_alacrity", 1, 10.0 );
 }
 
 // jedi_sage_t::init_gains =======================================================
@@ -1115,8 +1123,6 @@ void jedi_sage_t::init_actions()
 
       action_list_str += "/snapshot_stats";
 
-      action_list_str += "/mind_crush";
-
       action_list_str += "/weaken_mind,if=!ticking";
 
       if ( talents.force_in_balance -> rank() > 0 && talents.force_suppression -> rank() > 0 )
@@ -1124,6 +1130,8 @@ void jedi_sage_t::init_actions()
 
       if ( talents.sever_force -> rank() > 0 )
         action_list_str += "/sever_force,if=!ticking";
+
+      action_list_str += "/mind_crush";
 
       //action_list_str += "/project";
 
@@ -1143,9 +1151,14 @@ void jedi_sage_t::init_actions()
 
       action_list_str += "/snapshot_stats";
 
-      action_list_str += "/mind_crush";
-
       action_list_str += "/weaken_mind,if=!ticking";
+
+      if ( talents.turbulence -> rank() > 0 )
+        action_list_str += "/turbulence";
+
+      action_list_str += "/mental_alacrity";
+
+      action_list_str += "/mind_crush";
 
       action_list_str += "/project";
 
@@ -1159,12 +1172,8 @@ void jedi_sage_t::init_actions()
           action_list_str += ".up";
       }
 
-      if ( talents.turbulence -> rank() > 0 )
-      {
-        action_list_str += "/disturbance,if=buff.concentration.down|buff.concentration.remains<4";
+      action_list_str += "/disturbance";
 
-        action_list_str += "/turbulence";
-      }
 
       break;
 
@@ -1188,8 +1197,6 @@ void jedi_sage_t::init_actions()
 
       action_list_str += "/snapshot_stats";
 
-      action_list_str += "/crushing_darkness";
-
       action_list_str += "/affliction,if=!ticking";
 
       if ( talents.force_in_balance -> rank() > 0 && talents.force_suppression -> rank() > 0 )
@@ -1197,6 +1204,8 @@ void jedi_sage_t::init_actions()
 
       if ( talents.sever_force -> rank() > 0 )
         action_list_str += "/creeping_terror,if=!ticking";
+
+      action_list_str += "/crushing_darkness";
 
       //action_list_str += "/shock";
 
@@ -1216,9 +1225,14 @@ void jedi_sage_t::init_actions()
 
       action_list_str += "/snapshot_stats";
 
-      action_list_str += "/crushing_darkness";
-
       action_list_str += "/affliction,if=!ticking";
+
+      if ( talents.turbulence -> rank() > 0 )
+        action_list_str += "/thundering_blast";
+
+      action_list_str += "/polarity_shift";
+
+      action_list_str += "/crushing_darkness";
 
       action_list_str += "/shock";
 
@@ -1232,12 +1246,8 @@ void jedi_sage_t::init_actions()
           action_list_str += ".up";
       }
 
-      if ( talents.turbulence -> rank() > 0 )
-      {
-        action_list_str += "/lightning_strike,if=buff.concentration.down|buff.concentration.remains<4";
+      action_list_str += "/lightning_strike";
 
-        action_list_str += "/thundering_blast";
-      }
 
       break;
 
@@ -1274,13 +1284,24 @@ void jedi_sage_t::regen( const double periodicity )
 
 // jedi_sage_t::composite_spell_power ==================================================
 
-double jedi_sage_t::composite_spell_power( const school_type school ) const
+double jedi_sage_t::composite_force_damage_bonus() const
 {
-  double sp = jedi_consular_t::composite_spell_power( school );
+  double sp = jedi_consular_t::composite_force_damage_bonus();
 
   sp *= 1.0 + buffs_tremors -> stack() * 0.01;
 
   return sp;
+}
+
+// jedi_sage_t::composite_spell_haste ==================================================
+
+double jedi_sage_t::composite_spell_haste() const
+{
+  double sh = jedi_consular_t::composite_spell_haste();
+
+  sh *= 1.0 / ( 1.0 + buffs_mental_alacrity -> stack() * 0.20 );
+
+  return sh;
 }
 
 // jedi_sage_t::create_talents ==================================================
@@ -1379,7 +1400,7 @@ void player_t::jedi_sage_init( sim_t* sim )
   for ( unsigned int i = 0; i < sim -> actor_list.size(); i++ )
   {
     player_t* p = sim -> actor_list[i];
-    p -> buffs.force_valor = new buff_t( p, "force_valor", 1 );
+    p -> buffs.force_valor = new buff_t( p, "force_valor_mark_of_power", 1 );
   }
 }
 

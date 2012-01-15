@@ -7,17 +7,18 @@ race=human
 position=front
 role=spell
 use_pre_potion=0
-talents=http://www.torhead.com/talent#jedi_sage-000000000000000000032302200120122131513020302000000000000
+talents=http://www.torhead.com/skill-calc#jedi_sage-000000000000000000032302200120122131513020302000000000000
 actions=stim,type=rakata_resolve
 actions+=/power_potion,if=time>10
 actions+=/force_valor
 actions+=/snapshot_stats
-actions+=/mind_crush
 actions+=/weaken_mind,if=!ticking
+actions+=/turbulence
+actions+=/mental_alacrity
+actions+=/mind_crush
 actions+=/project
 actions+=/telekinetic_throw,if=buff.psychic_projection.up
-actions+=/disturbance,if=buff.concentration.down|buff.concentration.remains<4
-actions+=/turbulence
+actions+=/disturbance
 shirt=foo,stats=1575willpower_536crit_306haste_107power_1217forcepower_201surge
 # Gear Summary
 # gear_crit_rating=536

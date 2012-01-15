@@ -7,15 +7,15 @@ race=human
 position=front
 role=spell
 use_pre_potion=0
-talents=http://www.torhead.com/talent#sith_sorcerer-000000000000000000032001000000000000003020322131021122321
+talents=http://www.torhead.com/skill-calc#sith_sorcerer-000000000000000000032001000000000000003020322131021122321
 actions=stim,type=rakata_resolve
 actions+=/power_potion,if=time>10
 actions+=/mark_of_power
 actions+=/snapshot_stats
-actions+=/crushing_darkness
 actions+=/affliction,if=!ticking
 actions+=/force_in_balance,if=!dot.crushing_darkness.ticking
 actions+=/creeping_terror,if=!ticking
+actions+=/crushing_darkness
 actions+=/force_lightning
 actions+=/lightning_strike
 shirt=foo,stats=1575willpower_536crit_306haste_107power_1217forcepower_201surge

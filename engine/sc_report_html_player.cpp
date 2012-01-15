@@ -1173,6 +1173,8 @@ static void print_html_player_scale_factors( FILE* file, sim_t* sim, player_t* p
                  p -> scaling_lag_error );
       fprintf( file,
                "\t\t\t\t\t\t\t</tr>\n" );
+#if 0
+// Disabled until Torhead or others bring back gear weight interfaces
       fprintf( file,
                "\t\t\t\t\t\t\t<tr class=\"left\">\n"
                "\t\t\t\t\t\t\t\t<th>Gear Ranking</th>\n"
@@ -1223,14 +1225,14 @@ static void print_html_player_scale_factors( FILE* file, sim_t* sim, player_t* p
                "\t\t\t\t\t\t\t\t\t</ul>\n"
                "\t\t\t\t\t\t\t\t</td>\n"
                "\t\t\t\t\t\t\t</tr>\n" );
-
+#endif
       fprintf( file,
                "\t\t\t\t\t\t</table>\n" );
       if ( sim -> iterations < 10000 )
         fprintf( file,
                  "\t\t\t\t<div class=\"alert\">\n"
                  "\t\t\t\t\t<h3>Warning</h3>\n"
-                 "\t\t\t\t\t<p>Scale Factors generated using less than 10,000 iterations will vary significantly from run to run.</p>\n"
+                 "\t\t\t\t\t<p>Scale Factors generated using less than 10,000 iterations may vary significantly from run to run.</p>\n"
                  "\t\t\t\t</div>\n" );
     }
   }
