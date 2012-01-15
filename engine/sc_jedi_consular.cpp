@@ -299,11 +299,23 @@ struct jedi_consular_spell_t : public spell_t
 
       if ( base_execute_time > 0 && p -> buffs_presence_of_mind -> up() )
         player_multiplier *= 1.20;
+    }
+  }
 
-      // FIXME: test whether channeled spells profit from it or not ( they clearly don't consume the buff, tested January 2012 )
-      if ( p -> talents.force_suppression -> rank() > 0 && base_td > 0 )
+  virtual void target_debuff( player_t* t, int dmg_type )
+  {
+    spell_t::target_debuff( t, dmg_type );
+
+    if ( player -> is_jedi_sage() )
+    {
+      jedi_sage_t* p = player -> cast_jedi_sage();
+
+      // This method is in target_debuff so that it is checked before every dot tick
+
+      // Assume channeled spells don't profit
+      if ( p -> talents.force_suppression -> rank() > 0 && base_td > 0 && !channeled )
         if ( p -> buffs_force_suppression -> up() )
-          player_td_multiplier *= 1.20;
+          target_td_multiplier *= 1.20;
     }
   }
 
@@ -694,7 +706,7 @@ struct weaken_mind_t : public jedi_sage_spell_t
     jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
   {
     parse_options( 0, options_str );
-    base_td = 299.5;
+    base_td = 49.91;
     base_tick_time = 3.0;
     num_ticks = 6 + p -> talents.disturb_mind -> rank();
     base_cost = 35.0;
@@ -808,13 +820,14 @@ struct sever_force_t : public jedi_sage_spell_t
     check_talent( p -> talents.sever_force -> rank() );
 
     parse_options( 0, options_str );
-    base_td = 349.4;
+    base_td = 50;
     base_tick_time = 3.0;
     num_ticks = 6;
     base_cost = 20.0;
     range = 30.0;
     tick_power_mod = 0.311;
     may_crit = false;
+    cooldown -> duration = 9.0;
   }
 };
 

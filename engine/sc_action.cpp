@@ -72,6 +72,8 @@ void action_t::init_action_t_()
   player_multiplier              = 1.0;
   player_td_multiplier           = 1.0;
   player_dd_multiplier           = 1.0;
+  target_td_multiplier           = 1.0;
+  target_dd_multiplier           = 1.0;
   player_hit                     = 0.0;
   player_crit                    = 0.0;
   player_penetration             = 0.0;
@@ -509,6 +511,8 @@ void action_t::target_debuff( player_t* t, int /* dmg_type */ )
   target_spell_power           = 0;
   target_penetration           = 0;
   target_dd_adder              = 0;
+  target_dd_multiplier         = 1.0;
+  target_td_multiplier         = 1.0;
 
   if ( ! no_debuffs )
   {

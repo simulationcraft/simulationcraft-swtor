@@ -4194,6 +4194,7 @@ struct action_t
   double base_dd_min, base_dd_max, base_td, base_td_init;
   double   base_dd_multiplier,   base_td_multiplier;
   double player_dd_multiplier, player_td_multiplier;
+  double target_dd_multiplier, target_td_multiplier;
   double   base_multiplier,   base_hit,   base_crit,   base_penetration;
   double player_multiplier, player_hit, player_crit, player_penetration;
   double target_multiplier, target_hit, target_crit, target_penetration;
@@ -4318,8 +4319,8 @@ public:
 
   // Some actions require different multipliers for the "direct" and "tick" portions.
 
-  virtual double total_dd_multiplier() const { return total_multiplier() * base_dd_multiplier * player_dd_multiplier; }
-  virtual double total_td_multiplier() const { return total_multiplier() * base_td_multiplier * player_td_multiplier; }
+  virtual double total_dd_multiplier() const { return total_multiplier() * base_dd_multiplier * player_dd_multiplier * target_dd_multiplier; }
+  virtual double total_td_multiplier() const { return total_multiplier() * base_td_multiplier * player_td_multiplier * target_td_multiplier; }
 
   virtual action_expr_t* create_expression( const std::string& name );
 
