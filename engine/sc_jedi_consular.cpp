@@ -425,7 +425,8 @@ struct project_t : public jedi_consular_spell_t
 
     cooldown -> duration = 6.0;
 
-    travel_speed = 1.0 / 40.0; // 0.5s travel time for range=20, 0.75s for range=30
+    if ( p -> type == JEDI_SAGE )
+      travel_speed = 40.0; // 0.5s travel time for range=20, 0.75s for range=30
 
     if ( player -> is_jedi_sage() )
     {
