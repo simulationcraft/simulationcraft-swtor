@@ -468,7 +468,7 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
     jedi_consular_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
   {
     parse_options( 0, options_str );
-    base_td = 508.8;
+    base_td = 127.2;
     base_cost = 30.0;
     range = 30.0;
     tick_power_mod = 0.79;
