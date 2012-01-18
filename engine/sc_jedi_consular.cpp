@@ -1170,13 +1170,7 @@ void jedi_sage_t::init_actions()
       action_list_str += "/weaken_mind,if=!ticking";
 
       if ( talents.turbulence -> rank() > 0 )
-        action_list_str += "/turbulence";
-
-      action_list_str += "/mental_alacrity";
-
-      action_list_str += "/mind_crush";
-
-      action_list_str += "/project";
+        action_list_str += "/turbulence,if=dot.weaken_mind.remains>cast_time";
 
       if ( talents.psychic_projection -> rank() > 0)
       {
@@ -1188,8 +1182,13 @@ void jedi_sage_t::init_actions()
           action_list_str += ".up";
       }
 
-      action_list_str += "/disturbance";
+      action_list_str += "/mental_alacrity";
 
+      action_list_str += "/mind_crush";
+
+      action_list_str += "/project";
+
+      action_list_str += "/disturbance";
 
       break;
 
@@ -1244,13 +1243,7 @@ void jedi_sage_t::init_actions()
       action_list_str += "/affliction,if=!ticking";
 
       if ( talents.turbulence -> rank() > 0 )
-        action_list_str += "/thundering_blast";
-
-      action_list_str += "/polarity_shift";
-
-      action_list_str += "/crushing_darkness";
-
-      action_list_str += "/shock";
+        action_list_str += "/thundering_blast,if=dot.affliction.remains>cast_time";
 
       if ( talents.psychic_projection -> rank() > 0)
       {
@@ -1262,8 +1255,13 @@ void jedi_sage_t::init_actions()
           action_list_str += ".up";
       }
 
-      action_list_str += "/lightning_strike";
+      action_list_str += "/polarity_shift";
 
+      action_list_str += "/crushing_darkness";
+
+      action_list_str += "/shock";
+
+      action_list_str += "/lightning_strike";
 
       break;
 
