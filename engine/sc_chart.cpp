@@ -84,7 +84,7 @@ static const char* stat_color( int type )
   case STAT_HASTE_RATING:             return class_color( SITH_INQUISITOR );
   case STAT_EXPERTISE_RATING:         return school_color( SCHOOL_BLEED );
   case STAT_SPELL_PENETRATION:        return class_text_color( JEDI_SAGE );
-  default:                            return ( 0 );
+  default:                            return 0;
   }
 }
 

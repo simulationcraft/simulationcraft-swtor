@@ -1085,6 +1085,7 @@ const char* util_t::stat_type_wowhead( int stat )
   case STAT_STAMINA:   return "sta";
   case STAT_INTELLECT: return "int";
   case STAT_SPIRIT:    return "spr";
+  case STAT_WILLPOWER: return "willpower";
 
   case STAT_HEALTH: return "health";
   case STAT_MANA:   return "mana";

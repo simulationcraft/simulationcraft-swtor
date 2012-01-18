@@ -3537,7 +3537,12 @@ void player_t::register_direct_heal_callback( int64_t mask,
 
 void player_t::recalculate_haste()
 {
-  spell_haste = 1.0 / ( 1.0 + 0.3 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.3 ) ), haste_rating / std::max( 20, level ) / 0.55 ) ) );
+  double hr = haste_rating;
+
+  if ( hr < 0 )
+    hr = 0;
+
+  spell_haste = 1.0 / ( 1.0 + 0.3 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.3 ) ), hr / std::max( 20, level ) / 0.55 ) ) );
   attack_haste = spell_haste;
 }
 
@@ -3545,18 +3550,31 @@ void player_t::recalculate_haste()
 
 void player_t::recalculate_crit()
 {
-  double cr = 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), crit_rating / std::max( 20, level ) / 0.45 ) )
-                  + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), willpower() / std::max( 20, level ) / 2.5 ) );
+  double cr = crit_rating; double wp = willpower();
 
-  spell_crit  = base_spell_crit + cr;
-  attack_crit = base_attack_crit + cr;
+  if ( cr < 0 )
+    cr = 0;
+
+  if ( wp < 0 )
+    wp = 0;
+
+  double crit_tmp = 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), cr / std::max( 20, level ) / 0.45 ) )
+                  + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), wp / std::max( 20, level ) / 2.5 ) );
+
+  spell_crit  = base_spell_crit + crit_tmp;
+  attack_crit = base_attack_crit + crit_tmp;
 }
 
 // player_t::recalculate_accuracy ==============================================
 
 void player_t::recalculate_accuracy()
 {
-  double acc = 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), accuracy_rating / std::max( 20, level ) / 0.55 ) );
+  double ar = accuracy_rating;
+
+  if ( ar < 0 )
+    ar = 0;
+
+  double acc = 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), ar / std::max( 20, level ) / 0.55 ) );
 
   spell_hit  = base_spell_hit + acc;
   attack_hit = base_attack_hit + acc;
@@ -3566,7 +3584,12 @@ void player_t::recalculate_accuracy()
 
 void player_t::recalculate_surge()
 {
-  surge_bonus = 0.5 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.5 ) ), surge_rating / std::max( 20, level ) / 0.1 ) );
+  double sr = surge_rating;
+
+  if ( sr < 0 )
+    sr = 0;
+
+  surge_bonus = 0.5 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.5 ) ), sr / std::max( 20, level ) / 0.1 ) );
 }
 
 // player_t::recent_cast ====================================================
@@ -5016,7 +5039,7 @@ action_expr_t* player_t::create_expression( action_t* a,
         case STAT_STAMINA:          p_stat = &( a -> player -> temporary.attribute[ ATTR_STAMINA   ] ); attr = ATTR_STAMINA;   break;
         case STAT_INTELLECT:        p_stat = &( a -> player -> temporary.attribute[ ATTR_INTELLECT ] ); attr = ATTR_INTELLECT; break;
         case STAT_SPIRIT:           p_stat = &( a -> player -> temporary.attribute[ ATTR_SPIRIT    ] ); attr = ATTR_SPIRIT;    break;
-        case STAT_WILLPOWER:        p_stat = &( a -> player -> temporary.attribute[ ATTR_WILLPOWER ] ); attr = ATTR_SPIRIT;    break;
+        case STAT_WILLPOWER:        p_stat = &( a -> player -> temporary.attribute[ ATTR_WILLPOWER ] ); attr = ATTR_WILLPOWER; break;
         case STAT_SPELL_POWER:      p_stat = &( a -> player -> temporary.spell_power                 ); break;
         case STAT_ATTACK_POWER:     p_stat = &( a -> player -> temporary.attack_power                ); break;
         case STAT_EXPERTISE_RATING: p_stat = &( a -> player -> temporary.expertise_rating            ); break;

@@ -227,8 +227,11 @@ struct jedi_consular_attack_t : public attack_t
 
 struct jedi_consular_spell_t : public spell_t
 {
+  bool influenced_by_inner_strength;
+
   jedi_consular_spell_t( const char* n, jedi_consular_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_HOLY, int t=TREE_NONE ) :
-    spell_t( n, p, r, s, t )
+    spell_t( n, p, r, s, t ),
+    influenced_by_inner_strength( true )
   {
     _init_jedi_consular_spell_t();
   }
@@ -250,24 +253,19 @@ struct jedi_consular_spell_t : public spell_t
   {
     may_crit   = true;
     tick_may_crit = true;
-
-    if ( player -> is_jedi_sage() )
-    {
-      jedi_sage_t* p = player -> cast_jedi_sage();
-
-      base_td_multiplier *= 1.0 + p -> talents.mental_scarring -> rank() * 0.10;
-    }
   }
 
-  virtual void impact( player_t* t, int impact_result, double travel_dmg )
+  virtual void assess_damage( player_t* t, double dmg_amount, int dmg_type, int dmg_result )
   {
-    spell_t::impact( t, impact_result, travel_dmg );
+    spell_t::assess_damage( t, dmg_amount, dmg_type, dmg_result );
 
     if ( player -> is_jedi_sage() )
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
 
-      if ( impact_result == RESULT_CRIT && p -> talents.telekinetic_effusion -> rank() > 0 )
+      // Procs from all critical damage including dot ticks. Source:  17/01/2012 http://sithwarrior.com/forums/Thread-Sorcerer-Sage-Mechanics-and-Quirks
+
+      if ( dmg_result == RESULT_CRIT && p -> talents.telekinetic_effusion -> rank() > 0 )
       {
         p -> buffs_telekinetic_effusion -> trigger( 2 );
       }
@@ -326,16 +324,16 @@ struct jedi_consular_spell_t : public spell_t
     if ( player -> is_jedi_sage() )
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
-      if ( p -> talents.inner_strength -> rank() > 0 )
+      if ( p -> talents.inner_strength -> rank() > 0 && influenced_by_inner_strength )
       {
         c *= 1.0 - p -> talents.inner_strength -> rank() * 0.03;
-        c = floor( c );
+        c = ceil( c ); // 17/01/2012 According to http://sithwarrior.com/forums/Thread-Sorcerer-Sage-Mechanics-and-Quirks
       }
 
       if ( p -> buffs_telekinetic_effusion -> check() > 0 )
       {
         c *= 0.5;
-        c = floor( c );
+        c = floor( c ); // FIXME: floor or ceil?
       }
     }
 
@@ -426,6 +424,8 @@ struct project_t : public jedi_consular_spell_t
     direct_power_mod = 1.85;
 
     cooldown -> duration = 6.0;
+
+    travel_speed = 1.0 / 40.0; // 0.5s travel time for range=20, 0.75s for range=30
 
     if ( player -> is_jedi_sage() )
     {
@@ -693,8 +693,8 @@ struct mind_crush_t : public jedi_sage_spell_t
     range = 30.0;
     direct_power_mod = 1.23;
     tick_power_mod = 0.295;
-
     cooldown -> duration = 15.0;
+    influenced_by_inner_strength = false;
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
   }
@@ -715,6 +715,7 @@ struct weaken_mind_t : public jedi_sage_spell_t
     may_crit = false;
     crit_bonus += p -> talents.reverberation -> rank() * 0.1;
     base_multiplier *= 1.0 + p -> talents.drain_thoughts -> rank() * 0.075;
+    influenced_by_inner_strength = false;
   }
 
   virtual void tick( dot_t* d )
@@ -828,6 +829,7 @@ struct sever_force_t : public jedi_sage_spell_t
     tick_power_mod = 0.311;
     may_crit = false;
     cooldown -> duration = 9.0;
+    influenced_by_inner_strength = false;
   }
 };
 

@@ -97,7 +97,7 @@ static OptionEntry* getPlotOptions()
   {
     { "Plot DPS per Strength",                 "str",         "Generate DPS curve for Strength"     },
     { "Plot DPS per Willpower",                "willpower",   "Generate DPS curve for Willpower"    },
-    { "Plot DPS per Hit Rating",               "hit",         "Generate DPS curve for Hit Rating"   },
+    { "Plot DPS per Accuracy Rating",          "hit",         "Generate DPS curve for Hit Rating"   },
     { "Plot DPS per Crit Rating",              "crit",        "Generate DPS curve for Crit Rating"  },
     { "Plot DPS per Haste Rating",             "haste",       "Generate DPS curve for Haste Rating" },
     { "Plot DPS per Surge Rating",             "surge",       "Generate DPS curve for Surge Rating" },
@@ -113,9 +113,12 @@ static OptionEntry* getReforgePlotOptions()
 {
   static OptionEntry options[] =
   {
-    { "Plot Reforge Options for Hit Rating",        "hit",     "Generate reforge plot data for Hit Rating"       },
-    { "Plot Reforge Options for Crit Rating",       "crit",    "Generate reforge plot data for Crit Rating"      },
-    { "Plot Reforge Options for Haste Rating",      "haste",   "Generate reforge plot data for Haste Rating"     },
+    { "Plot Reforge Options for Willpower",         "willpower", "Generate reforge plot data for Willpower"        },
+    { "Plot Reforge Options for Power",             "power",     "Generate reforge plot data for Power"            },
+    { "Plot Reforge Options for Surge Rating",      "surge",     "Generate reforge plot data for Surge Rating"     },
+    { "Plot Reforge Options for Accuracy Rating",   "hit",       "Generate reforge plot data for Accuracy Rating"  },
+    { "Plot Reforge Options for Crit Rating",       "crit",      "Generate reforge plot data for Crit Rating"      },
+    { "Plot Reforge Options for Haste Rating",      "haste",     "Generate reforge plot data for Haste Rating"     },
     { NULL, NULL, NULL }
   };
   return options;
