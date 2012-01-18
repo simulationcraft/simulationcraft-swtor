@@ -3312,23 +3312,23 @@ double player_t::target_mitigation( double            amount,
 
   if ( school == SCHOOL_PHYSICAL || school == SCHOOL_KINETIC )
   {
-    if ( sim -> debug && action && ! action -> target -> is_enemy() && ! action -> target -> is_add() )
-      log_t::output( sim, "Damage to %s before armor mitigation is %f", action -> target -> name(), mitigated_amount );
 
     // Armor
     if ( action )
     {
-      double resist = action -> armor() / ( action -> armor() + action -> player -> armor_coeff );
+      double resist = action -> armor() / ( action -> armor() + armor_coeff );
 
       if ( resist < 0.0 )
         resist = 0.0;
       else if ( resist > 0.75 )
         resist = 0.75;
       mitigated_amount *= 1.0 - resist;
+
+
+      if ( sim -> debug )
+        log_t::output( sim, "%s armor mitigates %.1f%%", name(), resist * 100.0 );
     }
 
-    if ( sim -> debug && action && ! action -> target -> is_enemy() && ! action -> target -> is_add() )
-      log_t::output( sim, "Damage to %s after armor mitigation is %f", action -> target -> name(), mitigated_amount );
   }
 
   return mitigated_amount;
