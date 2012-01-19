@@ -170,9 +170,6 @@ struct power_potion_t : public action_t
     if ( ! player -> in_combat && player -> use_pre_potion <= 0 )
       return false;
 
-    if ( player -> potion_used )
-      return false;
-
     return action_t::ready();
   }
 };
