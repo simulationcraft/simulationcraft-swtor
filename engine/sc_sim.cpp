@@ -610,7 +610,7 @@ sim_t::sim_t( sim_t* p, int index ) :
   target_list( 0 ), player_list( 0 ), active_player( 0 ), num_players( 0 ), num_enemies( 0 ), num_targetdata_ids( 0 ), max_player_level( -1 ), canceled( 0 ),
   queue_lag( 0.037 ), queue_lag_stddev( 0 ),
   gcd_lag( 0.150 ), gcd_lag_stddev( 0 ),
-  channel_lag( 0.250 ), channel_lag_stddev( 0 ),
+  channel_lag( 0.200 ), channel_lag_stddev( 0 ),
   queue_gcd_reduction( 0.032 ), strict_gcd_queue( 0 ),
   confidence( 0.95 ), confidence_estimator( 1.96 ),
   world_lag( 0.1 ), world_lag_stddev( -1.0 ),

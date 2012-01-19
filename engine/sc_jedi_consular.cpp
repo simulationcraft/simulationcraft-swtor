@@ -830,6 +830,7 @@ struct sever_force_t : public jedi_sage_spell_t
     tick_power_mod = 0.311;
     may_crit = false;
     cooldown -> duration = 9.0;
+    tick_zero = true;
     influenced_by_inner_strength = false;
   }
 };
@@ -1073,14 +1074,16 @@ void jedi_sage_t::init_buffs()
   // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
 
-  buffs_concentration = new buff_t( this, "concentration", 3, 10.0, 0.5 * talents.concentration -> rank() );
-  buffs_psychic_projection = new buff_t( this, "psychic_projection", 1, 0.0, 0.5 * talents.psychic_projection -> rank(), 10.0 );
-  buffs_tidal_force = new buff_t( this, "tidal_force", 1, 0.0, 0, 10.0 );
-  buffs_telekinetic_effusion = new buff_t( this, "telekinetic_effusion", 2, 0.0, 0.5 * talents.telekinetic_effusion -> rank() );
-  buffs_tremors = new buff_t( this, "tremors", 3, 30.0 );
-  buffs_presence_of_mind = new buff_t( this, "presence_of_mind", 1, 0.0, talents.presence_of_mind -> rank() * 0.3 );
-  buffs_force_suppression = new buff_t( this, "force_suppression", 10, 30.0, talents.force_suppression -> rank() );
-  buffs_mental_alacrity = new buff_t( this, "mental_alacrity", 1, 10.0 );
+  bool is_sage = ( type == JEDI_SAGE );
+
+  buffs_concentration = new buff_t( this, is_sage ? "concentration" : "concentration", 3, 10.0, 0.5 * talents.concentration -> rank() );
+  buffs_psychic_projection = new buff_t( this, is_sage ? "psychic_projection" : "psychic_projection", 1, 0.0, 0.5 * talents.psychic_projection -> rank(), 10.0 );
+  buffs_tidal_force = new buff_t( this, is_sage ? "tidal_force" : "tidal_force", 1, 0.0, 0, 10.0 );
+  buffs_telekinetic_effusion = new buff_t( this, is_sage ? "telekinetic_effusion" : "telekinetic_effusion", 2, 0.0, 0.5 * talents.telekinetic_effusion -> rank() );
+  buffs_tremors = new buff_t( this, is_sage ? "tremors" : "tremors", 3, 30.0 );
+  buffs_presence_of_mind = new buff_t( this, is_sage ? "presence_of_mind" : "presence_of_mind", 1, 0.0, talents.presence_of_mind -> rank() * 0.3 );
+  buffs_force_suppression = new buff_t( this, is_sage ? "force_suppression" : "force_suppression", 10, 30.0, talents.force_suppression -> rank() );
+  buffs_mental_alacrity = new buff_t( this, is_sage ? "mental_alacrity" : "mental_alacrity", 1, 10.0 );
 }
 
 // jedi_sage_t::init_gains =======================================================
