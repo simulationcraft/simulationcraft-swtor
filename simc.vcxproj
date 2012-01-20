@@ -182,7 +182,6 @@
     <ClCompile Include="engine\sc_battle_net.cpp" />
     <ClCompile Include="engine\sc_bcp_api.cpp" />
     <ClCompile Include="engine\sc_buff.cpp" />
-    <ClCompile Include="engine\sc_chardev.cpp" />
     <ClCompile Include="engine\sc_chart.cpp" />
     <ClCompile Include="engine\sc_const_data.cpp" />
     <ClCompile Include="engine\sc_consumable.cpp" />
@@ -196,7 +195,7 @@
     <ClCompile Include="engine\sc_http.cpp" />
     <ClCompile Include="engine\sc_item.cpp" />
     <ClCompile Include="engine\sc_item_data.cpp" />
-    <ClCompile Include="engine\sc_jediconsular.cpp" />
+    <ClCompile Include="engine\sc_jedi_consular.cpp" />
     <ClCompile Include="engine\sc_js.cpp" />
     <ClCompile Include="engine\sc_log.cpp" />
     <ClCompile Include="engine\sc_main.cpp">
@@ -226,7 +225,6 @@
     <ClCompile Include="engine\sc_sim.cpp" />
     <ClCompile Include="engine\sc_spell.cpp" />
     <ClCompile Include="engine\sc_spell_data.cpp" />
-    <ClCompile Include="engine\sc_spell_info.cpp" />
     <ClCompile Include="engine\sc_stats.cpp" />
     <ClCompile Include="engine\sc_talent.cpp" />
     <ClCompile Include="engine\sc_target.cpp" />

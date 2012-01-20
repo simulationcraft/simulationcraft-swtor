@@ -604,7 +604,6 @@ void armory_t::fuzzy_stats( std::string&       encoding_str,
   stat_search( encoding_str, splits, STAT_CRIT_RATING,          "ranged critical strike" );
   stat_search( encoding_str, splits, STAT_CRIT_RATING,          "critical strike rating" );
   stat_search( encoding_str, splits, STAT_CRIT_RATING,          "crit rating" );
-  stat_search( encoding_str, splits, STAT_MASTERY_RATING,       "mastery rating" );
 
   stat_search( encoding_str, splits, STAT_BONUS_ARMOR,    "armor !penetration" );
   stat_search( encoding_str, splits, STAT_DODGE_RATING,   "dodge rating" );
@@ -853,7 +852,7 @@ player_t* armory_t::download_player( sim_t* sim,
         sim -> errorf( "Player %s unable to parse talents '%s'.\n", p -> name(), talents_encoding.c_str() );
         return 0;
       }
-      p -> talents_str = "http://www.torhead.com/talent#";
+      p -> talents_str = "http://www.torhead.com/skill-calc#";
       p -> talents_str += util_t::player_type_string( p -> type );
       p -> talents_str += "-" + talents_encoding;
 

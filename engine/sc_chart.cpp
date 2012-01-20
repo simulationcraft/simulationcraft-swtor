@@ -14,14 +14,14 @@ static const char* class_color( int type )
   {
   case PLAYER_NONE:  return "FFFFFF";
   case SITH_WARRIOR: return "C41F3B";
-  case TROOPER:        return "FF7D0A";
+  //case TROOPER:        return "FF7D0A";
   case BOUNTY_HUNTER:       return "336600";
-  //case MAGE:         return "69CCF0";
+  case TROOPER:         return "69CCF0";
   case IMPERIAL_AGENT:      return "F58CBA";
   case JEDI_SAGE:       return "C0C0C0";
   case SMUGGLER:        return "FFF569";
   case SITH_INQUISITOR:       return "2459FF";
-  //case WARLOCK:      return "9482C9";
+  case SITH_SORCERER:      return "9482C9";
   case JEDI_KNIGHT:      return "C79C6E";
   case ENEMY:        return "FFFFFF";
   case ENEMY_ADD:    return "FCFFFF";
@@ -47,7 +47,7 @@ static const char* school_color( int type )
 {
   switch ( type )
   {
-  case SCHOOL_ARCANE:     	return 0; //return class_color( MAGE );
+  case SCHOOL_INTERNAL:     return class_color( TROOPER );
   case SCHOOL_BLEED:      	return "C55D54"; // Half way between DK "red" and JEDI_KNIGHT "brown"
   case SCHOOL_CHAOS:      	return class_color( SITH_WARRIOR );
   case SCHOOL_FIRE:       	return class_color( SITH_WARRIOR );
@@ -56,7 +56,7 @@ static const char* school_color( int type )
   case SCHOOL_HOLY:       	return class_color( JEDI_SAGE );
   case SCHOOL_NATURE:     	return class_color( BOUNTY_HUNTER );
   case SCHOOL_PHYSICAL:   	return class_color( JEDI_KNIGHT );
-  case SCHOOL_SHADOW:     	return 0; //return class_color( WARLOCK );
+  case SCHOOL_KINETIC:     	return class_color( SITH_SORCERER );
   case SCHOOL_FROSTSTORM:   return "2C6080";
   case SCHOOL_SPELLSTORM: 	return "8AD0B1"; // Half way between BOUNTY_HUNTER "green" and Mage "blue" (spellstorm = arcane/nature damage)
   case SCHOOL_SHADOWFROST: 	return "000066"; // Shadowfrost???
@@ -82,10 +82,9 @@ static const char* stat_color( int type )
   case STAT_HIT_RATING:               return class_color( SITH_WARRIOR );
   case STAT_CRIT_RATING:              return class_color( IMPERIAL_AGENT );
   case STAT_HASTE_RATING:             return class_color( SITH_INQUISITOR );
-  case STAT_MASTERY_RATING:           return class_text_color( SMUGGLER );
   case STAT_EXPERTISE_RATING:         return school_color( SCHOOL_BLEED );
   case STAT_SPELL_PENETRATION:        return class_text_color( JEDI_SAGE );
-  default:                            return ( 0 );
+  default:                            return 0;
   }
 }
 
@@ -713,7 +712,7 @@ const char* chart_t::action_dpet( std::string& s,
     std::string school = school_color( stats_list[ i ] -> school );
     if ( school.empty() )
     {
-      p -> sim -> errorf( "chart_t::action_dpet assertion error! School unknown, stats %s from %s.\n", stats_list[ i ] -> name_str.c_str(), p -> name() );
+      p -> sim -> errorf( "chart_t::action_dpet assertion error! School color unknown, stats %s from %s.\n", stats_list[ i ] -> name_str.c_str(), p -> name() );
       assert( 0 );
     }
     s += school;
@@ -1796,11 +1795,12 @@ const char* chart_t::gear_weights_lootrank( std::string& s,
   case TROOPER:        s += "&Cla=1024"; break;
   case BOUNTY_HUNTER:       s += "&Cla=4";    break;
   case IMPERIAL_AGENT:      s += "&Cla=2";    break;
-  case JEDI_SAGE:       s += "&Cla=16";   break;
-  case SMUGGLER:        s += "&Cla=8";    break;
-  case SITH_INQUISITOR:       s += "&Cla=64";   break;
-  case JEDI_KNIGHT:      s += "&Cla=1";    break;
-  default: assert( 0 );
+  case JEDI_SAGE:       s += "&Cla=0";   break;
+  case SMUGGLER:        s += "&Cla=0";    break;
+  case SITH_INQUISITOR:       s += "&Cla=0";   break;
+  case JEDI_KNIGHT:      s += "&Cla=0";    break;
+  case SITH_SORCERER:  s+= "&CLA=0"; break;
+  default: s+= "&CLA=0"; break;
   }
 
   switch ( p -> race )
@@ -1840,7 +1840,6 @@ const char* chart_t::gear_weights_lootrank( std::string& s,
     case STAT_HIT_RATING:               name = "mhit"; break;
     case STAT_CRIT_RATING:              name = "mcr";  break;
     case STAT_HASTE_RATING:             name = "mh";   break;
-    case STAT_MASTERY_RATING:           name = "Mr";   break;
     case STAT_ARMOR:                    name = "Arm";  break;
     case STAT_WEAPON_DPS:               name = "dps";  break;
     case STAT_WEAPON_OFFHAND_DPS:       name = "odps"; break;
@@ -1881,7 +1880,7 @@ const char* chart_t::gear_weights_wowhead( std::string& s,
   case SMUGGLER:        s += "ub=4;";  break;
   case SITH_INQUISITOR:       s += "ub=7;";  break;
   case JEDI_KNIGHT:      s += "ub=1;";  break;
-  default: assert( 0 );
+  default:  s += "ub=0;";  break;
   }
 
   // Restrict wowhead to rare gems. When epic gems become available:"gm=4;gb=1;"
@@ -1914,7 +1913,6 @@ const char* chart_t::gear_weights_wowhead( std::string& s,
     case STAT_CRIT_RATING:              id = 96;  break;
     case STAT_HASTE_RATING:             id = 103; break;
     case STAT_ARMOR:                    id = 41;  break;
-    case STAT_MASTERY_RATING:           id = 170; break;
     case STAT_WEAPON_DPS:
       if ( BOUNTY_HUNTER == p -> type ) id = 138; else id = 32;  break;
     }
@@ -2044,7 +2042,6 @@ const char* chart_t::gear_weights_pawn( std::string& s,
     case STAT_HIT_RATING:               name = "HitRating";        if ( value*20 > maxY ) maxY = value*20; break;
     case STAT_CRIT_RATING:              name = "CritRating";       if ( value*20 > maxY ) maxY = value*20; break;
     case STAT_HASTE_RATING:             name = "HasteRating";      if ( value*20 > maxY ) maxY = value*20; break;
-    case STAT_MASTERY_RATING:           name = "MasteryRating";    if ( value*20 > maxY ) maxY = value*20; break;
     case STAT_ARMOR:                    name = "Armor";            break;
     case STAT_WEAPON_DPS:               name = "MeleeDps";  break;
     }

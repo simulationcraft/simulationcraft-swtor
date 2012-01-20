@@ -182,8 +182,6 @@ bool option_t::parse( sim_t*             sim,
       break;
     case OPT_FUNC:
       return ( ( option_function_t ) address )( sim, n, v );
-    case OPT_TALENT_RANK:
-      return ( ( struct talent_t * ) address )->set_rank( atoi( v.c_str() ), true );
     case OPT_SPELL_ENABLED:
       return ( ( struct spell_id_t * ) address )->enable( atoi( v.c_str() ) != 0 );
     case OPT_DEPRECATED:

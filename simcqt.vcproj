@@ -239,10 +239,6 @@
 				>
 			</File>
 			<File
-				RelativePath="engine\sc_chardev.cpp"
-				>
-			</File>
-			<File
 				RelativePath="engine\sc_chart.cpp"
 				>
 			</File>
@@ -259,15 +255,7 @@
 				>
 			</File>
 			<File
-				RelativePath="engine\sc_death_knight.cpp"
-				>
-			</File>
-			<File
 				RelativePath="engine\sc_dot.cpp"
-				>
-			</File>
-			<File
-				RelativePath="engine\sc_druid.cpp"
 				>
 			</File>
 			<File
@@ -304,10 +292,6 @@
 				>
 			</File>
 			<File
-				RelativePath="engine\sc_hunter.cpp"
-				>
-			</File>
-			<File
 				RelativePath="engine\sc_item.cpp"
 				>
 			</File>
@@ -324,6 +308,10 @@
 				>
 			</File>
 			<File
+				RelativePath="engine\sc_jedi_consular.cpp"
+				>
+			</File>
+			<File
 				RelativePath="engine\sc_js.cpp"
 				>
 			</File>
@@ -332,15 +320,7 @@
 				>
 			</File>
 			<File
-				RelativePath="engine\sc_mage.cpp"
-				>
-			</File>
-			<File
 				RelativePath="engine\sc_mmo_champion.cpp"
-				>
-			</File>
-			<File
-				RelativePath="engine\sc_monk.cpp"
 				>
 			</File>
 			<File
@@ -364,19 +344,11 @@
 				>
 			</File>
 			<File
-				RelativePath="engine\sc_priest.cpp"
-				>
-			</File>
-			<File
 				RelativePath="engine\sc_raid_event.cpp"
 				>
 			</File>
 			<File
 				RelativePath="engine\sc_rating.cpp"
-				>
-			</File>
-			<File
-				RelativePath="engine\sc_rawr.cpp"
 				>
 			</File>
 			<File
@@ -408,10 +380,6 @@
 				>
 			</File>
 			<File
-				RelativePath="engine\sc_rogue.cpp"
-				>
-			</File>
-			<File
 				RelativePath="engine\sc_sample_data.cpp"
 				>
 			</File>
@@ -436,10 +404,6 @@
 				>
 			</File>
 			<File
-				RelativePath="engine\sc_shaman.cpp"
-				>
-			</File>
-			<File
 				RelativePath="engine\sc_sim.cpp"
 				>
 			</File>
@@ -457,10 +421,6 @@
 			</File>
 			<File
 				RelativePath="engine\sc_spell_data_ptr.inc"
-				>
-			</File>
-			<File
-				RelativePath=".\engine\sc_spell_info.cpp"
 				>
 			</File>
 			<File
@@ -501,14 +461,6 @@
 			</File>
 			<File
 				RelativePath="engine\sc_util.cpp"
-				>
-			</File>
-			<File
-				RelativePath="engine\sc_warlock.cpp"
-				>
-			</File>
-			<File
-				RelativePath="engine\sc_warrior.cpp"
 				>
 			</File>
 			<File
@@ -871,10 +823,6 @@
 				>
 			</File>
 			<File
-				RelativePath="engine\sc_chardev.cpp"
-				>
-			</File>
-			<File
 				RelativePath="engine\sc_chart.cpp"
 				>
 			</File>
@@ -1008,10 +956,6 @@
 				>
 			</File>
 			<File
-				RelativePath="engine\sc_rawr.cpp"
-				>
-			</File>
-			<File
 				RelativePath="engine\sc_reforge_plot.cpp"
 				>
 			</File>
@@ -1089,10 +1033,6 @@
 			</File>
 			<File
 				RelativePath="engine\sc_spell_data_ptr.inc"
-				>
-			</File>
-			<File
-				RelativePath=".\engine\sc_spell_info.cpp"
 				>
 			</File>
 			<File

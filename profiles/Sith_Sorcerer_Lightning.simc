@@ -1,0 +1,29 @@
+#!./simc 
+
+sith_sorcerer=Sith_Sorcerer_Lightning
+origin="create_Sith_Sorcerer.simc"
+level=50
+race=human
+position=front
+role=spell
+use_pre_potion=0
+talents=http://www.torhead.com/skill-calc#sith_sorcerer-030000000000000000032312201120120131513020002000000000000
+actions=stim,type=rakata_resolve
+actions+=/power_potion,if=time>10
+actions+=/mark_of_power
+actions+=/snapshot_stats
+actions+=/affliction,if=!ticking
+actions+=/thundering_blast,if=dot.affliction.remains>cast_time
+actions+=/force_lightning,if=buff.psychic_projection.up
+actions+=/polarity_shift
+actions+=/crushing_darkness
+actions+=/shock
+actions+=/lightning_strike
+shirt=foo,stats=1575willpower_536crit_306haste_107power_1217forcepower_201surge
+# Gear Summary
+# gear_crit_rating=536
+# gear_haste_rating=306
+# gear_power=107
+# gear_forcepower=1217
+# gear_willpower=1575
+# gear_surge_rating=201

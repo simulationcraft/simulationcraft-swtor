@@ -24,13 +24,11 @@
 #endif
 
 #define TAB_BATTLE_NET 0
-#define TAB_CHAR_DEV   1
-#define TAB_RAWR       2
-#define TAB_BIS        3
-#define TAB_HISTORY    4
-#define TAB_CUSTOM     5
+#define TAB_BIS        1
+#define TAB_HISTORY    2
+#define TAB_CUSTOM     3
 
-#define HISTORY_VERSION "4.20"
+#define HISTORY_VERSION "0.10"
 
 class SimulationCraftTextEdit;
 class SimulationCraftWebView;
@@ -142,14 +140,9 @@ public:
     QComboBox* reforgePlotStepChoice;
     ReforgeButtonGroup* reforgeplotsButtonGroup;
     SimulationCraftWebView* battleNetView;
-    SimulationCraftWebView* charDevView;
     SimulationCraftWebView* siteView;
     SimulationCraftWebView* helpView;
     SimulationCraftWebView* visibleWebView;
-    PersistentCookieJar* charDevCookies;
-    QPushButton* rawrButton;
-    QByteArray rawrDialogState;
-    SimulationCraftTextEdit* rawrText;
     QListWidget* historyList;
     QTreeWidget* bisTree;
     QString bisProfilePath;
@@ -210,7 +203,6 @@ public:
     void createPlotsTab();
     void createReforgePlotsTab();
     void createImportTab();
-    void createRawrTab();
     void createBestInSlotTab();
     void createCustomTab();
     void createSimulateTab();
@@ -242,7 +234,6 @@ private slots:
     void importTabChanged( int index );
     void resultsTabChanged( int index );
     void resultsTabCloseRequest( int index );
-    void rawrButtonClicked( bool checked=false );
     void historyDoubleClicked( QListWidgetItem* item );
     void bisDoubleClicked( QTreeWidgetItem* item, int col );
     void allBuffsChanged( bool checked );
@@ -388,8 +379,6 @@ public:
     player_t* player;
 
     void importBattleNet();
-    void importCharDev();
-    void importRawr();
 
     void start( sim_t* s, int t, const QString& u ) { sim=s; tab=t; url=u; profile=""; player=0; QThread::start(); }
     virtual void run();

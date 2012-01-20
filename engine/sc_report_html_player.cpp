@@ -759,6 +759,17 @@ static void print_html_stats ( FILE* file, player_t* a )
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Willpower</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t</tr>\n",
+             a -> attribute_buffed[ ATTR_WILLPOWER  ],
+             a -> willpower(),
+             a -> stats.attribute[ ATTR_WILLPOWER  ] );
+
+    fprintf( file,
+             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
              "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Health</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
@@ -979,25 +990,36 @@ static void print_html_stats ( FILE* file, player_t* a )
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Mastery</th>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Power</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> buffed_mastery,
-             a -> composite_mastery(),
-             a -> stats.mastery_rating );
+             a -> buffed_power,
+             a -> composite_power(),
+             a -> stats.power );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Willpower</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Force Power</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> attribute_buffed[ ATTR_WILLPOWER  ],
-             a -> willpower(),
-             a -> stats.attribute[ ATTR_WILLPOWER  ] );
+             a -> buffed_force_power,
+             a -> composite_force_power(),
+             a -> stats.force_power );
+
+    fprintf( file,
+             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Surge</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t</tr>\n",
+             a -> buffed_surge,
+             a -> surge_bonus,
+             a -> stats.surge_rating );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t</table>\n"
@@ -1044,7 +1066,7 @@ static void print_html_talents( FILE* file, player_t* p )
         talent_t* t = p -> talent_trees[ i ][ j ];
 
         fprintf( file, "\t\t\t\t\t\t\t\t\t\t<tr%s>\n", ( ( j&1 ) ? " class=\"odd\"" : "" ) );
-        fprintf( file, "\t\t\t\t\t\t\t\t\t\t\t<td class=\"left\">%s</td>\n", t -> t_data -> name_cstr() );
+        fprintf( file, "\t\t\t\t\t\t\t\t\t\t\t<td class=\"left\">%s</td>\n", t -> name_cstr() );
         fprintf( file, "\t\t\t\t\t\t\t\t\t\t\t<td>%d</td>\n", t -> rank() );
         fprintf( file, "\t\t\t\t\t\t\t\t\t\t</tr>\n" );
       }
@@ -1151,6 +1173,8 @@ static void print_html_player_scale_factors( FILE* file, sim_t* sim, player_t* p
                  p -> scaling_lag_error );
       fprintf( file,
                "\t\t\t\t\t\t\t</tr>\n" );
+#if 0
+// Disabled until Torhead or others bring back gear weight interfaces
       fprintf( file,
                "\t\t\t\t\t\t\t<tr class=\"left\">\n"
                "\t\t\t\t\t\t\t\t<th>Gear Ranking</th>\n"
@@ -1201,14 +1225,14 @@ static void print_html_player_scale_factors( FILE* file, sim_t* sim, player_t* p
                "\t\t\t\t\t\t\t\t\t</ul>\n"
                "\t\t\t\t\t\t\t\t</td>\n"
                "\t\t\t\t\t\t\t</tr>\n" );
-
+#endif
       fprintf( file,
                "\t\t\t\t\t\t</table>\n" );
       if ( sim -> iterations < 10000 )
         fprintf( file,
                  "\t\t\t\t<div class=\"alert\">\n"
                  "\t\t\t\t\t<h3>Warning</h3>\n"
-                 "\t\t\t\t\t<p>Scale Factors generated using less than 10,000 iterations will vary significantly from run to run.</p>\n"
+                 "\t\t\t\t\t<p>Scale Factors generated using less than 10,000 iterations may vary significantly from run to run.</p>\n"
                  "\t\t\t\t</div>\n" );
     }
   }

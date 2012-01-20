@@ -11,164 +11,38 @@
 
 // talent_t::talent_t =======================================================
 
-talent_t::talent_t( player_t* player, talent_data_t* _td ) :
-  spell_id_t( player, _td -> name_cstr() ), t_data( 0 ), t_rank( 0 ), t_overridden( false ),
-  t_default_rank( 0 ),
-  // Future trimmed down access
-  td( _td ), sd( spell_data_t::nil() ), trigger( 0 )
+talent_t::talent_t( player_t* player, const char* n, unsigned tab_page, unsigned max_rank ) :
+  _name( n ), _tab_page( tab_page ), _max_rank( max_rank ),
+  t_rank( 0 )
 {
-  spell_id_t* default_rank = new spell_id_t;
-  t_default_rank = default_rank;
-  default_rank -> s_enabled = false;
-  range::fill( t_rank_spells, default_rank );
-
-  t_data = player -> dbc.talent( td -> id() );
-  t_enabled = t_data -> is_enabled();
-  const_cast< talent_data_t* >( t_data ) -> set_used( true );
 }
 
 talent_t::~talent_t()
 {
-  for ( size_t i = 0; i < sizeof_array( t_rank_spells ); i++ )
-  {
-    if ( t_rank_spells[ i ] != this && t_rank_spells[ i ] != t_default_rank )
-      delete t_rank_spells[ i ];
-  }
 
-  delete t_default_rank;
 }
 
 bool talent_t::ok() const
 {
-  if ( ! s_player || ! t_data )
-    return false;
-
-  return ( ( t_rank > 0 ) && spell_id_t::ok() && ( t_enabled ) );
+  return ( t_rank > 0 );
 }
-
-std::string talent_t::to_str() const
+bool talent_t::set_rank( uint32_t r )
 {
-  std::ostringstream s;
+  if ( r > max_rank() )
+    r = max_rank();
 
-  s << spell_id_t::to_str();
-  s << " talent_enabled=" << ( t_enabled ? "true" : "false" );
-  if ( t_overridden ) s << " (forced)";
-  s << " talent_rank=" << t_rank;
-  s << " max_rank=" << max_rank();
+  t_rank       = r;
 
-  return s.str();
-}
-
-// talent_t::get_spell_id ===================================================
-
-uint32_t talent_t::spell_id( ) const
-{
-  assert( s_player -> sim && ( t_rank <= 3 ) );
-
-  if ( ! ok() )
-    return 0;
-
-  return t_data -> rank_spell_id( t_rank );
-}
-
-bool talent_t::set_rank( uint32_t r, bool overridden )
-{
-  // Future trimmed down access
-  sd = ( ( r >= 3 ) ? td -> spell3 :
-         ( r == 2 ) ? td -> spell2 :
-         ( r == 1 ) ? td -> spell1 : spell_data_t::nil() );
-  trigger = 0;
-  if ( ! trigger && sd -> _effect1 -> trigger_spell_id() ) trigger = sd -> _effect1 -> _trigger_spell;
-  if ( ! trigger && sd -> _effect2 -> trigger_spell_id() ) trigger = sd -> _effect2 -> _trigger_spell;
-  if ( ! trigger && sd -> _effect3 -> trigger_spell_id() ) trigger = sd -> _effect3 -> _trigger_spell;
-  // rank = r;
-
-  if ( ! t_data || ! t_enabled )
-  {
-    if ( s_player -> sim -> debug )
-      log_t::output( s_player -> sim, "Talent status: %s", to_str().c_str() );
-    return false;
-  }
-
-  if ( r > t_data -> max_rank() )
-  {
-    if ( s_player -> sim -> debug )
-      log_t::output( s_player -> sim, "Talent status: %s", to_str().c_str() );
-    return false;
-  }
-
-  // We cannot allow non-overridden set_rank to take effect, if
-  // we have already overridden the talent rank once
-  if ( ! t_overridden || overridden )
-  {
-    t_overridden = overridden;
-    t_rank       = r;
-    s_id         = rank_spell_id( t_rank );
-
-    if ( t_enabled && t_rank > 0 && ! initialize() )
-    {
-      if ( s_player -> sim -> debug )
-        log_t::output( s_player -> sim, "Talent status: %s", to_str().c_str() );
-      return false;
-    }
-  }
-
-  if ( s_player -> sim -> debug )
-    log_t::output( s_player -> sim, "Talent status: %s", to_str().c_str() );
-
-  if ( t_rank > 0 )
-  {
-    // Setup all of the talent spells
-    for ( int i = 0; i < MAX_RANK; i++ )
-    {
-      if ( t_rank == ( unsigned ) i + 1 )
-        t_rank_spells[ i ] = this;
-      else if ( t_data -> _rank_id[ i ] && s_player -> dbc.spell( t_data -> _rank_id[ i ] ) )
-      {
-        char rankbuf[128];
-        snprintf( rankbuf, sizeof( rankbuf ), "%s_rank_%d", s_token.c_str(), i + 1 );
-        spell_id_t* talent_rank_spell = new spell_id_t( s_player, rankbuf, t_data -> _rank_id[ i ] );
-        talent_rank_spell -> s_enabled = s_enabled;
-        t_rank_spells[ i ] = talent_rank_spell;
-        if ( s_player -> sim -> debug ) log_t::output( s_player -> sim, "Talent Base status: %s", t_rank_spells[ i ] -> to_str().c_str() );
-      }
-    }
-  }
   return true;
 }
 
 uint32_t talent_t::max_rank() const
 {
-  if ( ! s_player || ! t_data || ! t_data->id() )
-    return 0;
-
-  return t_data -> max_rank();
-}
-
-uint32_t talent_t::rank_spell_id( const uint32_t r ) const
-{
-  if ( ! s_player || ! t_data || ! t_data->id() )
-    return 0;
-
-  return t_data -> rank_spell_id( r );
-}
-
-const spell_id_t* talent_t::rank_spell( uint32_t r ) const
-{
-  assert( r <= max_rank() );
-
-  // With default argument, return base spell always
-  if ( ! r )
-    return t_rank_spells[ 0 ];
-
-  return t_rank_spells[ r - 1 ];
+  return _max_rank;
 }
 
 uint32_t talent_t::rank() const
 {
-  if ( ! ok() )
-    return 0;
-
   return t_rank;
 }
 
@@ -379,8 +253,6 @@ std::string spell_id_t::to_str() const
   s << " tree=" << s_tree;
   s << " id=" << s_id;
   s << " player=" << s_player -> name_str;
-  if ( s_required_talent )
-    s << " req_talent=" << s_required_talent -> s_token;
 
   return s.str();
 }

@@ -219,10 +219,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\engine\sc_chardev.cpp"
-			>
-		</File>
-		<File
 			RelativePath=".\engine\sc_chart.cpp"
 			>
 		</File>
@@ -279,7 +275,7 @@
 			>
 		</File>
 		<File
-			RelativePath=".\engine\sc_jediconsular.cpp"
+			RelativePath=".\engine\sc_jedi_consular.cpp"
 			>
 		</File>
 		<File
@@ -404,10 +400,6 @@
 		</File>
 		<File
 			RelativePath=".\engine\sc_spell_data_ptr.inc"
-			>
-		</File>
-		<File
-			RelativePath=".\engine\sc_spell_info.cpp"
 			>
 		</File>
 		<File

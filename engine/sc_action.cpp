@@ -72,6 +72,8 @@ void action_t::init_action_t_()
   player_multiplier              = 1.0;
   player_td_multiplier           = 1.0;
   player_dd_multiplier           = 1.0;
+  target_td_multiplier           = 1.0;
+  target_dd_multiplier           = 1.0;
   player_hit                     = 0.0;
   player_crit                    = 0.0;
   player_penetration             = 0.0;
@@ -101,7 +103,6 @@ void action_t::init_action_t_()
   tick_dmg                       = 0.0;
   snapshot_crit                  = 0.0;
   snapshot_haste                 = 1.0;
-  snapshot_mastery               = 0.0;
   num_ticks                      = 0;
   weapon                         = NULL;
   weapon_multiplier              = 1.0;
@@ -510,6 +511,8 @@ void action_t::target_debuff( player_t* t, int /* dmg_type */ )
   target_spell_power           = 0;
   target_penetration           = 0;
   target_dd_adder              = 0;
+  target_dd_multiplier         = 1.0;
+  target_td_multiplier         = 1.0;
 
   if ( ! no_debuffs )
   {
@@ -529,7 +532,6 @@ void action_t::snapshot()
 {
   snapshot_crit    = total_crit();
   snapshot_haste   = haste();
-  snapshot_mastery = player -> composite_mastery();
 }
 
 // action_t::result_is_hit ==================================================
@@ -637,7 +639,7 @@ double action_t::resistance() const
 
 double action_t::total_crit_bonus() const
 {
-  double bonus = ( ( 1.0 + crit_bonus ) * crit_multiplier - 1.0 ) * crit_bonus_multiplier;
+  double bonus = ( ( 1.0 + crit_bonus + player -> surge_bonus ) * crit_multiplier - 1.0 ) * crit_bonus_multiplier;
 
   if ( sim -> debug )
   {
@@ -654,8 +656,7 @@ double action_t::total_power() const
 {
   double power=0;
 
-  if ( base_spell_power_multiplier  > 0 ) power += total_spell_power();
-  if ( base_attack_power_multiplier > 0 ) power += total_attack_power();
+  power += player -> composite_force_damage_bonus();
 
   return power;
 }

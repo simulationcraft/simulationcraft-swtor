@@ -32,7 +32,6 @@ void rating_t::init( sim_t* sim, dbc_t& dbc, int level, int type )
     dodge             = max;
     parry             = max;
     block             = max;
-    mastery           = max;
   }
   else
   {
@@ -49,7 +48,6 @@ void rating_t::init( sim_t* sim, dbc_t& dbc, int level, int type )
     dodge             = dbc.combat_rating( RATING_DODGE,        level );
     parry             = dbc.combat_rating( RATING_PARRY,        level );
     block             = dbc.combat_rating( RATING_BLOCK,        level );
-    mastery           = dbc.combat_rating( RATING_MASTERY,      level ) / 100;
   }
 }
 

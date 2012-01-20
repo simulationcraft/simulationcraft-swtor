@@ -108,8 +108,8 @@ namespace std {using namespace tr1; }
 
 #include "data_definitions.hh"
 
-#define SC_MAJOR_VERSION "010"
-#define SC_MINOR_VERSION "1"
+#define SC_MAJOR_VERSION "101"
+#define SC_MINOR_VERSION "2"
 #define SC_USE_PTR ( 0 )
 #define SC_BETA ( 0 )
 #define SC_EPSILON ( 0.000001 )
@@ -175,8 +175,10 @@ struct xml_node_t;
 
 struct targetdata_t;
 struct jedi_sage_targetdata_t;
+struct sith_sorcerer_targetdata_t;
 
 void register_jedi_sage_targetdata( sim_t* sim );
+void register_sith_sorcerer_targetdata( sim_t* sim );
 
 #define DATA_DOT 0
 #define DATA_AURA 1
@@ -224,7 +226,7 @@ enum player_type
   TROOPER, SMUGGLER, JEDI_KNIGHT,
   BOUNTY_HUNTER, SITH_WARRIOR, IMPERIAL_AGENT, SITH_INQUISITOR,
   PLAYER_PET, PLAYER_GUARDIAN,
-  JEDI_SAGE,
+  JEDI_SAGE, SITH_SORCERER,
   ENEMY, ENEMY_ADD,
   PLAYER_MAX
 };
@@ -309,6 +311,8 @@ enum school_type
   SCHOOL_DIVINE,      SCHOOL_SPELLFIRE,   SCHOOL_SPELLSTORM,  SCHOOL_SPELLFROST,  SCHOOL_SPELLSHADOW,
   SCHOOL_ELEMENTAL,   SCHOOL_CHROMATIC,   SCHOOL_MAGIC,       SCHOOL_CHAOS,       SCHOOL_BLEED,
   SCHOOL_DRAIN,
+
+  SCHOOL_INTERNAL, SCHOOL_KINETIC,
   SCHOOL_MAX
 };
 
@@ -333,20 +337,25 @@ const int64_t SCHOOL_SPELL_MASK  ( ( int64_t( 1 ) << SCHOOL_ARCANE )         | (
                                    ( int64_t( 1 ) << SCHOOL_SPELLFIRE )      | ( int64_t( 1 ) << SCHOOL_SPELLSTORM )   |
                                    ( int64_t( 1 ) << SCHOOL_SPELLFROST )     | ( int64_t( 1 ) << SCHOOL_SPELLSHADOW )  |
                                    ( int64_t( 1 ) << SCHOOL_ELEMENTAL )      | ( int64_t( 1 ) << SCHOOL_CHROMATIC )    |
-                                   ( int64_t( 1 ) << SCHOOL_MAGIC ) );
+                                   ( int64_t( 1 ) << SCHOOL_MAGIC )          | ( int64_t( 1 ) << SCHOOL_CHAOS )        |
+                                   ( int64_t( 1 ) << SCHOOL_BLEED )          | ( int64_t( 1 ) << SCHOOL_DRAIN )        |
+                                   ( int64_t( 1 ) << SCHOOL_INTERNAL )       | ( int64_t( 1 ) << SCHOOL_KINETIC )        );
 #define SCHOOL_ALL_MASK    ( int64_t( -1 ) )
 
 enum talent_tree_type
 {
   TREE_NONE=0,
-  TREE_SEER,TREE_TELEKINETICS,TREE_BALANCE,
+  TREE_SEER,         TREE_TELEKINETICS,  TREE_BALANCE,
+  TREE_CORRUPTION,   TREE_LIGHTNING,     TREE_MADNESS,
   TALENT_TREE_MAX
 };
 
 enum talent_tab_type
 {
   TALENT_TAB_NONE = -1,
-  JEDI_SAGE_SEER,JEDI_SAGE_TELEKINETICS,JEDI_SAGE_BALANCE
+  JEDI_SAGE_SEER = 0,           JEDI_SAGE_TELEKINETICS,   JEDI_SAGE_BALANCE,
+  SITH_SORCERER_CORRUPTION = 0, SITH_SORCERER_LIGHTNING,  SITH_SORCERER_MADNESS,
+
 };
 
 enum weapon_type
@@ -451,13 +460,14 @@ enum stat_type
   STAT_MAX_HEALTH, STAT_MAX_MANA, STAT_MAX_RAGE, STAT_MAX_ENERGY, STAT_MAX_AMMO,
   STAT_SPELL_POWER, STAT_SPELL_PENETRATION, STAT_MP5,
   STAT_ATTACK_POWER, STAT_EXPERTISE_RATING, STAT_EXPERTISE_RATING2,
-  STAT_HIT_RATING, STAT_HIT_RATING2,STAT_CRIT_RATING, STAT_HASTE_RATING,STAT_MASTERY_RATING,
+  STAT_HIT_RATING, STAT_HIT_RATING2,STAT_CRIT_RATING, STAT_HASTE_RATING,
   STAT_WEAPON_DPS, STAT_WEAPON_SPEED,
   STAT_WEAPON_OFFHAND_DPS, STAT_WEAPON_OFFHAND_SPEED,
   STAT_ARMOR, STAT_BONUS_ARMOR, STAT_RESILIENCE_RATING, STAT_DODGE_RATING, STAT_PARRY_RATING,
   STAT_BLOCK_RATING,
-
+  STAT_POWER, STAT_FORCE_POWER,
   STAT_WILLPOWER,
+  STAT_SURGE_RATING,
   STAT_MAX
 };
 
@@ -467,10 +477,11 @@ enum elixir_type
   ELIXIR_MAX
 };
 
-enum flask_type
+enum stim_type
 {
-  FLASK_NONE=0,
-  FLASK_MAX
+  STIM_NONE=0,
+  STIM_RAKATA_RESOLVE,
+  STIM_MAX
 };
 
 enum food_type
@@ -1842,7 +1853,7 @@ public:
   static const char* attribute_type_string     ( int type );
   static const char* dmg_type_string           ( int type );
   static const char* elixir_type_string        ( int type );
-  static const char* flask_type_string         ( int type );
+  static const char* stim_type_string         ( int type );
   static const char* food_type_string          ( int type );
   static const char* gem_type_string           ( int type );
   static const char* meta_gem_type_string      ( int type );
@@ -1873,7 +1884,7 @@ public:
   static int parse_attribute_type              ( const std::string& name );
   static int parse_dmg_type                    ( const std::string& name );
   static int parse_elixir_type                 ( const std::string& name );
-  static int parse_flask_type                  ( const std::string& name );
+  static int parse_stim_type                  ( const std::string& name );
   static int parse_food_type                   ( const std::string& name );
   static int parse_gem_type                    ( const std::string& name );
   static int parse_meta_gem_type               ( const std::string& name );
@@ -2131,7 +2142,29 @@ private:
 };
 
 // Talent class
+struct talent_t
+{
+  const char * _name;        // Talent name
+  unsigned     _tab_page;    // Talent tab page
+  //unsigned     _col;         // Talent column
+  //unsigned     _row;         // Talent row
+  unsigned     _max_rank;
 
+  unsigned t_rank;
+
+  talent_t( player_t* p, const char*, unsigned, unsigned );
+  virtual ~talent_t();
+
+  virtual bool set_rank( uint32_t value );
+  virtual bool ok() const;
+
+  virtual uint32_t rank() const;
+
+  virtual uint32_t max_rank() const;
+  const char*          name_cstr() const { return _name; }
+};
+
+/*
 struct talent_t : spell_id_t
 {
   const talent_data_t* t_data;
@@ -2170,7 +2203,7 @@ struct talent_t : spell_id_t
   const spelleffect_data_t& effect2() const { return sd -> effect2(); }
   const spelleffect_data_t& effect3() const { return sd -> effect3(); }
 };
-
+*/
 // Active Spell ID class
 
 struct active_spell_t : public spell_id_t
@@ -2289,7 +2322,9 @@ struct gear_stats_t
   double dodge_rating;
   double parry_rating;
   double block_rating;
-  double mastery_rating;
+  double power;
+  double force_power;
+  double surge_rating;
 };
 }
 
@@ -2413,10 +2448,8 @@ struct buff_t : public spell_id_t
 
   // Player Buff with extracted data
 private:
-  void init_from_talent_( player_t*, talent_t* );
   void init_from_spell_( player_t*, spell_data_t* );
 public:
-  buff_t( actor_pair_t pair, talent_t*, ... );
   buff_t( actor_pair_t pair, spell_data_t*, ... );
 
   // Player Buff as spell_id_t by name
@@ -2853,6 +2886,10 @@ struct sim_t : private thread_t
   struct overrides_t
   {
     int bleeding;
+    int coordination;// 5% crit. implement as buff, also add equal republic buffs
+    int force_valor; // 5% stat bonus. implement sith version
+    int shatter_shot; // -20% target armor. implement as buff, also add equal buffs
+    int unnatural_might;// 5% damage bonus. implement as buff, also add equal republic buffs
   };
   overrides_t overrides;
 
@@ -3008,7 +3045,7 @@ struct scaling_t
   int    debug_scale_factors;
   std::string scale_only_str;
   int    current_scaling_stat, num_scaling_stats, remaining_scaling_stats;
-  double    scale_haste_iterations, scale_expertise_iterations, scale_crit_iterations, scale_hit_iterations, scale_mastery_iterations;
+  double    scale_haste_iterations, scale_expertise_iterations, scale_crit_iterations, scale_hit_iterations;
   std::string scale_over;
   std::string scale_over_player;
 
@@ -3149,7 +3186,6 @@ struct rating_t
   double ranged_haste, ranged_hit,ranged_crit;
   double expertise;
   double dodge, parry, block;
-  double mastery;
 };
 }
 
@@ -3451,10 +3487,11 @@ struct player_t : public noncopyable
   std::string race_str;
   race_type race;
 
-  // Haste
-  double base_haste_rating, initial_haste_rating, haste_rating;
-  double spell_haste, buffed_spell_haste;
-  double attack_haste, buffed_attack_haste, buffed_attack_speed;
+  // Ratings
+  double initial_haste_rating, haste_rating;
+  double initial_crit_rating, crit_rating;
+  double initial_accuracy_rating, accuracy_rating;
+  double initial_surge_rating, surge_rating;
 
   // Attributes
   double attribute                   [ ATTRIBUTE_MAX ];
@@ -3464,17 +3501,18 @@ struct player_t : public noncopyable
   double attribute_multiplier_initial[ ATTRIBUTE_MAX ];
   double attribute_buffed            [ ATTRIBUTE_MAX ];
 
-  double mastery, buffed_mastery, mastery_rating, initial_mastery_rating,base_mastery;
+  double surge_bonus, buffed_surge;
 
   // Spell Mechanics
+  double base_power, initial_power, power, buffed_power;
+  double base_force_power, initial_force_power, force_power, buffed_force_power;
   double base_spell_power,       initial_spell_power[ SCHOOL_MAX+1 ], spell_power[ SCHOOL_MAX+1 ], buffed_spell_power;
-  double base_spell_hit,         initial_spell_hit,                   spell_hit,                   buffed_spell_hit;
-  double base_spell_crit,        initial_spell_crit,                  spell_crit,                  buffed_spell_crit;
+  double spell_haste, buffed_spell_haste;
+  double base_spell_hit,         spell_hit,                   buffed_spell_hit;
+  double base_spell_crit,        spell_crit,                  buffed_spell_crit;
   double base_spell_penetration, initial_spell_penetration,           spell_penetration,           buffed_spell_penetration;
   double base_mp5,               initial_mp5,                         mp5,                         buffed_mp5;
   double spell_power_multiplier,    initial_spell_power_multiplier;
-  double spell_power_per_intellect, initial_spell_power_per_intellect;
-  double spell_crit_per_intellect,  initial_spell_crit_per_intellect;
   double mp5_per_intellect;
   double mana_regen_base;
   double mana_regen_while_casting;
@@ -3485,10 +3523,11 @@ struct player_t : public noncopyable
   double last_cast;
 
   // Attack Mechanics
+  double attack_haste, buffed_attack_haste, buffed_attack_speed;
   double base_attack_power,       initial_attack_power,        attack_power,       buffed_attack_power;
-  double base_attack_hit,         initial_attack_hit,          attack_hit,         buffed_attack_hit;
+  double base_attack_hit,         attack_hit,         buffed_attack_hit;
   double base_attack_expertise,   initial_attack_expertise,    attack_expertise,   buffed_attack_expertise;
-  double base_attack_crit,        initial_attack_crit,         attack_crit,        buffed_attack_crit;
+  double base_attack_crit,        attack_crit,        buffed_attack_crit;
   double attack_power_multiplier,   initial_attack_power_multiplier;
   double attack_power_per_strength, initial_attack_power_per_strength;
   double attack_power_per_agility,  initial_attack_power_per_agility;
@@ -3541,10 +3580,10 @@ struct player_t : public noncopyable
   action_callback_t* dark_intent_cb;
 
   // Consumables
-  std::string flask_str, elixirs_str, food_str;
+  std::string stim_str, elixirs_str, food_str;
   int elixir_guardian;
   int elixir_battle;
-  int flask;
+  int stim;
   int food;
 
   // Events
@@ -3675,10 +3714,13 @@ struct player_t : public noncopyable
 
   struct buffs_t
   {
-    buff_t* stunned;
+    buff_t* coordination;
+    buff_t* force_valor;
+    buff_t* power_potion;
     buff_t* raid_movement;
     buff_t* self_movement;
-    std::vector<buff_t*> divine_aegis;
+    buff_t* stunned;
+    buff_t* unnatural_might;
   };
   buffs_t buffs;
 
@@ -3687,6 +3729,7 @@ struct player_t : public noncopyable
     debuff_t* bleeding;
     debuff_t* casting;
     debuff_t* invulnerable;
+    debuff_t* shatter_shot;
     debuff_t* vulnerable;
 
     bool snared();
@@ -3772,7 +3815,8 @@ struct player_t : public noncopyable
   virtual void combat_end();
   virtual void merge( player_t& other );
 
-  virtual double composite_mastery() const { return floor( ( mastery * 100.0 ) + 0.5 ) * 0.01; }
+  virtual double composite_power() const;
+  virtual double composite_force_power() const;
 
   virtual double energy_regen_per_second() const;
   virtual double ammo_regen_per_second() const;
@@ -3823,6 +3867,8 @@ struct player_t : public noncopyable
   virtual double composite_player_absorb_multiplier   ( const school_type school ) const;
 
   virtual double composite_movement_speed() const;
+
+  virtual double composite_force_damage_bonus() const;
 
   virtual double willpower() const;
   virtual double strength() const;
@@ -3919,6 +3965,10 @@ struct player_t : public noncopyable
   virtual int decode_set( item_t& item ) { ( void )item; assert( item.name() ); return SET_NONE; }
 
   virtual void recalculate_haste();
+  virtual void recalculate_crit();
+  virtual void recalculate_accuracy();
+  virtual void recalculate_surge();
+
 
   virtual void armory_extensions( const std::string& /* region */, const std::string& /* server */, const std::string& /* character */,
                                   cache::behavior_t /* behavior */=cache::players() )
@@ -3929,6 +3979,7 @@ struct player_t : public noncopyable
   static player_t* create( sim_t* sim, const std::string& type, const std::string& name, race_type r = RACE_NONE );
 
   static player_t* create_jedi_sage( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+  static player_t* create_sith_sorcerer( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
   static player_t* create_enemy       ( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
 
   // Raid-wide aura/buff/debuff maintenance
@@ -3952,9 +4003,11 @@ struct player_t : public noncopyable
   inline bool is_add() const { return type == ENEMY_ADD; }
 
   jedi_consular_t * cast_jedi_consular() { assert( main_class == JEDI_CONSULAR  ); return ( jedi_consular_t * ) this; }
-  jedi_sage_t     * cast_jedi_sage    () { assert( type == JEDI_SAGE            ); return ( jedi_sage_t     * ) this; }
+  jedi_sage_t     * cast_jedi_sage    () { assert( type == JEDI_SAGE || type == SITH_SORCERER ); return ( jedi_sage_t     * ) this; }
   pet_t           * cast_pet          () { assert( is_pet()                     ); return ( pet_t           * ) this; }
   enemy_t         * cast_enemy        () { assert( type == ENEMY                ); return ( enemy_t         * ) this; }
+
+  bool is_jedi_sage() { return ( type == JEDI_SAGE || type == SITH_SORCERER ); }
 
   bool      in_gcd() const { return gcd_ready > sim -> current_time; }
   bool      recent_cast() const;
@@ -3999,7 +4052,8 @@ struct targetdata_t : public noncopyable
 
   static targetdata_t* get( player_t* source, player_t* target );
 
-  jedi_sage_targetdata_t* cast_jedi_sage() { assert( source->type == JEDI_SAGE ); return ( jedi_sage_targetdata_t* ) this; }
+  jedi_sage_targetdata_t* cast_jedi_sage() { assert( source->type == JEDI_SAGE  ); return ( jedi_sage_targetdata_t* ) this; }
+  sith_sorcerer_targetdata_t* cast_sith_sorcerer() { assert( source->type == SITH_SORCERER ); return ( sith_sorcerer_targetdata_t* ) this; }
 
 protected:
   dot_t* add_dot( dot_t* d );
@@ -4140,6 +4194,7 @@ struct action_t
   double base_dd_min, base_dd_max, base_td, base_td_init;
   double   base_dd_multiplier,   base_td_multiplier;
   double player_dd_multiplier, player_td_multiplier;
+  double target_dd_multiplier, target_td_multiplier;
   double   base_multiplier,   base_hit,   base_crit,   base_penetration;
   double player_multiplier, player_hit, player_crit, player_penetration;
   double target_multiplier, target_hit, target_crit, target_penetration;
@@ -4153,7 +4208,7 @@ struct action_t
   double player_haste;
   double resource_consumed;
   double direct_dmg, tick_dmg;
-  double snapshot_crit, snapshot_haste, snapshot_mastery;
+  double snapshot_crit, snapshot_haste;
   int num_ticks;
   weapon_t* weapon;
   double weapon_multiplier;
@@ -4264,8 +4319,8 @@ public:
 
   // Some actions require different multipliers for the "direct" and "tick" portions.
 
-  virtual double total_dd_multiplier() const { return total_multiplier() * base_dd_multiplier * player_dd_multiplier; }
-  virtual double total_td_multiplier() const { return total_multiplier() * base_td_multiplier * player_td_multiplier; }
+  virtual double total_dd_multiplier() const { return total_multiplier() * base_dd_multiplier * player_dd_multiplier * target_dd_multiplier; }
+  virtual double total_td_multiplier() const { return total_multiplier() * base_td_multiplier * player_td_multiplier * target_td_multiplier; }
 
   virtual action_expr_t* create_expression( const std::string& name );
 
@@ -5014,13 +5069,6 @@ struct wowhead_t
                          bool ptr=false, cache::behavior_t b=cache::items() );
 };
 
-// CharDev  =================================================================
-
-struct chardev_t
-{
-  static player_t* download_player( sim_t* sim, const std::string& id, cache::behavior_t b=cache::players() );
-};
-
 // MMO Champion =============================================================
 
 struct mmo_champion_t
@@ -5187,7 +5235,6 @@ struct ticker_t // replacement for dot_t, handles any ticking buff/debuff
   dot_t stuff
   double crit;
   double haste;
-  double mastery;
 };
 
 struct sim_t
@@ -5344,7 +5391,6 @@ struct ability_t : public action_t
     ticker -> amount  = calculate_tick_amount( ticker -> target );
     ticker -> crit    = calculate_crit_chance( ticker -> target );
     ticker -> haste   = calculate_haste      ( ticker -> target );
-    ticker -> mastery = calculate_mastery    ( ticker -> target );
   }
   virtual void refresh_ticker( ticker_t* ticker )
   {
@@ -5384,13 +5430,6 @@ struct ability_t : public action_t
       return calculate_attack_haste( target );
     else
       return calculate_spell_haste( target );
-  }
-  virtual double calculate_mastery( actor_t* target )
-  {
-    if ( weapon )
-      return calculate_attack_mastery( target );
-    else
-      return calculate_spell_mastery( target );
   }
   virtual double calculate_miss_chance( actor_t* target )
   {

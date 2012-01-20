@@ -34,3 +34,5 @@ bin
 int
 .project
 .externalToolBuilders
+engine/simc_x64
+.cproject

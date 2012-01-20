@@ -27,24 +27,10 @@ static OptionEntry* getBuffOptions()
 {
   static OptionEntry options[] =
   {
-    { "Toggle All Buffs",       "",                                "Toggle all buffs on/off"                                                                         },
-    { "Dark Intent",            "override.dark_intent",            "Dark Intent"                                                                                     },
-    { "Focus Magic",            "override.focus_magic",            "Focus Magic"                                                                                     },
-    { "Agility and Strength",   "override.strength_of_earth",      "Battle Shout\nHorn of Winter\nRoar of Courage\nStrength of Earth Totem"                          },
-    { "All Damage",             "override.communion",              "Arcane Tactics\nCommunion\nFerocious Inspiration"                                                },
-    { "Armor",                  "override.devotion_aura",          "Devotion Aura\nStoneskin Totem"                                                                  },
-    { "Attack Power (%)",       "override.blessing_of_might",      "Abomination's Might\nBlessing of Might\nTrueshot Aura\nUnleashed Rage"                           },
-    { "Bloodlust",              "override.bloodlust",              "Ancient Hysteria\nBloodlust\nHeroism\nTime Warp"                                                 },
-    { "Critical Strike",        "override.leader_of_the_pack",     "Elemental Oath\nFurious Howl\nHonor Among Thieves\nLeader of the Pack\nRampage\nTerrifying Roar" },
-    { "Mana",                   "override.arcane_brilliance",      "Arcane Brilliance\nFel Intelligence"                                                             },
-    { "Mana Regen",             "override.mana_spring_totem",      "Blessing of Might\nFel Intelligence\nMana Spring Totem"                                          },
-    { "Melee and Ranged Haste", "override.windfury_totem",         "Hunting Party\nImproved Icy Talons\nWindfury Totem"                                              },
-    { "Replenishment",          "override.replenishment",          "Communion\nEnduring Winter\nReviatalize\nSoul Leech\nVampiric Touch"                             },
-    { "Spell Haste",            "override.wrath_of_air",           "Moonkin Form\nShadowform\nWrath of Air Totem"                                                    },
-    { "Spell Power 6%",         "override.arcane_brilliance",      "Arcane Brilliance\nFlametongue Totem"                                                            },
-    { "Spell Power 10%",        "override.demonic_pact",           "Demonic Pact\nTotemic Wrath"                                                                     },
-    { "Stamina",                "override.fortitude",              "Blood Pact\nCommanding Shout\nPower Word: Fortitude\nQiraji Fortitude"                           },
-    { "Stat Multiplier",        "override.blessing_of_kings",      "Blessing of Kings\nEmbrace of the Shale Spider\nMark of the Wild"                                },
+    { "Toggle All Buffs", "",                         "Toggle all buffs on/off"                           },
+    { "Crit",             "override.coordination",    "+5% Crit"                                          },
+    { "Stats",            "override.force_valor",     "+5% Stat Buff ( Str, Aim, Cunning, Willpower )"    },
+    { "Damage Bonus",     "override.unnatural_might", "+5% Damage Bonus"                                  },
     { NULL, NULL, NULL }
   };
   return options;
@@ -70,17 +56,9 @@ static OptionEntry* getDebuffOptions()
 {
   static OptionEntry options[] =
   {
-    { "Toggle All Debuffs",     "",                               "Toggle all debuffs on/off"                                                                                     },
-    { "Armor Reduction",        "override.sunder_armor",          "Corrosive Spit\nExpose Armor\nFaerie Fire\nSunder Armor\nTear Armor"                                           },
-    { "Bleed Damage",           "override.mangle",                "Blood Frenzy\nGore\nHemorrhage\nMangle\nStampede\nTendon Rip"                                                  },
-    { "Bleeding",               "override.bleeding",              "Rip\nRupture\nPiercing Shots"                                                                                  },
-    { "Physical Damage Done",   "override.demoralizing_roar",     "Curse of Weakness\nDemoralizing Roar\nDemoralizing Shout\nScarlet Fever\nVindication"                          },
-    { "Physical Damage Taken",  "override.blood_frenzy_physical", "Acid Spit\nBlood Frenzy\nBrittle Bones\nRavage\nSavage Combat"                                                 },
-    { "Poisoned",               "override.poisoned",              "Deadly Poison\nSerpent Sting"                                                                                  },
-    { "Ranged Attack Power",    "override.hunters_mark",          "Hunter's Mark"                                                                                                 },
-    { "Reduced Attack Speed",   "override.thunder_clap",          "Dust Cloud\nEarth Shock\nFrost Fever\nInfected Wounds\nJudgements of the Just\nTailspin\nThunder Clap\nWaylay" },
-    { "Spell Critical Strike",  "override.critical_mass",         "Critical Mass\nShadow and Flame"                                                                               },
-    { "Spell Damage",           "override.earth_and_moon",        "Curse of the Elements\nEarth and Moon\nEbon Plaguebriger\nFire Breath\nLightning Breath\nMaster Poisoner"      },
+    { "Toggle All Debuffs",     "",                       "Toggle all debuffs on/off"     },
+    { "Bleeding",               "override.bleeding",      "Rip\nRupture\nPiercing Shots"  },
+    { "Armor Reduction",        "override.shatter_shot",  "-20% Armor Reduction"          },
     { NULL, NULL, NULL }
   };
   return options;
@@ -95,23 +73,19 @@ static OptionEntry* getScalingOptions()
       "Use Positive Deltas Only",         "",         "Normally Hit/Expertise use negative scale factors to show DPS lost by reducing that stat.\n"
       "This option forces a positive scale delta, which is useful for classes with soft caps."
     },
-    { "Analyze Strength",                 "str",      "Calculate scale factors for Strength"                 },
-    { "Analyze Agility",                  "agi",      "Calculate scale factors for Agility"                  },
-    { "Analyze Stamina",                  "sta",      "Calculate scale factors for Stamina"                  },
-    { "Analyze Intellect",                "int",      "Calculate scale factors for Intellect"                },
-    { "Analyze Spirit",                   "spi",      "Calculate scale factors for Spirit"                   },
-    { "Analyze Spell Power",              "sp",       "Calculate scale factors for Spell Power"              },
-    { "Analyze Attack Power",             "ap",       "Calculate scale factors for Attack Power"             },
-    { "Analyze Expertise Rating",         "exp",      "Calculate scale factors for Expertise Rating"         },
-    { "Analyze Hit Rating",               "hit",      "Calculate scale factors for Hit Rating"               },
-    { "Analyze Crit Rating",              "crit",     "Calculate scale factors for Crit Rating"              },
-    { "Analyze Haste Rating",             "haste",    "Calculate scale factors for Haste Rating"             },
-    { "Analyze Mastery Rating",           "mastery",  "Calculate scale factors for Mastery Rating"           },
-    { "Analyze Weapon DPS",               "wdps",     "Calculate scale factors for Weapon DPS"               },
-    { "Analyze Weapon Speed",             "wspeed",   "Calculate scale factors for Weapon Speed"             },
-    { "Analyze Off-hand Weapon DPS",      "wohdps",   "Calculate scale factors for Off-hand Weapon DPS"      },
-    { "Analyze Off-hand Weapon Speed",    "wohspeed", "Calculate scale factors for Off-hand Weapon Speed"    },
-    { "Analyze Armor",                    "armor",    "Calculate scale factors for Armor"                    },
+    { "Analyze Strength",                 "str",          "Calculate scale factors for Strength"               },
+    { "Analyze Willpower",                "willpower",    "Calculate scale factors for Willpower"              },
+    { "Analyze Hit Rating",               "hit",          "Calculate scale factors for Hit Rating"             },
+    { "Analyze Crit Rating",              "crit",         "Calculate scale factors for Crit Rating"            },
+    { "Analyze Haste Rating",             "haste",        "Calculate scale factors for Haste Rating"           },
+    { "Analyze Surge Rating",             "surge",        "Calculate scale factors for Surge Rating"           },
+    { "Analyze Power",                    "power",        "Calculate scale factors for Power"                  },
+    { "Analyze Force Power",              "force_power",  "Calculate scale factors for Force Power"            },
+    { "Analyze Weapon DPS",               "wdps",         "Calculate scale factors for Weapon DPS"             },
+    { "Analyze Weapon Speed",             "wspeed",       "Calculate scale factors for Weapon Speed"           },
+    { "Analyze Off-hand Weapon DPS",      "wohdps",       "Calculate scale factors for Off-hand Weapon DPS"    },
+    { "Analyze Off-hand Weapon Speed",    "wohspeed",     "Calculate scale factors for Off-hand Weapon Speed"  },
+    { "Analyze Armor",                    "armor",        "Calculate scale factors for Armor"                  },
     { NULL, NULL, NULL }
   };
   return options;
@@ -121,19 +95,15 @@ static OptionEntry* getPlotOptions()
 {
   static OptionEntry options[] =
   {
-    { "Plot DPS per Strength",                 "str",     "Generate DPS curve for Strength"                 },
-    { "Plot DPS per Agility",                  "agi",     "Generate DPS curve for Agility"                  },
-    { "Plot DPS per Stamina",                  "sta",     "Generate DPS curve for Stamina"                  },
-    { "Plot DPS per Intellect",                "int",     "Generate DPS curve for Intellect"                },
-    { "Plot DPS per Spirit",                   "spi",     "Generate DPS curve for Spirit"                   },
-    { "Plot DPS per Spell Power",              "sp",      "Generate DPS curve for Spell Power"              },
-    { "Plot DPS per Attack Power",             "ap",      "Generate DPS curve for Attack Power"             },
-    { "Plot DPS per Expertise Rating",         "exp",     "Generate DPS curve for Expertise Rating"         },
-    { "Plot DPS per Hit Rating",               "hit",     "Generate DPS curve for Hit Rating"               },
-    { "Plot DPS per Crit Rating",              "crit",    "Generate DPS curve for Crit Rating"              },
-    { "Plot DPS per Haste Rating",             "haste",   "Generate DPS curve for Haste Rating"             },
-    { "Plot DPS per Mastery Rating",           "mastery", "Generate DPS curve for Mastery Rating"           },
-    { "Plot DPS per Weapon DPS",               "wdps",    "Generate DPS curve for Weapon DPS"               },
+    { "Plot DPS per Strength",                 "str",         "Generate DPS curve for Strength"     },
+    { "Plot DPS per Willpower",                "willpower",   "Generate DPS curve for Willpower"    },
+    { "Plot DPS per Accuracy Rating",          "hit",         "Generate DPS curve for Hit Rating"   },
+    { "Plot DPS per Crit Rating",              "crit",        "Generate DPS curve for Crit Rating"  },
+    { "Plot DPS per Haste Rating",             "haste",       "Generate DPS curve for Haste Rating" },
+    { "Plot DPS per Surge Rating",             "surge",       "Generate DPS curve for Surge Rating" },
+    { "Plot DPS per Power",                    "power",       "Generate DPS curve for Power"        },
+    { "Plot DPS per Force Power",              "forcepower", "Generate DPS curve for Force Power"  },
+    { "Plot DPS per Weapon DPS",               "wdps",        "Generate DPS curve for Weapon DPS"   },
     { NULL, NULL, NULL }
   };
   return options;
@@ -143,12 +113,12 @@ static OptionEntry* getReforgePlotOptions()
 {
   static OptionEntry options[] =
   {
-    { "Plot Reforge Options for Spirit",            "spi",     "Generate reforge plot data for Spirit"           },
-    { "Plot Reforge Options for Expertise Rating",  "exp",     "Generate reforge plot data for Expertise Rating" },
-    { "Plot Reforge Options for Hit Rating",        "hit",     "Generate reforge plot data for Hit Rating"       },
-    { "Plot Reforge Options for Crit Rating",       "crit",    "Generate reforge plot data for Crit Rating"      },
-    { "Plot Reforge Options for Haste Rating",      "haste",   "Generate reforge plot data for Haste Rating"     },
-    { "Plot Reforge Options for Mastery Rating",    "mastery", "Generate reforge plot data for Mastery Rating"   },
+    { "Plot Reforge Options for Willpower",         "willpower", "Generate reforge plot data for Willpower"        },
+    { "Plot Reforge Options for Power",             "power",     "Generate reforge plot data for Power"            },
+    { "Plot Reforge Options for Surge Rating",      "surge",     "Generate reforge plot data for Surge Rating"     },
+    { "Plot Reforge Options for Accuracy Rating",   "hit",       "Generate reforge plot data for Accuracy Rating"  },
+    { "Plot Reforge Options for Crit Rating",       "crit",      "Generate reforge plot data for Crit Rating"      },
+    { "Plot Reforge Options for Haste Rating",      "haste",     "Generate reforge plot data for Haste Rating"     },
     { NULL, NULL, NULL }
   };
   return options;
@@ -424,7 +394,6 @@ void SimulationCraftWindow::loadHistory()
 
 void SimulationCraftWindow::saveHistory()
 {
-  charDevCookies->save();
   http_t::cache_save();
   QFile file( "simc_history.dat" );
   if( file.open( QIODevice::WriteOnly ) )
@@ -598,7 +567,7 @@ void SimulationCraftWindow::createGlobalsTab()
   globalsLayout->addRow(   "Default Role",   defaultRoleChoice = createChoice( 4, "auto", "dps", "heal", "tank" ) );
   globalsLayout->addRow( "Generate Debug",         debugChoice = createChoice( 3, "None", "Log Only", "Gory Details" ) );
   iterationsChoice->setCurrentIndex( 1 );
-  fightLengthChoice->setCurrentIndex( 7 );
+  fightLengthChoice->setCurrentIndex( 4 );
   fightVarianceChoice->setCurrentIndex( 2 );
   QGroupBox* globalsGroupBox = new QGroupBox();
   globalsGroupBox->setLayout( globalsLayout );
@@ -744,46 +713,17 @@ void SimulationCraftWindow::createImportTab()
   battleNetView->setUrl( QUrl( "http://us.battle.net/wow/en" ) );
   importTab->addTab( battleNetView, "Battle.Net" );
 
-  charDevCookies = new PersistentCookieJar( "chardev.cookies" );
-  charDevCookies->load();
-  charDevView = new SimulationCraftWebView( this );
-  charDevView->page()->networkAccessManager()->setCookieJar( charDevCookies );
-  charDevView->setUrl( QUrl( "http://chardev.org/?planner" ) );
-  importTab->addTab( charDevView, "CharDev" );
-
-  createRawrTab();
   createBestInSlotTab();
 
   historyList = new QListWidget();
   historyList->setSortingEnabled( true );
   importTab->addTab( historyList, "History" );
 
-  connect( rawrButton,  SIGNAL( clicked( bool ) ),                       this, SLOT( rawrButtonClicked() ) );
   connect( historyList, SIGNAL( itemDoubleClicked( QListWidgetItem* ) ), this, SLOT( historyDoubleClicked( QListWidgetItem* ) ) );
   connect( importTab,   SIGNAL( currentChanged( int ) ),                 this, SLOT( importTabChanged( int ) ) );
 
   // Commenting out until it is more fleshed out.
   // createCustomTab();
-}
-
-void SimulationCraftWindow::createRawrTab()
-{
-  QVBoxLayout* rawrLayout = new QVBoxLayout();
-  QLabel* rawrLabel = new QLabel( " http://rawr.codeplex.com\n\n"
-                                  "Rawr is an exceptional theorycrafting tool that excels at gear optimization."
-                                  " The key architectural difference between Rawr and SimulationCraft is one of"
-                                  " formulation vs simulation.  There are strengths and weaknesses to each"
-                                  " approach.  Since they come from different directions, one can be confident"
-                                  " in the result when they arrive at the same destination.\n\n"
-                                  " To aid comparison, SimulationCraft can import the character xml file written by Rawr.\n\n"
-                                  " Alternatively, paste xml from the Rawr in-game addon into the space below." );
-  rawrLabel->setWordWrap( true );
-  rawrLayout->addWidget( rawrLabel );
-  rawrLayout->addWidget( rawrButton = new QPushButton( "Load Rawr XML" ) );
-  rawrLayout->addWidget( rawrText = new SimulationCraftTextEdit(), 1 );
-  QGroupBox* rawrGroupBox = new QGroupBox();
-  rawrGroupBox->setLayout( rawrLayout );
-  importTab->addTab( rawrGroupBox, "Rawr" );
 }
 
 void SimulationCraftWindow::createBestInSlotTab()
@@ -795,20 +735,13 @@ void SimulationCraftWindow::createBestInSlotTab()
   bisTree->setHeaderLabels( headerLabels );
   importTab->addTab( bisTree, "BiS" );
 
-  const int TIER_MAX=2;
-  const char* tierNames[] = { "T12", "T13" };
-  QTreeWidgetItem* rootItems[ PLAYER_MAX ][ TIER_MAX ];
-  for( int i=DEATH_KNIGHT; i <= WARRIOR; i++ )
+  QTreeWidgetItem* top[ PLAYER_MAX ];
+  for( int i=JEDI_SAGE; i <= SITH_SORCERER; i++ )
   {
-    // Ignore the Monk for now
-    if ( i == MONK ) continue;
 
-    QTreeWidgetItem* top = new QTreeWidgetItem( QStringList( util_t::player_type_string( i ) ) );
-    bisTree->addTopLevelItem( top );
-    for( int j=0; j < TIER_MAX; j++ )
-    {
-      top->addChild( rootItems[ i ][ j ] = new QTreeWidgetItem( QStringList( tierNames[ j ] ) ) );
-    }
+    top[i] = new QTreeWidgetItem( QStringList( util_t::player_type_string( i ) ) );
+    bisTree->addTopLevelItem( top[i] );
+
   }
 #ifndef Q_WS_MAC
   QDir dir = QString( "profiles" );
@@ -841,19 +774,10 @@ void SimulationCraftWindow::createBestInSlotTab()
       if( profile.contains( util_t::player_type_string( j ), Qt::CaseInsensitive ) )
         player = j;
 
-    // Hack! For now...  Need to decide sim-wide just how the heck we want to refer to DKs.
-    if ( profile.contains( "Death_Knight" ) )
-      player = DEATH_KNIGHT;
-
-    int tier = TIER_MAX;
-    for( int j=0; j < TIER_MAX && tier == TIER_MAX; j++ )
-      if( profile.contains( tierNames[ j ] ) )
-        tier = j;
-
-    if( player != PLAYER_MAX && tier != TIER_MAX )
+    if( player != PLAYER_MAX )
     {
       QTreeWidgetItem* item = new QTreeWidgetItem( QStringList( profile ) );
-      rootItems[ player ][ tier ]->addChild( item );
+      top[ player ] -> addChild( item );
     }
   }
 
@@ -923,7 +847,7 @@ void SimulationCraftWindow::createLogTab()
 void SimulationCraftWindow::createHelpTab()
 {
   helpView = new SimulationCraftWebView( this );
-  helpView->setUrl( QUrl( "http://code.google.com/p/simulationcraft/wiki/StartersGuide" ) );
+  helpView->setUrl( QUrl( "http://code.google.com/p/simulationcraft-swtor/" ) ); // FIXME: change back to a starters guide / help wiki page once there is one
   mainTab->addTab( helpView, "Help" );
 }
 
@@ -965,7 +889,7 @@ void SimulationCraftWindow::createResultsTab()
 void SimulationCraftWindow::createSiteTab()
 {
   siteView = new SimulationCraftWebView( this );
-  siteView->setUrl( QUrl( "http://code.google.com/p/simulationcraft/" ) );
+  siteView->setUrl( QUrl( "http://code.google.com/p/simulationcraft-swtor/" ) );
   mainTab->addTab( siteView, "Site" );
 }
 
@@ -1213,33 +1137,12 @@ void ImportThread::importBattleNet()
   }
 }
 
-void ImportThread::importCharDev()
-{
-  QStringList tokens = url.split( QRegExp( "[?&=:/.]" ), QString::SkipEmptyParts );
-  int count = tokens.count();
-  if( count > 0 )
-  {
-    // Win7/x86_64 workaround
-    std::string c = tokens[ count-1 ].toUtf8().constData();
-    player = chardev_t::download_player( sim, c );
-  }
-}
-
-void ImportThread::importRawr()
-{
-  // Win7/x86_64 workaround
-  std::string xml = mainWindow->rawrText->toPlainText().toUtf8().constData();
-  player = rawr_t::load_player( sim, "rawr.xml", xml );
-}
-
 void ImportThread::run()
 {
   cache::advance_era();
   switch( tab )
   {
   case TAB_BATTLE_NET: importBattleNet(); break;
-  case TAB_CHAR_DEV:   importCharDev();   break;
-  case TAB_RAWR:       importRawr();      break;
   default: assert( 0 );
   }
 
@@ -1414,7 +1317,7 @@ QString SimulationCraftWindow::mergeOptions()
   options += "\n";
   options += "fight_style=" + fightStyleChoice->currentText() + "\n";
 
-  static const char* const targetlevel[] = { "88", "87", "85" };
+  static const char* const targetlevel[] = { "53", "52", "51" };
   options += "target_level=";
   options += targetlevel[ targetLevelChoice->currentIndex() ];
   options += "\n";
@@ -1455,7 +1358,8 @@ QString SimulationCraftWindow::mergeOptions()
     }
   }
   if( buttons.at( 1 )->isChecked() ) options += "positive_scale_delta=1\n";
-  if( buttons.at( 15 )->isChecked() || buttons.at( 17 )->isChecked() ) options += "weapon_speed_scale_factors=1\n";
+  //if( buttons.at( 15 )->isChecked() || buttons.at( 17 )->isChecked() ) options += "weapon_speed_scale_factors=1\n";
+  // FIXME: Use the correct weapon scale factor position once all stats are implemented
   options += "scale_only=none";
   for( int i=2; scaling[ i ].label; i++ )
   {
@@ -1633,11 +1537,6 @@ void SimulationCraftWindow::cmdLineReturnPressed()
       battleNetView->setUrl( QUrl::fromUserInput( cmdLine->text() ) );
       importTab->setCurrentIndex( TAB_BATTLE_NET );
     }
-    else if( cmdLine->text().count( "chardev.org" ) )
-    {
-      charDevView->setUrl( QUrl::fromUserInput( cmdLine->text() ) );
-      importTab->setCurrentIndex( TAB_CHAR_DEV );
-    }
     else
     {
       if( ! sim ) mainButtonClicked( true );
@@ -1663,8 +1562,6 @@ void SimulationCraftWindow::mainButtonClicked( bool /* checked */ )
     switch( importTab->currentIndex() )
     {
     case TAB_BATTLE_NET: startImport( TAB_BATTLE_NET, cmdLine->text() ); break;
-    case TAB_CHAR_DEV:   startImport( TAB_CHAR_DEV,   cmdLine->text() ); break;
-    case TAB_RAWR:       startImport( TAB_RAWR,       "Rawr XML"      ); break;
     }
     break;
   case TAB_LOG: saveLog(); break;
@@ -1728,26 +1625,6 @@ void SimulationCraftWindow::forwardButtonClicked( bool /* checked */ )
   }
 }
 
-void SimulationCraftWindow::rawrButtonClicked( bool /* checked */ )
-{
-  QFileDialog dialog( this );
-  dialog.setFileMode( QFileDialog::ExistingFile );
-  dialog.setNameFilter( "Rawr Profiles (*.xml)" );
-  dialog.restoreState( rawrDialogState );
-  if( dialog.exec() )
-  {
-    rawrDialogState = dialog.saveState();
-    QStringList fileList = dialog.selectedFiles();
-    if ( ! fileList.empty() )
-    {
-      QFile rawrFile( fileList.at( 0 ) );
-      rawrFile.open( QIODevice::ReadOnly );
-      rawrText->setPlainText( rawrFile.readAll() );
-      rawrText->moveCursor( QTextCursor::Start );
-    }
-  }
-}
-
 void SimulationCraftWindow::mainTabChanged( int index )
 {
   visibleWebView = 0;
@@ -1791,8 +1668,7 @@ void SimulationCraftWindow::mainTabChanged( int index )
 
 void SimulationCraftWindow::importTabChanged( int index )
 {
-  if( index == TAB_RAWR ||
-      index == TAB_BIS  ||
+  if( index == TAB_BIS  ||
       index == TAB_CUSTOM  ||
       index == TAB_HISTORY )
   {
@@ -1840,21 +1716,8 @@ void SimulationCraftWindow::historyDoubleClicked( QListWidgetItem* item )
   QString text = item->text();
   QString url = text.section( ' ', 1, 1, QString::SectionSkipEmpty );
 
-  if( url.count( "battle.net"    ) ||
-      url.count( "wowarmory.com" ) )
-  {
-    battleNetView->setUrl( QUrl::fromEncoded( url.toAscii() ) );
-    importTab->setCurrentIndex( TAB_BATTLE_NET );
-  }
-  else if( url.count( "chardev.org" ) )
-  {
-    charDevView->setUrl( QUrl::fromEncoded( url.toAscii() ) );
-    importTab->setCurrentIndex( TAB_CHAR_DEV );
-  }
-  else
-  {
-    importTab->setCurrentIndex( TAB_RAWR );
-  }
+  battleNetView->setUrl( QUrl::fromEncoded( url.toAscii() ) );
+  importTab->setCurrentIndex( TAB_BATTLE_NET );
 }
 
 void SimulationCraftWindow::bisDoubleClicked( QTreeWidgetItem* item, int /* col */ )

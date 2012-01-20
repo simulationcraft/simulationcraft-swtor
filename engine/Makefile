@@ -75,7 +75,6 @@ SRC = \
 	sc_battle_net.cpp \
 	sc_bcp_api.cpp \
 	sc_buff.cpp \
-	sc_chardev.cpp \
 	sc_chart.cpp \
 	sc_const_data.cpp \
 	sc_consumable.cpp \

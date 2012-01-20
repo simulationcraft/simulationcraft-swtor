@@ -95,7 +95,7 @@ scaling_t::scaling_t( sim_t* s ) :
   sim( s ), baseline_sim( 0 ), ref_sim( 0 ), delta_sim( 0 ), ref_sim2( 0 ), delta_sim2( 0 ),
   scale_stat( STAT_NONE ),
   scale_value( 0 ),
-  scale_delta_multiplier( 1.0 ),
+  scale_delta_multiplier( 0.2 ),
   calculate_scale_factors( 0 ),
   center_scale_delta( 0 ),
   positive_scale_delta( 0 ),
@@ -111,7 +111,6 @@ scaling_t::scaling_t( sim_t* s ) :
   scale_expertise_iterations( 1.0 ),
   scale_crit_iterations( 1.0 ),
   scale_hit_iterations( 1.0 ),
-  scale_mastery_iterations( 1.0 ),
   scale_over( "" ), scale_over_player( "" )
 {
   create_options();
@@ -162,6 +161,11 @@ void scaling_t::init_deltas()
 
   if ( stats.spell_power == 0 ) stats.spell_power = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
 
+  if ( stats.power == 0 ) stats.power = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
+  if ( stats.force_power == 0 ) stats.force_power = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
+
+  if ( stats.surge_rating == 0 ) stats.surge_rating = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
+
   if ( stats.attack_power == 0 ) stats.attack_power = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
 
   if ( stats.expertise_rating == 0 )
@@ -188,7 +192,6 @@ void scaling_t::init_deltas()
 
   if ( stats.crit_rating  == 0 ) stats.crit_rating  = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
   if ( stats.haste_rating == 0 ) stats.haste_rating = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
-  if ( stats.mastery_rating == 0 ) stats.mastery_rating = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
 
   // Defensive
   if ( stats.armor == 0 ) stats.armor = smooth_scale_factors ? 1500 : 3000;
@@ -271,7 +274,6 @@ void scaling_t::analyze_stats()
     if ( i == STAT_EXPERTISE_RATING && ( scale_expertise_iterations != 0 ) ) delta_sim -> iterations = ( int ) ( delta_sim -> iterations * scale_expertise_iterations );
     if ( i == STAT_CRIT_RATING && ( scale_crit_iterations != 0 ) ) delta_sim -> iterations = ( int ) ( delta_sim -> iterations * scale_crit_iterations );
     if ( i == STAT_HIT_RATING && ( scale_hit_iterations != 0 ) ) delta_sim -> iterations = ( int ) ( delta_sim -> iterations * scale_hit_iterations );
-    if ( i == STAT_MASTERY_RATING && ( scale_mastery_iterations != 0 ) ) delta_sim -> iterations = ( int ) ( delta_sim -> iterations * scale_mastery_iterations );
     delta_sim -> execute();
 
     if ( center )
@@ -282,7 +284,6 @@ void scaling_t::analyze_stats()
       if ( i == STAT_EXPERTISE_RATING && ( scale_expertise_iterations != 0 ) ) ref_sim -> iterations = ( int ) ( ref_sim -> iterations * scale_expertise_iterations );
       if ( i == STAT_CRIT_RATING && ( scale_crit_iterations != 0 ) ) ref_sim -> iterations = ( int ) ( ref_sim -> iterations * scale_crit_iterations );
       if ( i == STAT_HIT_RATING && ( scale_hit_iterations != 0 ) ) ref_sim -> iterations = ( int ) ( ref_sim -> iterations * scale_hit_iterations );
-      if ( i == STAT_MASTERY_RATING && ( scale_mastery_iterations != 0 ) ) ref_sim -> iterations = ( int ) ( ref_sim -> iterations * scale_mastery_iterations );
       ref_sim -> execute();
     }
 
@@ -538,7 +539,6 @@ void scaling_t::create_options()
     { "scale_hit_rating",               OPT_FLT,    &( stats.hit_rating                     ) },
     { "scale_crit_rating",              OPT_FLT,    &( stats.crit_rating                    ) },
     { "scale_haste_rating",             OPT_FLT,    &( stats.haste_rating                   ) },
-    { "scale_mastery_rating",           OPT_FLT,    &( stats.mastery_rating                 ) },
     { "scale_weapon_dps",               OPT_FLT,    &( stats.weapon_dps                     ) },
     { "scale_weapon_speed",             OPT_FLT,    &( stats.weapon_speed                   ) },
     { "scale_offhand_weapon_dps",       OPT_FLT,    &( stats.weapon_offhand_dps             ) },
@@ -548,7 +548,6 @@ void scaling_t::create_options()
     { "scale_expertise_iterations",     OPT_FLT,    &( scale_expertise_iterations           ) },
     { "scale_crit_iterations",          OPT_FLT,    &( scale_crit_iterations                ) },
     { "scale_hit_iterations",           OPT_FLT,    &( scale_hit_iterations                 ) },
-    { "scale_mastery_iterations",       OPT_FLT,    &( scale_mastery_iterations             ) },
     { "scale_over",                     OPT_STRING, &( scale_over                           ) },
     { "scale_over_player",              OPT_STRING, &( scale_over_player                    ) },
     { NULL, OPT_UNKNOWN, NULL }

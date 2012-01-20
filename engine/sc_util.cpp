@@ -336,6 +336,7 @@ const char* util_t::player_type_string( int type )
   case ENEMY:           return "enemy";
   case ENEMY_ADD:       return "add";
   case JEDI_SAGE:       return "jedi_sage";
+  case SITH_SORCERER:   return "sith_sorcerer";
   }
   return "unknown";
 }
@@ -353,6 +354,7 @@ int util_t::translate_class_str( std::string& s )
   else if ( fmt_s == "sith_inquisitor" ) return SITH_INQUISITOR;
   else if ( fmt_s == "jedi_knight"     ) return JEDI_KNIGHT;
   else if ( fmt_s == "jedi_sage"       ) return JEDI_SAGE;
+  else if ( fmt_s == "sith_sorcerer"   ) return SITH_SORCERER;
   return PLAYER_NONE;
 }
 
@@ -589,6 +591,8 @@ const char* util_t::school_type_string( int school )
   case SCHOOL_CHROMATIC:        return "chromatic";
   case SCHOOL_MAGIC:            return "magic";
   case SCHOOL_DRAIN:            return "drain";
+  case SCHOOL_KINETIC:          return "kinetic";
+  case SCHOOL_INTERNAL:         return "internal";
   }
   return "unknown";
 }
@@ -613,10 +617,19 @@ int util_t::talent_tree( int tree, player_type ptype )
     case JEDI_SAGE:
       switch ( tree )
       {
-      case JEDI_SAGE_SEER:          return TREE_SEER;
-      case JEDI_SAGE_TELEKINETICS:  return TREE_TELEKINETICS;
-      case JEDI_SAGE_BALANCE:       return TREE_BALANCE;
+      case JEDI_SAGE_SEER:            return TREE_SEER;
+      case JEDI_SAGE_TELEKINETICS:    return TREE_TELEKINETICS;
+      case JEDI_SAGE_BALANCE:         return TREE_BALANCE;
       }
+    break;
+    case SITH_SORCERER:
+      switch ( tree )
+      {
+      case SITH_SORCERER_CORRUPTION:  return TREE_CORRUPTION;
+      case SITH_SORCERER_LIGHTNING:   return TREE_LIGHTNING;
+      case SITH_SORCERER_MADNESS:     return TREE_MADNESS;
+      }
+    break;
     default:
       break;
   }
@@ -632,9 +645,14 @@ const char* util_t::talent_tree_string( int tree, bool armory_format )
   {
     switch ( tree )
     {
+    // JEDI_SAGE
     case TREE_SEER:         return "seer";
     case TREE_TELEKINETICS: return "telekinetics";
     case TREE_BALANCE:      return "balance";
+    // SITH_SORCERER
+    case TREE_CORRUPTION:   return "corruption";
+    case TREE_LIGHTNING:    return "lightning";
+    case TREE_MADNESS:      return "madness";
     default: return "Unknown";
     }
   }
@@ -642,9 +660,14 @@ const char* util_t::talent_tree_string( int tree, bool armory_format )
   {
     switch ( tree )
     {
+    // JEDI_SAGE
     case TREE_SEER:         return "Seer";
     case TREE_TELEKINETICS: return "Telekinetics";
     case TREE_BALANCE:      return "Balance";
+    // SITH_SORCERER
+    case TREE_CORRUPTION:   return "Corruption";
+    case TREE_LIGHTNING:    return "Lightning";
+    case TREE_MADNESS:      return "Madness";
     default: return "Unknown";
     }
   }
@@ -793,26 +816,27 @@ int util_t::parse_weapon_type( const std::string& name )
   return WEAPON_NONE;
 }
 
-// util_t::flask_type_string ================================================
+// util_t::stim_type_string ================================================
 
-const char* util_t::flask_type_string( int flask )
+const char* util_t::stim_type_string( int stim )
 {
-  switch ( flask )
+  switch ( stim )
   {
-  case FLASK_NONE:               return "none";
+  case STIM_NONE:               return "none";
+  case STIM_RAKATA_RESOLVE:     return "rakata_resolve";
   }
   return "unknown";
 }
 
-// util_t::parse_flask_type =================================================
+// util_t::parse_stim_type =================================================
 
-int util_t::parse_flask_type( const std::string& name )
+int util_t::parse_stim_type( const std::string& name )
 {
-  for ( int i=0; i < FLASK_MAX; i++ )
-    if ( util_t::str_compare_ci( name, util_t::flask_type_string( i ) ) )
+  for ( int i=0; i < STIM_MAX; i++ )
+    if ( util_t::str_compare_ci( name, util_t::stim_type_string( i ) ) )
       return i;
 
-  return FLASK_NONE;
+  return STIM_NONE;
 }
 
 // util_t::food_type_string =================================================
@@ -948,6 +972,7 @@ const char* util_t::stat_type_string( int stat )
   case STAT_STAMINA:   return "stamina";
   case STAT_INTELLECT: return "intellect";
   case STAT_SPIRIT:    return "spirit";
+  case STAT_WILLPOWER: return "willpower";
 
   case STAT_HEALTH: return "health";
   case STAT_MANA:   return "mana";
@@ -983,9 +1008,10 @@ const char* util_t::stat_type_string( int stat )
 
   case STAT_BLOCK_RATING: return "block_rating";
 
-  case STAT_MASTERY_RATING: return "mastery_rating";
+  case STAT_POWER: return "power";
+  case STAT_FORCE_POWER: return "forcepower";
 
-  case STAT_WILLPOWER: return "willpower";
+  case STAT_SURGE_RATING: return "surge_rating";
 
   case STAT_MAX: return "all";
   }
@@ -1003,6 +1029,7 @@ const char* util_t::stat_type_abbrev( int stat )
   case STAT_STAMINA:   return "Sta";
   case STAT_INTELLECT: return "Int";
   case STAT_SPIRIT:    return "Spi";
+  case STAT_WILLPOWER: return "Willpower";
 
   case STAT_HEALTH: return "Health";
   case STAT_MANA:   return "Mana";
@@ -1037,9 +1064,10 @@ const char* util_t::stat_type_abbrev( int stat )
 
   case STAT_BLOCK_RATING: return "BlockR";
 
-  case STAT_MASTERY_RATING: return "Mastery";
+  case STAT_POWER: return "Power";
+  case STAT_FORCE_POWER: return "Force_Power";
 
-  case STAT_WILLPOWER: return "Willpower";
+  case STAT_SURGE_RATING: return "Surge";
 
   case STAT_MAX: return "All";
   }
@@ -1057,6 +1085,7 @@ const char* util_t::stat_type_wowhead( int stat )
   case STAT_STAMINA:   return "sta";
   case STAT_INTELLECT: return "int";
   case STAT_SPIRIT:    return "spr";
+  case STAT_WILLPOWER: return "willpower";
 
   case STAT_HEALTH: return "health";
   case STAT_MANA:   return "mana";
@@ -1082,8 +1111,6 @@ const char* util_t::stat_type_wowhead( int stat )
   case STAT_RESILIENCE_RATING: return "resilRating";
   case STAT_DODGE_RATING:      return "dodgeRating";
   case STAT_PARRY_RATING:      return "parryRating";
-
-  case STAT_MASTERY_RATING: return "masteryRating";
 
   case STAT_MAX: return "__all";
   }
@@ -1115,7 +1142,6 @@ stat_type util_t::parse_stat_type( const std::string& name )
   if ( name == "exprtng"        ) return STAT_EXPERTISE_RATING;
   if ( name == "hastertng"      ) return STAT_HASTE_RATING;
   if ( name == "hitrtng"        ) return STAT_HIT_RATING;
-  if ( name == "mastrtng"       ) return STAT_MASTERY_RATING;
   if ( name == "parryrtng"      ) return STAT_PARRY_RATING;
   if ( name == "resiliencertng" ) return STAT_RESILIENCE_RATING;
   if ( name == "splpwr"         ) return STAT_SPELL_POWER;
@@ -1139,7 +1165,6 @@ stat_type util_t::parse_reforge_type( const std::string& name )
   case STAT_HIT_RATING:
   case STAT_CRIT_RATING:
   case STAT_HASTE_RATING:
-  case STAT_MASTERY_RATING:
   case STAT_SPIRIT:
   case STAT_DODGE_RATING:
   case STAT_PARRY_RATING:
@@ -1304,7 +1329,6 @@ stat_type util_t::translate_item_mod( int item_mod )
   case ITEM_MOD_ATTACK_POWER:        return STAT_ATTACK_POWER;
   case ITEM_MOD_RANGED_ATTACK_POWER: return STAT_ATTACK_POWER;
   case ITEM_MOD_SPELL_POWER:         return STAT_SPELL_POWER;
-  case ITEM_MOD_MASTERY_RATING:      return STAT_MASTERY_RATING;
   case ITEM_MOD_EXTRA_ARMOR:         return STAT_BONUS_ARMOR;
   case ITEM_MOD_RESILIENCE_RATING:   return STAT_RESILIENCE_RATING;
   }

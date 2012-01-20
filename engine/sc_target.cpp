@@ -342,13 +342,7 @@ void enemy_t::init_base()
 
   if ( initial_armor <= 0 )
   {
-    // TO-DO: Fill in the blanks.
-    switch ( level )
-    {
-    default: if ( level < 80 )
-        initial_armor = ( int ) floor ( ( level / 80.0 ) * 100 ); // Need a better value here.
-      break;
-    }
+    initial_armor = 85 * level + 400;
   }
   player_t::base_armor = initial_armor;
 
@@ -599,7 +593,11 @@ void player_t::enemy_init( sim_t* /* sim */ )
 
 // player_t::enemy_combat_begin =============================================
 
-void player_t::enemy_combat_begin( sim_t* /* sim */ )
+void player_t::enemy_combat_begin( sim_t* sim )
 {
-
+  for ( player_t* p = sim -> target_list; p; p = p -> next )
+  {
+      if ( sim -> overrides.shatter_shot )
+        p -> debuffs.shatter_shot -> override(); // move to correct class
+  }
 }

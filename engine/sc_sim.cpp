@@ -482,20 +482,6 @@ static bool parse_wowhead( sim_t*             sim,
   return sim -> active_player != 0;
 }
 
-// parse_chardev ============================================================
-
-static bool parse_chardev( sim_t*             sim,
-                           const std::string& name,
-                           const std::string& value )
-{
-  if ( name == "chardev" )
-  {
-    sim -> active_player = chardev_t::download_player( sim, value );
-  }
-
-  return sim -> active_player != 0;
-}
-
 // parse_wowreforge =========================================================
 
 static bool parse_wowreforge( sim_t*             sim,
@@ -624,12 +610,12 @@ sim_t::sim_t( sim_t* p, int index ) :
   target_list( 0 ), player_list( 0 ), active_player( 0 ), num_players( 0 ), num_enemies( 0 ), num_targetdata_ids( 0 ), max_player_level( -1 ), canceled( 0 ),
   queue_lag( 0.037 ), queue_lag_stddev( 0 ),
   gcd_lag( 0.150 ), gcd_lag_stddev( 0 ),
-  channel_lag( 0.250 ), channel_lag_stddev( 0 ),
+  channel_lag( 0.200 ), channel_lag_stddev( 0 ),
   queue_gcd_reduction( 0.032 ), strict_gcd_queue( 0 ),
-  confidence( 0.95 ), confidence_estimator( 0.0 ),
+  confidence( 0.95 ), confidence_estimator( 1.96 ),
   world_lag( 0.1 ), world_lag_stddev( -1.0 ),
   travel_variance( 0 ), default_skill( 1.0 ), reaction_time( 0.5 ), regen_periodicity( 0.25 ),
-  current_time( 0 ), max_time( 120 ), expected_time( 0 ), vary_combat_length( 0.2 ),
+  current_time( 0 ), max_time( 300 ), expected_time( 0 ), vary_combat_length( 0.2 ),
   last_event( 0 ), fixed_time( 0 ),
   events_remaining( 0 ), max_events_remaining( 0 ),
   events_processed( 0 ), total_events_processed( 0 ),
@@ -656,12 +642,13 @@ sim_t::sim_t( sim_t* p, int index ) :
   // Report
   report_precision( 4 ),report_pets_separately( 0 ), report_targets( 1 ), report_details( 1 ),
   report_rng( 0 ), hosted_html( 0 ), print_styles( false ), report_overheal( 0 ),
-  save_raid_summary( 0 ), statistics_level( 1 ),
+  save_raid_summary( 0 ), statistics_level( 2 ),
   // Multi-Threading
   threads( 0 ), thread_index( index ),
   spell_query( 0 )
 {
   register_jedi_sage_targetdata( this );
+  register_sith_sorcerer_targetdata( this );
 
   path_str += "|profiles";
 
@@ -1747,6 +1734,10 @@ void sim_t::use_optimal_buffs_and_debuffs( int value )
   optimal_raid = value;
 
   overrides.bleeding               = optimal_raid;
+  overrides.coordination           = optimal_raid;
+  overrides.force_valor            = optimal_raid;
+  overrides.shatter_shot           = optimal_raid;
+  overrides.unnatural_might        = optimal_raid;
 }
 
 // sim_t::aura_gain =========================================================
@@ -2012,7 +2003,8 @@ void sim_t::create_options()
     { "target_level",                     OPT_INT,    &( target_level                             ) },
     { "target_race",                      OPT_STRING, &( target_race                              ) },
     // Character Creation
-    { "jedi_sage",                    OPT_FUNC,   ( void* ) ::parse_player                      },
+    { "jedi_sage",                        OPT_FUNC,   ( void* ) ::parse_player                      },
+    { "sith_sorcerer",                    OPT_FUNC,   ( void* ) ::parse_player                      },
     { "enemy",                            OPT_FUNC,   ( void* ) ::parse_player                      },
     { "pet",                              OPT_FUNC,   ( void* ) ::parse_player                      },
     { "player",                           OPT_FUNC,   ( void* ) ::parse_player                      },
@@ -2020,7 +2012,6 @@ void sim_t::create_options()
     { "armory",                           OPT_DEPRECATED,   ( void* ) ::parse_armory                      },
     { "guild",                            OPT_DEPRECATED,   ( void* ) ::parse_armory                      },
     { "wowhead",                          OPT_DEPRECATED,   ( void* ) ::parse_wowhead                     },
-    { "chardev",                          OPT_DEPRECATED,   ( void* ) ::parse_chardev                     },
     { "wowreforge",                       OPT_DEPRECATED,   ( void* ) ::parse_wowreforge                  },
     { "http_clear_cache",                 OPT_FUNC,   ( void* ) ::http_t::clear_cache               },
     { "cache_items",                      OPT_FUNC,   ( void* ) ::parse_cache                       },
@@ -2030,6 +2021,12 @@ void sim_t::create_options()
     { "save_prefix",                      OPT_STRING, &( save_prefix_str                          ) },
     { "save_suffix",                      OPT_STRING, &( save_suffix_str                          ) },
     { "save_talent_str",                  OPT_BOOL,   &( save_talent_str                          ) },
+    // Overrides
+    { "override.bleeding",                OPT_BOOL,   &( overrides.bleeding                        ) },
+    { "override.coordination",            OPT_BOOL,   &( overrides.coordination                    ) },
+    { "override.force_valor",             OPT_BOOL,   &( overrides.force_valor                     ) },
+    { "override.shatter_shot",            OPT_BOOL,   &( overrides.shatter_shot                    ) },
+    { "override.unnatural_might",         OPT_BOOL,   &( overrides.unnatural_might                 ) },
     // Stat Enchants
     { "default_enchant_strength",                 OPT_FLT,  &( enchant.attribute[ ATTR_STRENGTH  ] ) },
     { "default_enchant_agility",                  OPT_FLT,  &( enchant.attribute[ ATTR_AGILITY   ] ) },
@@ -2039,6 +2036,7 @@ void sim_t::create_options()
     { "default_enchant_willpower",                OPT_FLT,  &( enchant.attribute[ ATTR_WILLPOWER ] ) },
     { "default_enchant_spell_power",              OPT_FLT,  &( enchant.spell_power                 ) },
     { "default_enchant_mp5",                      OPT_FLT,  &( enchant.mp5                         ) },
+    { "default_enchant_power",                    OPT_FLT,  &( enchant.power                       ) },
     { "default_enchant_attack_power",             OPT_FLT,  &( enchant.attack_power                ) },
     { "default_enchant_expertise_rating",         OPT_FLT,  &( enchant.expertise_rating            ) },
     { "default_enchant_armor",                    OPT_FLT,  &( enchant.bonus_armor                 ) },
@@ -2046,7 +2044,6 @@ void sim_t::create_options()
     { "default_enchant_parry_rating",             OPT_FLT,  &( enchant.parry_rating                ) },
     { "default_enchant_block_rating",             OPT_FLT,  &( enchant.block_rating                ) },
     { "default_enchant_haste_rating",             OPT_FLT,  &( enchant.haste_rating                ) },
-    { "default_enchant_mastery_rating",           OPT_FLT,  &( enchant.mastery_rating              ) },
     { "default_enchant_hit_rating",               OPT_FLT,  &( enchant.hit_rating                  ) },
     { "default_enchant_crit_rating",              OPT_FLT,  &( enchant.crit_rating                 ) },
     { "default_enchant_health",                   OPT_FLT,  &( enchant.resource[ RESOURCE_HEALTH ] ) },

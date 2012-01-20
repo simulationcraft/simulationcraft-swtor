@@ -107,11 +107,11 @@
         <a href="#" class="close">close</a>
       </div>
     </div>
-    <img src="Welcome.png" width="547" height="291" alt="SimulationCraft 4.0">
+    <img src="Simc_Logo.png" width="512" height="512" alt="SimulationCraft Logo">
 
     <div id="masthead" class="section section-open">
 
-      <p>SimulationCraft is a tool to explore combat mechanics in the popular MMO RPG World of Warcraft. It is a multi-player event-driven simulator written in C++ that models raid damage. Increasing class synergy and the prevalence of proc-based combat modifiers have eroded the accuracy of traditional calculators that rely upon closed-form approximations to model very complex mechanics. The goal of this simulator is to close the accuracy gap while maintaining a performance level high enough to calculate relative stat weights to aid gear selection.</p>
+      <p>SimulationCraft is a tool to explore combat mechanics in the popular MMO RPG Star Wars: The Old Republic. It is a multi-player event-driven simulator written in C++ that models raid damage. Increasing class synergy and the prevalence of proc-based combat modifiers have eroded the accuracy of traditional calculators that rely upon closed-form approximations to model very complex mechanics. The goal of this simulator is to close the accuracy gap while maintaining a performance level high enough to calculate relative stat weights to aid gear selection.</p>
       <p>One of the common criticisms of theorycrafting tools is that they model <i>Patchwerk</i> style fights in which the DPS players are able to focus exclusively on generating damage without worrying about standing in molten lava or other such trivial distractions. While truly modeling individual boss fights is a near-impossible task, SimulationCraft does support a wide array of raid events. See "Modeling Raid Events" and the Examples tab for details.</p>
 
       <h2 class="toggle">Table of Contents</h2>
@@ -124,7 +124,6 @@
           <li><a href="#scale-factors">Scale Factors</a></li>
           <li><a href="#plots">Plots</a></li>
           <li><a href="#importing-from-the-armory">Importing from the Armory</a></li>
-          <li><a href="#importing-from-chardev">Importing from CharDev</a></li>
           <li><a href="#importing-from-rawr">Importing from Rawr</a></li>
 	      <li><a href="#creating-a-custom-profile">Creating A Custom Profile</a></li>
           <li><a href="#saving-results">Saving Results</a></li>
@@ -192,7 +191,7 @@
         <p>SimulationCraft has many, many options that can be loosely categorized into two groups, those that are applied to the <i>active</i> player and those that are applied globally. The <i>Globals</i> section of the <i>Options</i> tab is dedicated to the more commonly changed global parameters.</p>
         <ul class="mt spaced">
 
-          <li><b>Version:</b> The mechanics of <i>World of Warcraft</i> are constantly changing. SimulationCraft endeavors to model the two most recent patch levels. This corresponds to <i>Live</i> and <i>PTR</i>. The <i>Both</i> option will simulate two characters at once: One character will run with Live mechanics and a second character with the name <i>EvilTwinPTR</i> will be run with PTR mechanics. The results will shown side-by-side for easy comparison.</li>
+          <li><b>Version:</b> The mechanics of <i>Star Wars: The Old Republic</i> are constantly changing. SimulationCraft endeavors to model the two most recent patch levels. This corresponds to <i>Live</i> and <i>PTR</i>. The <i>Both</i> option will simulate two characters at once: One character will run with Live mechanics and a second character with the name <i>EvilTwinPTR</i> will be run with PTR mechanics. The results will shown side-by-side for easy comparison.</li>
         
           <li><b>Latency:</b> During simulation we do not attempt to model the actual latency in all internet traffic, but rather how that latency manifests itself in terms of the inevitable gaps between player actions. Rigorous testing has shown that these gaps differ greatly depending upon whether the preceding action has a cast-time (enabling queueing), is instant-cast (triggering the <i>GCD</i>), or is channeled (requiring extra care not to clip the last tick). SimulationCraft uses random values for these <i>gaps</i>, whose range is centered on user-supplied values.</li>
         
@@ -252,30 +251,7 @@
       </div>
       
     </div>
-    
-    <div id="importing-from-chardev" class="section">
-      
-      <h2 class="toggle">Importing from CharDev</h2>
-      <div class="toggle-content">
-        <p>SimulationCraft does not provide a graphical character sheet with which to experiment. Instead we have integrated with the CharDev character planner. CharDev is a powerful profiling tool that strives to be both current and accurate.</p>
-        <p>If you know the ID number of the profile you wish to simulate, one can simply type <b>chardev=ID</b> in the Simulate tab. If you would like to view the ID before simulating, go to the Import/CharDev tab and change the address from <b>?planner</b> to <b>?profile=ID</b> and hit Enter.</p>
-        <p>If you do not know the ID number of the profile, then you can use <b>Browse</b> under the Import/CharDev tab to search. Note that to search within your own CharDev profiles you will need to log in first.</p>
-        <p>Creating a new CharDev profile requires that you create an account at their site. This is both free and painless.</p>
-        <p>Once you log in, you can seed a CharDev profile with a character from the Armory or you can start from scratch.</p>
-        <p><b>Remember that you MUST save your profile after editting prior to Importing it into SimulationCraft.</b></p>
-      </div>
-
-    </div>
-    
-    <div id="importing-from-rawr" class="section">
-    
-      <h2 class="toggle">Importing from Rawr</h2>
-      <div class="toggle-content">
-        <p>Rawr character XML files can be used to generate a SimulationCraft character profile. While name, race, class, talents, glyphs, gear, and gems are all imported, <i>buff/debuff</i> settings and other module-specific settings that may be in the XML file are all ignored.</p>
-      </div>
-
-    </div>
-    
+   
     <div id="creating-a-custom-profile" class="section">
     
       <h2 class="toggle">Creating A Custom Profile</h2>
