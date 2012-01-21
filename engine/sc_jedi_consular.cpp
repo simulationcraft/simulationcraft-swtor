@@ -1320,7 +1320,7 @@ double jedi_sage_t::composite_spell_haste() const
 {
   double sh = jedi_consular_t::composite_spell_haste();
 
-  sh *= 1.0 / ( 1.0 + buffs_mental_alacrity -> stack() * 0.20 );
+  sh -= buffs_mental_alacrity -> stack() * 0.20;
 
   return sh;
 }
