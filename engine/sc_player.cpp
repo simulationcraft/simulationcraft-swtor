@@ -1916,7 +1916,7 @@ double player_t::composite_attribute_multiplier( int attr ) const
 
   if ( attr == ATTR_STRENGTH || attr ==  ATTR_WILLPOWER ) // TODO: Add Aim and Cunning
     if ( buffs.force_valor -> up() )
-      m *= 1.05;
+      m += 0.05;
 
   return m;
 }
@@ -2283,7 +2283,6 @@ void player_t::reset()
   accuracy_rating = initial_accuracy_rating;
   surge_rating = initial_surge_rating;
   recalculate_haste();
-  recalculate_crit();
   recalculate_accuracy();
   recalculate_surge();
 
@@ -2295,6 +2294,7 @@ void player_t::reset()
     if ( ( level >= 50 ) && matching_gear )
       attribute_multiplier[ i ] *= 1.0 + matching_gear_multiplier( ( const attribute_type ) i );
   }
+  recalculate_crit();
 
   for ( int i=0; i <= SCHOOL_MAX; i++ )
   {
@@ -3015,7 +3015,7 @@ void player_t::stat_gain( int       stat,
   case STAT_STAMINA:   stats.attribute[ ATTR_STAMINA   ] += amount; attribute[ ATTR_STAMINA   ] += amount; temporary.attribute[ ATTR_STAMINA   ] += temp_value * amount; recalculate_resource_max( RESOURCE_HEALTH ); break;
   case STAT_INTELLECT: stats.attribute[ ATTR_INTELLECT ] += amount; attribute[ ATTR_INTELLECT ] += amount; temporary.attribute[ ATTR_INTELLECT ] += temp_value * amount; recalculate_resource_max( RESOURCE_MANA ); break;
   case STAT_SPIRIT:    stats.attribute[ ATTR_SPIRIT    ] += amount; attribute[ ATTR_SPIRIT    ] += amount; temporary.attribute[ ATTR_SPIRIT    ] += temp_value * amount; break;
-  case STAT_WILLPOWER: stats.attribute[ ATTR_WILLPOWER ] += amount; attribute[ ATTR_WILLPOWER ] += amount; temporary.attribute[ ATTR_WILLPOWER ] += temp_value * amount; break;
+  case STAT_WILLPOWER: stats.attribute[ ATTR_WILLPOWER ] += amount; attribute[ ATTR_WILLPOWER ] += amount; temporary.attribute[ ATTR_WILLPOWER ] += temp_value * amount; recalculate_crit(); break;
 
   case STAT_MAX: for ( int i=0; i < ATTRIBUTE_MAX; i++ ) { stats.attribute[ i ] += amount; temporary.attribute[ i ] += temp_value * amount; attribute[ i ] += amount; } break;
 
@@ -3098,7 +3098,7 @@ void player_t::stat_loss( int       stat,
   case STAT_STAMINA:   stats.attribute[ ATTR_STAMINA   ] -= amount; temporary.attribute[ ATTR_STAMINA   ] -= temp_value * amount; attribute[ ATTR_STAMINA   ] -= amount; stat_loss( STAT_MAX_HEALTH, floor( amount * composite_attribute_multiplier( ATTR_STAMINA ) ) * health_per_stamina, action ); break;
   case STAT_INTELLECT: stats.attribute[ ATTR_INTELLECT ] -= amount; temporary.attribute[ ATTR_INTELLECT ] -= temp_value * amount; attribute[ ATTR_INTELLECT ] -= amount; stat_loss( STAT_MAX_MANA, floor( amount * composite_attribute_multiplier( ATTR_INTELLECT ) ) * mana_per_intellect, action ); break;
   case STAT_SPIRIT:    stats.attribute[ ATTR_SPIRIT    ] -= amount; temporary.attribute[ ATTR_SPIRIT    ] -= temp_value * amount; attribute[ ATTR_SPIRIT    ] -= amount; break;
-  case STAT_WILLPOWER: stats.attribute[ ATTR_WILLPOWER ] -= amount; temporary.attribute[ ATTR_WILLPOWER ] -= temp_value * amount; attribute[ ATTR_WILLPOWER ] -= amount; break;
+  case STAT_WILLPOWER: stats.attribute[ ATTR_WILLPOWER ] -= amount; temporary.attribute[ ATTR_WILLPOWER ] -= temp_value * amount; attribute[ ATTR_WILLPOWER ] -= amount; recalculate_crit(); break;
 
   case STAT_MAX: for ( int i=0; i < ATTRIBUTE_MAX; i++ ) { stats.attribute[ i ] -= amount; temporary.attribute[ i ] -= temp_value * amount; attribute[ i ] -= amount; } break;
 
@@ -3542,7 +3542,7 @@ void player_t::recalculate_haste()
   if ( hr < 0 )
     hr = 0;
 
-  spell_haste = 1.0 / ( 1.0 + 0.3 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.3 ) ), hr / std::max( 20, level ) / 0.55 ) ) );
+  spell_haste =  ( 1.0 - 0.3 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.3 ) ), hr / std::max( 20, level ) / 0.55 ) ) );
   attack_haste = spell_haste;
 }
 
