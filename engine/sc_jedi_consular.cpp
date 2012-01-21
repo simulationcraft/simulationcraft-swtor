@@ -244,7 +244,7 @@ struct jedi_consular_spell_t : public spell_t
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
 
-      if ( base_td > 0 )
+      if ( base_td > 0 && !channeled )
         crit_bonus += p -> talents.mental_scarring -> rank() * 0.1;
     }
   }
