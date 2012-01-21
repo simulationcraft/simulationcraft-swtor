@@ -832,8 +832,8 @@ static void print_html_stats ( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * ( 1 / a -> buffed_spell_haste - 1 ),
-             100 * ( 1 / a -> composite_spell_haste() - 1 ),
+             100 * ( 1 - a -> buffed_spell_haste ),
+             100 * ( 1 - a -> composite_spell_haste() ),
              a -> stats.haste_rating );
 
     fprintf( file,
@@ -898,8 +898,8 @@ static void print_html_stats ( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * ( 1 / a -> buffed_attack_haste - 1 ),
-             100 * ( 1 / a -> composite_attack_haste() - 1 ),
+             100 * ( 1.0 - a -> buffed_attack_haste ),
+             100 * ( 1.0 - a -> composite_attack_haste() ),
              a -> stats.haste_rating );
 
     fprintf( file,
@@ -909,8 +909,8 @@ static void print_html_stats ( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * ( 1 / a -> buffed_attack_speed - 1 ),
-             100 * ( 1 / a -> composite_attack_speed() - 1 ),
+             100 * ( 1.0 - a -> buffed_attack_speed ),
+             100 * ( 1.0 - a -> composite_attack_speed() ),
              a -> stats.haste_rating );
 
     fprintf( file,
