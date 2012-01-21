@@ -1436,7 +1436,7 @@ bool util_t::socket_gem_match( int socket,
 
 const char* util_t::item_quality_string( int quality )
 {
-  switch( quality )
+  switch ( quality )
   {
   case 1:   return "common";
   case 2:   return "uncommon";
@@ -1796,8 +1796,8 @@ void util_t::urldecode_( std::string& str )
 
     if ( c == '%' && i + 2 < l )
     {
-      long c = strtol( str.substr( i + 1, 2 ).c_str(), 0, 16 );
-      if ( c ) temp += ( unsigned char ) c;
+      long v = strtol( str.substr( i + 1, 2 ).c_str(), 0, 16 );
+      if ( v ) temp += ( unsigned char ) v;
       i += 2;
     }
     else if ( c == '+' )

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 PROJECT(simulationcraft)
@@ -69,6 +70,7 @@ SET(SIMC_ENGINE_SOURCE
   "engine/sc_talent.cpp"
   "engine/sc_target.cpp"
   "engine/sc_thread.cpp"
+  "engine/sc_timespan.cpp"
   "engine/sc_unique_gear.cpp"
   "engine/sc_util.cpp"
   "engine/sc_weapon.cpp"
@@ -266,3 +268,4 @@ IF(WIN32 AND NOT UNIX)
 ENDIF(WIN32 AND NOT UNIX)
 
 INCLUDE(CPack)
+

@@ -239,13 +239,13 @@ static void print_html_sim_summary( FILE*  file, sim_t* sim )
            "\t\t\t\t\t\t\t\t<th>CPU Seconds:</th>\n"
            "\t\t\t\t\t\t\t\t<td>%.4f</td>\n"
            "\t\t\t\t\t\t\t</tr>\n",
-           sim -> elapsed_cpu_seconds );
+           sim -> elapsed_cpu.total_seconds() );
   fprintf( file,
            "\t\t\t\t\t\t\t<tr class=\"left\">\n"
            "\t\t\t\t\t\t\t\t<th>Speed Up:</th>\n"
            "\t\t\t\t\t\t\t\t<td>%.0f</td>\n"
            "\t\t\t\t\t\t\t</tr>\n",
-           sim -> iterations * sim -> simulation_length.mean / sim -> elapsed_cpu_seconds );
+           sim -> iterations * sim -> simulation_length.mean / sim -> elapsed_cpu.total_seconds() );
 
   fprintf( file,
            "\t\t\t\t\t\t\t<tr class=\"left\">\n"
@@ -257,13 +257,13 @@ static void print_html_sim_summary( FILE*  file, sim_t* sim )
            "\t\t\t\t\t\t\t\t<th>World Lag:</th>\n"
            "\t\t\t\t\t\t\t\t<td>%.0f ms ( stddev = %.0f ms )</td>\n"
            "\t\t\t\t\t\t\t</tr>\n",
-           sim -> world_lag * 1000.0, sim -> world_lag_stddev * 1000.0 );
+           ( double )sim -> world_lag.total_millis(), ( double )sim -> world_lag_stddev.total_millis() );
   fprintf( file,
            "\t\t\t\t\t\t\t<tr class=\"left\">\n"
            "\t\t\t\t\t\t\t\t<th>Queue Lag:</th>\n"
            "\t\t\t\t\t\t\t\t<td>%.0f ms ( stddev = %.0f ms )</td>\n"
            "\t\t\t\t\t\t\t</tr>\n",
-           sim -> queue_lag * 1000.0, sim -> queue_lag_stddev * 1000.0 );
+           ( double )sim -> queue_lag.total_millis(), ( double )sim -> queue_lag_stddev.total_millis() );
   if ( sim -> strict_gcd_queue )
   {
     fprintf( file,
@@ -271,19 +271,19 @@ static void print_html_sim_summary( FILE*  file, sim_t* sim )
              "\t\t\t\t\t\t\t\t<th>GCD Lag:</th>\n"
              "\t\t\t\t\t\t\t\t<td>%.0f ms ( stddev = %.0f ms )</td>\n"
              "\t\t\t\t\t\t\t</tr>\n",
-             sim -> gcd_lag * 1000.0, sim -> gcd_lag_stddev * 1000.0 );
+             ( double )sim -> gcd_lag.total_millis(), ( double )sim -> gcd_lag_stddev.total_millis() );
     fprintf( file,
              "\t\t\t\t\t\t\t<tr class=\"left\">\n"
              "\t\t\t\t\t\t\t\t<th>Channel Lag:</th>\n"
              "\t\t\t\t\t\t\t\t<td>%.0f ms ( stddev = %.0f ms )</td>\n"
              "\t\t\t\t\t\t\t</tr>\n",
-             sim -> channel_lag * 1000.0, sim -> channel_lag_stddev * 1000.0 );
+             ( double )sim -> channel_lag.total_millis(), ( double )sim -> channel_lag_stddev.total_millis() );
     fprintf( file,
              "\t\t\t\t\t\t\t<tr class=\"left\">\n"
              "\t\t\t\t\t\t\t\t<th>Queue GCD Reduction:</th>\n"
              "\t\t\t\t\t\t\t\t<td>%.0f ms</td>\n"
              "\t\t\t\t\t\t\t</tr>\n",
-             sim -> queue_gcd_reduction * 1000.0 );
+             ( double )sim -> queue_gcd_reduction.total_millis() );
   }
 
 
@@ -493,37 +493,39 @@ static void print_html_raid_imagemap( FILE* file, sim_t* sim, int num, bool dps 
   char mapid[32];
   util_t::snprintf( mapid, sizeof( mapid ), "%sMAP%d", ( dps ) ? "DPS" : "HPS", num );
 
-  fprintf( file, "\t\t\tu = document.getElementById('%s').src;\n"
-                 "\t\t\tgetMap(u, n, function(mapStr) {\n"
-                 "\t\t\t\tdocument.getElementById('%s').innerHTML += mapStr;\n"
-                 "\t\t\t\t$j('#%s').attr('usemap','#%s');\n"
-                 "\t\t\t\t$j('#%s area').click(function(e) {\n"
-                 "\t\t\t\t\tanchor = $j(this).attr('href');\n"
-                 "\t\t\t\t\ttarget = $j(anchor).children('h2:first');\n"
-                 "\t\t\t\t\topen_anchor(target);\n"
-                 "\t\t\t\t});\n"
-                 "\t\t\t});\n\n",
-                 imgid, mapid, imgid, mapid, mapid );
+  fprintf( file,
+           "\t\t\tu = document.getElementById('%s').src;\n"
+           "\t\t\tgetMap(u, n, function(mapStr) {\n"
+           "\t\t\t\tdocument.getElementById('%s').innerHTML += mapStr;\n"
+           "\t\t\t\t$j('#%s').attr('usemap','#%s');\n"
+           "\t\t\t\t$j('#%s area').click(function(e) {\n"
+           "\t\t\t\t\tanchor = $j(this).attr('href');\n"
+           "\t\t\t\t\ttarget = $j(anchor).children('h2:first');\n"
+           "\t\t\t\t\topen_anchor(target);\n"
+           "\t\t\t\t});\n"
+           "\t\t\t});\n\n",
+           imgid, mapid, imgid, mapid, mapid );
 }
 
 static void print_html_raid_imagemaps( FILE*  file, sim_t* sim )
 {
 
-  fprintf( file, "\t\t<script type=\"text/javascript\">\n"
-                 "\t\t\tvar $j = jQuery.noConflict();\n"
-                 "\t\t\tfunction getMap(url, names, mapWrite) {\n"
-                 "\t\t\t\t$j.getJSON(url + '&chof=json&callback=?', function(jsonObj) {\n"
-                 "\t\t\t\t\tvar area = false;\n"
-                 "\t\t\t\t\tvar chart = jsonObj.chartshape;\n"
-                 "\t\t\t\t\tvar mapStr = '';\n"
-                 "\t\t\t\t\tfor (var i = 0; i < chart.length; i++) {\n"
-                 "\t\t\t\t\t\tarea = chart[i];\n"
-                 "\t\t\t\t\t\tarea.coords[2] = 523;\n"
-                 "\t\t\t\t\t\tmapStr += \"\\n  <area name='\" + area.name + \"' shape='\" + area.type + \"' coords='\" + area.coords.join(\",\") + \"' href='#\" + names[i] + \"'  title='\" + names[i] + \"'>\";\n"
-                 "\t\t\t\t\t}\n"
-                 "\t\t\t\t\tmapWrite(mapStr);\n"
-                 "\t\t\t\t});\n"
-                 "\t\t\t}\n\n" );
+  fprintf( file,
+           "\t\t<script type=\"text/javascript\">\n"
+           "\t\t\tvar $j = jQuery.noConflict();\n"
+           "\t\t\tfunction getMap(url, names, mapWrite) {\n"
+           "\t\t\t\t$j.getJSON(url + '&chof=json&callback=?', function(jsonObj) {\n"
+           "\t\t\t\t\tvar area = false;\n"
+           "\t\t\t\t\tvar chart = jsonObj.chartshape;\n"
+           "\t\t\t\t\tvar mapStr = '';\n"
+           "\t\t\t\t\tfor (var i = 0; i < chart.length; i++) {\n"
+           "\t\t\t\t\t\tarea = chart[i];\n"
+           "\t\t\t\t\t\tarea.coords[2] = 523;\n"
+           "\t\t\t\t\t\tmapStr += \"\\n  <area name='\" + area.name + \"' shape='\" + area.type + \"' coords='\" + area.coords.join(\",\") + \"' href='#\" + names[i] + \"'  title='\" + names[i] + \"'>\";\n"
+           "\t\t\t\t\t}\n"
+           "\t\t\t\t\tmapWrite(mapStr);\n"
+           "\t\t\t\t});\n"
+           "\t\t\t}\n\n" );
 
   int count = ( int ) sim -> dps_charts.size();
   for ( int i=0; i < count; i++ )
@@ -573,13 +575,13 @@ static void print_html_scale_factors( FILE*  file, sim_t* sim )
       fprintf( file,
                "\t\t\t\t\t<tr>\n"
                "\t\t\t\t\t\t<th class=\"left small\">Profile</th>\n" );
-      for ( int i=0; i < STAT_MAX; i++ )
+      for ( int j=0; j < STAT_MAX; j++ )
       {
-        if ( sim -> scaling -> stats.get_stat( i ) != 0 )
+        if ( sim -> scaling -> stats.get_stat( j ) != 0 )
         {
           fprintf( file,
                    "\t\t\t\t\t\t<th class=\"small\">%s</th>\n",
-                   util_t::stat_type_abbrev( i ) );
+                   util_t::stat_type_abbrev( j ) );
         }
       }
       fprintf( file,
@@ -916,7 +918,7 @@ static void print_html_help_boxes( FILE*  file, sim_t* sim )
            "\t\t\t\t<p>Fight Length is the specified average fight duration. If vary_combat_length is set, the fight length will vary by +/- that portion of the value. See <a href=\"http://code.google.com/p/simulationcraft-swtor/wiki/Options#Combat_Length\" class=\"ext\">Combat Length</a> in the wiki for further details.</p>\n"
            "\t\t\t</div>\n"
            "\t\t</div>\n",
-           sim -> max_time,
+           sim -> max_time.total_seconds(),
            sim -> vary_combat_length );
 
   fprintf( file,
@@ -1204,18 +1206,18 @@ static void print_html_masthead( FILE*  file, sim_t* sim )
 
   if ( sim -> vary_combat_length > 0.0 )
   {
-    double min_length = sim -> max_time * ( 1 - sim -> vary_combat_length );
-    double max_length = sim -> max_time * ( 1 + sim -> vary_combat_length );
+    timespan_t min_length = sim -> max_time * ( 1 - sim -> vary_combat_length );
+    timespan_t max_length = sim -> max_time * ( 1 + sim -> vary_combat_length );
     fprintf( file,
              "\t\t\t\t<li class=\"linked\"><a href=\"#help-fight-length\" class=\"help\"><b>Fight Length:</b> %.0f - %.0f</a></li>\n",
-             min_length,
-             max_length );
+             min_length.total_seconds(),
+             max_length.total_seconds() );
   }
   else
   {
     fprintf( file,
              "\t\t\t\t<li><b>Fight Length:</b> %.0f</li>\n",
-             sim -> max_time );
+             sim -> max_time.total_seconds() );
   }
   fprintf( file,
            "\t\t\t\t<li><b>Fight Style:</b> %s</li>\n",

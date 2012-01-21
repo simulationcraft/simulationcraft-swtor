@@ -595,7 +595,7 @@ struct weapon_discharge_proc_callback_t : public action_callback_t
   proc_t* proc;
   rng_t* rng;
 
-  weapon_discharge_proc_callback_t( const std::string& n, player_t* p, weapon_t* w, int ms, const school_type school, double dmg, double fc, double ppm=0, double cd=0, int rng_type=RNG_DEFAULT ) :
+  weapon_discharge_proc_callback_t( const std::string& n, player_t* p, weapon_t* w, int ms, const school_type school, double dmg, double fc, double ppm=0, timespan_t cd=timespan_t::zero, int rng_type=RNG_DEFAULT ) :
     action_callback_t( p -> sim, p ),
     name_str( n ), weapon( w ), stacks( 0 ), max_stacks( ms ), fixed_chance( fc ), PPM( ppm )
   {
@@ -606,7 +606,7 @@ struct weapon_discharge_proc_callback_t : public action_callback_t
       discharge_spell_t( const char* n, player_t* p, double dmg, const school_type s ) :
         spell_t( n, p, RESOURCE_NONE, ( s == SCHOOL_DRAIN ) ? SCHOOL_SHADOW : s )
       {
-        trigger_gcd = 0;
+        trigger_gcd = timespan_t::zero;
         base_dd_min = dmg;
         base_dd_max = dmg;
         may_crit = ( s != SCHOOL_DRAIN );
@@ -635,7 +635,7 @@ struct weapon_discharge_proc_callback_t : public action_callback_t
     if ( a -> proc ) return;
     if ( weapon && a -> weapon != weapon ) return;
 
-    if ( cooldown -> remains() > 0 )
+    if ( cooldown -> remains() > timespan_t::zero )
       return;
 
     double chance = fixed_chance;
@@ -678,7 +678,6 @@ void enchant_t::init( player_t* p )
   weapon_t* mhw = &( p -> main_hand_weapon );
   weapon_t* ohw = &( p -> off_hand_weapon );
   weapon_t* rw  = &( p -> ranged_weapon );
-
 
   int num_items = ( int ) p -> items.size();
   for ( int i=0; i < num_items; i++ )
@@ -820,7 +819,7 @@ int enchant_t::get_reforge_id( stat_type stat_from,
       if ( i == j ) continue;
       id++;
       if ( index_from == i &&
-          index_to   == j )
+           index_to   == j )
       {
         return id;
       }

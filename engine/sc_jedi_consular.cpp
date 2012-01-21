@@ -195,7 +195,7 @@ struct jedi_sage_t : public jedi_consular_t
   virtual void      init_rng();
   virtual void      init_actions();
   virtual int       primary_role() const;
-  virtual void      regen( const double periodicity );
+  virtual void      regen( timespan_t periodicity );
   virtual double    composite_force_damage_bonus() const;
   virtual double    composite_spell_haste() const;
   virtual void      create_talents();
@@ -272,16 +272,16 @@ struct jedi_consular_spell_t : public spell_t
     }
   }
 
-  virtual double execute_time() const
+  virtual timespan_t execute_time() const
   {
-    double et = spell_t::execute_time();
+    timespan_t et = spell_t::execute_time();
 
     if ( player -> is_jedi_sage() )
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
 
-      if ( base_execute_time > 0 && p -> buffs_presence_of_mind -> up() )
-        et = 0;
+      if ( base_execute_time > timespan_t::zero && p -> buffs_presence_of_mind -> up() )
+        et = timespan_t::zero;
     }
 
     return et;
@@ -295,7 +295,7 @@ struct jedi_consular_spell_t : public spell_t
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
 
-      if ( base_execute_time > 0 && p -> buffs_presence_of_mind -> up() )
+      if ( base_execute_time > timespan_t::zero && p -> buffs_presence_of_mind -> up() )
         player_multiplier *= 1.20;
     }
   }
@@ -360,7 +360,7 @@ struct jedi_consular_spell_t : public spell_t
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
 
-      if ( base_execute_time > 0 )
+      if ( base_execute_time > timespan_t::zero )
         p -> buffs_presence_of_mind -> expire();
     }
   }
@@ -424,7 +424,7 @@ struct project_t : public jedi_consular_spell_t
     range = 30.0;
     direct_power_mod = 1.85;
 
-    cooldown -> duration = 6.0;
+    cooldown -> duration = timespan_t::from_seconds( 6.0 );
 
     if ( p -> type == JEDI_SAGE )
       travel_speed = 40.0; // 0.5s travel time for range=20, 0.75s for range=30
@@ -476,12 +476,12 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
 
     num_ticks = 3;
 
-    base_tick_time = 1.0;
+    base_tick_time = timespan_t::from_seconds( 1.0 );
     may_crit = false;
     channeled = true;
     tick_zero = true;
 
-    cooldown -> duration = 6.0;
+    cooldown -> duration = timespan_t::from_seconds( 6.0 );
 
     if ( player -> is_jedi_sage() )
     {
@@ -490,15 +490,15 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
       base_multiplier *= 1.0 + p -> talents.empowered_throw -> rank() * 0.04;
 
       if ( p -> talents.telekinetic_balance -> rank() > 0 )
-        cooldown -> duration = 0;
+        cooldown -> duration = timespan_t::zero;
 
       crit_bonus += p -> talents.reverberation -> rank() * 0.1;
     }
   }
 
-  virtual double tick_time() const
+  virtual timespan_t tick_time() const
   {
-    double tt = jedi_consular_spell_t::tick_time();
+    timespan_t tt = jedi_consular_spell_t::tick_time();
 
     if ( player -> is_jedi_sage() )
     {
@@ -629,7 +629,7 @@ struct disturbance_t : public jedi_sage_spell_t
   {
     parse_options( 0, options_str );
     base_dd_min = 180.3; base_dd_max = 244.7;
-    base_execute_time = 1.5;
+    base_execute_time = timespan_t::from_seconds( 1.5 );
     base_cost = 30.0;
     range = 30.0;
     direct_power_mod = 1.32;
@@ -688,14 +688,14 @@ struct mind_crush_t : public jedi_sage_spell_t
     parse_options( 0, options_str );
     base_dd_min = 545.8; base_dd_max = 610.2;
     base_td = 47.5;
-    base_tick_time = 1.0;
-    base_execute_time = 2.0;
+    base_tick_time = timespan_t::from_seconds( 1.0 );
+    base_execute_time = timespan_t::from_seconds( 2.0 );
     num_ticks = 6 + p -> talents.assertion -> rank() * 1;
     base_cost = 40.0;
     range = 30.0;
     direct_power_mod = 1.23;
     tick_power_mod = 0.295;
-    cooldown -> duration = 15.0;
+    cooldown -> duration = timespan_t::from_seconds( 15.0 );
     influenced_by_inner_strength = false;
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
@@ -709,7 +709,7 @@ struct weaken_mind_t : public jedi_sage_spell_t
   {
     parse_options( 0, options_str );
     base_td = 49.91;
-    base_tick_time = 3.0;
+    base_tick_time = timespan_t::from_seconds( 3.0 );
     num_ticks = 6 + p -> talents.disturb_mind -> rank();
     base_cost = 35.0;
     range = 30.0;
@@ -744,14 +744,14 @@ struct turbulence_t : public jedi_sage_spell_t
 
     parse_options( 0, options_str );
     base_dd_min = 222.2; base_dd_max = 286.6;
-    base_execute_time = 2.0;
+    base_execute_time = timespan_t::from_seconds( 2.0 );
     base_cost = 45.0;
     range = 30.0;
     direct_power_mod = 1.58;
     crit_bonus += p -> talents.reverberation -> rank() * 0.1;
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
-    cooldown -> duration = 9.0;
+    cooldown -> duration = timespan_t::from_seconds( 9.0 );
   }
 
   virtual void calculate_result()
@@ -795,12 +795,12 @@ struct force_in_balance_t : public jedi_sage_spell_t
 
     parse_options( 0, options_str );
     base_dd_min = 268.9; base_dd_max = 333.3;
-    ability_lag=0.2;
+    ability_lag = timespan_t::from_seconds( 0.2 );
     base_cost = 50.0;
     range = 30.0;
     direct_power_mod = 1.87;
 
-    cooldown -> duration = 15.0;
+    cooldown -> duration = timespan_t::from_seconds( 15.0 );
 
     crit_bonus += p -> talents.mental_scarring -> rank() * 0.1;
   }
@@ -824,13 +824,13 @@ struct sever_force_t : public jedi_sage_spell_t
 
     parse_options( 0, options_str );
     base_td = 50;
-    base_tick_time = 3.0;
+    base_tick_time = timespan_t::from_seconds( 3.0 );
     num_ticks = 6;
     base_cost = 20.0;
     range = 30.0;
     tick_power_mod = 0.311;
     may_crit = false;
-    cooldown -> duration = 9.0;
+    cooldown -> duration = timespan_t::from_seconds( 9.0 );
     tick_zero = true;
     influenced_by_inner_strength = false;
   }
@@ -845,7 +845,7 @@ struct mental_alacrity_t : public jedi_sage_spell_t
 
     parse_options( 0, options_str );
     base_cost = 30.0;
-    cooldown -> duration = 120.0;
+    cooldown -> duration = timespan_t::from_seconds( 120.0 );
     harmful = false;
 
     // TODO: Does it trigger a gcd?
@@ -899,7 +899,7 @@ void jedi_consular_t::init_base()
   default_distance = 10;
   distance = default_distance;
 
-  base_gcd = 1.5;
+  base_gcd = timespan_t::from_seconds( 1.5 );
 
   resource_base[  RESOURCE_FORCE  ] = 100;
 
@@ -1080,14 +1080,14 @@ void jedi_sage_t::init_buffs()
 
   bool is_sage = ( type == JEDI_SAGE );
 
-  buffs_concentration = new buff_t( this, is_sage ? "concentration" : "concentration", 3, 10.0, 0.5 * talents.concentration -> rank() );
-  buffs_psychic_projection = new buff_t( this, is_sage ? "psychic_projection" : "psychic_projection", 1, 0.0, 0.5 * talents.psychic_projection -> rank(), 10.0 );
-  buffs_tidal_force = new buff_t( this, is_sage ? "tidal_force" : "tidal_force", 1, 0.0, 0, 10.0 );
-  buffs_telekinetic_effusion = new buff_t( this, is_sage ? "telekinetic_effusion" : "telekinetic_effusion", 2, 0.0, 0.5 * talents.telekinetic_effusion -> rank() );
-  buffs_tremors = new buff_t( this, is_sage ? "tremors" : "tremors", 3, 30.0 );
-  buffs_presence_of_mind = new buff_t( this, is_sage ? "presence_of_mind" : "presence_of_mind", 1, 0.0, talents.presence_of_mind -> rank() * 0.3 );
-  buffs_force_suppression = new buff_t( this, is_sage ? "force_suppression" : "force_suppression", 10, 30.0, talents.force_suppression -> rank() );
-  buffs_mental_alacrity = new buff_t( this, is_sage ? "mental_alacrity" : "mental_alacrity", 1, 10.0 );
+  buffs_concentration = new buff_t( this, is_sage ? "concentration" : "concentration", 3, timespan_t::from_seconds( 10.0 ), timespan_t::zero, 0.5 * talents.concentration -> rank() );
+  buffs_psychic_projection = new buff_t( this, is_sage ? "psychic_projection" : "psychic_projection", 1, timespan_t::zero, timespan_t::from_seconds( 10.0 ), 0.5 * talents.psychic_projection -> rank() );
+  buffs_tidal_force = new buff_t( this, is_sage ? "tidal_force" : "tidal_force", 1, timespan_t::zero, timespan_t::from_seconds( 10.0 ) );
+  buffs_telekinetic_effusion = new buff_t( this, is_sage ? "telekinetic_effusion" : "telekinetic_effusion", 2, timespan_t::zero, timespan_t::zero, 0.5 * talents.telekinetic_effusion -> rank() );
+  buffs_tremors = new buff_t( this, is_sage ? "tremors" : "tremors", 3, timespan_t::from_seconds( 30.0 ) );
+  buffs_presence_of_mind = new buff_t( this, is_sage ? "presence_of_mind" : "presence_of_mind", 1, timespan_t::zero, timespan_t::zero, talents.presence_of_mind -> rank() * 0.3 );
+  buffs_force_suppression = new buff_t( this, is_sage ? "force_suppression" : "force_suppression", 10, timespan_t::from_seconds( 30.0 ), timespan_t::zero, talents.force_suppression -> rank() );
+  buffs_mental_alacrity = new buff_t( this, is_sage ? "mental_alacrity" : "mental_alacrity", 1, timespan_t::from_seconds( 10.0 ) );
 }
 
 // jedi_sage_t::init_gains =======================================================
@@ -1291,13 +1291,13 @@ int jedi_sage_t::primary_role() const
 
 // jedi_sage_t::regen ==================================================
 
-void jedi_sage_t::regen( const double periodicity )
+void jedi_sage_t::regen( timespan_t periodicity )
 {
   jedi_consular_t::regen( periodicity );
 
   if ( buffs_concentration -> check() > 0 )
   {
-    double force_regen = periodicity * force_regen_per_second() * buffs_concentration -> check() * 0.10;
+    double force_regen = periodicity.total_seconds() * force_regen_per_second() * buffs_concentration -> check() * 0.10;
 
     resource_gain( RESOURCE_FORCE, force_regen, gains_concentration );
   }

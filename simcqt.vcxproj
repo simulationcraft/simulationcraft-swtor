@@ -443,6 +443,7 @@ c:\Qt\4.8.0\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_DLL -DQT_
     <ClCompile Include="engine\sc_talent.cpp" />
     <ClCompile Include="engine\sc_target.cpp" />
     <ClCompile Include="engine\sc_thread.cpp" />
+	<ClCompile Include="engine\sc_timespan.cpp" />
     <ClCompile Include="engine\sc_unique_gear.cpp" />
     <ClCompile Include="engine\sc_util.cpp" />
     <ClCompile Include="engine\sc_warlock.cpp" />

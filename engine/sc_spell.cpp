@@ -16,7 +16,7 @@ void spell_t::init_spell_t_()
   may_miss = may_resist = true;
   base_spell_power_multiplier = 1.0;
   crit_bonus = 0.5;
-  min_gcd = 1.0;
+  min_gcd = timespan_t::from_seconds( 1.0 );
 }
 
 spell_t::spell_t( const char* n, player_t* p, int r, const school_type s, int t ) :
@@ -34,15 +34,15 @@ double spell_t::haste() const
 
 // spell_t::gcd =============================================================
 
-double spell_t::gcd() const
+timespan_t spell_t::gcd() const
 {
-  double t = action_t::gcd();
-  if ( t == 0 ) return 0;
+  timespan_t t = action_t::gcd();
+  if ( t == timespan_t::zero ) return timespan_t::zero;
 
   // According to http://sithwarrior.com/forums/Thread-SWTOR-formula-list alacrity doesn't reduce the gcd
   // Actually it seems to be more complex, cast time spells ( eg. with 1.5s cast time ) get a reduced gcd, but instant cast spells do not
   // http://sithwarrior.com/forums/Thread-Alacrity-and-the-GCD?pid=9152#pid9152
-  if ( base_execute_time > 0 )
+  if ( base_execute_time > timespan_t::zero )
     t *= haste();
 
   if ( t < min_gcd ) t = min_gcd;
@@ -52,14 +52,16 @@ double spell_t::gcd() const
 
 // spell_t::execute_time ====================================================
 
-double spell_t::execute_time() const
+timespan_t spell_t::execute_time() const
 {
-  double t = base_execute_time;
+  timespan_t t = base_execute_time;
 
   if ( ! harmful && ! player -> in_combat )
-    return 0;
+    return timespan_t::zero;
 
-  if ( t <= 0 ) return 0;
+  if ( t <= timespan_t::zero )
+    return timespan_t::zero;
+
   t *= haste();
 
   return t;
@@ -111,7 +113,7 @@ double spell_t::crit_chance( int delta_level ) const
 {
   double chance = total_crit();
 
-  (void) delta_level;
+  ( void ) delta_level;
 
   return chance;
 }
@@ -187,6 +189,6 @@ void spell_t::schedule_execute()
 {
   action_t::schedule_execute();
 
-  if ( time_to_execute > 0 )
+  if ( time_to_execute > timespan_t::zero )
     player -> debuffs.casting -> trigger();
 }

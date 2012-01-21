@@ -40,21 +40,21 @@ class StringHistory : public QStringList
 {
 public:
   int current_index;
-  StringHistory() : current_index(-1) {}
+  StringHistory() : current_index( -1 ) {}
   QString current()
   {
-    if( current_index < 0 ) return "";
-    if( current_index >= size() ) return "";
+    if ( current_index < 0 ) return "";
+    if ( current_index >= size() ) return "";
     return at( current_index );
   }
   QString backwards()
   {
-    if( current_index < size() ) current_index++;
+    if ( current_index < size() ) current_index++;
     return current();
   }
   QString forwards()
   {
-    if( current_index >= 0 ) current_index--;
+    if ( current_index >= 0 ) current_index--;
     return current();
   }
   QString next( int k )
@@ -64,7 +64,7 @@ public:
   void add( QString s )
   {
     current_index = -1;
-    if( size() > 0 ) if( at( 0 ) == s ) return;
+    if ( size() > 0 ) if ( at( 0 ) == s ) return;
     prepend( s );
   }
   QString start()
@@ -78,7 +78,7 @@ class PersistentCookieJar : public QNetworkCookieJar
 {
 public:
   QString fileName;
-  PersistentCookieJar( const QString& fn ) : fileName(fn) {}
+  PersistentCookieJar( const QString& fn ) : fileName( fn ) {}
   virtual ~PersistentCookieJar() {}
   void load();
   void save();
@@ -99,150 +99,152 @@ public slots:
 
 class SimulationCraftWindow : public QWidget
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    qint32 historyWidth, historyHeight;
-    qint32 historyMaximized;
-    QWidget *customGearTab;
-    QWidget *customTalentsTab;
-    QWidget *customGlyphsTab;
-    QTabWidget* mainTab;
-    QTabWidget* optionsTab;
-    QTabWidget* importTab;
-    QTabWidget* resultsTab;
-    QTabWidget *createCustomProfileDock;
+  qint32 historyWidth, historyHeight;
+  qint32 historyMaximized;
+  QWidget *customGearTab;
+  QWidget *customTalentsTab;
+  QWidget *customGlyphsTab;
+  QTabWidget* mainTab;
+  QTabWidget* optionsTab;
+  QTabWidget* importTab;
+  QTabWidget* resultsTab;
+  QTabWidget *createCustomProfileDock;
 #ifdef SC_PAPERDOLL
-    QTabWidget* paperdollTab;
+  QTabWidget* paperdollTab;
 #endif
-    QComboBox* versionChoice;
-    QComboBox* latencyChoice;
-    QComboBox* iterationsChoice;
-    QComboBox* fightLengthChoice;
-    QComboBox* fightVarianceChoice;
-    QComboBox* fightStyleChoice;
-    QComboBox* targetLevelChoice;
-    QComboBox* targetRaceChoice;
-    QComboBox* playerSkillChoice;
-    QComboBox* threadsChoice;
-    QComboBox* armoryRegionChoice;
-    QComboBox* armorySpecChoice;
-    QComboBox* defaultRoleChoice;
-    QComboBox* debugChoice;
-    QListWidget* itemDbOrder;
-    QButtonGroup* buffsButtonGroup;
-    QButtonGroup* debuffsButtonGroup;
-    QButtonGroup* scalingButtonGroup;
-    QComboBox* plotsPointsChoice;
-    QComboBox* plotsStepChoice;
-    QButtonGroup* plotsButtonGroup;
-    QComboBox* reforgePlotAmountChoice;
-    QComboBox* reforgePlotStepChoice;
-    ReforgeButtonGroup* reforgeplotsButtonGroup;
-    SimulationCraftWebView* battleNetView;
-    SimulationCraftWebView* siteView;
-    SimulationCraftWebView* helpView;
-    SimulationCraftWebView* visibleWebView;
-    QListWidget* historyList;
-    QTreeWidget* bisTree;
-    QString bisProfilePath;
-    SimulationCraftTextEdit* simulateText;
-    SimulationCraftTextEdit* overridesText;
-    QPlainTextEdit* logText;
-    QPushButton* backButton;
-    QPushButton* forwardButton;
-    SimulationCraftCommandLine* cmdLine;
-    QProgressBar* progressBar;
-    QPushButton* mainButton;
-    QGroupBox* cmdLineGroupBox;
-    QGroupBox* createCustomCharData;
+  QComboBox* versionChoice;
+  QComboBox* latencyChoice;
+  QComboBox* iterationsChoice;
+  QComboBox* fightLengthChoice;
+  QComboBox* fightVarianceChoice;
+  QComboBox* fightStyleChoice;
+  QComboBox* targetLevelChoice;
+  QComboBox* targetRaceChoice;
+  QComboBox* playerSkillChoice;
+  QComboBox* threadsChoice;
+  QComboBox* armoryRegionChoice;
+  QComboBox* armorySpecChoice;
+  QComboBox* defaultRoleChoice;
+  QComboBox* debugChoice;
+  QListWidget* itemDbOrder;
+  QButtonGroup* buffsButtonGroup;
+  QButtonGroup* debuffsButtonGroup;
+  QButtonGroup* scalingButtonGroup;
+  QComboBox* plotsPointsChoice;
+  QComboBox* plotsStepChoice;
+  QButtonGroup* plotsButtonGroup;
+  QComboBox* reforgePlotAmountChoice;
+  QComboBox* reforgePlotStepChoice;
+  ReforgeButtonGroup* reforgeplotsButtonGroup;
+  SimulationCraftWebView* battleNetView;
+  SimulationCraftWebView* charDevView;
+  SimulationCraftWebView* siteView;
+  SimulationCraftWebView* helpView;
+  SimulationCraftWebView* visibleWebView;
+  PersistentCookieJar* charDevCookies;
+  QListWidget* historyList;
+  QTreeWidget* bisTree;
+  QString bisProfilePath;
+  SimulationCraftTextEdit* simulateText;
+  SimulationCraftTextEdit* overridesText;
+  QPlainTextEdit* logText;
+  QPushButton* backButton;
+  QPushButton* forwardButton;
+  SimulationCraftCommandLine* cmdLine;
+  QProgressBar* progressBar;
+  QPushButton* mainButton;
+  QGroupBox* cmdLineGroupBox;
+  QGroupBox* createCustomCharData;
 
-    QTimer* timer;
-    ImportThread* importThread;
-    SimulateThread* simulateThread;
+  QTimer* timer;
+  ImportThread* importThread;
+  SimulateThread* simulateThread;
 
-    sim_t* sim;
-    std::string simPhase;
-    int simProgress;
-    int simResults;
-    QStringList resultsHtml;
+  sim_t* sim;
+  std::string simPhase;
+  int simProgress;
+  int simResults;
+  QStringList resultsHtml;
 
-    QString cmdLineText;
-    QString logFileText;
-    QString resultsFileText;
+  QString cmdLineText;
+  QString logFileText;
+  QString resultsFileText;
 
-    StringHistory simulateCmdLineHistory;
-    StringHistory logCmdLineHistory;
-    StringHistory resultsCmdLineHistory;
-    StringHistory optionsHistory;
-    StringHistory simulateTextHistory;
-    StringHistory overridesTextHistory;
+  StringHistory simulateCmdLineHistory;
+  StringHistory logCmdLineHistory;
+  StringHistory resultsCmdLineHistory;
+  StringHistory optionsHistory;
+  StringHistory simulateTextHistory;
+  StringHistory overridesTextHistory;
 
-    void    startImport( int tab, const QString& url );
-    void    startSim();
-    sim_t*  initSim();
-    void    deleteSim();
-    QString mergeOptions();
+  void    startImport( int tab, const QString& url );
+  void    startSim();
+  sim_t*  initSim();
+  void    deleteSim();
+  QString mergeOptions();
 
-    void saveLog();
-    void saveResults();
+  void saveLog();
+  void saveResults();
 
-    void    decodeOptions( QString );
-    QString encodeOptions();
+  void    decodeOptions( QString );
+  QString encodeOptions();
 
-    void loadHistory();
-    void saveHistory();
+  void loadHistory();
+  void saveHistory();
 
-    void createCmdLine();
-    void createWelcomeTab();
-    void createOptionsTab();
-    void createGlobalsTab();
-    void createBuffsTab();
-    void createDebuffsTab();
-    void createScalingTab();
-    void createPlotsTab();
-    void createReforgePlotsTab();
-    void createImportTab();
-    void createBestInSlotTab();
-    void createCustomTab();
-    void createSimulateTab();
-    void createOverridesTab();
-    void createHelpTab();
-    void createLogTab();
-    void createResultsTab();
-    void createSiteTab();
-    void createToolTips();
+  void createCmdLine();
+  void createWelcomeTab();
+  void createOptionsTab();
+  void createGlobalsTab();
+  void createBuffsTab();
+  void createDebuffsTab();
+  void createScalingTab();
+  void createPlotsTab();
+  void createReforgePlotsTab();
+  void createImportTab();
+  void createBestInSlotTab();
+  void createCustomTab();
+  void createSimulateTab();
+  void createOverridesTab();
+  void createHelpTab();
+  void createLogTab();
+  void createResultsTab();
+  void createSiteTab();
+  void createToolTips();
 #ifdef SC_PAPERDOLL
-    void createPaperdoll();
+  void createPaperdoll();
 #endif
-    void createItemDataSourceSelector( QFormLayout* );
-    void updateVisibleWebView( SimulationCraftWebView* );
+  void createItemDataSourceSelector( QFormLayout* );
+  void updateVisibleWebView( SimulationCraftWebView* );
 
 protected:
-    virtual void closeEvent( QCloseEvent* );
+  virtual void closeEvent( QCloseEvent* );
 
 private slots:
-    void importFinished();
-    void simulateFinished();
-    void updateSimProgress();
-    void cmdLineReturnPressed();
-    void cmdLineTextEdited( const QString& );
-    void backButtonClicked( bool checked=false );
-    void forwardButtonClicked( bool checked=false );
-    void mainButtonClicked( bool checked=false );
-    void mainTabChanged( int index );
-    void importTabChanged( int index );
-    void resultsTabChanged( int index );
-    void resultsTabCloseRequest( int index );
-    void historyDoubleClicked( QListWidgetItem* item );
-    void bisDoubleClicked( QTreeWidgetItem* item, int col );
-    void allBuffsChanged( bool checked );
-    void allDebuffsChanged( bool checked );
-    void allScalingChanged( bool checked );
-    void armoryRegionChanged( const QString& region );
+  void importFinished();
+  void simulateFinished();
+  void updateSimProgress();
+  void cmdLineReturnPressed();
+  void cmdLineTextEdited( const QString& );
+  void backButtonClicked( bool checked=false );
+  void forwardButtonClicked( bool checked=false );
+  void mainButtonClicked( bool checked=false );
+  void mainTabChanged( int index );
+  void importTabChanged( int index );
+  void resultsTabChanged( int index );
+  void resultsTabCloseRequest( int index );
+  void historyDoubleClicked( QListWidgetItem* item );
+  void bisDoubleClicked( QTreeWidgetItem* item, int col );
+  void allBuffsChanged( bool checked );
+  void allDebuffsChanged( bool checked );
+  void allScalingChanged( bool checked );
+  void armoryRegionChanged( const QString& region );
 
 public:
-    SimulationCraftWindow(QWidget *parent = 0);
+  SimulationCraftWindow( QWidget *parent = 0 );
 };
 
 class SimulationCraftTextEdit : public QPlainTextEdit
@@ -267,12 +269,12 @@ protected:
   virtual void keyPressEvent( QKeyEvent* e )
   {
     int k = e->key();
-    if( k != Qt::Key_Up && k != Qt::Key_Down )
+    if ( k != Qt::Key_Up && k != Qt::Key_Down )
     {
       QLineEdit::keyPressEvent( e );
       return;
     }
-    switch( mainWindow->mainTab->currentIndex() )
+    switch ( mainWindow->mainTab->currentIndex() )
     {
     case TAB_WELCOME:
     case TAB_OPTIONS:
@@ -295,7 +297,7 @@ protected:
   }
 
 public:
-  SimulationCraftCommandLine( SimulationCraftWindow* mw ) : mainWindow(mw) {}
+  SimulationCraftCommandLine( SimulationCraftWindow* mw ) : mainWindow( mw ) {}
 };
 
 class SimulationCraftWebView : public QWebView
@@ -310,7 +312,7 @@ private slots:
   void loadProgressSlot( int p )
   {
     progress = p;
-    if( mainWindow->visibleWebView == this )
+    if ( mainWindow->visibleWebView == this )
     {
       mainWindow->progressBar->setValue( progress );
     }
@@ -318,17 +320,17 @@ private slots:
   void loadFinishedSlot( bool /* ok */ )
   {
     progress = 100;
-    if( mainWindow->visibleWebView == this )
+    if ( mainWindow->visibleWebView == this )
     {
       mainWindow->progressBar->setValue( 100 );
     }
   }
   void urlChangedSlot( const QUrl& url )
   {
-    if( mainWindow->visibleWebView == this )
+    if ( mainWindow->visibleWebView == this )
     {
       QString s = url.toString();
-      if( s == "about:blank" ) s = "results.html";
+      if ( s == "about:blank" ) s = "results.html";
       mainWindow->cmdLine->setText( s );
     }
   }
@@ -339,13 +341,13 @@ private slots:
 
 public:
   SimulationCraftWebView( SimulationCraftWindow* mw ) :
-    mainWindow(mw), progress(0)
+    mainWindow( mw ), progress( 0 )
   {
-    connect( this, SIGNAL(loadProgress(int)),       this, SLOT(loadProgressSlot(int)) );
-    connect( this, SIGNAL(loadFinished(bool)),      this, SLOT(loadFinishedSlot(bool)) );
-    connect( this, SIGNAL(urlChanged(const QUrl&)), this, SLOT(urlChangedSlot(const QUrl&)) );
+    connect( this, SIGNAL( loadProgress( int ) ),       this, SLOT( loadProgressSlot( int ) ) );
+    connect( this, SIGNAL( loadFinished( bool ) ),      this, SLOT( loadFinishedSlot( bool ) ) );
+    connect( this, SIGNAL( urlChanged( const QUrl& ) ), this, SLOT( urlChangedSlot( const QUrl& ) ) );
 
-    connect( page(), SIGNAL(linkClicked(const QUrl&)), this, SLOT(linkClickedSlot(const QUrl&)) );
+    connect( page(), SIGNAL( linkClicked( const QUrl& ) ), this, SLOT( linkClickedSlot( const QUrl& ) ) );
     page() -> setLinkDelegationPolicy( QWebPage::DelegateExternalLinks );
   }
   virtual ~SimulationCraftWebView() {}
@@ -353,36 +355,36 @@ public:
 
 class SimulateThread : public QThread
 {
-    Q_OBJECT
-    SimulationCraftWindow* mainWindow;
-    sim_t* sim;
+  Q_OBJECT
+  SimulationCraftWindow* mainWindow;
+  sim_t* sim;
 
 public:
-    QString options;
-    bool success;
+  QString options;
+  bool success;
 
-    void start( sim_t* s, const QString& o ) { sim=s; options=o; success=false; QThread::start(); }
-    virtual void run();
-    SimulateThread( SimulationCraftWindow* mw ) : mainWindow(mw), sim(0) {}
+  void start( sim_t* s, const QString& o ) { sim=s; options=o; success=false; QThread::start(); }
+  virtual void run();
+  SimulateThread( SimulationCraftWindow* mw ) : mainWindow( mw ), sim( 0 ) {}
 };
 
 class ImportThread : public QThread
 {
-    Q_OBJECT
-    SimulationCraftWindow* mainWindow;
-    sim_t* sim;
+  Q_OBJECT
+  SimulationCraftWindow* mainWindow;
+  sim_t* sim;
 
 public:
-    int tab;
-    QString url;
-    QString profile;
-    player_t* player;
+  int tab;
+  QString url;
+  QString profile;
+  player_t* player;
 
-    void importBattleNet();
+  void importBattleNet();
 
-    void start( sim_t* s, int t, const QString& u ) { sim=s; tab=t; url=u; profile=""; player=0; QThread::start(); }
-    virtual void run();
-    ImportThread( SimulationCraftWindow* mw ) : mainWindow(mw), sim(0), player(0) {}
+  void start( sim_t* s, int t, const QString& u ) { sim=s; tab=t; url=u; profile=""; player=0; QThread::start(); }
+  virtual void run();
+  ImportThread( SimulationCraftWindow* mw ) : mainWindow( mw ), sim( 0 ), player( 0 ) {}
 };
 
 #endif // SIMULATIONCRAFTQT_H

@@ -100,9 +100,9 @@ static void print_text_action( FILE* file, stats_t* s, int max_name_length=0 )
                      s -> tick_results[ RESULT_CRIT ].pct );
   }
 
-  if ( s -> total_tick_time > 0 )
+  if ( s -> total_tick_time > timespan_t::zero )
   {
-    util_t::fprintf( file, "  UpTime=%.1f%%", 100.0 * s -> total_tick_time / s -> player -> fight_length.mean  );
+    util_t::fprintf( file, "  UpTime=%.1f%%", 100.0 * s -> total_tick_time.total_seconds() / s -> player -> fight_length.mean  );
   }
 
   util_t::fprintf( file, "\n" );
@@ -186,7 +186,7 @@ static inline bool buff_comp( const buff_t* i, const buff_t* j )
 
   return ( i -> name_str.compare( j -> name_str ) < 0 );
 }
-  
+
 static void print_text_buffs( FILE* file, player_t* p )
 {
   bool first=true;
@@ -194,27 +194,27 @@ static void print_text_buffs( FILE* file, player_t* p )
   int total_length = 100;
   std::vector< buff_t* > buff_list;
   std::string full_name;
-  
+
   for ( buff_t* b = p -> sim -> buff_list; b; b = b -> next )
   {
     if ( b -> quiet || ! b -> start_count || ! b -> constant )
       continue;
-    
+
     buff_list.push_back( b );
   }
-  
+
   for ( buff_t* b = p -> buff_list; b; b = b -> next )
   {
     if ( b -> quiet || ! b -> start_count || ! b -> constant )
       continue;
-    
+
     buff_list.push_back( b );
   }
-  
+
   std::sort( buff_list.begin(), buff_list.end(), buff_comp );
-  
+
   for ( std::vector< buff_t* >::const_iterator b = buff_list.begin();
-       b < buff_list.end(); b++ )
+        b < buff_list.end(); b++ )
   {
     int length = ( int ) ( *b ) -> name_str.length();
     if ( ( total_length + length ) > 100 )
@@ -234,7 +234,7 @@ static void print_text_buffs( FILE* file, player_t* p )
   util_t::fprintf( file, "\n" );
 
   buff_list.clear();
-  
+
   int max_length = 0;
 
   // Consolidate player buffs, first auras
@@ -242,7 +242,7 @@ static void print_text_buffs( FILE* file, player_t* p )
   {
     if ( b -> quiet || ! b -> start_count || b -> constant )
       continue;
-    
+
     buff_list.push_back( b );
   }
 
@@ -254,7 +254,7 @@ static void print_text_buffs( FILE* file, player_t* p )
 
     buff_list.push_back( b );
   }
-  
+
   // Then pet buffs
   for ( pet_t* pet = p -> pet_list; pet; pet = pet -> next_pet )
   {
@@ -262,19 +262,19 @@ static void print_text_buffs( FILE* file, player_t* p )
     {
       if ( b -> quiet || ! b -> start_count || b -> constant )
         continue;
-      
+
       buff_list.push_back( b );
     }
   }
 
   for ( std::vector< buff_t* >::const_iterator b = buff_list.begin();
-       b < buff_list.end(); b++ )
+        b < buff_list.end(); b++ )
   {
     if ( ( *b ) -> player && ( *b ) -> player -> is_pet() )
       full_name = ( *b ) -> player -> name_str + "-" + ( *b ) -> name_str;
     else
       full_name = ( *b ) -> name_str;
-    
+
     int length = ( int ) full_name.length();
     if ( length > max_length ) max_length = length;
   }
@@ -283,9 +283,9 @@ static void print_text_buffs( FILE* file, player_t* p )
 
   if ( buff_list.size() > 0 )
     util_t::fprintf( file, "  Dynamic Buffs:\n" );
-  
+
   for ( std::vector< buff_t* >::const_iterator b = buff_list.begin();
-       b < buff_list.end(); b++ )
+        b < buff_list.end(); b++ )
   {
     if ( ( *b ) -> player && ( *b ) -> player -> is_pet() )
       full_name = ( *b ) -> player -> name_str + "-" + ( *b ) -> name_str;
@@ -293,12 +293,12 @@ static void print_text_buffs( FILE* file, player_t* p )
       full_name = ( *b ) -> name_str;
 
     util_t::fprintf( file, "    %-*s : start=%-4.1f refresh=%-5.1f interval=%5.1f trigger=%-5.1f uptime=%2.0f%%",
-                    max_length, full_name.c_str(), ( *b ) -> avg_start, ( *b ) -> avg_refresh,
-                    ( *b ) -> avg_start_interval, ( *b ) -> avg_trigger_interval, ( *b ) -> uptime_pct.mean );
-    
+                     max_length, full_name.c_str(), ( *b ) -> avg_start, ( *b ) -> avg_refresh,
+                     ( *b ) -> avg_start_interval, ( *b ) -> avg_trigger_interval, ( *b ) -> uptime_pct.mean );
+
     if ( ( *b ) -> benefit_pct > 0 && ( *b ) -> benefit_pct < 100 )
       util_t::fprintf( file, "  benefit=%2.0f%%", ( *b ) -> benefit_pct );
-    
+
     util_t::fprintf( file, "\n" );
   }
 }
@@ -508,8 +508,8 @@ static void print_text_performance( FILE* file, sim_t* sim )
                    ( long ) sim -> max_events_remaining,
                    sim -> target -> resource_base[ RESOURCE_HEALTH ],
                    sim -> iterations * sim -> simulation_length.mean,
-                   sim -> elapsed_cpu_seconds,
-                   sim -> iterations * sim -> simulation_length.mean / sim -> elapsed_cpu_seconds );
+                   sim -> elapsed_cpu.total_seconds(),
+                   sim -> iterations * sim -> simulation_length.mean / sim -> elapsed_cpu.total_seconds() );
 
   sim -> rng -> report( file );
 }
@@ -584,7 +584,7 @@ static void print_text_scale_factors( FILE* file, player_t* p )
     {
       util_t::fprintf( file, "  %s=%.*f(%.*f)", util_t::stat_type_abbrev( i ),
                        p -> sim -> report_precision, sf.get_stat( i ),
-                       p -> sim -> report_precision, p -> scaling_error.get_stat( i ) );;
+                       p -> sim -> report_precision, p -> scaling_error.get_stat( i ) );
     }
   }
   if ( p -> sim -> scaling -> normalize_scale_factors )

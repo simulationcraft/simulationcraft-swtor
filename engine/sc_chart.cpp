@@ -33,7 +33,7 @@ static const char* class_color( int type )
 // The above colors don't all work for text rendered on a light (white) background.  These colors work better by reducing the brightness HSV component of the above colors
 static const char* class_text_color( int type )
 {
-  switch( type )
+  switch ( type )
   {
   //case MAGE:         return "59ADCC"; // darker blue
   case JEDI_SAGE:       return "8A8A8A"; // darker silver
@@ -70,7 +70,7 @@ static const char* school_color( int type )
 
 static const char* stat_color( int type )
 {
-  switch( type )
+  switch ( type )
   {
   case STAT_STRENGTH:                 return class_color( JEDI_KNIGHT );
   case STAT_AGILITY:                  return class_color( BOUNTY_HUNTER );
@@ -865,7 +865,7 @@ const char* chart_t::time_spent( std::string& s,
   for ( stats_t* st = p -> stats_list; st; st = st -> next )
   {
     if ( st -> quiet ) continue;
-    if ( st -> total_time <= 0 ) continue;
+    if ( st -> total_time <= timespan_t::zero ) continue;
     if ( st -> background ) continue;
 
     stats_list.push_back( st );
@@ -893,7 +893,7 @@ const char* chart_t::time_spent( std::string& s,
   s += "chd=t:";
   for ( int i=0; i < num_stats; i++ )
   {
-    snprintf( buffer, sizeof( buffer ), "%s%.1f", ( i?",":"" ), 100.0 * stats_list[ i ] -> total_time / p -> fight_length.mean ); s += buffer;
+    snprintf( buffer, sizeof( buffer ), "%s%.1f", ( i?",":"" ), 100.0 * stats_list[ i ] -> total_time.total_seconds() / p -> fight_length.mean ); s += buffer;
   }
   if ( p -> waiting_time.mean > 0 )
   {
@@ -929,7 +929,7 @@ const char* chart_t::time_spent( std::string& s,
     stats_t* st = stats_list[ i ];
     if ( i ) s += "|";
     s += st -> name_str.c_str();
-    snprintf( buffer, sizeof( buffer ), " %.1fs", st -> total_time ); s += buffer;
+    snprintf( buffer, sizeof( buffer ), " %.1fs", st -> total_time.total_seconds() ); s += buffer;
   }
   if ( p -> waiting_time.mean > 0 )
   {
@@ -1315,7 +1315,7 @@ const char* chart_t::reforge_dps( std::string& s,
     double max_ydelta = std::max( min_delta, max_delta );
     int ysteps = 5;
     double ystep_amount = max_ydelta / ysteps;
-    
+
     char buffer[ 1024 ];
 
     s = get_chart_base_url();
@@ -1328,7 +1328,7 @@ const char* chart_t::reforge_dps( std::string& s,
       s += "chf=bg,s,333333";
       s += "&amp;";
     }
-    
+
     // X series
     s += "chd=t2:";
     for ( int i=0; i < num_points; i++ )
@@ -1338,7 +1338,7 @@ const char* chart_t::reforge_dps( std::string& s,
       if ( i < num_points - 1 )
         s+= ",";
     }
-    
+
     // Y series
     s += "|";
     for ( int i=0; i < num_points; i++ )
@@ -1348,7 +1348,7 @@ const char* chart_t::reforge_dps( std::string& s,
       if ( i < num_points - 1 )
         s+= ",";
     }
-    
+
     // Min Y series
     s += "|-1|";
     for ( int i=0; i < num_points; i++ )
@@ -1359,7 +1359,7 @@ const char* chart_t::reforge_dps( std::string& s,
       if ( i < num_points - 1 )
         s+= ",";
     }
-    
+
     // Max Y series
     s += "|-1|";
     for ( int i=0; i < num_points; i++ )
@@ -1372,72 +1372,72 @@ const char* chart_t::reforge_dps( std::string& s,
     }
 
     s += "&amp;";
-    
+
     // Axis dimensions
-    snprintf( buffer, sizeof( buffer ), "chds=%d,%d,%.0f,%.0f", 
-             -range, +range, 
-             floor( baseline.value - max_ydelta ), 
-             ceil( baseline.value + max_ydelta ) );
+    snprintf( buffer, sizeof( buffer ), "chds=%d,%d,%.0f,%.0f",
+              -range, +range,
+              floor( baseline.value - max_ydelta ),
+              ceil( baseline.value + max_ydelta ) );
     s += buffer;
     s += "&amp;chxt=x,y,x&amp;";
-    
+
     // X Axis labels
-    snprintf( buffer, sizeof( buffer ), "chxl=0:|%d|%d|0|%d|%d|", 
-             ( range ), ( range ) / 2, ( range ) / 2, ( range ) );
+    snprintf( buffer, sizeof( buffer ), "chxl=0:|%d|%d|0|%d|%d|",
+              ( range ), ( range ) / 2, ( range ) / 2, ( range ) );
     s += buffer;
-    
+
     // Y Axis labels
     s += "1:|";
     for ( int i = ysteps; i >= 1; i -= 1 )
     {
-      snprintf( buffer, sizeof( buffer ), "%.0f (%.0f)|", 
-               baseline.value - i * ystep_amount,
-               - ( i * ystep_amount ) );
+      snprintf( buffer, sizeof( buffer ), "%.0f (%.0f)|",
+                baseline.value - i * ystep_amount,
+                - ( i * ystep_amount ) );
       s += buffer;
     }
     snprintf( buffer, sizeof( buffer ), "%.0f|", baseline.value );
     s += buffer;
     for ( int i = 1; i <= ysteps; i += 1 )
     {
-      snprintf( buffer, sizeof( buffer ), "%.0f (%%2b%.0f)|", 
-               baseline.value + i * ystep_amount,
-               i * ystep_amount );
+      snprintf( buffer, sizeof( buffer ), "%.0f (%%2b%.0f)|",
+                baseline.value + i * ystep_amount,
+                i * ystep_amount );
       s += buffer;
     }
-    
+
     // X2 Axis labels
-    snprintf( buffer, sizeof( buffer ), "2:|%s to %s||%s to %s", 
-             util_t::stat_type_abbrev( stat_indices[ 0 ] ),
-             util_t::stat_type_abbrev( stat_indices[ 1 ] ), 
-             util_t::stat_type_abbrev( stat_indices[ 1 ] ),
-             util_t::stat_type_abbrev( stat_indices[ 0 ] ) );
+    snprintf( buffer, sizeof( buffer ), "2:|%s to %s||%s to %s",
+              util_t::stat_type_abbrev( stat_indices[ 0 ] ),
+              util_t::stat_type_abbrev( stat_indices[ 1 ] ),
+              util_t::stat_type_abbrev( stat_indices[ 1 ] ),
+              util_t::stat_type_abbrev( stat_indices[ 0 ] ) );
     s += buffer;
     s += "&amp;";
-    
+
     // Chart legend
     if ( ! p -> sim -> print_styles )
     {
       s += "chdls=dddddd,12";
       s += "&amp;";
     }
-    
+
     // Chart color
     s += "chco=";
     s += stat_color( stat_indices[ 0 ] );
     s += "&amp;";
-    
+
     // Grid lines
     s += "chg=5,";
     s += util_t::to_string( 100 / ( ysteps * 2 ) );
     s += ",1,3";
     s += "&amp;";
-    
+
     // Chart Title
     std::string formatted_name = p -> name_str;
     util_t::urlencode( util_t::str_to_utf8( formatted_name ) );
     snprintf( buffer, sizeof( buffer ), "chtt=%s+Reforge+Scaling", formatted_name.c_str() ); s += buffer;
     s += "&amp;";
-    
+
     if ( p -> sim -> print_styles )
       s += "chts=666666,18";
     else
@@ -1563,12 +1563,12 @@ const char* chart_t::timeline( std::string& s,
 
   size_t max_buckets = timeline_data.size();
   int increment = ( ( max_buckets > max_points ) ?
-                     ( ( int ) floor( ( double ) max_buckets / max_points ) + 1 ) :
-                     1 );
+                    ( ( int ) floor( ( double ) max_buckets / max_points ) + 1 ) :
+                    1 );
 
   double timeline_max = ( max_buckets ?
-                           *std::max_element( timeline_data.begin(), timeline_data.end() ) :
-                           0 );
+                          *std::max_element( timeline_data.begin(), timeline_data.end() ) :
+                          0 );
 
   double timeline_adjust = timeline_range / timeline_max;
 
@@ -1607,7 +1607,7 @@ const char* chart_t::timeline( std::string& s,
   s += "&amp;";
   s += "chxt=x,y";
   s += "&amp;";
-  snprintf( buffer, sizeof( buffer ), "chxl=0:|0|sec=%d|1:|0|avg=%.0f|max=%.0f", (int) max_buckets, avg, timeline_max ); s += buffer;
+  snprintf( buffer, sizeof( buffer ), "chxl=0:|0|sec=%d|1:|0|avg=%.0f|max=%.0f", ( int ) max_buckets, avg, timeline_max ); s += buffer;
   s += "&amp;";
   snprintf( buffer, sizeof( buffer ), "chxp=1,1,%.0f,100", 100.0 * avg / timeline_max ); s += buffer;
   s += "&amp;";

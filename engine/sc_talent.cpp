@@ -425,23 +425,23 @@ bool spell_id_t::in_range() const
   return s_data -> in_range( s_player -> distance );
 }
 
-double spell_id_t::cooldown() const
+timespan_t spell_id_t::cooldown() const
 {
   if ( ! ok() )
-    return 0.0;
+    return timespan_t::zero;
 
-  double d = s_data -> cooldown();
+  double d = s_data -> cooldown().total_seconds();
 
   if ( d > ( s_player -> sim -> wheel_seconds - 2.0 ) )
     d = s_player -> sim -> wheel_seconds - 2.0;
 
-  return d;
+  return timespan_t::from_seconds( d );
 }
 
-double spell_id_t::gcd() const
+timespan_t spell_id_t::gcd() const
 {
   if ( ! ok() )
-    return 0.0;
+    return timespan_t::zero;
 
   return s_data -> gcd();
 }
@@ -454,15 +454,15 @@ uint32_t spell_id_t::category() const
   return s_data -> category();
 }
 
-double spell_id_t::duration() const
+timespan_t spell_id_t::duration() const
 {
   if ( ! ok() )
-    return 0.0;
+    return timespan_t::zero;
 
-  double d = s_data -> duration();
-
-  if ( d > ( s_player -> sim -> wheel_seconds - 2.0 ) )
-    d = s_player -> sim -> wheel_seconds - 2.0;
+  timespan_t d = s_data -> duration();
+  timespan_t player_wheel_seconds = timespan_t::from_seconds( s_player -> sim -> wheel_seconds - 2.0 );
+  if ( d > player_wheel_seconds )
+    d = player_wheel_seconds;
 
   return d;
 }
@@ -515,10 +515,10 @@ double spell_id_t::proc_chance() const
   return s_data -> proc_chance();
 }
 
-double spell_id_t::cast_time() const
+timespan_t spell_id_t::cast_time() const
 {
   if ( ! ok() )
-    return 0.0;
+    return timespan_t::zero;
 
   return s_data -> cast_time( s_player -> level );
 }
@@ -685,10 +685,10 @@ double spell_id_t::effect_coeff( uint32_t effect_num ) const
   return s_player -> dbc.effect( effect_id ) -> coeff();
 }
 
-double spell_id_t::effect_period( uint32_t effect_num ) const
+timespan_t spell_id_t::effect_period( uint32_t effect_num ) const
 {
   if ( ! ok() )
-    return 0.0;
+    return timespan_t::zero;
 
   uint32_t effect_id = s_data -> effect_id( effect_num );
 
@@ -780,6 +780,34 @@ double spell_id_t::base_value( effect_type_t type, effect_subtype_t sub_type, in
   return 0.0;
 }
 
+const spelleffect_data_t* spell_id_t::get_effect( property_type_t p_type ) const
+{
+  if ( ! ok() )
+    return NULL;
+
+  if ( s_single )
+  {
+    if ( ( p_type == P_MAX ) || ( s_single -> subtype() == A_ADD_FLAT_MODIFIER ) || ( s_single -> subtype() == A_ADD_PCT_MODIFIER ) )
+      return s_single;
+    else
+      return NULL;
+  }
+
+  for ( int i = 0; i < MAX_EFFECTS; i++ )
+  {
+    if ( ! s_effects[ i ] )
+      continue;
+
+    if ( s_effects[ i ] -> subtype() != A_ADD_FLAT_MODIFIER && s_effects[ i ] -> subtype() != A_ADD_PCT_MODIFIER )
+      continue;
+
+    if ( p_type == P_MAX || s_effects[ i ] -> misc_value1() == p_type )
+      return s_effects[ i ];
+  }
+
+  return NULL;
+}
+
 double spell_id_t::mod_additive( property_type_t p_type ) const
 {
   // Move this somewhere sane, here for now
@@ -816,45 +844,30 @@ double spell_id_t::mod_additive( property_type_t p_type ) const
     100.0,  // P_DISPEL_CHANCE
   };
 
-  if ( ! ok() )
+  const spelleffect_data_t* effect = get_effect( p_type );
+
+  if( effect == NULL )
     return 0.0;
 
-  if ( s_single )
-  {
-    if ( ( p_type == P_MAX ) || ( s_single -> subtype() == A_ADD_FLAT_MODIFIER ) || ( s_single -> subtype() == A_ADD_PCT_MODIFIER ) )
-    {
-      if ( s_single -> subtype() == ( int ) A_ADD_PCT_MODIFIER )
-        return s_single -> base_value() / 100.0;
-      // Divide by property_flat_divisor for every A_ADD_FLAT_MODIFIER
-      else
-        return s_single -> base_value() / property_flat_divisor[ s_single -> misc_value1() ];
-    }
-    else
-      return 0.0;
-  }
-
-  for ( int i = 0; i < MAX_EFFECTS; i++ )
-  {
-    if ( ! s_effects[ i ] )
-      continue;
-
-    if ( s_effects[ i ] -> subtype() != A_ADD_FLAT_MODIFIER && s_effects[ i ] -> subtype() != A_ADD_PCT_MODIFIER )
-      continue;
-
-    if ( p_type == P_MAX || s_effects[ i ] -> misc_value1() == p_type )
-    {
-      // Divide by 100 for every A_ADD_PCT_MODIFIER
-      if ( s_effects[ i ] -> subtype() == ( int ) A_ADD_PCT_MODIFIER )
-        return s_effects[ i ] -> base_value() / 100.0;
-      // Divide by property_flat_divisor for every A_ADD_FLAT_MODIFIER
-      else
-        return s_effects[ i ] -> base_value() / property_flat_divisor[ s_effects[ i ] -> misc_value1() ];
-    }
-  }
-
-  return 0.0;
+  // Divide by 100 for every A_ADD_PCT_MODIFIER
+  if( effect -> subtype() == ( int ) A_ADD_PCT_MODIFIER )
+    return effect -> base_value() / 100.0;
+  // Divide by property_flat_divisor for every A_ADD_FLAT_MODIFIER
+  else
+    return effect -> base_value() / property_flat_divisor[ effect -> misc_value1() ];
 }
 
+timespan_t spell_id_t::mod_additive_time( property_type_t p_type ) const
+{
+  const spelleffect_data_t* effect = get_effect( p_type );
+
+  if( effect == NULL )
+    return timespan_t::zero;
+
+  assert(effect -> subtype() == A_ADD_FLAT_MODIFIER);
+
+  return timespan_t::from_millis(effect -> base_value());
+}
 
 // ==========================================================================
 // Active Spell ID

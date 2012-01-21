@@ -50,7 +50,7 @@ pet_t::pet_t( sim_t*             s,
               const std::string& n,
               pet_type_t         pt,
               bool               g ) :
-              player_t( s, PLAYER_MAIN_NONE, g ? PLAYER_GUARDIAN : PLAYER_PET, n ), owner( o ), next_pet( 0 ), summoned( false ), pet_type( pt )
+  player_t( s, PLAYER_MAIN_NONE, pt == PET_ENEMY ? ENEMY_ADD : g ? PLAYER_GUARDIAN : PLAYER_PET, n ), owner( o ), next_pet( 0 ), summoned( false ), pet_type( pt )
 {
   init_pet_t_();
 }
@@ -117,11 +117,11 @@ void pet_t::reset()
 
 // pet_t::summon ============================================================
 
-void pet_t::summon( double duration )
+void pet_t::summon( timespan_t duration )
 {
   if ( sim -> log )
   {
-    log_t::output( sim, "%s summons %s. for %.2fs", owner -> name(), name(), duration );
+    log_t::output( sim, "%s summons %s. for %.2fs", owner -> name(), name(), duration.total_seconds() );
   }
 
   distance = owner -> distance;
@@ -137,11 +137,11 @@ void pet_t::summon( double duration )
     expiration = 0;
   }
 
-  if ( duration > 0 )
+  if ( duration > timespan_t::zero )
   {
     struct expiration_t : public event_t
     {
-      expiration_t( sim_t* sim, pet_t* p, double duration ) : event_t( sim, p )
+      expiration_t( sim_t* sim, pet_t* p, timespan_t duration ) : event_t( sim, p )
       {
         sim -> add_event( this, duration );
       }
