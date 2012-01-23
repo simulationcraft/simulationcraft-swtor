@@ -13,7 +13,6 @@ struct compare_talents
 {
   bool operator()( const talent_t* l, const talent_t* r ) const
   {
-
     return ( l -> _tab_page < r -> _tab_page );
   }
 };
@@ -109,11 +108,11 @@ static bool parse_world_lag( sim_t* sim,
 {
   assert( name == "world_lag" ); ( void )name;
 
-  sim -> active_player -> world_lag = atof( value.c_str() );
+  sim -> active_player -> world_lag = timespan_t::from_seconds( atof( value.c_str() ) );
 
-  if ( sim -> active_player -> world_lag < 0.0 )
+  if ( sim -> active_player -> world_lag < timespan_t::zero )
   {
-    sim -> active_player -> world_lag = 0.0;
+    sim -> active_player -> world_lag = timespan_t::zero;
   }
 
   sim -> active_player -> world_lag_override = true;
@@ -130,11 +129,11 @@ static bool parse_world_lag_stddev( sim_t* sim,
 {
   assert( name == "world_lag_stddev" ); ( void )name;
 
-  sim -> active_player -> world_lag_stddev = atof( value.c_str() );
+  sim -> active_player -> world_lag_stddev = timespan_t::from_seconds( atof( value.c_str() ) );
 
-  if ( sim -> active_player -> world_lag_stddev < 0.0 )
+  if ( sim -> active_player -> world_lag_stddev < timespan_t::zero )
   {
-    sim -> active_player -> world_lag_stddev = 0.0;
+    sim -> active_player -> world_lag_stddev = timespan_t::zero;
   }
 
   sim -> active_player -> world_lag_stddev_override = true;
@@ -150,11 +149,11 @@ static bool parse_brain_lag( sim_t* sim,
 {
   assert( name == "brain_lag" ); ( void )name;
 
-  sim -> active_player -> brain_lag = atof( value.c_str() );
+  sim -> active_player -> brain_lag = timespan_t::from_seconds( atof( value.c_str() ) );
 
-  if ( sim -> active_player -> brain_lag < 0.0 )
+  if ( sim -> active_player -> brain_lag < timespan_t::zero )
   {
-    sim -> active_player -> brain_lag = 0.0;
+    sim -> active_player -> brain_lag = timespan_t::zero;
   }
 
   return true;
@@ -169,11 +168,11 @@ static bool parse_brain_lag_stddev( sim_t* sim,
 {
   assert( name == "brain_lag_stddev" ); ( void )name;
 
-  sim -> active_player -> brain_lag_stddev = atof( value.c_str() );
+  sim -> active_player -> brain_lag_stddev = timespan_t::from_seconds( atof( value.c_str() ) );
 
-  if ( sim -> active_player -> brain_lag_stddev < 0.0 )
+  if ( sim -> active_player -> brain_lag_stddev < timespan_t::zero )
   {
-    sim -> active_player -> brain_lag_stddev = 0.0;
+    sim -> active_player -> brain_lag_stddev = timespan_t::zero;
   }
 
   return true;
@@ -196,15 +195,16 @@ player_t::player_t( sim_t*             s,
   region_str( s -> default_region_str ), server_str( s -> default_server_str ), origin_str( "unknown" ),
   next( 0 ), index( -1 ), main_class( m ), type( t ), role( ROLE_HYBRID ), target( 0 ), level( is_enemy() ? 53 : 50 ), use_pre_potion( 0 ),
   party( 0 ), member( 0 ),
-  skill( 0 ), initial_skill( s -> default_skill ), distance( 0 ), default_distance( 0 ), gcd_ready( 0 ), base_gcd( 1.5 ),
+  skill( 0 ), initial_skill( s -> default_skill ), distance( 0 ), default_distance( 0 ), gcd_ready( timespan_t::zero ), base_gcd( timespan_t::from_seconds( 1.5 ) ),
   potion_used( 0 ), sleeping( 1 ), initial_sleeping( 0 ), initialized( 0 ),
   pet_list( 0 ), bugs( true ), specialization( TALENT_TAB_NONE ), invert_scaling( 0 ),
   vengeance_enabled( false ), vengeance_damage( 0.0 ), vengeance_value( 0.0 ), vengeance_max( 0.0 ), vengeance_was_attacked( false ),
   active_pets( 0 ),
-  reaction_mean( 0.5 ), reaction_stddev( 0.0 ), reaction_nu( 0.5 ), scale_player( 1 ), avg_ilvl( 0 ),
+  reaction_mean( timespan_t::from_seconds( 0.5 ) ), reaction_stddev( timespan_t::zero ), reaction_nu( timespan_t::from_seconds( 0.5 ) ),
+  scale_player( 1 ), avg_ilvl( 0 ),
   // Latency
-  world_lag( 0.1 ), world_lag_stddev( -1.0 ),
-  brain_lag( -1.0 ), brain_lag_stddev( -1.0 ),
+  world_lag( timespan_t::from_seconds( 0.1 ) ), world_lag_stddev( timespan_t::min ),
+  brain_lag( timespan_t::min ), brain_lag_stddev( timespan_t::min ),
   world_lag_override( false ), world_lag_stddev_override( false ),
   events( 0 ),
   dbc( s -> dbc ),
@@ -228,7 +228,7 @@ player_t::player_t( sim_t*             s,
   mp5_per_intellect( 0 ),
   mana_regen_base( 0 ), mana_regen_while_casting( 0 ),
   base_energy_regen_per_second( 0 ), base_ammo_regen_per_second( 0 ), base_force_regen_per_second( 0 ),
-  last_cast( 0 ),
+  last_cast( timespan_t::zero ),
   // Attack Mechanics
   attack_haste( 1.0 ), buffed_attack_haste( 1.0 ), buffed_attack_speed( 1.0 ),
   base_attack_power( 0 ),       initial_attack_power( 0 ),        attack_power( 0 ),       buffed_attack_power( 0 ),
@@ -266,14 +266,14 @@ player_t::player_t( sim_t*             s,
   food( FOOD_NONE ),
   // Events
   executing( 0 ), channeling( 0 ), readying( 0 ), off_gcd( 0 ), in_combat( false ), action_queued( false ),
-  cast_delay_reaction( 0 ), cast_delay_occurred( 0 ),
+  cast_delay_reaction( timespan_t::zero ), cast_delay_occurred( timespan_t::zero ),
   // Actions
   action_list( 0 ), action_list_default( 0 ), cooldown_list( 0 ), dot_list( 0 ),
   // Reporting
   quiet( 0 ), last_foreground_action( 0 ),
-  iteration_fight_length( 0 ), arise_time( 0 ),
+  iteration_fight_length( timespan_t::zero ), arise_time( timespan_t::zero ),
   fight_length( s -> statistics_level < 2, true ), waiting_time( true ), executed_foreground_actions( s -> statistics_level < 3 ),
-  iteration_waiting_time( 0 ), iteration_executed_foreground_actions( 0 ),
+  iteration_waiting_time( timespan_t::zero ), iteration_executed_foreground_actions( 0 ),
   rps_gain( 0 ), rps_loss( 0 ),
   deaths(), deaths_error( 0 ),
   buff_list( 0 ), proc_list( 0 ), gain_list( 0 ), stats_list( 0 ), benefit_list( 0 ), uptime_list( 0 ),
@@ -368,14 +368,14 @@ player_t::player_t( sim_t*             s,
   range::fill( talent_tab_points, 0 );
   range::fill( tree_type, TREE_NONE );
 
-  if ( reaction_stddev == 0 ) reaction_stddev = reaction_mean * 0.25;
+  if ( reaction_stddev == timespan_t::zero ) reaction_stddev = reaction_mean * 0.25;
 }
 
 // player_t::~player_t ======================================================
 
 player_t::~player_t()
 {
-  for( std::vector<targetdata_t*>::iterator i = targetdata.begin(); i != targetdata.end(); ++i )
+  for ( std::vector<targetdata_t*>::iterator i = targetdata.begin(); i != targetdata.end(); ++i )
     delete *i;
 
   while ( action_t* a = action_list )
@@ -598,12 +598,13 @@ void player_t::init_base()
 {
   if ( sim -> debug ) log_t::output( sim, "Initializing base for player (%s)", name() );
 
-  attribute_base[ ATTR_STRENGTH  ] = 0;
+  attribute_base[ ATTR_STRENGTH  ] = 50;
   attribute_base[ ATTR_AGILITY   ] = 0;
-  attribute_base[ ATTR_STAMINA   ] = 0;
+  attribute_base[ ATTR_STAMINA   ] = 225;
   attribute_base[ ATTR_INTELLECT ] = 0;
   attribute_base[ ATTR_SPIRIT    ] = 0;
-  resource_base[ RESOURCE_HEALTH ] = 100;
+  attribute_base[ ATTR_WILLPOWER ] = 50;
+  resource_base[ RESOURCE_HEALTH ] = 2500;
   resource_base[ RESOURCE_MANA   ] = 0;
   base_spell_crit                  = 0.05;
   base_attack_crit                 = 0.05;
@@ -622,11 +623,10 @@ void player_t::init_base()
   initial_attack_crit_per_agility  = rating_t::get_attribute_base( sim, dbc, level, type, race, BASE_STAT_MELEE_CRIT_PER_AGI );
   base_mp5                         = rating_t::get_attribute_base( sim, dbc, level, type, race, BASE_STAT_MP5 );
 */
-  if ( level <= 80 ) health_per_stamina = 10;
-  else if ( level <= 85 ) health_per_stamina = ( level - 80 ) / 5 * 4 + 10;
-  else if ( level <= MAX_LEVEL ) health_per_stamina = 14;
-  if ( world_lag_stddev < 0 ) world_lag_stddev = world_lag * 0.1;
-  if ( brain_lag_stddev < 0 ) brain_lag_stddev = brain_lag * 0.1;
+  health_per_stamina = 10;
+
+  if ( world_lag_stddev < timespan_t::zero  ) world_lag_stddev = world_lag * 0.1;
+  if ( brain_lag_stddev < timespan_t::zero  ) brain_lag_stddev = brain_lag * 0.1;
 }
 
 // player_t::init_items =====================================================
@@ -726,7 +726,6 @@ void player_t::init_meta_gem( gear_stats_t& item_stats )
   if ( ! meta_gem_str.empty() ) meta_gem = util_t::parse_meta_gem_type( meta_gem_str );
 
   if ( sim -> debug ) log_t::output( sim, "Initializing meta-gem for player (%s)", name() );
-
 }
 
 // player_t::init_core ======================================================
@@ -854,21 +853,9 @@ void player_t::init_attack()
   initial_attack_expertise = base_attack_expertise + initial_stats.expertise_rating / rating.expertise;
 
   double a,b;
-  if ( level > 80 )
-  {
-    a = 2167.5;
-    b = -158167.5;
-  }
-  else if ( level >= 60 )
-  {
-    a = 467.5;
-    b = -22167.5;
-  }
-  else
-  {
-    a = 85.0;
-    b = 400.0;
-  }
+  a = 200.0;
+  b = 800.0;
+
   armor_coeff = a * level + b;
 }
 
@@ -963,7 +950,7 @@ void player_t::init_resources( bool force )
     timeline_resource.resize( RESOURCE_MAX );
     timeline_resource_chart.resize( RESOURCE_MAX );
 
-    int size = ( int ) ( sim -> max_time * ( 1.0 + sim -> vary_combat_length ) );
+    int size = ( int ) ( sim -> max_time.total_seconds() * ( 1.0 + sim -> vary_combat_length ) );
     if ( size <= 0 ) size = 600; // Default to 10 minutes
     size *= 2;
     size += 3; // Buffer against rounding.
@@ -1028,7 +1015,7 @@ struct execute_pet_action_t : public action_t
     action_t( ACTION_OTHER, "execute_pet_action", player ), pet_action( 0 ), pet( p ), action_str( as )
   {
     parse_options( NULL, options_str );
-    trigger_gcd = 0;
+    trigger_gcd = timespan_t::zero;
   }
 
   virtual void reset()
@@ -1221,6 +1208,11 @@ void player_t::init_actions()
                                  ( i < 58 ) ? ( 'a' + i - 36 ) : '.' );
 
         a -> signature_str = splits[ i ];
+
+        if (  sim -> separate_stats_by_actions > 0 && !is_pet() )
+        {
+          a -> stats = get_stats( a -> name_str + "__" + a -> marker, a );
+        }
       }
       else
       {
@@ -1248,12 +1240,12 @@ void player_t::init_actions()
   for ( action_t* action = action_list; action; action = action -> next )
   {
     action -> init();
-    if ( action -> trigger_gcd == 0 && ! action -> background && action -> use_off_gcd )
+    if ( action -> trigger_gcd == timespan_t::zero && ! action -> background && action -> use_off_gcd )
       off_gcd_actions.push_back( action );
 
   }
 
-  int capacity = std::max( 1200, ( int ) ( sim -> max_time / 2.0 ) );
+  int capacity = std::max( 1200, ( int ) ( sim -> max_time.total_seconds() / 2.0 ) );
   action_sequence.reserve( capacity );
   action_sequence = "";
 }
@@ -1314,20 +1306,21 @@ void player_t::init_buffs()
 {
   if ( sim -> debug ) log_t::output( sim, "Initializing buffs for player (%s)", name() );
 
-  buffs.power_potion     = new stat_buff_t( this, "power_potion", STAT_POWER, 565.0, 1, 15.0, 180.0 );
-
+  buffs.power_potion     = new stat_buff_t( this, "power_potion", STAT_POWER, 565.0, 1, timespan_t::from_seconds( 15.0 ), timespan_t::from_seconds( 180.0 ) );
   buffs.coordination    = new buff_t( this, "coordination",     1 );
+  buffs.unnatural_might = new buff_t( this, "unnatural_might",  1 );
+
+
   buffs.raid_movement   = new buff_t( this, "raid_movement",    1 );
   buffs.self_movement   = new buff_t( this, "self_movement",    1 );
   buffs.stunned         = new buff_t( this, "stunned",         -1 );
-  buffs.unnatural_might = new buff_t( this, "unnatural_might",  1 );
-
   debuffs.bleeding     = new debuff_t( this, "bleeding",     -1 );
   debuffs.casting      = new debuff_t( this, "casting",      -1 );
   debuffs.invulnerable = new debuff_t( this, "invulnerable", -1 );
   debuffs.vulnerable   = new debuff_t( this, "vulnerable",   -1 );
 
-  debuffs.shatter_shot = new debuff_t( this, "shatter_shot", 1, 45.0 ); // TODO: move to player_t extension of correct class
+  debuffs.shatter_shot = new debuff_t( this, "shatter_shot", 1, timespan_t::from_seconds( 45.0 ) ); // TODO: move to player_t extension of correct class
+  debuffs.flying       = new debuff_t( this, "flying",   -1 );
 }
 
 // player_t::init_gains =====================================================
@@ -1499,22 +1492,22 @@ void player_t::init_scaling()
       case STAT_WEAPON_DPS:
         if ( main_hand_weapon.damage > 0 )
         {
-          main_hand_weapon.damage  += main_hand_weapon.swing_time * v;
-          main_hand_weapon.min_dmg += main_hand_weapon.swing_time * v;
-          main_hand_weapon.max_dmg += main_hand_weapon.swing_time * v;
+          main_hand_weapon.damage  += main_hand_weapon.swing_time.total_seconds() * v;
+          main_hand_weapon.min_dmg += main_hand_weapon.swing_time.total_seconds() * v;
+          main_hand_weapon.max_dmg += main_hand_weapon.swing_time.total_seconds() * v;
         }
         if ( ranged_weapon.damage > 0 )
         {
-          ranged_weapon.damage     += ranged_weapon.swing_time * v;
-          ranged_weapon.min_dmg    += ranged_weapon.swing_time * v;
-          ranged_weapon.max_dmg    += ranged_weapon.swing_time * v;
+          ranged_weapon.damage     += ranged_weapon.swing_time.total_seconds() * v;
+          ranged_weapon.min_dmg    += ranged_weapon.swing_time.total_seconds() * v;
+          ranged_weapon.max_dmg    += ranged_weapon.swing_time.total_seconds() * v;
         }
         break;
 
       case STAT_WEAPON_SPEED:
-        if ( main_hand_weapon.swing_time > 0 )
+        if ( main_hand_weapon.swing_time > timespan_t::zero )
         {
-          double new_speed = ( main_hand_weapon.swing_time + v );
+          timespan_t new_speed = ( main_hand_weapon.swing_time + timespan_t::from_seconds( v ) );
           double mult = new_speed / main_hand_weapon.swing_time;
 
           main_hand_weapon.min_dmg *= mult;
@@ -1523,9 +1516,9 @@ void player_t::init_scaling()
 
           main_hand_weapon.swing_time = new_speed;
         }
-        if ( ranged_weapon.swing_time > 0 )
+        if ( ranged_weapon.swing_time > timespan_t::zero )
         {
-          double new_speed = ( ranged_weapon.swing_time + v );
+          timespan_t new_speed = ( ranged_weapon.swing_time + timespan_t::from_seconds( v ) );
 
           double mult = new_speed / ranged_weapon.swing_time;
 
@@ -1540,16 +1533,16 @@ void player_t::init_scaling()
       case STAT_WEAPON_OFFHAND_DPS:
         if ( off_hand_weapon.damage > 0 )
         {
-          off_hand_weapon.damage   += off_hand_weapon.swing_time * v;
-          off_hand_weapon.min_dmg  += off_hand_weapon.swing_time * v;
-          off_hand_weapon.max_dmg  += off_hand_weapon.swing_time * v;
+          off_hand_weapon.damage   += off_hand_weapon.swing_time.total_seconds() * v;
+          off_hand_weapon.min_dmg  += off_hand_weapon.swing_time.total_seconds() * v;
+          off_hand_weapon.max_dmg  += off_hand_weapon.swing_time.total_seconds() * v;
         }
         break;
 
       case STAT_WEAPON_OFFHAND_SPEED:
-        if ( off_hand_weapon.swing_time > 0 )
+        if ( off_hand_weapon.swing_time > timespan_t::zero )
         {
-          double new_speed = ( off_hand_weapon.swing_time + v );
+          timespan_t new_speed = ( off_hand_weapon.swing_time + timespan_t::from_seconds( v ) );
           double mult = new_speed / off_hand_weapon.swing_time;
 
           off_hand_weapon.min_dmg *= mult;
@@ -1923,7 +1916,7 @@ double player_t::composite_attribute_multiplier( int attr ) const
 
   if ( attr == ATTR_STRENGTH || attr ==  ATTR_WILLPOWER ) // TODO: Add Aim and Cunning
     if ( buffs.force_valor -> up() )
-      m *= 1.05;
+      m += 0.05;
 
   return m;
 }
@@ -2107,8 +2100,8 @@ void player_t::combat_begin()
 
   action_sequence = "";
 
-  iteration_fight_length = 0;
-  iteration_waiting_time = 0;
+  iteration_fight_length = timespan_t::zero;
+  iteration_waiting_time = timespan_t::zero;
   iteration_executed_foreground_actions = 0;
   iteration_dmg = 0;
   iteration_heal = 0;
@@ -2146,10 +2139,10 @@ void player_t::combat_end()
   else if ( is_pet() )
     cast_pet() -> dismiss();
 
-  fight_length.add( iteration_fight_length );
+  fight_length.add( iteration_fight_length.total_seconds() );
 
   executed_foreground_actions.add( iteration_executed_foreground_actions );
-  waiting_time.add( iteration_waiting_time );
+  waiting_time.add( iteration_waiting_time.total_seconds() );
 
   for ( stats_t* s = stats_list; s; s = s -> next )
     s -> combat_end();
@@ -2164,10 +2157,10 @@ void player_t::combat_end()
   }
   compound_dmg.add( iteration_dmg );
 
-  dps.add( iteration_fight_length ? iteration_dmg / iteration_fight_length : 0 );
-  dpse.add( sim -> current_time ? iteration_dmg / sim -> current_time : 0 );
+  dps.add( iteration_fight_length != timespan_t::zero ? iteration_dmg / iteration_fight_length.total_seconds() : 0 );
+  dpse.add( sim -> current_time != timespan_t::zero ? iteration_dmg / sim -> current_time.total_seconds() : 0 );
 
-  if ( sim -> debug ) log_t::output( sim, "Combat ends for player %s at time %.4f fight_length=%.4f", name(), sim -> current_time, iteration_fight_length );
+  if ( sim -> debug ) log_t::output( sim, "Combat ends for player %s at time %.4f fight_length=%.4f", name(), sim -> current_time.total_seconds(), iteration_fight_length.total_seconds() );
 
   // Heal
   heal.add( iteration_heal );
@@ -2179,14 +2172,14 @@ void player_t::combat_end()
   }
   compound_heal.add( iteration_heal );
 
-  hps.add( iteration_fight_length ? iteration_heal / iteration_fight_length : 0 );
-  hpse.add( sim -> current_time ? iteration_heal / sim -> current_time : 0 );
+  hps.add( iteration_fight_length != timespan_t::zero ? iteration_heal / iteration_fight_length.total_seconds() : 0 );
+  hpse.add( sim -> current_time != timespan_t::zero ? iteration_heal / sim -> current_time.total_seconds() : 0 );
 
   dmg_taken.add( iteration_dmg_taken );
-  dtps.add( iteration_fight_length ? iteration_dmg_taken / iteration_fight_length : 0 );
+  dtps.add( iteration_fight_length != timespan_t::zero ? iteration_dmg_taken / iteration_fight_length.total_seconds() : 0 );
 
   heal_taken.add( iteration_heal_taken );
-  htps.add( iteration_fight_length ? iteration_heal_taken / iteration_fight_length : 0 );
+  htps.add( iteration_fight_length != timespan_t::zero ? iteration_heal_taken / iteration_fight_length.total_seconds() : 0 );
 
   for ( buff_t* b = buff_list; b; b = b -> next )
   {
@@ -2275,8 +2268,8 @@ void player_t::reset()
 
   skill = initial_skill;
 
-  last_cast = 0;
-  gcd_ready = 0;
+  last_cast = timespan_t::zero;
+  gcd_ready = timespan_t::zero;
 
   sleeping = 1;
   events = 0;
@@ -2290,7 +2283,6 @@ void player_t::reset()
   accuracy_rating = initial_accuracy_rating;
   surge_rating = initial_surge_rating;
   recalculate_haste();
-  recalculate_crit();
   recalculate_accuracy();
   recalculate_surge();
 
@@ -2302,6 +2294,7 @@ void player_t::reset()
     if ( ( level >= 50 ) && matching_gear )
       attribute_multiplier[ i ] *= 1.0 + matching_gear_multiplier( ( const attribute_type ) i );
   }
+  recalculate_crit();
 
   for ( int i=0; i <= SCHOOL_MAX; i++ )
   {
@@ -2352,8 +2345,8 @@ void player_t::reset()
   off_gcd = 0;
   in_combat = false;
 
-  cast_delay_reaction = 0;
-  cast_delay_occurred = 0;
+  cast_delay_reaction = timespan_t::zero;
+  cast_delay_occurred = timespan_t::zero;
 
   main_hand_weapon.buff_type  = 0;
   main_hand_weapon.buff_value = 0;
@@ -2401,7 +2394,7 @@ void player_t::reset()
 
   for ( std::vector<targetdata_t*>::iterator i = targetdata.begin(); i != targetdata.end(); ++i )
   {
-    if( *i )
+    if ( *i )
       ( *i )->reset();
   }
 
@@ -2414,7 +2407,7 @@ void player_t::reset()
 
 // player_t::schedule_ready =================================================
 
-void player_t::schedule_ready( double delta_time,
+void player_t::schedule_ready( timespan_t delta_time,
                                bool   waiting )
 {
   if ( readying )
@@ -2433,8 +2426,8 @@ void player_t::schedule_ready( double delta_time,
 
   if ( ! has_foreground_actions( this ) ) return;
 
-  double gcd_adjust = gcd_ready - ( sim -> current_time + delta_time );
-  if ( gcd_adjust > 0 ) delta_time += gcd_adjust;
+  timespan_t gcd_adjust = gcd_ready - ( sim -> current_time + delta_time );
+  if ( gcd_adjust > timespan_t::zero ) delta_time += gcd_adjust;
 
   if ( unlikely( waiting ) )
   {
@@ -2442,16 +2435,16 @@ void player_t::schedule_ready( double delta_time,
   }
   else
   {
-    double lag = 0;
+    timespan_t lag = timespan_t::zero;
 
     if ( last_foreground_action && ! last_foreground_action -> auto_cast )
     {
-      if ( last_foreground_action -> ability_lag > 0.0 )
+      if ( last_foreground_action -> ability_lag > timespan_t::zero )
       {
-        double ability_lag = rngs.lag_ability -> gauss( last_foreground_action -> ability_lag, last_foreground_action -> ability_lag_stddev );
-        double gcd_lag     = rngs.lag_gcd   -> gauss( sim ->   gcd_lag, sim ->   gcd_lag_stddev );
-        double diff        = ( gcd_ready + gcd_lag ) - ( sim -> current_time + ability_lag );
-        if ( diff > 0 && sim -> strict_gcd_queue )
+        timespan_t ability_lag = rngs.lag_ability -> gauss( last_foreground_action -> ability_lag, last_foreground_action -> ability_lag_stddev );
+        timespan_t gcd_lag     = rngs.lag_gcd   -> gauss( sim ->   gcd_lag, sim ->   gcd_lag_stddev );
+        timespan_t diff        = ( gcd_ready + gcd_lag ) - ( sim -> current_time + ability_lag );
+        if ( diff > timespan_t::zero && sim -> strict_gcd_queue )
         {
           lag = gcd_lag;
         }
@@ -2461,9 +2454,9 @@ void player_t::schedule_ready( double delta_time,
           action_queued = true;
         }
       }
-      else if ( last_foreground_action -> gcd() == 0 )
+      else if ( last_foreground_action -> gcd() == timespan_t::zero )
       {
-        lag = 0;
+        lag = timespan_t::zero;
       }
       else if ( last_foreground_action -> channeled )
       {
@@ -2471,12 +2464,12 @@ void player_t::schedule_ready( double delta_time,
       }
       else
       {
-        double   gcd_lag = rngs.lag_gcd   -> gauss( sim ->   gcd_lag, sim ->   gcd_lag_stddev );
-        double queue_lag = rngs.lag_queue -> gauss( sim -> queue_lag, sim -> queue_lag_stddev );
+        timespan_t   gcd_lag = rngs.lag_gcd   -> gauss( sim ->   gcd_lag, sim ->   gcd_lag_stddev );
+        timespan_t queue_lag = rngs.lag_queue -> gauss( sim -> queue_lag, sim -> queue_lag_stddev );
 
-        double diff = ( gcd_ready + gcd_lag ) - ( sim -> current_time + queue_lag );
+        timespan_t diff = ( gcd_ready + gcd_lag ) - ( sim -> current_time + queue_lag );
 
-        if ( diff > 0 && sim -> strict_gcd_queue )
+        if ( diff > timespan_t::zero && sim -> strict_gcd_queue )
         {
           lag = gcd_lag;
         }
@@ -2488,7 +2481,7 @@ void player_t::schedule_ready( double delta_time,
       }
     }
 
-    if ( lag < 0 ) lag = 0;
+    if ( lag < timespan_t::zero ) lag = timespan_t::zero;
 
     delta_time += lag;
   }
@@ -2500,7 +2493,7 @@ void player_t::schedule_ready( double delta_time,
 
   readying = new ( sim ) player_ready_event_t( sim, this, delta_time );
 
-  if ( was_executing && was_executing -> gcd() > 0 && ! was_executing -> background && ! was_executing -> proc && ! was_executing -> repeating )
+  if ( was_executing && was_executing -> gcd() > timespan_t::zero && ! was_executing -> background && ! was_executing -> proc && ! was_executing -> repeating )
   {
     // Record the last ability use time for cast_react
     cast_delay_occurred = readying -> occurs();
@@ -2510,8 +2503,8 @@ void player_t::schedule_ready( double delta_time,
       log_t::output( sim, "%s %s schedule_ready(): cast_finishes=%f cast_delay=%f",
                      name_str.c_str(),
                      was_executing -> name_str.c_str(),
-                     readying -> occurs(),
-                     cast_delay_reaction );
+                     readying -> occurs().total_seconds(),
+                     cast_delay_reaction.total_seconds() );
     }
   }
 }
@@ -2549,9 +2542,9 @@ void player_t::demise()
   if ( sim -> log )
     log_t::output( sim, "%s demises.", name() );
 
-  assert( arise_time >= 0 );
-  iteration_fight_length += ( sim -> current_time - arise_time );
-  arise_time = -1;
+  assert( arise_time >= timespan_t::zero );
+  iteration_fight_length += sim -> current_time - arise_time;
+  arise_time = timespan_t::min;
 
   sleeping = 1;
   if ( readying )
@@ -2648,7 +2641,7 @@ void player_t::clear_debuffs()
 
   for ( std::vector<targetdata_t*>::iterator i = targetdata.begin(); i != targetdata.end(); ++i )
   {
-    if( *i )
+    if ( *i )
       ( *i )->clear_debuffs();
   }
 }
@@ -2712,27 +2705,27 @@ action_t* player_t::execute_action()
 
 // player_t::regen ==========================================================
 
-void player_t::regen( const double periodicity )
+void player_t::regen( const timespan_t periodicity )
 {
   int resource_type = primary_resource();
 
   if ( resource_type == RESOURCE_ENERGY )
   {
-    double energy_regen = periodicity * energy_regen_per_second();
+    double energy_regen = periodicity.total_seconds() * energy_regen_per_second();
 
     resource_gain( RESOURCE_ENERGY, energy_regen, gains.energy_regen );
   }
 
   else if ( resource_type == RESOURCE_FORCE )
   {
-    double force_regen = periodicity * force_regen_per_second();
+    double force_regen = periodicity.total_seconds() * force_regen_per_second();
 
     resource_gain( RESOURCE_FORCE, force_regen, gains.force_regen );
   }
 
   else if ( resource_type == RESOURCE_AMMO )
   {
-    double ammo_regen = periodicity * ammo_regen_per_second();
+    double ammo_regen = periodicity.total_seconds() * ammo_regen_per_second();
 
     resource_gain( RESOURCE_AMMO, ammo_regen, gains.ammo_regen );
   }
@@ -2741,7 +2734,7 @@ void player_t::regen( const double periodicity )
   {
     if ( mana_regen_while_casting > 0 )
     {
-      double spirit_regen = periodicity * sqrt( floor( intellect() ) ) * floor( spirit() ) * mana_regen_base;
+      double spirit_regen = periodicity.total_seconds() * sqrt( floor( intellect() ) ) * floor( spirit() ) * mana_regen_base;
 
       spirit_regen *= mana_regen_while_casting;
 
@@ -2751,19 +2744,19 @@ void player_t::regen( const double periodicity )
     double cmp5 = composite_mp5();
     if ( cmp5 > 0 )
     {
-      double mp5_regen = periodicity * cmp5 / 5.0;
+      double mp5_regen = periodicity.total_seconds() * cmp5 / 5.0;
 
       resource_gain( RESOURCE_MANA, mp5_regen, gains.mp5_regen );
     }
   }
 
-  int index = ( int ) ( sim -> current_time );
+  int index = ( int ) ( sim -> current_time.total_seconds() );
 
   for ( int i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
   {
     if ( resource_max[ i ] == 0 ) continue;
 
-    timeline_resource[ i ][ index ] += resource_current[ i ] * periodicity;
+    timeline_resource[ i ][ index ] += resource_current[ i ] * periodicity.total_seconds();
   }
 }
 
@@ -2979,25 +2972,25 @@ double player_t::health_percentage() const
 
 // target_t::time_to_die ====================================================
 
-double player_t::time_to_die() const
+timespan_t player_t::time_to_die() const
 {
   // FIXME: Someone can figure out a better way to do this, for now, we NEED to
   // wait a minimum gcd before starting to estimate fight duration based on health,
   // otherwise very odd things happen with multi-actor simulations and time_to_die
   // expressions
-  if ( resource_base[ RESOURCE_HEALTH ] > 0 && sim -> current_time >= 1.0 )
+  if ( resource_base[ RESOURCE_HEALTH ] > 0 && sim -> current_time >= timespan_t::from_seconds( 1.0 ) )
   {
-    return sim -> current_time * resource_current[ RESOURCE_HEALTH ] / iteration_dmg_taken;
+    return sim -> current_time * ( resource_current[ RESOURCE_HEALTH ] / iteration_dmg_taken );
   }
   else
   {
-    return sim -> expected_time - sim -> current_time;
+    return ( sim -> expected_time - sim -> current_time );
   }
 }
 
 // player_t::total_reaction_time ============================================
 
-double player_t::total_reaction_time() const
+timespan_t player_t::total_reaction_time() const
 {
   return rngs.lag_reaction -> exgauss( reaction_mean, reaction_stddev, reaction_nu );
 }
@@ -3014,16 +3007,17 @@ void player_t::stat_gain( int       stat,
 
   if ( sim -> log ) log_t::output( sim, "%s gains %.0f %s%s", name(), amount, util_t::stat_type_string( stat ), temporary_stat ? " (temporary)" : "" );
 
+  int temp_value = temporary_stat ? 1 : 0;
   switch ( stat )
   {
-  case STAT_STRENGTH:  stats.attribute[ ATTR_STRENGTH  ] += amount; attribute[ ATTR_STRENGTH  ] += amount; temporary.attribute[ ATTR_STRENGTH  ] += temporary_stat * amount; break;
-  case STAT_AGILITY:   stats.attribute[ ATTR_AGILITY   ] += amount; attribute[ ATTR_AGILITY   ] += amount; temporary.attribute[ ATTR_AGILITY   ] += temporary_stat * amount; break;
-  case STAT_STAMINA:   stats.attribute[ ATTR_STAMINA   ] += amount; attribute[ ATTR_STAMINA   ] += amount; temporary.attribute[ ATTR_STAMINA   ] += temporary_stat * amount; recalculate_resource_max( RESOURCE_HEALTH ); break;
-  case STAT_INTELLECT: stats.attribute[ ATTR_INTELLECT ] += amount; attribute[ ATTR_INTELLECT ] += amount; temporary.attribute[ ATTR_INTELLECT ] += temporary_stat * amount; recalculate_resource_max( RESOURCE_MANA ); break;
-  case STAT_SPIRIT:    stats.attribute[ ATTR_SPIRIT    ] += amount; attribute[ ATTR_SPIRIT    ] += amount; temporary.attribute[ ATTR_SPIRIT    ] += temporary_stat * amount; break;
-  case STAT_WILLPOWER: stats.attribute[ ATTR_WILLPOWER ] += amount; attribute[ ATTR_WILLPOWER ] += amount; temporary.attribute[ ATTR_WILLPOWER ] += temporary_stat * amount; break;
+  case STAT_STRENGTH:  stats.attribute[ ATTR_STRENGTH  ] += amount; attribute[ ATTR_STRENGTH  ] += amount; temporary.attribute[ ATTR_STRENGTH  ] += temp_value * amount; break;
+  case STAT_AGILITY:   stats.attribute[ ATTR_AGILITY   ] += amount; attribute[ ATTR_AGILITY   ] += amount; temporary.attribute[ ATTR_AGILITY   ] += temp_value * amount; break;
+  case STAT_STAMINA:   stats.attribute[ ATTR_STAMINA   ] += amount; attribute[ ATTR_STAMINA   ] += amount; temporary.attribute[ ATTR_STAMINA   ] += temp_value * amount; recalculate_resource_max( RESOURCE_HEALTH ); break;
+  case STAT_INTELLECT: stats.attribute[ ATTR_INTELLECT ] += amount; attribute[ ATTR_INTELLECT ] += amount; temporary.attribute[ ATTR_INTELLECT ] += temp_value * amount; recalculate_resource_max( RESOURCE_MANA ); break;
+  case STAT_SPIRIT:    stats.attribute[ ATTR_SPIRIT    ] += amount; attribute[ ATTR_SPIRIT    ] += amount; temporary.attribute[ ATTR_SPIRIT    ] += temp_value * amount; break;
+  case STAT_WILLPOWER: stats.attribute[ ATTR_WILLPOWER ] += amount; attribute[ ATTR_WILLPOWER ] += amount; temporary.attribute[ ATTR_WILLPOWER ] += temp_value * amount; recalculate_crit(); break;
 
-  case STAT_MAX: for ( int i=0; i < ATTRIBUTE_MAX; i++ ) { stats.attribute[ i ] += amount; temporary.attribute[ i ] += temporary_stat * amount; attribute[ i ] += amount; } break;
+  case STAT_MAX: for ( int i=0; i < ATTRIBUTE_MAX; i++ ) { stats.attribute[ i ] += amount; temporary.attribute[ i ] += temp_value * amount; attribute[ i ] += amount; } break;
 
   case STAT_HEALTH: resource_gain( RESOURCE_HEALTH, amount, gain, action ); break;
   case STAT_MANA:   resource_gain( RESOURCE_MANA,   amount, gain, action ); break;
@@ -3037,49 +3031,49 @@ void player_t::stat_gain( int       stat,
   case STAT_MAX_ENERGY: resource_max[ RESOURCE_ENERGY ] += amount; resource_gain( RESOURCE_ENERGY, amount, gain, action ); break;
   case STAT_MAX_AMMO:   resource_max[ RESOURCE_AMMO   ] += amount; resource_gain( RESOURCE_AMMO,   amount, gain, action ); break;
 
-  case STAT_SPELL_POWER:       stats.spell_power       += amount; temporary.spell_power += temporary_stat * amount; spell_power[ SCHOOL_MAX ] += amount; break;
+  case STAT_SPELL_POWER:       stats.spell_power       += amount; temporary.spell_power += temp_value * amount; spell_power[ SCHOOL_MAX ] += amount; break;
   case STAT_SPELL_PENETRATION: stats.spell_penetration += amount; spell_penetration         += amount; break;
   case STAT_MP5:               stats.mp5               += amount; mp5                       += amount; break;
   case STAT_POWER:             stats.power             += amount; power                     += amount; break;
   case STAT_FORCE_POWER:       stats.force_power       += amount; force_power               += amount; break;
 
-  case STAT_ATTACK_POWER:             stats.attack_power             += amount; temporary.attack_power += temporary_stat * amount; attack_power       += amount;                            break;
-  case STAT_EXPERTISE_RATING:         stats.expertise_rating         += amount; temporary.expertise_rating += temporary_stat * amount; attack_expertise   += amount / rating.expertise;         break;
+  case STAT_ATTACK_POWER:             stats.attack_power             += amount; temporary.attack_power += temp_value * amount; attack_power       += amount;                            break;
+  case STAT_EXPERTISE_RATING:         stats.expertise_rating         += amount; temporary.expertise_rating += temp_value * amount; attack_expertise   += amount / rating.expertise;         break;
 
   case STAT_HIT_RATING:
     stats.hit_rating += amount;
-    temporary.hit_rating += temporary_stat * amount;
+    temporary.hit_rating += temp_value * amount;
     accuracy_rating += amount;
     recalculate_accuracy();
     break;
 
   case STAT_CRIT_RATING:
     stats.crit_rating += amount;
-    temporary.crit_rating += temporary_stat * amount;
+    temporary.crit_rating += temp_value * amount;
     crit_rating += amount;
     recalculate_crit();
     break;
 
   case STAT_HASTE_RATING:
     stats.haste_rating += amount;
-    temporary.haste_rating += temporary_stat * amount;
+    temporary.haste_rating += temp_value * amount;
     haste_rating       += amount;
     recalculate_haste();
     break;
 
   case STAT_SURGE_RATING:
     stats.surge_rating += amount;
-    temporary.surge_rating += temporary_stat * amount;
+    temporary.surge_rating += temp_value * amount;
     surge_rating       += amount;
     recalculate_surge();
     break;
 
-  case STAT_ARMOR:          stats.armor          += amount; temporary.armor += temporary_stat * amount; armor       += amount;                  break;
+  case STAT_ARMOR:          stats.armor          += amount; temporary.armor += temp_value * amount; armor       += amount;                  break;
   case STAT_BONUS_ARMOR:    stats.bonus_armor    += amount; bonus_armor += amount;                  break;
-  case STAT_DODGE_RATING:   stats.dodge_rating   += amount; temporary.dodge_rating += temporary_stat * amount; dodge       += amount / rating.dodge;   break;
-  case STAT_PARRY_RATING:   stats.parry_rating   += amount; temporary.parry_rating += temporary_stat * amount; parry       += amount / rating.parry;   break;
+  case STAT_DODGE_RATING:   stats.dodge_rating   += amount; temporary.dodge_rating += temp_value * amount; dodge       += amount / rating.dodge;   break;
+  case STAT_PARRY_RATING:   stats.parry_rating   += amount; temporary.parry_rating += temp_value * amount; parry       += amount / rating.parry;   break;
 
-  case STAT_BLOCK_RATING: stats.block_rating += amount; temporary.block_rating += temporary_stat * amount; block       += amount / rating.block; break;
+  case STAT_BLOCK_RATING: stats.block_rating += amount; temporary.block_rating += temp_value * amount; block       += amount / rating.block; break;
 
   default: assert( 0 );
   }
@@ -3096,16 +3090,17 @@ void player_t::stat_loss( int       stat,
 
   if ( sim -> log ) log_t::output( sim, "%s loses %.0f %s%s", name(), amount, util_t::stat_type_string( stat ), ( temporary_buff ) ? " (temporary)" : "" );
 
+  int temp_value = temporary_buff ? 1 : 0;
   switch ( stat )
   {
-  case STAT_STRENGTH:  stats.attribute[ ATTR_STRENGTH  ] -= amount; temporary.attribute[ ATTR_STRENGTH  ] -= temporary_buff * amount; attribute[ ATTR_STRENGTH  ] -= amount; break;
-  case STAT_AGILITY:   stats.attribute[ ATTR_AGILITY   ] -= amount; temporary.attribute[ ATTR_AGILITY   ] -= temporary_buff * amount; attribute[ ATTR_AGILITY   ] -= amount; break;
-  case STAT_STAMINA:   stats.attribute[ ATTR_STAMINA   ] -= amount; temporary.attribute[ ATTR_STAMINA   ] -= temporary_buff * amount; attribute[ ATTR_STAMINA   ] -= amount; stat_loss( STAT_MAX_HEALTH, floor( amount * composite_attribute_multiplier( ATTR_STAMINA ) ) * health_per_stamina, action ); break;
-  case STAT_INTELLECT: stats.attribute[ ATTR_INTELLECT ] -= amount; temporary.attribute[ ATTR_INTELLECT ] -= temporary_buff * amount; attribute[ ATTR_INTELLECT ] -= amount; stat_loss( STAT_MAX_MANA, floor( amount * composite_attribute_multiplier( ATTR_INTELLECT ) ) * mana_per_intellect, action ); break;
-  case STAT_SPIRIT:    stats.attribute[ ATTR_SPIRIT    ] -= amount; temporary.attribute[ ATTR_SPIRIT    ] -= temporary_buff * amount; attribute[ ATTR_SPIRIT    ] -= amount; break;
-  case STAT_WILLPOWER: stats.attribute[ ATTR_WILLPOWER ] -= amount; temporary.attribute[ ATTR_WILLPOWER ] -= temporary_buff * amount; attribute[ ATTR_WILLPOWER ] -= amount; break;
+  case STAT_STRENGTH:  stats.attribute[ ATTR_STRENGTH  ] -= amount; temporary.attribute[ ATTR_STRENGTH  ] -= temp_value * amount; attribute[ ATTR_STRENGTH  ] -= amount; break;
+  case STAT_AGILITY:   stats.attribute[ ATTR_AGILITY   ] -= amount; temporary.attribute[ ATTR_AGILITY   ] -= temp_value * amount; attribute[ ATTR_AGILITY   ] -= amount; break;
+  case STAT_STAMINA:   stats.attribute[ ATTR_STAMINA   ] -= amount; temporary.attribute[ ATTR_STAMINA   ] -= temp_value * amount; attribute[ ATTR_STAMINA   ] -= amount; stat_loss( STAT_MAX_HEALTH, floor( amount * composite_attribute_multiplier( ATTR_STAMINA ) ) * health_per_stamina, action ); break;
+  case STAT_INTELLECT: stats.attribute[ ATTR_INTELLECT ] -= amount; temporary.attribute[ ATTR_INTELLECT ] -= temp_value * amount; attribute[ ATTR_INTELLECT ] -= amount; stat_loss( STAT_MAX_MANA, floor( amount * composite_attribute_multiplier( ATTR_INTELLECT ) ) * mana_per_intellect, action ); break;
+  case STAT_SPIRIT:    stats.attribute[ ATTR_SPIRIT    ] -= amount; temporary.attribute[ ATTR_SPIRIT    ] -= temp_value * amount; attribute[ ATTR_SPIRIT    ] -= amount; break;
+  case STAT_WILLPOWER: stats.attribute[ ATTR_WILLPOWER ] -= amount; temporary.attribute[ ATTR_WILLPOWER ] -= temp_value * amount; attribute[ ATTR_WILLPOWER ] -= amount; recalculate_crit(); break;
 
-  case STAT_MAX: for ( int i=0; i < ATTRIBUTE_MAX; i++ ) { stats.attribute[ i ] -= amount; temporary.attribute[ i ] -= temporary_buff * amount; attribute[ i ] -= amount; } break;
+  case STAT_MAX: for ( int i=0; i < ATTRIBUTE_MAX; i++ ) { stats.attribute[ i ] -= amount; temporary.attribute[ i ] -= temp_value * amount; attribute[ i ] -= amount; } break;
 
   case STAT_HEALTH: resource_loss( RESOURCE_HEALTH, amount, action ); break;
   case STAT_MANA:   resource_loss( RESOURCE_MANA,   amount, action ); break;
@@ -3129,49 +3124,49 @@ void player_t::stat_loss( int       stat,
   }
   break;
 
-  case STAT_SPELL_POWER:       stats.spell_power       -= amount; temporary.spell_power -= temporary_buff * amount; spell_power[ SCHOOL_MAX ] -= amount; break;
+  case STAT_SPELL_POWER:       stats.spell_power       -= amount; temporary.spell_power -= temp_value * amount; spell_power[ SCHOOL_MAX ] -= amount; break;
   case STAT_SPELL_PENETRATION: stats.spell_penetration -= amount; spell_penetration         -= amount; break;
   case STAT_MP5:               stats.mp5               -= amount; mp5                       -= amount; break;
   case STAT_POWER:             stats.power             -= amount; power                     -= amount; break;
   case STAT_FORCE_POWER:       stats.force_power       -= amount; force_power               -= amount; break;
 
-  case STAT_ATTACK_POWER:             stats.attack_power             -= amount; temporary.attack_power -= temporary_buff * amount; attack_power       -= amount;                            break;
-  case STAT_EXPERTISE_RATING:         stats.expertise_rating         -= amount; temporary.expertise_rating -= temporary_buff * amount; attack_expertise   -= amount / rating.expertise;         break;
+  case STAT_ATTACK_POWER:             stats.attack_power             -= amount; temporary.attack_power -= temp_value * amount; attack_power       -= amount;                            break;
+  case STAT_EXPERTISE_RATING:         stats.expertise_rating         -= amount; temporary.expertise_rating -= temp_value * amount; attack_expertise   -= amount / rating.expertise;         break;
 
   case STAT_HIT_RATING:
     stats.hit_rating -= amount;
-    temporary.hit_rating -= temporary_buff * amount;
+    temporary.hit_rating -= temp_value * amount;
     accuracy_rating       -= amount;
     recalculate_accuracy();
     break;
 
   case STAT_CRIT_RATING:
     stats.crit_rating -= amount;
-    temporary.crit_rating -= temporary_buff * amount;
+    temporary.crit_rating -= temp_value * amount;
     crit_rating       -= amount;
     recalculate_crit();
     break;
 
   case STAT_HASTE_RATING:
     stats.haste_rating -= amount;
-    temporary.haste_rating -= temporary_buff * amount;
+    temporary.haste_rating -= temp_value * amount;
     haste_rating       -= amount;
     recalculate_haste();
     break;
 
   case STAT_SURGE_RATING:
     stats.surge_rating -= amount;
-    temporary.surge_rating -= temporary_buff * amount;
+    temporary.surge_rating -= temp_value * amount;
     surge_rating       -= amount;
     recalculate_surge();
     break;
 
-  case STAT_ARMOR:          stats.armor          -= amount; temporary.armor -= temporary_buff * amount; armor       -= amount;                  break;
+  case STAT_ARMOR:          stats.armor          -= amount; temporary.armor -= temp_value * amount; armor       -= amount;                  break;
   case STAT_BONUS_ARMOR:    stats.bonus_armor    -= amount; bonus_armor -= amount;                  break;
-  case STAT_DODGE_RATING:   stats.dodge_rating   -= amount; temporary.dodge_rating -= temporary_buff * amount; dodge       -= amount / rating.dodge;   break;
-  case STAT_PARRY_RATING:   stats.parry_rating   -= amount; temporary.parry_rating -= temporary_buff * amount; parry       -= amount / rating.parry;   break;
+  case STAT_DODGE_RATING:   stats.dodge_rating   -= amount; temporary.dodge_rating -= temp_value * amount; dodge       -= amount / rating.dodge;   break;
+  case STAT_PARRY_RATING:   stats.parry_rating   -= amount; temporary.parry_rating -= temp_value * amount; parry       -= amount / rating.parry;   break;
 
-  case STAT_BLOCK_RATING: stats.block_rating -= amount; temporary.block_rating -= temporary_buff * amount; block       -= amount / rating.block; break;
+  case STAT_BLOCK_RATING: stats.block_rating -= amount; temporary.block_rating -= temp_value * amount; block       -= amount / rating.block; break;
 
   default: assert( 0 );
   }
@@ -3267,7 +3262,12 @@ double player_t::assess_damage( double            amount,
 
     if ( ! sleeping )
     {
-      deaths.add( sim -> current_time );
+      if ( ! sleeping )
+      {
+        deaths.add( sim -> current_time.total_seconds() );
+      }
+      if ( sim -> log ) log_t::output( sim, "%s has died.", name() );
+      demise();
     }
     if ( sim -> log ) log_t::output( sim, "%s has died.", name() );
 
@@ -3355,7 +3355,7 @@ player_t::heal_info_t player_t::assess_heal(  double            amount,
 // player_t::summon_pet =====================================================
 
 void player_t::summon_pet( const char* pet_name,
-                           double      duration )
+                           timespan_t  duration )
 {
   for ( pet_t* p = pet_list; p; p = p -> next_pet )
   {
@@ -3542,7 +3542,7 @@ void player_t::recalculate_haste()
   if ( hr < 0 )
     hr = 0;
 
-  spell_haste = 1.0 / ( 1.0 + 0.3 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.3 ) ), hr / std::max( 20, level ) / 0.55 ) ) );
+  spell_haste = ( 1.0 - 0.3 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.3 ) ), hr / std::max( 20, level ) / 0.55 ) ) );
   attack_haste = spell_haste;
 }
 
@@ -3596,7 +3596,7 @@ void player_t::recalculate_surge()
 
 bool player_t::recent_cast() const
 {
-  return ( last_cast > 0 ) && ( ( last_cast + 5.0 ) > sim -> current_time );
+  return ( last_cast > timespan_t::zero ) && ( ( last_cast + timespan_t::from_seconds( 5.0 ) ) > sim -> current_time );
 }
 
 // player_t::find_action ====================================================
@@ -3937,8 +3937,8 @@ struct start_moving_t : public action_t
     action_t( ACTION_OTHER, "start_moving", player )
   {
     parse_options( NULL, options_str );
-    trigger_gcd = 0;
-    cooldown -> duration = 0.5;
+    trigger_gcd = timespan_t::zero;
+    cooldown -> duration = timespan_t::from_seconds( 0.5 );
     harmful = false;
   }
 
@@ -3965,8 +3965,8 @@ struct stop_moving_t : public action_t
     action_t( ACTION_OTHER, "stop_moving", player )
   {
     parse_options( NULL, options_str );
-    trigger_gcd = 0;
-    cooldown -> duration = 0.5;
+    trigger_gcd = timespan_t::zero;
+    cooldown -> duration = timespan_t::from_seconds( 0.5 );
     harmful = false;
   }
 
@@ -3988,6 +3988,7 @@ struct stop_moving_t : public action_t
 };
 
 // ===== Racial Abilities ===================================================
+
 
 // Cycle Action =============================================================
 
@@ -4051,7 +4052,7 @@ struct restart_sequence_t : public action_t
     };
     parse_options( options, options_str );
 
-    trigger_gcd = 0;
+    trigger_gcd = timespan_t::zero;
   }
 
   virtual void execute()
@@ -4099,7 +4100,7 @@ struct restore_mana_t : public action_t
     };
     parse_options( options, options_str );
 
-    trigger_gcd = 0;
+    trigger_gcd = timespan_t::zero;
   }
 
   virtual void execute()
@@ -4127,7 +4128,7 @@ struct snapshot_stats_t : public action_t
     action_t( ACTION_OTHER, "snapshot_stats", player ), attack( 0 ), spell( 0 )
   {
     parse_options( NULL, options_str );
-    trigger_gcd = 0;
+    trigger_gcd = timespan_t::zero;
   }
 
   virtual void execute()
@@ -4232,13 +4233,13 @@ struct wait_fixed_t : public wait_action_base_t
     time_expr = action_expr_t::parse( this, sec_str );
   }
 
-  virtual double execute_time() const
+  virtual timespan_t execute_time() const
   {
     int result = time_expr -> evaluate();
     assert( result == TOK_NUM ); ( void )result;
-    double wait = time_expr -> result_num;
+    timespan_t wait = timespan_t::from_seconds( time_expr -> result_num );
 
-    if ( wait <= 0 ) wait = player -> available();
+    if ( wait <= timespan_t::zero ) wait = player -> available();
 
     return wait;
   }
@@ -4252,23 +4253,23 @@ struct wait_until_ready_t : public wait_fixed_t
     wait_fixed_t( player, options_str )
   {}
 
-  virtual double execute_time() const
+  virtual timespan_t execute_time() const
   {
-    double wait = wait_fixed_t::execute_time();
-    double remains = 0;
+    timespan_t wait = wait_fixed_t::execute_time();
+    timespan_t remains = timespan_t::zero;
 
     for ( action_t* a = player -> action_list; a; a = a -> next )
     {
       if ( a -> background ) continue;
 
       remains = a -> cooldown -> remains();
-      if ( remains > 0 && remains < wait ) wait = remains;
+      if ( remains > timespan_t::zero && remains < wait ) wait = remains;
 
       remains = a -> dot() -> remains();
-      if ( remains > 0 && remains < wait ) wait = remains;
+      if ( remains > timespan_t::zero && remains < wait ) wait = remains;
     }
 
-    if ( wait <= 0 ) wait = player -> available();
+    if ( wait <= timespan_t::zero ) wait = player -> available();
 
     return wait;
   }
@@ -4283,7 +4284,7 @@ wait_for_cooldown_t::wait_for_cooldown_t( player_t* player, const char* cd_name 
   assert( a );
 }
 
-double wait_for_cooldown_t::execute_time() const
+timespan_t wait_for_cooldown_t::execute_time() const
 { return wait_cd -> remains(); }
 
 // Use Item Action ==========================================================
@@ -4340,19 +4341,19 @@ struct use_item_t : public action_t
       {
         trigger = unique_gear_t::register_cost_reduction_proc( e.trigger_type, e.trigger_mask, use_name, player,
                                                                e.school, e.max_stacks, e.discharge_amount,
-                                                               e.proc_chance, 0.0/*dur*/, 0.0/*cd*/, false, e.reverse, 0 );
+                                                               e.proc_chance, timespan_t::zero/*dur*/, timespan_t::zero/*cd*/, false, e.reverse, 0 );
       }
       else if ( e.stat )
       {
         trigger = unique_gear_t::register_stat_proc( e.trigger_type, e.trigger_mask, use_name, player,
                                                      e.stat, e.max_stacks, e.stat_amount,
-                                                     e.proc_chance, 0.0/*dur*/, 0.0/*cd*/, e.tick, e.reverse, 0 );
+                                                     e.proc_chance, timespan_t::zero/*dur*/, timespan_t::zero/*cd*/, e.tick, e.reverse, 0 );
       }
       else if ( e.school )
       {
         trigger = unique_gear_t::register_discharge_proc( e.trigger_type, e.trigger_mask, use_name, player,
                                                           e.max_stacks, e.school, e.discharge_amount, e.discharge_scaling,
-                                                          e.proc_chance, 0.0/*cd*/, e.no_crit, e.no_player_benefits, e.no_debuffs );
+                                                          e.proc_chance, timespan_t::zero/*cd*/, e.no_crit, e.no_player_benefits, e.no_debuffs );
       }
 
       if ( trigger ) trigger -> deactivate();
@@ -4364,7 +4365,7 @@ struct use_item_t : public action_t
         discharge_spell_t( const char* n, player_t* p, double a, const school_type s ) :
           spell_t( n, p, RESOURCE_NONE, s )
         {
-          trigger_gcd = 0;
+          trigger_gcd = timespan_t::zero;
           base_dd_min = a;
           base_dd_max = a;
           may_crit    = true;
@@ -4381,7 +4382,7 @@ struct use_item_t : public action_t
       if ( e.max_stacks  == 0 ) e.max_stacks  = 1;
       if ( e.proc_chance == 0 ) e.proc_chance = 1;
 
-      buff = new stat_buff_t( player, use_name, e.stat, e.stat_amount, e.max_stacks, e.duration, 0, e.proc_chance, false, e.reverse );
+      buff = new stat_buff_t( player, use_name, e.stat, e.stat_amount, e.max_stacks, e.duration, timespan_t::zero, e.proc_chance, false, e.reverse );
     }
     else assert( false );
 
@@ -4391,15 +4392,15 @@ struct use_item_t : public action_t
 
     cooldown = player -> get_cooldown( cooldown_name );
     cooldown -> duration = item -> use.cooldown;
-    trigger_gcd = 0;
+    trigger_gcd = timespan_t::zero;
 
     if ( buff != 0 ) buff -> cooldown = cooldown;
   }
 
-  void lockout( double duration )
+  void lockout( timespan_t duration )
   {
-    if ( duration <= 0 ) return;
-    double ready = sim -> current_time + duration;
+    if ( duration <= timespan_t::zero ) return;
+    timespan_t ready = sim -> current_time + duration;
     for ( action_t* a = player -> action_list; a; a = a -> next )
     {
       if ( a -> name_str == "use_item" )
@@ -4424,7 +4425,7 @@ struct use_item_t : public action_t
 
       trigger -> activate();
 
-      if ( item -> use.duration )
+      if ( item -> use.duration != timespan_t::zero )
       {
         struct trigger_expiration_t : public event_t
         {
@@ -4504,7 +4505,7 @@ struct cancel_buff_t : public action_t
       sim -> errorf( "Player %s uses cancel_buff with unknown buff %s\n", player -> name(), buff_name.c_str() );
       sim -> cancel();
     }
-    trigger_gcd = 0;
+    trigger_gcd = timespan_t::zero;
   }
 
   virtual void execute()
@@ -4892,7 +4893,7 @@ action_expr_t* player_t::create_expression( action_t* a,
       player_t* player;
       time_to_die_expr_t( action_t* a, player_t* p ) :
         action_expr_t( a, "target_time_to_die", TOK_NUM ), player( p ) {}
-      virtual int evaluate() { result_num = player -> time_to_die();  return TOK_NUM; }
+      virtual int evaluate() { result_num = player -> time_to_die().total_seconds();  return TOK_NUM; }
     };
     return new time_to_die_expr_t( a, this );
   }
@@ -4978,6 +4979,24 @@ action_expr_t* player_t::create_expression( action_t* a,
     };
     return new ptr_expr_t( a );
   }
+  if ( name_str == "position_front" )
+  {
+    struct position_front_expr_t : public action_expr_t
+    {
+      position_front_expr_t( action_t* a ) : action_expr_t( a, "position_front", TOK_NUM ) {}
+      virtual int evaluate() { result_num = ( action -> player -> position == POSITION_FRONT || action -> player -> position == POSITION_RANGED_FRONT ) ? 1 : 0; return TOK_NUM; }
+    };
+    return new position_front_expr_t( a );
+  }
+  if ( name_str == "position_back" )
+  {
+    struct position_back_expr_t : public action_expr_t
+    {
+      position_back_expr_t( action_t* a ) : action_expr_t( a, "position_back", TOK_NUM ) {}
+      virtual int evaluate() { result_num = ( action -> player -> position == POSITION_BACK || action -> player -> position == POSITION_RANGED_BACK ) ? 1 : 0; return TOK_NUM; }
+    };
+    return new position_back_expr_t( a );
+  }
   std::vector<std::string> splits;
   int num_splits = util_t::string_split( splits, name_str, "." );
   if ( splits[ 0 ] == "pet" )
@@ -5001,7 +5020,7 @@ action_expr_t* player_t::create_expression( action_t* a,
         {
           pet_t* pet;
           pet_remains_expr_t( action_t* a, pet_t* p ) : action_expr_t( a, "pet_remains", TOK_NUM ), pet( p ) {}
-          virtual int evaluate() { result_num = ( pet -> expiration && pet -> expiration-> remains() > 0 ) ? pet -> expiration -> remains() : 0; return TOK_NUM; }
+          virtual int evaluate() { result_num = ( pet -> expiration && pet -> expiration-> remains() > timespan_t::zero ) ? pet -> expiration -> remains().total_seconds() : 0; return TOK_NUM; }
         };
         return new pet_remains_expr_t( a, pet );
       }
@@ -5116,7 +5135,7 @@ action_expr_t* player_t::create_expression( action_t* a,
         {
           cooldown_t* cooldown;
           cooldown_remains_expr_t( action_t* a, cooldown_t* c ) : action_expr_t( a, "cooldown_remains", TOK_NUM ), cooldown( c ) {}
-          virtual int evaluate() { result_num = cooldown -> remains(); return TOK_NUM; }
+          virtual int evaluate() { result_num = cooldown -> remains().total_seconds(); return TOK_NUM; }
         };
         return new cooldown_remains_expr_t( a, cooldown );
       }
@@ -5134,7 +5153,7 @@ action_expr_t* player_t::create_expression( action_t* a,
         struct duration_expr_t : public action_expr_t
         {
           duration_expr_t( action_t* a ) : action_expr_t( a, "dot_duration", TOK_NUM ) {}
-          virtual int evaluate() { result_num = action -> num_ticks * action -> tick_time(); return TOK_NUM; }
+          virtual int evaluate() { result_num = action -> num_ticks * action -> tick_time().total_seconds(); return TOK_NUM; }
         };
         return new duration_expr_t( a );
       }
@@ -5153,7 +5172,7 @@ action_expr_t* player_t::create_expression( action_t* a,
         {
           dot_t* dot;
           dot_remains_expr_t( action_t* a, dot_t* d ) : action_expr_t( a, "dot_remains", TOK_NUM ), dot( d ) {}
-          virtual int evaluate() { result_num = dot -> remains(); return TOK_NUM; }
+          virtual int evaluate() { result_num = dot -> remains().total_seconds(); return TOK_NUM; }
         };
         return new dot_remains_expr_t( a, dot );
       }
@@ -5196,7 +5215,7 @@ action_expr_t* player_t::create_expression( action_t* a,
             result_num = 9999;
             player_t* p = action -> player;
             attack_t* attack = ( slot == SLOT_MAIN_HAND ) ? p -> main_hand_attack : p -> off_hand_attack;
-            if ( attack && attack -> execute_event ) result_num = attack -> execute_event -> remains();
+            if ( attack && attack -> execute_event ) result_num = attack -> execute_event -> remains().total_seconds();
             return TOK_NUM;
           }
         };
@@ -5251,7 +5270,7 @@ action_expr_t* player_t::create_expression( action_t* a,
   if ( num_splits >= 2 && splits[ 0 ] == "target" )
   {
     std::string rest = splits[1];
-    for( int i = 2; i < num_splits; ++i )
+    for ( int i = 2; i < num_splits; ++i )
       rest += '.' + splits[i];
     return target -> create_expression( a, rest );
   }
@@ -5688,9 +5707,9 @@ void player_t::create_options()
     { "player_resist_frost",                  OPT_INT,    &( spell_resistance[ SCHOOL_FROST  ]        ) },
     { "player_resist_fire",                   OPT_INT,    &( spell_resistance[ SCHOOL_FIRE   ]        ) },
     { "player_resist_nature",                 OPT_INT,    &( spell_resistance[ SCHOOL_NATURE ]        ) },
-    { "reaction_time_mean",                   OPT_FLT,    &( reaction_mean                            ) },
-    { "reaction_time_stddev",                 OPT_FLT,    &( reaction_stddev                          ) },
-    { "reaction_time_nu",                     OPT_FLT,    &( reaction_nu                              ) },
+    { "reaction_time_mean",                   OPT_TIMESPAN, &( reaction_mean                          ) },
+    { "reaction_time_stddev",                 OPT_TIMESPAN, &( reaction_stddev                        ) },
+    { "reaction_time_nu",                     OPT_TIMESPAN, &( reaction_nu                            ) },
     { NULL, OPT_UNKNOWN, NULL }
   };
 
@@ -5733,14 +5752,14 @@ targetdata_t* player_t::new_targetdata( player_t* source, player_t* target )
 targetdata_t* targetdata_t::get( player_t* source, player_t* target )
 {
   int id = source->targetdata_id;
-  if( id < 0 )
+  if ( id < 0 )
     source -> targetdata_id = id = source -> sim -> num_targetdata_ids++;
 
-  if( id >= ( int ) target -> targetdata.size() )
+  if ( id >= ( int ) target -> targetdata.size() )
     target -> targetdata.resize( id + 1 );
 
   targetdata_t* p = target->targetdata[id];
-  if( ! p )
+  if ( ! p )
     target -> targetdata[id] = p = source -> new_targetdata( source, target );
 
   return p;
@@ -5750,7 +5769,7 @@ targetdata_t::targetdata_t( player_t* source, player_t* target )
   : source( ( player_t* )source ), target( ( player_t* )target ), dot_list( NULL )
 {
   std::vector<std::pair<size_t, std::string> >& v = source->sim->targetdata_dots[source->type];
-  for( std::vector<std::pair<size_t, std::string> >::iterator i = v.begin(); i != v.end(); ++i )
+  for ( std::vector<std::pair<size_t, std::string> >::iterator i = v.begin(); i != v.end(); ++i )
   {
     *( dot_t** )( ( char* )this + i->first ) = add_dot( new dot_t( i->second, this->target ) );
   }
@@ -5767,7 +5786,7 @@ targetdata_t::~targetdata_t()
 
 void targetdata_t::reset()
 {
-  for( dot_t* d = dot_list; d; d = d->next )
+  for ( dot_t* d = dot_list; d; d = d->next )
     d -> reset();
 }
 
@@ -5775,7 +5794,7 @@ void targetdata_t::clear_debuffs()
 {
   // FIXME: should clear debuffs as well according to similar FIXME in player_t::clear_debuffs()
 
-  for( dot_t* d = dot_list; d; d = d->next )
+  for ( dot_t* d = dot_list; d; d = d->next )
     d -> cancel();
 }
 
