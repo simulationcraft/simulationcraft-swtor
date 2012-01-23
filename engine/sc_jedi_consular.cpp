@@ -491,8 +491,6 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
 
       if ( p -> talents.telekinetic_balance -> rank() > 0 )
         cooldown -> duration = timespan_t::zero;
-
-      crit_bonus += p -> talents.reverberation -> rank() * 0.1;
     }
   }
 
@@ -686,7 +684,7 @@ struct mind_crush_t : public jedi_sage_spell_t
     jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
   {
     parse_options( 0, options_str );
-    base_dd_min = 545.8; base_dd_max = 610.2;
+    base_dd_min = 165.83; base_dd_max = 230.23;
     base_td = 47.5;
     base_tick_time = timespan_t::from_seconds( 1.0 );
     base_execute_time = timespan_t::from_seconds( 2.0 );

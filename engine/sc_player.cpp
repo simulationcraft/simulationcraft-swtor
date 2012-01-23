@@ -3326,7 +3326,7 @@ double player_t::target_mitigation( double            amount,
 
 
       if ( sim -> debug )
-        log_t::output( sim, "%s armor mitigates %.1f%%", name(), resist * 100.0 );
+        log_t::output( sim, "%s %.0f armor mitigates %.1f%%", name(), action -> armor(), resist * 100.0 );
     }
 
   }

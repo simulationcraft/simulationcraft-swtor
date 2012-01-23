@@ -341,7 +341,7 @@ void enemy_t::init_base()
 
   if ( initial_armor <= 0 )
   {
-    initial_armor = 85 * level + 400;
+    initial_armor = 200 * level + 800;
   }
   player_t::base_armor = initial_armor;
 
