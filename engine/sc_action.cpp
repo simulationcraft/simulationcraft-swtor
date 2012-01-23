@@ -948,6 +948,8 @@ void action_t::tick( dot_t* d )
 
   result = RESULT_HIT;
 
+  player_buff(); // 23/01/2012 According to http://sithwarrior.com/forums/Thread-Madness-Balance-Sorcerer-DPS-Compendium--573?pid=11311#pid11311
+
   player_tick();
 
   target_debuff( target, DMG_OVER_TIME );
