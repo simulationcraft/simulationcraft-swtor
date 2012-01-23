@@ -146,15 +146,14 @@ static bool download( url_cache_entry_t& entry,
   if ( ! entry.last_modified_header.empty() )
   {
     wHeaders += "If-Modified-Since: ";
-    utf8::utf8to16( entry.last_modified_header.begin(), entry.last_modified_header.end(),
-                    std::back_inserter( wHeaders ) );
+    wHeaders += entry.last_modified_header;
     wHeaders += "\r\n";
   }
 
   std::string wURL = url;
-  wURL = util_t::urlencode( wURL ); 
+  wURL = util_t::urlencode( wURL );
 
-  InetWrapper hFile( InternetOpenUrlA( hINet, wURL.c_str(), wHeaders.data(), static_cast<DWORD>(wHeaders.length()),
+  InetWrapper hFile( InternetOpenUrlA( hINet, wURL.c_str(), wHeaders.data(), static_cast<DWORD>( wHeaders.length() ),
                                        INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE, 0 ) );
   if ( ! hFile )
     return false;
@@ -578,7 +577,7 @@ void http_t::cache_load()
       c.modified = c.validated = cache::IN_THE_BEGINNING;
     }
   }
-  catch( ... )
+  catch ( ... )
   {}
 }
 

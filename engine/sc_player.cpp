@@ -3542,7 +3542,7 @@ void player_t::recalculate_haste()
   if ( hr < 0 )
     hr = 0;
 
-  spell_haste = ( 1.0 - 0.3 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.3 ) ), hr / std::max( 20, level ) / 0.55 ) ) );
+  spell_haste =  1.0 - 0.3 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.3 ) ), hr / std::max( 20, level ) / 0.55 ) );
   attack_haste = spell_haste;
 }
 

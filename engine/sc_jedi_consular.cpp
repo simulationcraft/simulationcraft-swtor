@@ -413,6 +413,7 @@ struct project_t : public jedi_consular_spell_t
 {
   jedi_consular_spell_t* upheaval;
 
+
   project_t( jedi_consular_t* p, const std::string& n, const std::string& options_str, bool is_upheaval = false ) :
     jedi_consular_spell_t( ( n + std::string( is_upheaval ? "_upheaval" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
     upheaval( 0 )
@@ -872,9 +873,9 @@ struct telekinetic_wave_t : public jedi_sage_spell_t
 
     parse_options( 0, options_str );
     base_cost = 50.0;
-    cooldown -> duration = 6.0;
+    cooldown -> duration = timespan_t::from_seconds( 6.0 );
     base_dd_min = 293.02; base_dd_max = 357.42;
-    base_execute_time = 3.0;
+    base_execute_time = timespan_t::from_seconds( 3.0 );
     range = 30.0;
     direct_power_mod = 2.02;
 

@@ -36,3 +36,5 @@ int
 .externalToolBuilders
 engine/simc_x64
 .cproject
+Makefile
+simcqt.pro.user

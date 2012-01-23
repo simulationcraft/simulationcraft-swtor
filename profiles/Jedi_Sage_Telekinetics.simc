@@ -19,11 +19,11 @@ actions+=/mental_alacrity
 actions+=/mind_crush
 actions+=/project
 actions+=/disturbance
-shirt=foo,stats=1575willpower_536crit_306haste_107power_1217forcepower_201surge
+shirt=foo,stats=1325willpower_536crit_306haste_107power_1217forcepower_201surge
 # Gear Summary
 # gear_crit_rating=536
 # gear_haste_rating=306
 # gear_power=107
 # gear_forcepower=1217
-# gear_willpower=1575
+# gear_willpower=1325
 # gear_surge_rating=201

@@ -20,12 +20,14 @@ struct expr_unary_t : public action_expr_t
     if ( input_result == TOK_NUM )
     {
       result_type = TOK_NUM;
-      switch( operation )
+      switch ( operation )
       {
       case TOK_PLUS:  result_num =   input -> result_num; break;
       case TOK_MINUS: result_num = - input -> result_num; break;
       case TOK_NOT:   result_num = ( input -> result_num != 0 ) ? 0 : 1; break;
       case TOK_ABS:   result_num = fabs( input -> result_num ); break;
+      case TOK_FLOOR: result_num = floor( input -> result_num ); break;
+      case TOK_CEIL:  result_num = ceil( input -> result_num ); break;
       }
     }
     else
@@ -55,7 +57,7 @@ struct expr_binary_t : public action_expr_t
     if ( left_result == TOK_NUM )
     {
       result_type = TOK_NUM;
-      switch( operation )
+      switch ( operation )
       {
       case TOK_ADD:
       {
@@ -165,7 +167,7 @@ struct expr_binary_t : public action_expr_t
       result_type = TOK_NUM;
       right_result = right -> evaluate();
       if ( left_result != right_result ) goto error;
-      switch( operation )
+      switch ( operation )
       {
       case TOK_EQ:    result_num = ( left -> result_str == right -> result_str ) ? 1 : 0; break;
       case TOK_NOTEQ: result_num = ( left -> result_str != right -> result_str ) ? 1 : 0; break;
@@ -191,8 +193,12 @@ error:
 
 int expression_t::precedence( int expr_token_type )
 {
-  switch( expr_token_type )
+  switch ( expr_token_type )
   {
+  case TOK_FLOOR:
+  case TOK_CEIL:
+    return 6;
+      
   case TOK_NOT:
   case TOK_PLUS:
   case TOK_MINUS:
@@ -230,12 +236,14 @@ int expression_t::precedence( int expr_token_type )
 
 int expression_t::is_unary( int expr_token_type )
 {
-  switch( expr_token_type )
+  switch ( expr_token_type )
   {
   case TOK_NOT:
   case TOK_PLUS:
   case TOK_MINUS:
   case TOK_ABS:
+  case TOK_FLOOR:
+  case TOK_CEIL:
     return true;
   }
   return false;
@@ -245,7 +253,7 @@ int expression_t::is_unary( int expr_token_type )
 
 int expression_t::is_binary( int expr_token_type )
 {
-  switch( expr_token_type )
+  switch ( expr_token_type )
   {
   case TOK_MULT:
   case TOK_DIV:
@@ -270,9 +278,11 @@ int expression_t::is_binary( int expr_token_type )
 
 int expression_t::next_token( action_t* action, const std::string& expr_str, int& current_index, std::string& token_str, token_type_t prev_token )
 {
-  char c = expr_str[ current_index++ ];
+  unsigned char c = expr_str[ current_index++ ];
 
   if ( c == '\0' ) return TOK_UNKNOWN;
+  if ( ( prev_token == TOK_FLOOR || prev_token == TOK_CEIL ) && c != '(' )
+    return TOK_UNKNOWN;
 
   token_str = c;
 
@@ -324,18 +334,24 @@ int expression_t::next_token( action_t* action, const std::string& expr_str, int
   if ( isalpha( c ) )
   {
     c = expr_str[ current_index ];
-    while( isalpha( c ) || isdigit( c ) || c == '_' || c == '.' )
+    while ( isalpha( c ) || isdigit( c ) || c == '_' || c == '.' )
     {
       token_str += c;
       c = expr_str[ ++current_index ];
     }
-    return TOK_STR;
+    
+    if ( util_t::str_compare_ci( token_str, "floor" ) )
+      return TOK_FLOOR;
+    else if ( util_t::str_compare_ci( token_str, "ceil" ) )
+      return TOK_CEIL;
+    else
+      return TOK_STR;
   }
 
   if ( isdigit( c ) || c == '-' )
   {
     c = expr_str[ current_index ];
-    while( isdigit( c ) || c == '.' )
+    while ( isdigit( c ) || c == '.' )
     {
       token_str += c;
       c = expr_str[ ++current_index ];
@@ -366,7 +382,7 @@ void expression_t::parse_tokens( action_t* action,
   int current_index=0;
   token_type_t t = TOK_UNKNOWN;
 
-  while( ( token.type = next_token( action, expr_str, current_index, token.label, t ) ) != TOK_UNKNOWN )
+  while ( ( token.type = next_token( action, expr_str, current_index, token.label, t ) ) != TOK_UNKNOWN )
   {
     t = ( token_type_t ) token.type;
     tokens.push_back( token );

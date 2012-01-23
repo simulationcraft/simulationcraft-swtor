@@ -80,8 +80,8 @@ static xml_node_t* download_id( sim_t*             sim,
 {
   if ( id_str.empty() || id_str == "0" ) return 0;
 
-  std::string url_www = ( ptr ? "http://ptr.wowhead.com/item=" : "http://www.wowhead.com/item=")
-      + id_str + "&xml";
+  std::string url_www = ( ptr ? "http://ptr.wowhead.com/item=" : "http://www.wowhead.com/item=" )
+                        + id_str + "&xml";
 
   xml_node_t *node = xml_t::get( sim, url_www, caching, "</json>" );
   if ( sim -> debug ) xml_t::print( node );
@@ -192,10 +192,10 @@ static bool parse_gems( item_t&           item,
       if ( pos != std::string::npos )
       {
         std::string::size_type start = pos + strlen( search );
-        std::string::size_type pos = tooltip_str.find( "<", start );
-        if ( pos != std::string::npos )
+        std::string::size_type new_pos = tooltip_str.find( "<", start );
+        if ( new_pos != std::string::npos )
         {
-          armory_t::fuzzy_stats( item.armory_gems_str, tooltip_str.substr( start, pos-start ) );
+          armory_t::fuzzy_stats( item.armory_gems_str, tooltip_str.substr( start, new_pos-start ) );
         }
       }
     }
@@ -565,8 +565,8 @@ int wowhead_t::parse_gem( item_t&            item,
       std::string name_str;
       if ( xml_t::get_value( name_str, node, "name/cdata" ) )
       {
-        std::string::size_type pos = name_str.find( " Diamond" );
-        if ( pos != std::string::npos ) name_str.erase( pos );
+        std::string::size_type new_pos = name_str.find( " Diamond" );
+        if ( new_pos != std::string::npos ) name_str.erase( new_pos );
         armory_t::format( name_str );
         item.armory_gems_str += "_";
         item.armory_gems_str += name_str;

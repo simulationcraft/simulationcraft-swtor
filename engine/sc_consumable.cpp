@@ -27,7 +27,7 @@ struct stim_t : public action_t
     };
     parse_options( options, options_str );
 
-    trigger_gcd = 0;
+    trigger_gcd = timespan_t::zero;
     harmful = false;
     for ( int i=0; i < STIM_MAX; i++ )
     {
@@ -37,8 +37,14 @@ struct stim_t : public action_t
         break;
       }
     }
-    assert( type != STIM_NONE );
+    if ( type == STIM_NONE )
+    {
+      sim -> errorf( "Player %s attempting to use sim of type '%s', which is not supported.\n",
+                     player -> name(), type_str.c_str() );
+      sim -> cancel();
+    }
     gain = p -> get_gain( "stim" );
+
   }
 
   virtual void execute()
@@ -88,7 +94,7 @@ struct food_t : public action_t
     };
     parse_options( options, options_str );
 
-    trigger_gcd = 0;
+    trigger_gcd = timespan_t::zero;
     harmful = false;
     for ( int i=0; i < FOOD_MAX; i++ )
     {
@@ -126,7 +132,6 @@ struct food_t : public action_t
   }
 };
 
-
 // ==========================================================================
 // Power Potion
 // ==========================================================================
@@ -138,10 +143,10 @@ struct power_potion_t : public action_t
   {
     parse_options( NULL, options_str );
 
-    trigger_gcd = 0;
+    trigger_gcd = timespan_t::zero;
     harmful = false;
     cooldown = p -> get_cooldown( "potion" );
-    cooldown -> duration = 180.0;
+    cooldown -> duration = timespan_t::from_seconds( 180.0 );
   }
 
   virtual void execute()
@@ -152,14 +157,16 @@ struct power_potion_t : public action_t
     }
     else
     {
-      cooldown -> duration -= 5.0;
-      player -> buffs.power_potion -> buff_duration -= 5.0;
+      cooldown -> duration -= timespan_t::from_seconds( 5.0 );
+      player -> buffs.power_potion -> buff_duration -= timespan_t::from_seconds( 5.0 );
       player -> buffs.power_potion -> trigger();
-      cooldown -> duration += 5.0;
-      player -> buffs.power_potion -> buff_duration += 5.0;
+      cooldown -> duration += timespan_t::from_seconds( 5.0 );
+      player -> buffs.power_potion -> buff_duration += timespan_t::from_seconds( 5.0 );
+
     }
 
     if ( sim -> log ) log_t::output( sim, "%s uses %s", player -> name(), name() );
+
 
     if ( player -> in_combat ) player -> potion_used = 1;
     update_ready();

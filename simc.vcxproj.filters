@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="engine\sc_action.cpp" />
@@ -39,6 +39,7 @@
     <ClCompile Include="engine\sc_talent.cpp" />
     <ClCompile Include="engine\sc_target.cpp" />
     <ClCompile Include="engine\sc_thread.cpp" />
+    <ClCompile Include="engine\sc_timespan.cpp" />
     <ClCompile Include="engine\sc_unique_gear.cpp" />
     <ClCompile Include="engine\sc_util.cpp" />
     <ClCompile Include="engine\sc_weapon.cpp" />
@@ -112,4 +113,5 @@
       <UniqueIdentifier>{3222852b-0c45-4154-b5b9-05232007bb46}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+
 </Project>
