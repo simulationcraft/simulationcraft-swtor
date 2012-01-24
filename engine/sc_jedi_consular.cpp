@@ -106,9 +106,11 @@ struct jedi_sage_t : public jedi_consular_t
   rng_t* rng_psychic_barrier;
   rng_t* rng_upheaval;
   rng_t* rng_tm;
+  rng_t* rng_tidal_force;
 
   benefit_t* benefits_turbulence;
 
+  cooldown_t* cooldowns_telekinetic_wave;
 
   // Talents
   struct talents_t
@@ -170,13 +172,16 @@ struct jedi_sage_t : public jedi_consular_t
       tree_type[ SITH_SORCERER_CORRUPTION ] = TREE_CORRUPTION;
       tree_type[ SITH_SORCERER_LIGHTNING ]  = TREE_LIGHTNING;
       tree_type[ SITH_SORCERER_MADNESS ]    = TREE_MADNESS;
+      cooldowns_telekinetic_wave = get_cooldown( "chain_lightning" );
     }
     else
     {
       tree_type[ JEDI_SAGE_SEER ]         = TREE_SEER;
       tree_type[ JEDI_SAGE_TELEKINETICS ] = TREE_TELEKINETICS;
       tree_type[ JEDI_SAGE_BALANCE ]      = TREE_BALANCE;
+      cooldowns_telekinetic_wave = get_cooldown( "telekinetic_wave" );
     }
+
 
     create_talents();
     create_glyphs();
@@ -665,16 +670,23 @@ struct disturbance_t : public jedi_sage_spell_t
   {
     jedi_consular_spell_t::execute();
 
+    jedi_sage_t* p = player -> cast_jedi_sage();
+
     if ( tm )
     {
-      jedi_sage_t* p = player -> cast_jedi_sage();
-
       if ( p -> rng_tm -> roll( p -> talents.telekinetic_momentum -> rank() * 0.10 ) )
       {
         tm -> execute();
         p -> buffs_tremors -> trigger( 1 );
       }
     }
+
+    if ( p -> talents.tidal_force -> rank() > 0 )
+      if ( p -> rng_tidal_force -> roll( 0.30 ) )
+      {
+        p -> cooldowns_telekinetic_wave -> reset();
+        p -> buffs_tidal_force -> trigger();
+      }
   }
 };
 
@@ -908,6 +920,27 @@ struct telekinetic_wave_t : public jedi_sage_spell_t
       }
     }
   }
+
+  virtual timespan_t execute_time() const
+  {
+    timespan_t et = jedi_consular_spell_t::execute_time();
+
+    jedi_sage_t* p = player -> cast_jedi_sage();
+
+    if ( p -> buffs_tidal_force -> up() )
+      et = timespan_t::zero;
+
+    return et;
+  }
+
+  virtual void update_ready()
+  {
+    jedi_consular_spell_t::update_ready();
+
+    jedi_sage_t* p = player -> cast_jedi_sage();
+
+    p -> buffs_tidal_force -> expire();
+  }
 };
 
 } // ANONYMOUS NAMESPACE ====================================================
@@ -1007,25 +1040,25 @@ action_t* jedi_sage_t::create_action( const std::string& name,
 {
   if ( type == JEDI_SAGE )
   {
-    if ( name == "disturbance" || name == "lightning_strike"  ) return new       disturbance_t( this, "disturbance", options_str );
-    if ( name == "mind_crush"  || name == "crushing_darkness" ) return new        mind_crush_t( this, "mind_crush", options_str );
-    if ( name == "weaken_mind" || name == "affliction"        ) return new       weaken_mind_t( this, "weaken_mind", options_str );
-    if ( name == "turbulence"  || name == "thundering_blast"  ) return new        turbulence_t( this, "turbulence", options_str );
-    if ( name == "force_in_balance" || name == "death_field"  ) return new  force_in_balance_t( this, "force_in_balance", options_str );
-    if ( name == "sever_force" || name == "creeping_terror"   ) return new       sever_force_t( this, "sever_force", options_str );
-    if ( name == "mental_alacrity"                            ) return new   mental_alacrity_t( this, "mental_alacrity", options_str );
-    if ( name == "telekinetic_wave"                           ) return new  telekinetic_wave_t( this, "telekinetic_wave", options_str );
+    if ( name == "disturbance"        ) return new       disturbance_t( this, "disturbance", options_str );
+    if ( name == "mind_crush"         ) return new        mind_crush_t( this, "mind_crush", options_str );
+    if ( name == "weaken_mind"        ) return new       weaken_mind_t( this, "weaken_mind", options_str );
+    if ( name == "turbulence"         ) return new        turbulence_t( this, "turbulence", options_str );
+    if ( name == "force_in_balance"   ) return new  force_in_balance_t( this, "force_in_balance", options_str );
+    if ( name == "sever_force"        ) return new       sever_force_t( this, "sever_force", options_str );
+    if ( name == "mental_alacrity"    ) return new   mental_alacrity_t( this, "mental_alacrity", options_str );
+    if ( name == "telekinetic_wave"   ) return new  telekinetic_wave_t( this, "telekinetic_wave", options_str );
   }
   else if ( type == SITH_SORCERER )
   {
-    if ( name == "disturbance" || name == "lightning_strike"  ) return new       disturbance_t( this, "lightning_strike", options_str );
-    if ( name == "mind_crush"  || name == "crushing_darkness" ) return new        mind_crush_t( this, "crushing_darkness", options_str );
-    if ( name == "weaken_mind" || name == "affliction"        ) return new       weaken_mind_t( this, "affliction", options_str );
-    if ( name == "turbulence"  || name == "thundering_blast"  ) return new        turbulence_t( this, "thundering_blast", options_str );
-    if ( name == "force_in_balance" || name == "death_field"  ) return new  force_in_balance_t( this, "death_field", options_str );
-    if ( name == "sever_force" || name == "creeping_terror"   ) return new       sever_force_t( this, "creeping_terror", options_str );
-    if ( name == "polarity_shift"                             ) return new   mental_alacrity_t( this, "polarity_shift", options_str );
-    if ( name == "chain_lightning"                            ) return new  telekinetic_wave_t( this, "chain_lightning", options_str );
+    if ( name == "lightning_strike"   ) return new       disturbance_t( this, "lightning_strike", options_str );
+    if ( name == "crushing_darkness"  ) return new        mind_crush_t( this, "crushing_darkness", options_str );
+    if ( name == "affliction"         ) return new       weaken_mind_t( this, "affliction", options_str );
+    if ( name == "thundering_blast"   ) return new        turbulence_t( this, "thundering_blast", options_str );
+    if ( name == "death_field"        ) return new  force_in_balance_t( this, "death_field", options_str );
+    if ( name == "creeping_terror"    ) return new       sever_force_t( this, "creeping_terror", options_str );
+    if ( name == "polarity_shift"     ) return new   mental_alacrity_t( this, "polarity_shift", options_str );
+    if ( name == "chain_lightning"    ) return new  telekinetic_wave_t( this, "chain_lightning", options_str );
   }
 
   return jedi_consular_t::create_action( name, options_str );
@@ -1131,14 +1164,14 @@ void jedi_sage_t::init_buffs()
 
   bool is_sage = ( type == JEDI_SAGE );
 
-  buffs_concentration = new buff_t( this, is_sage ? "concentration" : "concentration", 3, timespan_t::from_seconds( 10.0 ), timespan_t::zero, 0.5 * talents.concentration -> rank() );
-  buffs_psychic_projection = new buff_t( this, is_sage ? "psychic_projection" : "psychic_projection", 1, timespan_t::zero, timespan_t::from_seconds( 10.0 ), 0.5 * talents.psychic_projection -> rank() );
-  buffs_tidal_force = new buff_t( this, is_sage ? "tidal_force" : "tidal_force", 1, timespan_t::zero, timespan_t::from_seconds( 10.0 ) );
-  buffs_telekinetic_effusion = new buff_t( this, is_sage ? "telekinetic_effusion" : "telekinetic_effusion", 2, timespan_t::zero, timespan_t::zero, 0.5 * talents.telekinetic_effusion -> rank() );
-  buffs_tremors = new buff_t( this, is_sage ? "tremors" : "tremors", 3, timespan_t::from_seconds( 30.0 ) );
-  buffs_presence_of_mind = new buff_t( this, is_sage ? "presence_of_mind" : "presence_of_mind", 1, timespan_t::zero, timespan_t::zero, talents.presence_of_mind -> rank() * 0.3 );
-  buffs_force_suppression = new buff_t( this, is_sage ? "force_suppression" : "force_suppression", 10, timespan_t::from_seconds( 30.0 ), timespan_t::zero, talents.force_suppression -> rank() );
-  buffs_mental_alacrity = new buff_t( this, is_sage ? "mental_alacrity" : "mental_alacrity", 1, timespan_t::from_seconds( 10.0 ) );
+  buffs_concentration = new buff_t( this, is_sage ? "concentration" : "subversion", 3, timespan_t::from_seconds( 10.0 ), timespan_t::zero, 0.5 * talents.concentration -> rank() );
+  buffs_psychic_projection = new buff_t( this, is_sage ? "psychic_projection" : "lightning_barrage", 1, timespan_t::zero, timespan_t::from_seconds( 10.0 ), 0.5 * talents.psychic_projection -> rank() );
+  buffs_tidal_force = new buff_t( this, is_sage ? "tidal_force" : "lightning_storm", 1, timespan_t::zero, timespan_t::from_seconds( 10.0 ) );
+  buffs_telekinetic_effusion = new buff_t( this, is_sage ? "telekinetic_effusion" : "lightning_effusion", 2, timespan_t::zero, timespan_t::zero, 0.5 * talents.telekinetic_effusion -> rank() );
+  buffs_tremors = new buff_t( this, is_sage ? "tremors" : "conduction", 3, timespan_t::from_seconds( 30.0 ) );
+  buffs_presence_of_mind = new buff_t( this, is_sage ? "presence_of_mind" : "wrath", 1, timespan_t::zero, timespan_t::zero, talents.presence_of_mind -> rank() * 0.3 );
+  buffs_force_suppression = new buff_t( this, is_sage ? "force_suppression" : "deathmark", 10, timespan_t::from_seconds( 30.0 ), timespan_t::zero, talents.force_suppression -> rank() );
+  buffs_mental_alacrity = new buff_t( this, is_sage ? "mental_alacrity" : "polarity_shift", 1, timespan_t::from_seconds( 10.0 ) );
 }
 
 // jedi_sage_t::init_gains =======================================================
@@ -1168,6 +1201,7 @@ void jedi_sage_t::init_rng()
   rng_psychic_barrier = get_rng( "psychic_barrier" );
   rng_upheaval = get_rng( "upheaval" );
   rng_tm = get_rng( "telekinetic_momentum" );
+  rng_tidal_force = get_rng( "tidal_force" );
 }
 
 // jedi_sage_t::init_actions =====================================================
@@ -1231,14 +1265,10 @@ void jedi_sage_t::init_actions()
         action_list_str += "/turbulence,if=dot.weaken_mind.remains>cast_time";
 
       if ( talents.psychic_projection -> rank() > 0)
-      {
-        action_list_str += "/telekinetic_throw,if=buff.psychic_projection";
+        action_list_str += "/telekinetic_throw,if=buff.psychic_projection.react";
 
-        if ( talents.psychic_projection -> rank() == 1 )
-          action_list_str += ".react";
-        else
-          action_list_str += ".up";
-      }
+      if ( talents.telekinetic_wave -> rank() > 0 && talents.tidal_force -> rank() > 0 )
+        action_list_str += "/telekinetic_wave,if=buff.tidal_force.react";
 
       action_list_str += "/mental_alacrity";
 
@@ -1273,7 +1303,7 @@ void jedi_sage_t::init_actions()
       action_list_str += "/affliction,if=!ticking";
 
       if ( talents.force_in_balance -> rank() > 0 && talents.force_suppression -> rank() > 0 )
-        action_list_str += "/force_in_balance,if=!dot.crushing_darkness.ticking";
+        action_list_str += "/death_field,if=!dot.crushing_darkness.ticking";
 
       if ( talents.sever_force -> rank() > 0 )
         action_list_str += "/creeping_terror,if=!ticking";
@@ -1304,14 +1334,10 @@ void jedi_sage_t::init_actions()
         action_list_str += "/thundering_blast,if=dot.affliction.remains>cast_time";
 
       if ( talents.psychic_projection -> rank() > 0)
-      {
-        action_list_str += "/force_lightning,if=buff.psychic_projection";
+        action_list_str += "/force_lightning,if=buff.lightning_barrage.react";
 
-        if ( talents.psychic_projection -> rank() == 1 )
-          action_list_str += ".react";
-        else
-          action_list_str += ".up";
-      }
+      if ( talents.telekinetic_wave -> rank() > 0 && talents.tidal_force -> rank() > 0 )
+        action_list_str += "/chain_lightning,if=buff.lightning_storm.react";
 
       action_list_str += "/polarity_shift";
 
