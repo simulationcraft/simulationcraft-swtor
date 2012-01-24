@@ -300,7 +300,7 @@ struct jedi_consular_spell_t : public spell_t
       jedi_sage_t* p = player -> cast_jedi_sage();
 
       if ( base_execute_time > timespan_t::zero && p -> buffs_presence_of_mind -> up() )
-        player_multiplier *= 1.20;
+        player_dd_multiplier *= 1.20;
     }
   }
 
