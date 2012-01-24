@@ -16,5 +16,14 @@ jedi_sage=Jedi_Sage_Hybrid
 level=50
 talents=http://www.torhead.com/skill-calc#201ZfcM0dZsMfRsbkdc.1
 position=front
+actions+=/power_potion,if=time>10
+actions+=/force_valor
+actions+=/snapshot_stats
+actions+=/weaken_mind,if=!ticking
+actions+=/force_in_balance
+actions+=/mind_crush
+actions+=/telekinetic_wave,if=buff.presence_of_mind.react&cooldown.mind_crush.remains>9
+actions+=/telekinetic_throw
+actions+=/disturbance
 shirt=foo,stats=1325willpower_536crit_306haste_107power_1217forcepower_201surge
 save=Jedi_Sage_Hybrid.simc

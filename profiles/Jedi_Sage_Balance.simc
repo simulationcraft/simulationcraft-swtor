@@ -13,7 +13,7 @@ actions+=/power_potion,if=time>10
 actions+=/force_valor
 actions+=/snapshot_stats
 actions+=/weaken_mind,if=!ticking
-actions+=/force_in_balance,if=!dot.mind_crush.ticking
+actions+=/force_in_balance
 actions+=/sever_force,if=!ticking
 actions+=/mind_crush
 actions+=/telekinetic_throw

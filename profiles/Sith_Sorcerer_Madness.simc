@@ -13,7 +13,7 @@ actions+=/power_potion,if=time>10
 actions+=/mark_of_power
 actions+=/snapshot_stats
 actions+=/affliction,if=!ticking
-actions+=/death_field,if=!dot.crushing_darkness.ticking
+actions+=/death_field
 actions+=/creeping_terror,if=!ticking
 actions+=/crushing_darkness
 actions+=/force_lightning

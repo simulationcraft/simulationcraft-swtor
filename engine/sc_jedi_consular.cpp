@@ -1253,7 +1253,7 @@ void jedi_sage_t::init_actions()
       action_list_str += "/weaken_mind,if=!ticking";
 
       if ( talents.force_in_balance -> rank() > 0 && talents.force_suppression -> rank() > 0 )
-        action_list_str += "/force_in_balance,if=!dot.mind_crush.ticking";
+        action_list_str += "/force_in_balance";
 
       if ( talents.sever_force -> rank() > 0 )
         action_list_str += "/sever_force,if=!ticking";
@@ -1318,7 +1318,7 @@ void jedi_sage_t::init_actions()
       action_list_str += "/affliction,if=!ticking";
 
       if ( talents.force_in_balance -> rank() > 0 && talents.force_suppression -> rank() > 0 )
-        action_list_str += "/death_field,if=!dot.crushing_darkness.ticking";
+        action_list_str += "/death_field";
 
       if ( talents.sever_force -> rank() > 0 )
         action_list_str += "/creeping_terror,if=!ticking";

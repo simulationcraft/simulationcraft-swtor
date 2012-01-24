@@ -8,13 +8,13 @@ position=front
 role=spell
 use_pre_potion=0
 talents=http://www.torhead.com/skill-calc#jedi_sage-000000000000000000032302000120000000003120322131021112300
-actions=stim,type=rakata_resolve
-actions+=/power_potion,if=time>10
+actions=power_potion,if=time>10
 actions+=/force_valor
 actions+=/snapshot_stats
 actions+=/weaken_mind,if=!ticking
-actions+=/force_in_balance,if=!dot.mind_crush.ticking
+actions+=/force_in_balance
 actions+=/mind_crush
+actions+=/telekinetic_wave,if=buff.presence_of_mind.react&cooldown.mind_crush.remains>9
 actions+=/telekinetic_throw
 actions+=/disturbance
 shirt=foo,stats=1325willpower_536crit_306haste_107power_1217forcepower_201surge
