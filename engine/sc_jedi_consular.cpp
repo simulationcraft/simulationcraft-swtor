@@ -1233,8 +1233,6 @@ void jedi_sage_t::init_actions()
 
       action_list_str += "/mind_crush";
 
-      //action_list_str += "/project";
-
       action_list_str += "/telekinetic_throw";
 
       action_list_str += "/disturbance";
@@ -1265,8 +1263,6 @@ void jedi_sage_t::init_actions()
       action_list_str += "/mental_alacrity";
 
       action_list_str += "/mind_crush";
-
-      action_list_str += "/project";
 
       action_list_str += "/disturbance";
 
@@ -1302,8 +1298,6 @@ void jedi_sage_t::init_actions()
 
       action_list_str += "/crushing_darkness";
 
-      //action_list_str += "/shock";
-
       action_list_str += "/force_lightning";
 
       action_list_str += "/lightning_strike";
@@ -1334,8 +1328,6 @@ void jedi_sage_t::init_actions()
       action_list_str += "/polarity_shift";
 
       action_list_str += "/crushing_darkness";
-
-      action_list_str += "/shock";
 
       action_list_str += "/lightning_strike";
 

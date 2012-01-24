@@ -14,11 +14,10 @@ actions+=/force_valor
 actions+=/snapshot_stats
 actions+=/weaken_mind,if=!ticking
 actions+=/turbulence,if=dot.weaken_mind.remains>cast_time
-actions+=/telekinetic_throw,if=buff.psychic_projection.up
+actions+=/telekinetic_throw,if=buff.psychic_projection.react
 actions+=/telekinetic_wave,if=buff.tidal_force.react
 actions+=/mental_alacrity
 actions+=/mind_crush
-actions+=/project
 actions+=/disturbance
 shirt=foo,stats=1325willpower_536crit_306haste_107power_1217forcepower_201surge
 # Gear Summary

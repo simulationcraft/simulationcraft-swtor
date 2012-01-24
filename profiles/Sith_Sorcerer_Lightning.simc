@@ -14,11 +14,10 @@ actions+=/mark_of_power
 actions+=/snapshot_stats
 actions+=/affliction,if=!ticking
 actions+=/thundering_blast,if=dot.affliction.remains>cast_time
-actions+=/force_lightning,if=buff.lightning_barrage.up
+actions+=/force_lightning,if=buff.lightning_barrage.react
 actions+=/chain_lightning,if=buff.lightning_storm.react
 actions+=/polarity_shift
 actions+=/crushing_darkness
-actions+=/shock
 actions+=/lightning_strike
 shirt=foo,stats=1325willpower_536crit_306haste_107power_1217forcepower_201surge
 # Gear Summary
