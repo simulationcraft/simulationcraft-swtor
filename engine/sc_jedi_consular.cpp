@@ -683,25 +683,52 @@ struct disturbance_t : public jedi_sage_spell_t
   }
 };
 
+struct mind_crush_dot_t : public jedi_sage_spell_t
+{
+  mind_crush_dot_t( jedi_sage_t* p, const std::string& n ) :
+    jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
+  {
+    base_td = 47.5;
+    base_tick_time = timespan_t::from_seconds( 1.0 );
+    num_ticks = 6 + p -> talents.assertion -> rank() * 1;
+    range = 30.0;
+    tick_power_mod = 0.295;
+    influenced_by_inner_strength = false;
+    background = true;
+
+    base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
+  }
+};
+
 struct mind_crush_t : public jedi_sage_spell_t
 {
+  jedi_sage_spell_t* dot_spell;
+
   mind_crush_t( jedi_sage_t* p, const std::string& n, const std::string& options_str ) :
-    jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
+    jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
+    dot_spell( 0 )
   {
     parse_options( 0, options_str );
     base_dd_min = 165.83; base_dd_max = 230.23;
-    base_td = 47.5;
-    base_tick_time = timespan_t::from_seconds( 1.0 );
     base_execute_time = timespan_t::from_seconds( 2.0 );
-    num_ticks = 6 + p -> talents.assertion -> rank() * 1;
     base_cost = 40.0;
     range = 30.0;
     direct_power_mod = 1.23;
-    tick_power_mod = 0.295;
     cooldown -> duration = timespan_t::from_seconds( 15.0 );
     influenced_by_inner_strength = false;
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
+
+    dot_spell = new mind_crush_dot_t( p, ( n + "_dot").c_str() );
+
+    assert( dot_spell );
+  }
+
+  virtual void execute()
+  {
+    jedi_sage_spell_t::execute();
+
+    dot_spell -> execute();
   }
 };
 
@@ -713,7 +740,7 @@ struct weaken_mind_t : public jedi_sage_spell_t
     parse_options( 0, options_str );
     base_td = 49.91;
     base_tick_time = timespan_t::from_seconds( 3.0 );
-    num_ticks = 6 + p -> talents.disturb_mind -> rank();
+    num_ticks = 5 + p -> talents.disturb_mind -> rank();
     base_cost = 35.0;
     range = 30.0;
     tick_power_mod = 0.31;
