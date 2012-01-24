@@ -106,7 +106,6 @@ struct jedi_sage_t : public jedi_consular_t
   rng_t* rng_psychic_barrier;
   rng_t* rng_upheaval;
   rng_t* rng_tm;
-  rng_t* rng_tidal_force;
 
   benefit_t* benefits_turbulence;
 
@@ -616,7 +615,7 @@ void trigger_tidal_force( action_t* a, double pc = 0 )
 
   if ( p -> buffs_tidal_force -> trigger( 1, 0, pc ) )
   {
-    // telekinetic wave cd -> reset();
+    p -> cooldowns_telekinetic_wave -> reset();
   }
 }
 
@@ -662,6 +661,7 @@ struct disturbance_t : public jedi_sage_spell_t
 
       p -> buffs_concentration -> trigger();
 
+      // Does the TM version also proc Tidal Force?
       trigger_tidal_force( this, 0.3 );
     }
   }
@@ -680,13 +680,6 @@ struct disturbance_t : public jedi_sage_spell_t
         p -> buffs_tremors -> trigger( 1 );
       }
     }
-
-    if ( p -> talents.tidal_force -> rank() > 0 )
-      if ( p -> rng_tidal_force -> roll( 0.30 ) )
-      {
-        p -> cooldowns_telekinetic_wave -> reset();
-        p -> buffs_tidal_force -> trigger();
-      }
   }
 };
 
@@ -1201,7 +1194,6 @@ void jedi_sage_t::init_rng()
   rng_psychic_barrier = get_rng( "psychic_barrier" );
   rng_upheaval = get_rng( "upheaval" );
   rng_tm = get_rng( "telekinetic_momentum" );
-  rng_tidal_force = get_rng( "tidal_force" );
 }
 
 // jedi_sage_t::init_actions =====================================================
