@@ -217,7 +217,7 @@ void SimulationCraftWindow::decodeOptions( QString encoding )
     else if ( ! opt_tokens[ 0 ].compare( "scaling"        ) ) { options = scaling;         buttons = &scaling_buttons;     }
     else if ( ! opt_tokens[ 0 ].compare( "plots"          ) ) { options = plots;           buttons = &plot_buttons;        }
     else if ( ! opt_tokens[ 0 ].compare( "reforge_plots"  ) ) { options = reforgeplots;    buttons = &reforgeplot_buttons; }
-    else if ( ! opt_tokens[ 0 ].compare( "item_db_source" ) )
+    /*else if ( ! opt_tokens[ 0 ].compare( "item_db_source" ) )
     {
       QStringList item_db_list = opt_tokens[ 1 ].split( '/' );
       QListWidgetItem** items = new QListWidgetItem *[item_db_list.size()];
@@ -239,6 +239,7 @@ void SimulationCraftWindow::decodeOptions( QString encoding )
 
       delete [] items;
     }
+    */
     if ( ! options ) continue;
 
     QStringList opt_value = opt_tokens[ 1 ].split( '=' );
@@ -321,7 +322,7 @@ QString SimulationCraftWindow::encodeOptions()
     encoded += buttons.at( i )->isChecked() ? "1" : "0";
   }
 
-  if ( itemDbOrder -> count() > 0 )
+  /*if ( itemDbOrder -> count() > 0 )
   {
     encoded += " item_db_source:";
     for ( int i = 0; i < itemDbOrder -> count(); i++ )
@@ -331,7 +332,7 @@ QString SimulationCraftWindow::encodeOptions()
       if ( i < itemDbOrder -> count() - 1 )
         encoded += "/";
     }
-  }
+  }*/
 
   return encoded;
 }
@@ -574,7 +575,7 @@ void SimulationCraftWindow::createGlobalsTab()
 
   optionsTab->addTab( globalsGroupBox, "Globals" );
 
-  createItemDataSourceSelector( globalsLayout );
+  //createItemDataSourceSelector( globalsLayout );
 }
 
 void SimulationCraftWindow::createBuffsTab()
@@ -1287,6 +1288,7 @@ QString SimulationCraftWindow::mergeOptions()
 #if SC_USE_PTR
   options += "ptr="; options += ( ( versionChoice->currentIndex() == 1 ) ? "1" : "0" ); options += "\n";
 #endif
+#if 0
   if ( itemDbOrder -> count() > 0 )
   {
     options += "item_db_source=";
@@ -1299,6 +1301,7 @@ QString SimulationCraftWindow::mergeOptions()
     }
     options += "\n";
   }
+#endif
   options += "iterations=" + iterationsChoice->currentText() + "\n";
   if ( iterationsChoice->currentText() == "10000" )
   {

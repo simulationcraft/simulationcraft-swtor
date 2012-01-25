@@ -1309,7 +1309,7 @@ const char* chart_t::reforge_dps( std::string& s,
     std::vector<int> stat_indices = p -> sim -> reforge_plot -> reforge_plot_stat_indices;
     const reforge_plot_data_t& baseline = pd[ num_points / 2 ][ 2 ];
     double min_delta = baseline.value - ( min_dps - baseline.error / 2 );
-    double max_delta = std::max ( ( max_dps + baseline.error / 2 ) - baseline.value, baseline.value - min_dps + baseline.error / 2 );
+    double max_delta = ( max_dps + baseline.error / 2 ) - baseline.value;
     double max_ydelta = std::max( min_delta, max_delta );
     int ysteps = 5;
     double ystep_amount = max_ydelta / ysteps;
