@@ -23,7 +23,9 @@
 #define TAB_PAPERDOLL 9
 #endif
 
+#if 0
 #define TAB_BATTLE_NET 0
+#endif
 #define TAB_BIS        1
 #define TAB_HISTORY    2
 #define TAB_CUSTOM     3

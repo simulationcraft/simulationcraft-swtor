@@ -57,7 +57,6 @@ static OptionEntry* getDebuffOptions()
   static OptionEntry options[] =
   {
     { "Toggle All Debuffs",     "",                       "Toggle all debuffs on/off"     },
-    { "Bleeding",               "override.bleeding",      "Rip\nRupture\nPiercing Shots"  },
     { "Armor Reduction",        "override.shatter_shot",  "-20% Armor Reduction"          },
     { NULL, NULL, NULL }
   };
@@ -186,7 +185,7 @@ void SimulationCraftWindow::decodeOptions( QString encoding )
       targetRaceChoice->setCurrentIndex( tokens[  5 ].toInt() );
      playerSkillChoice->setCurrentIndex( tokens[  6 ].toInt() );
          threadsChoice->setCurrentIndex( tokens[  7 ].toInt() );
-    armoryRegionChoice->setCurrentIndex( tokens[  8 ].toInt() );
+    //armoryRegionChoice->setCurrentIndex( tokens[  8 ].toInt() );
       armorySpecChoice->setCurrentIndex( tokens[  9 ].toInt() );
      defaultRoleChoice->setCurrentIndex( tokens[ 10 ].toInt() );
          latencyChoice->setCurrentIndex( tokens[ 11 ].toInt() );
@@ -265,7 +264,7 @@ QString SimulationCraftWindow::encodeOptions()
     .arg(    targetRaceChoice->currentIndex() )
     .arg(   playerSkillChoice->currentIndex() )
     .arg(       threadsChoice->currentIndex() )
-    .arg(  armoryRegionChoice->currentIndex() )
+    //.arg(  armoryRegionChoice->currentIndex() )
     .arg(    armorySpecChoice->currentIndex() )
     .arg(   defaultRoleChoice->currentIndex() )
     .arg(       latencyChoice->currentIndex() )
@@ -542,7 +541,7 @@ void SimulationCraftWindow::createOptionsTab()
   QAbstractButton* allDebuffs = debuffsButtonGroup->buttons().at( 0 );
   QAbstractButton* allScaling = scalingButtonGroup->buttons().at( 0 );
 
-  connect( armoryRegionChoice, SIGNAL( currentIndexChanged( const QString& ) ), this, SLOT( armoryRegionChanged( const QString& ) ) );
+  //connect( armoryRegionChoice, SIGNAL( currentIndexChanged( const QString& ) ), this, SLOT( armoryRegionChanged( const QString& ) ) );
 
   connect( allBuffs,   SIGNAL( toggled( bool ) ), this, SLOT( allBuffsChanged( bool ) )   );
   connect( allDebuffs, SIGNAL( toggled( bool ) ), this, SLOT( allDebuffsChanged( bool ) ) );
@@ -563,7 +562,7 @@ void SimulationCraftWindow::createGlobalsTab()
   globalsLayout->addRow(    "Target Race",    targetRaceChoice = createChoice( 7, "humanoid", "beast", "demon", "dragonkin", "elemental", "giant", "undead" ) );
   globalsLayout->addRow(   "Player Skill",   playerSkillChoice = createChoice( 4, "Elite", "Good", "Average", "Ouch! Fire is hot!" ) );
   globalsLayout->addRow(        "Threads",       threadsChoice = createChoice( 4, "1", "2", "4", "8" ) );
-  globalsLayout->addRow(  "Armory Region",  armoryRegionChoice = createChoice( 5, "us", "eu", "tw", "cn", "kr" ) );
+  //globalsLayout->addRow(  "Armory Region",  armoryRegionChoice = createChoice( 5, "us", "eu", "tw", "cn", "kr" ) );
   globalsLayout->addRow(    "Armory Spec",    armorySpecChoice = createChoice( 2, "active", "inactive" ) );
   globalsLayout->addRow(   "Default Role",   defaultRoleChoice = createChoice( 4, "auto", "dps", "heal", "tank" ) );
   globalsLayout->addRow( "Generate Debug",         debugChoice = createChoice( 3, "None", "Log Only", "Gory Details" ) );
@@ -587,7 +586,7 @@ void SimulationCraftWindow::createBuffsTab()
   for ( int i=0; buffs[ i ].label; i++ )
   {
     QCheckBox* checkBox = new QCheckBox( buffs[ i ].label );
-    if ( i>2 ) checkBox->setChecked( true );
+    if ( i > 0 ) checkBox->setChecked( true );
     checkBox->setToolTip( buffs[ i ].tooltip );
     buffsButtonGroup->addButton( checkBox );
     buffsLayout->addWidget( checkBox );
@@ -712,7 +711,7 @@ void SimulationCraftWindow::createImportTab()
 
   battleNetView = new SimulationCraftWebView( this );
   battleNetView->setUrl( QUrl( "http://us.battle.net/wow/en" ) );
-  importTab->addTab( battleNetView, "Battle.Net" );
+  // importTab->addTab( battleNetView, "Battle.Net" );
 
   createBestInSlotTab();
 
@@ -926,7 +925,7 @@ void SimulationCraftWindow::createToolTips()
   threadsChoice->setToolTip( "Match the number of CPUs for optimal performance.\n"
                              "Most modern desktops have at least two CPU cores." );
 
-  armoryRegionChoice->setToolTip( "United States, Europe, Taiwan, China, Korea" );
+  //armoryRegionChoice->setToolTip( "United States, Europe, Taiwan, China, Korea" );
 
   armorySpecChoice->setToolTip( "Controls which Talent/Glyph specification is used when importing profiles from the Armory." );
 
@@ -1139,11 +1138,11 @@ void ImportThread::importBattleNet()
 void ImportThread::run()
 {
   cache::advance_era();
-  switch ( tab )
+  /*switch ( tab )
   {
   case TAB_BATTLE_NET: importBattleNet(); break;
   default: assert( 0 );
-  }
+  }*/
 
   if ( player )
   {
@@ -1536,7 +1535,8 @@ void SimulationCraftWindow::cmdLineReturnPressed()
          cmdLine->text().count( "wowarmory.com" ) )
     {
       battleNetView->setUrl( QUrl::fromUserInput( cmdLine->text() ) );
-      importTab->setCurrentIndex( TAB_BATTLE_NET );
+      //importTab->setCurrentIndex( TAB_BATTLE_NET );
+      importTab->setCurrentIndex( TAB_BIS );
     }
     else
     {
@@ -1560,10 +1560,10 @@ void SimulationCraftWindow::mainButtonClicked( bool /* checked */ )
   case TAB_HELP:      startSim(); break;
   case TAB_SITE:      startSim(); break;
   case TAB_IMPORT:
-    switch ( importTab->currentIndex() )
+    /*switch ( importTab->currentIndex() )
     {
     case TAB_BATTLE_NET: startImport( TAB_BATTLE_NET, cmdLine->text() ); break;
-    }
+    }*/
     break;
   case TAB_LOG: saveLog(); break;
   case TAB_RESULTS: saveResults(); break;
@@ -1680,7 +1680,7 @@ void SimulationCraftWindow::importTabChanged( int index )
   }
   else
   {
-    updateVisibleWebView( ( SimulationCraftWebView* ) importTab->widget( index ) );
+    //updateVisibleWebView( ( SimulationCraftWebView* ) importTab->widget( index ) );
   }
 }
 
@@ -1718,7 +1718,7 @@ void SimulationCraftWindow::historyDoubleClicked( QListWidgetItem* item )
   QString url = text.section( ' ', 1, 1, QString::SectionSkipEmpty );
 
   battleNetView->setUrl( QUrl::fromEncoded( url.toAscii() ) );
-  importTab->setCurrentIndex( TAB_BATTLE_NET );
+  importTab->setCurrentIndex( TAB_BIS );
 }
 
 void SimulationCraftWindow::bisDoubleClicked( QTreeWidgetItem* item, int /* col */ )
