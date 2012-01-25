@@ -35,7 +35,7 @@ static const char* class_text_color( int type )
 {
   switch ( type )
   {
-  //case MAGE:         return "59ADCC"; // darker blue
+  case TROOPER:         return "59ADCC"; // darker blue
   case JEDI_SAGE:       return "8A8A8A"; // darker silver
   //case SMUGGLER:        return "C0B84F"; // darker yellow
   default:           return class_color( type );
@@ -73,12 +73,10 @@ static const char* stat_color( int type )
   switch ( type )
   {
   case STAT_STRENGTH:                 return class_color( JEDI_KNIGHT );
-  case STAT_AGILITY:                  return class_color( BOUNTY_HUNTER );
-  case STAT_INTELLECT:                return 0; //return class_color( MAGE );
-  case STAT_SPIRIT:                   return class_color( JEDI_SAGE );
-  case STAT_MP5:                      return 0; //return class_text_color( MAGE );
-  case STAT_ATTACK_POWER:             return class_color( SMUGGLER );
-  case STAT_SPELL_POWER:              return 0; //return class_color( WARLOCK );
+  case STAT_SURGE_RATING:             return class_color( BOUNTY_HUNTER );
+  case STAT_WILLPOWER:                return class_color( TROOPER );
+  case STAT_POWER:                    return class_color( JEDI_SAGE );
+  case STAT_FORCE_POWER:              return class_text_color( TROOPER );
   case STAT_HIT_RATING:               return class_color( SITH_WARRIOR );
   case STAT_CRIT_RATING:              return class_color( IMPERIAL_AGENT );
   case STAT_HASTE_RATING:             return class_color( SITH_INQUISITOR );
@@ -1311,7 +1309,7 @@ const char* chart_t::reforge_dps( std::string& s,
     std::vector<int> stat_indices = p -> sim -> reforge_plot -> reforge_plot_stat_indices;
     const reforge_plot_data_t& baseline = pd[ num_points / 2 ][ 2 ];
     double min_delta = baseline.value - ( min_dps - baseline.error / 2 );
-    double max_delta = ( max_dps + baseline.error / 2 ) - baseline.value;
+    double max_delta = std::max ( ( max_dps + baseline.error / 2 ) - baseline.value, baseline.value - min_dps + baseline.error / 2 );
     double max_ydelta = std::max( min_delta, max_delta );
     int ysteps = 5;
     double ystep_amount = max_ydelta / ysteps;

@@ -695,6 +695,7 @@ struct mind_crush_dot_t : public jedi_sage_spell_t
     tick_power_mod = 0.295;
     influenced_by_inner_strength = false;
     background = true;
+    may_crit = false;
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
   }
@@ -722,6 +723,8 @@ struct mind_crush_t : public jedi_sage_spell_t
     dot_spell = new mind_crush_dot_t( p, ( n + "_dot").c_str() );
 
     assert( dot_spell );
+
+    add_child( dot_spell );
   }
 
   virtual void execute()
