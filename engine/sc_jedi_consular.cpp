@@ -1266,6 +1266,7 @@ void jedi_sage_t::init_actions()
       action_list_str += "/telekinetic_throw";
 
       action_list_str += "/disturbance";
+
       break;
 
 
@@ -1290,11 +1291,13 @@ void jedi_sage_t::init_actions()
       if ( talents.telekinetic_wave -> rank() > 0 && talents.tidal_force -> rank() > 0 )
         action_list_str += "/telekinetic_wave,if=buff.tidal_force.react";
 
-      action_list_str += "/mental_alacrity";
+      action_list_str += "/mental_alacrity,moving=0";
 
       action_list_str += "/mind_crush";
 
       action_list_str += "/disturbance";
+
+      action_list_str += "/project,moving=1";
 
       break;
 
@@ -1355,11 +1358,13 @@ void jedi_sage_t::init_actions()
       if ( talents.telekinetic_wave -> rank() > 0 && talents.tidal_force -> rank() > 0 )
         action_list_str += "/chain_lightning,if=buff.lightning_storm.react";
 
-      action_list_str += "/polarity_shift";
+      action_list_str += "/polarity_shift,moving=0";
 
       action_list_str += "/crushing_darkness";
 
       action_list_str += "/lightning_strike";
+
+      action_list_str += "/shock,moving=1";
 
       break;
 
