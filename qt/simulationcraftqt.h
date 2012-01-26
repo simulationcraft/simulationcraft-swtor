@@ -26,11 +26,11 @@
 #if 0
 #define TAB_BATTLE_NET 0
 #endif
-#define TAB_BIS        1
-#define TAB_HISTORY    2
-#define TAB_CUSTOM     3
+#define TAB_BIS        0
+#define TAB_HISTORY    1
+#define TAB_CUSTOM     2
 
-#define HISTORY_VERSION "0.10"
+#define HISTORY_VERSION "1.01"
 
 class SimulationCraftTextEdit;
 class SimulationCraftWebView;
@@ -127,11 +127,10 @@ public:
   QComboBox* targetRaceChoice;
   QComboBox* playerSkillChoice;
   QComboBox* threadsChoice;
-  QComboBox* armoryRegionChoice;
-  QComboBox* armorySpecChoice;
+  //QComboBox* armoryRegionChoice;
+  //QComboBox* armorySpecChoice;
   QComboBox* defaultRoleChoice;
   QComboBox* debugChoice;
-  QListWidget* itemDbOrder;
   QButtonGroup* buffsButtonGroup;
   QButtonGroup* debuffsButtonGroup;
   QButtonGroup* scalingButtonGroup;
@@ -141,8 +140,7 @@ public:
   QComboBox* reforgePlotAmountChoice;
   QComboBox* reforgePlotStepChoice;
   ReforgeButtonGroup* reforgeplotsButtonGroup;
-  SimulationCraftWebView* battleNetView;
-  SimulationCraftWebView* charDevView;
+  //SimulationCraftWebView* battleNetView;
   SimulationCraftWebView* siteView;
   SimulationCraftWebView* helpView;
   SimulationCraftWebView* visibleWebView;
@@ -243,7 +241,7 @@ private slots:
   void allBuffsChanged( bool checked );
   void allDebuffsChanged( bool checked );
   void allScalingChanged( bool checked );
-  void armoryRegionChanged( const QString& region );
+  //void armoryRegionChanged( const QString& region );
 
 public:
   SimulationCraftWindow( QWidget *parent = 0 );
@@ -382,7 +380,7 @@ public:
   QString profile;
   player_t* player;
 
-  void importBattleNet();
+  //void importBattleNet();
 
   void start( sim_t* s, int t, const QString& u ) { sim=s; tab=t; url=u; profile=""; player=0; QThread::start(); }
   virtual void run();

@@ -36,6 +36,7 @@ static OptionEntry* getBuffOptions()
   return options;
 }
 
+#if 0
 static OptionEntry* getItemSourceOptions()
 {
   static OptionEntry options[] =
@@ -51,6 +52,7 @@ static OptionEntry* getItemSourceOptions()
 
   return options;
 }
+#endif
 
 static OptionEntry* getDebuffOptions()
 {
@@ -186,7 +188,7 @@ void SimulationCraftWindow::decodeOptions( QString encoding )
      playerSkillChoice->setCurrentIndex( tokens[  6 ].toInt() );
          threadsChoice->setCurrentIndex( tokens[  7 ].toInt() );
     //armoryRegionChoice->setCurrentIndex( tokens[  8 ].toInt() );
-      armorySpecChoice->setCurrentIndex( tokens[  9 ].toInt() );
+     // armorySpecChoice->setCurrentIndex( tokens[  9 ].toInt() );
      defaultRoleChoice->setCurrentIndex( tokens[ 10 ].toInt() );
          latencyChoice->setCurrentIndex( tokens[ 11 ].toInt() );
      targetLevelChoice->setCurrentIndex( tokens[ 12 ].toInt() );
@@ -216,29 +218,7 @@ void SimulationCraftWindow::decodeOptions( QString encoding )
     else if ( ! opt_tokens[ 0 ].compare( "scaling"        ) ) { options = scaling;         buttons = &scaling_buttons;     }
     else if ( ! opt_tokens[ 0 ].compare( "plots"          ) ) { options = plots;           buttons = &plot_buttons;        }
     else if ( ! opt_tokens[ 0 ].compare( "reforge_plots"  ) ) { options = reforgeplots;    buttons = &reforgeplot_buttons; }
-    /*else if ( ! opt_tokens[ 0 ].compare( "item_db_source" ) )
-    {
-      QStringList item_db_list = opt_tokens[ 1 ].split( '/' );
-      QListWidgetItem** items = new QListWidgetItem *[item_db_list.size()];
 
-      for ( int opt = 0; opt < item_db_list.size(); opt++ )
-      {
-        for ( int source = 0; itemDbOrder -> count(); source++ )
-        {
-          if ( ! item_db_list[ opt ].compare( itemDbOrder -> item( source ) -> data( Qt::UserRole ).toString() ) )
-          {
-            items[ opt ] = itemDbOrder -> takeItem( source );
-            break;
-          }
-        }
-      }
-
-      for ( int j = 0; j < item_db_list.size(); j++ )
-        itemDbOrder -> addItem( items[ j ] );
-
-      delete [] items;
-    }
-    */
     if ( ! options ) continue;
 
     QStringList opt_value = opt_tokens[ 1 ].split( '=' );
@@ -265,7 +245,7 @@ QString SimulationCraftWindow::encodeOptions()
     .arg(   playerSkillChoice->currentIndex() )
     .arg(       threadsChoice->currentIndex() )
     //.arg(  armoryRegionChoice->currentIndex() )
-    .arg(    armorySpecChoice->currentIndex() )
+    //.arg(    armorySpecChoice->currentIndex() )
     .arg(   defaultRoleChoice->currentIndex() )
     .arg(       latencyChoice->currentIndex() )
     .arg(   targetLevelChoice->currentIndex() )
@@ -563,7 +543,7 @@ void SimulationCraftWindow::createGlobalsTab()
   globalsLayout->addRow(   "Player Skill",   playerSkillChoice = createChoice( 4, "Elite", "Good", "Average", "Ouch! Fire is hot!" ) );
   globalsLayout->addRow(        "Threads",       threadsChoice = createChoice( 4, "1", "2", "4", "8" ) );
   //globalsLayout->addRow(  "Armory Region",  armoryRegionChoice = createChoice( 5, "us", "eu", "tw", "cn", "kr" ) );
-  globalsLayout->addRow(    "Armory Spec",    armorySpecChoice = createChoice( 2, "active", "inactive" ) );
+  //globalsLayout->addRow(    "Armory Spec",    armorySpecChoice = createChoice( 2, "active", "inactive" ) );
   globalsLayout->addRow(   "Default Role",   defaultRoleChoice = createChoice( 4, "auto", "dps", "heal", "tank" ) );
   globalsLayout->addRow( "Generate Debug",         debugChoice = createChoice( 3, "None", "Log Only", "Gory Details" ) );
   iterationsChoice->setCurrentIndex( 1 );
@@ -709,8 +689,8 @@ void SimulationCraftWindow::createImportTab()
   importTab = new QTabWidget();
   mainTab->addTab( importTab, "Import" );
 
-  battleNetView = new SimulationCraftWebView( this );
-  battleNetView->setUrl( QUrl( "http://us.battle.net/wow/en" ) );
+  //battleNetView = new SimulationCraftWebView( this );
+  //battleNetView->setUrl( QUrl( "http://us.battle.net/wow/en" ) );
   // importTab->addTab( battleNetView, "Battle.Net" );
 
   createBestInSlotTab();
@@ -927,7 +907,7 @@ void SimulationCraftWindow::createToolTips()
 
   //armoryRegionChoice->setToolTip( "United States, Europe, Taiwan, China, Korea" );
 
-  armorySpecChoice->setToolTip( "Controls which Talent/Glyph specification is used when importing profiles from the Armory." );
+  //armorySpecChoice->setToolTip( "Controls which Talent/Glyph specification is used when importing profiles from the Armory." );
 
   defaultRoleChoice->setToolTip( "Specify the character role during import to ensure correct action priority list." );
 
@@ -943,8 +923,8 @@ void SimulationCraftWindow::createToolTips()
                              "    'Medium': 300ms\n"
                              "    'High'  : 500ms" );
 
-  backButton->setToolTip( "Backwards" );
-  forwardButton->setToolTip( "Forwards" );
+  //backButton->setToolTip( "Backwards" );
+  //forwardButton->setToolTip( "Forwards" );
 
   plotsPointsChoice -> setToolTip( "The number of points that will appear on the graph" );
   plotsStepChoice -> setToolTip( "The delta between two points of the graph.\n"
@@ -975,6 +955,7 @@ void SimulationCraftWindow::createPaperdoll()
 }
 #endif
 
+#if 0
 void SimulationCraftWindow::createItemDataSourceSelector( QFormLayout* layout )
 {
   itemDbOrder = new QListWidget( this );
@@ -997,6 +978,7 @@ void SimulationCraftWindow::createItemDataSourceSelector( QFormLayout* layout )
 
   layout->addRow( "Item Source Order", itemDbOrder );
 }
+#endif
 
 void SimulationCraftWindow::updateVisibleWebView( SimulationCraftWebView* wv )
 {
@@ -1044,7 +1026,7 @@ void SimulationCraftWindow::deleteSim()
 // ==========================================================================
 // Import
 // ==========================================================================
-
+#if 0
 void ImportThread::importBattleNet()
 {
   QString region, server, character;
@@ -1134,6 +1116,7 @@ void ImportThread::importBattleNet()
     }
   }
 }
+#endif
 
 void ImportThread::run()
 {
@@ -1506,7 +1489,7 @@ void SimulationCraftWindow::saveResults()
 void SimulationCraftWindow::closeEvent( QCloseEvent* e )
 {
   saveHistory();
-  battleNetView->stop();
+  //battleNetView->stop();
   QCoreApplication::quit();
   e->accept();
 }
@@ -1534,7 +1517,7 @@ void SimulationCraftWindow::cmdLineReturnPressed()
     if ( cmdLine->text().count( "battle.net" ) ||
          cmdLine->text().count( "wowarmory.com" ) )
     {
-      battleNetView->setUrl( QUrl::fromUserInput( cmdLine->text() ) );
+      //battleNetView->setUrl( QUrl::fromUserInput( cmdLine->text() ) );
       //importTab->setCurrentIndex( TAB_BATTLE_NET );
       importTab->setCurrentIndex( TAB_BIS );
     }
@@ -1559,12 +1542,7 @@ void SimulationCraftWindow::mainButtonClicked( bool /* checked */ )
   case TAB_OVERRIDES: startSim(); break;
   case TAB_HELP:      startSim(); break;
   case TAB_SITE:      startSim(); break;
-  case TAB_IMPORT:
-    /*switch ( importTab->currentIndex() )
-    {
-    case TAB_BATTLE_NET: startImport( TAB_BATTLE_NET, cmdLine->text() ); break;
-    }*/
-    break;
+  case TAB_IMPORT:    startSim(); break;
   case TAB_LOG: saveLog(); break;
   case TAB_RESULTS: saveResults(); break;
   }
@@ -1680,6 +1658,7 @@ void SimulationCraftWindow::importTabChanged( int index )
   }
   else
   {
+    assert( 0 );
     //updateVisibleWebView( ( SimulationCraftWebView* ) importTab->widget( index ) );
   }
 }
@@ -1717,7 +1696,7 @@ void SimulationCraftWindow::historyDoubleClicked( QListWidgetItem* item )
   QString text = item->text();
   QString url = text.section( ' ', 1, 1, QString::SectionSkipEmpty );
 
-  battleNetView->setUrl( QUrl::fromEncoded( url.toAscii() ) );
+  //battleNetView->setUrl( QUrl::fromEncoded( url.toAscii() ) );
   importTab->setCurrentIndex( TAB_BIS );
 }
 
@@ -1770,13 +1749,16 @@ void SimulationCraftWindow::allScalingChanged( bool checked )
   }
 }
 
+#if 0
 void SimulationCraftWindow::armoryRegionChanged( const QString& region )
 {
+  assert( 0 );
   QString importUrl = "http://" + region + ".battle.net/wow/en";
 
   battleNetView->stop();
   battleNetView->setUrl( QUrl( importUrl ) );
 }
+#endif
 
 void PersistentCookieJar::save()
 {
