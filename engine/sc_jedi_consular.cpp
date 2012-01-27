@@ -116,6 +116,7 @@ struct jedi_sage_t : public jedi_consular_t
   {
     // TREE_SEER
     talent_t* penetrating_light;
+    talent_t* psychic_suffusion;
 
     // TREE_TELEKINETICS
     talent_t* inner_strength;
@@ -836,6 +837,7 @@ struct force_in_balance_t : public jedi_sage_spell_t
     cooldown -> duration = timespan_t::from_seconds( 15.0 );
 
     crit_bonus += p -> talents.mental_scarring -> rank() * 0.1;
+    base_multiplier *= 1.0 + p -> talents.psychic_suffusion -> rank() * 0.05;
   }
 
   virtual void calculate_result()
@@ -912,7 +914,7 @@ struct telekinetic_wave_t : public jedi_sage_spell_t
     range = 30.0;
     direct_power_mod = 2.02;
 
-    base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
+    base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02 + p -> talents.psychic_suffusion -> rank() * 0.05;
     crit_bonus += p -> talents.reverberation -> rank() * 0.1;
 
     if ( !is_tm )
@@ -1094,6 +1096,7 @@ void jedi_sage_t::init_talents()
   jedi_consular_t::init_talents();
 
   talents.penetrating_light = find_talent( "Penetrating Light" );
+  talents.psychic_suffusion = find_talent( "Psychic Suffusion" );
 
 
   talents.inner_strength = find_talent( "Inner Strength" );
