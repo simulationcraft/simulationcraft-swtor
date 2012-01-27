@@ -14,7 +14,7 @@ save=Jedi_Sage_Telekinetics.simc
 
 jedi_sage=Jedi_Sage_Hybrid
 level=50
-talents=http://www.torhead.com/skill-calc#201ZfcM0dZsMfRsbkdc.1
+talents=http://www.torhead.com/skill-calc#600ZfcM0dZfMfRs0krc.1
 position=front
 actions+=/power_potion,if=time>10
 actions+=/force_valor
