@@ -544,9 +544,9 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
 
-      if ( tick_dmg > 0 && p -> talents.psychic_barrier -> rank() > 0 )
+      if ( tick_dmg > 0 )
       {
-        if ( p -> rng_psychic_barrier -> roll( p -> talents.psychic_barrier -> rank() * ( 1 / 3.0 ) ) )
+        if ( p -> talents.psychic_barrier -> rank() > 0 && p -> rng_psychic_barrier -> roll( p -> talents.psychic_barrier -> rank() * ( 1 / 3.0 ) ) )
         {
           double f = p -> resource_max[ RESOURCE_FORCE ] * 0.01;
           p -> resource_gain( RESOURCE_FORCE, f , p -> gains_psychic_barrier );
