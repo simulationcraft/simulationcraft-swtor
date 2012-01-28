@@ -93,6 +93,7 @@ struct jedi_sage_t : public jedi_consular_t
   buff_t* buffs_presence_of_mind;
   buff_t* buffs_force_suppression;
   buff_t* buffs_mental_alacrity;
+  buff_t* buffs_force_potency;
 
   // Gains
   gain_t* gains_concentration;
@@ -108,6 +109,9 @@ struct jedi_sage_t : public jedi_consular_t
   rng_t* rng_tm;
 
   benefit_t* benefits_turbulence;
+  benefit_t* benefits_fs_weaken_mind;
+  benefit_t* benefits_fs_mind_crush;
+  benefit_t* benefits_fs_sever_force;
 
   cooldown_t* cooldowns_telekinetic_wave;
 
@@ -302,6 +306,9 @@ struct jedi_consular_spell_t : public spell_t
 
       if ( base_execute_time > timespan_t::zero && p -> buffs_presence_of_mind -> up() )
         player_dd_multiplier *= 1.20;
+
+      if ( p -> buffs_force_potency -> up() && base_dd_min > 0 )
+        player_crit += 0.60;
     }
   }
 
@@ -367,6 +374,9 @@ struct jedi_consular_spell_t : public spell_t
 
       if ( base_execute_time > timespan_t::zero )
         p -> buffs_presence_of_mind -> expire();
+
+      if ( base_dd_min > 0 )
+        p -> buffs_force_potency -> decrement();
     }
   }
 
@@ -700,6 +710,16 @@ struct mind_crush_dot_t : public jedi_sage_spell_t
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
   }
+
+  virtual void target_debuff( player_t* t, int dmg_type )
+  {
+    jedi_sage_spell_t::target_debuff( t, dmg_type );
+
+    jedi_sage_t* p = player -> cast_jedi_sage();
+
+    if ( p -> talents.force_suppression -> rank() > 0 )
+      p -> benefits_fs_mind_crush -> update( p -> buffs_force_suppression -> check() > 0 );
+  }
 };
 
 struct mind_crush_t : public jedi_sage_spell_t
@@ -764,6 +784,16 @@ struct weaken_mind_t : public jedi_sage_spell_t
     {
       p -> buffs_psychic_projection -> trigger();
     }
+  }
+
+  virtual void target_debuff( player_t* t, int dmg_type )
+  {
+    jedi_sage_spell_t::target_debuff( t, dmg_type );
+
+    jedi_sage_t* p = player -> cast_jedi_sage();
+
+    if ( p -> talents.force_suppression -> rank() > 0 )
+      p -> benefits_fs_weaken_mind -> update( p -> buffs_force_suppression -> check() > 0 );
   }
 };
 
@@ -869,6 +899,16 @@ struct sever_force_t : public jedi_sage_spell_t
     tick_zero = true;
     influenced_by_inner_strength = false;
   }
+
+  virtual void target_debuff( player_t* t, int dmg_type )
+  {
+    jedi_sage_spell_t::target_debuff( t, dmg_type );
+
+    jedi_sage_t* p = player -> cast_jedi_sage();
+
+    if ( p -> talents.force_suppression -> rank() > 0 )
+      p -> benefits_fs_sever_force -> update( p -> buffs_force_suppression -> check() > 0 );
+  }
 };
 
 struct mental_alacrity_t : public jedi_sage_spell_t
@@ -965,6 +1005,30 @@ struct telekinetic_wave_t : public jedi_sage_spell_t
     jedi_sage_t* p = player -> cast_jedi_sage();
 
     p -> buffs_tidal_force -> expire();
+  }
+};
+
+struct force_potency_t : public jedi_sage_spell_t
+{
+  force_potency_t( jedi_sage_t* p, const std::string& n, const std::string& options_str ) :
+    jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+  {
+    check_talent( p -> talents.mental_alacrity -> rank() );
+
+    parse_options( 0, options_str );
+    cooldown -> duration = timespan_t::from_seconds( 90.0 );
+    harmful = false;
+
+    // TODO: Does it trigger a gcd?
+  }
+
+  virtual void execute()
+  {
+    jedi_sage_spell_t::execute();
+
+    jedi_sage_t* p = player -> cast_jedi_sage();
+
+    p -> buffs_force_potency -> trigger( 2 );
   }
 };
 
@@ -1073,6 +1137,7 @@ action_t* jedi_sage_t::create_action( const std::string& name,
     if ( name == "sever_force"        ) return new       sever_force_t( this, "sever_force", options_str );
     if ( name == "mental_alacrity"    ) return new   mental_alacrity_t( this, "mental_alacrity", options_str );
     if ( name == "telekinetic_wave"   ) return new  telekinetic_wave_t( this, "telekinetic_wave", options_str );
+    if ( name == "force_potency"      ) return new     force_potency_t( this, "force_potency", options_str );
   }
   else if ( type == SITH_SORCERER )
   {
@@ -1084,6 +1149,7 @@ action_t* jedi_sage_t::create_action( const std::string& name,
     if ( name == "creeping_terror"    ) return new       sever_force_t( this, "creeping_terror", options_str );
     if ( name == "polarity_shift"     ) return new   mental_alacrity_t( this, "polarity_shift", options_str );
     if ( name == "chain_lightning"    ) return new  telekinetic_wave_t( this, "chain_lightning", options_str );
+    if ( name == "recklessness"       ) return new     force_potency_t( this, "recklessness", options_str );
   }
 
   return jedi_consular_t::create_action( name, options_str );
@@ -1173,9 +1239,19 @@ void jedi_sage_t::init_benefits()
   jedi_consular_t::init_benefits();
 
   if ( type == SITH_SORCERER )
+  {
     benefits_turbulence = get_benefit( "Thundering Blast automatic crit" );
+    benefits_fs_weaken_mind = get_benefit( "Affliction ticks with Deathmark");
+    benefits_fs_mind_crush = get_benefit( "Crushing Darkness ticks with Deathmark");
+    benefits_fs_sever_force = get_benefit( "Creeping Terror ticks with Deathmarkc");
+  }
   else
+  {
     benefits_turbulence = get_benefit( "Turbulence automatic crit" );
+    benefits_fs_weaken_mind = get_benefit( "Weaken Mind ticks with Force Suppression");
+    benefits_fs_mind_crush = get_benefit( "Mind Crush ticks with Force Suppression");
+    benefits_fs_sever_force = get_benefit( "Sever Force ticks with Force Suppression");
+  }
 }
 
 // jedi_sage_t::init_buffs =======================================================
@@ -1198,6 +1274,7 @@ void jedi_sage_t::init_buffs()
   buffs_presence_of_mind = new buff_t( this, is_sage ? "presence_of_mind" : "wrath", 1, timespan_t::zero, timespan_t::zero, talents.presence_of_mind -> rank() * 0.3 );
   buffs_force_suppression = new buff_t( this, is_sage ? "force_suppression" : "deathmark", 10, timespan_t::from_seconds( 30.0 ), timespan_t::zero, talents.force_suppression -> rank() );
   buffs_mental_alacrity = new buff_t( this, is_sage ? "mental_alacrity" : "polarity_shift", 1, timespan_t::from_seconds( 10.0 ) );
+  buffs_force_potency = new buff_t( this, is_sage ? "force_potency" : "recklessness", 2, timespan_t::from_seconds( 20.0 ) );
 }
 
 // jedi_sage_t::init_gains =======================================================
