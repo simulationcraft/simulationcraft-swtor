@@ -671,14 +671,6 @@ void enchant_t::init( player_t* p )
 {
   if ( p -> is_pet() ) return;
 
-  std::string& mh_enchant     = p -> items[ SLOT_MAIN_HAND ].encoded_enchant_str;
-  std::string& oh_enchant     = p -> items[ SLOT_OFF_HAND  ].encoded_enchant_str;
-  std::string& ranged_enchant = p -> items[ SLOT_RANGED    ].encoded_enchant_str;
-
-  weapon_t* mhw = &( p -> main_hand_weapon );
-  weapon_t* ohw = &( p -> off_hand_weapon );
-  weapon_t* rw  = &( p -> ranged_weapon );
-
   int num_items = ( int ) p -> items.size();
   for ( int i=0; i < num_items; i++ )
   {
