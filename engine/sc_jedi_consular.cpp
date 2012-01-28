@@ -478,8 +478,11 @@ struct project_t : public jedi_consular_spell_t
 
 struct telekinetic_throw_t : public jedi_consular_spell_t
 {
+  bool is_buffed_by_psychic_projection;
+
   telekinetic_throw_t( jedi_consular_t* p, const std::string& n, const std::string& options_str ) :
-    jedi_consular_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
+    jedi_consular_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
+    is_buffed_by_psychic_projection( false )
   {
     parse_options( 0, options_str );
     base_td = 127.2;
@@ -507,17 +510,27 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
     }
   }
 
-  virtual timespan_t tick_time() const
+  virtual void execute()
   {
-    timespan_t tt = jedi_consular_spell_t::tick_time();
+    jedi_consular_spell_t::execute();
 
     if ( player -> is_jedi_sage() )
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
 
-      if ( p -> buffs_psychic_projection -> check() )
-        tt *= 0.5;
+      if ( p -> buffs_psychic_projection -> up() )
+        is_buffed_by_psychic_projection = true;
+      else
+        is_buffed_by_psychic_projection = false;
     }
+  }
+
+  virtual timespan_t tick_time() const
+  {
+    timespan_t tt = jedi_consular_spell_t::tick_time();
+
+    if ( is_buffed_by_psychic_projection )
+      tt *= 0.5;
 
     return tt;
   }
@@ -530,19 +543,8 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
 
-      p -> buffs_psychic_projection -> expire();
-    }
-  }
-
-  virtual void update_ready()
-  {
-    jedi_consular_spell_t::update_ready();
-
-    if ( player -> is_jedi_sage() )
-    {
-      jedi_sage_t* p = player -> cast_jedi_sage();
-
-      p -> buffs_psychic_projection -> up();
+      if ( is_buffed_by_psychic_projection )
+        p -> buffs_psychic_projection -> expire();
     }
   }
 
