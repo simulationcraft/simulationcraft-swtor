@@ -138,10 +138,18 @@ struct food_t : public action_t
 
 struct power_potion_t : public action_t
 {
+  double amount;
+
   power_potion_t( player_t* p, const std::string& options_str ) :
-    action_t( ACTION_USE, "power_potion", p )
+    action_t( ACTION_USE, "power_potion", p ),
+    amount( 565.0 )
   {
-    parse_options( NULL, options_str );
+    option_t options[] =
+    {
+      { "amount", OPT_FLT, &amount },
+      { NULL, OPT_UNKNOWN, NULL }
+    };
+    parse_options( options, options_str );
 
     trigger_gcd = timespan_t::zero;
     harmful = false;
@@ -153,13 +161,13 @@ struct power_potion_t : public action_t
   {
     if ( player -> in_combat )
     {
-      player -> buffs.power_potion -> trigger();
+      player -> buffs.power_potion -> trigger( 1, amount );
     }
     else
     {
       cooldown -> duration -= timespan_t::from_seconds( 5.0 );
       player -> buffs.power_potion -> buff_duration -= timespan_t::from_seconds( 5.0 );
-      player -> buffs.power_potion -> trigger();
+      player -> buffs.power_potion -> trigger( 1, amount);
       cooldown -> duration += timespan_t::from_seconds( 5.0 );
       player -> buffs.power_potion -> buff_duration += timespan_t::from_seconds( 5.0 );
 
