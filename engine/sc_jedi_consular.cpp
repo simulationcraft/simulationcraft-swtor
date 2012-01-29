@@ -512,8 +512,6 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
 
   virtual void execute()
   {
-    jedi_consular_spell_t::execute();
-
     if ( player -> is_jedi_sage() )
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
@@ -523,6 +521,8 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
       else
         is_buffed_by_psychic_projection = false;
     }
+
+    jedi_consular_spell_t::execute();
   }
 
   virtual timespan_t tick_time() const
