@@ -163,8 +163,6 @@ struct report_t;
 struct rng_t;
 struct talent_t;
 struct spell_id_t;
-struct active_spell_t;
-struct passive_spell_t;
 struct scaling_t;
 struct sim_t;
 struct spell_t;
@@ -2472,25 +2470,9 @@ struct talent_t : spell_id_t
   const spelleffect_data_t& effect1() const { return sd -> effect1(); }
   const spelleffect_data_t& effect2() const { return sd -> effect2(); }
   const spelleffect_data_t& effect3() const { return sd -> effect3(); }
-};
-*/
-// Active Spell ID class
+}; */
 
-struct active_spell_t : public spell_id_t
-{
-  active_spell_t( player_t* player = 0, const char* t_name = 0 ) : spell_id_t( player, t_name ) {}
-  active_spell_t( player_t* player, const char* t_name, const uint32_t id, talent_t* talent = 0 );
-  active_spell_t( player_t* player, const char* t_name, const char* s_name, talent_t* talent = 0 );
-};
-
-// Passive Spell ID class
-
-struct passive_spell_t : public spell_id_t
-{
-  passive_spell_t( player_t* player = 0, const char* t_name = 0 ) : spell_id_t( player, t_name ) {}
-  passive_spell_t( player_t* player, const char* t_name, const uint32_t id, talent_t* talent = 0 );
-  passive_spell_t( player_t* player, const char* t_name, const char* s_name, talent_t* talent = 0 );
-};
+// Glyph
 
 struct glyph_t : public spell_id_t
 {
@@ -2508,6 +2490,8 @@ struct glyph_t : public spell_id_t
   const spelleffect_data_t& effect2() const { return sd_enabled -> effect2(); }
   const spelleffect_data_t& effect3() const { return sd_enabled -> effect3(); }
 };
+
+// Mastery
 
 struct mastery_t : public spell_id_t
 {
