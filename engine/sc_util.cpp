@@ -992,7 +992,7 @@ const char* util_t::stat_type_string( int stat )
   case STAT_HIT_RATING:   return "hit_rating";
   case STAT_HIT_RATING2:  return "inverse_hit_rating";
   case STAT_CRIT_RATING:  return "crit_rating";
-  case STAT_HASTE_RATING: return "haste_rating";
+  case STAT_ALACRITY_RATING: return "alacrity_rating";
 
   case STAT_WEAPON_DPS:   return "weapon_dps";
   case STAT_WEAPON_SPEED: return "weapon_speed";
@@ -1048,7 +1048,7 @@ const char* util_t::stat_type_abbrev( int stat )
   case STAT_HIT_RATING:   return "Hit";
   case STAT_HIT_RATING2:  return "InvHit";
   case STAT_CRIT_RATING:  return "Crit";
-  case STAT_HASTE_RATING: return "Haste";
+  case STAT_ALACRITY_RATING: return "Alacrity";
 
   case STAT_WEAPON_DPS:   return "Wdps";
   case STAT_WEAPON_SPEED: return "Wspeed";
@@ -1101,7 +1101,7 @@ const char* util_t::stat_type_wowhead( int stat )
 
   case STAT_HIT_RATING:   return "hitRating";
   case STAT_CRIT_RATING:  return "critRating";
-  case STAT_HASTE_RATING: return "hasteRating";
+  case STAT_ALACRITY_RATING: return "alacrityRating";
 
   case STAT_WEAPON_DPS:   return "__dps";
   case STAT_WEAPON_SPEED: return "__speed";
@@ -1140,7 +1140,7 @@ stat_type util_t::parse_stat_type( const std::string& name )
   if ( name == "critstrkrtng"   ) return STAT_CRIT_RATING;
   if ( name == "dodgertng"      ) return STAT_DODGE_RATING;
   if ( name == "exprtng"        ) return STAT_EXPERTISE_RATING;
-  if ( name == "hastertng"      ) return STAT_HASTE_RATING;
+  if ( name == "alacrityrtng"      ) return STAT_ALACRITY_RATING;
   if ( name == "hitrtng"        ) return STAT_HIT_RATING;
   if ( name == "parryrtng"      ) return STAT_PARRY_RATING;
   if ( name == "resiliencertng" ) return STAT_RESILIENCE_RATING;
@@ -1164,7 +1164,7 @@ stat_type util_t::parse_reforge_type( const std::string& name )
   case STAT_EXPERTISE_RATING:
   case STAT_HIT_RATING:
   case STAT_CRIT_RATING:
-  case STAT_HASTE_RATING:
+  case STAT_ALACRITY_RATING:
   case STAT_SPIRIT:
   case STAT_DODGE_RATING:
   case STAT_PARRY_RATING:
@@ -1324,7 +1324,7 @@ stat_type util_t::translate_item_mod( int item_mod )
   case ITEM_MOD_BLOCK_RATING:        return STAT_BLOCK_RATING;
   case ITEM_MOD_HIT_RATING:          return STAT_HIT_RATING;
   case ITEM_MOD_CRIT_RATING:         return STAT_CRIT_RATING;
-  case ITEM_MOD_HASTE_RATING:        return STAT_HASTE_RATING;
+  case ITEM_MOD_HASTE_RATING:        return STAT_ALACRITY_RATING;
   case ITEM_MOD_EXPERTISE_RATING:    return STAT_EXPERTISE_RATING;
   case ITEM_MOD_ATTACK_POWER:        return STAT_ATTACK_POWER;
   case ITEM_MOD_RANGED_ATTACK_POWER: return STAT_ATTACK_POWER;

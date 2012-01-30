@@ -107,7 +107,7 @@ scaling_t::scaling_t( sim_t* s ) :
   current_scaling_stat( 0 ),
   num_scaling_stats( 0 ),
   remaining_scaling_stats( 0 ),
-  scale_haste_iterations( 1.0 ),
+  scale_alacrity_iterations( 1.0 ),
   scale_expertise_iterations( 1.0 ),
   scale_crit_iterations( 1.0 ),
   scale_hit_iterations( 1.0 ),
@@ -190,8 +190,8 @@ void scaling_t::init_deltas()
     if ( positive_scale_delta ) stats.hit_rating2 *= -1;
   }
 
-  if ( stats.crit_rating  == 0 ) stats.crit_rating  = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
-  if ( stats.haste_rating == 0 ) stats.haste_rating = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
+  if ( stats.crit_rating  == 0    ) stats.crit_rating     = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
+  if ( stats.alacrity_rating == 0 ) stats.alacrity_rating = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
 
   // Defensive
   if ( stats.armor == 0 ) stats.armor = smooth_scale_factors ? 1500 : 3000;
@@ -270,7 +270,7 @@ void scaling_t::analyze_stats()
     delta_sim = new sim_t( sim );
     delta_sim -> scaling -> scale_stat = i;
     delta_sim -> scaling -> scale_value = +scale_delta / ( center ? 2 : 1 );
-    if ( i == STAT_HASTE_RATING && ( scale_haste_iterations != 0 ) ) delta_sim -> iterations = ( int ) ( delta_sim -> iterations * scale_haste_iterations );
+    if ( i == STAT_ALACRITY_RATING && ( scale_alacrity_iterations != 0 ) ) delta_sim -> iterations = ( int ) ( delta_sim -> iterations * scale_alacrity_iterations );
     if ( i == STAT_EXPERTISE_RATING && ( scale_expertise_iterations != 0 ) ) delta_sim -> iterations = ( int ) ( delta_sim -> iterations * scale_expertise_iterations );
     if ( i == STAT_CRIT_RATING && ( scale_crit_iterations != 0 ) ) delta_sim -> iterations = ( int ) ( delta_sim -> iterations * scale_crit_iterations );
     if ( i == STAT_HIT_RATING && ( scale_hit_iterations != 0 ) ) delta_sim -> iterations = ( int ) ( delta_sim -> iterations * scale_hit_iterations );
@@ -280,7 +280,7 @@ void scaling_t::analyze_stats()
     {
       ref_sim -> scaling -> scale_stat = i;
       ref_sim -> scaling -> scale_value = center ? -( scale_delta / 2 ) : 0;
-      if ( i == STAT_HASTE_RATING && ( scale_haste_iterations != 0 ) ) ref_sim -> iterations = ( int ) ( ref_sim -> iterations * scale_haste_iterations );
+      if ( i == STAT_ALACRITY_RATING && ( scale_alacrity_iterations != 0 ) ) ref_sim -> iterations = ( int ) ( ref_sim -> iterations * scale_alacrity_iterations );
       if ( i == STAT_EXPERTISE_RATING && ( scale_expertise_iterations != 0 ) ) ref_sim -> iterations = ( int ) ( ref_sim -> iterations * scale_expertise_iterations );
       if ( i == STAT_CRIT_RATING && ( scale_crit_iterations != 0 ) ) ref_sim -> iterations = ( int ) ( ref_sim -> iterations * scale_crit_iterations );
       if ( i == STAT_HIT_RATING && ( scale_hit_iterations != 0 ) ) ref_sim -> iterations = ( int ) ( ref_sim -> iterations * scale_hit_iterations );
@@ -538,13 +538,13 @@ void scaling_t::create_options()
     { "scale_expertise_rating",         OPT_FLT,    &( stats.expertise_rating               ) },
     { "scale_hit_rating",               OPT_FLT,    &( stats.hit_rating                     ) },
     { "scale_crit_rating",              OPT_FLT,    &( stats.crit_rating                    ) },
-    { "scale_haste_rating",             OPT_FLT,    &( stats.haste_rating                   ) },
+    { "scale_alacrity_rating",          OPT_FLT,    &( stats.alacrity_rating                ) },
     { "scale_weapon_dps",               OPT_FLT,    &( stats.weapon_dps                     ) },
     { "scale_weapon_speed",             OPT_FLT,    &( stats.weapon_speed                   ) },
     { "scale_offhand_weapon_dps",       OPT_FLT,    &( stats.weapon_offhand_dps             ) },
     { "scale_offhand_weapon_speed",     OPT_FLT,    &( stats.weapon_offhand_speed           ) },
     { "scale_only",                     OPT_STRING, &( scale_only_str                       ) },
-    { "scale_haste_iterations",         OPT_FLT,    &( scale_haste_iterations               ) }, // multiplies #iterations for haste scale factor calculation
+    { "scale_alacrity_iterations",      OPT_FLT,    &( scale_alacrity_iterations            ) },
     { "scale_expertise_iterations",     OPT_FLT,    &( scale_expertise_iterations           ) },
     { "scale_crit_iterations",          OPT_FLT,    &( scale_crit_iterations                ) },
     { "scale_hit_iterations",           OPT_FLT,    &( scale_hit_iterations                 ) },

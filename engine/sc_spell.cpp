@@ -25,11 +25,11 @@ spell_t::spell_t( const char* n, player_t* p, int r, const school_type s, int t 
   init_spell_t_();
 }
 
-// spell_t::haste ===========================================================
+// spell_t::alacrity ===========================================================
 
-double spell_t::haste() const
+double spell_t::alacrity() const
 {
-  return player -> composite_spell_haste();
+  return player -> composite_spell_alacrity();
 }
 
 // spell_t::gcd =============================================================
@@ -43,7 +43,7 @@ timespan_t spell_t::gcd() const
   // Actually it seems to be more complex, cast time spells ( eg. with 1.5s cast time ) get a reduced gcd, but instant cast spells do not
   // http://sithwarrior.com/forums/Thread-Alacrity-and-the-GCD?pid=9152#pid9152
   if ( base_execute_time > timespan_t::zero )
-    t *= haste();
+    t *= alacrity();
 
   if ( t < min_gcd ) t = min_gcd;
 
@@ -62,7 +62,7 @@ timespan_t spell_t::execute_time() const
   if ( t <= timespan_t::zero )
     return timespan_t::zero;
 
-  t *= haste();
+  t *= alacrity();
 
   return t;
 }

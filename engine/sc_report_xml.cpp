@@ -358,8 +358,8 @@ void print_xml_player_stats( xml_writer_t & writer, player_t * p )
                               100 * p -> composite_spell_crit(), p -> stats.crit_rating, 100 * p -> buffed_spell_crit );
   print_xml_player_attribute( writer, "spellpenetration",
                               100 * p -> composite_spell_penetration(), p -> stats.spell_penetration, 100 * p -> buffed_spell_penetration );
-  print_xml_player_attribute( writer, "spellhaste",
-                              100 * ( 1 / p -> spell_haste - 1 ), p -> stats.haste_rating, 100 * ( 1 / p -> buffed_spell_haste - 1 ) );
+  print_xml_player_attribute( writer, "spellalacrity",
+                              100 * ( 1 / p -> spell_alacrity - 1 ), p -> stats.alacrity_rating, 100 * ( 1 / p -> buffed_spell_alacrity - 1 ) );
   print_xml_player_attribute( writer, "mp5",
                               p -> composite_mp5(), p -> stats.mp5, p -> buffed_mp5 );
   print_xml_player_attribute( writer, "attackpower",
@@ -370,10 +370,10 @@ void print_xml_player_stats( xml_writer_t & writer, player_t * p )
                               100 * p -> composite_attack_crit(), p -> stats.crit_rating, 100 * p -> buffed_attack_crit );
   print_xml_player_attribute( writer, "expertise",
                               100 * p -> composite_attack_expertise(), p -> stats.expertise_rating, 100 * p -> buffed_attack_expertise );
-  print_xml_player_attribute( writer, "attackhaste",
-                              100 * ( 1 / p -> composite_attack_haste() - 1 ), p -> stats.haste_rating, 100 * ( 1 / p -> buffed_attack_haste - 1 ) );
+  print_xml_player_attribute( writer, "attackalacrity",
+                              100 * ( 1 / p -> composite_attack_alacrity() - 1 ), p -> stats.alacrity_rating, 100 * ( 1 / p -> buffed_attack_alacrity - 1 ) );
   print_xml_player_attribute( writer, "attackspeed",
-                              100 * ( 1 / p -> composite_attack_speed() - 1 ), p -> stats.haste_rating, 100 * ( 1 / p -> buffed_attack_speed - 1 ) );
+                              100 * ( 1 / p -> composite_attack_speed() - 1 ), p -> stats.alacrity_rating, 100 * ( 1 / p -> buffed_attack_speed - 1 ) );
   print_xml_player_attribute( writer, "armor",
                               p -> composite_armor(), ( p -> stats.armor + p -> stats.bonus_armor ), p -> buffed_armor );
   print_xml_player_attribute( writer, "miss",

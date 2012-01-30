@@ -2007,7 +2007,7 @@ void sim_t::create_options()
     { "default_enchant_dodge_rating",             OPT_FLT,  &( enchant.dodge_rating                ) },
     { "default_enchant_parry_rating",             OPT_FLT,  &( enchant.parry_rating                ) },
     { "default_enchant_block_rating",             OPT_FLT,  &( enchant.block_rating                ) },
-    { "default_enchant_haste_rating",             OPT_FLT,  &( enchant.haste_rating                ) },
+    { "default_enchant_alacrity_rating",          OPT_FLT,  &( enchant.alacrity_rating             ) },
     { "default_enchant_hit_rating",               OPT_FLT,  &( enchant.hit_rating                  ) },
     { "default_enchant_crit_rating",              OPT_FLT,  &( enchant.crit_rating                 ) },
     { "default_enchant_health",                   OPT_FLT,  &( enchant.resource[ RESOURCE_HEALTH ] ) },

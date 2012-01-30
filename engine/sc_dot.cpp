@@ -42,7 +42,7 @@ void dot_t::extend_duration( int extra_ticks, bool cap )
   if ( cap )
   {
     // Can't extend beyond initial duration.
-    // Assuming this limit is based on current haste, not haste at previous application/extension/refresh.
+    // Assuming this limit is based on current alacrity, not alacrity at previous application/extension/refresh.
 
     int max_extra_ticks = std::max( action -> hasted_num_ticks() - ticks(), 0 );
 
@@ -67,12 +67,12 @@ void dot_t::extend_duration_seconds( timespan_t extra_seconds )
   assert( tick_event );
 
   // Treat extra_ticks as 'seconds added' instead of 'ticks added'
-  // Duration left needs to be calculated with old haste for tick_time()
+  // Duration left needs to be calculated with old alacrity for tick_time()
   // First we need the number of ticks remaining after the next one =>
   // ( num_ticks - current_tick ) - 1
   int old_num_ticks = num_ticks;
   int old_remaining_ticks = old_num_ticks - current_tick - 1;
-  double old_haste_factor = 1.0 / action -> player_haste;
+  double old_haste_factor = 1.0 / action -> player_alacrity;
 
   // Multiply with tick_time() for the duration left after the next tick
   timespan_t duration_left = old_remaining_ticks * action -> tick_time();
@@ -91,7 +91,7 @@ void dot_t::extend_duration_seconds( timespan_t extra_seconds )
   {
     log_t::output( sim, "%s extends duration of %s on %s by %.1f second(s). h: %.2f => %.2f, num_t: %d => %d, rem_t: %d => %d",
                    action -> player -> name(), name(), player -> name(), extra_seconds.total_seconds(),
-                   old_haste_factor, ( 1.0 / action -> player_haste ),
+                   old_haste_factor, ( 1.0 / action -> player_alacrity ),
                    old_num_ticks, num_ticks,
                    old_remaining_ticks, new_remaining_ticks );
   }

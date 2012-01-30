@@ -20,10 +20,10 @@ actions+=/mental_alacrity,moving=0
 actions+=/mind_crush
 actions+=/disturbance
 actions+=/project,moving=1
-shirt=foo,stats=1325willpower_536crit_306haste_107power_1217forcepower_201surge
+shirt=foo,stats=1325willpower_536crit_306alacrity_107power_1217forcepower_201surge
 # Gear Summary
 # gear_crit_rating=536
-# gear_haste_rating=306
+# gear_alacrity_rating=306
 # gear_power=107
 # gear_forcepower=1217
 # gear_willpower=1325

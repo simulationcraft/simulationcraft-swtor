@@ -55,18 +55,18 @@ attack_t::attack_t( const char* n, player_t* p, int resource, const school_type 
   init_attack_t_();
 }
 
-// attack_t::swing_haste ====================================================
+// attack_t::swing_alacrity ====================================================
 
-double attack_t::swing_haste() const
+double attack_t::swing_alacrity() const
 {
   return player -> composite_attack_speed();
 }
 
-// attack_t::haste ==========================================================
+// attack_t::alacrity ==========================================================
 
-double attack_t::haste() const
+double attack_t::alacrity() const
 {
-  return player -> composite_attack_haste();
+  return player -> composite_attack_alacrity();
 }
 
 // attack_t::execute_time ===================================================
@@ -78,7 +78,7 @@ timespan_t attack_t::execute_time() const
   if ( ! harmful && ! player -> in_combat )
     return timespan_t::zero;
 
-  return base_execute_time * swing_haste();
+  return base_execute_time * swing_alacrity();
 }
 
 // attack_t::player_buff ====================================================

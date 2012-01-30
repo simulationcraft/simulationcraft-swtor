@@ -210,7 +210,7 @@ player_t::player_t( sim_t*             s,
   dbc( s -> dbc ),
   race( r ),
   // Ratings
-  initial_haste_rating( 0 ), haste_rating( 0 ),
+  initial_alacrity_rating( 0 ), alacrity_rating( 0 ),
   initial_crit_rating( 0 ), crit_rating( 0 ),
   initial_accuracy_rating( 0 ), accuracy_rating( 0 ),
   initial_surge_rating( 0 ), surge_rating( 0 ),
@@ -219,7 +219,7 @@ player_t::player_t( sim_t*             s,
   base_power( 0.0 ), initial_power( 0.0 ), power( 0.0 ), buffed_power( 0.0 ),
   base_force_power( 0.0 ), initial_force_power( 0.0 ), force_power( 0.0 ), buffed_force_power( 0.0 ),
   base_spell_power( 0 ), buffed_spell_power( 0 ),
-  spell_haste( 1.0 ),  buffed_spell_haste( 1.0 ),
+  spell_alacrity( 1.0 ),  buffed_spell_alacrity( 1.0 ),
   base_spell_hit( 0 ), spell_hit( 0 ), buffed_spell_hit( 0 ),
   base_spell_crit( 0 ), spell_crit( 0 ), buffed_spell_crit( 0 ),
   base_spell_penetration( 0 ), initial_spell_penetration( 0 ), spell_penetration( 0 ), buffed_spell_penetration( 0 ),
@@ -230,7 +230,7 @@ player_t::player_t( sim_t*             s,
   base_energy_regen_per_second( 0 ), base_ammo_regen_per_second( 0 ), base_force_regen_per_second( 0 ),
   last_cast( timespan_t::zero ),
   // Attack Mechanics
-  attack_haste( 1.0 ), buffed_attack_haste( 1.0 ), buffed_attack_speed( 1.0 ),
+  attack_alacrity( 1.0 ), buffed_attack_alacrity( 1.0 ), buffed_attack_speed( 1.0 ),
   base_attack_power( 0 ),       initial_attack_power( 0 ),        attack_power( 0 ),       buffed_attack_power( 0 ),
   base_attack_hit( 0 ), attack_hit( 0 ),         buffed_attack_hit( 0 ),
   base_attack_expertise( 0 ),   initial_attack_expertise( 0 ),    attack_expertise( 0 ),   buffed_attack_expertise( 0 ),
@@ -735,10 +735,10 @@ void player_t::init_core()
 
   initial_stats.  hit_rating = gear.  hit_rating + enchant.  hit_rating + ( is_pet() ? 0 : sim -> enchant.  hit_rating );
   initial_stats. crit_rating = gear. crit_rating + enchant. crit_rating + ( is_pet() ? 0 : sim -> enchant. crit_rating );
-  initial_stats.haste_rating = gear.haste_rating + enchant.haste_rating + ( is_pet() ? 0 : sim -> enchant.haste_rating );
+  initial_stats.alacrity_rating = gear.alacrity_rating + enchant.alacrity_rating + ( is_pet() ? 0 : sim -> enchant.alacrity_rating );
   initial_stats.surge_rating = gear.surge_rating + enchant.surge_rating + ( is_pet() ? 0 : sim -> enchant.surge_rating );
 
-  initial_haste_rating    = initial_stats.haste_rating;
+  initial_alacrity_rating    = initial_stats.alacrity_rating;
   initial_crit_rating     = initial_stats.crit_rating;
   initial_accuracy_rating = initial_stats.hit_rating;
   initial_surge_rating    = initial_stats.surge_rating;
@@ -1436,7 +1436,7 @@ void player_t::init_scaling()
 
     scales_with[ STAT_HIT_RATING                ] = 0;
     scales_with[ STAT_CRIT_RATING               ] = spell || attack;
-    scales_with[ STAT_HASTE_RATING              ] = spell || attack;
+    scales_with[ STAT_ALACRITY_RATING              ] = spell || attack;
 
     scales_with[ STAT_WEAPON_DPS   ] = attack;
     scales_with[ STAT_WEAPON_SPEED ] = sim -> weapon_speed_scale_factors ? attack : 0;
@@ -1486,7 +1486,7 @@ void player_t::init_scaling()
 
       case STAT_HIT_RATING:     initial_accuracy_rating += v; break;
       case STAT_CRIT_RATING:    initial_crit_rating     += v; break;
-      case STAT_HASTE_RATING:   initial_haste_rating    += v; break;
+      case STAT_ALACRITY_RATING:   initial_alacrity_rating    += v; break;
 
       case STAT_WEAPON_DPS:
         if ( main_hand_weapon.damage > 0 )
@@ -1625,11 +1625,11 @@ double player_t::composite_force_power() const
   return fpow;
 }
 
-// player_t::composite_attack_haste =========================================
+// player_t::composite_attack_alacrity =========================================
 
-double player_t::composite_attack_haste() const
+double player_t::composite_attack_alacrity() const
 {
-  double h = attack_haste;
+  double h = attack_alacrity;
 
   return h;
 }
@@ -1638,7 +1638,7 @@ double player_t::composite_attack_haste() const
 
 double player_t::composite_attack_speed() const
 {
-  double h = composite_attack_haste();
+  double h = composite_attack_alacrity();
 
   return h;
 }
@@ -1821,11 +1821,11 @@ double player_t::diminished_parry() const
   return loss > 0 ? loss : 0;
 }
 
-// player_t::composite_spell_haste ==========================================
+// player_t::composite_spell_alacrity ==========================================
 
-double player_t::composite_spell_haste() const
+double player_t::composite_spell_alacrity() const
 {
-  double h = spell_haste;
+  double h = spell_alacrity;
 
   return h;
 }
@@ -2277,11 +2277,11 @@ void player_t::reset()
 
   vengeance_damage = vengeance_value = vengeance_max = 0.0;
 
-  haste_rating = initial_haste_rating;
+  alacrity_rating = initial_alacrity_rating;
   crit_rating = initial_crit_rating;
   accuracy_rating = initial_accuracy_rating;
   surge_rating = initial_surge_rating;
-  recalculate_haste();
+  recalculate_alacrity();
   recalculate_accuracy();
   recalculate_surge();
 
@@ -3053,11 +3053,11 @@ void player_t::stat_gain( int       stat,
     recalculate_crit();
     break;
 
-  case STAT_HASTE_RATING:
-    stats.haste_rating += amount;
-    temporary.haste_rating += temp_value * amount;
-    haste_rating       += amount;
-    recalculate_haste();
+  case STAT_ALACRITY_RATING:
+    stats.alacrity_rating += amount;
+    temporary.alacrity_rating += temp_value * amount;
+    alacrity_rating       += amount;
+    recalculate_alacrity();
     break;
 
   case STAT_SURGE_RATING:
@@ -3146,11 +3146,11 @@ void player_t::stat_loss( int       stat,
     recalculate_crit();
     break;
 
-  case STAT_HASTE_RATING:
-    stats.haste_rating -= amount;
-    temporary.haste_rating -= temp_value * amount;
-    haste_rating       -= amount;
-    recalculate_haste();
+  case STAT_ALACRITY_RATING:
+    stats.alacrity_rating -= amount;
+    temporary.alacrity_rating -= temp_value * amount;
+    alacrity_rating       -= amount;
+    recalculate_alacrity();
     break;
 
   case STAT_SURGE_RATING:
@@ -3532,17 +3532,17 @@ void player_t::register_direct_heal_callback( int64_t mask,
   }
 }
 
-// player_t::recalculate_haste ==============================================
+// player_t::recalculate_alacrity ==============================================
 
-void player_t::recalculate_haste()
+void player_t::recalculate_alacrity()
 {
-  double hr = haste_rating;
+  double hr = alacrity_rating;
 
   if ( hr < 0 )
     hr = 0;
 
-  spell_haste =  1.0 - 0.3 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.3 ) ), hr / std::max( 20, level ) / 0.55 ) );
-  attack_haste = spell_haste;
+  spell_alacrity =  1.0 - 0.3 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.3 ) ), hr / std::max( 20, level ) / 0.55 ) );
+  attack_alacrity = spell_alacrity;
 }
 
 // player_t::recalculate_crit ==============================================
@@ -4136,8 +4136,8 @@ struct snapshot_stats_t : public action_t
 
     if ( sim -> log ) log_t::output( sim, "%s performs %s", p -> name(), name() );
 
-    p -> buffed_spell_haste  = p -> composite_spell_haste();
-    p -> buffed_attack_haste = p -> composite_attack_haste();
+    p -> buffed_spell_alacrity  = p -> composite_spell_alacrity();
+    p -> buffed_attack_alacrity = p -> composite_attack_alacrity();
     p -> buffed_attack_speed = p -> composite_attack_speed();
 
     p -> attribute_buffed[ ATTR_STRENGTH  ] = floor( p -> strength()  );
@@ -4840,14 +4840,14 @@ action_expr_t* player_t::create_expression( action_t* a,
     };
     return new in_combat_expr_t( a );
   }
-  if ( name_str == "attack_haste" )
+  if ( name_str == "attack_alacrity" )
   {
-    struct attack_haste_expr_t : public action_expr_t
+    struct attack_alacrity_expr_t : public action_expr_t
     {
-      attack_haste_expr_t( action_t* a ) : action_expr_t( a, "attack_haste", TOK_NUM ) {}
-      virtual int evaluate() { result_num = action -> player -> composite_attack_haste(); return TOK_NUM; }
+      attack_alacrity_expr_t( action_t* a ) : action_expr_t( a, "attack_alacrity", TOK_NUM ) {}
+      virtual int evaluate() { result_num = action -> player -> composite_attack_alacrity(); return TOK_NUM; }
     };
-    return new attack_haste_expr_t( a );
+    return new attack_alacrity_expr_t( a );
   }
   if ( name_str == "attack_speed" )
   {
@@ -4858,14 +4858,14 @@ action_expr_t* player_t::create_expression( action_t* a,
     };
     return new attack_speed_expr_t( a );
   }
-  if ( name_str == "spell_haste" )
+  if ( name_str == "spell_alacrity" )
   {
-    struct spell_haste_expr_t : public action_expr_t
+    struct spell_alacrity_expr_t : public action_expr_t
     {
-      spell_haste_expr_t( action_t* a ) : action_expr_t( a, "spell_haste", TOK_NUM ) {}
-      virtual int evaluate() { result_num = action -> player -> composite_spell_haste(); return TOK_NUM; }
+      spell_alacrity_expr_t( action_t* a ) : action_expr_t( a, "spell_alacrity", TOK_NUM ) {}
+      virtual int evaluate() { result_num = action -> player -> composite_spell_alacrity(); return TOK_NUM; }
     };
-    return new spell_haste_expr_t( a );
+    return new spell_alacrity_expr_t( a );
   }
   if ( name_str == "energy_regen" )
   {
@@ -5063,7 +5063,7 @@ action_expr_t* player_t::create_expression( action_t* a,
         case STAT_EXPERTISE_RATING: p_stat = &( a -> player -> temporary.expertise_rating            ); break;
         case STAT_HIT_RATING:       p_stat = &( a -> player -> temporary.hit_rating                  ); break;
         case STAT_CRIT_RATING:      p_stat = &( a -> player -> temporary.crit_rating                 ); break;
-        case STAT_HASTE_RATING:     p_stat = &( a -> player -> temporary.haste_rating                ); break;
+        case STAT_ALACRITY_RATING:     p_stat = &( a -> player -> temporary.alacrity_rating             ); break;
         case STAT_ARMOR:            p_stat = &( a -> player -> temporary.armor                       ); break;
         case STAT_DODGE_RATING:     p_stat = &( a -> player -> temporary.dodge_rating                ); break;
         case STAT_PARRY_RATING:     p_stat = &( a -> player -> temporary.parry_rating                ); break;
@@ -5476,7 +5476,7 @@ bool player_t::create_profile( std::string& profile_str, int save_type, bool sav
     if ( enchant.attack_power                != 0 )  profile_str += "enchant_attack_power="     + util_t::to_string( enchant.attack_power ) + term;
     if ( enchant.expertise_rating            != 0 )  profile_str += "enchant_expertise_rating=" + util_t::to_string( enchant.expertise_rating ) + term;
     if ( enchant.armor                       != 0 )  profile_str += "enchant_armor="            + util_t::to_string( enchant.armor ) + term;
-    if ( enchant.haste_rating                != 0 )  profile_str += "enchant_haste_rating="     + util_t::to_string( enchant.haste_rating ) + term;
+    if ( enchant.alacrity_rating             != 0 )  profile_str += "enchant_alacrity_rating="  + util_t::to_string( enchant.alacrity_rating ) + term;
     if ( enchant.hit_rating                  != 0 )  profile_str += "enchant_hit_rating="       + util_t::to_string( enchant.hit_rating ) + term;
     if ( enchant.crit_rating                 != 0 )  profile_str += "enchant_crit_rating="      + util_t::to_string( enchant.crit_rating ) + term;
     if ( enchant.resource[ RESOURCE_HEALTH ] != 0 )  profile_str += "enchant_health="           + util_t::to_string( enchant.resource[ RESOURCE_HEALTH ] ) + term;
@@ -5657,7 +5657,7 @@ void player_t::create_options()
     { "gear_force_power",                     OPT_FLT,  &( gear.force_power                           ) },
     { "gear_attack_power",                    OPT_FLT,  &( gear.attack_power                          ) },
     { "gear_expertise_rating",                OPT_FLT,  &( gear.expertise_rating                      ) },
-    { "gear_haste_rating",                    OPT_FLT,  &( gear.haste_rating                          ) },
+    { "gear_alacrity_rating",                 OPT_FLT,  &( gear.alacrity_rating                       ) },
     { "gear_hit_rating",                      OPT_FLT,  &( gear.hit_rating                            ) },
     { "gear_crit_rating",                     OPT_FLT,  &( gear.crit_rating                           ) },
     { "gear_health",                          OPT_FLT,  &( gear.resource[ RESOURCE_HEALTH ]           ) },
@@ -5680,7 +5680,7 @@ void player_t::create_options()
     { "enchant_attack_power",                 OPT_FLT,  &( enchant.attack_power                       ) },
     { "enchant_expertise_rating",             OPT_FLT,  &( enchant.expertise_rating                   ) },
     { "enchant_armor",                        OPT_FLT,  &( enchant.armor                              ) },
-    { "enchant_haste_rating",                 OPT_FLT,  &( enchant.haste_rating                       ) },
+    { "enchant_alacrity_rating",              OPT_FLT,  &( enchant.alacrity_rating                    ) },
     { "enchant_hit_rating",                   OPT_FLT,  &( enchant.hit_rating                         ) },
     { "enchant_crit_rating",                  OPT_FLT,  &( enchant.crit_rating                        ) },
     { "enchant_health",                       OPT_FLT,  &( enchant.resource[ RESOURCE_HEALTH ]        ) },

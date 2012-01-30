@@ -206,7 +206,7 @@ struct jedi_sage_t : public jedi_consular_t
   virtual int       primary_role() const;
   virtual void      regen( timespan_t periodicity );
   virtual double    composite_force_damage_bonus() const;
-  virtual double    composite_spell_haste() const;
+  virtual double    composite_spell_alacrity() const;
   virtual void      create_talents();
 };
 
@@ -1492,11 +1492,11 @@ double jedi_sage_t::composite_force_damage_bonus() const
   return sp;
 }
 
-// jedi_sage_t::composite_spell_haste ==================================================
+// jedi_sage_t::composite_spell_alacrity ==================================================
 
-double jedi_sage_t::composite_spell_haste() const
+double jedi_sage_t::composite_spell_alacrity() const
 {
-  double sh = jedi_consular_t::composite_spell_haste();
+  double sh = jedi_consular_t::composite_spell_alacrity();
 
   sh -= buffs_mental_alacrity -> stack() * 0.20;
 

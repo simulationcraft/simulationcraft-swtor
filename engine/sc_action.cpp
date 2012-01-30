@@ -97,12 +97,12 @@ void action_t::init_action_t_()
   base_dd_adder                  = 0.0;
   player_dd_adder                = 0.0;
   target_dd_adder                = 0.0;
-  player_haste                   = 1.0;
+  player_alacrity                   = 1.0;
   resource_consumed              = 0.0;
   direct_dmg                     = 0.0;
   tick_dmg                       = 0.0;
   snapshot_crit                  = 0.0;
-  snapshot_haste                 = 1.0;
+  snapshot_alacrity                 = 1.0;
   num_ticks                      = 0;
   weapon                         = NULL;
   weapon_multiplier              = 1.0;
@@ -116,8 +116,8 @@ void action_t::init_action_t_()
   time_to_travel                 = timespan_t::zero;
   travel_speed                   = 0.0;
   bloodlust_active               = 0;
-  max_haste                      = 0.0;
-  haste_gain_percentage          = 0.0;
+  max_alacrity                      = 0.0;
+  alacrity_gain_percentage          = 0.0;
   min_current_time               = timespan_t::zero;
   max_current_time               = timespan_t::zero;
   min_health_percentage          = 0.0;
@@ -344,8 +344,8 @@ void action_t::parse_options( option_t*          options,
   option_t base_options[] =
   {
     { "bloodlust",              OPT_BOOL,   &bloodlust_active      },
-    { "haste<",                 OPT_FLT,    &max_haste             },
-    { "haste_gain_percentage>", OPT_FLT,    &haste_gain_percentage },
+    { "alacrity<",              OPT_FLT,    &max_alacrity             },
+    { "alacrity_gain_percentage>", OPT_FLT,    &alacrity_gain_percentage },
     { "health_percentage<",     OPT_FLT,    &max_health_percentage },
     { "health_percentage>",     OPT_FLT,    &min_health_percentage },
     { "if",                     OPT_STRING, &if_expr_str           },
@@ -496,7 +496,7 @@ void action_t::player_buff()
     }
   }
 
-  player_haste = total_haste();
+  player_alacrity = total_alacrity();
 
   if ( sim -> debug )
     log_t::output( sim, "action_t::player_buff: %s hit=%.2f crit=%.2f penetration=%.0f spell_power=%.2f attack_power=%.2f ",
@@ -534,7 +534,7 @@ void action_t::target_debuff( player_t* t, int /* dmg_type */ )
 void action_t::snapshot()
 {
   snapshot_crit    = total_crit();
-  snapshot_haste   = haste();
+  snapshot_alacrity   = alacrity();
 }
 
 // action_t::result_is_hit ==================================================
@@ -1280,8 +1280,8 @@ bool action_t::ready()
     if ( sim -> current_time > max_current_time )
       return false;
 
-  if ( max_haste > 0 )
-    if ( ( ( 1.0 / haste() ) - 1.0 ) > max_haste )
+  if ( max_alacrity > 0 )
+    if ( ( ( 1.0 / alacrity() ) - 1.0 ) > max_alacrity )
       return false;
 
   if ( sync_action && ! sync_action -> ready() )
@@ -1735,7 +1735,7 @@ timespan_t action_t::tick_time() const
   timespan_t t = base_tick_time;
   if ( channeled || hasted_ticks )
   {
-    t *= player_haste;
+    t *= player_alacrity;
   }
   return t;
 }
@@ -1746,15 +1746,15 @@ int action_t::hasted_num_ticks( timespan_t d ) const
 {
   if ( ! hasted_ticks ) return num_ticks;
 
-  assert( player_haste > 0.0 );
+  assert( player_alacrity > 0.0 );
 
   // For the purposes of calculating the number of ticks, the tick time is rounded to the 3rd decimal place.
-  // It's important that we're accurate here so that we model haste breakpoints correctly.
+  // It's important that we're accurate here so that we model alacrity breakpoints correctly.
 
   if ( d < timespan_t::zero )
     d = num_ticks * base_tick_time;
 
-  timespan_t t = timespan_t::from_millis( ( base_tick_time.total_millis() * player_haste ) + 0.5 );
+  timespan_t t = timespan_t::from_millis( ( base_tick_time.total_millis() * player_alacrity ) + 0.5 );
 
   double n = d / t;
 

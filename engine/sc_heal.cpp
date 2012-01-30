@@ -97,7 +97,7 @@ void heal_t::player_buff()
     player_spell_power_multiplier = p -> composite_spell_power_multiplier();
   }
 
-  player_haste = haste();
+  player_alacrity = alacrity();
 
   if ( sim -> debug )
     log_t::output( sim, "heal_t::player_buff: %s hit=%.2f crit=%.2f pen=%.0f sp=%.2f ap=%.2f mult=%.2f ",
@@ -123,11 +123,11 @@ void heal_t::target_debuff( player_t* /* t */, int /* dmg_type */ )
                    target_attack_power, target_spell_power, target_multiplier );
 }
 
-// heal_t::haste ============================================================
+// heal_t::alacrity ============================================================
 
-double heal_t::haste() const
+double heal_t::alacrity() const
 {
-  double h = spell_t::haste();
+  double h = spell_t::alacrity();
 
   return h;
 }
@@ -521,7 +521,7 @@ void absorb_t::player_buff()
     player_spell_power_multiplier = p -> composite_spell_power_multiplier();
   }
 
-  player_haste = haste();
+  player_alacrity = alacrity();
 
   if ( sim -> debug )
     log_t::output( sim, "absorb_t::player_buff: %s hit=%.2f crit=%.2f pen=%.0f sp=%.2f ap=%.2f mult=%.2f",
@@ -547,11 +547,11 @@ void absorb_t::target_debuff( player_t* /* t */, int /* dmg_type */ )
                    target_attack_power, target_spell_power, target_multiplier );
 }
 
-// absorb_t::haste ==========================================================
+// absorb_t::alacrity ==========================================================
 
-double absorb_t::haste() const
+double absorb_t::alacrity() const
 {
-  double h = spell_t::haste();
+  double h = spell_t::alacrity();
 
   return h;
 }

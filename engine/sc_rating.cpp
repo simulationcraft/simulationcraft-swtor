@@ -19,13 +19,13 @@ void rating_t::init( sim_t* sim, dbc_t& dbc, int level, int type )
   if ( type == ENEMY || type == ENEMY_ADD )
   {
     double max = +1.0E+50;
-    spell_haste       = max;
+    spell_alacrity       = max;
     spell_hit         = max;
     spell_crit        = max;
-    attack_haste      = max;
+    attack_alacrity      = max;
     attack_hit        = max;
     attack_crit       = max;
-    ranged_haste      = max;
+    ranged_alacrity      = max;
     ranged_hit        = max;
     ranged_crit       = max;
     expertise         = max;
@@ -35,13 +35,13 @@ void rating_t::init( sim_t* sim, dbc_t& dbc, int level, int type )
   }
   else
   {
-    spell_haste       = dbc.combat_rating( RATING_SPELL_HASTE,  level );
+    spell_alacrity       = dbc.combat_rating( RATING_SPELL_ALACRITY,  level );
     spell_hit         = dbc.combat_rating( RATING_SPELL_HIT,    level );
     spell_crit        = dbc.combat_rating( RATING_SPELL_CRIT,   level );
-    attack_haste      = dbc.combat_rating( RATING_MELEE_HASTE,  level );
+    attack_alacrity      = dbc.combat_rating( RATING_MELEE_ALACRITY,  level );
     attack_hit        = dbc.combat_rating( RATING_MELEE_HIT,    level );
     attack_crit       = dbc.combat_rating( RATING_MELEE_CRIT,   level );
-    ranged_haste      = dbc.combat_rating( RATING_RANGED_HASTE, level );
+    ranged_alacrity      = dbc.combat_rating( RATING_RANGED_ALACRITY, level );
     ranged_hit        = dbc.combat_rating( RATING_RANGED_HIT,   level );
     ranged_crit       = dbc.combat_rating( RATING_RANGED_CRIT,  level );
     expertise         = dbc.combat_rating( RATING_EXPERTISE,    level );

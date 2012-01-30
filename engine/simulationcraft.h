@@ -468,7 +468,7 @@ enum stat_type
   STAT_MAX_HEALTH, STAT_MAX_MANA, STAT_MAX_RAGE, STAT_MAX_ENERGY, STAT_MAX_AMMO,
   STAT_SPELL_POWER, STAT_SPELL_PENETRATION, STAT_MP5,
   STAT_ATTACK_POWER, STAT_EXPERTISE_RATING, STAT_EXPERTISE_RATING2,
-  STAT_HIT_RATING, STAT_HIT_RATING2,STAT_CRIT_RATING, STAT_HASTE_RATING,
+  STAT_HIT_RATING, STAT_HIT_RATING2,STAT_CRIT_RATING, STAT_ALACRITY_RATING,
   STAT_WEAPON_DPS, STAT_WEAPON_SPEED,
   STAT_WEAPON_OFFHAND_DPS, STAT_WEAPON_OFFHAND_SPEED,
   STAT_ARMOR, STAT_BONUS_ARMOR, STAT_RESILIENCE_RATING, STAT_DODGE_RATING, STAT_PARRY_RATING,
@@ -613,9 +613,9 @@ enum rating_type
   RATING_MELEE_CRIT,
   RATING_RANGED_CRIT,
   RATING_SPELL_CRIT,
-  RATING_MELEE_HASTE,
-  RATING_RANGED_HASTE,
-  RATING_SPELL_HASTE,
+  RATING_MELEE_ALACRITY,
+  RATING_RANGED_ALACRITY,
+  RATING_SPELL_ALACRITY,
   RATING_EXPERTISE,
   RATING_MASTERY,
   RATING_MAX
@@ -2582,7 +2582,7 @@ struct gear_stats_t
   double hit_rating;
   double hit_rating2;
   double crit_rating;
-  double haste_rating;
+  double alacrity_rating;
   double weapon_dps;
   double weapon_speed;
   double weapon_offhand_dps;
@@ -3327,7 +3327,7 @@ struct scaling_t
   int    debug_scale_factors;
   std::string scale_only_str;
   int    current_scaling_stat, num_scaling_stats, remaining_scaling_stats;
-  double    scale_haste_iterations, scale_expertise_iterations, scale_crit_iterations, scale_hit_iterations;
+  double    scale_alacrity_iterations, scale_expertise_iterations, scale_crit_iterations, scale_hit_iterations;
   std::string scale_over;
   std::string scale_over_player;
 
@@ -3463,9 +3463,9 @@ public:
 namespace internal {
 struct rating_t
 {
-  double  spell_haste,  spell_hit,  spell_crit;
-  double attack_haste, attack_hit, attack_crit;
-  double ranged_haste, ranged_hit,ranged_crit;
+  double  spell_alacrity,  spell_hit,  spell_crit;
+  double attack_alacrity, attack_hit, attack_crit;
+  double ranged_alacrity, ranged_hit,ranged_crit;
   double expertise;
   double dodge, parry, block;
 };
@@ -3773,7 +3773,7 @@ struct player_t : public noncopyable
   race_type race;
 
   // Ratings
-  double initial_haste_rating, haste_rating;
+  double initial_alacrity_rating, alacrity_rating;
   double initial_crit_rating, crit_rating;
   double initial_accuracy_rating, accuracy_rating;
   double initial_surge_rating, surge_rating;
@@ -3792,7 +3792,7 @@ struct player_t : public noncopyable
   double base_power, initial_power, power, buffed_power;
   double base_force_power, initial_force_power, force_power, buffed_force_power;
   double base_spell_power,       initial_spell_power[ SCHOOL_MAX+1 ], spell_power[ SCHOOL_MAX+1 ], buffed_spell_power;
-  double spell_haste, buffed_spell_haste;
+  double spell_alacrity, buffed_spell_alacrity;
   double base_spell_hit,         spell_hit,                   buffed_spell_hit;
   double base_spell_crit,        spell_crit,                  buffed_spell_crit;
   double base_spell_penetration, initial_spell_penetration,           spell_penetration,           buffed_spell_penetration;
@@ -3808,7 +3808,7 @@ struct player_t : public noncopyable
   timespan_t last_cast;
 
   // Attack Mechanics
-  double attack_haste, buffed_attack_haste, buffed_attack_speed;
+  double attack_alacrity, buffed_attack_alacrity, buffed_attack_speed;
   double base_attack_power,       initial_attack_power,        attack_power,       buffed_attack_power;
   double base_attack_hit,         attack_hit,         buffed_attack_hit;
   double base_attack_expertise,   initial_attack_expertise,    attack_expertise,   buffed_attack_expertise;
@@ -4105,14 +4105,14 @@ struct player_t : public noncopyable
   virtual double energy_regen_per_second() const;
   virtual double ammo_regen_per_second() const;
   virtual double force_regen_per_second() const;
-  virtual double composite_attack_haste() const;
+  virtual double composite_attack_alacrity() const;
   virtual double composite_attack_speed() const;
   virtual double composite_attack_power() const;
   virtual double composite_attack_crit() const;
   virtual double composite_attack_expertise() const { return attack_expertise; }
   virtual double composite_attack_hit() const;
 
-  virtual double composite_spell_haste() const;
+  virtual double composite_spell_alacrity() const;
   virtual double composite_spell_power( const school_type school ) const;
   virtual double composite_spell_crit() const;
   virtual double composite_spell_hit() const;
@@ -4248,7 +4248,7 @@ struct player_t : public noncopyable
 
   virtual int decode_set( item_t& item ) { ( void )item; assert( item.name() ); return SET_NONE; }
 
-  virtual void recalculate_haste();
+  virtual void recalculate_alacrity();
   virtual void recalculate_crit();
   virtual void recalculate_accuracy();
   virtual void recalculate_surge();
@@ -4493,10 +4493,10 @@ struct action_t
   double player_spell_power_multiplier, player_attack_power_multiplier;
   double crit_multiplier, crit_bonus_multiplier, crit_bonus;
   double base_dd_adder, player_dd_adder, target_dd_adder;
-  double player_haste;
+  double player_alacrity;
   double resource_consumed;
   double direct_dmg, tick_dmg;
-  double snapshot_crit, snapshot_haste;
+  double snapshot_crit, snapshot_alacrity;
   int num_ticks;
   weapon_t* weapon;
   double weapon_multiplier;
@@ -4513,8 +4513,8 @@ struct action_t
   timespan_t time_to_execute, time_to_travel;
   double travel_speed;
   int bloodlust_active;
-  double max_haste;
-  double haste_gain_percentage;
+  double max_alacrity;
+  double alacrity_gain_percentage;
   timespan_t min_current_time, max_current_time;
   double min_health_percentage, max_health_percentage;
   int moving, vulnerable, invulnerable, wait_on_ready, interrupt, not_flying, flying;
@@ -4549,8 +4549,8 @@ public:
   virtual void   parse_effect_data( int spell_id, int effect_nr );
   virtual void   parse_options( option_t*, const std::string& options_str );
   virtual double cost() const;
-  virtual double total_haste() const  { return haste();           }
-  virtual double haste() const        { return 1.0;               }
+  virtual double total_alacrity() const  { return alacrity();           }
+  virtual double alacrity() const        { return 1.0;               }
   virtual timespan_t gcd() const;
   virtual timespan_t execute_time() const { return base_execute_time; }
   virtual timespan_t tick_time() const;
@@ -4662,9 +4662,9 @@ public:
   attack_t( const char* n=0, player_t* p=0, int r=RESOURCE_NONE, const school_type s=SCHOOL_PHYSICAL, int t=TREE_NONE, bool special=false );
 
   // Attack Overrides
-  virtual double haste() const;
-  virtual double total_haste() const  { return swing_haste();           }
-  virtual double swing_haste() const;
+  virtual double alacrity() const;
+  virtual double total_alacrity() const  { return swing_alacrity();           }
+  virtual double swing_alacrity() const;
   virtual timespan_t execute_time() const;
   virtual void   player_buff();
   virtual void   target_debuff( player_t* t, int dmg_type );
@@ -4694,7 +4694,7 @@ public:
   spell_t( const char* n=0, player_t* p=0, int r=RESOURCE_NONE, const school_type s=SCHOOL_PHYSICAL, int t=TREE_NONE );
 
   // Spell Overrides
-  virtual double haste() const;
+  virtual double alacrity() const;
   virtual timespan_t gcd() const;
   virtual timespan_t execute_time() const;
   virtual void   player_buff();
@@ -4726,7 +4726,7 @@ public:
   virtual void parse_options( option_t* options, const std::string& options_str );
   virtual void player_buff();
   virtual void target_debuff( player_t* t, int dmg_type );
-  virtual double haste() const;
+  virtual double alacrity() const;
   virtual void execute();
   virtual void assess_damage( player_t* t, double amount,
                               int    dmg_type, int impact_result );
@@ -4758,7 +4758,7 @@ public:
   virtual void parse_options( option_t* options, const std::string& options_str );
   virtual void player_buff();
   virtual void target_debuff( player_t* t, int dmg_type );
-  virtual double haste() const;
+  virtual double alacrity() const;
   virtual void execute();
   virtual void assess_damage( player_t* t, double amount,
                               int    dmg_type, int impact_result );
