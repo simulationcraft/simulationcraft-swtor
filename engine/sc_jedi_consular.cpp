@@ -1021,7 +1021,7 @@ struct force_potency_t : public jedi_sage_spell_t
     cooldown -> duration = timespan_t::from_seconds( 90.0 );
     harmful = false;
 
-    // TODO: Does it trigger a gcd?
+    trigger_gcd = timespan_t::zero;
   }
 
   virtual void execute()
