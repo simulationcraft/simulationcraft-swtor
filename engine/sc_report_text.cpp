@@ -739,13 +739,12 @@ static void print_text_player( FILE* file, player_t* p )
                    util_t::player_type_string( p -> type ),
                    util_t::talent_tree_string( p -> primary_tree() ), p -> level );
 
-  util_t::fprintf( file, "  DPS: %.1f  DPS-Error=%.1f/%.1f%% HPS: %.1f HPS-Error=%.1f/%.1f%% DPS-Range=%.0f/%.1f%%  DPS-Convergence=%.1f%%",
+  util_t::fprintf( file, "  DPS: %.1f  DPS-Error=%.1f/%.1f%% HPS: %.1f HPS-Error=%.1f/%.1f%% DPS-Range=%.0f/%.1f%%",
                    p -> dps.mean,
                    p -> dps_error, p -> dps.mean ? p -> dps_error * 100 / p -> dps.mean : 0,
                    p -> hps.mean,
                    p -> hps_error, p -> hps.mean ? p -> hps_error * 100 / p -> hps.mean : 0,
-                   ( p -> dps.max - p -> dps.min ) / 2.0 , p -> dps.mean ? ( ( p -> dps.max - p -> dps.min ) / 2 ) * 100 / p -> dps.mean : 0,
-                   p -> dps_convergence * 100 );
+                   ( p -> dps.max - p -> dps.min ) / 2.0 , p -> dps.mean ? ( ( p -> dps.max - p -> dps.min ) / 2 ) * 100 / p -> dps.mean : 0 );
 
   if ( p -> rps_loss > 0 )
   {

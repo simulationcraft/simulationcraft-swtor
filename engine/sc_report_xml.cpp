@@ -296,7 +296,6 @@ void print_xml_player( sim_t * sim, xml_writer_t & writer, player_t * p, player_
   writer.print_attribute( "effective", util_t::to_string( p -> dpse.mean ) );
   writer.print_attribute( "error", util_t::to_string( p -> dps_error ) );
   writer.print_attribute( "range", util_t::to_string( ( p -> dps.max - p -> dps.min ) / 2.0 ) );
-  writer.print_attribute( "convergence", util_t::to_string( p -> dps_convergence ) );
   writer.end_tag(); // </dps>
 
   if ( p -> rps_loss > 0 )

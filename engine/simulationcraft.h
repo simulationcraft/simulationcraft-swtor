@@ -3150,7 +3150,6 @@ struct sim_t : private thread_t
   rng_t* deterministic_rng;
   rng_t* rng_list;
   int smooth_rng, deterministic_roll, average_range, average_gauss;
-  int convergence_scale;
 
   // Timing Wheel Event Management
   event_t** timing_wheel;
@@ -3945,8 +3944,6 @@ struct player_t : public noncopyable
   sample_data_t dmg_taken;
   std::vector<double> timeline_dmg;
   std::vector<double> timeline_dps;
-  std::vector<double> dps_convergence_error;
-  double    dps_convergence;
 
   // Heal
   double iteration_heal,iteration_heal_taken;
@@ -3962,7 +3959,7 @@ struct player_t : public noncopyable
   std::string action_sequence;
   std::string action_dpet_chart, action_dmg_chart, time_spent_chart, gains_chart;
   std::vector<std::string> timeline_resource_chart;
-  std::string timeline_dps_chart, timeline_dps_error_chart, timeline_resource_health_chart;
+  std::string timeline_dps_chart, timeline_resource_health_chart;
   std::string distribution_dps_chart, scaling_dps_chart, scale_factors_chart;
   std::string reforge_dps_chart, dps_error_chart, distribution_deaths_chart;
   std::string gear_weights_lootrank_link, gear_weights_wowhead_link, gear_weights_wowreforge_link;
@@ -5218,7 +5215,6 @@ struct chart_t
   static const char* time_spent       ( std::string& s, player_t* );
   static const char* gains            ( std::string& s, player_t*, resource_type );
   static const char* timeline         ( std::string& s, player_t*, const std::vector<double>&, const std::string&, double avg=0, const char* color="FDD017" );
-  static const char* timeline_dps_error( std::string& s, player_t* );
   static const char* scale_factors    ( std::string& s, player_t* );
   static const char* scaling_dps      ( std::string& s, player_t* );
   static const char* reforge_dps      ( std::string& s, player_t* );

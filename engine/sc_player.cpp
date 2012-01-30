@@ -283,7 +283,6 @@ player_t::player_t( sim_t*             s,
   dmg( s -> statistics_level < 2 ), compound_dmg( s -> statistics_level < 2 ),
   dps( s -> statistics_level < 1 ), dpse( s -> statistics_level < 2 ),
   dtps( s -> statistics_level < 2 ), dmg_taken( s -> statistics_level < 2 ),
-  dps_convergence( 0 ),
   // Heal
   iteration_heal( 0 ),iteration_heal_taken( 0 ),
   hps_error( 0 ), hpr( 0 ),

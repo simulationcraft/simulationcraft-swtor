@@ -1327,20 +1327,9 @@ static void print_html_player_statistics( FILE* file, player_t* p )
 
   print_html_sample_data( file, p, p -> hps, "HPS" );
 
-  std::string timeline_dps_error_str           = "";
   std::string dps_error_str                    = "";
 
   char buffer[ 1024 ];
-
-  if ( ! p -> timeline_dps_error_chart.empty() )
-  {
-    snprintf( buffer, sizeof( buffer ), "<img src=\"%s\" alt=\"Timeline DPS Error Chart\" />\n", p -> timeline_dps_error_chart.c_str() );
-    timeline_dps_error_str = buffer;
-  }
-
-  fprintf( file,
-           "%s\n",
-           timeline_dps_error_str.c_str() );
 
   if ( ! p -> dps_error_chart.empty() )
   {

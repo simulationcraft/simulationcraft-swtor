@@ -1624,94 +1624,6 @@ const char* chart_t::timeline( std::string& s,
   return s.c_str();
 }
 
-
-// chart_t::timeline_dps_error ==============================================
-
-const char* chart_t::timeline_dps_error( std::string& s,
-                                         player_t* p )
-{
-  int max_buckets = ( int ) p -> dps_convergence_error.size();
-  if ( ! max_buckets ) return 0;
-
-  int max_points  = 600;
-  int increment   = 1;
-
-  if ( max_buckets > max_points )
-  {
-    increment = ( ( int ) floor( max_buckets / ( double ) max_points ) ) + 1;
-  }
-
-  double dps_max_error=0;
-  for ( int i=0; i < max_buckets; i++ )
-  {
-    if ( p -> dps_convergence_error[ i ] > dps_max_error )
-    {
-      dps_max_error = p -> dps_convergence_error[ i ];
-    }
-  }
-  double dps_range  = 60.0;
-  double dps_adjust = dps_range / dps_max_error;
-
-  char buffer[ 1024 ];
-
-  s = get_chart_base_url();
-  s += "chs=525x185";
-  s += "&amp;";
-  s += "cht=lc";
-  s += "&amp;";
-  s += "chg=20,20";
-  s += "&amp;";
-  s += "chxs=0,ffffff|1,ffffff";
-  s += "&amp;";
-  s += "chco=FF0000,0000FF";
-  s += "&amp;";
-  if ( p -> sim -> print_styles )
-  {
-    s += "chf=c,ls,0,EEEEEE,0.2,FFFFFF,0.2";
-  }
-  else
-  {
-    s += "chf=bg,s,333333";
-  }
-  s += "&amp;";
-  s += "chd=s:";
-  for ( int i=0; i < max_buckets; i += increment )
-  {
-    s += simple_encoding( ( int ) ( p -> dps_convergence_error[ i ] * dps_adjust ) );
-  }
-  s += "&amp;";
-  s += "chxt=x,y";
-  s += "&amp;";
-  s += "chm=";
-  for ( int i=1; i <= 5; i++ )
-  {
-    int j = ( int ) ( ( max_buckets / 5 ) * i );
-    if ( !j ) continue;
-    if ( j >= max_buckets ) j = max_buckets - 1;
-    if ( i > 1 ) s += "|";
-    snprintf( buffer, sizeof( buffer ), "t%.1f,FFFFFF,0,%i,10", p -> dps_convergence_error[ j ], j / increment ); s += buffer;
-
-  }
-  s += "&amp;";
-  snprintf( buffer, sizeof( buffer ), "chxl=0:|0|iterations=%d|1:|0|max dps error=%.0f", max_buckets, dps_max_error ); s += buffer;
-  s += "&amp;";
-  s += "chdl=DPS Error";
-  s += "&amp;";
-  s += "chtt=Standard Error";
-  s += "&amp;";
-  if ( p -> sim -> print_styles )
-  {
-    s += "chts=666666,18";
-  }
-  else
-  {
-    s += "chts=dddddd,18";
-  }
-
-  return s.c_str();
-}
-
-
 // chart_t::distribution_dps ================================================
 
 const char* chart_t::distribution( std::string& s,
@@ -2106,13 +2018,13 @@ const char* chart_t::dps_error( std::string& s,
     s += "chts=dddddd,18";
   }
   s += "&amp;";
-  snprintf( buffer, sizeof( buffer ), "chfd=0,x,%.0f,%.0f,%.8f,100*exp(-(x-%.0f)^2/(2*%.0f^2))", p -> dps.mean - std_dev * 4, p -> dps.mean + std_dev * 4, 1 / std_dev, p -> dps.mean, std_dev ); s += buffer;
+  snprintf( buffer, sizeof( buffer ), "chfd=0,x,%.2f,%.2f,%.8f,100*exp(-(x-%.4f)^2/(2*%.4f^2))", p -> dps.mean - std_dev * 4, p -> dps.mean + std_dev * 4, std_dev / 100.0, p -> dps.mean, std_dev ); s += buffer;
 
   s += "&amp;";
   s += "chd=t:-1";
 
   s += "&amp;";
-  snprintf( buffer, sizeof( buffer ), "chm=B,C6D9FD,0,%.0f:%.0f,0", std::max( 4 * std_dev - p -> dps_error, 0.0 ) * std_dev, floor( std::min( 4 * std_dev + p -> dps_error, 8* std_dev ) * std_dev ) ); s += buffer;
+  snprintf( buffer, sizeof( buffer ), "chm=B,C6D9FD,0,%.0f:%.0f,0", std::max( 4 * std_dev - p -> dps_error, 0.0 ) * 100.0 / std_dev, floor( std::min( 4 * std_dev + p -> dps_error, 8* std_dev ) * 100.0 / std_dev ) ); s += buffer;
 
 
   return s.c_str();

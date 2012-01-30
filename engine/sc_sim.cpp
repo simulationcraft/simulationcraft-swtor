@@ -633,7 +633,7 @@ sim_t::sim_t( sim_t* p, int index ) :
   input_is_utf8( false ),
   target_death_pct( 0 ), target_level( -1 ), target_adds( 0 ),
   rng( 0 ), deterministic_rng( 0 ), rng_list( 0 ),
-  smooth_rng( 0 ), deterministic_roll( 0 ), average_range( 1 ), average_gauss( 0 ), convergence_scale( 2 ),
+  smooth_rng( 0 ), deterministic_roll( 0 ), average_range( 1 ), average_gauss( 0 ),
   timing_wheel( 0 ), wheel_seconds( 0 ), wheel_size( 0 ), wheel_mask( 0 ), timing_slice( 0 ), wheel_granularity( 0.0 ),
   fight_style( "Patchwerk" ), overrides( overrides_t() ), auras( auras_t() ),
   buff_list( 0 ), aura_delay( timespan_t::from_seconds( 0.5 ) ), default_aura_delay( timespan_t::from_seconds( 0.3 ) ),
@@ -1409,54 +1409,6 @@ void sim_t::analyze_player( player_t* p )
                                      std::back_inserter( p -> timeline_dps ) );
   assert( p -> timeline_dps.size() == ( std::size_t ) max_buckets );
 
-  // Error Convergence ======================================================
-
-  int    convergence_iterations = 0;
-  double convergence_dps = 0;
-  double convergence_min = +1.0E+50;
-  double convergence_max = -1.0E+50;
-  double convergence_std_dev = 0;
-
-  if ( iterations > 1 && convergence_scale > 1 && !p -> dps.simple )
-  {
-    for ( int i=0; i < iterations; i += convergence_scale )
-    {
-      double i_dps = p -> dps.data[ i ];
-      convergence_dps += i_dps;
-      if ( convergence_min > i_dps ) convergence_min = i_dps;
-      if ( convergence_max < i_dps ) convergence_max = i_dps;
-    }
-    convergence_iterations = ( iterations + convergence_scale - 1 ) / convergence_scale;
-    convergence_dps /= convergence_iterations;
-
-    assert( p -> dps_convergence_error.empty() );
-    p -> dps_convergence_error.reserve( iterations );
-
-    double sum_of_squares = 0;
-
-    for ( int i=0; i < iterations; i++ )
-    {
-      p -> dps_convergence_error.push_back( confidence_estimator * sqrt( sum_of_squares / i ) / sqrt( ( float ) i ) );
-
-      double delta = p -> dps.data[ i ] - convergence_dps;
-      double delta_squared = delta * delta;
-
-      sum_of_squares += delta_squared;
-
-      if ( ( i % convergence_scale ) == 0 )
-        convergence_std_dev += delta_squared;
-    }
-  }
-
-  if ( convergence_iterations > 1 ) convergence_std_dev /= convergence_iterations;
-  convergence_std_dev = sqrt( convergence_std_dev );
-  double convergence_error = confidence_estimator * convergence_std_dev;
-  if ( convergence_iterations > 1 ) convergence_error /= sqrt( ( float ) convergence_iterations );
-
-  if ( convergence_error > 0 )
-    p -> dps_convergence = convergence_error / ( p -> dps_error * convergence_scale );
-
-
   // Charts =================================================================
 
   chart_t::action_dpet       ( p -> action_dpet_chart,               p );
@@ -1480,7 +1432,6 @@ void sim_t::analyze_player( player_t* p )
                                encoded_name + " DPS",
                                p -> dps.mean );
 
-  chart_t::timeline_dps_error( p -> timeline_dps_error_chart,        p );
   chart_t::dps_error         ( p -> dps_error_chart,                 p );
 
   if ( p -> primary_role() == ROLE_HEAL )
@@ -1995,7 +1946,6 @@ void sim_t::create_options()
     { "deterministic_roll",               OPT_BOOL,   &( deterministic_roll                       ) },
     { "average_range",                    OPT_BOOL,   &( average_range                            ) },
     { "average_gauss",                    OPT_BOOL,   &( average_gauss                            ) },
-    { "convergence_scale",                OPT_INT,    &( convergence_scale                        ) },
     // Misc
     { "party",                            OPT_LIST,   &( party_encoding                           ) },
     { "active",                           OPT_FUNC,   ( void* ) ::parse_active                      },
