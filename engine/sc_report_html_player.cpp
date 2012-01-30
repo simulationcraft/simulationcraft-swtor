@@ -163,24 +163,24 @@ static void print_html_sample_data( FILE* file, player_t* p, sample_data_t& data
 
         fprintf( file,
                  "\t\t\t\t\t\t\t\t<tr>\n"
-                 "\t\t\t\t\t\t\t\t\t<td class=\"left\">0.1 Scale Factor Error with Delta=300</td>\n"
+                 "\t\t\t\t\t\t\t\t\t<td class=\"left\">0.1 Scale Factor Error with Delta=60</td>\n"
                  "\t\t\t\t\t\t\t\t\t<td class=\"right\">%i</td>\n"
                  "\t\t\t\t\t\t\t\t</tr>\n",
-                 ( int ) ( 2.0 * mean_error * mean_error * ( ( float ) data.size() ) / ( 30 * 30 ) ) );
+                 ( int ) ( 2.0 * mean_error * mean_error * ( ( float ) data.size() ) / ( 6 * 6 ) ) );
 
         fprintf( file,
                  "\t\t\t\t\t\t\t\t<tr>\n"
-                 "\t\t\t\t\t\t\t\t\t<td class=\"left\">0.05 Scale Factor Error with Delta=300</td>\n"
+                 "\t\t\t\t\t\t\t\t\t<td class=\"left\">0.05 Scale Factor Error with Delta=60</td>\n"
                  "\t\t\t\t\t\t\t\t\t<td class=\"right\">%i</td>\n"
                  "\t\t\t\t\t\t\t\t</tr>\n",
-                 ( int ) ( 2.0 * mean_error * mean_error * ( ( float ) data.size() ) / ( 15 * 15 ) ) );
+                 ( int ) ( 2.0 * mean_error * mean_error * ( ( float ) data.size() ) / ( 3 * 3 ) ) );
 
         fprintf( file,
                  "\t\t\t\t\t\t\t\t<tr>\n"
-                 "\t\t\t\t\t\t\t\t\t<td class=\"left\">0.01 Scale Factor Error with Delta=300</td>\n"
+                 "\t\t\t\t\t\t\t\t\t<td class=\"left\">0.01 Scale Factor Error with Delta=60</td>\n"
                  "\t\t\t\t\t\t\t\t\t<td class=\"right\">%i</td>\n"
                  "\t\t\t\t\t\t\t\t</tr>\n",
-                 ( int ) (  2.0 * mean_error * mean_error * ( ( float ) data.size() ) / ( 3 * 3 ) ) );
+                 ( int ) (  2.0 * mean_error * mean_error * ( ( float ) data.size() ) / ( 0.6 * 0.6 ) ) );
       }
     }
 
