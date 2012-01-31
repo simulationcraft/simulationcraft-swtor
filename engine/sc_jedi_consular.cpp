@@ -865,7 +865,7 @@ struct force_in_balance_t : public jedi_sage_spell_t
     base_cost = 50.0;
     range = 30.0;
     direct_power_mod = 1.87;
-    aoe = 3;
+    aoe = 2;
 
     cooldown -> duration = timespan_t::from_seconds( 15.0 );
 
@@ -956,7 +956,7 @@ struct telekinetic_wave_t : public jedi_sage_spell_t
     base_execute_time = timespan_t::from_seconds( 3.0 );
     range = 30.0;
     direct_power_mod = 2.02;
-    aoe = 5;
+    aoe = 4;
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02 + p -> talents.psychic_suffusion -> rank() * 0.05;
     crit_bonus += p -> talents.reverberation -> rank() * 0.1;
