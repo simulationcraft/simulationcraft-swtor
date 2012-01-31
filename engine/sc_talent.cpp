@@ -11,7 +11,7 @@
 
 // talent_t::talent_t =======================================================
 
-talent_t::talent_t( player_t* player, const char* n, unsigned tab_page, unsigned max_rank ) :
+talent_t::talent_t( player_t* /* player */, const char* n, unsigned tab_page, unsigned max_rank ) :
   _name( n ), _tab_page( tab_page ), _max_rank( max_rank ),
   t_rank( 0 )
 {

@@ -720,7 +720,7 @@ void player_t::init_items()
 
 // player_t::init_meta_gem ==================================================
 
-void player_t::init_meta_gem( gear_stats_t& item_stats )
+void player_t::init_meta_gem( gear_stats_t& /* item_stats */ )
 {
   if ( ! meta_gem_str.empty() ) meta_gem = util_t::parse_meta_gem_type( meta_gem_str );
 
@@ -1080,7 +1080,7 @@ std::string player_t::init_use_item_actions( const std::string& append )
 
 // player_t::init_use_profession_actions ====================================
 
-std::string player_t::init_use_profession_actions( const std::string& append )
+std::string player_t::init_use_profession_actions( const std::string& /* append */ )
 {
   std::string buffer;
   // Lifeblood
@@ -1715,7 +1715,7 @@ double player_t::composite_spell_resistance( const school_type school ) const
 
 // player_t::composite_tank_miss ============================================
 
-double player_t::composite_tank_miss( const school_type school ) const
+double player_t::composite_tank_miss( const school_type /* school */ ) const
 {
   double m = 0;
 

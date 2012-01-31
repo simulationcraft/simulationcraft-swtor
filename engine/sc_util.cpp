@@ -945,7 +945,7 @@ const char* util_t::slot_type_string( int slot )
 
 // util_t::armor_type_string ================================================
 
-const char* util_t::armor_type_string( player_type ptype, int slot_type )
+const char* util_t::armor_type_string( player_type /* ptype */, int /* slot_type */ )
 {
   return NULL;
 }
@@ -1233,14 +1233,14 @@ int util_t::class_id_mask( int type )
 
 // util_t::class_id =========================================================
 
-int util_t::class_id( int type )
+int util_t::class_id( int /* type */ )
 {
   return 0;
 }
 
 // util_t::race_id ==========================================================
 
-unsigned util_t::race_id( int r )
+unsigned util_t::race_id( int /* r */ )
 {
   return 0;
 }
@@ -1259,14 +1259,14 @@ unsigned util_t::race_mask( int r )
 
 // util_t::pet_class_type ===================================================
 
-player_type util_t::pet_class_type( int c )
+player_type util_t::pet_class_type( int /* c */ )
 {
   return PLAYER_PET;
 }
 
 // util_t::pet_mask =========================================================
 
-unsigned util_t::pet_mask( int p )
+unsigned util_t::pet_mask( int /* p */ )
 {
   return 0x0;
 }
@@ -1289,21 +1289,21 @@ unsigned util_t::pet_id( int p )
 
 // util_t::class_id_string ==================================================
 
-const char* util_t::class_id_string( int type )
+const char* util_t::class_id_string( int /* type */ )
 {
   return "0";
 }
 
 // util_t::translate_class_id ===============================================
 
-int util_t::translate_class_id( int cid )
+int util_t::translate_class_id( int /* cid */ )
 {
   return PLAYER_NONE;
 }
 
 // util_t::translate_race_id ================================================
 
-race_type util_t::translate_race_id( int rid )
+race_type util_t::translate_race_id( int /* rid */ )
 {
   return RACE_NONE;
 }
