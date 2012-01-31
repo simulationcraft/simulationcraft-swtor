@@ -107,6 +107,7 @@ void action_t::init_action_t_()
   weapon                         = NULL;
   weapon_multiplier              = 1.0;
   base_add_multiplier            = 1.0;
+  base_aoe_multiplier            = 1.0;
   normalize_weapon_speed         = false;
   rng_travel                     = NULL;
   stats                          = NULL;
@@ -469,11 +470,6 @@ void action_t::player_buff()
   {
     player_t* p = player;
 
-    if ( school == SCHOOL_BLEED )
-    {
-      // Not applicable
-    }
-
     if ( school != SCHOOL_PHYSICAL )
     {
       player_penetration = p -> composite_spell_penetration();
@@ -519,9 +515,8 @@ void action_t::target_debuff( player_t* t, int /* dmg_type */ )
 
   if ( ! no_debuffs )
   {
-
-    if ( t -> debuffs.vulnerable -> up() ) target_multiplier *= t -> debuffs.vulnerable -> value();
-
+    if ( t -> debuffs.vulnerable -> up() )
+      target_multiplier *= t -> debuffs.vulnerable -> value();
   }
 
   if ( sim -> debug )
@@ -660,6 +655,12 @@ double action_t::total_power() const
   double power=0;
 
   power += player -> composite_force_damage_bonus();
+
+  if ( sim -> debug )
+  {
+    log_t::output( sim, "%s total power for %s: power=%.2f",
+                   player -> name(), name(), power );
+  }
 
   return power;
 }
