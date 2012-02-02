@@ -235,14 +235,16 @@ const char* util_t::race_type_string( int type )
 {
   switch ( type )
   {
-  case RACE_NONE:        return "none";
-  case RACE_HUMAN:       return "human";
-  case RACE_MIRIALAN:    return "mirialan";
-  case RACE_MIRALUKA:    return "miraluka";
-  case RACE_TWILEK:      return "twilek";
-  case RACE_ZABRAK:      return "zabrak";
-  case RACE_RATTATAKI:   return "rattataki";
-  case RACE_PUREBLOOD:   return "pureblood";
+  case RACE_NONE:           return "none";
+  case RACE_CHISS:          return "chiss";
+  case RACE_CYBORG:         return "cyborg";
+  case RACE_HUMAN:          return "human";
+  case RACE_MIRALUKA:       return "miraluka";
+  case RACE_MIRIALAN:       return "mirialan";
+  case RACE_RATTATAKI:      return "rattataki";
+  case RACE_SITH_PUREBLOOD: return "sith_pureblood";
+  case RACE_TWILEK:         return "twilek";
+  case RACE_ZABRAK:         return "zabrak";
   }
   return "unknown";
 }

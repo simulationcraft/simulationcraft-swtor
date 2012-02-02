@@ -1466,6 +1466,19 @@ void jedi_sage_t::init_actions()
 
 int jedi_sage_t::primary_role() const
 {
+  switch ( player_t::primary_role() )
+  {
+  case ROLE_HEAL:
+    return ROLE_HEAL;
+  case ROLE_DPS:
+  case ROLE_SPELL:
+    return ROLE_SPELL;
+  default:
+    if ( primary_tree() == TREE_SEER || primary_tree() == TREE_CORRUPTION )
+      return ROLE_HEAL;
+    break;
+  }
+
   return ROLE_SPELL;
 }
 

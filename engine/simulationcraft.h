@@ -214,7 +214,7 @@ enum race_type
   // Target Races
   RACE_BEAST, RACE_DRAGONKIN, RACE_GIANT, RACE_HUMANOID, RACE_DEMON, RACE_ELEMENTAL,
   // Player Races
-  RACE_HUMAN,RACE_MIRIALAN,RACE_MIRALUKA,RACE_TWILEK,RACE_ZABRAK,RACE_RATTATAKI,RACE_PUREBLOOD,
+  RACE_CHISS, RACE_CYBORG, RACE_HUMAN, RACE_MIRALUKA, RACE_MIRIALAN, RACE_RATTATAKI, RACE_SITH_PUREBLOOD, RACE_TWILEK, RACE_ZABRAK,
   RACE_MAX
 };
 
@@ -4267,7 +4267,7 @@ struct player_t : public noncopyable
   static void enemy_combat_end  ( sim_t* /* sim */ ) {}
 
   inline bool is_pet() const { return type == PLAYER_PET || type == PLAYER_GUARDIAN || type == ENEMY_ADD; }
-  inline bool is_enemy() const { return type == ENEMY; }
+  inline bool is_enemy() const { return type == ENEMY || type == ENEMY_ADD; }
   inline bool is_add() const { return type == ENEMY_ADD; }
 
   jedi_consular_t * cast_jedi_consular() { assert( main_class == JEDI_CONSULAR  ); return ( jedi_consular_t * ) this; }
