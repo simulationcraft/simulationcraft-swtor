@@ -49,8 +49,8 @@ pet_t::pet_t( sim_t*             s,
               player_t*          o,
               const std::string& n,
               pet_type_t         pt,
-              bool               g ) :
-  player_t( s, PLAYER_MAIN_NONE, pt == PET_ENEMY ? ENEMY_ADD : g ? PLAYER_GUARDIAN : PLAYER_PET, n ), owner( o ), next_pet( 0 ), summoned( false ), pet_type( pt )
+              player_type        type) :
+  player_t( s, PLAYER_MAIN_NONE, type, n ), owner( o ), next_pet( 0 ), summoned( false ), pet_type( pt )
 {
   init_pet_t_();
 }
@@ -197,4 +197,27 @@ void pet_t::combat_begin()
   quiet = ! sim -> report_pets_separately;
 
   player_t::combat_begin();
+}
+
+// companion_t::companion_t
+
+
+companion_t::companion_t( sim_t*             s,
+                          player_t*          o,
+                          const std::string& n,
+                          pet_type_t         pt ) :
+  pet_t( s, o, n, pt, PLAYER_COMPANION )
+{
+}
+
+void companion_t::summon( timespan_t duration )
+{
+  owner -> active_companion = this;
+  pet_t::summon( duration );
+}
+
+void companion_t::dismiss()
+{
+  pet_t::dismiss();
+  owner -> active_companion = 0;
 }

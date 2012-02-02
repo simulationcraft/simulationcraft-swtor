@@ -64,6 +64,7 @@ protected:
     player_t( sim, JEDI_CONSULAR, pt, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
   {
     create_options();
+
   }
 public:
 
@@ -74,6 +75,8 @@ public:
   virtual void      init_resources( bool force=false );
   virtual int       primary_resource() const;
   virtual int       primary_role() const;
+  virtual pet_t*    create_pet   ( const std::string& name, const std::string& type = std::string() );
+  virtual void      create_pets();
 };
 
 
@@ -212,6 +215,75 @@ struct jedi_sage_t : public jedi_consular_t
 
 namespace { // ANONYMOUS NAMESPACE ==========================================
 
+// ==========================================================================
+// jedi_consular Companions
+// ==========================================================================
+
+struct jedi_consular_companion_t : pet_t
+{
+  jedi_consular_companion_t( sim_t* sim, player_t* owner, const std::string& pet_name, pet_type_t pt ) :
+    pet_t( sim, owner, pet_name, pt )
+  {
+
+  }
+};
+
+struct jedi_consular_companion_attack_t : public attack_t
+{
+  jedi_consular_companion_attack_t( const char* n, jedi_consular_companion_t* p, int r=RESOURCE_MANA, const school_type s=SCHOOL_PHYSICAL ) :
+    attack_t( n, p, r, s, TREE_NONE, true )
+  {
+    weapon = &( p -> main_hand_weapon );
+    may_crit   = true;
+    special = true;
+  }
+};
+
+struct jedi_consular_companion_spell_t : public spell_t
+{
+
+  jedi_consular_companion_spell_t( const char* n, jedi_consular_companion_t* p, int r=RESOURCE_MANA, const school_type s=SCHOOL_KINETIC ) :
+    spell_t( n, p, r, s )
+  {
+    may_crit = true;
+  }
+};
+
+struct qyzen_fess_t : jedi_consular_companion_t
+{
+  struct power_attack_t : jedi_consular_companion_attack_t
+  {
+    power_attack_t( qyzen_fess_t* p ) :
+      jedi_consular_companion_attack_t( "power_attack", p )
+    {
+      range = 4.0;
+
+      // Assuming Standard Health of 1610 for lvl 50!!!
+      base_dd_min = 238.28;
+      base_dd_max = 238.28;
+
+      direct_power_mod = 1.66;
+
+      cooldown -> duration = timespan_t::from_seconds( 9.0 );
+    }
+  };
+
+  qyzen_fess_t( sim_t* sim, player_t* owner ) :
+    jedi_consular_companion_t( sim, owner, "qyzen_fess", PET_QYZEN_FESS )
+  {
+    action_list_str += "/snapshot_stats";
+    action_list_str += "/power_attack";
+    action_list_str += "/wait_until_ready";
+  }
+
+  virtual action_t* create_action( const std::string& name,
+                                   const std::string& options_str )
+  {
+    if ( name == "power_attack"   ) return new power_attack_t( this );
+
+    return jedi_consular_companion_t::create_action( name, options_str );
+  }
+};
 
 // ==========================================================================
 // jedi_consular Abilities
@@ -1122,6 +1194,27 @@ int jedi_consular_t::primary_role() const
   return ROLE_HYBRID;
 }
 
+// jedi_consular_t::create_pet ====================================================
+
+pet_t* jedi_consular_t::create_pet( const std::string& pet_name,
+                              const std::string& /* pet_type */ )
+{
+  pet_t* p = find_pet( pet_name );
+
+  if ( p ) return p;
+
+  if ( pet_name == "qyzen_fess"     ) return new    qyzen_fess_t( sim, this );
+
+  return 0;
+}
+
+// jedi_consular_t::create_pets ===================================================
+
+void jedi_consular_t::create_pets()
+{
+  create_pet( "qyzen_fess"  );
+}
+
 // ==========================================================================
 // jedi_sage Character Definition
 // ==========================================================================
@@ -1331,6 +1424,8 @@ void jedi_sage_t::init_actions()
 
       action_list_str += "stim,type=rakata_resolve";
 
+      action_list_str += "/summon_companion,name=qyzen_fess";
+
       action_list_str += "/power_potion,if=time>10";
 
       action_list_str += "/force_valor";
@@ -1357,6 +1452,8 @@ void jedi_sage_t::init_actions()
       case TREE_TELEKINETICS:
 
       action_list_str += "stim,type=rakata_resolve";
+
+      action_list_str += "/summon_companion,name=qyzen_fess";
 
       action_list_str += "/power_potion,if=time>10";
 
@@ -1399,6 +1496,8 @@ void jedi_sage_t::init_actions()
 
       action_list_str += "stim,type=rakata_resolve";
 
+      action_list_str += "/summon_companion,name=qyzen_fess";
+
       action_list_str += "/power_potion,if=time>10";
 
       action_list_str += "/mark_of_power";
@@ -1424,6 +1523,8 @@ void jedi_sage_t::init_actions()
       case TREE_LIGHTNING:
 
       action_list_str += "stim,type=rakata_resolve";
+
+      action_list_str += "/summon_companion,name=qyzen_fess";
 
       action_list_str += "/power_potion,if=time>10";
 

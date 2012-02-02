@@ -138,6 +138,7 @@ struct benefit_t;
 struct buff_t;
 struct buff_uptime_t;
 struct callback_t;
+struct companion_t;
 struct cooldown_t;
 class  dbc_t;
 struct dot_t;
@@ -231,7 +232,7 @@ enum player_type
   PLAYER_NONE=0,
   TROOPER, SMUGGLER, JEDI_KNIGHT,
   BOUNTY_HUNTER, SITH_WARRIOR, IMPERIAL_AGENT, SITH_INQUISITOR,
-  PLAYER_PET, PLAYER_GUARDIAN,
+  PLAYER_PET, PLAYER_COMPANION, PLAYER_GUARDIAN,
   JEDI_SAGE, SITH_SORCERER,
   ENEMY, ENEMY_ADD,
   PLAYER_MAX
@@ -240,6 +241,7 @@ enum player_type
 enum pet_type_t
 {
   PET_NONE=0,
+  PET_QYZEN_FESS,
 
 
   PET_ENEMY,
@@ -3726,6 +3728,7 @@ struct player_t : public noncopyable
   std::vector<buff_t*> absorb_buffs;
   int         scale_player;
   double      avg_ilvl;
+  pet_t*      active_companion;
 
   // Latency
   timespan_t  world_lag, world_lag_stddev;
@@ -4345,7 +4348,7 @@ private:
   void init_pet_t_();
 public:
   pet_t( sim_t* sim, player_t* owner, const std::string& name, bool guardian=false );
-  pet_t( sim_t* sim, player_t* owner, const std::string& name, pet_type_t pt, bool guardian=false );
+  pet_t( sim_t* sim, player_t* owner, const std::string& name, pet_type_t pt, player_type type=PLAYER_PET );
 
   // Pets gain their owners' hit rating, but it rounds down to a
   // percentage.  Also, heroic presence does not contribute to pet
@@ -4369,6 +4372,16 @@ public:
 
   virtual const char* name() const { return full_name_str.c_str(); }
   virtual const char* id();
+};
+
+// Companion
+
+struct companion_t : pet_t
+{
+  companion_t( sim_t* sim, player_t* owner, const std::string& name, pet_type_t pt );
+
+  virtual void summon( timespan_t duration=timespan_t::zero );
+  virtual void dismiss();
 };
 
 // Stats ====================================================================

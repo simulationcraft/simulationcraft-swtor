@@ -201,7 +201,7 @@ player_t::player_t( sim_t*             s,
   vengeance_enabled( false ), vengeance_damage( 0.0 ), vengeance_value( 0.0 ), vengeance_max( 0.0 ), vengeance_was_attacked( false ),
   active_pets( 0 ),
   reaction_mean( timespan_t::from_seconds( 0.5 ) ), reaction_stddev( timespan_t::zero ), reaction_nu( timespan_t::from_seconds( 0.5 ) ),
-  scale_player( 1 ), avg_ilvl( 0 ),
+  scale_player( 1 ), avg_ilvl( 0 ), active_companion( 0 ),
   // Latency
   world_lag( timespan_t::from_seconds( 0.1 ) ), world_lag_stddev( timespan_t::min ),
   brain_lag( timespan_t::min ), brain_lag_stddev( timespan_t::min ),
@@ -2273,6 +2273,8 @@ void player_t::reset()
   sleeping = 1;
   events = 0;
 
+  active_companion = 0;
+
   stats = initial_stats;
 
   vengeance_damage = vengeance_value = vengeance_max = 0.0;
@@ -3928,6 +3930,73 @@ bool player_t::debuffs_t::snared()
   return false;
 }
 
+// Summon Pet Spell =========================================================
+
+struct summon_companion_t : public action_t
+{
+  timespan_t summoning_duration;
+  pet_t* pet;
+
+private:
+  void _init_summon_companion_t( const std::string& pet_name )
+  {
+    harmful = false;
+
+    pet = player -> find_pet( pet_name.c_str() );
+    if ( ! pet )
+    {
+      sim -> errorf( "Player %s unable to find pet %s for summons.\n", player -> name(), pet_name.c_str() );
+      sim -> cancel();
+    }
+  }
+
+public:
+  summon_companion_t( player_t* p, const std::string& options_str ) :
+    action_t( ACTION_OTHER, "summon_companion", p ), summoning_duration ( timespan_t::zero ), pet( 0 )
+  {
+    std::string pet_name;
+    option_t options[] =
+    {
+      { "name", OPT_STRING,  &pet_name     },
+      { NULL, OPT_UNKNOWN, NULL }
+    };
+    parse_options( options, options_str );
+
+    _init_summon_companion_t( pet_name );
+  }
+
+  virtual void execute()
+  {
+    pet -> summon( timespan_t::zero );
+
+    player -> active_companion = pet;
+
+    action_t::execute();
+  }
+
+  virtual void calculate_result()
+  {
+    result = RESULT_NONE;
+  }
+
+  virtual void schedule_execute()
+  {
+    action_t::schedule_execute();
+
+    if ( player -> active_companion )
+      player -> active_companion -> dismiss();
+  }
+
+  virtual bool ready()
+  {
+    if ( player -> active_companion == pet )
+      return false;
+
+    return action_t::ready();
+  }
+
+};
+
 // Chosen Movement Actions ==================================================
 
 struct start_moving_t : public action_t
@@ -4537,6 +4606,8 @@ action_t* player_t::create_action( const std::string& name,
   if ( name == "use_item"         ) return new         use_item_t( this, options_str );
   if ( name == "wait"             ) return new       wait_fixed_t( this, options_str );
   if ( name == "wait_until_ready" ) return new wait_until_ready_t( this, options_str );
+  if ( name == "summon_companion" ) return new summon_companion_t( this, options_str );
+
 
   return consumable_t::create_action( this, name, options_str );
 }

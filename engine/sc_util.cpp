@@ -335,6 +335,7 @@ const char* util_t::player_type_string( int type )
   case JEDI_KNIGHT:     return "jedi_knight";
   case PLAYER_PET:      return "pet";
   case PLAYER_GUARDIAN: return "guardian";
+  case PLAYER_COMPANION: return "companion";
   case ENEMY:           return "enemy";
   case ENEMY_ADD:       return "add";
   case JEDI_SAGE:       return "jedi_sage";
@@ -378,6 +379,7 @@ const char* util_t::pet_type_string( int type )
   switch ( type )
   {
   case PET_NONE:                return "none";
+  case PET_QYZEN_FESS:          return "qyzen_fess";
   case PET_ENEMY:               return "pet_enemy";
   }
   return "unknown";

@@ -85,7 +85,7 @@ struct enemy_t : public player_t
 struct enemy_add_t : public pet_t
 {
   enemy_add_t( sim_t* s, player_t* o, const std::string& n, pet_type_t pt = PET_ENEMY ) :
-    pet_t( s, o, n, pt )
+    pet_t( s, o, n, pt, ENEMY_ADD )
   {
     create_options();
   }

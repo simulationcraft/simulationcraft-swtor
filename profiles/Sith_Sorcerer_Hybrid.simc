@@ -9,6 +9,7 @@ role=spell
 use_pre_potion=0
 talents=http://www.torhead.com/skill-calc#sith_sorcerer-000000000000000000032302000120000000003220322131001122300
 actions=stim,type=rakata_resolve
+actions+=/summon_companion,name=qyzen_fess
 actions+=/power_potion,if=time>10
 actions+=/mark_of_power
 actions+=/snapshot_stats
