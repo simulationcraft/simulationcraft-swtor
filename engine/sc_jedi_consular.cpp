@@ -379,7 +379,7 @@ struct jedi_consular_spell_t : public spell_t
       if ( base_execute_time > timespan_t::zero && p -> buffs_presence_of_mind -> up() )
         player_dd_multiplier *= 1.20;
 
-      if ( p -> buffs_force_potency -> up() && base_dd_min > 0 )
+      if ( base_dd_min > 0 && p -> buffs_force_potency -> up() )
         player_crit += 0.60;
     }
   }
@@ -1089,8 +1089,6 @@ struct force_potency_t : public jedi_sage_spell_t
   force_potency_t( jedi_sage_t* p, const std::string& n, const std::string& options_str ) :
     jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
   {
-    check_talent( p -> talents.mental_alacrity -> rank() );
-
     parse_options( 0, options_str );
     cooldown -> duration = timespan_t::from_seconds( 90.0 );
     harmful = false;
