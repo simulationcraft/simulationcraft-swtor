@@ -17,7 +17,6 @@ level=50
 talents=http://www.torhead.com/skill-calc#600ZfcM0dZfMfRs0krc.1
 position=front
 actions=stim,type=rakata_resolve
-actions+=/summon_companion,name=qyzen_fess
 actions+=/power_potion,if=time>10
 actions+=/force_valor
 actions+=/snapshot_stats

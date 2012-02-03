@@ -1422,8 +1422,6 @@ void jedi_sage_t::init_actions()
 
       action_list_str += "stim,type=rakata_resolve";
 
-      action_list_str += "/summon_companion,name=qyzen_fess";
-
       action_list_str += "/power_potion,if=time>10";
 
       action_list_str += "/force_valor";
@@ -1450,8 +1448,6 @@ void jedi_sage_t::init_actions()
       case TREE_TELEKINETICS:
 
       action_list_str += "stim,type=rakata_resolve";
-
-      action_list_str += "/summon_companion,name=qyzen_fess";
 
       action_list_str += "/power_potion,if=time>10";
 
@@ -1494,8 +1490,6 @@ void jedi_sage_t::init_actions()
 
       action_list_str += "stim,type=rakata_resolve";
 
-      action_list_str += "/summon_companion,name=qyzen_fess";
-
       action_list_str += "/power_potion,if=time>10";
 
       action_list_str += "/mark_of_power";
@@ -1521,8 +1515,6 @@ void jedi_sage_t::init_actions()
       case TREE_LIGHTNING:
 
       action_list_str += "stim,type=rakata_resolve";
-
-      action_list_str += "/summon_companion,name=qyzen_fess";
 
       action_list_str += "/power_potion,if=time>10";
 
