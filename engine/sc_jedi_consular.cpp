@@ -994,7 +994,6 @@ struct mental_alacrity_t : public jedi_sage_spell_t
     check_talent( p -> talents.mental_alacrity -> rank() );
 
     parse_options( 0, options_str );
-    base_cost = 30.0;
     cooldown -> duration = timespan_t::from_seconds( 120.0 );
     harmful = false;
 
