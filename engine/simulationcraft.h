@@ -420,26 +420,8 @@ typedef uint32_t set_bonus_description_t[N_TIER][N_TIER_BONUS];
 enum set_type
 {
   SET_NONE = 0,
-  SET_T11_CASTER, SET_T11_2PC_CASTER, SET_T11_4PC_CASTER,
-  SET_T11_MELEE,  SET_T11_2PC_MELEE,  SET_T11_4PC_MELEE,
-  SET_T11_TANK,   SET_T11_2PC_TANK,   SET_T11_4PC_TANK,
-  SET_T11_HEAL,   SET_T11_2PC_HEAL,   SET_T11_4PC_HEAL,
-  SET_T12_CASTER, SET_T12_2PC_CASTER, SET_T12_4PC_CASTER,
-  SET_T12_MELEE,  SET_T12_2PC_MELEE,  SET_T12_4PC_MELEE,
-  SET_T12_TANK,   SET_T12_2PC_TANK,   SET_T12_4PC_TANK,
-  SET_T12_HEAL,   SET_T12_2PC_HEAL,   SET_T12_4PC_HEAL,
-  SET_T13_CASTER, SET_T13_2PC_CASTER, SET_T13_4PC_CASTER,
-  SET_T13_MELEE,  SET_T13_2PC_MELEE,  SET_T13_4PC_MELEE,
-  SET_T13_TANK,   SET_T13_2PC_TANK,   SET_T13_4PC_TANK,
-  SET_T13_HEAL,   SET_T13_2PC_HEAL,   SET_T13_4PC_HEAL,
-  SET_T14_CASTER, SET_T14_2PC_CASTER, SET_T14_4PC_CASTER,
-  SET_T14_MELEE,  SET_T14_2PC_MELEE,  SET_T14_4PC_MELEE,
-  SET_T14_TANK,   SET_T14_2PC_TANK,   SET_T14_4PC_TANK,
-  SET_T14_HEAL,   SET_T14_2PC_HEAL,   SET_T14_4PC_HEAL,
-  SET_PVP_CASTER, SET_PVP_2PC_CASTER, SET_PVP_4PC_CASTER,
-  SET_PVP_MELEE,  SET_PVP_2PC_MELEE,  SET_PVP_4PC_MELEE,
-  SET_PVP_TANK,   SET_PVP_2PC_TANK,   SET_PVP_4PC_TANK,
-  SET_PVP_HEAL,   SET_PVP_2PC_HEAL,   SET_PVP_4PC_HEAL,
+  SET_RAKATA_COMBAT_TECH_GEAR, SET_RAKATA_COMBAT_TECH_GEAR_2PC, SET_RAKATA_COMBAT_TECH_GEAR_4PC,
+  SET_INDOMITABLE, SET_INDOMITABLE_2PC, SET_INDOMITABLE_4PC,
   SET_MAX
 };
 // static_assert( SET_MAX == N_TIER * 3 * N_TIER_BONUS / 2 );
@@ -2739,6 +2721,7 @@ public:
   virtual void   increment( int stacks=1, double value=-1.0 );
   void   decrement( int stacks=1, double value=-1.0 );
   void   extend_duration( player_t* p, timespan_t seconds );
+  void   start_expiration( timespan_t );
 
   virtual void start    ( int stacks=1, double value=-1.0 );
   virtual void refresh  ( int stacks=0, double value=-1.0 );
@@ -3661,39 +3644,20 @@ struct item_database_t
 
 struct set_bonus_t
 {
-  int count[ SET_MAX ];
-  int tier11_2pc_caster() const; int tier11_2pc_melee() const; int tier11_2pc_tank() const; int tier11_2pc_heal() const;
-  int tier11_4pc_caster() const; int tier11_4pc_melee() const; int tier11_4pc_tank() const; int tier11_4pc_heal() const;
-  int tier12_2pc_caster() const; int tier12_2pc_melee() const; int tier12_2pc_tank() const; int tier12_2pc_heal() const;
-  int tier12_4pc_caster() const; int tier12_4pc_melee() const; int tier12_4pc_tank() const; int tier12_4pc_heal() const;
-  int tier13_2pc_caster() const; int tier13_2pc_melee() const; int tier13_2pc_tank() const; int tier13_2pc_heal() const;
-  int tier13_4pc_caster() const; int tier13_4pc_melee() const; int tier13_4pc_tank() const; int tier13_4pc_heal() const;
-  int tier14_2pc_caster() const; int tier14_2pc_melee() const; int tier14_2pc_tank() const; int tier14_2pc_heal() const;
-  int tier14_4pc_caster() const; int tier14_4pc_melee() const; int tier14_4pc_tank() const; int tier14_4pc_heal() const;
-  int pvp_2pc_caster() const; int pvp_2pc_melee() const; int pvp_2pc_tank() const; int pvp_2pc_heal() const;
-  int pvp_4pc_caster() const; int pvp_4pc_melee() const; int pvp_4pc_tank() const; int pvp_4pc_heal() const;
-  int decode( player_t*, item_t& item ) const;
+
+  set_bonus_t* next;
+  player_t* player;
+  std::string name_str;
+private:
+  int count;
+public:
+  int two_pc() const; int four_pc() const;
+  bool decode( player_t*, item_t& item ) const;
   bool init( player_t* );
 
-  set_bonus_t();
+  set_bonus_t( player_t*, const std::string );
 
-  action_expr_t* create_expression( action_t*, const std::string& type );
-};
-
-struct set_bonus_array_t
-{
-private:
-  const std::auto_ptr<spell_id_t> default_value;
-  std::auto_ptr<spell_id_t> set_bonuses[ SET_MAX ];
-  player_t* p;
-
-  spell_id_t* create_set_bonus( uint32_t spell_id );
-
-public:
-  set_bonus_array_t( player_t* p, const uint32_t a_bonus[ N_TIER ][ N_TIER_BONUS ] );
-
-  bool              has_set_bonus( set_type s ) const;
-  const spell_id_t* set( set_type s ) const;
+  //action_expr_t* create_expression( action_t*, const std::string& type );
 };
 
 // Player ===================================================================
@@ -3916,6 +3880,7 @@ struct player_t : public noncopyable
   stats_t*  stats_list;
   benefit_t* benefit_list;
   uptime_t* uptime_list;
+  set_bonus_t* set_bonus_list;
   std::vector<double> dps_plot_data[ STAT_MAX ];
   std::vector<std::vector<reforge_plot_data_t> > reforge_plot_data;
   std::vector<std::vector<double> > timeline_resource;
@@ -3962,8 +3927,6 @@ struct player_t : public noncopyable
   std::string items_str, meta_gem_str;
   std::vector<item_t> items;
   gear_stats_t stats, initial_stats, gear, enchant, temporary;
-  set_bonus_t set_bonus;
-  set_bonus_array_t * sets;
   int meta_gem;
   bool matching_gear;
 
@@ -4035,6 +3998,13 @@ struct player_t : public noncopyable
   };
   rngs_t rngs;
 
+  struct set_bonuses_t
+  {
+    set_bonus_t* indomitable;
+    void reset() { *this = set_bonuses_t(); }
+  };
+  set_bonuses_t set_bonus;
+
   int targetdata_id;
   std::vector<targetdata_t*> targetdata;
 
@@ -4048,6 +4018,7 @@ struct player_t : public noncopyable
   virtual void init();
   virtual void init_glyphs();
   virtual void init_base() = 0;
+  virtual void init_set_bonus();
   virtual void init_items();
   virtual void init_meta_gem( gear_stats_t& );
   virtual void init_core();
@@ -4233,7 +4204,7 @@ struct player_t : public noncopyable
 
   virtual void trigger_replenishment();
 
-  virtual int decode_set( item_t& item ) { ( void )item; assert( item.name() ); return SET_NONE; }
+  virtual bool decode_set( item_t& item, const set_bonus_t* );
 
   virtual void recalculate_alacrity();
   virtual void recalculate_crit();
@@ -4300,6 +4271,7 @@ struct player_t : public noncopyable
   benefit_t*  get_benefit ( const std::string& name );
   uptime_t*   get_uptime  ( const std::string& name );
   rng_t*      get_rng     ( const std::string& name, int type=RNG_DEFAULT );
+  set_bonus_t* get_set_bonus( const std::string& name );
   double      get_player_distance( const player_t* p ) const;
   double      get_position_distance( double m=0, double v=0 ) const;
   action_priority_list_t* get_action_priority_list( const std::string& name );

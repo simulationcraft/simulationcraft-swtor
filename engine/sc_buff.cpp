@@ -615,6 +615,19 @@ void buff_t::extend_duration( player_t* p, timespan_t extra_seconds )
   }
 }
 
+// buff_t::start_expiration
+
+void buff_t::start_expiration( timespan_t t )
+{
+  if ( expiration )
+    return;
+
+  if ( t > timespan_t::zero )
+  {
+    expiration = new ( sim ) expiration_t( sim, player, this, t );
+  }
+}
+
 // buff_t::start ============================================================
 
 void buff_t::start( int    stacks,

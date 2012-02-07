@@ -589,7 +589,13 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
       jedi_sage_t* p = player -> cast_jedi_sage();
 
       if ( p -> buffs_psychic_projection -> up() )
+      {
         is_buffed_by_psychic_projection = true;
+        if ( p -> buffs_psychic_projection -> check() == 2 )
+        {
+          p -> buffs_psychic_projection -> start_expiration( timespan_t::from_seconds( 2.0 ) );
+        }
+      }
       else
         is_buffed_by_psychic_projection = false;
     }
@@ -615,7 +621,14 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
 
-      if ( is_buffed_by_psychic_projection )
+      if ( p -> bugs )
+      {
+        if ( is_buffed_by_psychic_projection )
+        {
+            p -> buffs_psychic_projection -> decrement();
+        }
+      }
+      else if ( is_buffed_by_psychic_projection )
         p -> buffs_psychic_projection -> expire();
     }
   }
@@ -856,7 +869,7 @@ struct weaken_mind_t : public jedi_sage_spell_t
 
     if ( result == RESULT_CRIT && p -> talents.psychic_projection -> rank() > 0 )
     {
-      p -> buffs_psychic_projection -> trigger();
+      p -> buffs_psychic_projection -> trigger( p -> buffs_psychic_projection -> max_stack );
     }
   }
 
@@ -1361,7 +1374,7 @@ void jedi_sage_t::init_buffs()
   bool is_sage = ( type == JEDI_SAGE );
 
   buffs_concentration = new buff_t( this, is_sage ? "concentration" : "subversion", 3, timespan_t::from_seconds( 10.0 ), timespan_t::zero, 0.5 * talents.concentration -> rank() );
-  buffs_psychic_projection = new buff_t( this, is_sage ? "psychic_projection" : "lightning_barrage", 1, timespan_t::zero, timespan_t::from_seconds( 10.0 ), 0.5 * talents.psychic_projection -> rank() );
+  buffs_psychic_projection = new buff_t( this, is_sage ? "psychic_projection" : "lightning_barrage", bugs ? 2 : 1, timespan_t::zero, timespan_t::from_seconds( 10.0 ), 0.5 * talents.psychic_projection -> rank() );
   buffs_tidal_force = new buff_t( this, is_sage ? "tidal_force" : "lightning_storm", 1, timespan_t::zero, timespan_t::from_seconds( 10.0 ) );
   buffs_telekinetic_effusion = new buff_t( this, is_sage ? "telekinetic_effusion" : "lightning_effusion", 2, timespan_t::zero, timespan_t::zero, 0.5 * talents.telekinetic_effusion -> rank() );
   buffs_tremors = new buff_t( this, is_sage ? "tremors" : "conduction", 3, timespan_t::from_seconds( 30.0 ) );
