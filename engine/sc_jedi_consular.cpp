@@ -1439,8 +1439,6 @@ void jedi_sage_t::init_actions()
 
       action_list_str += "/telekinetic_throw";
 
-      action_list_str += "/disturbance";
-
       break;
 
 
@@ -1507,7 +1505,6 @@ void jedi_sage_t::init_actions()
 
       action_list_str += "/force_lightning";
 
-      action_list_str += "/lightning_strike";
       break;
 
 

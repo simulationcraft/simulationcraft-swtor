@@ -17,7 +17,6 @@ actions+=/death_field
 actions+=/creeping_terror,if=!ticking
 actions+=/crushing_darkness
 actions+=/force_lightning
-actions+=/lightning_strike
 shirt=foo,stats=1325willpower_536crit_306alacrity_107power_1217forcepower_201surge
 # Gear Summary
 # gear_crit_rating=536

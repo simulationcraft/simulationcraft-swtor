@@ -17,7 +17,6 @@ actions+=/force_in_balance
 actions+=/sever_force,if=!ticking
 actions+=/mind_crush
 actions+=/telekinetic_throw
-actions+=/disturbance
 shirt=foo,stats=1325willpower_536crit_306alacrity_107power_1217forcepower_201surge
 # Gear Summary
 # gear_crit_rating=536
