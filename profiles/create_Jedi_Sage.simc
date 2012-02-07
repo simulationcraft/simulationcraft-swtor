@@ -21,6 +21,7 @@ actions+=/power_potion,if=time>10
 actions+=/force_valor
 actions+=/snapshot_stats
 actions+=/weaken_mind,if=!ticking
+actions+=/telekinetic_throw,if=buff.psychic_projection.react
 actions+=/force_in_balance
 actions+=/mind_crush,if=buff.presence_of_mind.react
 actions+=/telekinetic_wave,if=buff.presence_of_mind.react&force>150&cooldown.mind_crush.remains>4

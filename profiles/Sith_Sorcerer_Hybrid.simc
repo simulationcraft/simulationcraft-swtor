@@ -13,6 +13,7 @@ actions+=/power_potion,if=time>10
 actions+=/mark_of_power
 actions+=/snapshot_stats
 actions+=/affliction,if=!ticking
+actions+=/force_lightning,if=buff.lightning_barrage.react
 actions+=/death_field
 actions+=/crushing_darkness,if=buff.wrath.react
 actions+=/chain_lightning,if=buff.wrath.react&force>150&cooldown.crushing_darkness.remains>4
