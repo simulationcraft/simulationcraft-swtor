@@ -1,25 +1,26 @@
 #!./simc 
 
-sith_sorcerer=Sith_Sorcerer_Madness
+sith_sorcerer=Sith_Sorcerer_Conduction
 origin="create_Sith_Sorcerer.simc"
 level=50
 race=human
 position=front
 role=spell
 use_pre_potion=0
-talents=http://www.torhead.com/skill-calc#sith_sorcerer-030000000000000000002302000000000000003020322131201122321
+talents=http://www.torhead.com/skill-calc#sith_sorcerer-000000000000000000032312201120120131003020302131001000000
 actions=stim,type=rakata_resolve
 actions+=/mark_of_power
 actions+=/snapshot_stats
 actions+=/power_potion
 actions+=/recklessness
-actions+=/force_lightning,if=buff.lightning_barrage.react
+actions+=/chain_lightning,if=buff.wrath.react|buff.lightning_storm.react
 actions+=/affliction,if=!ticking
-actions+=/death_field,if=force>100
+actions+=/force_lightning,if=buff.lightning_barrage.react
+actions+=/death_field
 actions+=/crushing_darkness,if=buff.wrath.react
-actions+=/creeping_terror,if=!ticking
-actions+=/crushing_darkness
-actions+=/force_lightning
+actions+=/polarity_shift
+actions+=/lightning_strike
+actions+=/shock,moving=1
 shirt=foo,stats=1325willpower_536crit_306alacrity_107power_1217forcepower_201surge
 # Gear Summary
 # gear_crit_rating=536

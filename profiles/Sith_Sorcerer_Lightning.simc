@@ -9,14 +9,15 @@ role=spell
 use_pre_potion=0
 talents=http://www.torhead.com/skill-calc#sith_sorcerer-030000000000000000032312201120120131513020002000000000000
 actions=stim,type=rakata_resolve
-actions+=/power_potion,if=time>10
 actions+=/mark_of_power
 actions+=/snapshot_stats
+actions+=/power_potion
 actions+=/affliction,if=!ticking
 actions+=/thundering_blast,if=dot.affliction.remains>cast_time
+actions+=/recklessness,if=buff.lightning_barrage.react|buff.lightning_storm.react
 actions+=/force_lightning,if=buff.lightning_barrage.react
 actions+=/chain_lightning,if=buff.lightning_storm.react
-actions+=/polarity_shift,moving=0
+actions+=/polarity_shift
 actions+=/crushing_darkness
 actions+=/lightning_strike
 actions+=/shock,moving=1
