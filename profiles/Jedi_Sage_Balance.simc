@@ -13,13 +13,13 @@ actions+=/force_valor
 actions+=/snapshot_stats
 actions+=/power_potion
 actions+=/force_potency
-actions+=/telekinetic_throw,if=buff.psychic_projection.react
 actions+=/weaken_mind,if=!ticking
 actions+=/force_in_balance,if=force>100
 actions+=/mind_crush,if=buff.presence_of_mind.react
 actions+=/sever_force,if=!ticking
 actions+=/mind_crush
 actions+=/telekinetic_throw
+actions+=/project,moving=1
 shirt=foo,stats=1325willpower_536crit_306alacrity_107power_1217forcepower_201surge
 # Gear Summary
 # gear_crit_rating=536

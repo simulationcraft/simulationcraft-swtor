@@ -1434,16 +1434,27 @@ void jedi_sage_t::init_actions()
 
       action_list_str += "stim,type=rakata_resolve";
 
-      action_list_str += "/power_potion,if=time>10";
-
       action_list_str += "/force_valor";
 
       action_list_str += "/snapshot_stats";
 
+      action_list_str += "/power_potion";
+
+      action_list_str += "/force_potency";
+
+      if ( talents.psychic_projection -> rank() )
+        action_list_str += "/telekinetic_throw,if=buff.psychic_projection.react";
+
       action_list_str += "/weaken_mind,if=!ticking";
 
       if ( talents.force_in_balance -> rank() > 0 && talents.force_suppression -> rank() > 0 )
-        action_list_str += "/force_in_balance";
+        action_list_str += "/force_in_balance,if=force>100";
+
+      if ( talents.presence_of_mind -> rank() )
+        action_list_str += "/mind_crush,if=buff.presence_of_mind.react";
+
+      if ( talents.telekinetic_wave -> rank() && talents.presence_of_mind -> rank() )
+        action_list_str += "/telekinetic_wave,if=buff.presence_of_mind.react&force>76+6*target.health_pct&cooldown.mind_crush.remains>4";
 
       if ( talents.sever_force -> rank() > 0 )
         action_list_str += "/sever_force,if=!ticking";
@@ -1452,6 +1463,8 @@ void jedi_sage_t::init_actions()
 
       action_list_str += "/telekinetic_throw";
 
+      action_list_str += "/project,moving=1";
+
       break;
 
 
@@ -1459,16 +1472,18 @@ void jedi_sage_t::init_actions()
 
       action_list_str += "stim,type=rakata_resolve";
 
-      action_list_str += "/power_potion,if=time>10";
-
       action_list_str += "/force_valor";
 
       action_list_str += "/snapshot_stats";
+
+      action_list_str += "/power_potion";
 
       action_list_str += "/weaken_mind,if=!ticking";
 
       if ( talents.turbulence -> rank() > 0 )
         action_list_str += "/turbulence,if=dot.weaken_mind.remains>cast_time";
+
+      action_list_str += "/force_potency,if=buff.psychic_projection.react|buff.tidal_force.react";
 
       if ( talents.psychic_projection -> rank() > 0)
         action_list_str += "/telekinetic_throw,if=buff.psychic_projection.react";
@@ -1482,7 +1497,7 @@ void jedi_sage_t::init_actions()
 
       action_list_str += "/disturbance";
 
-      action_list_str += "/project,moving=1";
+      action_list_str += "/project,moving=1,if=force>120";
 
       break;
 
@@ -1500,16 +1515,27 @@ void jedi_sage_t::init_actions()
 
       action_list_str += "stim,type=rakata_resolve";
 
-      action_list_str += "/power_potion,if=time>10";
-
       action_list_str += "/mark_of_power";
 
       action_list_str += "/snapshot_stats";
 
+      action_list_str += "/power_potion";
+
+      action_list_str += "/recklessness";
+
+      if ( talents.psychic_projection -> rank() )
+        action_list_str += "/force_lightning,if=buff.lightning_barrage.react";
+
       action_list_str += "/affliction,if=!ticking";
 
-      if ( talents.force_in_balance -> rank() > 0 && talents.force_suppression -> rank() > 0 )
-        action_list_str += "/death_field";
+      if ( talents.force_in_balance -> rank() > 0 )
+        action_list_str += "/death_field,if=force>100";
+
+      if ( talents.presence_of_mind -> rank() )
+        action_list_str += "/crushing_darkness,if=buff.wrath.react";
+
+      if ( talents.telekinetic_wave -> rank() && talents.presence_of_mind -> rank() )
+        action_list_str += "/chain_lightning,if=buff.wrath.react&force>76+6*target.health_pct&cooldown.crushing_darkness.remains>4";
 
       if ( talents.sever_force -> rank() > 0 )
         action_list_str += "/creeping_terror,if=!ticking";
@@ -1518,6 +1544,8 @@ void jedi_sage_t::init_actions()
 
       action_list_str += "/force_lightning";
 
+      action_list_str += "/shock,moving=1,if=force>120";
+
       break;
 
 
@@ -1525,16 +1553,18 @@ void jedi_sage_t::init_actions()
 
       action_list_str += "stim,type=rakata_resolve";
 
-      action_list_str += "/power_potion,if=time>10";
-
       action_list_str += "/mark_of_power";
 
       action_list_str += "/snapshot_stats";
+
+      action_list_str += "/power_potion";
 
       action_list_str += "/affliction,if=!ticking";
 
       if ( talents.turbulence -> rank() > 0 )
         action_list_str += "/thundering_blast,if=dot.affliction.remains>cast_time";
+
+      action_list_str += "/recklessness,if=buff.lightning_barrage.react|buff.lightning_storm.react";
 
       if ( talents.psychic_projection -> rank() > 0)
         action_list_str += "/force_lightning,if=buff.lightning_barrage.react";

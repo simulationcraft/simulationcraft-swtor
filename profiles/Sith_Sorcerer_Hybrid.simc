@@ -15,9 +15,10 @@ actions+=/power_potion
 actions+=/recklessness
 actions+=/force_lightning,if=buff.lightning_barrage.react
 actions+=/affliction,if=!ticking
-actions+=/death_field
+actions+=/death_field,if=force>100
 actions+=/crushing_darkness,if=buff.wrath.react
 actions+=/chain_lightning,if=buff.wrath.react&force>76+6*target.health_pct&cooldown.crushing_darkness.remains>4
+actions+=/crushing_darkness
 actions+=/force_lightning
 actions+=/shock,moving=1,if=force>120
 shirt=foo,stats=1325willpower_536crit_306alacrity_107power_1217forcepower_201surge

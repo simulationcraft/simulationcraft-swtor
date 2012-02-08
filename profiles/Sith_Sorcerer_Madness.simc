@@ -13,13 +13,13 @@ actions+=/mark_of_power
 actions+=/snapshot_stats
 actions+=/power_potion
 actions+=/recklessness
-actions+=/force_lightning,if=buff.lightning_barrage.react
 actions+=/affliction,if=!ticking
 actions+=/death_field,if=force>100
 actions+=/crushing_darkness,if=buff.wrath.react
 actions+=/creeping_terror,if=!ticking
 actions+=/crushing_darkness
 actions+=/force_lightning
+actions+=/shock,moving=1,if=force>120
 shirt=foo,stats=1325willpower_536crit_306alacrity_107power_1217forcepower_201surge
 # Gear Summary
 # gear_crit_rating=536
