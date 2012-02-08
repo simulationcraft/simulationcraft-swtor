@@ -21,11 +21,11 @@ actions+=/polarity_shift,moving=0
 actions+=/crushing_darkness
 actions+=/lightning_strike
 actions+=/shock,moving=1
-shirt=foo,stats=1325willpower_536crit_306alacrity_107power_1217forcepower_201surge
+shirt=foo,stats=1487willpower_410crit_346alacrity_218power_1224forcepower_153surge
 # Gear Summary
-# gear_crit_rating=536
-# gear_alacrity_rating=306
-# gear_power=107
-# gear_forcepower=1217
-# gear_willpower=1325
-# gear_surge_rating=201
+# gear_crit_rating=410
+# gear_alacrity_rating=346
+# gear_power=218
+# gear_forcepower=1224
+# gear_willpower=1487
+# gear_surge_rating=153

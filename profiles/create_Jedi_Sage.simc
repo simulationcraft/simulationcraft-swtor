@@ -2,7 +2,7 @@ jedi_sage=Jedi_Sage_Balance
 level=50
 talents=http://www.torhead.com/skill-calc#600hZbcMZcMfRsMkrfz.1
 position=front
-shirt=foo,stats=1325willpower_536crit_306alacrity_107power_1217forcepower_201surge
+shirt=foo,stats=1487willpower_410crit_346alacrity_218power_1224forcepower_153surge
 save=Jedi_Sage_Balance.simc
 
 copy=Jedi_Sage_Telekinetics,Jedi_Sage_Balance
