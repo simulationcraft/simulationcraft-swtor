@@ -9,14 +9,15 @@ role=spell
 use_pre_potion=0
 talents=http://www.torhead.com/skill-calc#jedi_sage-030000000000000000032312201120120131513020002000000000000
 actions=stim,type=rakata_resolve
-actions+=/power_potion,if=time>10
 actions+=/force_valor
 actions+=/snapshot_stats
+actions+=/power_potion
 actions+=/weaken_mind,if=!ticking
 actions+=/turbulence,if=dot.weaken_mind.remains>cast_time
+actions+=/force_potency,if=buff.psychic_projection.react|buff.tidal_force.react
 actions+=/telekinetic_throw,if=buff.psychic_projection.react
 actions+=/telekinetic_wave,if=buff.tidal_force.react
-actions+=/mental_alacrity,moving=0
+actions+=/mental_alacrity
 actions+=/mind_crush
 actions+=/disturbance
 actions+=/project,moving=1

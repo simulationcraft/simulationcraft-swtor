@@ -1,13 +1,13 @@
 #!./simc 
 
-jedi_sage=Jedi_Sage_Balance
+jedi_sage=Jedi_Sage_Suffusion
 origin="create_Jedi_Sage.simc"
 level=50
 race=human
 position=front
 role=spell
 use_pre_potion=0
-talents=http://www.torhead.com/skill-calc#jedi_sage-030000000000000000002302000000000000003020322131201122321
+talents=http://www.torhead.com/skill-calc#jedi_sage-230002000000000000032302020120120000003020302131001000000
 actions=stim,type=rakata_resolve
 actions+=/force_valor
 actions+=/snapshot_stats
@@ -15,11 +15,11 @@ actions+=/power_potion
 actions+=/force_potency
 actions+=/telekinetic_throw,if=buff.psychic_projection.react
 actions+=/weaken_mind,if=!ticking
-actions+=/force_in_balance,if=force>100
+actions+=/force_in_balance
+actions+=/telekinetic_wave,if=buff.presence_of_mind.react|buff.tidal_force.react
 actions+=/mind_crush,if=buff.presence_of_mind.react
-actions+=/sever_force,if=!ticking
-actions+=/mind_crush
 actions+=/telekinetic_throw
+actions+=/project,moving=1
 shirt=foo,stats=1325willpower_536crit_306alacrity_107power_1217forcepower_201surge
 # Gear Summary
 # gear_crit_rating=536

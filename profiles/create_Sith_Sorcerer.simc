@@ -1,6 +1,6 @@
 sith_sorcerer=Sith_Sorcerer_Madness
 level=50
-talents=http://www.torhead.com/skill-calc#600hZbcMZcMfRsMkrfz.1
+talents=http://www.torhead.com/skill-calc#201hZbcMZfrfRs0krcz.1
 position=front
 shirt=foo,stats=1325willpower_536crit_306alacrity_107power_1217forcepower_201surge
 actions=stim,type=rakata_resolve
@@ -18,7 +18,7 @@ actions+=/force_lightning
 save=Sith_Sorcerer_Madness.simc
 
 copy=Sith_Sorcerer_Lightning,Sith_Sorcerer_Madness
-talents=http://www.torhead.com/skill-calc#600hZfsrodoMutzZcM0M.1
+talents=http://www.torhead.com/skill-calc#201hZfsrodoMutzZcM0M.1
 actions=stim,type=rakata_resolve
 actions+=/mark_of_power
 actions+=/snapshot_stats
