@@ -19,10 +19,13 @@
 
 void heal_t::init_heal_t_()
 {
-  target = player -> target;
   if ( target -> is_enemy() || target -> is_add() )
     target = player;
-  heal_target.push_back( target );
+
+  base_spell_power_multiplier = 1.0;
+  min_gcd = timespan_t::from_seconds( 1.0 );
+
+  group_only = false;
 
   total_heal = total_actual = 0;
 
@@ -36,145 +39,87 @@ void heal_t::init_heal_t_()
   crit_bonus = 1.0;
 
   crit_multiplier = 1.0;
-}
 
-// heal_t::heal_t ======== Heal Constructor by Spell ID =====================
+}
 
 heal_t::heal_t( const char* n, player_t* p, int r, const school_type s, int t ) :
-  spell_t( n, p, r, s, t )
+    action_t( ACTION_HEAL, n, p, r, s, t )
 {
   init_heal_t_();
-}
-
-// heal_t::parse_options ====================================================
-
-void heal_t::parse_options( option_t*          options,
-                            const std::string& options_str )
-{
-  spell_t::parse_options( options, options_str );
-
-  if ( target )
-  {
-    heal_target.clear();
-    heal_target.push_back( target );
-  }
 }
 
 // heal_t::player_buff ======================================================
 
 void heal_t::player_buff()
 {
-  player_multiplier              = 1.0;
-  player_dd_multiplier           = 1.0;
-  player_td_multiplier           = 1.0;
-  player_hit                     = 0;
-  player_crit                    = 0;
-  player_penetration             = 0;
-  player_dd_adder                = 0;
-  player_spell_power             = 0;
-  player_attack_power            = 0;
-  player_spell_power_multiplier  = 1.0;
-  player_attack_power_multiplier = 1.0;
+  action_t::player_buff();
 
   player_t* p = player;
 
-  player_hit  = p -> composite_spell_hit();
-  player_crit = p -> composite_spell_crit();
-
-  player_multiplier    = p -> composite_player_heal_multiplier   ( school );
+  player_multiplier    = p -> composite_player_heal_multiplier( school );
   player_dd_multiplier = p -> composite_player_dh_multiplier( school );
   player_td_multiplier = p -> composite_player_th_multiplier( school );
 
-  if ( base_attack_power_multiplier > 0 )
-  {
-    player_attack_power            = p -> composite_attack_power();
-    player_attack_power_multiplier = p -> composite_attack_power_multiplier();
-  }
-
-  if ( base_spell_power_multiplier > 0 )
-  {
-    player_spell_power            = p -> composite_spell_power( school );
-    player_spell_power_multiplier = p -> composite_spell_power_multiplier();
-  }
-
   player_alacrity = alacrity();
 
-  if ( sim -> debug )
-    log_t::output( sim, "heal_t::player_buff: %s hit=%.2f crit=%.2f pen=%.0f sp=%.2f ap=%.2f mult=%.2f ",
-                   name(), player_hit, player_crit, player_penetration,
-                   player_spell_power, player_attack_power, player_multiplier );
-}
+  player_crit = p -> composite_spell_crit();
 
-// heal_t::target_buff ======================================================
-
-void heal_t::target_debuff( player_t* /* t */, int /* dmg_type */ )
-{
-  target_multiplier            = 1.0;
-  target_hit                   = 0;
-  target_crit                  = 0;
-  target_attack_power          = 0;
-  target_spell_power           = 0;
-  target_penetration           = 0;
-  target_dd_adder              = 0;
-
-  if ( sim -> debug )
-    log_t::output( sim, "heal_t::target_buff: %s hit=%.2f crit=%.2f pen=%.0f ap=%.2f sp=%.2f mult=%.2f",
-                   name(), target_hit, target_crit, target_penetration,
-                   target_attack_power, target_spell_power, target_multiplier );
+  if ( sim -> debug ) log_t::output( sim, "heal_t::player_buff: %s mult=%.2f dd_mult=%.2f td_mult=%.2f crit=%.2f",
+                                     name(), player_multiplier, player_dd_multiplier, player_td_multiplier, player_crit );
 }
 
 // heal_t::alacrity ============================================================
 
 double heal_t::alacrity() const
 {
-  double h = spell_t::alacrity();
+  return player -> composite_spell_alacrity();
+}
 
-  return h;
+// heal_t::gcd =============================================================
+
+timespan_t heal_t::gcd() const
+{
+  // KEEP IDENTICAL TO SPELL_T::GCD
+
+  timespan_t t = action_t::gcd();
+  if ( t == timespan_t::zero ) return timespan_t::zero;
+
+  // According to http://sithwarrior.com/forums/Thread-SWTOR-formula-list alacrity doesn't reduce the gcd
+  // Actually it seems to be more complex, cast time spells ( eg. with 1.5s cast time ) get a reduced gcd, but instant cast spells do not
+  // http://sithwarrior.com/forums/Thread-Alacrity-and-the-GCD?pid=9152#pid9152
+  if ( base_execute_time > timespan_t::zero )
+    t *= alacrity();
+
+  if ( t < min_gcd ) t = min_gcd;
+
+  return t;
+}
+
+// heal_t::execute_time ====================================================
+
+timespan_t heal_t::execute_time() const
+{
+  timespan_t t = base_execute_time;
+
+  if ( ! harmful && ! player -> in_combat )
+    return timespan_t::zero;
+
+  if ( t <= timespan_t::zero )
+    return timespan_t::zero;
+
+  t *= alacrity();
+
+  return t;
 }
 
 // heal_t::execute ==========================================================
 
 void heal_t::execute()
 {
-  if ( ! initialized )
-  {
-    sim -> errorf( "action_t::execute: action %s from player %s is not initialized.\n", name(), player -> name() );
-    assert( 0 );
-  }
-
-  if ( sim -> log && ! dual )
-  {
-    log_t::output( sim, "%s performs %s (%.0f)", player -> name(), name(),
-                   player -> resource_current[ player -> primary_resource() ] );
-  }
-
-  player_buff();
-
   total_heal = 0;
 
-  for ( unsigned int i = 0; i < heal_target.size(); i++ )
-  {
-    target_debuff( heal_target[ i ], HEAL_DIRECT );
+  action_t::execute();
 
-    calculate_result();
-
-    direct_dmg = calculate_direct_damage();
-
-    schedule_travel( heal_target[ i ] );
-  }
-
-  consume_resource();
-
-  update_ready();
-
-  if ( ! dual ) stats -> add_execute( time_to_execute );
-
-  if ( harmful ) player -> in_combat = true;
-
-  if ( repeating && ! proc ) schedule_execute();
-
-
-  // Add options found in spell_t::execute()
   if ( player -> last_foreground_action == this )
     player -> debuffs.casting -> expire();
 
@@ -183,76 +128,14 @@ void heal_t::execute()
     if ( result != RESULT_NONE )
     {
       action_callback_t::trigger( player -> heal_callbacks[ result ], this );
+      action_callback_t::trigger( player -> spell_callbacks[ result ], this );
     }
     if ( ! background ) // OnSpellCast
     {
       action_callback_t::trigger( player -> heal_callbacks[ RESULT_NONE ], this );
+      action_callback_t::trigger( player -> spell_callbacks[ RESULT_NONE ], this );
     }
   }
-}
-
-// heal_t::impact ===========================================================
-
-void heal_t::impact( player_t* t, int impact_result, double travel_heal=0 )
-{
-  assess_damage( t, travel_heal, HEAL_DIRECT, impact_result );
-
-  if ( num_ticks > 0 )
-  {
-    dot_t* dot = this -> dot();
-    if ( dot_behavior != DOT_REFRESH ) dot -> cancel();
-    dot -> action = this;
-    dot -> num_ticks = hasted_num_ticks();
-    dot -> current_tick = 0;
-    dot -> added_ticks = 0;
-    if ( dot -> ticking )
-    {
-      assert( dot -> tick_event );
-      if ( ! channeled )
-      {
-        // Recasting a dot while it's still ticking gives it an extra tick in total
-        dot -> num_ticks++;
-      }
-    }
-    else
-    {
-      dot -> schedule_tick();
-    }
-    dot -> recalculate_ready();
-    if ( sim -> debug )
-      log_t::output( sim, "%s extends dot-ready to %.2f for %s (%s)",
-                     player -> name(), dot -> ready.total_seconds(), name(), dot -> name() );
-  }
-}
-
-// heal_t::tick =============================================================
-
-void heal_t::tick( dot_t* d )
-{
-  if ( sim -> debug )
-    log_t::output( sim, "%s ticks (%d of %d)", name(), d -> current_tick, d -> num_ticks );
-
-  result = RESULT_HIT;
-
-  player_tick();
-
-  target_debuff( heal_target[0], HEAL_OVER_TIME );
-
-  if ( tick_may_crit )
-  {
-    if ( rng[ RESULT_CRIT ] -> roll( crit_chance( 0 ) ) )
-    {
-      result = RESULT_CRIT;
-    }
-  }
-
-  tick_dmg = calculate_tick_damage();
-
-  assess_damage( heal_target[0], tick_dmg, HEAL_OVER_TIME, result );
-
-  if ( callbacks ) action_callback_t::trigger( player -> tick_callbacks[ result ], this );
-
-  stats -> add_tick( d -> time_to_tick );
 }
 
 // heal_t::calculate_result =================================================
@@ -277,72 +160,21 @@ void heal_t::calculate_result()
   if ( sim -> debug ) log_t::output( sim, "%s result for %s is %s", player -> name(), name(), util_t::result_type_string( result ) );
 }
 
-// heal_t::calculate_direct_damage ==========================================
+// heal_t::crit_chance =====================================================
 
-double heal_t::calculate_direct_damage( int )
+double heal_t::crit_chance( int /* delta_level */ ) const
 {
-  double dmg = sim -> range( base_dd_min, base_dd_max );
-
-  if ( round_base_dmg ) dmg = floor( dmg + 0.5 );
-
-  if ( dmg == 0 && weapon_multiplier == 0 && direct_power_mod == 0 ) return 0;
-
-  double base_direct_dmg = dmg;
-
-  dmg += base_dd_adder + player_dd_adder + target_dd_adder;
-
-  dmg += direct_power_mod * total_power();
-  dmg *= total_dd_multiplier();
-
-  double init_direct_dmg = dmg;
-
-  if ( result == RESULT_CRIT )
-  {
-    dmg *= 1.0 + total_crit_bonus();
-  }
-
-  if ( ! sim -> average_range ) dmg = floor( dmg + sim -> real() );
-
-  if ( sim -> debug )
-  {
-    log_t::output( sim, "%s heal for %s: dd=%.0f i_dd=%.0f b_dd=%.0f mod=%.2f power=%.0f b_mult=%.2f p_mult=%.2f t_mult=%.2f",
-                   player -> name(), name(), dmg, init_direct_dmg, base_direct_dmg, direct_power_mod,
-                   total_power(), base_multiplier * base_dd_multiplier, player_multiplier, target_multiplier );
-  }
-
-  return dmg;
+  return total_crit();
 }
 
-// heal_t::calculate_tick_damage ============================================
+// heal_t::schedule_execute ================================================
 
-double heal_t::calculate_tick_damage()
+void heal_t::schedule_execute()
 {
-  double dmg = 0;
+  action_t::schedule_execute();
 
-  if ( base_td == 0 ) base_td = base_td_init;
-
-  if ( base_td == 0 && tick_power_mod == 0 ) return 0;
-
-  dmg  = floor( base_td + 0.5 ) + total_power() * tick_power_mod;
-  dmg *= total_td_multiplier();
-
-  double init_tick_dmg = dmg;
-
-  if ( result == RESULT_CRIT )
-  {
-    dmg *= 1.0 + total_crit_bonus();
-  }
-
-  if ( ! sim -> average_range ) dmg = floor( dmg + sim -> real() );
-
-  if ( sim -> debug )
-  {
-    log_t::output( sim, "%s heal for %s: td=%.0f i_td=%.0f b_td=%.0f mod=%.2f power=%.0f b_mult=%.2f p_mult=%.2f t_mult=%.2f",
-                   player -> name(), name(), tick_dmg, init_tick_dmg, base_td, tick_power_mod,
-                   total_power(), base_multiplier * base_td_multiplier, player_multiplier, target_multiplier );
-  }
-
-  return dmg;
+  if ( time_to_execute > timespan_t::zero )
+    player -> debuffs.casting -> trigger();
 }
 
 // heal_t::assess_damage ====================================================
@@ -379,7 +211,7 @@ void heal_t::assess_damage( player_t* t,
       log_t::output( sim, "%s %s ticks (%d of %d) %s for %.0f (%.0f) heal (%s)",
                      player -> name(), name(),
                      dot -> current_tick, dot -> num_ticks,
-                     heal_target[0] -> name(), heal.amount, heal.actual,
+                     t -> name(), heal.amount, heal.actual,
                      util_t::result_type_string( result ) );
     }
 
@@ -388,16 +220,6 @@ void heal_t::assess_damage( player_t* t,
 
   stats -> add_result( sim -> report_overheal ? heal.amount : heal.actual, heal.actual, ( direct_tick ? HEAL_OVER_TIME : heal_type ), heal_result );
 
-}
-
-// heal_t::last_tick ========================================================
-
-void heal_t::last_tick( dot_t* d )
-{
-  if ( sim -> debug ) log_t::output( sim, "%s fades from %s", d -> name(), heal_target[0] -> name() );
-
-  d -> ticking = 0;
-  d -> time_to_tick = timespan_t::zero;
 }
 
 // heal_t::find_greatest_difference_player ==================================
@@ -440,6 +262,31 @@ player_t* heal_t::find_lowest_player()
   return max_player;
 }
 
+// heal_t::available_targets ==============================================
+
+size_t heal_t::available_targets( std::vector< player_t* >& tl ) const
+{
+  // TODO: This does not work for heals at all, as it presumes enemies in the
+  // actor list.
+
+  if ( group_only )
+  {
+  tl.push_back( target );
+
+  for ( size_t i = 0; i < sim -> actor_list.size(); i++ )
+  {
+    if ( ! sim -> actor_list[ i ] -> sleeping &&
+         !sim -> actor_list[ i ] -> is_enemy() &&
+         sim -> actor_list[ i ] != target && sim -> actor_list[ i ] -> party == target -> party )
+      tl.push_back( sim -> actor_list[ i ] );
+  }
+
+  return tl.size();
+  }
+
+  return action_t::available_targets( tl );
+}
+
 // ==========================================================================
 // Absorb
 // ==========================================================================
@@ -455,10 +302,11 @@ player_t* heal_t::find_lowest_player()
 
 void absorb_t::init_absorb_t_()
 {
-  target = player -> target;
   if ( target -> is_enemy() || target -> is_add() )
     target = player;
-  heal_target.push_back( target );
+
+  base_spell_power_multiplier = 1.0;
+  min_gcd = timespan_t::from_seconds( 1.0 );
 
   total_heal = total_actual = 0;
 
@@ -470,145 +318,93 @@ void absorb_t::init_absorb_t_()
 // absorb_t::absorb_t =======================
 
 absorb_t::absorb_t( const char* n, player_t* p, int r, const school_type s, int t ) :
-  spell_t( n, p, r, s, t )
+  action_t( ACTION_ABSORB, n, p, r, s, t )
 {
   init_absorb_t_();
-}
-
-// absorb_t::parse_options ==================================================
-
-void absorb_t::parse_options( option_t*          options,
-                              const std::string& options_str )
-{
-  spell_t::parse_options( options, options_str );
-
-  if ( target )
-  {
-    heal_target.clear();
-    heal_target.push_back( target );
-  }
 }
 
 // absorb_t::player_buff ====================================================
 
 void absorb_t::player_buff()
 {
-  player_multiplier              = 1.0;
-  player_dd_multiplier           = 1.0;
-  player_td_multiplier           = 1.0;
-  player_hit                     = 0;
-  player_crit                    = 0;
-  player_penetration             = 0;
-  player_dd_adder                = 0;
-  player_spell_power             = 0;
-  player_attack_power            = 0;
-  player_spell_power_multiplier  = 1.0;
-  player_attack_power_multiplier = 1.0;
+  action_t::player_buff();
 
   player_t* p = player;
 
   player_multiplier    = p -> composite_player_absorb_multiplier   ( school );
 
-  if ( base_attack_power_multiplier > 0 )
-  {
-    player_attack_power            = p -> composite_attack_power();
-    player_attack_power_multiplier = p -> composite_attack_power_multiplier();
-  }
-
-  if ( base_spell_power_multiplier > 0 )
-  {
-    player_spell_power            = p -> composite_spell_power( school );
-    player_spell_power_multiplier = p -> composite_spell_power_multiplier();
-  }
-
   player_alacrity = alacrity();
 
-  if ( sim -> debug )
-    log_t::output( sim, "absorb_t::player_buff: %s hit=%.2f crit=%.2f pen=%.0f sp=%.2f ap=%.2f mult=%.2f",
-                   name(), player_hit, player_crit, player_penetration,
-                   player_spell_power, player_attack_power, player_multiplier );
-}
+  player_crit = p -> composite_spell_crit();
 
-// absorb_t::target_debuff ==================================================
-
-void absorb_t::target_debuff( player_t* /* t */, int /* dmg_type */ )
-{
-  target_multiplier            = 1.0;
-  target_hit                   = 0;
-  target_crit                  = 0;
-  target_attack_power          = 0;
-  target_spell_power           = 0;
-  target_penetration           = 0;
-  target_dd_adder              = 0;
-
-  if ( sim -> debug )
-    log_t::output( sim, "absorb_t::target_debuff: %s hit=%.2f crit=%.2f pen=%.0f ap=%.2f sp=%.2f mult=%.2f",
-                   name(), target_hit, target_crit, target_penetration,
-                   target_attack_power, target_spell_power, target_multiplier );
+  if ( sim -> debug ) log_t::output( sim, "absorb_t::player_buff: %s crit=%.2f",
+                                     name(), player_crit );
 }
 
 // absorb_t::alacrity ==========================================================
 
 double absorb_t::alacrity() const
 {
-  double h = spell_t::alacrity();
+  return player -> composite_spell_alacrity();
+}
 
-  return h;
+// absorb_t::gcd =============================================================
+
+timespan_t absorb_t::gcd() const
+{
+  // KEEP IDENTICAL TO SPELL_T::GCD
+
+  timespan_t t = action_t::gcd();
+  if ( t == timespan_t::zero ) return timespan_t::zero;
+
+  // According to http://sithwarrior.com/forums/Thread-SWTOR-formula-list alacrity doesn't reduce the gcd
+  // Actually it seems to be more complex, cast time spells ( eg. with 1.5s cast time ) get a reduced gcd, but instant cast spells do not
+  // http://sithwarrior.com/forums/Thread-Alacrity-and-the-GCD?pid=9152#pid9152
+  if ( base_execute_time > timespan_t::zero )
+    t *= alacrity();
+
+  if ( t < min_gcd ) t = min_gcd;
+
+  return t;
+}
+
+// absorb_t::execute_time ====================================================
+
+timespan_t absorb_t::execute_time() const
+{
+  timespan_t t = base_execute_time;
+
+  if ( ! harmful && ! player -> in_combat )
+    return timespan_t::zero;
+
+  if ( t <= timespan_t::zero ) return timespan_t::zero;
+  t *= alacrity();
+
+  return t;
 }
 
 // absorb_t::execute ========================================================
 
+
 void absorb_t::execute()
 {
-  if ( ! initialized )
-  {
-    sim -> errorf( "action_t::execute: action %s from player %s is not initialized.\n", name(), player -> name() );
-    assert( 0 );
-  }
+  total_heal = 0;
 
-  if ( sim -> log && ! dual )
-  {
-    log_t::output( sim, "%s performs %s (%.0f)", player -> name(), name(),
-                   player -> resource_current[ player -> primary_resource() ] );
-  }
+  action_t::execute();
 
-  if ( harmful )
-  {
-    if ( player -> in_combat == false && sim -> debug )
-      log_t::output( sim, "%s enters combat.", player -> name() );
-
-    player -> in_combat = true;
-  }
-
-  player_buff();
-
-  for ( unsigned int i = 0; i < heal_target.size(); i++ )
-  {
-    target_debuff( heal_target[i], HEAL_DIRECT );
-
-    calculate_result();
-
-    direct_dmg = calculate_direct_damage();
-
-    schedule_travel( heal_target[i] );
-  }
-
-  consume_resource();
-
-  update_ready();
-
-  if ( ! dual ) stats -> add_execute( time_to_execute );
-
-  if ( repeating && ! proc ) schedule_execute();
-
-  // Add options found in spell_t::execute()
   if ( player -> last_foreground_action == this )
     player -> debuffs.casting -> expire();
 
   if ( harmful && callbacks )
   {
+    if ( result != RESULT_NONE )
+    {
+      //action_callback_t::trigger( player -> heal_callbacks[ result ], this );
+      action_callback_t::trigger( player -> spell_callbacks[ result ], this );
+    }
     if ( ! background ) // OnSpellCast
     {
+      //action_callback_t::trigger( player -> heal_callbacks[ RESULT_NONE ], this );
       action_callback_t::trigger( player -> spell_callbacks[ RESULT_NONE ], this );
     }
   }
@@ -665,33 +461,12 @@ void absorb_t::calculate_result()
   if ( sim -> debug ) log_t::output( sim, "%s result for %s is %s", player -> name(), name(), util_t::result_type_string( result ) );
 }
 
-// absorb_t::calculate_direct_damage ========================================
+// spell_t::schedule_execute ================================================
 
-double absorb_t::calculate_direct_damage( int )
+void absorb_t::schedule_execute()
 {
-  double dmg = sim -> range( base_dd_min, base_dd_max );
+  action_t::schedule_execute();
 
-  if ( round_base_dmg ) dmg = floor( dmg + 0.5 );
-
-  if ( dmg == 0 && weapon_multiplier == 0 && direct_power_mod == 0 ) return 0;
-
-  double base_direct_dmg = dmg;
-
-  dmg += base_dd_adder + player_dd_adder + target_dd_adder;
-
-  dmg += direct_power_mod * total_power();
-  dmg *= total_dd_multiplier();
-
-  double init_direct_dmg = dmg;
-
-  if ( ! sim -> average_range ) dmg = floor( dmg + sim -> real() );
-
-  if ( sim -> debug )
-  {
-    log_t::output( sim, "%s heal for %s: dd=%.0f i_dd=%.0f b_dd=%.0f mod=%.2f power=%.0f b_mult=%.2f p_mult=%.2f t_mult=%.2f",
-                   player -> name(), name(), dmg, init_direct_dmg, base_direct_dmg, direct_power_mod,
-                   total_power(), base_multiplier * base_dd_multiplier, player_multiplier, target_multiplier );
-  }
-
-  return dmg;
+  if ( time_to_execute > timespan_t::zero )
+    player -> debuffs.casting -> trigger();
 }

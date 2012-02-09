@@ -112,8 +112,8 @@ namespace std {using namespace tr1; }
 
 #include "data_definitions.hh"
 
-#define SC_MAJOR_VERSION "111"
-#define SC_MINOR_VERSION "0"
+#define SC_MAJOR_VERSION "112"
+#define SC_MINOR_VERSION "1"
 #define SC_USE_PTR ( 0 )
 #define SC_BETA ( 0 )
 #define SC_EPSILON ( 0.000001 )
@@ -281,7 +281,7 @@ enum result_type
   RESULT_MAX
 };
 
-#define RESULT_HIT_MASK  ( (1<<RESULT_GLANCE) | (1<<RESULT_BLOCK) | (1<<RESULT_CRIT) | (1<<RESULT_HIT) )
+#define RESULT_HIT_MASK  ( (1<<RESULT_GLANCE) | (1<<RESULT_BLOCK) | (1<<RESULT_CRIT_BLOCK) | (1<<RESULT_CRIT) | (1<<RESULT_HIT) )
 #define RESULT_CRIT_MASK ( (1<<RESULT_CRIT) )
 #define RESULT_MISS_MASK ( (1<<RESULT_MISS) )
 #define RESULT_NONE_MASK ( (1<<RESULT_NONE) )
@@ -306,7 +306,7 @@ enum proc_type
   PROC_MAX
 };
 
-enum action_type { ACTION_USE=0, ACTION_SPELL, ACTION_ATTACK, ACTION_SEQUENCE, ACTION_OTHER, ACTION_MAX };
+enum action_type { ACTION_USE=0, ACTION_SPELL, ACTION_ATTACK, ACTION_HEAL, ACTION_ABSORB, ACTION_SEQUENCE, ACTION_OTHER, ACTION_MAX };
 
 enum school_type
 {
@@ -4679,10 +4679,9 @@ public:
 
 // Heal =====================================================================
 
-struct heal_t : public spell_t
+struct heal_t : public action_t
 {
-  std::vector<player_t*> heal_target;
-
+  bool group_only;
   // Reporting
   double total_heal, total_actual;
 
@@ -4692,29 +4691,25 @@ private:
 public:
   heal_t( const char* n=0, player_t* p=0, int r=RESOURCE_NONE, const school_type s=SCHOOL_HOLY, int t=TREE_NONE );
 
-  virtual void parse_options( option_t* options, const std::string& options_str );
   virtual void player_buff();
-  virtual void target_debuff( player_t* t, int dmg_type );
   virtual double alacrity() const;
+  virtual timespan_t gcd() const;
+  virtual timespan_t execute_time() const;
   virtual void execute();
   virtual void assess_damage( player_t* t, double amount,
                               int    dmg_type, int impact_result );
   virtual void calculate_result();
-  virtual double calculate_direct_damage( int = 0 );
-  virtual double calculate_tick_damage();
-  virtual void impact( player_t*, int impact_result, double travel_dmg );
-  virtual void tick( dot_t* d );
-  virtual void last_tick( dot_t* d );
+  virtual double crit_chance( int delta_level ) const;
+  virtual void   schedule_execute();
   player_t* find_greatest_difference_player();
   player_t* find_lowest_player();
+  virtual size_t available_targets( std::vector< player_t* >& ) const;
 };
 
 // Absorb ===================================================================
 
-struct absorb_t : public spell_t
+struct absorb_t : public action_t
 {
-  std::vector<player_t*> heal_target;
-
   // Reporting
   double total_heal, total_actual;
 
@@ -4724,16 +4719,16 @@ private:
 public:
   absorb_t( const char* n=0, player_t* p=0, int r=RESOURCE_NONE, const school_type s=SCHOOL_HOLY, int t=TREE_NONE );
 
-  virtual void parse_options( option_t* options, const std::string& options_str );
   virtual void player_buff();
-  virtual void target_debuff( player_t* t, int dmg_type );
   virtual double alacrity() const;
+  virtual timespan_t gcd() const;
+  virtual timespan_t execute_time() const;
   virtual void execute();
   virtual void assess_damage( player_t* t, double amount,
                               int    dmg_type, int impact_result );
   virtual void calculate_result();
-  virtual double calculate_direct_damage( int = 0 );
   virtual void impact( player_t*, int impact_result, double travel_dmg );
+  virtual void   schedule_execute();
 
 };
 

@@ -177,7 +177,7 @@ void ReforgeButtonGroup::setSelected( int state )
 void SimulationCraftWindow::decodeOptions( QString encoding )
 {
   QStringList tokens = encoding.split( ' ' );
-  if ( tokens.count() >= 14 )
+  if ( tokens.count() >= 15 )
   {
          versionChoice->setCurrentIndex( tokens[  0 ].toInt() );
       iterationsChoice->setCurrentIndex( tokens[  1 ].toInt() );
@@ -192,6 +192,7 @@ void SimulationCraftWindow::decodeOptions( QString encoding )
      defaultRoleChoice->setCurrentIndex( tokens[ 10 ].toInt() );
          latencyChoice->setCurrentIndex( tokens[ 11 ].toInt() );
      targetLevelChoice->setCurrentIndex( tokens[ 12 ].toInt() );
+      reportpetsChoice->setCurrentIndex( tokens[ 13 ].toInt() );
   }
 
   QList<QAbstractButton*>       buff_buttons  =        buffsButtonGroup->buttons();
@@ -235,7 +236,7 @@ void SimulationCraftWindow::decodeOptions( QString encoding )
 
 QString SimulationCraftWindow::encodeOptions()
 {
-  QString encoded = QString( "%1 %2 %3 %4 %5 %6 %7 %8 %9 %10 %11 %12 %13" )
+  QString encoded = QString( "%1 %2 %3 %4 %5 %6 %7 %8 %9 %10 %11 %12 %13 %14" )
     .arg(       versionChoice->currentIndex() )
     .arg(    iterationsChoice->currentIndex() )
     .arg(   fightLengthChoice->currentIndex() )
@@ -249,6 +250,7 @@ QString SimulationCraftWindow::encodeOptions()
     .arg(   defaultRoleChoice->currentIndex() )
     .arg(       latencyChoice->currentIndex() )
     .arg(   targetLevelChoice->currentIndex() )
+    .arg(    reportpetsChoice->currentIndex() )
     ;
 
   QList<QAbstractButton*> buttons = buffsButtonGroup->buttons();
@@ -546,9 +548,11 @@ void SimulationCraftWindow::createGlobalsTab()
   //globalsLayout->addRow(    "Armory Spec",    armorySpecChoice = createChoice( 2, "active", "inactive" ) );
   globalsLayout->addRow(   "Default Role",   defaultRoleChoice = createChoice( 4, "auto", "dps", "heal", "tank" ) );
   globalsLayout->addRow( "Generate Debug",         debugChoice = createChoice( 3, "None", "Log Only", "Gory Details" ) );
+  globalsLayout->addRow( "Report Pets Separately", reportpetsChoice = createChoice( 2, "Yes", "No" ) );
   iterationsChoice->setCurrentIndex( 1 );
   fightLengthChoice->setCurrentIndex( 4 );
   fightVarianceChoice->setCurrentIndex( 2 );
+  reportpetsChoice->setCurrentIndex( 1 );
   QGroupBox* globalsGroupBox = new QGroupBox();
   globalsGroupBox->setLayout( globalsLayout );
 
@@ -916,6 +920,8 @@ void SimulationCraftWindow::createToolTips()
   //armorySpecChoice->setToolTip( "Controls which Talent/Glyph specification is used when importing profiles from the Armory." );
 
   defaultRoleChoice->setToolTip( "Specify the character role during import to ensure correct action priority list." );
+
+  reportpetsChoice->setToolTip( "Specify if pets get reported separately in detail." );
 
   debugChoice->setToolTip( "When a log is generated, only one iteration is used.\n"
                            "Gory details are very gory.  No documentation will be forthcoming.\n"
@@ -1408,6 +1414,10 @@ QString SimulationCraftWindow::mergeOptions()
     options += "log=1\n";
     options += "scale_only=none\n";
     options += "dps_plot_stat=none\n";
+  }
+  if ( reportpetsChoice->currentIndex() != 1 )
+  {
+    options += "report_pets_separately=1\n";
   }
   return options;
 }

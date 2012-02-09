@@ -1419,7 +1419,7 @@ void player_t::init_scaling()
 
     int role = primary_role();
 
-    int attack = ( ( role == ROLE_ATTACK ) || ( role == ROLE_HYBRID ) ) ? 1 : 0;
+    int attack = ( ( role == ROLE_ATTACK ) || ( role == ROLE_HYBRID ) || role == ROLE_TANK ) ? 1 : 0;
     int spell  = ( ( role == ROLE_SPELL  ) || ( role == ROLE_HYBRID ) || ( role == ROLE_HEAL ) ) ? 1 : 0;
     int tank   = role == ROLE_TANK ? 1 : 0;
 
@@ -3255,10 +3255,16 @@ double player_t::assess_damage( double            amount,
       double buff_value = absorb_buffs[ i ] -> value();
       double value = std::min( mitigated_amount - absorbed_amount, buff_value );
       absorbed_amount += value;
+      if ( sim -> debug ) log_t::output( sim, "%s %s absorbs %.2f",
+                                         name(), absorb_buffs[ i ] -> name(), value );
       if ( value == buff_value )
         absorb_buffs[ i ] -> expire();
       else
+      {
         absorb_buffs[ i ] -> current_value -= value;
+        if ( sim -> debug ) log_t::output( sim, "%s %s absorb remaining %.2f",
+                                           name(), absorb_buffs[ i ] -> name(), absorb_buffs[ i ] -> current_value );
+      }
     }
   }
   mitigated_amount -= absorbed_amount;
@@ -4508,7 +4514,7 @@ struct use_item_t : public action_t
     timespan_t ready = sim -> current_time + duration;
     for ( action_t* a = player -> action_list; a; a = a -> next )
     {
-      if ( a -> name_str == "use_item" )
+      if ( a -> name_str.substr(0, 8) == "use_item" )
       {
         if ( ready > a -> cooldown -> ready )
         {
