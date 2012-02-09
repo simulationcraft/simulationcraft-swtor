@@ -632,7 +632,7 @@ void player_t::init_set_bonus()
 {
   if ( sim -> debug ) log_t::output( sim, "Initializing set_bonus for player (%s)", name() );
 
-  set_bonus.indomitable = get_set_bonus( "indomitable" );
+  set_bonus.indomitable = get_set_bonus( "indomitable", "_force_masters_" );
 }
 
 // player_t::init_items =====================================================
@@ -3913,7 +3913,7 @@ rng_t* player_t::get_rng( const std::string& n, int type )
 
 // player_t::get_set_bonus =======================================================
 
-set_bonus_t* player_t::get_set_bonus( const std::string& name )
+set_bonus_t* player_t::get_set_bonus( const std::string& name, std::string filter )
 {
   set_bonus_t* sb=0;
 
@@ -3923,7 +3923,10 @@ set_bonus_t* player_t::get_set_bonus( const std::string& name )
       return sb;
   }
 
-  sb = new set_bonus_t( this, name );
+  if ( filter.empty() )
+    filter = name;
+
+  sb = new set_bonus_t( this, name, filter );
 
   set_bonus_t** tail = &set_bonus_list;
 
@@ -4671,28 +4674,6 @@ pet_t* player_t::find_pet( const std::string& pet_name )
 void player_t::trigger_replenishment()
 {
 
-}
-
-// player_t::decode_set =====================================================
-
-bool player_t::decode_set( item_t& item, const set_bonus_t* sb )
-{
-  if ( item.slot != SLOT_HEAD      &&
-       item.slot != SLOT_SHOULDERS &&
-       item.slot != SLOT_CHEST     &&
-       item.slot != SLOT_HANDS     &&
-       item.slot != SLOT_LEGS      )
-  {
-    return SET_NONE;
-  }
-
-  const char* s = item.name();
-
-  if ( strstr( sb -> name_str.c_str(), "indomitable" ) )
-    if ( strstr( s, "_force_masters_" ) )
-      return true;
-
-  return "";
 }
 
 // player_t::parse_talent_trees =============================================
@@ -5528,6 +5509,12 @@ bool player_t::create_profile( std::string& profile_str, int save_type, bool sav
         profile_str += util_t::stat_type_string( i );
         profile_str += "=" + util_t::to_string( value, 0 ) + term;
       }
+    }
+    profile_str += "# Set Bonuses" + term;
+    for ( set_bonus_t* sb = set_bonus_list; sb; sb = sb -> next )
+    {
+      if ( sb -> two_pc()   != 0 )  profile_str += "# set_bonus." + sb -> name_str + "_2pc="  + util_t::to_string( sb -> two_pc() ) + term ;
+      if ( sb -> four_pc()   != 0 )  profile_str += "# set_bonus." + sb -> name_str + "_4pc="  + util_t::to_string( sb -> four_pc() ) + term ;
     }
     if ( meta_gem != META_GEM_NONE )
     {

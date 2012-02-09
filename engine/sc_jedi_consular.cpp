@@ -98,6 +98,7 @@ struct jedi_sage_t : public jedi_consular_t
   buff_t* buffs_mental_alacrity;
   buff_t* buffs_force_potency;
   buff_t* buffs_psychic_projection_dd;
+  buff_t* buffs_indomitable_4pc;
 
   // Gains
   gain_t* gains_concentration;
@@ -560,6 +561,8 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
     parse_options( 0, options_str );
     base_td = 127.2;
     base_cost = 30.0;
+    if ( player -> set_bonus.indomitable -> two_pc() > 0 )
+      base_cost -= 2.0;
     range = 30.0;
     tick_power_mod = 0.79;
     num_ticks = 3;
@@ -732,6 +735,8 @@ struct disturbance_t : public jedi_sage_spell_t
     base_dd_min = 180.3; base_dd_max = 244.7;
     base_execute_time = timespan_t::from_seconds( 1.5 );
     base_cost = 30.0;
+    if ( player -> set_bonus.indomitable -> two_pc() > 0 )
+      base_cost -= 2.0;
     range = 30.0;
     direct_power_mod = 1.32;
 
@@ -874,6 +879,8 @@ struct weaken_mind_t : public jedi_sage_spell_t
     {
       p -> buffs_psychic_projection -> trigger( p -> buffs_psychic_projection -> max_stack );
     }
+
+    p -> buffs_indomitable_4pc -> trigger();
   }
 
   virtual void target_debuff( player_t* t, int dmg_type )
@@ -1386,6 +1393,7 @@ void jedi_sage_t::init_buffs()
   buffs_mental_alacrity = new buff_t( this, is_sage ? "mental_alacrity" : "polarity_shift", 1, timespan_t::from_seconds( 10.0 ) );
   buffs_force_potency = new buff_t( this, is_sage ? "force_potency" : "recklessness", 2, timespan_t::from_seconds( 20.0 ) );
   buffs_psychic_projection_dd = new buff_t( this, is_sage ? "psychic_projection_dd" : "lightning_barrage_dd", 1, timespan_t::from_seconds( 2.0 ), timespan_t::zero, 0.80, true ); // 80% sucessfull double dipping according to http://sithwarrior.com/forums/Thread-Simulationcraft-for-Sage-Sorcerer?pid=13497#pid13497
+  buffs_indomitable_4pc = new buff_t( this, "indomitable_4pc", 1, timespan_t::from_seconds( 15.0 ), timespan_t::from_seconds( 20.0 ), set_bonus.indomitable -> four_pc() > 0 ? 0.10 : 0.0 );
 
 }
 
@@ -1649,6 +1657,8 @@ double jedi_sage_t::composite_spell_alacrity() const
   double sh = jedi_consular_t::composite_spell_alacrity();
 
   sh -= buffs_mental_alacrity -> stack() * 0.20;
+
+  sh -= buffs_indomitable_4pc -> up() * 0.05;
 
   return sh;
 }

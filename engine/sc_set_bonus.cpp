@@ -7,8 +7,8 @@
 
 // set_bonus_t::set_bonus_t =================================================
 
-set_bonus_t::set_bonus_t( player_t* p , const std::string n ) :
- next( 0 ), player( p ), name_str( n ), count( 0 )
+set_bonus_t::set_bonus_t( player_t* p , const std::string n, const std::string f ) :
+ next( 0 ), player( p ), name_str( n ), filter_str( f ), count( 0 )
 {
 
 }
@@ -21,13 +21,13 @@ int set_bonus_t::four_pc() const { return ( count >= 4 ) ? 1 : 0; }
 
 // set_bonus_t::decode ======================================================
 
-bool set_bonus_t::decode( player_t* p,
+bool set_bonus_t::decode( player_t* /* p */,
                          item_t&   item ) const
 {
   if ( ! item.name() )
     return SET_NONE;
 
-  int set = p -> decode_set( item, this );
+  int set = decode_set( item, this );
 
   return ( set > 0 );
 }
@@ -46,6 +46,20 @@ bool set_bonus_t::init( player_t* p )
 
   return true;
 }
+
+// set_bonus_t::decode_set =====================================================
+
+bool set_bonus_t::decode_set( item_t& item, const set_bonus_t* sb ) const
+{
+  const char* s = item.name();
+
+  if ( strstr( s, sb -> filter_str.c_str() ) )
+      return true;
+
+  return false;
+}
+
+
 /*
 action_expr_t* set_bonus_t::create_expression( action_t* action,
                                                const std::string& type )

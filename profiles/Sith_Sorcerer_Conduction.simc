@@ -21,7 +21,11 @@ actions+=/crushing_darkness,if=buff.wrath.react
 actions+=/polarity_shift
 actions+=/lightning_strike
 actions+=/shock,moving=1
+head=foo_force_masters_headgear
 shirt=foo,stats=1487willpower_410crit_346alacrity_218power_1224forcepower_153surge
+chest=foo_force_masters_vestments
+legs=foo_force_masters_lowe_robe
+hands=foo_force_masters_gloves
 # Gear Summary
 # gear_crit_rating=410
 # gear_alacrity_rating=346
@@ -29,3 +33,6 @@ shirt=foo,stats=1487willpower_410crit_346alacrity_218power_1224forcepower_153sur
 # gear_forcepower=1224
 # gear_willpower=1487
 # gear_surge_rating=153
+# Set Bonuses
+# set_bonus.indomitable_2pc=1
+# set_bonus.indomitable_4pc=1

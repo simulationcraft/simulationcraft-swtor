@@ -3648,14 +3648,17 @@ struct set_bonus_t
   set_bonus_t* next;
   player_t* player;
   std::string name_str;
+  std::string filter_str;
 private:
   int count;
 public:
+  set_bonus_t( player_t*, const std::string, const std::string );
+
   int two_pc() const; int four_pc() const;
   bool decode( player_t*, item_t& item ) const;
   bool init( player_t* );
+  virtual bool decode_set( item_t& item, const set_bonus_t* ) const;
 
-  set_bonus_t( player_t*, const std::string );
 
   //action_expr_t* create_expression( action_t*, const std::string& type );
 };
@@ -4204,7 +4207,6 @@ struct player_t : public noncopyable
 
   virtual void trigger_replenishment();
 
-  virtual bool decode_set( item_t& item, const set_bonus_t* );
 
   virtual void recalculate_alacrity();
   virtual void recalculate_crit();
@@ -4271,7 +4273,7 @@ struct player_t : public noncopyable
   benefit_t*  get_benefit ( const std::string& name );
   uptime_t*   get_uptime  ( const std::string& name );
   rng_t*      get_rng     ( const std::string& name, int type=RNG_DEFAULT );
-  set_bonus_t* get_set_bonus( const std::string& name );
+  set_bonus_t* get_set_bonus( const std::string& name, std::string filter="" );
   double      get_player_distance( const player_t* p ) const;
   double      get_position_distance( double m=0, double v=0 ) const;
   action_priority_list_t* get_action_priority_list( const std::string& name );
