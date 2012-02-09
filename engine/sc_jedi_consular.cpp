@@ -97,6 +97,7 @@ struct jedi_sage_t : public jedi_consular_t
   buff_t* buffs_force_suppression;
   buff_t* buffs_mental_alacrity;
   buff_t* buffs_force_potency;
+  buff_t* buffs_psychic_projection_dd;
 
   // Gains
   gain_t* gains_concentration;
@@ -588,12 +589,14 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
 
-      if ( p -> buffs_psychic_projection -> up() )
+      if ( p -> buffs_psychic_projection -> check() > 1 || p -> buffs_psychic_projection_dd -> check() > 0 )
       {
+        p -> buffs_psychic_projection -> up();
         is_buffed_by_psychic_projection = true;
         if ( p -> buffs_psychic_projection -> check() == 2 )
         {
           p -> buffs_psychic_projection -> start_expiration( timespan_t::from_seconds( 2.0 ) );
+          p -> buffs_psychic_projection_dd -> trigger();
         }
       }
       else
@@ -1367,7 +1370,7 @@ void jedi_sage_t::init_buffs()
 {
   jedi_consular_t::init_buffs();
 
-  // buff_t( player, name, max_stack, duration, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
+  // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
 
@@ -1382,6 +1385,8 @@ void jedi_sage_t::init_buffs()
   buffs_force_suppression = new buff_t( this, is_sage ? "force_suppression" : "deathmark", 10, timespan_t::from_seconds( 30.0 ), timespan_t::zero, talents.force_suppression -> rank() );
   buffs_mental_alacrity = new buff_t( this, is_sage ? "mental_alacrity" : "polarity_shift", 1, timespan_t::from_seconds( 10.0 ) );
   buffs_force_potency = new buff_t( this, is_sage ? "force_potency" : "recklessness", 2, timespan_t::from_seconds( 20.0 ) );
+  buffs_psychic_projection_dd = new buff_t( this, is_sage ? "psychic_projection_dd" : "lightning_barrage_dd", 1, timespan_t::from_seconds( 2.0 ), timespan_t::zero, 0.80, true ); // 80% sucessfull double dipping according to http://sithwarrior.com/forums/Thread-Simulationcraft-for-Sage-Sorcerer?pid=13497#pid13497
+
 }
 
 // jedi_sage_t::init_gains =======================================================
