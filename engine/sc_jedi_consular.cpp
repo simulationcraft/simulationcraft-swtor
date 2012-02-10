@@ -1476,7 +1476,7 @@ void jedi_sage_t::init_actions()
 
       action_list_str += "/telekinetic_throw";
 
-      action_list_str += "/project,moving=1";
+      action_list_str += "/project,moving=1,if=force>120";
 
       break;
 
