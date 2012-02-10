@@ -5,7 +5,7 @@ position=front
 shirt=foo,stats=1487willpower_410crit_346alacrity_218power_1224forcepower_153surge
 chest=foo_force_masters_vestments
 hands=foo_force_masters_gloves
-legs=foo_force_masters_lowe_robe
+legs=foo_force_masters_lower_robe
 head=foo_force_masters_headgear
 save=Sith_Sorcerer_Madness.simc
 
@@ -24,7 +24,7 @@ actions+=/mark_of_power
 actions+=/snapshot_stats
 actions+=/power_potion
 actions+=/recklessness
-actions+=/force_lightning,if=buff.lightning_barrage.react
+actions+=/force_lightning,if=buff.lightning_barrage_dd.up
 actions+=/affliction,if=!ticking
 actions+=/death_field
 actions+=/chain_lightning,if=buff.wrath.react|buff.lightning_storm.react
@@ -40,6 +40,7 @@ actions+=/mark_of_power
 actions+=/snapshot_stats
 actions+=/power_potion
 actions+=/recklessness
+actions+=/force_lightning,if=buff.lightning_barrage_dd.up
 actions+=/chain_lightning,if=buff.wrath.react|buff.lightning_storm.react
 actions+=/affliction,if=!ticking
 actions+=/force_lightning,if=buff.lightning_barrage.react

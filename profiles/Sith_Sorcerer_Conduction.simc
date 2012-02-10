@@ -13,6 +13,7 @@ actions+=/mark_of_power
 actions+=/snapshot_stats
 actions+=/power_potion
 actions+=/recklessness
+actions+=/force_lightning,if=buff.lightning_barrage_dd.up
 actions+=/chain_lightning,if=buff.wrath.react|buff.lightning_storm.react
 actions+=/affliction,if=!ticking
 actions+=/force_lightning,if=buff.lightning_barrage.react
@@ -24,7 +25,7 @@ actions+=/shock,moving=1
 head=foo_force_masters_headgear
 shirt=foo,stats=1487willpower_410crit_346alacrity_218power_1224forcepower_153surge
 chest=foo_force_masters_vestments
-legs=foo_force_masters_lowe_robe
+legs=foo_force_masters_lower_robe
 hands=foo_force_masters_gloves
 # Gear Summary
 # gear_crit_rating=410
