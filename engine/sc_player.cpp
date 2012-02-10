@@ -3624,7 +3624,7 @@ void player_t::recalculate_surge()
   if ( sr < 0 )
     sr = 0;
 
-  surge_bonus = 0.5 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.3 ) ), sr / std::max( 20, level ) / 0.11 ) );
+  surge_bonus = 0.3 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.3 ) ), sr / std::max( 20, level ) / 0.11 ) );
 }
 
 // player_t::recent_cast ====================================================
