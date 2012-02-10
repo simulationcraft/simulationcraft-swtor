@@ -1230,7 +1230,7 @@ pet_t* jedi_consular_t::create_pet( const std::string& pet_name,
 
 void jedi_consular_t::create_pets()
 {
-  create_pet( "qyzen_fess"  );
+  //create_pet( "qyzen_fess"  );
 }
 
 // ==========================================================================
