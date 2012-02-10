@@ -11,9 +11,9 @@ talents=http://www.torhead.com/skill-calc#sith_sorcerer-230002000000000000032302
 actions=stim,type=rakata_resolve
 actions+=/mark_of_power
 actions+=/snapshot_stats
+actions+=/force_lightning,if=buff.lightning_barrage_dd.up
 actions+=/power_potion
 actions+=/recklessness
-actions+=/force_lightning,if=buff.lightning_barrage_dd.up
 actions+=/affliction,if=!ticking
 actions+=/death_field
 actions+=/chain_lightning,if=buff.wrath.react|buff.lightning_storm.react

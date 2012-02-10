@@ -1450,12 +1450,12 @@ void jedi_sage_t::init_actions()
 
       action_list_str += "/snapshot_stats";
 
+      if ( talents.psychic_projection -> rank() )
+        action_list_str += "/telekinetic_throw,if=buff.psychic_projection_dd.up";
+
       action_list_str += "/power_potion";
 
       action_list_str += "/force_potency";
-
-      if ( talents.psychic_projection -> rank() )
-        action_list_str += "/telekinetic_throw,if=buff.psychic_projection_dd.up";
 
       action_list_str += "/weaken_mind,if=!ticking";
 
@@ -1510,7 +1510,7 @@ void jedi_sage_t::init_actions()
 
       action_list_str += "/disturbance";
 
-      action_list_str += "/project,moving=1,if=force>120";
+      action_list_str += "/project,moving=1";
 
       break;
 
@@ -1532,12 +1532,12 @@ void jedi_sage_t::init_actions()
 
       action_list_str += "/snapshot_stats";
 
+      if ( talents.psychic_projection -> rank() )
+        action_list_str += "/force_lightning,if=buff.lightning_barrage_dd.up";
+
       action_list_str += "/power_potion";
 
       action_list_str += "/recklessness";
-
-      if ( talents.psychic_projection -> rank() )
-        action_list_str += "/force_lightning,if=buff.lightning_barrage_dd.up";
 
       action_list_str += "/affliction,if=!ticking";
 

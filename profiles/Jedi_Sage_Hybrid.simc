@@ -11,9 +11,9 @@ talents=http://www.torhead.com/skill-calc#jedi_sage-0000000000000000000323020001
 actions=stim,type=rakata_resolve
 actions+=/force_valor
 actions+=/snapshot_stats
+actions+=/telekinetic_throw,if=buff.psychic_projection_dd.up
 actions+=/power_potion
 actions+=/force_potency
-actions+=/telekinetic_throw,if=buff.psychic_projection_dd.up
 actions+=/weaken_mind,if=!ticking
 actions+=/force_in_balance,if=force>100
 actions+=/mind_crush,if=buff.presence_of_mind.react
