@@ -112,6 +112,7 @@ struct jedi_sage_t : public jedi_consular_t
   rng_t* rng_psychic_barrier;
   rng_t* rng_upheaval;
   rng_t* rng_tm;
+  rng_t* rng_psychic_projection_dd;
 
   benefit_t* benefits_turbulence;
   benefit_t* benefits_fs_weaken_mind;
@@ -119,6 +120,8 @@ struct jedi_sage_t : public jedi_consular_t
   benefit_t* benefits_fs_sever_force;
 
   cooldown_t* cooldowns_telekinetic_wave;
+
+  double psychic_projection_dd_chance;
 
   // Talents
   struct talents_t
@@ -191,6 +194,7 @@ struct jedi_sage_t : public jedi_consular_t
       cooldowns_telekinetic_wave = get_cooldown( "telekinetic_wave" );
     }
 
+    psychic_projection_dd_chance = 1.0;
 
     create_talents();
     create_glyphs();
@@ -213,6 +217,7 @@ struct jedi_sage_t : public jedi_consular_t
   virtual double    composite_force_damage_bonus() const;
   virtual double    composite_spell_alacrity() const;
   virtual void      create_talents();
+  virtual void      create_options();
 };
 
 namespace { // ANONYMOUS NAMESPACE ==========================================
@@ -592,13 +597,13 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
 
-      if ( p -> buffs_psychic_projection -> check() > 1 || p -> buffs_psychic_projection_dd -> check() > 0 )
+      if ( p -> buffs_psychic_projection -> up()
+           || ( p -> buffs_psychic_projection_dd -> up() && p -> rng_psychic_projection_dd -> roll ( p -> psychic_projection_dd_chance ) )
+         )
       {
-        p -> buffs_psychic_projection -> up();
         is_buffed_by_psychic_projection = true;
-        if ( p -> buffs_psychic_projection -> check() == 2 )
+        if ( p -> bugs && p -> buffs_psychic_projection -> check() )
         {
-          p -> buffs_psychic_projection -> start_expiration( timespan_t::from_seconds( 2.0 ) );
           p -> buffs_psychic_projection_dd -> trigger();
         }
       }
@@ -627,14 +632,7 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
     {
       jedi_sage_t* p = player -> cast_jedi_sage();
 
-      if ( p -> bugs )
-      {
-        if ( is_buffed_by_psychic_projection )
-        {
-            p -> buffs_psychic_projection -> decrement();
-        }
-      }
-      else if ( is_buffed_by_psychic_projection )
+      if ( is_buffed_by_psychic_projection )
         p -> buffs_psychic_projection -> expire();
     }
   }
@@ -1384,7 +1382,7 @@ void jedi_sage_t::init_buffs()
   bool is_sage = ( type == JEDI_SAGE );
 
   buffs_concentration = new buff_t( this, is_sage ? "concentration" : "subversion", 3, timespan_t::from_seconds( 10.0 ), timespan_t::zero, 0.5 * talents.concentration -> rank() );
-  buffs_psychic_projection = new buff_t( this, is_sage ? "psychic_projection" : "lightning_barrage", bugs ? 2 : 1, timespan_t::zero, timespan_t::from_seconds( 10.0 ), 0.5 * talents.psychic_projection -> rank() );
+  buffs_psychic_projection = new buff_t( this, is_sage ? "psychic_projection" : "lightning_barrage", 1, timespan_t::zero, timespan_t::from_seconds( 10.0 ), 0.5 * talents.psychic_projection -> rank() );
   buffs_tidal_force = new buff_t( this, is_sage ? "tidal_force" : "lightning_storm", 1, timespan_t::zero, timespan_t::from_seconds( 10.0 ) );
   buffs_telekinetic_effusion = new buff_t( this, is_sage ? "telekinetic_effusion" : "lightning_effusion", 2, timespan_t::zero, timespan_t::zero, 0.5 * talents.telekinetic_effusion -> rank() );
   buffs_tremors = new buff_t( this, is_sage ? "tremors" : "conduction", 3, timespan_t::from_seconds( 30.0 ) );
@@ -1392,7 +1390,7 @@ void jedi_sage_t::init_buffs()
   buffs_force_suppression = new buff_t( this, is_sage ? "force_suppression" : "deathmark", 10, timespan_t::from_seconds( 30.0 ), timespan_t::zero, talents.force_suppression -> rank() );
   buffs_mental_alacrity = new buff_t( this, is_sage ? "mental_alacrity" : "polarity_shift", 1, timespan_t::from_seconds( 10.0 ) );
   buffs_force_potency = new buff_t( this, is_sage ? "force_potency" : "recklessness", 2, timespan_t::from_seconds( 20.0 ) );
-  buffs_psychic_projection_dd = new buff_t( this, is_sage ? "psychic_projection_dd" : "lightning_barrage_dd", 1, timespan_t::from_seconds( 2.0 ), timespan_t::zero, 0.80, true ); // 80% sucessfull double dipping according to http://sithwarrior.com/forums/Thread-Simulationcraft-for-Sage-Sorcerer?pid=13497#pid13497
+  buffs_psychic_projection_dd = new buff_t( this, is_sage ? "psychic_projection_dd" : "lightning_barrage_dd", 1, timespan_t::from_seconds( 2.0 ), timespan_t::zero );
   buffs_indomitable_4pc = new buff_t( this, "indomitable_4pc", 1, timespan_t::from_seconds( 15.0 ), timespan_t::from_seconds( 20.0 ), set_bonus.indomitable -> four_pc() > 0 ? 0.10 : 0.0 );
 
 }
@@ -1424,6 +1422,7 @@ void jedi_sage_t::init_rng()
   rng_psychic_barrier = get_rng( "psychic_barrier" );
   rng_upheaval = get_rng( "upheaval" );
   rng_tm = get_rng( "telekinetic_momentum" );
+  rng_psychic_projection_dd = get_rng( type == JEDI_SAGE ? "psychic_projection_dd" : "lightning_barrage_dd" );
 }
 
 // jedi_sage_t::init_actions =====================================================
@@ -1732,6 +1731,22 @@ void jedi_sage_t::create_talents()
 
 
   jedi_consular_t::create_talents();
+}
+
+// jedi_sage_t::create_options =================================================
+
+void jedi_sage_t::create_options()
+{
+  jedi_consular_t::create_options();
+
+  option_t jedi_sage_options[] =
+  {
+    { "psychic_projection_dd_chance",       OPT_FLT, &( psychic_projection_dd_chance      ) },
+    { "lightning_barrage_dd_chance",        OPT_FLT, &( psychic_projection_dd_chance      ) },
+    { NULL, OPT_UNKNOWN, NULL }
+  };
+
+  option_t::copy( options, jedi_sage_options );
 }
 
 // ==========================================================================
