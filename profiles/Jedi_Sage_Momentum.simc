@@ -34,5 +34,5 @@ hands=foo_force_masters_gloves
 # gear_willpower=1487
 # gear_surge_rating=153
 # Set Bonuses
-# set_bonus.indomitable_2pc=1
-# set_bonus.indomitable_4pc=1
+# set_bonus=indomitable_2pc
+# set_bonus=indomitable_4pc

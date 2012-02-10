@@ -3649,9 +3649,8 @@ struct set_bonus_t
   player_t* player;
   std::string name_str;
   std::string filter_str;
-private:
   int count;
-public:
+
   set_bonus_t( player_t*, const std::string, const std::string );
 
   int two_pc() const; int four_pc() const;
@@ -4021,7 +4020,6 @@ struct player_t : public noncopyable
   virtual void init();
   virtual void init_glyphs();
   virtual void init_base() = 0;
-  virtual void init_set_bonus();
   virtual void init_items();
   virtual void init_meta_gem( gear_stats_t& );
   virtual void init_core();
@@ -4257,6 +4255,7 @@ struct player_t : public noncopyable
   bool      recent_cast() const;
   item_t*   find_item( const std::string& );
   action_t* find_action( const std::string& );
+  set_bonus_t* find_set_bonus( const std::string& name );
   bool      dual_wield() const { return main_hand_weapon.type != WEAPON_NONE && off_hand_weapon.type != WEAPON_NONE; }
   void      aura_gain( const char* name, double value=0 );
   void      aura_loss( const char* name, double value=0 );

@@ -94,11 +94,37 @@ static bool parse_role_string( sim_t* sim,
 {
   assert( name == "role" ); ( void )name;
 
+
+
   sim -> active_player -> role = util_t::parse_role_type( value );
 
   return true;
 }
 
+// parse_role_string ========================================================
+
+static bool parse_set_bonus( sim_t* sim,
+                               const std::string& name,
+                               const std::string& value )
+{
+  assert( name == "set_bonus" ); ( void )name;
+
+  std::string::size_type cut_pt;
+  if ( ( cut_pt = value.find( "_2pc" ) ) != value.npos )
+  {
+    set_bonus_t* sb = sim -> active_player -> find_set_bonus( value.substr( 0, cut_pt ) );
+    if ( sb && sb -> count < 2 )
+      sb -> count = 2;
+  }
+  if ( ( cut_pt = value.find( "_4pc" ) ) != value.npos )
+  {
+    set_bonus_t* sb = sim -> active_player -> find_set_bonus( value.substr( 0, cut_pt ) );
+    if ( sb && sb -> count < 4 )
+      sb -> count = 4;
+  }
+
+  return true;
+}
 
 // parse_world_lag ==========================================================
 
@@ -367,6 +393,8 @@ player_t::player_t( sim_t*             s,
   range::fill( tree_type, TREE_NONE );
 
   if ( reaction_stddev == timespan_t::zero ) reaction_stddev = reaction_mean * 0.25;
+
+  set_bonus.indomitable = get_set_bonus( "indomitable", "_force_masters_" );
 }
 
 // player_t::~player_t ======================================================
@@ -561,7 +589,6 @@ void player_t::init()
   init_glyphs();
   init_race();
   init_base();
-  init_set_bonus();
   init_racials();
   init_position();
   init_professions();
@@ -624,15 +651,6 @@ void player_t::init_base()
 
   if ( world_lag_stddev < timespan_t::zero  ) world_lag_stddev = world_lag * 0.1;
   if ( brain_lag_stddev < timespan_t::zero  ) brain_lag_stddev = brain_lag * 0.1;
-}
-
-// player_t::init_set_bonus ======================================================
-
-void player_t::init_set_bonus()
-{
-  if ( sim -> debug ) log_t::output( sim, "Initializing set_bonus for player (%s)", name() );
-
-  set_bonus.indomitable = get_set_bonus( "indomitable", "_force_masters_" );
 }
 
 // player_t::init_items =====================================================
@@ -3606,7 +3624,7 @@ void player_t::recalculate_surge()
   if ( sr < 0 )
     sr = 0;
 
-  surge_bonus = 0.5 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.5 ) ), sr / std::max( 20, level ) / 0.1 ) );
+  surge_bonus = 0.5 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.3 ) ), sr / std::max( 20, level ) / 0.11 ) );
 }
 
 // player_t::recent_cast ====================================================
@@ -3682,6 +3700,21 @@ action_priority_list_t* player_t::find_action_priority_list( const std::string& 
     action_priority_list_t* a = action_priority_list[i];
     if ( a -> name_str == name )
       return a;
+  }
+
+  return 0;
+}
+
+// player_t::find_set_bonus =======================================================
+
+set_bonus_t* player_t::find_set_bonus( const std::string& name )
+{
+  set_bonus_t* sb=0;
+
+  for ( sb = set_bonus_list; sb; sb = sb -> next )
+  {
+    if ( sb -> name_str == name )
+      return sb;
   }
 
   return 0;
@@ -5513,8 +5546,8 @@ bool player_t::create_profile( std::string& profile_str, int save_type, bool sav
     profile_str += "# Set Bonuses" + term;
     for ( set_bonus_t* sb = set_bonus_list; sb; sb = sb -> next )
     {
-      if ( sb -> two_pc()   != 0 )  profile_str += "# set_bonus." + sb -> name_str + "_2pc="  + util_t::to_string( sb -> two_pc() ) + term ;
-      if ( sb -> four_pc()   != 0 )  profile_str += "# set_bonus." + sb -> name_str + "_4pc="  + util_t::to_string( sb -> four_pc() ) + term ;
+      if ( sb -> two_pc()    != 0 )  profile_str += "# set_bonus=" + sb -> name_str + "_2pc" + term ;
+      if ( sb -> four_pc()   != 0 )  profile_str += "# set_bonus=" + sb -> name_str + "_4pc" + term ;
     }
     if ( meta_gem != META_GEM_NONE )
     {
@@ -5630,6 +5663,7 @@ void player_t::create_options()
     { "level",                                OPT_INT,      &( level                                  ) },
     { "use_pre_potion",                       OPT_INT,      &( use_pre_potion                         ) },
     { "role",                                 OPT_FUNC,     ( void* ) ::parse_role_string               },
+    { "set_bonus",                            OPT_FUNC,     ( void* ) ::parse_set_bonus                 },
     { "target",                               OPT_STRING,   &( target_str                             ) },
     { "skill",                                OPT_FLT,      &( initial_skill                          ) },
     { "distance",                             OPT_FLT,      &( distance                               ) },
