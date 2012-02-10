@@ -539,6 +539,8 @@ void scaling_t::create_options()
     { "scale_hit_rating",               OPT_FLT,    &( stats.hit_rating                     ) },
     { "scale_crit_rating",              OPT_FLT,    &( stats.crit_rating                    ) },
     { "scale_alacrity_rating",          OPT_FLT,    &( stats.alacrity_rating                ) },
+    { "scale_power",                    OPT_FLT,    &( stats.power                          ) },
+    { "scale_surge_rating",             OPT_FLT,    &( stats.surge_rating                   ) },
     { "scale_weapon_dps",               OPT_FLT,    &( stats.weapon_dps                     ) },
     { "scale_weapon_speed",             OPT_FLT,    &( stats.weapon_speed                   ) },
     { "scale_offhand_weapon_dps",       OPT_FLT,    &( stats.weapon_offhand_dps             ) },
