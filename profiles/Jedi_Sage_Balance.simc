@@ -17,13 +17,12 @@ actions+=/weaken_mind,if=!ticking
 actions+=/force_in_balance,if=force>100
 actions+=/mind_crush,if=buff.presence_of_mind.react
 actions+=/sever_force,if=!ticking
-actions+=/mind_crush
 actions+=/telekinetic_throw
-actions+=/project,moving=1
+actions+=/project,moving=1,if=force>120
 head=foo_force_masters_headgear
 shirt=foo,stats=1487willpower_410crit_346alacrity_218power_1224forcepower_153surge
 chest=foo_force_masters_vestments
-legs=foo_force_masters_lowe_robe
+legs=foo_force_masters_lower_robe
 hands=foo_force_masters_gloves
 # Gear Summary
 # gear_crit_rating=410

@@ -5,7 +5,7 @@ position=front
 shirt=foo,stats=1487willpower_410crit_346alacrity_218power_1224forcepower_153surge
 chest=foo_force_masters_vestments
 hands=foo_force_masters_gloves
-legs=foo_force_masters_lowe_robe
+legs=foo_force_masters_lower_robe
 head=foo_force_masters_headgear
 save=Jedi_Sage_Balance.simc
 
@@ -22,9 +22,9 @@ talents=http://www.torhead.com/skill-calc#600G0bZfcMMdoMZcMcRs0z.1
 actions=stim,type=rakata_resolve
 actions+=/force_valor
 actions+=/snapshot_stats
+actions+=/telekinetic_throw,if=buff.psychic_projection_dd.up
 actions+=/power_potion
 actions+=/force_potency
-actions+=/telekinetic_throw,if=buff.psychic_projection.react
 actions+=/weaken_mind,if=!ticking
 actions+=/force_in_balance
 actions+=/telekinetic_wave,if=buff.presence_of_mind.react|buff.tidal_force.react
@@ -38,6 +38,7 @@ talents=http://www.torhead.com/skill-calc#600ZfcrMdoMuzZcMcRs0z.1
 actions=stim,type=rakata_resolve
 actions+=/force_valor
 actions+=/snapshot_stats
+actions+=/telekinetic_throw,if=buff.psychic_projection_dd.up
 actions+=/power_potion
 actions+=/force_potency
 actions+=/telekinetic_wave,if=buff.presence_of_mind.react|buff.tidal_force.react

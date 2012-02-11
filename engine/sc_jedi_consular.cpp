@@ -1358,7 +1358,7 @@ void jedi_sage_t::init_benefits()
     benefits_turbulence = get_benefit( "Thundering Blast automatic crit" );
     benefits_fs_weaken_mind = get_benefit( "Affliction ticks with Deathmark");
     benefits_fs_mind_crush = get_benefit( "Crushing Darkness ticks with Deathmark");
-    benefits_fs_sever_force = get_benefit( "Creeping Terror ticks with Deathmarkc");
+    benefits_fs_sever_force = get_benefit( "Creeping Terror ticks with Deathmark");
   }
   else
   {
@@ -1450,16 +1450,16 @@ void jedi_sage_t::init_actions()
 
       action_list_str += "/snapshot_stats";
 
+      if ( talents.psychic_projection -> rank() )
+        action_list_str += "/telekinetic_throw,if=buff.psychic_projection_dd.up";
+
       action_list_str += "/power_potion";
 
       action_list_str += "/force_potency";
 
-      if ( talents.psychic_projection -> rank() )
-        action_list_str += "/telekinetic_throw,if=buff.psychic_projection.react";
-
       action_list_str += "/weaken_mind,if=!ticking";
 
-      if ( talents.force_in_balance -> rank() > 0 && talents.force_suppression -> rank() > 0 )
+      if ( talents.force_in_balance -> rank() > 0 )
         action_list_str += "/force_in_balance,if=force>100";
 
       if ( talents.presence_of_mind -> rank() )
@@ -1471,11 +1471,12 @@ void jedi_sage_t::init_actions()
       if ( talents.sever_force -> rank() > 0 )
         action_list_str += "/sever_force,if=!ticking";
 
-      action_list_str += "/mind_crush";
+      if ( ! talents.presence_of_mind -> rank() )
+        action_list_str += "/mind_crush";
 
       action_list_str += "/telekinetic_throw";
 
-      action_list_str += "/project,moving=1";
+      action_list_str += "/project,moving=1,if=force>120";
 
       break;
 
@@ -1509,7 +1510,7 @@ void jedi_sage_t::init_actions()
 
       action_list_str += "/disturbance";
 
-      action_list_str += "/project,moving=1,if=force>120";
+      action_list_str += "/project,moving=1";
 
       break;
 
@@ -1531,12 +1532,12 @@ void jedi_sage_t::init_actions()
 
       action_list_str += "/snapshot_stats";
 
+      if ( talents.psychic_projection -> rank() )
+        action_list_str += "/force_lightning,if=buff.lightning_barrage_dd.up";
+
       action_list_str += "/power_potion";
 
       action_list_str += "/recklessness";
-
-      if ( talents.psychic_projection -> rank() )
-        action_list_str += "/force_lightning,if=buff.lightning_barrage.react";
 
       action_list_str += "/affliction,if=!ticking";
 
@@ -1552,7 +1553,8 @@ void jedi_sage_t::init_actions()
       if ( talents.sever_force -> rank() > 0 )
         action_list_str += "/creeping_terror,if=!ticking";
 
-      action_list_str += "/crushing_darkness";
+      if ( ! talents.presence_of_mind -> rank() )
+        action_list_str += "/crushing_darkness";
 
       action_list_str += "/force_lightning";
 
