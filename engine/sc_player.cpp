@@ -3624,7 +3624,11 @@ void player_t::recalculate_surge()
   if ( sr < 0 )
     sr = 0;
 
-  surge_bonus = 0.3 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.3 ) ), sr / std::max( 20, level ) / 0.11 ) );
+  // FIXME: Remove once
+  if ( dbc.ptr )
+    surge_bonus = 0.3 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.3 ) ), sr / std::max( 20, level ) / 0.11 ) );
+  else
+    surge_bonus = 0.5 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.5 ) ), sr / std::max( 20, level ) / 0.10 ) );
 }
 
 // player_t::recent_cast ====================================================
