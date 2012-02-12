@@ -720,11 +720,8 @@ void SimulationCraftWindow::createBestInSlotTab()
   importTab->addTab( bisTree, "BiS" );
 
   QTreeWidgetItem* top[ PLAYER_MAX ];
-  for( int i=JEDI_SAGE; i <= SITH_SORCERER; i++ )
-  {
-    top[i] = new QTreeWidgetItem( QStringList( util_t::player_type_string( i ) ) );
-    bisTree->addTopLevelItem( top[i] );
-  }
+  range::fill( top, 0 );
+
 #ifndef Q_WS_MAC
   QDir dir = QString( "profiles" );
 #else
@@ -751,15 +748,19 @@ void SimulationCraftWindow::createBestInSlotTab()
   {
     QString& profile = profileList[ i ];
 
-    int player = PLAYER_MAX;
-    for ( int j=0; j < PLAYER_MAX && player == PLAYER_MAX; j++ )
-      if ( profile.contains( util_t::player_type_string( j ), Qt::CaseInsensitive ) )
-        player = j;
-
-    if( player != PLAYER_MAX )
+    for ( int pt = PLAYER_NONE; pt < PLAYER_MAX; ++pt )
     {
-      QTreeWidgetItem* item = new QTreeWidgetItem( QStringList( profile ) );
-      top[ player ] -> addChild( item );
+      if ( profile.contains( util_t::player_type_string( pt ), Qt::CaseInsensitive ) )
+      {
+        if ( ! top[ pt ] )
+        {
+          top[ pt ] = new QTreeWidgetItem( QStringList( util_t::player_type_string( pt ) ) );
+          bisTree -> addTopLevelItem( top[ pt ] );
+        }
+        QTreeWidgetItem* item = new QTreeWidgetItem( QStringList( profile ) );
+        top[ pt ] -> addChild( item );
+        break;
+      }
     }
   }
 

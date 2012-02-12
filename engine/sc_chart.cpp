@@ -7,38 +7,70 @@
 
 namespace { // ANONYMOUS NAMESPACE ==========================================
 
-// Colors returned by this function are defined as http://www.wowpedia.org/Class_colors
-static const char* class_color( int type )
+namespace color {
+const char* const blue = "2459FF";
+const char* const cyan = "69CCF0";
+const char* const green = "336600";
+const char* const grey = "C0C0C0";
+const char* const nearly_white = "FCFFFF";
+const char* const pink = "F58CBA";
+const char* const purple = "9482C9";
+const char* const red = "C41F3B";
+const char* const taupe = "C79C6E";
+const char* const white = "FFFFFF";
+const char* const yellow = "FFF569";
+}
+
+static const char* class_color( player_type type )
 {
   switch ( type )
   {
-  case PLAYER_NONE:  return "FFFFFF";
-  case SITH_WARRIOR: return "C41F3B";
-  //case TROOPER:        return "FF7D0A";
-  case BOUNTY_HUNTER:       return "336600";
-  case TROOPER:         return "69CCF0";
-  case IMPERIAL_AGENT:      return "F58CBA";
-  case JEDI_SAGE:       return "C0C0C0";
-  case SMUGGLER:        return "FFF569";
-  case SITH_INQUISITOR:       return "2459FF";
-  case SITH_SORCERER:      return "9482C9";
-  case JEDI_KNIGHT:      return "C79C6E";
-  case ENEMY:        return "FFFFFF";
-  case ENEMY_ADD:    return "FCFFFF";
+  case PLAYER_NONE:     return color::white;
+
+  case SITH_MARAUDER:
+  case SITH_JUGGERNAUT: return color::red;
+
+  case SITH_ASSASSIN:   return color::blue;
+  case SITH_SORCERER:   return color::purple;
+
+  case BH_MERCENARY:
+  case BH_POWERTECH:    return color::green;
+
+  case IA_SNIPER:
+  case IA_OPERATIVE:    return color::pink;
+
+  case JEDI_GUARDIAN:
+  case JEDI_SENTINEL:   return color::taupe;
+
+  case JEDI_SAGE:
+  case JEDI_SHADOW:     return color::grey;
+
+  case S_GUNSLINGER:
+  case S_SCOUNDREL:     return color::yellow;
+
+  case T_COMMANDO:
+  case T_VANGUARD:      return color::cyan;
+
+  case ENEMY:           return color::white;
+  case ENEMY_ADD:       return color::nearly_white;
+
   default: assert( 0 );
   }
+
   return 0;
 }
 
-// The above colors don't all work for text rendered on a light (white) background.  These colors work better by reducing the brightness HSV component of the above colors
-static const char* class_text_color( int type )
+// The above colors don't all work for text rendered on a light (white) background.
+// These colors work better by reducing the brightness HSV component of the above colors.
+static const char* class_text_color( player_type type )
 {
   switch ( type )
   {
-  case TROOPER:         return "59ADCC"; // darker blue
-  case JEDI_SAGE:       return "8A8A8A"; // darker silver
-  //case SMUGGLER:        return "C0B84F"; // darker yellow
-  default:           return class_color( type );
+  case T_COMMANDO:
+  case T_VANGUARD: return "59ADCC"; // darker blue
+  case JEDI_SAGE:  return "8A8A8A"; // darker silver
+  //case SMUGGLER: return "C0B84F"; // darker yellow
+  default:         return class_color( type );
   }
 }
 
@@ -47,15 +79,15 @@ static const char* school_color( int type )
 {
   switch ( type )
   {
-  case SCHOOL_INTERNAL:     return class_color( TROOPER );
+  case SCHOOL_INTERNAL:     return class_color( T_COMMANDO );
   case SCHOOL_BLEED:      	return "C55D54"; // Half way between DK "red" and JEDI_KNIGHT "brown"
-  case SCHOOL_CHAOS:      	return class_color( SITH_WARRIOR );
-  case SCHOOL_FIRE:       	return class_color( SITH_WARRIOR );
-  case SCHOOL_FROST:      	return class_color( SITH_INQUISITOR );
-  case SCHOOL_FROSTFIRE:  	return class_color( SITH_INQUISITOR );
+  case SCHOOL_CHAOS:      	return class_color( SITH_MARAUDER );
+  case SCHOOL_FIRE:       	return class_color( SITH_MARAUDER );
+  case SCHOOL_FROST:      	return class_color( SITH_ASSASSIN );
+  case SCHOOL_FROSTFIRE:  	return class_color( SITH_SORCERER );
   case SCHOOL_HOLY:       	return class_color( JEDI_SAGE );
-  case SCHOOL_NATURE:     	return class_color( BOUNTY_HUNTER );
-  case SCHOOL_PHYSICAL:   	return class_color( JEDI_KNIGHT );
+  case SCHOOL_NATURE:     	return class_color( BH_MERCENARY );
+  case SCHOOL_PHYSICAL:   	return class_color( JEDI_SENTINEL );
   case SCHOOL_KINETIC:     	return class_color( SITH_SORCERER );
   case SCHOOL_FROSTSTORM:   return "2C6080";
   case SCHOOL_SPELLSTORM: 	return "8AD0B1"; // Half way between BOUNTY_HUNTER "green" and Mage "blue" (spellstorm = arcane/nature damage)
@@ -72,14 +104,14 @@ static const char* stat_color( int type )
 {
   switch ( type )
   {
-  case STAT_STRENGTH:                 return class_color( JEDI_KNIGHT );
-  case STAT_SURGE_RATING:             return class_color( BOUNTY_HUNTER );
-  case STAT_WILLPOWER:                return class_color( TROOPER );
+  case STAT_STRENGTH:                 return class_color( JEDI_SENTINEL );
+  case STAT_SURGE_RATING:             return class_color( BH_MERCENARY );
+  case STAT_WILLPOWER:                return class_color( T_COMMANDO );
   case STAT_POWER:                    return class_color( JEDI_SAGE );
-  case STAT_FORCE_POWER:              return class_text_color( TROOPER );
-  case STAT_HIT_RATING:               return class_color( SITH_WARRIOR );
-  case STAT_CRIT_RATING:              return class_color( IMPERIAL_AGENT );
-  case STAT_ALACRITY_RATING:             return class_color( SITH_INQUISITOR );
+  case STAT_FORCE_POWER:              return class_text_color( T_VANGUARD);
+  case STAT_HIT_RATING:               return class_color( SITH_JUGGERNAUT );
+  case STAT_CRIT_RATING:              return class_color( IA_OPERATIVE );
+  case STAT_ALACRITY_RATING:          return class_color( SITH_SORCERER );
   case STAT_EXPERTISE_RATING:         return school_color( SCHOOL_BLEED );
   case STAT_SPELL_PENETRATION:        return class_text_color( JEDI_SAGE );
   default:                            return 0;
@@ -109,7 +141,7 @@ static unsigned char simple_encoding( int number )
   if ( number < 0  ) number = 0;
   if ( number > 61 ) number = 61;
 
-  static const char* encoding = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  static const char encoding[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
   return encoding[ number ];
 }
@@ -151,23 +183,19 @@ static const char* get_chart_base_url()
 }
 
 #if 0
-static const char* extended_encoding( int number )
+static std::string extended_encoding( int number )
 {
+  static const char encoding[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.";
+
   if ( number < 0    ) number = 0;
   if ( number > 4095 ) number = 4095;
 
-  static const char* encoding = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-  int first  = number / 64;
-  int second = number - ( first * 64 );
-
   std::string pair;
 
-  pair = "";
-  pair += encoding[ first  ];
-  pair += encoding[ second ];
+  pair += encoding[ number / 64 ];
+  pair += encoding[ number % 64 ];
 
-  return pair.c_str();
+  return pair;
 }
 #endif
 
@@ -1701,16 +1729,7 @@ const char* chart_t::gear_weights_lootrank( std::string& s,
 
   switch ( p -> type )
   {
-  case SITH_WARRIOR: s += "&Cla=2048"; break;
-  case TROOPER:        s += "&Cla=1024"; break;
-  case BOUNTY_HUNTER:       s += "&Cla=4";    break;
-  case IMPERIAL_AGENT:      s += "&Cla=2";    break;
-  case JEDI_SAGE:       s += "&Cla=0";   break;
-  case SMUGGLER:        s += "&Cla=0";    break;
-  case SITH_INQUISITOR:       s += "&Cla=0";   break;
-  case JEDI_KNIGHT:      s += "&Cla=0";    break;
-  case SITH_SORCERER:  s+= "&CLA=0"; break;
-  default: s+= "&CLA=0"; break;
+  default: s+= "&Cla=0"; break;
   }
 
   switch ( p -> race )
@@ -1782,15 +1801,7 @@ const char* chart_t::gear_weights_wowhead( std::string& s,
 
   switch ( p -> type )
   {
-  case SITH_WARRIOR: s += "ub=6;";  break;
-  case TROOPER:        s += "ub=11;"; break;
-  case BOUNTY_HUNTER:       s += "ub=3;";  break;
-  case IMPERIAL_AGENT:      s += "ub=2;";  break;
-  case JEDI_SAGE:       s += "ub=5;";  break;
-  case SMUGGLER:        s += "ub=4;";  break;
-  case SITH_INQUISITOR:       s += "ub=7;";  break;
-  case JEDI_KNIGHT:      s += "ub=1;";  break;
-  default:  s += "ub=0;";  break;
+  default: break;
   }
 
   // Restrict wowhead to rare gems. When epic gems become available:"gm=4;gb=1;"
@@ -1821,10 +1832,9 @@ const char* chart_t::gear_weights_wowhead( std::string& s,
     case STAT_EXPERTISE_RATING:         id = 117; break;
     case STAT_HIT_RATING:               id = 119; break;
     case STAT_CRIT_RATING:              id = 96;  break;
-    case STAT_ALACRITY_RATING:             id = 103; break;
+    case STAT_ALACRITY_RATING:          id = 103; break;
     case STAT_ARMOR:                    id = 41;  break;
-    case STAT_WEAPON_DPS:
-      if ( BOUNTY_HUNTER == p -> type ) id = 138; else id = 32;  break;
+    case STAT_WEAPON_DPS:               id = 32;  break;
     }
 
     if ( id )
@@ -2036,17 +2046,15 @@ const char* chart_t::resource_color( int type )
 {
   switch ( type )
   {
-  case RESOURCE_HEALTH: return class_color( BOUNTY_HUNTER );
+  case RESOURCE_HEALTH: return color::green;
 
-  case RESOURCE_MANA:        return class_color( SITH_INQUISITOR );
+  case RESOURCE_FORCE:  return color::blue;
 
   case RESOURCE_ENERGY:
-  case RESOURCE_FORCE:
-  case RESOURCE_AMMO:       return class_text_color( SMUGGLER );
+  case RESOURCE_AMMO:   return color::yellow;
 
-  case RESOURCE_RAGE: return class_color( SITH_WARRIOR );
+  case RESOURCE_RAGE:   return color::red;
 
-  case RESOURCE_NONE:
-  default:                   return "000000";
+  default:              return "000000";
   }
 }

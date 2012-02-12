@@ -325,40 +325,44 @@ const char* util_t::player_type_string( int type )
 {
   switch ( type )
   {
-  case PLAYER_NONE:     return "none";
-  case SITH_WARRIOR:    return "sith_warrior";
-  case TROOPER:         return "trooper";
-  case BOUNTY_HUNTER:   return "bounty_hunter";
-  case IMPERIAL_AGENT:  return "imperial_agent";
-  case SMUGGLER:        return "smuggler";
-  case SITH_INQUISITOR: return "sith_inquisitor";
-  case JEDI_KNIGHT:     return "jedi_knight";
-  case PLAYER_PET:      return "pet";
-  case PLAYER_GUARDIAN: return "guardian";
+  case JEDI_SAGE:        return "jedi_sage";
+  case JEDI_SHADOW:      return "shadow";
+  case JEDI_SENTINEL:    return "sentinel";
+  case JEDI_GUARDIAN:    return "guardian";
+  case S_SCOUNDREL:      return "scoundrel";
+  case S_GUNSLINGER:     return "gunslinger";
+  case T_COMMANDO:       return "commando";
+  case T_VANGUARD:       return "vanguard";
+
+  case SITH_SORCERER:    return "sith_sorcerer";
+  case SITH_ASSASSIN:    return "assassin";
+  case SITH_MARAUDER:    return "marauder";
+  case SITH_JUGGERNAUT:  return "juggernaut";
+  case BH_MERCENARY:     return "mercenary";
+  case BH_POWERTECH:     return "powertech";
+  case IA_SNIPER:        return "sniper";
+  case IA_OPERATIVE:     return "operative";
+
+  case PLAYER_NONE:      return "none";
+  case PLAYER_PET:       return "pet";
+  case PLAYER_GUARDIAN:  return "guardian";
   case PLAYER_COMPANION: return "companion";
-  case ENEMY:           return "enemy";
-  case ENEMY_ADD:       return "add";
-  case JEDI_SAGE:       return "jedi_sage";
-  case SITH_SORCERER:   return "sith_sorcerer";
+  case ENEMY:            return "enemy";
+  case ENEMY_ADD:        return "add";
+  default:               return "unknown";
   }
-  return "unknown";
 }
 
 // util_t::translate_class_str ==============================================
 
-int util_t::translate_class_str( std::string& s )
+int util_t::translate_class_str( const std::string& s )
 {
-  std::string fmt_s = armory_t::format( s );
-  if      ( fmt_s == "sith_warrior"    ) return SITH_WARRIOR;
-  else if ( fmt_s == "trooper"         ) return TROOPER;
-  else if ( fmt_s == "bounty_hunter"   ) return BOUNTY_HUNTER;
-  else if ( fmt_s == "imperial_agent"  ) return IMPERIAL_AGENT;
-  else if ( fmt_s == "smuggler"        ) return SMUGGLER;
-  else if ( fmt_s == "sith_inquisitor" ) return SITH_INQUISITOR;
-  else if ( fmt_s == "jedi_knight"     ) return JEDI_KNIGHT;
-  else if ( fmt_s == "jedi_sage"       ) return JEDI_SAGE;
-  else if ( fmt_s == "sith_sorcerer"   ) return SITH_SORCERER;
-  return PLAYER_NONE;
+  std::string fmt_s( s );
+  armory_t::format( fmt_s );
+
+  if      ( fmt_s == "jedi_sage" || fmt_s == "sage"         ) return JEDI_SAGE;
+  else if ( fmt_s == "sith_sorcerer" || fmt_s == "sorceror" ) return SITH_SORCERER;
+  else                                                        return PLAYER_NONE;
 }
 
 // util_t::parse_player_type ================================================

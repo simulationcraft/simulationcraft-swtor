@@ -230,10 +230,18 @@ enum player_type
 {
   PLAYER_SPECIAL_SCALE=-1,
   PLAYER_NONE=0,
-  TROOPER, SMUGGLER, JEDI_KNIGHT,
-  BOUNTY_HUNTER, SITH_WARRIOR, IMPERIAL_AGENT, SITH_INQUISITOR,
+
+  SITH_MARAUDER, SITH_JUGGERNAUT,
+  SITH_ASSASSIN, SITH_SORCERER,
+  BH_MERCENARY, BH_POWERTECH,
+  IA_SNIPER, IA_OPERATIVE,
+
+  JEDI_GUARDIAN, JEDI_SENTINEL,
+  JEDI_SAGE, JEDI_SHADOW,
+  S_GUNSLINGER, S_SCOUNDREL,
+  T_COMMANDO, T_VANGUARD,
+
   PLAYER_PET, PLAYER_COMPANION, PLAYER_GUARDIAN,
-  JEDI_SAGE, SITH_SORCERER,
   ENEMY, ENEMY_ADD,
   PLAYER_MAX
 };
@@ -2167,7 +2175,7 @@ public:
 
   static const char* class_id_string( int type );
   static int translate_class_id( int cid );
-  static int translate_class_str( std::string& s );
+  static int translate_class_str( const std::string& s );
   static race_type translate_race_id( int rid );
   static stat_type translate_item_mod( int stat_mod );
   static slot_type translate_invtype( int inv_type );

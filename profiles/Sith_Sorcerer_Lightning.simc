@@ -7,7 +7,7 @@ race=human
 position=front
 role=spell
 use_pre_potion=0
-talents=http://www.torhead.com/skill-calc#sith_sorcerer-030000000000000000032312201120120131513020002000000000000
+talents=http://www.torhead.com/skill-calc#201hZfsrodoMutzZcM0M.1
 actions=stim,type=rakata_resolve
 actions+=/mark_of_power
 actions+=/snapshot_stats
