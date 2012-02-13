@@ -74,21 +74,20 @@ static OptionEntry* getScalingOptions()
       "Use Positive Deltas Only",         "",         "Normally Hit/Expertise use negative scale factors to show DPS lost by reducing that stat.\n"
       "This option forces a positive scale delta, which is useful for classes with soft caps."
     },
-    { "Analyze Strength",                 "str",          "Calculate scale factors for Strength"               },
-    { "Analyze Willpower",                "willpower",    "Calculate scale factors for Willpower"              },
-    { "Analyze Hit Rating",               "hit",          "Calculate scale factors for Hit Rating"             },
-    { "Analyze Crit Rating",              "crit",         "Calculate scale factors for Crit Rating"            },
-    { "Analyze Haste Rating",             "haste",        "Calculate scale factors for Haste Rating"           },
-    { "Analyze Surge Rating",             "surge",        "Calculate scale factors for Surge Rating"           },
-    { "Analyze Power",                    "power",        "Calculate scale factors for Power"                  },
-    { "Analyze Force Power",              "force_power",  "Calculate scale factors for Force Power"            },
-    { "Analyze Weapon DPS",               "wdps",         "Calculate scale factors for Weapon DPS"             },
-    { "Analyze Weapon Speed",             "wspeed",       "Calculate scale factors for Weapon Speed"           },
-    { "Analyze Off-hand Weapon DPS",      "wohdps",       "Calculate scale factors for Off-hand Weapon DPS"    },
-    { "Analyze Off-hand Weapon Speed",    "wohspeed",     "Calculate scale factors for Off-hand Weapon Speed"  },
-    { "Analyze Armor",                    "armor",        "Calculate scale factors for Armor"                  },
-    { NULL, NULL, NULL }
-  };
+    { "Analyze Strength",                 "str",          "Calculate scale factor for Strength"               },
+    { "Analyze Willpower",                "willpower",    "Calculate scale factor for Willpower"              },
+    { "Analyze Accuracy Rating",          "hit",          "Calculate scale factor for Accuracy Rating"        },
+    { "Analyze Crit Rating",              "crit",         "Calculate scale factor for Crit Rating"            },
+    { "Analyze Alacrity Rating",          "alacrity",     "Calculate scale factor for Alacrity Rating"        },
+    { "Analyze Surge Rating",             "surge",        "Calculate scale factor for Surge Rating"           },
+    { "Analyze Power",                    "power",        "Calculate scale factor for Power"                  },
+    { "Analyze Force Power",              "force_power",  "Calculate scale factor for Force Power"            },
+    { "Analyze Weapon DPS",               "wdps",         "Calculate scale factor for Weapon DPS"             },
+    { "Analyze Weapon Speed",             "wspeed",       "Calculate scale factor for Weapon Speed"           },
+    { "Analyze Off-hand Weapon DPS",      "wohdps",       "Calculate scale factor for Off-hand Weapon DPS"    },
+    { "Analyze Off-hand Weapon Speed",    "wohspeed",     "Calculate scale factor for Off-hand Weapon Speed"  },
+    { "Analyze Armor",                    "armor",        "Calculate scale factor for Armor"                  },
+    { NULL, NULL, NULL }  };
   return options;
 }
 
@@ -96,15 +95,15 @@ static OptionEntry* getPlotOptions()
 {
   static OptionEntry options[] =
   {
-    { "Plot DPS per Strength",                 "str",         "Generate DPS curve for Strength"     },
-    { "Plot DPS per Willpower",                "willpower",   "Generate DPS curve for Willpower"    },
-    { "Plot DPS per Accuracy Rating",          "hit",         "Generate DPS curve for Hit Rating"   },
-    { "Plot DPS per Crit Rating",              "crit",        "Generate DPS curve for Crit Rating"  },
-    { "Plot DPS per Haste Rating",             "haste",       "Generate DPS curve for Haste Rating" },
-    { "Plot DPS per Surge Rating",             "surge",       "Generate DPS curve for Surge Rating" },
-    { "Plot DPS per Power",                    "power",       "Generate DPS curve for Power"        },
-    { "Plot DPS per Force Power",              "forcepower", "Generate DPS curve for Force Power"  },
-    { "Plot DPS per Weapon DPS",               "wdps",        "Generate DPS curve for Weapon DPS"   },
+    { "Plot DPS per Strength",            "str",        "Generate DPS curve for Strength"     },
+    { "Plot DPS per Willpower",           "willpower",  "Generate DPS curve for Willpower"    },
+    { "Plot DPS per Accuracy Rating",     "hit",        "Generate DPS curve for Accuracy Rating" },
+    { "Plot DPS per Crit Rating",         "crit",       "Generate DPS curve for Crit Rating"  },
+    { "Plot DPS per Alacrity Rating",     "alacrity",   "Generate DPS curve for Alacrity Rating" },
+    { "Plot DPS per Surge Rating",        "surge",      "Generate DPS curve for Surge Rating" },
+    { "Plot DPS per Power",               "power",      "Generate DPS curve for Power"        },
+    { "Plot DPS per Force Power",         "forcepower", "Generate DPS curve for Force Power"  },
+    { "Plot DPS per Weapon DPS",          "wdps",       "Generate DPS curve for Weapon DPS"   },
     { NULL, NULL, NULL }
   };
   return options;
@@ -119,7 +118,7 @@ static OptionEntry* getReforgePlotOptions()
     { "Plot Reforge Options for Surge Rating",      "surge",     "Generate reforge plot data for Surge Rating"     },
     { "Plot Reforge Options for Accuracy Rating",   "hit",       "Generate reforge plot data for Accuracy Rating"  },
     { "Plot Reforge Options for Crit Rating",       "crit",      "Generate reforge plot data for Crit Rating"      },
-    { "Plot Reforge Options for Haste Rating",      "haste",     "Generate reforge plot data for Haste Rating"     },
+    { "Plot Reforge Options for Alacrity Rating",   "alacrity",  "Generate reforge plot data for Alacrity Rating"  },
     { NULL, NULL, NULL }
   };
   return options;
@@ -666,7 +665,7 @@ void SimulationCraftWindow::createReforgePlotsTab()
   reforgePlotStepChoice -> setCurrentIndex( 1 ); // Default is 20
   reforgePlotsLayout -> addRow( "Step Amount", reforgePlotStepChoice );
 
-  QLabel* messageText = new QLabel( "A maximum of three stats may be ran at once." );
+  QLabel* messageText = new QLabel( "A maximum of three stats may be run at once." );
   reforgePlotsLayout -> addRow( messageText );
 
   reforgeplotsButtonGroup = new ReforgeButtonGroup();
@@ -1313,14 +1312,14 @@ QString SimulationCraftWindow::mergeOptions()
   options += "\n";
   options += "fight_style=" + fightStyleChoice->currentText() + "\n";
 
-  static const char* const targetlevel[] = { "53", "52", "51" };
+  static const char* const targetlevel[] = { "53", "52", "50" };
   options += "target_level=";
   options += targetlevel[ targetLevelChoice->currentIndex() ];
   options += "\n";
 
   options += "target_race=" + targetRaceChoice->currentText() + "\n";
   options += "default_skill=";
-  const char *skill[] = { "1.0", "0.9", "0.75", "0.50" };
+  static const char * const skill[] = { "1.0", "0.9", "0.75", "0.50" };
   options += skill[ playerSkillChoice->currentIndex() ];
   options += "\n";
   options += "threads=" + threadsChoice->currentText() + "\n";
