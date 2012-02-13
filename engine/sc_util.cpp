@@ -831,9 +831,10 @@ const char* util_t::stim_type_string( int stim )
   switch ( stim )
   {
   case STIM_NONE:               return "none";
+  case STIM_EXOTECH_RESOLVE:    return "exotech_resolve";
   case STIM_RAKATA_RESOLVE:     return "rakata_resolve";
+  default:                      return "unknown";
   }
-  return "unknown";
 }
 
 // util_t::parse_stim_type =================================================

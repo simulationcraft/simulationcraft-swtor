@@ -1444,7 +1444,7 @@ void jedi_sage_t::init_actions()
       {
       case TREE_BALANCE:
 
-      action_list_str += "stim,type=rakata_resolve";
+      action_list_str += "stim,type=exotech_resolve";
 
       action_list_str += "/force_valor";
 
@@ -1483,7 +1483,7 @@ void jedi_sage_t::init_actions()
 
       case TREE_TELEKINETICS:
 
-      action_list_str += "stim,type=rakata_resolve";
+      action_list_str += "stim,type=exotech_resolve";
 
       action_list_str += "/force_valor";
 
@@ -1526,7 +1526,7 @@ void jedi_sage_t::init_actions()
       {
       case TREE_MADNESS:
 
-      action_list_str += "stim,type=rakata_resolve";
+      action_list_str += "stim,type=exotech_resolve";
 
       action_list_str += "/mark_of_power";
 
@@ -1565,7 +1565,7 @@ void jedi_sage_t::init_actions()
 
       case TREE_LIGHTNING:
 
-      action_list_str += "stim,type=rakata_resolve";
+      action_list_str += "stim,type=exotech_resolve";
 
       action_list_str += "/mark_of_power";
 

@@ -52,14 +52,17 @@ struct stim_t : public action_t
     player_t* p = player;
     if ( sim -> log ) log_t::output( sim, "%s uses Stim %s", p -> name(), util_t::stim_type_string( type ) );
     p -> stim = type;
-    double willpower = 0, power = 0;
     switch ( type )
     {
 
+    case STIM_EXOTECH_RESOLVE:
+      p -> stat_gain( STAT_WILLPOWER, 128, gain, this );
+      p -> stat_gain( STAT_POWER, 52, gain, this );
+      break;
+
     case STIM_RAKATA_RESOLVE:
-      willpower = 136.0; power = 56;
-      p -> stat_gain( STAT_WILLPOWER, willpower, gain, this );
-      p -> stat_gain( STAT_POWER, power, gain, this );
+      p -> stat_gain( STAT_WILLPOWER, 112, gain, this );
+      p -> stat_gain( STAT_POWER, 46, gain, this );
       break;
 
     default: assert( 0 );
@@ -142,7 +145,7 @@ struct power_potion_t : public action_t
 
   power_potion_t( player_t* p, const std::string& options_str ) :
     action_t( ACTION_USE, "power_potion", p ),
-    amount( 565.0 )
+    amount( 535.0 ) // Exotech Attack Adrenal
   {
     option_t options[] =
     {

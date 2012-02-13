@@ -478,6 +478,7 @@ enum elixir_type
 enum stim_type
 {
   STIM_NONE=0,
+  STIM_EXOTECH_RESOLVE,
   STIM_RAKATA_RESOLVE,
   STIM_MAX
 };

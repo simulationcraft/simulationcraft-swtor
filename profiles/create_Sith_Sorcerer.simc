@@ -19,7 +19,7 @@ save=Sith_Sorcerer_Hybrid.simc
 
 copy=Sith_Sorcerer_Suffusion,Sith_Sorcerer_Madness
 talents=http://www.torhead.com/skill-calc#201G0bZfcMMdoMZcMcRs0z.1
-actions=stim,type=rakata_resolve
+actions=stim,type=exotech_resolve
 actions+=/mark_of_power
 actions+=/snapshot_stats
 actions+=/force_lightning,if=buff.lightning_barrage_dd.up
@@ -35,7 +35,7 @@ save=Sith_Sorcerer_Suffusion.simc
 
 copy=Sith_Sorcerer_Conduction,Sith_Sorcerer_Madness
 talents=http://www.torhead.com/skill-calc#201ZfsrodoMuzZcMcRs0z.1
-actions=stim,type=rakata_resolve
+actions=stim,type=exotech_resolve
 actions+=/mark_of_power
 actions+=/snapshot_stats
 actions+=/force_lightning,if=buff.lightning_barrage_dd.up
