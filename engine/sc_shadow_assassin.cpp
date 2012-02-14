@@ -23,7 +23,7 @@ void register_shadow_assassin_targetdata( sim_t* /* sim */ )
 
 
 // ==========================================================================
-// Jedi Sage
+// Shadow Assassin
 // ==========================================================================
 
 struct shadow_assassin_t : public player_t
@@ -42,11 +42,51 @@ struct shadow_assassin_t : public player_t
   // Talents
   struct talents_t
   {
-    // TREE_A
+    // TREE_DARKNESS
+    talent_t* thrashing_blades;
+    talent_t* charge_mastery;    
 
-    // TREE_B
-
-    // TREE_C
+    // TREE_DECEPTION
+    talent_t* insulation;
+    talent_t* duplicity;
+    talent_t* dark_embrace;
+    talent_t* obfuscation;
+    talent_t* recirculation;
+    talent_t* avoidance;
+    talent_t* induction;
+    talent_t* surging_charge;
+    talent_t* darkswell;
+    talent_t* deceptive_power;
+    talent_t* entropic_field;
+    talent_t* saber_conduct;
+    talent_t* fade;
+    talent_t* static_cling;
+    talent_t* resourcefulness;
+    talent_t* static_charges;
+    talent_t* low_slash;
+    talent_t* crackling_blasts;
+    talent_t* voltaic_slash;
+    
+    // TREE_MADNESS
+    talent_t* exploitive_strikes;
+    talent_t* sith_defiance;
+    talent_t* crackling_charge;
+    talent_t* oppressing_force;
+    talent_t* chain_shock;
+    talent_t* parasitism;
+    talent_t* torment;
+    talent_t* death_field;
+    talent_t* fanaticism;
+    talent_t* claws_of_decay;
+    talent_t* haunted_dreams;
+    talent_t* corrupted_flesh;
+    talent_t* raze;
+    talent_t* deathmark;
+    talent_t* calculating_mind;
+    talent_t* unearthed_knowledge;
+    talent_t* creeping_death;
+    talent_t* devour;
+    talent_t* creeping_terror;
 
     talents_t() { memset( ( void* ) this, 0x0, sizeof( talents_t ) ); }
   };
@@ -96,7 +136,7 @@ namespace { // ANONYMOUS NAMESPACE ==========================================
 
 
 // ==========================================================================
-// Jedi Sage Abilities
+// Sith assassin Abilities
 // ==========================================================================
 
 struct shadow_assassin_attack_t : public attack_t
@@ -217,17 +257,51 @@ struct telekinetic_throw_t : public shadow_assassin_spell_t
 action_t* shadow_assassin_t::create_action( const std::string& name,
                                  const std::string& options_str )
 {
-  if ( type == JEDI_SHADOW )
+  if ( type == SITH_ASSASSIN )
   {
-    if ( name == "force_valor"        ) return new       force_valor_t( this, "force_valor", options_str );
-    if ( name == "project"            ) return new           project_t( this, "project", options_str );
-    if ( name == "telekinetic_throw"  ) return new telekinetic_throw_t( this, "telekinetic_throw", options_str );
+    if ( name == "mark_of_power"      ) return new     mark_of_power_t( this, "mark_of_power", options_str );
+    if ( name == "shock"              ) return new             shock_t( this, "shock", options_str );
+    if ( name == "force_lightning"    ) return new   force_lightning_t( this, "force_lightning", options_str );
+    if ( name == "crushing_darkness"  ) return new crushing_darkness_t( this, "crushing_darkness", options_str );
+    if ( name == "death_field"        ) return new       death_field_t( this, "death_field", options_str );
+    if ( name == "creeping_terror"    ) return new   creeping_terror_t( this, "creeping_terror", options_str );
+    if ( name == "recklessness"       ) return new      recklessness_t( this, "recklessness", options_str );
+    if ( name == "lightning_charge"   ) return new  lightning_charge_t( this, "lightning_charge", options_str );
+    if ( name == "surging_charge"     ) return new    surging_charge_t( this, "surging_charge", options_str );
+    if ( name == "low_slash"          ) return new         low_slash_t( this, "low_slash", options_str );
+    if ( name == "voltaic_slash"      ) return new     voltaic_slash_t( this, "voltaic_slash", options_str );
+    if ( name == "overcharge_saber"   ) return new  overcharge_saber_t( this, "overcharge_saber", options_str );
+    if ( name == "assassinate"        ) return new       assassinate_t( this, "assassinate", options_str );
+    if ( name == "lacerate"           ) return new          lacerate_t( this, "lacerate", options_str );
+    if ( name == "blackout"           ) return new          blackout_t( this, "blackout", options_str );
+    if ( name == "force_cloak"        ) return new       force_cloak_t( this, "force_cloak", options_str );
+    if ( name == "discharge"          ) return new         discharge_t( this, "discharge", options_str );
+    if ( name == "maul"               ) return new              maul_t( this, "maul, options_str );
+    if ( name == "saber_strike"       ) return new      saber_strike_t( this, "maul, options_str );
+    if ( name == "thrash"             ) return new            thrash_t( this, "maul, options_str );
   }
-  else if ( type == SITH_ASSASSIN )
+  else if ( type == JEDI_SHADOW )
   {
-    if ( name == "mark_of_power"      ) return new       force_valor_t( this, "mark_of_power", options_str );
-    if ( name == "shock"              ) return new           project_t( this, "shock", options_str );
-    if ( name == "force_lightning"    ) return new telekinetic_throw_t( this, "force_lightning", options_str );
+    if ( name == "force_valor"        ) return new        force_valor_t( this, "mark_of_power", options_str );
+    if ( name == "project"            ) return new            project_t( this, "shock", options_str );
+    if ( name == "telekinetic_throw"  ) return new  telekinetic_throw_t( this, "force_lightning", options_str );
+    if ( name == "mind_crush"         ) return new         mind_crush_t( this, "crushing_darkness", options_str );
+    if ( name == "force_in_balance"   ) return new   force_in_balance_t( this, "death_field", options_str );
+    if ( name == "sever_force"        ) return new        sever_force_t( this, "creeping_terror", options_str );
+    if ( name == "force_potency"      ) return new      force_potency_t( this, "recklessness", options_str );
+    if ( name == "force_technique"    ) return new    force_technique_t( this, "lightning_charge", options_str );
+    if ( name == "shadow_technique"   ) return new   shadow_technique_t( this, "surging_charge", options_str );
+    if ( name == "low_slash"          ) return new          low_slash_t( this, "low_slash", options_str );
+    if ( name == "clairvoyant_strike" ) return new clairvoyant_strike_t( this, "voltaic_slash", options_str );
+    if ( name == "battle_readiness"   ) return new   battle_readiness_t( this, "overcharge_saber", options_str );
+    if ( name == "spinning_strike"    ) return new    spinning_strike_t( this, "assassinate", options_str );
+    if ( name == "whirling_blow"      ) return new      whirling_blow_t( this, "lacerate", options_str );
+    if ( name == "blackout"           ) return new           blackout_t( this, "blackout", options_str );
+    if ( name == "force_cloak"        ) return new        force_cloak_t( this, "force_cloak", options_str );
+    if ( name == "force_breach"       ) return new       force_breach_t( this, "discharge", options_str );
+    if ( name == "shadow_strike"      ) return new      shadow_strike_t( this, "maul, options_str );
+    if ( name == "saber_strike"       ) return new       saber_strike_t( this, "maul, options_str );
+    if ( name == "double_strike"      ) return new      double_strike_t( this, "maul, options_str );
   }
 
   return player_t::create_action( name, options_str );
@@ -239,7 +313,53 @@ void shadow_assassin_t::init_talents()
 {
   player_t::init_talents();
 
-  // talents.name = find_talent( "NAME" );
+     // TREE_DARKNESS
+    talents.thrashing_blades = find_talent( "Thrashing Blades" );
+    talents.charge_mastery = find_talent( "Charge Mastery" );    
+
+    // TREE_DECEPTION
+    talents.insulation = find_talent( "Insulation" );
+    talents.duplicity = find_talent( "Duplicity" );
+    talents.dark_embrace = find_talent( "Dark Embrace" );
+    talents.obfuscation = find_talent( "Obfuscation" );
+    talents.recirculation = find_talent( "Recirculation" );
+    talents.avoidance = find_talent( "Avoidance" );
+    talents.induction = find_talent( "Induction" );
+    talents.surging_charge = find_talent( "Surging Charge" );
+    talents.darkswell = find_talent( "Darkswell" );
+    talents.deceptive_power = find_talent( "Deceptive Power" );
+    talents.entropic_field = find_talent( "Entropic Field" );
+    talents.saber_conduct = find_talent( "Saber Conduct" );
+    talents.fade = find_talent( "Fade" );
+    talents.static_cling = find_talent( "Static Cling" );
+    talents.resourcefulness = find_talent( "Resourcefulness" );
+    talents.static_charges = find_talent( "Static Charges" );
+    talents.low_slash = find_talent( "Low Slash" );
+    talents.crackling_blasts = find_talent( "Crackling Blasts" );
+    talents.voltaic_slash = find_talent( "Voltaic Slash" );
+    
+    // TREE_MADNESS
+    talents.exploitive_strikes = find_talent( "Exploitive Strikes" );
+    talents.sith_defiance = find_talent( "Sith Defiance" );
+    talents.crackling_charge = find_talent( "Crackling Charge" );
+    talents.oppressing_force = find_talent( "Oppressing Force" );
+    talents.chain_shock = find_talent( "Chain Shock" );
+    talents.parasitism = find_talent( "Parasitism" );
+    talents.torment = find_talent( "Torment" );
+    talents.death_field = find_talent( "Death Field" );
+    talents.fanaticism = find_talent( "Fanaticism" );
+    talents.claws_of_decay = find_talent( "Claws Of Decay" );
+    talents.haunted_dreams = find_talent( "Haunted Dreams" );
+    talents.corrupted_flesh = find_talent( "Corrupted Flesh" );
+    talents.raze = find_talent( "Raze" );
+    talents.deathmark = find_talent( "Deathmark" );
+    talents.calculating_mind = find_talent( "Calculating Mind" );
+    talents.unearthed_knowledge = find_talent( "Unearthed Knowledge" );
+    talents.creeping_death = find_talent( "Creeping Death" );
+    talents.devour = find_talent( "Devour" );
+    talents.creeping_terror = find_talent( "Creeping Terror" );
+  
+ // talents.name = find_talent( "NAME" );
 
 }
 
@@ -251,7 +371,7 @@ void shadow_assassin_t::init_base()
 
   base_gcd = timespan_t::from_seconds( 1.5 );
 
-  attribute_base[ ATTR_WILLPOWER ] = 100;
+  attribute_base[ ATTR_WILLPOWER ] = 250;
 
   default_distance = 3;
   distance = default_distance;
