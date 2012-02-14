@@ -253,13 +253,12 @@ std::pair<int, int> wowhead_talent_decode_pair( char c )
 // player_t::player_t =======================================================
 
 player_t::player_t( sim_t*             s,
-                    player_main_class  m,
                     player_type        t,
                     const std::string& n,
                     race_type          r ) :
   sim( s ), name_str( n ),
   region_str( s -> default_region_str ), server_str( s -> default_server_str ), origin_str( "unknown" ),
-  next( 0 ), index( -1 ), main_class( m ), type( t ), role( ROLE_HYBRID ), target( 0 ), level( is_enemy() ? 53 : 50 ), use_pre_potion( 0 ),
+  next( 0 ), index( -1 ), type( t ), role( ROLE_HYBRID ), target( 0 ), level( is_enemy() ? 53 : 50 ), use_pre_potion( 0 ),
   party( 0 ), member( 0 ),
   skill( 0 ), initial_skill( s -> default_skill ), distance( 0 ), default_distance( 0 ), gcd_ready( timespan_t::zero ), base_gcd( timespan_t::from_seconds( 1.5 ) ),
   potion_used( 0 ), sleeping( 1 ), initial_sleeping( 0 ), initialized( 0 ),
@@ -5899,10 +5898,17 @@ player_t* player_t::create( sim_t*             sim,
   {
     return player_t::create_jedi_sage( sim, name, r );
   }
-
   else if ( type == "sith_sorcerer" )
   {
     return player_t::create_sith_sorcerer( sim, name, r );
+  }
+  else if ( type == "jedi_shadow" )
+  {
+    return player_t::create_jedi_shadow( sim, name, r );
+  }
+  else if ( type == "sith_assassin" )
+  {
+    return player_t::create_sith_assassin( sim, name, r );
   }
 
   else if ( type == "enemy" )

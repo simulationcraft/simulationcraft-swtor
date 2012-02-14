@@ -163,7 +163,6 @@
     <ClCompile Include="engine\sc_http.cpp" />
     <ClCompile Include="engine\sc_item.cpp" />
     <ClCompile Include="engine\sc_item_data.cpp" />
-    <ClCompile Include="engine\sc_jedi_consular.cpp" />
     <ClCompile Include="engine\sc_js.cpp" />
     <ClCompile Include="engine\sc_log.cpp" />
     <ClCompile Include="engine\sc_mmo_champion.cpp" />
@@ -176,9 +175,11 @@
     <ClCompile Include="engine\sc_reforge_plot.cpp" />
     <ClCompile Include="engine\sc_report.cpp" />
     <ClCompile Include="engine\sc_rng.cpp" />
+    <ClCompile Include="engine\sc_sage_sorcerer.cpp" />
     <ClCompile Include="engine\sc_scaling.cpp" />
     <ClCompile Include="engine\sc_sequence.cpp" />
     <ClCompile Include="engine\sc_set_bonus.cpp" />
+    <ClCompile Include="engine\sc_shadow_assassin.cpp" />
     <ClCompile Include="engine\sc_sim.cpp" />
     <ClCompile Include="engine\sc_spell.cpp" />
     <ClCompile Include="engine\sc_spell_data.cpp" />

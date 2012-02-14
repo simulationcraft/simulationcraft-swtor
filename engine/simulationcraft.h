@@ -148,7 +148,6 @@ struct enchant_t;
 struct event_t;
 struct gain_t;
 struct item_t;
-struct jedi_consular_t;
 struct jedi_sage_t;
 struct js_node_t;
 struct option_t;
@@ -170,6 +169,7 @@ struct spell_t;
 struct spell_data_t;
 struct spelleffect_data_t;
 struct sample_data_t;
+struct shadow_assassin_t;
 struct heal_t;
 struct stats_t;
 struct talent_t;
@@ -182,8 +182,10 @@ struct xml_node_t;
 
 struct targetdata_t;
 struct jedi_sage_targetdata_t;
+struct shadow_assassin_targetdata_t;
 
 void register_jedi_sage_targetdata( sim_t* sim );
+void register_shadow_assassin_targetdata( sim_t* sim );
 
 #define DATA_DOT 0
 #define DATA_AURA 1
@@ -217,13 +219,6 @@ enum race_type
   RACE_MAX
 };
 
-enum player_main_class
-{
-  PLAYER_MAIN_NONE=0,
-  JEDI_CONSULAR,
-  PLAYER_MAIN_MAX
-};
-
 enum player_type
 {
   PLAYER_SPECIAL_SCALE=-1,
@@ -247,8 +242,6 @@ enum player_type
 enum pet_type_t
 {
   PET_NONE=0,
-  PET_QYZEN_FESS,
-
 
   PET_ENEMY,
 
@@ -361,6 +354,8 @@ enum talent_tree_type
   TREE_NONE=0,
   TREE_SEER,         TREE_TELEKINETICS,  TREE_BALANCE,
   TREE_CORRUPTION,   TREE_LIGHTNING,     TREE_MADNESS,
+  TREE_KINETIC_COMBAT, TREE_INFILTRATION,
+  TREE_DARKNESS, TREE_DECEPTION,
   TALENT_TREE_MAX
 };
 
@@ -370,6 +365,8 @@ enum talent_tab_type
   JEDI_SAGE_SEER = 0,           JEDI_SAGE_TELEKINETICS,   JEDI_SAGE_BALANCE,
   SITH_SORCERER_CORRUPTION = 0, SITH_SORCERER_LIGHTNING,  SITH_SORCERER_MADNESS,
 
+  JEDI_SHADOW_KINETIC_COMBAT = 0,   JEDI_SHADOW_INFILTRATION, JEDI_SHADOW_BALANCE,
+  SITH_ASSASSIN_DARKNESS = 0,       SITH_ASSASSIN_DECEPTION,  SITH_ASSASSIN_MADNESS,
 };
 
 enum weapon_type
@@ -3678,7 +3675,6 @@ struct player_t : public noncopyable
   std::string region_str, server_str, origin_str;
   player_t*   next;
   int         index;
-  player_main_class main_class;
   player_type type;
   role_type   role;
   player_t*   target;
@@ -4017,7 +4013,7 @@ struct player_t : public noncopyable
   int targetdata_id;
   std::vector<targetdata_t*> targetdata;
 
-  player_t( sim_t* sim, player_main_class m, player_type type, const std::string& name, race_type race_type = RACE_NONE );
+  player_t( sim_t* sim, player_type type, const std::string& name, race_type race_type = RACE_NONE );
 
   virtual ~player_t();
 
@@ -4229,6 +4225,8 @@ struct player_t : public noncopyable
 
   static player_t* create_jedi_sage( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
   static player_t* create_sith_sorcerer( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+  static player_t* create_jedi_shadow( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+  static player_t* create_sith_assassin( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
   static player_t* create_enemy       ( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
 
   // Raid-wide aura/buff/debuff maintenance
@@ -4236,11 +4234,15 @@ struct player_t : public noncopyable
   static void combat_begin( sim_t* sim );
   static void combat_end  ( sim_t* sim );
 
-  // Raid-wide Jedi Consular buff maintenance
+  // Raid-wide Sage / Sorcerer buff maintenance
   static void jedi_sage_init        ( sim_t* sim );
   static void jedi_sage_combat_begin( sim_t* sim );
   static void jedi_sage_combat_end  ( sim_t* /* sim */ ) {}
 
+  // Raid-wide Shadow / Assassin buff maintenance
+  static void shadow_assassin_init        ( sim_t* sim );
+  static void shadow_assassin_combat_begin( sim_t* sim );
+  static void shadow_assassin_combat_end  ( sim_t* /* sim */ ) {}
 
   // Raid-wide Enemy buff maintenance
   static void enemy_init        ( sim_t* sim );
@@ -4251,8 +4253,8 @@ struct player_t : public noncopyable
   inline bool is_enemy() const { return type == ENEMY || type == ENEMY_ADD; }
   inline bool is_add() const { return type == ENEMY_ADD; }
 
-  jedi_consular_t * cast_jedi_consular() { assert( main_class == JEDI_CONSULAR  ); return ( jedi_consular_t * ) this; }
   jedi_sage_t     * cast_jedi_sage    () { assert( type == JEDI_SAGE || type == SITH_SORCERER ); return ( jedi_sage_t     * ) this; }
+  shadow_assassin_t * cast_shadow_assassin () { assert( type == JEDI_SHADOW || type == SITH_ASSASSIN ); return ( shadow_assassin_t * ) this; }
   pet_t           * cast_pet          () { assert( is_pet()                     ); return ( pet_t           * ) this; }
   enemy_t         * cast_enemy        () { assert( type == ENEMY                ); return ( enemy_t         * ) this; }
 

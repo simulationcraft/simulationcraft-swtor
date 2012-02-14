@@ -308,10 +308,6 @@
 				>
 			</File>
 			<File
-				RelativePath="engine\sc_jedi_consular.cpp"
-				>
-			</File>
-			<File
 				RelativePath="engine\sc_js.cpp"
 				>
 			</File>
@@ -380,6 +376,10 @@
 				>
 			</File>
 			<File
+				RelativePath="engine\sc_sage_sorcerer.cpp"
+				>
+			</File>
+			<File
 				RelativePath="engine\sc_sample_data.cpp"
 				>
 			</File>
@@ -401,6 +401,10 @@
 			</File>
 			<File
 				RelativePath="engine\sc_set_bonus.cpp"
+				>
+			</File>
+			<File
+				RelativePath="engine\sc_shadow_assassin.cpp"
 				>
 			</File>
 			<File

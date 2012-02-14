@@ -16,7 +16,7 @@ OPENSSL_PATH =
 
 CXX        = g++
 CPP_FLAGS  = -Wall -Woverloaded-virtual -W -Wno-strict-aliasing
-OPTS       = -O3 -fomit-frame-pointer -ffast-math
+OPTS       = -O3 -fomit-frame-pointer -ffast-math -g
 BITS       = 32
 
 ifeq (64,${BITS})
@@ -87,7 +87,6 @@ SRC = \
 	sc_heal.cpp \
 	sc_http.cpp \
 	sc_item.cpp \
-	sc_jedi_consular.cpp \
 	sc_item_data.cpp \
 	sc_js.cpp \
 	sc_log.cpp \
@@ -106,10 +105,12 @@ SRC = \
 	sc_report_xml.cpp \
 	sc_report.cpp \
 	sc_rng.cpp \
+	sc_sage_sorcerer.cpp \
 	sc_sample_data.cpp \
 	sc_scaling.cpp \
 	sc_sequence.cpp \
 	sc_set_bonus.cpp \
+	sc_shadow_assassin.cpp \
 	sc_sim.cpp \
 	sc_spell.cpp \
 	sc_spell_data.cpp \

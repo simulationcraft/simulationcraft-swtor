@@ -29,38 +29,12 @@ void register_jedi_sage_targetdata( sim_t*  sim  )
   REGISTER_DOT( sever_force );
 }
 
-// ==========================================================================
-// Jediconsular
-// ==========================================================================
-
-struct jedi_consular_t : public player_t
-{
-protected:
-  jedi_consular_t( sim_t* sim, player_type pt, const std::string& name, race_type r ) :
-    player_t( sim, JEDI_CONSULAR, pt, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
-  {
-    create_options();
-
-  }
-public:
-
-  // Character Definition
-  virtual action_t* create_action( const std::string& name, const std::string& options );
-  virtual void      init_base();
-  virtual void      init_buffs();
-  virtual void      init_resources( bool force=false );
-  virtual int       primary_resource() const;
-  virtual int       primary_role() const;
-  virtual pet_t*    create_pet   ( const std::string& name, const std::string& type = std::string() );
-  virtual void      create_pets();
-};
-
 
 // ==========================================================================
 // Jedi Sage
 // ==========================================================================
 
-struct jedi_sage_t : public jedi_consular_t
+struct jedi_sage_t : public player_t
 {
 
   // Buffs
@@ -153,7 +127,7 @@ struct jedi_sage_t : public jedi_consular_t
   talents_t talents;
 
   jedi_sage_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
-    jedi_consular_t( sim, pt == SITH_SORCERER ? SITH_SORCERER : JEDI_SAGE, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
+    player_t( sim, pt == SITH_SORCERER ? SITH_SORCERER : JEDI_SAGE, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
   {
     if ( pt == SITH_SORCERER )
     {
@@ -188,6 +162,7 @@ struct jedi_sage_t : public jedi_consular_t
   virtual void      init_procs();
   virtual void      init_rng();
   virtual void      init_actions();
+  virtual int       primary_resource() const;
   virtual int       primary_role() const;
   virtual void      regen( timespan_t periodicity );
   virtual double    composite_force_damage_bonus() const;
@@ -198,189 +173,116 @@ struct jedi_sage_t : public jedi_consular_t
 
 namespace { // ANONYMOUS NAMESPACE ==========================================
 
-// ==========================================================================
-// jedi_consular Companions
-// ==========================================================================
-
-struct jedi_consular_companion_t : pet_t
-{
-  jedi_consular_companion_t( sim_t* sim, player_t* owner, const std::string& pet_name, pet_type_t pt ) :
-    pet_t( sim, owner, pet_name, pt )
-  {
-
-  }
-};
-
-struct jedi_consular_companion_attack_t : public attack_t
-{
-  jedi_consular_companion_attack_t( const char* n, jedi_consular_companion_t* p, int r=RESOURCE_MANA, const school_type s=SCHOOL_PHYSICAL ) :
-    attack_t( n, p, r, s, TREE_NONE, true )
-  {
-    weapon = &( p -> main_hand_weapon );
-    may_crit   = true;
-    special = true;
-  }
-};
-
-struct jedi_consular_companion_spell_t : public spell_t
-{
-
-  jedi_consular_companion_spell_t( const char* n, jedi_consular_companion_t* p, int r=RESOURCE_MANA, const school_type s=SCHOOL_KINETIC ) :
-    spell_t( n, p, r, s )
-  {
-    may_crit = true;
-  }
-};
-
-struct qyzen_fess_t : jedi_consular_companion_t
-{
-  struct power_attack_t : jedi_consular_companion_attack_t
-  {
-    power_attack_t( qyzen_fess_t* p ) :
-      jedi_consular_companion_attack_t( "power_attack", p )
-    {
-      range = 4.0;
-
-      // Assuming Standard Health of 1610 for lvl 50!!!
-      base_dd_min = 238.28;
-      base_dd_max = 238.28;
-
-      direct_power_mod = 1.66;
-
-      cooldown -> duration = timespan_t::from_seconds( 9.0 );
-    }
-  };
-
-  qyzen_fess_t( sim_t* sim, player_t* owner ) :
-    jedi_consular_companion_t( sim, owner, "qyzen_fess", PET_QYZEN_FESS )
-  {
-    action_list_str += "/snapshot_stats";
-    action_list_str += "/power_attack";
-    action_list_str += "/wait_until_ready";
-  }
-
-  virtual action_t* create_action( const std::string& name,
-                                   const std::string& options_str )
-  {
-    if ( name == "power_attack"   ) return new power_attack_t( this );
-
-    return jedi_consular_companion_t::create_action( name, options_str );
-  }
-};
 
 // ==========================================================================
-// jedi_consular Abilities
+// Jedi Sage Abilities
 // ==========================================================================
 
-struct jedi_consular_attack_t : public attack_t
+struct jedi_sage_attack_t : public attack_t
 {
-  jedi_consular_attack_t( const char* n, jedi_consular_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_HOLY, int t=TREE_NONE ) :
+  jedi_sage_attack_t( const char* n, jedi_sage_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_HOLY, int t=TREE_NONE ) :
     attack_t( n, p, r, s, t )
   {
-    _init_jedi_consular_attack_t();
+    _init_jedi_sage_attack_t();
   }
 
-  void _init_jedi_consular_attack_t()
+  void _init_jedi_sage_attack_t()
   {
     may_crit   = true;
     may_glance = false;
   }
-
-  virtual bool ready();
 };
 
-struct jedi_consular_spell_t : public spell_t
+struct jedi_sage_spell_t : public spell_t
 {
   bool influenced_by_inner_strength;
 
-  jedi_consular_spell_t( const char* n, jedi_consular_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_HOLY, int t=TREE_NONE ) :
+  jedi_sage_spell_t( const char* n, jedi_sage_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_HOLY, int t=TREE_NONE ) :
     spell_t( n, p, r, s, t ),
     influenced_by_inner_strength( true )
   {
-    _init_jedi_consular_spell_t();
+    _init_jedi_sage_spell_t();
+  }
+
+  void _init_jedi_sage_spell_t()
+  {
+    may_crit   = true;
+    tick_may_crit = true;
   }
 
   virtual void init()
   {
     spell_t::init();
 
-    if ( player -> is_jedi_sage() )
-    {
-      jedi_sage_t* p = player -> cast_jedi_sage();
+    jedi_sage_t* p = player -> cast_jedi_sage();
 
-      if ( base_td > 0 && !channeled )
-        crit_bonus += p -> talents.mental_scarring -> rank() * 0.1;
-    }
-  }
-
-  void _init_jedi_consular_spell_t()
-  {
-    may_crit   = true;
-    tick_may_crit = true;
-  }
-
-  virtual void assess_damage( player_t* t, double dmg_amount, int dmg_type, int dmg_result )
-  {
-    spell_t::assess_damage( t, dmg_amount, dmg_type, dmg_result );
-
-    if ( player -> is_jedi_sage() )
-    {
-      jedi_sage_t* p = player -> cast_jedi_sage();
-
-      // Procs from all critical damage including dot ticks. Source:  17/01/2012 http://sithwarrior.com/forums/Thread-Sorcerer-Sage-Mechanics-and-Quirks
-
-      if ( dmg_result == RESULT_CRIT && p -> talents.telekinetic_effusion -> rank() > 0 )
-      {
-        p -> buffs_telekinetic_effusion -> trigger( 2 );
-      }
-    }
+    if ( base_td > 0 && !channeled )
+      crit_bonus += p -> talents.mental_scarring -> rank() * 0.1;
   }
 
   virtual timespan_t execute_time() const
   {
     timespan_t et = spell_t::execute_time();
 
-    if ( player -> is_jedi_sage() )
-    {
-      jedi_sage_t* p = player -> cast_jedi_sage();
+    jedi_sage_t* p = player -> cast_jedi_sage();
 
-      if ( base_execute_time > timespan_t::zero && p -> buffs_presence_of_mind -> up() )
-        et = timespan_t::zero;
-    }
+    if ( base_execute_time > timespan_t::zero && p -> buffs_presence_of_mind -> up() )
+      et = timespan_t::zero;
 
     return et;
+  }
+
+  virtual void execute()
+  {
+    spell_t::execute();
+
+    jedi_sage_t* p = player -> cast_jedi_sage();
+
+    if ( base_execute_time > timespan_t::zero )
+      p -> buffs_presence_of_mind -> expire();
+
+    if ( base_dd_min > 0 )
+      p -> buffs_force_potency -> decrement();
   }
 
   virtual void player_buff()
   {
     spell_t::player_buff();
 
-    if ( player -> is_jedi_sage() )
-    {
-      jedi_sage_t* p = player -> cast_jedi_sage();
+    jedi_sage_t* p = player -> cast_jedi_sage();
 
-      if ( base_execute_time > timespan_t::zero && p -> buffs_presence_of_mind -> up() )
-        player_dd_multiplier *= 1.20;
+    if ( base_execute_time > timespan_t::zero && p -> buffs_presence_of_mind -> up() )
+      player_dd_multiplier *= 1.20;
 
-      if ( base_dd_min > 0 && p -> buffs_force_potency -> up() )
-        player_crit += 0.60;
-    }
+    if ( base_dd_min > 0 && p -> buffs_force_potency -> up() )
+      player_crit += 0.60;
   }
 
   virtual void target_debuff( player_t* t, int dmg_type )
   {
     spell_t::target_debuff( t, dmg_type );
 
-    if ( player -> is_jedi_sage() )
+    jedi_sage_t* p = player -> cast_jedi_sage();
+
+    // This method is in target_debuff so that it is checked before every dot tick
+
+    // Assume channeled spells don't profit
+    if ( p -> talents.force_suppression -> rank() > 0 && base_td > 0 && !channeled )
+      if ( p -> buffs_force_suppression -> up() )
+        target_td_multiplier *= 1.20;
+  }
+
+  virtual void assess_damage( player_t* t, double dmg_amount, int dmg_type, int dmg_result )
+  {
+    spell_t::assess_damage( t, dmg_amount, dmg_type, dmg_result );
+
+    jedi_sage_t* p = player -> cast_jedi_sage();
+
+    // Procs from all critical damage including dot ticks. Source:  17/01/2012 http://sithwarrior.com/forums/Thread-Sorcerer-Sage-Mechanics-and-Quirks
+
+    if ( dmg_result == RESULT_CRIT && p -> talents.telekinetic_effusion -> rank() > 0 )
     {
-      jedi_sage_t* p = player -> cast_jedi_sage();
-
-      // This method is in target_debuff so that it is checked before every dot tick
-
-      // Assume channeled spells don't profit
-      if ( p -> talents.force_suppression -> rank() > 0 && base_td > 0 && !channeled )
-        if ( p -> buffs_force_suppression -> up() )
-          target_td_multiplier *= 1.20;
+      p -> buffs_telekinetic_effusion -> trigger( 2 );
     }
   }
 
@@ -388,20 +290,18 @@ struct jedi_consular_spell_t : public spell_t
   {
     double c = spell_t::cost();
 
-    if ( player -> is_jedi_sage() )
-    {
-      jedi_sage_t* p = player -> cast_jedi_sage();
-      if ( p -> talents.inner_strength -> rank() > 0 && influenced_by_inner_strength )
-      {
-        c *= 1.0 - p -> talents.inner_strength -> rank() * 0.03;
-        c = ceil( c ); // 17/01/2012 According to http://sithwarrior.com/forums/Thread-Sorcerer-Sage-Mechanics-and-Quirks
-      }
+    jedi_sage_t* p = player -> cast_jedi_sage();
 
-      if ( p -> buffs_telekinetic_effusion -> check() > 0 )
-      {
-        c *= 0.5;
-        c = floor( c ); // FIXME: floor or ceil?
-      }
+    if ( p -> talents.inner_strength -> rank() > 0 && influenced_by_inner_strength )
+    {
+      c *= 1.0 - p -> talents.inner_strength -> rank() * 0.03;
+      c = ceil( c ); // 17/01/2012 According to http://sithwarrior.com/forums/Thread-Sorcerer-Sage-Mechanics-and-Quirks
+    }
+
+    if ( p -> buffs_telekinetic_effusion -> check() > 0 )
+    {
+      c *= 0.5;
+      c = floor( c ); // FIXME: floor or ceil?
     }
 
     return c;
@@ -411,48 +311,45 @@ struct jedi_consular_spell_t : public spell_t
   {
     spell_t::consume_resource();
 
-    if ( player -> is_jedi_sage() )
-    {
-      jedi_sage_t* p = player -> cast_jedi_sage();
+    jedi_sage_t* p = player -> cast_jedi_sage();
 
-      p -> buffs_telekinetic_effusion -> up();
-    }
+    p -> buffs_telekinetic_effusion -> up();
   }
 
-  virtual void execute()
-  {
-    spell_t::execute();
-
-    if ( player -> is_jedi_sage() )
-    {
-      jedi_sage_t* p = player -> cast_jedi_sage();
-
-      if ( base_execute_time > timespan_t::zero )
-        p -> buffs_presence_of_mind -> expire();
-
-      if ( base_dd_min > 0 )
-        p -> buffs_force_potency -> decrement();
-    }
-  }
-
-  virtual void tick( dot_t* d)
+  virtual void tick( dot_t* d )
   {
     spell_t::tick( d );
 
-    if ( player -> is_jedi_sage() )
-    {
-      jedi_sage_t* p = player -> cast_jedi_sage();
+    jedi_sage_t* p = player -> cast_jedi_sage();
 
-      if ( tick_dmg > 0 && !channeled )
-        p -> buffs_force_suppression -> decrement();
+    if ( tick_dmg > 0 && !channeled )
+      p -> buffs_force_suppression -> decrement();
+
+    if ( tick_dmg > 0 && p -> talents.focused_insight -> rank() > 0 )
+    {
+      double hp = p -> resource_max[ RESOURCE_HEALTH ] * p -> talents.focused_insight -> rank() * 0.005;
+      p -> resource_gain( RESOURCE_HEALTH, hp , p -> gains_focused_insight );
     }
   }
 };
 
-struct force_valor_t : public jedi_consular_spell_t
+void trigger_tidal_force( action_t* a, double pc = 0 )
 {
-  force_valor_t( jedi_consular_t* p, const std::string& n, const std::string& options_str ) :
-    jedi_consular_spell_t( n.c_str(), p, RESOURCE_FORCE )
+  jedi_sage_t* p = a -> player -> cast_jedi_sage();
+
+  if ( p -> talents.tidal_force -> rank() == 0 )
+    return;
+
+  if ( p -> buffs_tidal_force -> trigger( 1, 0, pc ) )
+  {
+    p -> cooldowns_telekinetic_wave -> reset();
+  }
+}
+
+struct force_valor_t : public jedi_sage_spell_t
+{
+  force_valor_t( jedi_sage_t* p, const std::string& n, const std::string& options_str ) :
+    jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE )
   {
     parse_options( 0, options_str );
     base_cost = 0.0;
@@ -461,7 +358,7 @@ struct force_valor_t : public jedi_consular_spell_t
 
   virtual void execute()
   {
-    jedi_consular_spell_t::execute();
+    jedi_sage_spell_t::execute();
 
     for ( player_t* p = sim -> player_list; p; p = p -> next )
     {
@@ -475,17 +372,17 @@ struct force_valor_t : public jedi_consular_spell_t
     if ( player -> buffs.force_valor -> check() )
       return false;
 
-    return jedi_consular_spell_t::ready();
+    return jedi_sage_spell_t::ready();
   }
 };
 
-struct project_t : public jedi_consular_spell_t
+struct project_t : public jedi_sage_spell_t
 {
-  jedi_consular_spell_t* upheaval;
+  jedi_sage_spell_t* upheaval;
 
 
-  project_t( jedi_consular_t* p, const std::string& n, const std::string& options_str, bool is_upheaval = false ) :
-    jedi_consular_spell_t( ( n + std::string( is_upheaval ? "_upheaval" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
+  project_t( jedi_sage_t* p, const std::string& n, const std::string& options_str, bool is_upheaval = false ) :
+    jedi_sage_spell_t( ( n + std::string( is_upheaval ? "_upheaval" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
     upheaval( 0 )
   {
     parse_options( 0, options_str );
@@ -516,7 +413,7 @@ struct project_t : public jedi_consular_spell_t
 
   virtual void execute()
   {
-    jedi_consular_spell_t::execute();
+    jedi_sage_spell_t::execute();
 
     if ( upheaval )
     {
@@ -531,12 +428,12 @@ struct project_t : public jedi_consular_spell_t
   }
 };
 
-struct telekinetic_throw_t : public jedi_consular_spell_t
+struct telekinetic_throw_t : public jedi_sage_spell_t
 {
   bool is_buffed_by_psychic_projection;
 
-  telekinetic_throw_t( jedi_consular_t* p, const std::string& n, const std::string& options_str ) :
-    jedi_consular_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
+  telekinetic_throw_t( jedi_sage_t* p, const std::string& n, const std::string& options_str ) :
+    jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
     is_buffed_by_psychic_projection( false )
   {
     parse_options( 0, options_str );
@@ -587,12 +484,12 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
         is_buffed_by_psychic_projection = false;
     }
 
-    jedi_consular_spell_t::execute();
+    jedi_sage_spell_t::execute();
   }
 
   virtual timespan_t tick_time() const
   {
-    timespan_t tt = jedi_consular_spell_t::tick_time();
+    timespan_t tt = jedi_sage_spell_t::tick_time();
 
     if ( is_buffed_by_psychic_projection )
       tt *= 0.5;
@@ -602,7 +499,7 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
 
   virtual void last_tick( dot_t* d )
   {
-    jedi_consular_spell_t::last_tick( d );
+    jedi_sage_spell_t::last_tick( d );
 
     if ( player -> is_jedi_sage() )
     {
@@ -615,7 +512,7 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
 
   virtual void tick( dot_t* d )
   {
-    jedi_consular_spell_t::tick( d );
+    jedi_sage_spell_t::tick( d );
 
     if ( player -> is_jedi_sage() )
     {
@@ -635,71 +532,9 @@ struct telekinetic_throw_t : public jedi_consular_spell_t
   }
 };
 
-// ==========================================================================
-// Jedi Sage Abilities
-// ==========================================================================
-
-struct jedi_sage_attack_t : public jedi_consular_attack_t
-{
-  jedi_sage_attack_t( const char* n, jedi_sage_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_HOLY, int t=TREE_NONE ) :
-    jedi_consular_attack_t( n, p, r, s, t )
-  {
-    _init_jedi_sage_attack_t();
-  }
-
-  void _init_jedi_sage_attack_t()
-  {
-    may_crit   = true;
-    may_glance = false;
-  }
-
-  virtual bool ready();
-};
-
-struct jedi_sage_spell_t : public jedi_consular_spell_t
-{
-  jedi_sage_spell_t( const char* n, jedi_sage_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_HOLY, int t=TREE_NONE ) :
-    jedi_consular_spell_t( n, p, r, s, t )
-  {
-    _init_jedi_sage_spell_t();
-  }
-
-  void _init_jedi_sage_spell_t()
-  {
-    may_crit   = true;
-    tick_may_crit = true;
-  }
-
-  virtual void tick( dot_t* d )
-  {
-    jedi_consular_spell_t::tick( d );
-
-    jedi_sage_t* p = player -> cast_jedi_sage();
-
-    if ( tick_dmg > 0 && p -> talents.focused_insight -> rank() > 0 )
-    {
-      double hp = p -> resource_max[ RESOURCE_HEALTH ] * p -> talents.focused_insight -> rank() * 0.005;
-      p -> resource_gain( RESOURCE_HEALTH, hp , p -> gains_focused_insight );
-    }
-  }
-};
-
-void trigger_tidal_force( action_t* a, double pc = 0 )
-{
-  jedi_sage_t* p = a -> player -> cast_jedi_sage();
-
-  if ( p -> talents.tidal_force -> rank() == 0 )
-    return;
-
-  if ( p -> buffs_tidal_force -> trigger( 1, 0, pc ) )
-  {
-    p -> cooldowns_telekinetic_wave -> reset();
-  }
-}
-
 struct disturbance_t : public jedi_sage_spell_t
 {
-  jedi_consular_spell_t* tm;
+  jedi_sage_spell_t* tm;
 
   disturbance_t( jedi_sage_t* p, const std::string& n, const std::string& options_str, bool is_tm = false ) :
     jedi_sage_spell_t( ( n + std::string( is_tm ? "_tm" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
@@ -748,7 +583,7 @@ struct disturbance_t : public jedi_sage_spell_t
 
   virtual void execute()
   {
-    jedi_consular_spell_t::execute();
+    jedi_sage_spell_t::execute();
 
     jedi_sage_t* p = player -> cast_jedi_sage();
 
@@ -870,7 +705,7 @@ struct weaken_mind_t : public jedi_sage_spell_t
 
 struct turbulence_t : public jedi_sage_spell_t
 {
-  jedi_consular_spell_t* tm;
+  jedi_sage_spell_t* tm;
 
   turbulence_t( jedi_sage_t* p, const std::string& n, const std::string& options_str ) :
     jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
@@ -994,7 +829,7 @@ struct mental_alacrity_t : public jedi_sage_spell_t
 
 struct telekinetic_wave_t : public jedi_sage_spell_t
 {
-  jedi_consular_spell_t* tm;
+  jedi_sage_spell_t* tm;
 
   telekinetic_wave_t( jedi_sage_t* p, const std::string& n, const std::string& options_str, bool is_tm = false ) :
     jedi_sage_spell_t( ( n + std::string( is_tm ? "_tm" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
@@ -1029,7 +864,7 @@ struct telekinetic_wave_t : public jedi_sage_spell_t
 
   virtual void execute()
   {
-    jedi_consular_spell_t::execute();
+    jedi_sage_spell_t::execute();
 
     if ( tm )
     {
@@ -1045,7 +880,7 @@ struct telekinetic_wave_t : public jedi_sage_spell_t
 
   virtual timespan_t execute_time() const
   {
-    timespan_t et = jedi_consular_spell_t::execute_time();
+    timespan_t et = jedi_sage_spell_t::execute_time();
 
     jedi_sage_t* p = player -> cast_jedi_sage();
 
@@ -1057,7 +892,7 @@ struct telekinetic_wave_t : public jedi_sage_spell_t
 
   virtual void update_ready()
   {
-    jedi_consular_spell_t::update_ready();
+    jedi_sage_spell_t::update_ready();
 
     jedi_sage_t* p = player -> cast_jedi_sage();
 
@@ -1089,111 +924,6 @@ struct force_potency_t : public jedi_sage_spell_t
 
 } // ANONYMOUS NAMESPACE ====================================================
 
-
-// ==========================================================================
-// jediconsular Character Definition
-// ==========================================================================
-
-// jedi_consular_t::create_action ====================================================
-
-action_t* jedi_consular_t::create_action( const std::string& name,
-                                 const std::string& options_str )
-{
-  if ( type == JEDI_SAGE )
-  {
-    if ( name == "force_valor"       ) return new        force_valor_t( this, "force_valor", options_str );
-    if ( name == "project"           ) return new            project_t( this, "project", options_str );
-    if ( name == "telekinetic_throw" ) return new  telekinetic_throw_t( this, "telekinetic_throw", options_str );
-  }
-  else if ( type == SITH_SORCERER )
-  {
-    if ( name == "mark_of_power"   ) return new        force_valor_t( this, "mark_of_power", options_str );
-    if ( name == "shock"           ) return new            project_t( this, "shock", options_str );
-    if ( name == "force_lightning" ) return new  telekinetic_throw_t( this, "force_lightning", options_str );
-  }
-
-  return player_t::create_action( name, options_str );
-}
-
-// jedi_consular_t::init_base ========================================================
-
-void jedi_consular_t::init_base()
-{
-  player_t::init_base();
-
-
-  default_distance = 10;
-  distance = default_distance;
-
-  base_gcd = timespan_t::from_seconds( 1.5 );
-
-  resource_base[  RESOURCE_FORCE  ] = 100;
-
-  base_force_regen_per_second = 8.0;
-
-
-  attribute_base[ ATTR_WILLPOWER ] = 250;
-
-  // FIXME: Add defensive constants
-  //diminished_kfactor    = 0;
-  //diminished_dodge_capi = 0;
-  //diminished_parry_capi = 0;
-}
-
-// jedi_consular_t::init_buffs =======================================================
-
-void jedi_consular_t::init_buffs()
-{
-  player_t::init_buffs();
-
-  // buff_t( player, name, max_stack, duration, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-  // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-  // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-
-}
-
-// jedi_consular_t::reset ==================================================
-
-void jedi_consular_t::init_resources( bool force )
-{
-  player_t::init_resources( force);
-}
-
-// jedi_consular_t::primary_role ==================================================
-
-int jedi_consular_t::primary_resource() const
-{
-  return RESOURCE_FORCE;
-}
-
-// jedi_consular_t::primary_role ==================================================
-
-int jedi_consular_t::primary_role() const
-{
-  return ROLE_HYBRID;
-}
-
-// jedi_consular_t::create_pet ====================================================
-
-pet_t* jedi_consular_t::create_pet( const std::string& pet_name,
-                              const std::string& /* pet_type */ )
-{
-  pet_t* p = find_pet( pet_name );
-
-  if ( p ) return p;
-
-  if ( pet_name == "qyzen_fess"     ) return new    qyzen_fess_t( sim, this );
-
-  return 0;
-}
-
-// jedi_consular_t::create_pets ===================================================
-
-void jedi_consular_t::create_pets()
-{
-  //create_pet( "qyzen_fess"  );
-}
-
 // ==========================================================================
 // jedi_sage Character Definition
 // ==========================================================================
@@ -1205,6 +935,9 @@ action_t* jedi_sage_t::create_action( const std::string& name,
 {
   if ( type == JEDI_SAGE )
   {
+    if ( name == "force_valor"        ) return new       force_valor_t( this, "force_valor", options_str );
+    if ( name == "project"            ) return new           project_t( this, "project", options_str );
+    if ( name == "telekinetic_throw"  ) return new telekinetic_throw_t( this, "telekinetic_throw", options_str );
     if ( name == "disturbance"        ) return new       disturbance_t( this, "disturbance", options_str );
     if ( name == "mind_crush"         ) return new        mind_crush_t( this, "mind_crush", options_str );
     if ( name == "weaken_mind"        ) return new       weaken_mind_t( this, "weaken_mind", options_str );
@@ -1217,6 +950,9 @@ action_t* jedi_sage_t::create_action( const std::string& name,
   }
   else if ( type == SITH_SORCERER )
   {
+    if ( name == "mark_of_power"      ) return new       force_valor_t( this, "mark_of_power", options_str );
+    if ( name == "shock"              ) return new           project_t( this, "shock", options_str );
+    if ( name == "force_lightning"    ) return new telekinetic_throw_t( this, "force_lightning", options_str );
     if ( name == "lightning_strike"   ) return new       disturbance_t( this, "lightning_strike", options_str );
     if ( name == "crushing_darkness"  ) return new        mind_crush_t( this, "crushing_darkness", options_str );
     if ( name == "affliction"         ) return new       weaken_mind_t( this, "affliction", options_str );
@@ -1228,14 +964,14 @@ action_t* jedi_sage_t::create_action( const std::string& name,
     if ( name == "recklessness"       ) return new     force_potency_t( this, "recklessness", options_str );
   }
 
-  return jedi_consular_t::create_action( name, options_str );
+  return player_t::create_action( name, options_str );
 }
 
 // jedi_sage_t::init_talents =====================================================
 
 void jedi_sage_t::init_talents()
 {
-  jedi_consular_t::init_talents();
+  player_t::init_talents();
 
   talents.penetrating_light = find_talent( "Penetrating Light" );
   talents.psychic_suffusion = find_talent( "Psychic Suffusion" );
@@ -1283,21 +1019,23 @@ void jedi_sage_t::init_talents()
   talents.psychic_absorption = find_talent( "Psychic Absorption" );
   talents.sever_force = find_talent( "Sever Force" );
 
-
 }
 
 // jedi_sage_t::init_base ========================================================
 
 void jedi_sage_t::init_base()
 {
-  jedi_consular_t::init_base();
+  player_t::init_base();
 
+  base_gcd = timespan_t::from_seconds( 1.5 );
+
+  attribute_base[ ATTR_WILLPOWER ] = 250;
 
   default_distance = 30;
   distance = default_distance;
 
-
-  resource_base[  RESOURCE_FORCE  ] += 400 + talents.mental_longevity -> rank() * 50;
+  base_force_regen_per_second = 8.0;
+  resource_base[  RESOURCE_FORCE  ] += 500 + talents.mental_longevity -> rank() * 50;
 
   attribute_multiplier_initial[ ATTR_WILLPOWER ] += talents.will_of_the_jedi -> rank() * 0.03;
 
@@ -1312,7 +1050,7 @@ void jedi_sage_t::init_base()
 
 void jedi_sage_t::init_benefits()
 {
-  jedi_consular_t::init_benefits();
+  player_t::init_benefits();
 
   if ( type == SITH_SORCERER )
   {
@@ -1334,7 +1072,7 @@ void jedi_sage_t::init_benefits()
 
 void jedi_sage_t::init_buffs()
 {
-  jedi_consular_t::init_buffs();
+  player_t::init_buffs();
 
   // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
@@ -1360,7 +1098,7 @@ void jedi_sage_t::init_buffs()
 
 void jedi_sage_t::init_gains()
 {
-  jedi_consular_t::init_gains();
+  player_t::init_gains();
 
   gains_concentration   = get_gain( "concentration"   );
   gains_focused_insight = get_gain( "focused_insight" );
@@ -1371,14 +1109,14 @@ void jedi_sage_t::init_gains()
 
 void jedi_sage_t::init_procs()
 {
-  jedi_consular_t::init_procs();
+  player_t::init_procs();
 }
 
 // jedi_sage_t::init_rng =========================================================
 
 void jedi_sage_t::init_rng()
 {
-  jedi_consular_t::init_rng();
+  player_t::init_rng();
 
   rng_psychic_barrier = get_rng( "psychic_barrier" );
   rng_upheaval = get_rng( "upheaval" );
@@ -1564,7 +1302,14 @@ void jedi_sage_t::init_actions()
     }
   }
 
-  jedi_consular_t::init_actions();
+  player_t::init_actions();
+}
+
+// jedi_sage_t::primary_resource ==================================================
+
+int jedi_sage_t::primary_resource() const
+{
+  return RESOURCE_FORCE;
 }
 
 // jedi_sage_t::primary_role ==================================================
@@ -1591,7 +1336,7 @@ int jedi_sage_t::primary_role() const
 
 void jedi_sage_t::regen( timespan_t periodicity )
 {
-  jedi_consular_t::regen( periodicity );
+  player_t::regen( periodicity );
 
   if ( buffs_concentration -> check() > 0 )
   {
@@ -1605,7 +1350,7 @@ void jedi_sage_t::regen( timespan_t periodicity )
 
 double jedi_sage_t::composite_force_damage_bonus() const
 {
-  double sp = jedi_consular_t::composite_force_damage_bonus();
+  double sp = player_t::composite_force_damage_bonus();
 
   sp *= 1.0 + buffs_tremors -> stack() * 0.01;
 
@@ -1616,7 +1361,7 @@ double jedi_sage_t::composite_force_damage_bonus() const
 
 double jedi_sage_t::composite_spell_alacrity() const
 {
-  double sh = jedi_consular_t::composite_spell_alacrity();
+  double sh = player_t::composite_spell_alacrity();
 
   sh -= buffs_mental_alacrity -> stack() * 0.20;
 
@@ -1693,14 +1438,14 @@ void jedi_sage_t::create_talents()
   talent_trees[ 2 ].push_back(  new talent_t( this, "Sever Force", 2, 1 ) );
 
 
-  jedi_consular_t::create_talents();
+  player_t::create_talents();
 }
 
 // jedi_sage_t::create_options =================================================
 
 void jedi_sage_t::create_options()
 {
-  jedi_consular_t::create_options();
+  player_t::create_options();
 
   option_t jedi_sage_options[] =
   {

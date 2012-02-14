@@ -383,7 +383,6 @@ const char* util_t::pet_type_string( int type )
   switch ( type )
   {
   case PET_NONE:                return "none";
-  case PET_QYZEN_FESS:          return "qyzen_fess";
   case PET_ENEMY:               return "pet_enemy";
   }
   return "unknown";

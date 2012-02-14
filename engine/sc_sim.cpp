@@ -656,6 +656,7 @@ sim_t::sim_t( sim_t* p, int index ) :
   spell_query( 0 )
 {
   register_jedi_sage_targetdata( this );
+  register_shadow_assassin_targetdata( this );
 
   path_str += "|profiles";
   path_str += "|..";
@@ -1969,6 +1970,8 @@ void sim_t::create_options()
     // Character Creation
     { "jedi_sage",                        OPT_FUNC,   ( void* ) ::parse_player                      },
     { "sith_sorcerer",                    OPT_FUNC,   ( void* ) ::parse_player                      },
+    { "jedi_shadow",                      OPT_FUNC,   ( void* ) ::parse_player                      },
+    { "sith_assassin",                    OPT_FUNC,   ( void* ) ::parse_player                      },
     { "enemy",                            OPT_FUNC,   ( void* ) ::parse_player                      },
     { "pet",                              OPT_FUNC,   ( void* ) ::parse_player                      },
     { "player",                           OPT_FUNC,   ( void* ) ::parse_player                      },

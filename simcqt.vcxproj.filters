@@ -69,9 +69,6 @@
     <ClCompile Include="engine\sc_item_data.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="engine\sc_jedi_consular.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="engine\sc_js.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -108,6 +105,9 @@
     <ClCompile Include="engine\sc_rng.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="engine\sc_sage_sorcerer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="engine\sc_scaling.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -115,6 +115,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="engine\sc_set_bonus.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\sc_shadow_assassin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="engine\sc_sim.cpp">
