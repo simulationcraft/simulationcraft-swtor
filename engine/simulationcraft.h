@@ -182,9 +182,11 @@ struct xml_node_t;
 
 struct targetdata_t;
 struct jedi_sage_targetdata_t;
+struct sith_sorcerer_targetdata_t;
 struct shadow_assassin_targetdata_t;
 
 void register_jedi_sage_targetdata( sim_t* sim );
+void register_sith_sorcerer_targetdata( sim_t* sim );
 void register_shadow_assassin_targetdata( sim_t* sim );
 
 #define DATA_DOT 0
@@ -4308,6 +4310,7 @@ struct targetdata_t : public noncopyable
   static targetdata_t* get( player_t* source, player_t* target );
 
   jedi_sage_targetdata_t* cast_jedi_sage() { assert( source->type == JEDI_SAGE  ); return ( jedi_sage_targetdata_t* ) this; }
+  sith_sorcerer_targetdata_t* cast_sith_sorcerer() { assert( source->type == SITH_SORCERER ); return ( sith_sorcerer_targetdata_t* ) this; }
 
 protected:
   dot_t* add_dot( dot_t* d );

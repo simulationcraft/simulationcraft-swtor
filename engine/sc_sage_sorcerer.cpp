@@ -29,6 +29,29 @@ void register_jedi_sage_targetdata( sim_t*  sim  )
   REGISTER_DOT( sever_force );
 }
 
+struct sith_sorcerer_targetdata_t : public targetdata_t
+{
+  dot_t* dots_telekinetic_throw;
+  dot_t* dots_crushing_darkness;
+  dot_t* dots_affliction;
+  dot_t* dots_creeping_terror;
+
+  sith_sorcerer_targetdata_t( player_t* source, player_t* target )
+    : targetdata_t( source, target )
+  {
+  }
+};
+
+void register_sith_sorcerer_targetdata( sim_t*  sim  )
+{
+  player_type t = SITH_SORCERER;
+  typedef sith_sorcerer_targetdata_t type;
+
+  REGISTER_DOT( telekinetic_throw );
+  REGISTER_DOT( crushing_darkness );
+  REGISTER_DOT( affliction );
+  REGISTER_DOT( creeping_terror );
+}
 
 // ==========================================================================
 // Jedi Sage
@@ -729,13 +752,28 @@ struct turbulence_t : public jedi_sage_spell_t
     jedi_sage_spell_t::calculate_result();
 
     bool t = false;
-    jedi_sage_targetdata_t* td = targetdata() -> cast_jedi_sage();
-
-    if ( td -> dots_weaken_mind -> ticking )
+    if ( player -> type == JEDI_SAGE )
     {
-      t = true;
-      result = RESULT_CRIT;
+      jedi_sage_targetdata_t* td = targetdata() -> cast_jedi_sage();
+
+      if ( td -> dots_weaken_mind -> ticking )
+      {
+        t = true;
+        result = RESULT_CRIT;
+      }
     }
+    else if ( player -> type == SITH_SORCERER )
+    {
+      sith_sorcerer_targetdata_t* td = targetdata() -> cast_sith_sorcerer();
+
+      if ( td -> dots_affliction -> ticking )
+      {
+        t = true;
+        result = RESULT_CRIT;
+      }
+    }
+    else
+      assert( 0 );
 
     player -> cast_jedi_sage() -> benefits_turbulence -> update( t );
   }
