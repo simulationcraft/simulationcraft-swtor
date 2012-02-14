@@ -721,11 +721,12 @@ void SimulationCraftWindow::createBestInSlotTab()
   QTreeWidgetItem* top[ PLAYER_MAX ];
   range::fill( top, 0 );
 
+  // Scan all subfolders in /profiles/ and create a list
 #ifndef Q_WS_MAC
-  QDir dir = QString( "profiles" );
+  QDir tdir = QString( "profiles" );
 #else
   CFURLRef fileRef    = CFBundleCopyResourceURL( CFBundleGetMainBundle(), CFSTR( "profiles" ), 0, 0 );
-  QDir dir;
+  QDir tdir;
   if ( fileRef )
   {
     CFStringRef macPath = CFURLCopyFileSystemPath( fileRef, kCFURLPOSIXPathStyle );
@@ -735,33 +736,56 @@ void SimulationCraftWindow::createBestInSlotTab()
     CFRelease( macPath );
   }
 #endif
-  dir.setSorting( QDir::Name );
-  dir.setFilter( QDir::Files );
-  dir.setNameFilters( QStringList( "*.simc" ) );
-  bisProfilePath = dir.absolutePath() + "/";
-  bisProfilePath = QDir::toNativeSeparators( bisProfilePath );
+  tdir.setFilter( QDir::Dirs );
 
-  QStringList profileList = dir.entryList();
-  int numProfiles = profileList.count();
-  for ( int i=0; i < numProfiles; i++ )
+  QStringList tprofileList = tdir.entryList();
+  int tnumProfiles = tprofileList.count();
+  // Main loop through all subfolders of ./profiles/
+  for ( int i=0; i < tnumProfiles; i++ )
   {
-    QString& profile = profileList[ i ];
 
-    for ( int pt = PLAYER_NONE; pt < PLAYER_MAX; ++pt )
+#ifndef Q_WS_MAC
+    QDir dir = QString( "profiles/" + tprofileList[ i ] );
+#else
+    CFURLRef fileRef    = CFBundleCopyResourceURL( CFBundleGetMainBundle(), CFSTR( "profiles" ), 0, 0 );
+    QDir dir;
+    if ( fileRef )
     {
-      if ( profile.contains( util_t::player_type_string( pt ), Qt::CaseInsensitive ) )
-      {
-        if ( ! top[ pt ] )
-        {
-          top[ pt ] = new QTreeWidgetItem( QStringList( util_t::player_type_string( pt ) ) );
-          bisTree -> addTopLevelItem( top[ pt ] );
-        }
-        QTreeWidgetItem* item = new QTreeWidgetItem( QStringList( profile ) );
-        top[ pt ] -> addChild( item );
-        break;
-      }
+      CFStringRef macPath = CFURLCopyFileSystemPath( fileRef, kCFURLPOSIXPathStyle );
+      dir            = QString( CFStringGetCStringPtr( macPath, CFStringGetSystemEncoding() ) );
+
+      CFRelease( fileRef );
+      CFRelease( macPath );
     }
-  }
+#endif
+    dir.setSorting( QDir::Name );
+    dir.setFilter( QDir::Files );
+    dir.setNameFilters( QStringList( "*.simc" ) );
+    bisProfilePath = dir.absolutePath() + "/";
+    bisProfilePath = QDir::toNativeSeparators( bisProfilePath );
+
+    QStringList profileList = dir.entryList();
+    int numProfiles = profileList.count();
+    for ( int i=0; i < numProfiles; i++ )
+    {
+      QString& profile = profileList[ i ];
+
+      for ( int pt = PLAYER_NONE; pt < PLAYER_MAX; ++pt )
+      {
+        if ( profile.contains( util_t::player_type_string( pt ), Qt::CaseInsensitive ) )
+        {
+          if ( ! top[ pt ] )
+          {
+            top[ pt ] = new QTreeWidgetItem( QStringList( util_t::player_type_string( pt ) ) );
+            bisTree -> addTopLevelItem( top[ pt ] );
+          }
+          QTreeWidgetItem* item = new QTreeWidgetItem( QStringList( profile ) );
+          top[ pt ] -> addChild( item );
+          break;
+        }
+      }
+   }
+ }
 
   bisTree->setColumnWidth( 0, 300 );
 

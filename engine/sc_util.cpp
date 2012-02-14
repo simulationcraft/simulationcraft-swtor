@@ -326,18 +326,18 @@ const char* util_t::player_type_string( int type )
   switch ( type )
   {
   case JEDI_SAGE:        return "jedi_sage";
-  case JEDI_SHADOW:      return "shadow";
-  case JEDI_SENTINEL:    return "sentinel";
-  case JEDI_GUARDIAN:    return "guardian";
+  case JEDI_SHADOW:      return "jedi_shadow";
+  case JEDI_SENTINEL:    return "jedi_sentinel";
+  case JEDI_GUARDIAN:    return "jedi_guardian";
   case S_SCOUNDREL:      return "scoundrel";
   case S_GUNSLINGER:     return "gunslinger";
   case T_COMMANDO:       return "commando";
   case T_VANGUARD:       return "vanguard";
 
   case SITH_SORCERER:    return "sith_sorcerer";
-  case SITH_ASSASSIN:    return "assassin";
-  case SITH_MARAUDER:    return "marauder";
-  case SITH_JUGGERNAUT:  return "juggernaut";
+  case SITH_ASSASSIN:    return "sith_assassin";
+  case SITH_MARAUDER:    return "sith_marauder";
+  case SITH_JUGGERNAUT:  return "sith_juggernaut";
   case BH_MERCENARY:     return "mercenary";
   case BH_POWERTECH:     return "powertech";
   case IA_SNIPER:        return "sniper";

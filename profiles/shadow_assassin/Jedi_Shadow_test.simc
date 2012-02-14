@@ -1,0 +1,15 @@
+#!./simc 
+
+jedi_shadow=Jedi_Shadow_test1
+level=50
+race=human
+position=front
+role=spell
+use_pre_potion=0
+talents=
+actions=stim,type=exotech_resolve
+actions+=/force_valor
+actions+=/snapshot_stats
+actions+=/telekinetic_throw
+head=foo_force_masters_headgear
+shirt=foo,stats=1487willpower_410crit_346alacrity_218power_1224forcepower_153surge
