@@ -294,6 +294,7 @@ const char* util_t::profession_type_string( int type )
   switch ( type )
   {
   case PROFESSION_NONE:     return "none";
+  case PROFESSION_BIOCHEM:  return "biochem";
   }
   return "unknown";
 }
