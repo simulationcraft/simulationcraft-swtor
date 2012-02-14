@@ -257,6 +257,7 @@ struct telekinetic_throw_t : public shadow_assassin_spell_t
 action_t* shadow_assassin_t::create_action( const std::string& name,
                                  const std::string& options_str )
 {
+#if 0
   if ( type == SITH_ASSASSIN )
   {
     if ( name == "mark_of_power"      ) return new     mark_of_power_t( this, "mark_of_power", options_str );
@@ -276,9 +277,9 @@ action_t* shadow_assassin_t::create_action( const std::string& name,
     if ( name == "blackout"           ) return new          blackout_t( this, "blackout", options_str );
     if ( name == "force_cloak"        ) return new       force_cloak_t( this, "force_cloak", options_str );
     if ( name == "discharge"          ) return new         discharge_t( this, "discharge", options_str );
-    if ( name == "maul"               ) return new              maul_t( this, "maul, options_str );
-    if ( name == "saber_strike"       ) return new      saber_strike_t( this, "maul, options_str );
-    if ( name == "thrash"             ) return new            thrash_t( this, "maul, options_str );
+    if ( name == "maul"               ) return new              maul_t( this, "maul", options_str );
+    if ( name == "saber_strike"       ) return new      saber_strike_t( this, "saber_strike", options_str );
+    if ( name == "thrash"             ) return new            thrash_t( this, "thrash", options_str );
   }
   else if ( type == JEDI_SHADOW )
   {
@@ -299,10 +300,11 @@ action_t* shadow_assassin_t::create_action( const std::string& name,
     if ( name == "blackout"           ) return new           blackout_t( this, "blackout", options_str );
     if ( name == "force_cloak"        ) return new        force_cloak_t( this, "force_cloak", options_str );
     if ( name == "force_breach"       ) return new       force_breach_t( this, "discharge", options_str );
-    if ( name == "shadow_strike"      ) return new      shadow_strike_t( this, "maul, options_str );
-    if ( name == "saber_strike"       ) return new       saber_strike_t( this, "maul, options_str );
-    if ( name == "double_strike"      ) return new      double_strike_t( this, "maul, options_str );
+    if ( name == "shadow_strike"      ) return new      shadow_strike_t( this, "maul", options_str );
+    if ( name == "saber_strike"       ) return new       saber_strike_t( this, "saber_strike", options_str );
+    if ( name == "double_strike"      ) return new      double_strike_t( this, "thrash", options_str );
   }
+#endif
 
   return player_t::create_action( name, options_str );
 }
@@ -602,7 +604,7 @@ void player_t::shadow_assassin_init( sim_t* sim )
 {
   for ( unsigned int i = 0; i < sim -> actor_list.size(); i++ )
   {
-    player_t* p = sim -> actor_list[i];
+    //player_t* p = sim -> actor_list[i];
     //p -> buffs.force_valor = new buff_t( p, "force_valor_mark_of_power", 1 );
   }
 }
