@@ -711,7 +711,7 @@ void SimulationCraftWindow::createImportTab()
 
 void SimulationCraftWindow::createBestInSlotTab()
 {
-  QStringList headerLabels( "Player Class" ); headerLabels += QString( "Profile" );
+  QStringList headerLabels( "Player Class" ); headerLabels += QString( "Location" );
 
   bisTree = new QTreeWidget();
   bisTree->setColumnCount( 1 );
@@ -761,14 +761,14 @@ void SimulationCraftWindow::createBestInSlotTab()
     dir.setSorting( QDir::Name );
     dir.setFilter( QDir::Files );
     dir.setNameFilters( QStringList( "*.simc" ) );
-    bisProfilePath = dir.absolutePath() + "/";
-    bisProfilePath = QDir::toNativeSeparators( bisProfilePath );
 
     QStringList profileList = dir.entryList();
     int numProfiles = profileList.count();
     for ( int i=0; i < numProfiles; i++ )
     {
-      QString& profile = profileList[ i ];
+      QString profile = dir.absolutePath() + "/";
+      profile = QDir::toNativeSeparators( profile );
+      profile += profileList[ i ];
 
       for ( int pt = PLAYER_NONE; pt < PLAYER_MAX; ++pt )
       {
@@ -779,7 +779,7 @@ void SimulationCraftWindow::createBestInSlotTab()
             top[ pt ] = new QTreeWidgetItem( QStringList( util_t::player_type_string( pt ) ) );
             bisTree -> addTopLevelItem( top[ pt ] );
           }
-          QTreeWidgetItem* item = new QTreeWidgetItem( QStringList( profile ) );
+          QTreeWidgetItem* item = new QTreeWidgetItem( QStringList() << profileList[ i ] << profile );
           top[ pt ] -> addChild( item );
           break;
         }
@@ -1742,11 +1742,11 @@ void SimulationCraftWindow::historyDoubleClicked( QListWidgetItem* item )
 
 void SimulationCraftWindow::bisDoubleClicked( QTreeWidgetItem* item, int /* col */ )
 {
-  QString profile = item->text( 0 );
+  QString profile = item->text( 1 );
 
   QString s = "Unable to import profile "; s += profile;
 
-  QFile file( bisProfilePath + profile );
+  QFile file( profile );
   if ( file.open( QIODevice::ReadOnly ) )
   {
     s = file.readAll();
