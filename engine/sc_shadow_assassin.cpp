@@ -40,27 +40,24 @@ struct shadow_assassin_t : public player_t
   buff_t* buffs_exploit_weakness;
   buff_t* buffs_dark_embrace;
   buff_t* buffs_induction;
-  buff_t* buffs_surging_charge;
-  buff_t* buffs_lightning_charge;
-  buff_t* buffs_darkswell;
-  buff_t* buffs_saber_conduit;
+  buff_t* voltaic_slash;
   buff_t* buffs_static_charges;
   buff_t* buffs_exploitive_strikes;
-  buff_t* buffs_chain_shock;
   buff_t* buffs_raze;
   buff_t* buffs_unearthed_knowledge
     
   
   // Gains
-  gain_t* gains_exploit_weakness;
   gain_t* gains_parasitism;
-  
+  gain_t* gains_dark_embrace;  
+  gain_t* gains_calculating_mind; 
   
   
 
   // Procs
   proc_t* procs_exploitive_strikes;
-  proc_t* procs_exploitive_raze;
+  proc_t* procs_raze;
+  proc_t* procs_exploitive_weakness;
 
   // RNG
 
@@ -432,14 +429,21 @@ void shadow_assassin_t::init_benefits()
 void shadow_assassin_t::init_buffs()
 {
   player_t::init_buffs();
-
+ 
   // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
 
   // bool is_shadow = ( type == JEDI_SHADOW );
-
-
+  
+ buffs_exploit_weakness = new buff_t( this, "exploit_weakness", 1, timespan_t::from_seconds( 10.0 ), timespan_t::from_seconds( 10.0 ) );
+ buffs_induction = new buff_t( this, "induction", 2, timespan_t::from_seconds( 10.0 ), timespan_t::zero );
+ buffs_voltaic_slash = new buff_t( this, "voltaic_slash", 2, timespan_t::from_seconds( 10.0 ), timespan_t::zero );
+ buffs_static_charges = new buff_t( this, "static_charges", 5, timespan_t::from_seconds( 30.0 ), timespan_t::zero );
+ buffs_exploitive_strikes = new buff_t( this, "exploitive_strikes", 1, timespan_t::from_seconds( 10.0 ), timespan_t::zero );
+ buffs_raze = new buff_t( this, "raze", 1, timespan_t::from_seconds( 15.0 ), timespan_t::from_seconds( 7.5 ), talents.raze -> rank() * 0.6 );
+ buffs_unearthed_knowledge = new buff_t( this, "unearthed_knowledge", 1, timespan_t::from_seconds( 20.0 ), timespan_t::zero, talents.unearthed_knowledge -> rank() * 0.5 ); 
+  
 }
 
 // shadow_assassin_t::init_gains =======================================================
@@ -447,6 +451,10 @@ void shadow_assassin_t::init_buffs()
 void shadow_assassin_t::init_gains()
 {
   player_t::init_gains();
+
+  gains_concentration   = get_gain( "dark_embrace"     );
+  gains_focused_insight = get_gain( "parasitism"       );
+  gains_psychic_barrier = get_gain( "calculating_mind" );
 
 }
 
