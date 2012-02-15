@@ -40,9 +40,10 @@ timespan_t spell_t::gcd() const
   if ( t == timespan_t::zero ) return timespan_t::zero;
 
   // According to http://sithwarrior.com/forums/Thread-SWTOR-formula-list alacrity doesn't reduce the gcd
-  // Actually it seems to be more complex, cast time spells ( eg. with 1.5s cast time ) get a reduced gcd, but instant cast spells do not
+  // cast time spells get a reduced gcd, but instant cast spells do not
   // http://sithwarrior.com/forums/Thread-Alacrity-and-the-GCD?pid=9152#pid9152
-  if ( base_execute_time > timespan_t::zero )
+  // spells with base_execute_time > 0 but with time_to_execute=0 ( because of procs ) don't get a reduced gcd. Tested visually by Kor, 15/2/2012
+  if ( time_to_execute > timespan_t::zero )
     t *= alacrity();
 
   if ( t < min_gcd ) t = min_gcd;
