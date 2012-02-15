@@ -608,6 +608,69 @@ void shadow_assassin_t::create_talents()
 
   // eg.   talent_trees[ 0 ].push_back(  new talent_t( this, "Immutable Force", 0, 2 ) );
 
+  // TREE DARKNESS
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Thrashing Blades, 0, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Lightning Reflexes", 0, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Charge Mastery", 0, 3 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Shroud of Darkness", 0, 3 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Lightning Recovery", 0, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Swelling Shadows", 0, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Electric Execution", 0, 3 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Disjunction", 0, 1 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Energize", 0, 1 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Dark Ward", 0, 1 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Premonition", 0, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Hollow", 0, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Blood of Sith", 0, 3 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Electrify", 0, 1 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Eye of the Storm", 0, 1 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Force Pull", 0, 1 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Nerve Wracking", 0, 3 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Harnessed Darkness", 0, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Mounting Darkness", 0, 3 ) );  
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Wither", 0, 1 ) );
+
+  // TREE DECEPTION
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Insulation", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Duplicity", 1, 3 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Dark Embrace", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Obfuscation", 1, 3 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Recirculation", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Avoidance", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Induction", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Surging Charge", 1, 1 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Darkswell", 1, 1 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Deceptive Power", 1, 1 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Entropic Field", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Saber Conduit", 1, 3 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Fade", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Static Cling", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Resourcefulness", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Static Charges", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Low Slash", 1, 1 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Crackling Blasts", 1, 5 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Voltaic Slash", 1, 1 ) );
+
+  // TREE MADNESS
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Exploitive Strikes", 2, 3 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Sith Defiance", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Crackling Charge", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Oppressing Force", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Chain Shock", 2, 3 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Parasitism", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Torment", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Death Field", 2, 1 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Fanaticism", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Claws of Decay", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Haunted Dreams", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Corrupted Flesh", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Raze", 2, 1 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Deathmark", 2, 1 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Calculating Mind", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Unearthed Knowledge", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Creeping Death", 2, 3 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Devour", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Creeping Terror", 2, 1 ) );
 
   player_t::create_talents();
 }
