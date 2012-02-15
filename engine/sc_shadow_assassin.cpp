@@ -533,6 +533,30 @@ void shadow_assassin_t::init_actions()
 
       action_list_str += "/snapshot_stats";
 
+      action_list_str += "/power_potion";
+
+      action_list_str += "/recklessness";
+
+      action_list_str += "/shock,if=buff.unearthed_knowledge.down";
+
+      action_list_str += "/assassinate";
+
+      action_list_str += "/death_field";
+
+      action_list_str += "/discharge,if=!ticking";
+
+      action_list_str += "/creeping_terror,if=!ticking";
+
+      action_list_str += "/maul,if=buff.exploit_weakness.react";
+
+      action_list_str += "/crushing_darkness,if=buff.raze.react";
+
+      action_list_str += "/thrash";
+
+      action_list_str += "/force_cloak";
+
+      action_list_str += "/saber_strike";
+
       break;
 
 
@@ -543,6 +567,26 @@ void shadow_assassin_t::init_actions()
       action_list_str += "/mark_of_power";
 
       action_list_str += "/snapshot_stats";
+
+      action_list_str += "/power_potion";
+
+      action_list_str += "/recklessness";
+
+      action_list_str += "/assassinate";
+
+      action_list_str += "/discharge";
+
+      action_list_str += "/maul,if=buff.exploit_weakness.react";
+
+      action_list_str += "/shock,if=buff.induction.stack=2";
+
+      action_list_str += "/voltaic_slash";
+
+      action_list_str += "/blackout";
+
+      action_list_str += "/force_cloak";
+
+      action_list_str += "/saber_strike";
 
       break;
 
