@@ -59,7 +59,8 @@ struct shadow_assassin_t : public player_t
   
 
   // Procs
-  //proc_t* procs_<procname>;
+  proc_t* procs_exploitive_strikes;
+  proc_t* procs_exploitive_raze;
 
   // RNG
 
