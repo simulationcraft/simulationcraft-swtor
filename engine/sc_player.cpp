@@ -444,8 +444,7 @@ player_t::player_t( sim_t*             s,
 
 player_t::~player_t()
 {
-  for ( std::vector<targetdata_t*>::iterator i = targetdata.begin(); i != targetdata.end(); ++i )
-    delete *i;
+  range::dispose( targetdata );
 
   while ( action_t* a = action_list )
   {
@@ -2973,25 +2972,21 @@ void player_t::recalculate_resource_max( int resource )
 
 // player_t::primary_tab ====================================================
 
-int player_t::primary_tab()
+int player_t::primary_tab() const
 {
-  specialization = TALENT_TAB_NONE;
-
+  int spec = TALENT_TAB_NONE;
   int max_points = 0;
 
   for ( int i=0; i < MAX_TALENT_TREES; i++ )
   {
-    if ( talent_tab_points[ i ] > 0 )
+    if ( talent_tab_points[ i ] > max_points )
     {
-      if ( specialization == TALENT_TAB_NONE || ( talent_tab_points[ i ] > max_points ) )
-      {
-        specialization = i;
-        max_points = talent_tab_points[ i ];
-      }
+      spec = i;
+      max_points = talent_tab_points[ i ];
     }
   }
 
-  return specialization;
+  return spec;
 }
 
 // player_t::primary_role ===================================================

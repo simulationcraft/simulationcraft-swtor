@@ -4147,7 +4147,7 @@ struct player_t : public noncopyable
   virtual int    primary_resource() const { return RESOURCE_NONE; }
   virtual int    primary_role() const;
   virtual int    primary_tree() const;
-  virtual int    primary_tab();
+  int            primary_tab() const;
   virtual const char* primary_tree_name() const;
   virtual int    normalize_by() const;
 
