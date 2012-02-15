@@ -7,7 +7,10 @@
 
 struct shadow_assassin_targetdata_t : public targetdata_t
 {
-
+  dot_t* dots_crushing_darkness;
+  dot_t* dots_creeping_terror;
+  dot_t* dots_discharge
+  
   shadow_assassin_targetdata_t( player_t* source, player_t* target )
     : targetdata_t( source, target )
   {
@@ -16,9 +19,13 @@ struct shadow_assassin_targetdata_t : public targetdata_t
 
 void register_shadow_assassin_targetdata( sim_t* /* sim */ )
 {
-  //player_type t = JEDI_SHADOW;
+  //player_type t = SITH_ASSASSIN;
   typedef shadow_assassin_targetdata_t type;
 
+  REGISTER_DOT( crushing_darkness );
+  REGISTER_DOT( creeping_terror );
+  REGISTER_DOT( discharge );
+  
 }
 
 
@@ -30,11 +37,27 @@ struct shadow_assassin_t : public player_t
 {
 
   // Buffs
-
+  buff_t* buffs_exploit_weakness;
+  buff_t* buffs_dark_embrace;
+  buff_t* buffs_induction;
+  buff_t* voltaic_slash;
+  buff_t* buffs_static_charges;
+  buff_t* buffs_exploitive_strikes;
+  buff_t* buffs_raze;
+  buff_t* buffs_unearthed_knowledge
+    
+  
   // Gains
+  gain_t* gains_parasitism;
+  gain_t* gains_dark_embrace;  
+  gain_t* gains_calculating_mind; 
+  
+  
 
   // Procs
-  //proc_t* procs_<procname>;
+  proc_t* procs_exploitive_strikes;
+  proc_t* procs_raze;
+  proc_t* procs_exploitive_weakness;
 
   // RNG
 
@@ -171,9 +194,9 @@ struct shadow_assassin_spell_t : public spell_t
 
 };
 
-struct force_valor_t : public shadow_assassin_spell_t
+struct mark_of_power_t : public shadow_assassin_spell_t
 {
-  force_valor_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
+  mark_of_powerr_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
     shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE )
   {
     parse_options( 0, options_str );
@@ -188,62 +211,69 @@ struct force_valor_t : public shadow_assassin_spell_t
     for ( player_t* p = sim -> player_list; p; p = p -> next )
     {
       if ( p -> ooc_buffs() )
-        p -> buffs.force_valor -> override();
+        p -> buffs.mark_of_power -> override();
     }
   }
 
   virtual bool ready()
   {
-    if ( player -> buffs.force_valor -> check() )
+    if ( player -> buffs.mark_of_power -> check() )
       return false;
 
     return shadow_assassin_spell_t::ready();
   }
 };
 
-struct project_t : public shadow_assassin_spell_t
+struct shock_t : public shadow_assassin_spell_t
 {
-  shadow_assassin_spell_t* upheaval;
+  shadow_assassin_spell_t* chain_shock;
 
-  project_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str, bool is_upheaval = false ) :
-    shadow_assassin_spell_t( ( n + std::string( is_upheaval ? "_upheaval" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
-    upheaval( 0 )
+  shock_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str, bool is_chain_shock = false ) :
+    shadow_assassin_spell_t( ( n + std::string( is_chain_shock ? "_chain_shock" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
+    chain_shock( 0 )
   {
     parse_options( 0, options_str );
-    base_dd_min = 219.0; base_dd_max = 283.4;
+    base_dd_min = 254.93; base_dd_max = 316.73;
     base_cost = 45.0;
     range = 10.0;
     direct_power_mod = 1.85;
 
     cooldown -> duration = timespan_t::from_seconds( 6.0 );
+    
+    if ( player -> is_sith_assassin() )
+    {
+      sith_assassin_t* p = player -> cast_sith_assassin();
 
+      if ( !is_chain_shock && p -> talents.chain_shock -> rank() > 0 )
+      {
+        chain_shock = new chain_shock_t( p, n, options_str, true );
+        chain_shock -> base_multiplier *= 0.50;
+        chain_shock -> base_cost = 0.0;
+        chain_shock -> background = true;
+        add_child( chain_shock );
+      }
+    }
   }
 
-};
-
-struct telekinetic_throw_t : public shadow_assassin_spell_t
-{
-
-  telekinetic_throw_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
-    shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
+  virtual void execute()
   {
-    parse_options( 0, options_str );
-    base_td = 127.2;
-    base_cost = 10.0;
-    if ( player -> set_bonus.indomitable -> two_pc() > 0 )
-      base_cost -= 2.0;
-    range = 30.0;
-    tick_power_mod = 0.79;
-    num_ticks = 3;
-    base_tick_time = timespan_t::from_seconds( 1.0 );
-    may_crit = false;
-    channeled = true;
-    tick_zero = true;
+    sith_assassin_spell_t::execute();
 
-    cooldown -> duration = timespan_t::from_seconds( 6.0 );
+    if ( chain_shock )
+    {
+      if ( player -> is_sith_assassin() )
+      {
+        sith_assassin_t* p = player -> cast_sith_assassin();
 
+        if ( p -> rng_chain_shock -> roll( p -> talents.chain_shock -> rank() * 0.15 ) )
+          chain_shock -> execute();
+      }
+    }
   }
+
 };
+
+
 
 
 } // ANONYMOUS NAMESPACE ====================================================
@@ -399,14 +429,21 @@ void shadow_assassin_t::init_benefits()
 void shadow_assassin_t::init_buffs()
 {
   player_t::init_buffs();
-
+ 
   // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
 
   // bool is_shadow = ( type == JEDI_SHADOW );
-
-
+  
+ buffs_exploit_weakness = new buff_t( this, "exploit_weakness", 1, timespan_t::from_seconds( 10.0 ), timespan_t::from_seconds( 10.0 ) );
+ buffs_induction = new buff_t( this, "induction", 2, timespan_t::from_seconds( 10.0 ), timespan_t::zero );
+ buffs_voltaic_slash = new buff_t( this, "voltaic_slash", 2, timespan_t::from_seconds( 10.0 ), timespan_t::zero );
+ buffs_static_charges = new buff_t( this, "static_charges", 5, timespan_t::from_seconds( 30.0 ), timespan_t::zero );
+ buffs_exploitive_strikes = new buff_t( this, "exploitive_strikes", 1, timespan_t::from_seconds( 10.0 ), timespan_t::zero );
+ buffs_raze = new buff_t( this, "raze", 1, timespan_t::from_seconds( 15.0 ), timespan_t::from_seconds( 7.5 ), talents.raze -> rank() * 0.6 );
+ buffs_unearthed_knowledge = new buff_t( this, "unearthed_knowledge", 1, timespan_t::from_seconds( 20.0 ), timespan_t::zero, talents.unearthed_knowledge -> rank() * 0.5 ); 
+  
 }
 
 // shadow_assassin_t::init_gains =======================================================
@@ -414,6 +451,10 @@ void shadow_assassin_t::init_buffs()
 void shadow_assassin_t::init_gains()
 {
   player_t::init_gains();
+
+  gains_concentration   = get_gain( "dark_embrace"     );
+  gains_focused_insight = get_gain( "parasitism"       );
+  gains_psychic_barrier = get_gain( "calculating_mind" );
 
 }
 
@@ -576,6 +617,69 @@ void shadow_assassin_t::create_talents()
 
   // eg.   talent_trees[ 0 ].push_back(  new talent_t( this, "Immutable Force", 0, 2 ) );
 
+  // TREE DARKNESS
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Thrashing Blades, 0, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Lightning Reflexes", 0, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Charge Mastery", 0, 3 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Shroud of Darkness", 0, 3 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Lightning Recovery", 0, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Swelling Shadows", 0, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Electric Execution", 0, 3 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Disjunction", 0, 1 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Energize", 0, 1 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Dark Ward", 0, 1 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Premonition", 0, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Hollow", 0, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Blood of Sith", 0, 3 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Electrify", 0, 1 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Eye of the Storm", 0, 1 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Force Pull", 0, 1 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Nerve Wracking", 0, 3 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Harnessed Darkness", 0, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Mounting Darkness", 0, 3 ) );  
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Wither", 0, 1 ) );
+
+  // TREE DECEPTION
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Insulation", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Duplicity", 1, 3 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Dark Embrace", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Obfuscation", 1, 3 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Recirculation", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Avoidance", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Induction", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Surging Charge", 1, 1 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Darkswell", 1, 1 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Deceptive Power", 1, 1 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Entropic Field", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Saber Conduit", 1, 3 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Fade", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Static Cling", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Resourcefulness", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Static Charges", 1, 2 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Low Slash", 1, 1 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Crackling Blasts", 1, 5 ) );
+  talent_trees[ 1 ].push_back(  new talent_t( this, "Voltaic Slash", 1, 1 ) );
+
+  // TREE MADNESS
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Exploitive Strikes", 2, 3 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Sith Defiance", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Crackling Charge", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Oppressing Force", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Chain Shock", 2, 3 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Parasitism", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Torment", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Death Field", 2, 1 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Fanaticism", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Claws of Decay", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Haunted Dreams", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Corrupted Flesh", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Raze", 2, 1 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Deathmark", 2, 1 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Calculating Mind", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Unearthed Knowledge", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Creeping Death", 2, 3 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Devour", 2, 2 ) );
+  talent_trees[ 2 ].push_back(  new talent_t( this, "Creeping Terror", 2, 1 ) );
 
   player_t::create_talents();
 }

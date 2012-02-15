@@ -656,10 +656,10 @@ sim_t::sim_t( sim_t* p, int index ) :
   spell_query( 0 )
 {
   register_jedi_sage_targetdata( this );
+  register_sith_sorcerer_targetdata( this );
   register_shadow_assassin_targetdata( this );
 
   path_str += "|profiles";
-
 
   path_str += "|..";
   path_str += DIRECTORY_DELIMITER;
