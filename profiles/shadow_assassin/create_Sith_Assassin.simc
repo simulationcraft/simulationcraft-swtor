@@ -3,19 +3,39 @@ level=50
 talents=http://www.torhead.com/skill-calc#200McZhMZcMfRrMkrfz.1
 position=back
 // Gear to do
-shirt=foo,stats=1487willpower_410crit_346alacrity_218power_1224forcepower_153surge
-chest=foo_force_masters_vestments
-hands=foo_force_masters_gloves
-legs=foo_force_masters_lower_robe
-head=foo_force_masters_headgear
+shirt=foo,stats=1303willpower_510crit_357accuracy_151power_1224forcepower_153surge
+chest=foo_stalker_vestments
+hands=foo_stalker_gloves
+legs=foo_stalker_lower_robe
+head=foo_stalker_headgear
 save=Sith_Assassin.simc
 
 copy=Sith_Assassin_Madness,Sith_Assassin
 talents=http://www.torhead.com/skill-calc#200McZhMZcMfRrMkrfz.1
-// actions to do
+actions+=/mark_of_power
+actions+=/snapshot_stats
+actions+=/power_potion
+actions+=/recklessness
+
+
+
+
 save=Sith_Assassin_Madness.simc
 
 copy=Sith_Assassin_Deception,Sith_Assassin
 talents=http://www.torhead.com/skill-calc#200McZhGMRkhMrtzZcM.1
-// actions to do
+actions=stim,type=exotech_resolve
+actions+=/mark_of_power
+actions+=/snapshot_stats
+actions+=/power_potion
+actions+=/recklessness
+actions+=/shock,if=buff.unearthed_knowledge.down
+actions+=/assassinate
+actions+=/death_field
+actions+=/discharge,if=!ticking
+actions+=/creeping_terror,if=!ticking
+actions+=/maul,if=buff.exploit_weakness.react
+actions+=/crushing_darkness,if=buff.raze.react
+actions+=/thrash
+actions+=/saber_strike
 save=Sith_Assassin_Deception.simc
