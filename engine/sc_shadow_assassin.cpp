@@ -36,29 +36,39 @@ void register_shadow_assassin_targetdata( sim_t* sim )
 struct shadow_assassin_t : public player_t
 {
   // Buffs
-  buff_t* buffs_exploit_weakness;
-  buff_t* buffs_dark_embrace;
-  buff_t* buffs_induction;
-  buff_t* voltaic_slash;
-  buff_t* buffs_static_charges;
-  buff_t* buffs_exploitive_strikes;
-  buff_t* buffs_raze;
-  buff_t* buffs_unearthed_knowledge;
+  struct buffs_t
+  {
+    buff_t* exploit_weakness;
+    buff_t* dark_embrace;
+    buff_t* induction;
+    buff_t* voltaic_slash;
+    buff_t* static_charges;
+    buff_t* exploitive_strikes;
+    buff_t* raze;
+    buff_t* unearthed_knowledge;
+  } buffs;
 
   // Gains
-  gain_t* gains_parasitism;
-  gain_t* gains_dark_embrace;  
-  gain_t* gains_calculating_mind; 
-  
-  
+  struct gains_t
+  {
+    gain_t* parasitism;
+    gain_t* dark_embrace;
+    gain_t* calculating_mind;
+  } gains;
 
   // Procs
-  proc_t* procs_exploitive_strikes;
-  proc_t* procs_raze;
-  proc_t* procs_exploitive_weakness;
+  struct procs_t
+  {
+    proc_t* exploitive_strikes;
+    proc_t* raze;
+    proc_t* exploitive_weakness;
+  } procs;
 
   // RNGs
-  rng_t* rng_chain_shock;
+  struct rngs_t
+  {
+    rng_t* chain_shock;
+  } rngs;
 
   // Talents
   struct talents_t
@@ -263,7 +273,7 @@ struct shock_t : public shadow_assassin_spell_t
       {
         shadow_assassin_t* p = player -> cast_shadow_assassin();
 
-        if ( p -> rng_chain_shock -> roll( p -> talents.chain_shock -> rank() * 0.15 ) )
+        if ( p -> rngs.chain_shock -> roll( p -> talents.chain_shock -> rank() * 0.15 ) )
           chain_shock -> execute();
       }
     }
@@ -427,21 +437,21 @@ void shadow_assassin_t::init_benefits()
 void shadow_assassin_t::init_buffs()
 {
   player_t::init_buffs();
- 
+
   // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
 
   // bool is_shadow = ( type == JEDI_SHADOW );
-  
- buffs_exploit_weakness = new buff_t( this, "exploit_weakness", 1, timespan_t::from_seconds( 10.0 ), timespan_t::from_seconds( 10.0 ) );
- buffs_induction = new buff_t( this, "induction", 2, timespan_t::from_seconds( 10.0 ), timespan_t::zero );
- buffs_voltaic_slash = new buff_t( this, "voltaic_slash", 2, timespan_t::from_seconds( 10.0 ), timespan_t::zero );
- buffs_static_charges = new buff_t( this, "static_charges", 5, timespan_t::from_seconds( 30.0 ), timespan_t::zero );
- buffs_exploitive_strikes = new buff_t( this, "exploitive_strikes", 1, timespan_t::from_seconds( 10.0 ), timespan_t::zero );
- buffs_raze = new buff_t( this, "raze", 1, timespan_t::from_seconds( 15.0 ), timespan_t::from_seconds( 7.5 ), talents.raze -> rank() * 0.6 );
- buffs_unearthed_knowledge = new buff_t( this, "unearthed_knowledge", 1, timespan_t::from_seconds( 20.0 ), timespan_t::zero, talents.unearthed_knowledge -> rank() * 0.5 ); 
-  
+
+ buffs.exploit_weakness = new buff_t( this, "exploit_weakness", 1, timespan_t::from_seconds( 10.0 ), timespan_t::from_seconds( 10.0 ) );
+ buffs.induction = new buff_t( this, "induction", 2, timespan_t::from_seconds( 10.0 ), timespan_t::zero );
+ buffs.voltaic_slash = new buff_t( this, "voltaic_slash", 2, timespan_t::from_seconds( 10.0 ), timespan_t::zero );
+ buffs.static_charges = new buff_t( this, "static_charges", 5, timespan_t::from_seconds( 30.0 ), timespan_t::zero );
+ buffs.exploitive_strikes = new buff_t( this, "exploitive_strikes", 1, timespan_t::from_seconds( 10.0 ), timespan_t::zero );
+ buffs.raze = new buff_t( this, "raze", 1, timespan_t::from_seconds( 15.0 ), timespan_t::from_seconds( 7.5 ), talents.raze -> rank() * 0.6 );
+ buffs.unearthed_knowledge = new buff_t( this, "unearthed_knowledge", 1, timespan_t::from_seconds( 20.0 ), timespan_t::zero, talents.unearthed_knowledge -> rank() * 0.5 );
+
 }
 
 // shadow_assassin_t::init_gains =======================================================
@@ -450,9 +460,9 @@ void shadow_assassin_t::init_gains()
 {
   player_t::init_gains();
 
-  gains_concentration   = get_gain( "dark_embrace"     );
-  gains_focused_insight = get_gain( "parasitism"       );
-  gains_psychic_barrier = get_gain( "calculating_mind" );
+  gains.dark_embrace     = get_gain( "dark_embrace"     );
+  gains.parasitism       = get_gain( "parasitism"       );
+  gains.calculating_mind = get_gain( "calculating_mind" );
 
 }
 
@@ -470,7 +480,7 @@ void shadow_assassin_t::init_rng()
 {
   player_t::init_rng();
 
-  rng_chain_shock = get_rng( "chain_shock" );
+  rngs.chain_shock = get_rng( "chain_shock" );
 }
 
 // shadow_assassin_t::init_actions =====================================================
