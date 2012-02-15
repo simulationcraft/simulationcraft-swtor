@@ -7,7 +7,10 @@
 
 struct shadow_assassin_targetdata_t : public targetdata_t
 {
-
+  dot_t* dots_crushing_darkness;
+  dot_t* dots_creeping_terror;
+  dot_t* dots_discharge
+  
   shadow_assassin_targetdata_t( player_t* source, player_t* target )
     : targetdata_t( source, target )
   {
@@ -16,9 +19,13 @@ struct shadow_assassin_targetdata_t : public targetdata_t
 
 void register_shadow_assassin_targetdata( sim_t* /* sim */ )
 {
-  //player_type t = JEDI_SHADOW;
+  //player_type t = SITH_ASSASSIN;
   typedef shadow_assassin_targetdata_t type;
 
+  REGISTER_DOT( crushing_darkness );
+  REGISTER_DOT( creeping_terror );
+  REGISTER_DOT( discharge );
+  
 }
 
 
@@ -30,8 +37,26 @@ struct shadow_assassin_t : public player_t
 {
 
   // Buffs
-
+  buff_t* buffs_exploit_weakness;
+  buff_t* buffs_dark_embrace;
+  buff_t* buffs_induction;
+  buff_t* buffs_surging_charge;
+  buff_t* buffs_lightning_charge;
+  buff_t* buffs_darkswell;
+  buff_t* buffs_saber_conduit;
+  buff_t* buffs_static_charges;
+  buff_t* buffs_exploitive_strikes;
+  buff_t* buffs_chain_shock;
+  buff_t* buffs_raze;
+  buff_t* buffs_unearthed_knowledge
+    
+  
   // Gains
+  gain_t* gains_exploit_weakness;
+  gain_t* gains_parasitism;
+  
+  
+  
 
   // Procs
   //proc_t* procs_<procname>;
