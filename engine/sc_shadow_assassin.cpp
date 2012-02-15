@@ -266,7 +266,7 @@ struct shock_t : public shadow_assassin_spell_t
     {
       shadow_assassin_t* p = player -> cast_shadow_assassin();
 
-      if ( p -> rng_chain_shock -> roll( p -> talents.chain_shock -> rank() * 0.15 ) )
+      if ( p -> rngs.chain_shock -> roll( p -> talents.chain_shock -> rank() * 0.15 ) )
         chain_shock -> execute();
     }
   }
