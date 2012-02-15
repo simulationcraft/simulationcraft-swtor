@@ -151,6 +151,7 @@ struct sage_sorcerer_t : public player_t
 
   sage_sorcerer_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
     player_t( sim, pt == SITH_SORCERER ? SITH_SORCERER : JEDI_SAGE, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
+    psychic_projection_dd_chance( 1.0 )
   {
     if ( pt == SITH_SORCERER )
     {
@@ -166,8 +167,6 @@ struct sage_sorcerer_t : public player_t
       tree_type[ JEDI_SAGE_BALANCE ]      = TREE_BALANCE;
       cooldowns_telekinetic_wave = get_cooldown( "telekinetic_wave" );
     }
-
-    psychic_projection_dd_chance = 1.0;
 
     create_talents();
     create_glyphs();
@@ -192,6 +191,14 @@ struct sage_sorcerer_t : public player_t
   virtual double    composite_spell_alacrity() const;
   virtual void      create_talents();
   virtual void      create_options();
+
+  void trigger_tidal_force( double pc )
+  {
+    if ( talents.tidal_force -> rank() && buffs_tidal_force -> trigger( 1, 0, pc ) )
+    {
+      cooldowns_telekinetic_wave -> reset();
+    }
+  }
 };
 
 namespace { // ANONYMOUS NAMESPACE ==========================================
@@ -355,19 +362,6 @@ struct jedi_sage_spell_t : public spell_t
     }
   }
 };
-
-void trigger_tidal_force( action_t* a, double pc = 0 )
-{
-  sage_sorcerer_t* p = a -> player -> cast_sage_sorcerer();
-
-  if ( p -> talents.tidal_force -> rank() == 0 )
-    return;
-
-  if ( p -> buffs_tidal_force -> trigger( 1, 0, pc ) )
-  {
-    p -> cooldowns_telekinetic_wave -> reset();
-  }
-}
 
 struct force_valor_t : public jedi_sage_spell_t
 {
@@ -576,16 +570,16 @@ struct disturbance_t : public jedi_sage_spell_t
 
     base_crit += p -> talents.critical_kinesis -> rank() * 0.05;
 
-    if ( !is_tm )
+    if ( is_tm )
     {
-      if ( p -> talents.telekinetic_momentum -> rank() > 0 )
-      {
-        tm = new disturbance_t( p, n, options_str, true );
-        tm -> base_multiplier *= 0.30;
-        tm -> base_cost = 0.0;
-        tm -> background = true;
-        add_child( tm );
-      }
+      base_multiplier *= 0.30;
+      base_cost = 0.0;
+      background = true;
+    }
+    else if ( p -> talents.telekinetic_momentum -> rank() > 0 )
+    {
+      tm = new disturbance_t( p, n, options_str, true );
+      add_child( tm );
     }
   }
 
@@ -600,7 +594,7 @@ struct disturbance_t : public jedi_sage_spell_t
       p -> buffs_concentration -> trigger();
 
       // Does the TM version also proc Tidal Force?
-      trigger_tidal_force( this, 0.3 );
+      p -> trigger_tidal_force( 0.3 );
     }
   }
 
@@ -1138,9 +1132,11 @@ void sage_sorcerer_t::init_gains()
 {
   player_t::init_gains();
 
-  gains_concentration   = get_gain( "concentration"   );
-  gains_focused_insight = get_gain( "focused_insight" );
-  gains_psychic_barrier = get_gain( "psychic_barrier" );
+  bool is_sage = ( type == JEDI_SAGE );
+
+  gains_concentration   = get_gain( is_sage ? "concentration" : "subversion" );
+  gains_focused_insight = get_gain( is_sage ? "focused_insight" : "parasitism" );
+  gains_psychic_barrier = get_gain( is_sage ? "psychic_barrier" : "sith_efficacy" );
 }
 
 // sage_sorcerer_t::init_procs =======================================================
@@ -1376,10 +1372,9 @@ void sage_sorcerer_t::regen( timespan_t periodicity )
 {
   player_t::regen( periodicity );
 
-  if ( buffs_concentration -> check() > 0 )
+  if ( buffs_concentration -> up() )
   {
     double force_regen = periodicity.total_seconds() * force_regen_per_second() * buffs_concentration -> check() * 0.10;
-
     resource_gain( RESOURCE_FORCE, force_regen, gains_concentration );
   }
 }
