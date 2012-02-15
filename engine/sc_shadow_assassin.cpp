@@ -9,7 +9,7 @@ struct shadow_assassin_targetdata_t : public targetdata_t
 {
   dot_t* dots_crushing_darkness;
   dot_t* dots_creeping_terror;
-  dot_t* dots_discharge
+  dot_t* dots_discharge;
   
   shadow_assassin_targetdata_t( player_t* source, player_t* target )
     : targetdata_t( source, target )
@@ -17,9 +17,9 @@ struct shadow_assassin_targetdata_t : public targetdata_t
   }
 };
 
-void register_shadow_assassin_targetdata( sim_t* /* sim */ )
+void register_shadow_assassin_targetdata( sim_t* sim )
 {
-  //player_type t = SITH_ASSASSIN;
+  player_type t = SITH_ASSASSIN;
   typedef shadow_assassin_targetdata_t type;
 
   REGISTER_DOT( crushing_darkness );
@@ -40,11 +40,11 @@ struct shadow_assassin_t : public player_t
   buff_t* buffs_exploit_weakness;
   buff_t* buffs_dark_embrace;
   buff_t* buffs_induction;
-  buff_t* voltaic_slash;
+  buff_t* buffs_voltaic_slash;
   buff_t* buffs_static_charges;
   buff_t* buffs_exploitive_strikes;
   buff_t* buffs_raze;
-  buff_t* buffs_unearthed_knowledge
+  buff_t* buffs_unearthed_knowledge;
     
   
   // Gains
@@ -60,6 +60,7 @@ struct shadow_assassin_t : public player_t
   proc_t* procs_exploitive_weakness;
 
   // RNG
+  rng_t* rng_chain_shock;
 
 
   // Talents
@@ -196,7 +197,7 @@ struct shadow_assassin_spell_t : public spell_t
 
 struct mark_of_power_t : public shadow_assassin_spell_t
 {
-  mark_of_powerr_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
+  mark_of_power_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
     shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE )
   {
     parse_options( 0, options_str );
@@ -211,13 +212,13 @@ struct mark_of_power_t : public shadow_assassin_spell_t
     for ( player_t* p = sim -> player_list; p; p = p -> next )
     {
       if ( p -> ooc_buffs() )
-        p -> buffs.mark_of_power -> override();
+        p -> buffs.force_valor -> override();
     }
   }
 
   virtual bool ready()
   {
-    if ( player -> buffs.mark_of_power -> check() )
+    if ( player -> buffs.force_valor -> check() )
       return false;
 
     return shadow_assassin_spell_t::ready();
@@ -240,34 +241,26 @@ struct shock_t : public shadow_assassin_spell_t
 
     cooldown -> duration = timespan_t::from_seconds( 6.0 );
     
-    if ( player -> is_sith_assassin() )
+    if ( !is_chain_shock && p -> talents.chain_shock -> rank() > 0 )
     {
-      sith_assassin_t* p = player -> cast_sith_assassin();
-
-      if ( !is_chain_shock && p -> talents.chain_shock -> rank() > 0 )
-      {
-        chain_shock = new chain_shock_t( p, n, options_str, true );
-        chain_shock -> base_multiplier *= 0.50;
-        chain_shock -> base_cost = 0.0;
-        chain_shock -> background = true;
-        add_child( chain_shock );
-      }
+      chain_shock = new shock_t( p, n, options_str, true );
+      chain_shock -> base_multiplier *= 0.50;
+      chain_shock -> base_cost = 0.0;
+      chain_shock -> background = true;
+      add_child( chain_shock );
     }
   }
 
   virtual void execute()
   {
-    sith_assassin_spell_t::execute();
+    shadow_assassin_spell_t::execute();
 
     if ( chain_shock )
     {
-      if ( player -> is_sith_assassin() )
-      {
-        sith_assassin_t* p = player -> cast_sith_assassin();
+      shadow_assassin_t* p = player -> cast_shadow_assassin();
 
-        if ( p -> rng_chain_shock -> roll( p -> talents.chain_shock -> rank() * 0.15 ) )
-          chain_shock -> execute();
-      }
+      if ( p -> rng_chain_shock -> roll( p -> talents.chain_shock -> rank() * 0.15 ) )
+        chain_shock -> execute();
     }
   }
 
@@ -452,9 +445,9 @@ void shadow_assassin_t::init_gains()
 {
   player_t::init_gains();
 
-  gains_concentration   = get_gain( "dark_embrace"     );
-  gains_focused_insight = get_gain( "parasitism"       );
-  gains_psychic_barrier = get_gain( "calculating_mind" );
+  gains_dark_embrace      = get_gain( "dark_embrace"     );
+  gains_parasitism        = get_gain( "parasitism"       );
+  gains_calculating_mind  = get_gain( "calculating_mind" );
 
 }
 
@@ -472,6 +465,7 @@ void shadow_assassin_t::init_rng()
 {
   player_t::init_rng();
 
+  rng_chain_shock = get_rng( "chain_shock" );
 }
 
 // shadow_assassin_t::init_actions =====================================================
@@ -618,7 +612,7 @@ void shadow_assassin_t::create_talents()
   // eg.   talent_trees[ 0 ].push_back(  new talent_t( this, "Immutable Force", 0, 2 ) );
 
   // TREE DARKNESS
-  talent_trees[ 0 ].push_back(  new talent_t( this, "Thrashing Blades, 0, 2 ) );
+  talent_trees[ 0 ].push_back(  new talent_t( this, "Thrashing Blades", 0, 2 ) );
   talent_trees[ 0 ].push_back(  new talent_t( this, "Lightning Reflexes", 0, 2 ) );
   talent_trees[ 0 ].push_back(  new talent_t( this, "Charge Mastery", 0, 3 ) );
   talent_trees[ 0 ].push_back(  new talent_t( this, "Shroud of Darkness", 0, 3 ) );
