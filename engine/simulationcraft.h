@@ -112,9 +112,9 @@ namespace std {using namespace tr1; }
 
 #include "data_definitions.hh"
 
-#define SC_MAJOR_VERSION "112"
-#define SC_MINOR_VERSION "2"
-#define SC_USE_PTR ( 1 )
+#define SC_MAJOR_VERSION "113"
+#define SC_MINOR_VERSION "1"
+#define SC_USE_PTR ( 0 )
 #define SC_BETA ( 0 )
 #define SC_EPSILON ( 0.000001 )
 #ifndef M_PI
@@ -651,8 +651,7 @@ struct iterator_type<const T>
 // Generic algorithms =======================================================
 
 // Wrappers for std::fill, std::fill_n, and std::find that perform any type
-// conversions for t at the callsite instead of per assignement in the
-// loop body.
+// conversions for t at the callsite instead of per assignment in the loop body.
 template <typename I>
 inline void fill( I first, I last, typename std::iterator_traits<I>::value_type const& t )
 { std::fill( first, last, t ); }
