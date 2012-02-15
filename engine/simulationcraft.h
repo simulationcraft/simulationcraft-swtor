@@ -148,7 +148,7 @@ struct enchant_t;
 struct event_t;
 struct gain_t;
 struct item_t;
-struct jedi_sage_t;
+struct sage_sorcerer_t;
 struct js_node_t;
 struct option_t;
 struct pet_t;
@@ -4253,16 +4253,16 @@ struct player_t : public noncopyable
   static void enemy_combat_begin( sim_t* sim );
   static void enemy_combat_end  ( sim_t* /* sim */ ) {}
 
-  inline bool is_pet() const { return type == PLAYER_PET || type == PLAYER_GUARDIAN || type == ENEMY_ADD; }
-  inline bool is_enemy() const { return type == ENEMY || type == ENEMY_ADD; }
-  inline bool is_add() const { return type == ENEMY_ADD; }
+  bool is_pet() const { return type == PLAYER_PET || type == PLAYER_GUARDIAN || type == ENEMY_ADD; }
+  bool is_enemy() const { return type == ENEMY || type == ENEMY_ADD; }
+  bool is_add() const { return type == ENEMY_ADD; }
+  bool is_sage_sorcerer() const { return ( type == JEDI_SAGE || type == SITH_SORCERER ); }
+  bool is_shadow_assassin() const { return ( type == JEDI_SHADOW || type == SITH_ASSASSIN ); }
 
-  jedi_sage_t     * cast_jedi_sage    () { assert( type == JEDI_SAGE || type == SITH_SORCERER ); return ( jedi_sage_t     * ) this; }
-  shadow_assassin_t * cast_shadow_assassin () { assert( type == JEDI_SHADOW || type == SITH_ASSASSIN ); return ( shadow_assassin_t * ) this; }
-  pet_t           * cast_pet          () { assert( is_pet()                     ); return ( pet_t           * ) this; }
-  enemy_t         * cast_enemy        () { assert( type == ENEMY                ); return ( enemy_t         * ) this; }
-
-  bool is_jedi_sage() { return ( type == JEDI_SAGE || type == SITH_SORCERER ); }
+  pet_t* cast_pet() { assert( is_pet() ); return ( pet_t* )this; }
+  enemy_t* cast_enemy() { assert( type == ENEMY ); return ( enemy_t*)this; }
+  sage_sorcerer_t* cast_sage_sorcerer() { assert( is_sage_sorcerer() ); return ( sage_sorcerer_t*)this; }
+  shadow_assassin_t* cast_shadow_assassin() { assert( is_shadow_assassin() ); return ( shadow_assassin_t* )this; }
 
   bool      in_gcd() const { return gcd_ready > sim -> current_time; }
   bool      recent_cast() const;
