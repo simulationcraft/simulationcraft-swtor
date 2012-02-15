@@ -57,7 +57,7 @@ void register_sith_sorcerer_targetdata( sim_t*  sim  )
 // Jedi Sage
 // ==========================================================================
 
-struct jedi_sage_t : public player_t
+struct sage_sorcerer_t : public player_t
 {
 
   // Buffs
@@ -149,8 +149,9 @@ struct jedi_sage_t : public player_t
   };
   talents_t talents;
 
-  jedi_sage_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
+  sage_sorcerer_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
     player_t( sim, pt == SITH_SORCERER ? SITH_SORCERER : JEDI_SAGE, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
+    psychic_projection_dd_chance( 1.0 )
   {
     if ( pt == SITH_SORCERER )
     {
@@ -166,8 +167,6 @@ struct jedi_sage_t : public player_t
       tree_type[ JEDI_SAGE_BALANCE ]      = TREE_BALANCE;
       cooldowns_telekinetic_wave = get_cooldown( "telekinetic_wave" );
     }
-
-    psychic_projection_dd_chance = 1.0;
 
     create_talents();
     create_glyphs();
@@ -192,6 +191,14 @@ struct jedi_sage_t : public player_t
   virtual double    composite_spell_alacrity() const;
   virtual void      create_talents();
   virtual void      create_options();
+
+  void trigger_tidal_force( double pc )
+  {
+    if ( talents.tidal_force -> rank() && buffs_tidal_force -> trigger( 1, 0, pc ) )
+    {
+      cooldowns_telekinetic_wave -> reset();
+    }
+  }
 };
 
 namespace { // ANONYMOUS NAMESPACE ==========================================
@@ -203,7 +210,7 @@ namespace { // ANONYMOUS NAMESPACE ==========================================
 
 struct jedi_sage_attack_t : public attack_t
 {
-  jedi_sage_attack_t( const char* n, jedi_sage_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_HOLY, int t=TREE_NONE ) :
+  jedi_sage_attack_t( const char* n, sage_sorcerer_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_HOLY, int t=TREE_NONE ) :
     attack_t( n, p, r, s, t )
   {
     _init_jedi_sage_attack_t();
@@ -220,7 +227,7 @@ struct jedi_sage_spell_t : public spell_t
 {
   bool influenced_by_inner_strength;
 
-  jedi_sage_spell_t( const char* n, jedi_sage_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_HOLY, int t=TREE_NONE ) :
+  jedi_sage_spell_t( const char* n, sage_sorcerer_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_HOLY, int t=TREE_NONE ) :
     spell_t( n, p, r, s, t ),
     influenced_by_inner_strength( true )
   {
@@ -237,7 +244,7 @@ struct jedi_sage_spell_t : public spell_t
   {
     spell_t::init();
 
-    jedi_sage_t* p = player -> cast_jedi_sage();
+    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     if ( base_td > 0 && !channeled )
       crit_bonus += p -> talents.mental_scarring -> rank() * 0.1;
@@ -247,7 +254,7 @@ struct jedi_sage_spell_t : public spell_t
   {
     timespan_t et = spell_t::execute_time();
 
-    jedi_sage_t* p = player -> cast_jedi_sage();
+    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     if ( base_execute_time > timespan_t::zero && p -> buffs_presence_of_mind -> up() )
       et = timespan_t::zero;
@@ -259,7 +266,7 @@ struct jedi_sage_spell_t : public spell_t
   {
     spell_t::execute();
 
-    jedi_sage_t* p = player -> cast_jedi_sage();
+    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     if ( base_execute_time > timespan_t::zero )
       p -> buffs_presence_of_mind -> expire();
@@ -272,7 +279,7 @@ struct jedi_sage_spell_t : public spell_t
   {
     spell_t::player_buff();
 
-    jedi_sage_t* p = player -> cast_jedi_sage();
+    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     if ( base_execute_time > timespan_t::zero && p -> buffs_presence_of_mind -> up() )
       player_dd_multiplier *= 1.20;
@@ -285,7 +292,7 @@ struct jedi_sage_spell_t : public spell_t
   {
     spell_t::target_debuff( t, dmg_type );
 
-    jedi_sage_t* p = player -> cast_jedi_sage();
+    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     // This method is in target_debuff so that it is checked before every dot tick
 
@@ -299,7 +306,7 @@ struct jedi_sage_spell_t : public spell_t
   {
     spell_t::assess_damage( t, dmg_amount, dmg_type, dmg_result );
 
-    jedi_sage_t* p = player -> cast_jedi_sage();
+    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     // Procs from all critical damage including dot ticks. Source:  17/01/2012 http://sithwarrior.com/forums/Thread-Sorcerer-Sage-Mechanics-and-Quirks
 
@@ -313,7 +320,7 @@ struct jedi_sage_spell_t : public spell_t
   {
     double c = spell_t::cost();
 
-    jedi_sage_t* p = player -> cast_jedi_sage();
+    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     if ( p -> talents.inner_strength -> rank() > 0 && influenced_by_inner_strength )
     {
@@ -334,7 +341,7 @@ struct jedi_sage_spell_t : public spell_t
   {
     spell_t::consume_resource();
 
-    jedi_sage_t* p = player -> cast_jedi_sage();
+    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     p -> buffs_telekinetic_effusion -> up();
   }
@@ -343,7 +350,7 @@ struct jedi_sage_spell_t : public spell_t
   {
     spell_t::tick( d );
 
-    jedi_sage_t* p = player -> cast_jedi_sage();
+    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     if ( tick_dmg > 0 && !channeled )
       p -> buffs_force_suppression -> decrement();
@@ -356,22 +363,9 @@ struct jedi_sage_spell_t : public spell_t
   }
 };
 
-void trigger_tidal_force( action_t* a, double pc = 0 )
-{
-  jedi_sage_t* p = a -> player -> cast_jedi_sage();
-
-  if ( p -> talents.tidal_force -> rank() == 0 )
-    return;
-
-  if ( p -> buffs_tidal_force -> trigger( 1, 0, pc ) )
-  {
-    p -> cooldowns_telekinetic_wave -> reset();
-  }
-}
-
 struct force_valor_t : public jedi_sage_spell_t
 {
-  force_valor_t( jedi_sage_t* p, const std::string& n, const std::string& options_str ) :
+  force_valor_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
     jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE )
   {
     parse_options( 0, options_str );
@@ -404,7 +398,7 @@ struct project_t : public jedi_sage_spell_t
   jedi_sage_spell_t* upheaval;
 
 
-  project_t( jedi_sage_t* p, const std::string& n, const std::string& options_str, bool is_upheaval = false ) :
+  project_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str, bool is_upheaval = false ) :
     jedi_sage_spell_t( ( n + std::string( is_upheaval ? "_upheaval" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
     upheaval( 0 )
   {
@@ -419,9 +413,9 @@ struct project_t : public jedi_sage_spell_t
     if ( p -> type == JEDI_SAGE )
       travel_speed = 40.0; // 0.5s travel time for range=20, 0.75s for range=30
 
-    if ( player -> is_jedi_sage() )
+    if ( player -> is_sage_sorcerer() )
     {
-      jedi_sage_t* p = player -> cast_jedi_sage();
+      sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
       if ( !is_upheaval && p -> talents.upheaval -> rank() > 0 )
       {
@@ -440,9 +434,9 @@ struct project_t : public jedi_sage_spell_t
 
     if ( upheaval )
     {
-      if ( player -> is_jedi_sage() )
+      if ( player -> is_sage_sorcerer() )
       {
-        jedi_sage_t* p = player -> cast_jedi_sage();
+        sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
         if ( p -> rng_upheaval -> roll( p -> talents.upheaval -> rank() * 0.15 ) )
           upheaval -> execute();
@@ -455,7 +449,7 @@ struct telekinetic_throw_t : public jedi_sage_spell_t
 {
   bool is_buffed_by_psychic_projection;
 
-  telekinetic_throw_t( jedi_sage_t* p, const std::string& n, const std::string& options_str ) :
+  telekinetic_throw_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
     jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
     is_buffed_by_psychic_projection( false )
   {
@@ -474,9 +468,9 @@ struct telekinetic_throw_t : public jedi_sage_spell_t
 
     cooldown -> duration = timespan_t::from_seconds( 6.0 );
 
-    if ( player -> is_jedi_sage() )
+    if ( player -> is_sage_sorcerer() )
     {
-      jedi_sage_t* p = player -> cast_jedi_sage();
+      sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
       base_crit += p -> talents.critical_kinesis -> rank() * 0.05;
 
@@ -489,9 +483,9 @@ struct telekinetic_throw_t : public jedi_sage_spell_t
 
   virtual void execute()
   {
-    if ( player -> is_jedi_sage() )
+    if ( player -> is_sage_sorcerer() )
     {
-      jedi_sage_t* p = player -> cast_jedi_sage();
+      sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
       if ( p -> buffs_psychic_projection -> up()
            || ( p -> buffs_psychic_projection_dd -> up() && p -> rng_psychic_projection_dd -> roll ( p -> psychic_projection_dd_chance ) )
@@ -524,9 +518,9 @@ struct telekinetic_throw_t : public jedi_sage_spell_t
   {
     jedi_sage_spell_t::last_tick( d );
 
-    if ( player -> is_jedi_sage() )
+    if ( player -> is_sage_sorcerer() )
     {
-      jedi_sage_t* p = player -> cast_jedi_sage();
+      sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
       if ( is_buffed_by_psychic_projection )
         p -> buffs_psychic_projection -> expire();
@@ -537,9 +531,9 @@ struct telekinetic_throw_t : public jedi_sage_spell_t
   {
     jedi_sage_spell_t::tick( d );
 
-    if ( player -> is_jedi_sage() )
+    if ( player -> is_sage_sorcerer() )
     {
-      jedi_sage_t* p = player -> cast_jedi_sage();
+      sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
       if ( tick_dmg > 0 )
       {
@@ -559,7 +553,7 @@ struct disturbance_t : public jedi_sage_spell_t
 {
   jedi_sage_spell_t* tm;
 
-  disturbance_t( jedi_sage_t* p, const std::string& n, const std::string& options_str, bool is_tm = false ) :
+  disturbance_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str, bool is_tm = false ) :
     jedi_sage_spell_t( ( n + std::string( is_tm ? "_tm" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
     tm( 0 )
   {
@@ -576,16 +570,16 @@ struct disturbance_t : public jedi_sage_spell_t
 
     base_crit += p -> talents.critical_kinesis -> rank() * 0.05;
 
-    if ( !is_tm )
+    if ( is_tm )
     {
-      if ( p -> talents.telekinetic_momentum -> rank() > 0 )
-      {
-        tm = new disturbance_t( p, n, options_str, true );
-        tm -> base_multiplier *= 0.30;
-        tm -> base_cost = 0.0;
-        tm -> background = true;
-        add_child( tm );
-      }
+      base_multiplier *= 0.30;
+      base_cost = 0.0;
+      background = true;
+    }
+    else if ( p -> talents.telekinetic_momentum -> rank() > 0 )
+    {
+      tm = new disturbance_t( p, n, options_str, true );
+      add_child( tm );
     }
   }
 
@@ -595,12 +589,12 @@ struct disturbance_t : public jedi_sage_spell_t
 
     if ( result_is_hit( impact_result ) )
     {
-      jedi_sage_t* p = player -> cast_jedi_sage();
+      sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
       p -> buffs_concentration -> trigger();
 
       // Does the TM version also proc Tidal Force?
-      trigger_tidal_force( this, 0.3 );
+      p -> trigger_tidal_force( 0.3 );
     }
   }
 
@@ -608,7 +602,7 @@ struct disturbance_t : public jedi_sage_spell_t
   {
     jedi_sage_spell_t::execute();
 
-    jedi_sage_t* p = player -> cast_jedi_sage();
+    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     if ( tm )
     {
@@ -623,7 +617,7 @@ struct disturbance_t : public jedi_sage_spell_t
 
 struct mind_crush_dot_t : public jedi_sage_spell_t
 {
-  mind_crush_dot_t( jedi_sage_t* p, const std::string& n ) :
+  mind_crush_dot_t( sage_sorcerer_t* p, const std::string& n ) :
     jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
   {
     base_td = 47.5;
@@ -642,7 +636,7 @@ struct mind_crush_dot_t : public jedi_sage_spell_t
   {
     jedi_sage_spell_t::target_debuff( t, dmg_type );
 
-    jedi_sage_t* p = player -> cast_jedi_sage();
+    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     if ( p -> talents.force_suppression -> rank() > 0 )
       p -> benefits_fs_mind_crush -> update( p -> buffs_force_suppression -> check() > 0 );
@@ -653,7 +647,7 @@ struct mind_crush_t : public jedi_sage_spell_t
 {
   jedi_sage_spell_t* dot_spell;
 
-  mind_crush_t( jedi_sage_t* p, const std::string& n, const std::string& options_str ) :
+  mind_crush_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
     jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
     dot_spell( 0 )
   {
@@ -685,7 +679,7 @@ struct mind_crush_t : public jedi_sage_spell_t
 
 struct weaken_mind_t : public jedi_sage_spell_t
 {
-  weaken_mind_t( jedi_sage_t* p, const std::string& n, const std::string& options_str ) :
+  weaken_mind_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
     jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
   {
     parse_options( 0, options_str );
@@ -705,7 +699,7 @@ struct weaken_mind_t : public jedi_sage_spell_t
   {
     jedi_sage_spell_t::tick( d );
 
-    jedi_sage_t* p = player -> cast_jedi_sage();
+    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     if ( result == RESULT_CRIT && p -> talents.psychic_projection -> rank() > 0 )
     {
@@ -719,7 +713,7 @@ struct weaken_mind_t : public jedi_sage_spell_t
   {
     jedi_sage_spell_t::target_debuff( t, dmg_type );
 
-    jedi_sage_t* p = player -> cast_jedi_sage();
+    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     if ( p -> talents.force_suppression -> rank() > 0 )
       p -> benefits_fs_weaken_mind -> update( p -> buffs_force_suppression -> check() > 0 );
@@ -730,7 +724,7 @@ struct turbulence_t : public jedi_sage_spell_t
 {
   jedi_sage_spell_t* tm;
 
-  turbulence_t( jedi_sage_t* p, const std::string& n, const std::string& options_str ) :
+  turbulence_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
     jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
   {
     check_talent( p -> talents.turbulence -> rank() );
@@ -775,13 +769,13 @@ struct turbulence_t : public jedi_sage_spell_t
     else
       assert( 0 );
 
-    player -> cast_jedi_sage() -> benefits_turbulence -> update( t );
+    player -> cast_sage_sorcerer() -> benefits_turbulence -> update( t );
   }
 };
 
 struct force_in_balance_t : public jedi_sage_spell_t
 {
-  force_in_balance_t( jedi_sage_t* p, const std::string& n, const std::string& options_str ) :
+  force_in_balance_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
     jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
   {
     check_talent( p -> talents.force_in_balance -> rank() );
@@ -804,7 +798,7 @@ struct force_in_balance_t : public jedi_sage_spell_t
   {
     jedi_sage_spell_t::calculate_result();
 
-    jedi_sage_t* p = player -> cast_jedi_sage();
+    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     p -> buffs_force_suppression -> trigger( 10 );
   }
@@ -812,7 +806,7 @@ struct force_in_balance_t : public jedi_sage_spell_t
 
 struct sever_force_t : public jedi_sage_spell_t
 {
-  sever_force_t( jedi_sage_t* p, const std::string& n, const std::string& options_str ) :
+  sever_force_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
     jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
   {
     check_talent( p -> talents.sever_force -> rank() );
@@ -834,7 +828,7 @@ struct sever_force_t : public jedi_sage_spell_t
   {
     jedi_sage_spell_t::target_debuff( t, dmg_type );
 
-    jedi_sage_t* p = player -> cast_jedi_sage();
+    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     if ( p -> talents.force_suppression -> rank() > 0 )
       p -> benefits_fs_sever_force -> update( p -> buffs_force_suppression -> check() > 0 );
@@ -843,7 +837,7 @@ struct sever_force_t : public jedi_sage_spell_t
 
 struct mental_alacrity_t : public jedi_sage_spell_t
 {
-  mental_alacrity_t( jedi_sage_t* p, const std::string& n, const std::string& options_str ) :
+  mental_alacrity_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
     jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
   {
     check_talent( p -> talents.mental_alacrity -> rank() );
@@ -859,7 +853,7 @@ struct mental_alacrity_t : public jedi_sage_spell_t
   {
     jedi_sage_spell_t::execute();
 
-    jedi_sage_t* p = player -> cast_jedi_sage();
+    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     p -> buffs_mental_alacrity -> trigger();
   }
@@ -869,7 +863,7 @@ struct telekinetic_wave_t : public jedi_sage_spell_t
 {
   jedi_sage_spell_t* tm;
 
-  telekinetic_wave_t( jedi_sage_t* p, const std::string& n, const std::string& options_str, bool is_tm = false ) :
+  telekinetic_wave_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str, bool is_tm = false ) :
     jedi_sage_spell_t( ( n + std::string( is_tm ? "_tm" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
     tm( 0 )
   {
@@ -906,7 +900,7 @@ struct telekinetic_wave_t : public jedi_sage_spell_t
 
     if ( tm )
     {
-      jedi_sage_t* p = player -> cast_jedi_sage();
+      sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
       if ( p -> rng_tm -> roll( p -> talents.telekinetic_momentum -> rank() * 0.10 ) )
       {
@@ -920,7 +914,7 @@ struct telekinetic_wave_t : public jedi_sage_spell_t
   {
     timespan_t et = jedi_sage_spell_t::execute_time();
 
-    jedi_sage_t* p = player -> cast_jedi_sage();
+    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     if ( p -> buffs_tidal_force -> up() )
       et = timespan_t::zero;
@@ -932,7 +926,7 @@ struct telekinetic_wave_t : public jedi_sage_spell_t
   {
     jedi_sage_spell_t::update_ready();
 
-    jedi_sage_t* p = player -> cast_jedi_sage();
+    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     p -> buffs_tidal_force -> expire();
   }
@@ -940,7 +934,7 @@ struct telekinetic_wave_t : public jedi_sage_spell_t
 
 struct force_potency_t : public jedi_sage_spell_t
 {
-  force_potency_t( jedi_sage_t* p, const std::string& n, const std::string& options_str ) :
+  force_potency_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
     jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
   {
     parse_options( 0, options_str );
@@ -954,7 +948,7 @@ struct force_potency_t : public jedi_sage_spell_t
   {
     jedi_sage_spell_t::execute();
 
-    jedi_sage_t* p = player -> cast_jedi_sage();
+    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     p -> buffs_force_potency -> trigger( 2 );
   }
@@ -966,9 +960,9 @@ struct force_potency_t : public jedi_sage_spell_t
 // jedi_sage Character Definition
 // ==========================================================================
 
-// jedi_sage_t::create_action ====================================================
+// sage_sorcerer_t::create_action ====================================================
 
-action_t* jedi_sage_t::create_action( const std::string& name,
+action_t* sage_sorcerer_t::create_action( const std::string& name,
                                  const std::string& options_str )
 {
   if ( type == JEDI_SAGE )
@@ -1005,9 +999,9 @@ action_t* jedi_sage_t::create_action( const std::string& name,
   return player_t::create_action( name, options_str );
 }
 
-// jedi_sage_t::init_talents =====================================================
+// sage_sorcerer_t::init_talents =====================================================
 
-void jedi_sage_t::init_talents()
+void sage_sorcerer_t::init_talents()
 {
   player_t::init_talents();
 
@@ -1059,9 +1053,9 @@ void jedi_sage_t::init_talents()
 
 }
 
-// jedi_sage_t::init_base ========================================================
+// sage_sorcerer_t::init_base ========================================================
 
-void jedi_sage_t::init_base()
+void sage_sorcerer_t::init_base()
 {
   player_t::init_base();
 
@@ -1084,9 +1078,9 @@ void jedi_sage_t::init_base()
   //diminished_dodge_capi = 0;
   //diminished_parry_capi = 0;
 }
-// jedi_sage_t::init_benefits =======================================================
+// sage_sorcerer_t::init_benefits =======================================================
 
-void jedi_sage_t::init_benefits()
+void sage_sorcerer_t::init_benefits()
 {
   player_t::init_benefits();
 
@@ -1106,9 +1100,9 @@ void jedi_sage_t::init_benefits()
   }
 }
 
-// jedi_sage_t::init_buffs =======================================================
+// sage_sorcerer_t::init_buffs =======================================================
 
-void jedi_sage_t::init_buffs()
+void sage_sorcerer_t::init_buffs()
 {
   player_t::init_buffs();
 
@@ -1132,27 +1126,29 @@ void jedi_sage_t::init_buffs()
 
 }
 
-// jedi_sage_t::init_gains =======================================================
+// sage_sorcerer_t::init_gains =======================================================
 
-void jedi_sage_t::init_gains()
+void sage_sorcerer_t::init_gains()
 {
   player_t::init_gains();
 
-  gains_concentration   = get_gain( "concentration"   );
-  gains_focused_insight = get_gain( "focused_insight" );
-  gains_psychic_barrier = get_gain( "psychic_barrier" );
+  bool is_sage = ( type == JEDI_SAGE );
+
+  gains_concentration   = get_gain( is_sage ? "concentration" : "subversion" );
+  gains_focused_insight = get_gain( is_sage ? "focused_insight" : "parasitism" );
+  gains_psychic_barrier = get_gain( is_sage ? "psychic_barrier" : "sith_efficacy" );
 }
 
-// jedi_sage_t::init_procs =======================================================
+// sage_sorcerer_t::init_procs =======================================================
 
-void jedi_sage_t::init_procs()
+void sage_sorcerer_t::init_procs()
 {
   player_t::init_procs();
 }
 
-// jedi_sage_t::init_rng =========================================================
+// sage_sorcerer_t::init_rng =========================================================
 
-void jedi_sage_t::init_rng()
+void sage_sorcerer_t::init_rng()
 {
   player_t::init_rng();
 
@@ -1162,9 +1158,9 @@ void jedi_sage_t::init_rng()
   rng_psychic_projection_dd = get_rng( type == JEDI_SAGE ? "psychic_projection_dd" : "lightning_barrage_dd" );
 }
 
-// jedi_sage_t::init_actions =====================================================
+// sage_sorcerer_t::init_actions =====================================================
 
-void jedi_sage_t::init_actions()
+void sage_sorcerer_t::init_actions()
 {
 
 //======================================================================================
@@ -1343,16 +1339,16 @@ void jedi_sage_t::init_actions()
   player_t::init_actions();
 }
 
-// jedi_sage_t::primary_resource ==================================================
+// sage_sorcerer_t::primary_resource ==================================================
 
-int jedi_sage_t::primary_resource() const
+int sage_sorcerer_t::primary_resource() const
 {
   return RESOURCE_FORCE;
 }
 
-// jedi_sage_t::primary_role ==================================================
+// sage_sorcerer_t::primary_role ==================================================
 
-int jedi_sage_t::primary_role() const
+int sage_sorcerer_t::primary_role() const
 {
   switch ( player_t::primary_role() )
   {
@@ -1370,23 +1366,22 @@ int jedi_sage_t::primary_role() const
   return ROLE_SPELL;
 }
 
-// jedi_sage_t::regen ==================================================
+// sage_sorcerer_t::regen ==================================================
 
-void jedi_sage_t::regen( timespan_t periodicity )
+void sage_sorcerer_t::regen( timespan_t periodicity )
 {
   player_t::regen( periodicity );
 
-  if ( buffs_concentration -> check() > 0 )
+  if ( buffs_concentration -> up() )
   {
     double force_regen = periodicity.total_seconds() * force_regen_per_second() * buffs_concentration -> check() * 0.10;
-
     resource_gain( RESOURCE_FORCE, force_regen, gains_concentration );
   }
 }
 
-// jedi_sage_t::composite_spell_power ==================================================
+// sage_sorcerer_t::composite_spell_power ==================================================
 
-double jedi_sage_t::composite_force_damage_bonus() const
+double sage_sorcerer_t::composite_force_damage_bonus() const
 {
   double sp = player_t::composite_force_damage_bonus();
 
@@ -1395,9 +1390,9 @@ double jedi_sage_t::composite_force_damage_bonus() const
   return sp;
 }
 
-// jedi_sage_t::composite_spell_alacrity ==================================================
+// sage_sorcerer_t::composite_spell_alacrity ==================================================
 
-double jedi_sage_t::composite_spell_alacrity() const
+double sage_sorcerer_t::composite_spell_alacrity() const
 {
   double sh = player_t::composite_spell_alacrity();
 
@@ -1408,9 +1403,9 @@ double jedi_sage_t::composite_spell_alacrity() const
   return sh;
 }
 
-// jedi_sage_t::create_talents ==================================================
+// sage_sorcerer_t::create_talents ==================================================
 
-void jedi_sage_t::create_talents()
+void sage_sorcerer_t::create_talents()
 {
 
   talent_trees[ 0 ].push_back(  new talent_t( this, "Immutable Force", 0, 2 ) );
@@ -1479,9 +1474,9 @@ void jedi_sage_t::create_talents()
   player_t::create_talents();
 }
 
-// jedi_sage_t::create_options =================================================
+// sage_sorcerer_t::create_options =================================================
 
-void jedi_sage_t::create_options()
+void sage_sorcerer_t::create_options()
 {
   player_t::create_options();
 
@@ -1503,14 +1498,14 @@ void jedi_sage_t::create_options()
 
 player_t* player_t::create_jedi_sage( sim_t* sim, const std::string& name, race_type r )
 {
-  return new jedi_sage_t( sim, JEDI_SAGE, name, r );
+  return new sage_sorcerer_t( sim, JEDI_SAGE, name, r );
 }
 
 // player_t::create_sith_sorcerer  ===================================================
 
 player_t* player_t::create_sith_sorcerer( sim_t* sim, const std::string& name, race_type r )
 {
-  return new jedi_sage_t( sim, SITH_SORCERER, name, r );
+  return new sage_sorcerer_t( sim, SITH_SORCERER, name, r );
 }
 
 // player_t::jedi_sage_init ======================================================
