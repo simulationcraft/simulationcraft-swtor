@@ -1,4 +1,4 @@
-sith_Assassin=Sith_Assassin
+sith_assassin=Sith_Assassin_Madness
 level=50
 talents=http://www.torhead.com/skill-calc#200McZhMZcMfRrMkrfz.1
 position=back
@@ -7,40 +7,9 @@ chest=foo_stalker_vestments
 hands=foo_stalker_gloves
 legs=foo_stalker_lower_robe
 head=foo_stalker_headgear
-save=Sith_Assassin.simc
-
-copy=Sith_Assassin_Madness,Sith_Assassin
-talents=http://www.torhead.com/skill-calc#200McZhMZcMfRrMkrfz.1
-actions=stim,type=exotech_resolve
-actions+=/mark_of_power
-actions+=/snapshot_stats
-actions+=/power_potion
-actions+=/recklessness
-actions+=/shock,if=buff.unearthed_knowledge.down
-actions+=/assassinate
-actions+=/death_field
-actions+=/discharge,if=!ticking
-actions+=/creeping_terror,if=!ticking
-actions+=/maul,if=buff.exploit_weakness.react
-actions+=/crushing_darkness,if=buff.raze.react
-actions+=/thrash
-actions+=/force_cloak
-actions+=/saber_strike
 save=Sith_Assassin_Madness.simc
 
-copy=Sith_Assassin_Deception,Sith_Assassin
+copy=Sith_Assassin_Deception,Sith_Assassin_Madness
 talents=http://www.torhead.com/skill-calc#200McZhGMRkhMrtzZcM.1
-actions+=/mark_of_power
-actions+=/snapshot_stats
-actions+=/power_potion
-actions+=/recklessness
-actions+=/assassinate
-actions+=/discharge
-actions+=/maul,if=buff.exploit_weakness.react
-action+=/shock,if=buff.induction.stack=2
-actions+=/voltaic_slash
-actions+=/blackout
-actions+=/force_cloak
-action+=/saber_strike
 save=Sith_Assassin_Deception.simc
 

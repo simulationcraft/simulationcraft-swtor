@@ -747,7 +747,7 @@ void SimulationCraftWindow::createBestInSlotTab()
 #ifndef Q_WS_MAC
     QDir dir = QString( "profiles/" + tprofileList[ i ] );
 #else
-    CFURLRef fileRef    = CFBundleCopyResourceURL( CFBundleGetMainBundle(), CFSTR( "profiles" ), 0, 0 );
+    CFURLRef fileRef    = CFBundleCopyResourceURL( CFBundleGetMainBundle(), CFSTR( "profiles" + tprofileList[ i ] ), 0, 0 );
     QDir dir;
     if ( fileRef )
     {

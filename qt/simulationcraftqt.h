@@ -149,7 +149,6 @@ public:
   PersistentCookieJar* charDevCookies;
   QListWidget* historyList;
   QTreeWidget* bisTree;
-  QString bisProfilePath;
   SimulationCraftTextEdit* simulateText;
   SimulationCraftTextEdit* overridesText;
   QPlainTextEdit* logText;
