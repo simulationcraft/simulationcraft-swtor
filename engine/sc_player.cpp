@@ -507,7 +507,7 @@ player_t::~player_t()
   for ( size_t i=0; i < sizeof_array( talent_trees ); i++ )
     range::dispose( talent_trees[ i ] );
 
-  range::dispose( glyphs );
+  //range::dispose( glyphs );
   range::dispose( spell_list );
 }
 
@@ -628,7 +628,7 @@ void player_t::init()
   init_target();
   init_talents();
   init_spells();
-  init_glyphs();
+  //init_glyphs();
   init_race();
   init_base();
   init_racials();
@@ -1349,6 +1349,7 @@ void player_t::init_talents()
   specialization = primary_tab();
 }
 
+#if 0
 // player_t::init_glyphs ====================================================
 
 void player_t::init_glyphs()
@@ -1363,6 +1364,7 @@ void player_t::init_glyphs()
     if ( g ) g -> enable();
   }
 }
+#endif
 
 // player_t::init_spells ====================================================
 
@@ -4872,6 +4874,7 @@ talent_t* player_t::find_talent( const std::string& n,
   return 0;
 }
 
+#if 0
 // player_t::create_glyphs ==================================================
 
 void player_t::create_glyphs()
@@ -4899,6 +4902,7 @@ glyph_t* player_t::find_glyph( const std::string& n )
 
   return 0;
 }
+#endif
 
 // player_t::create_expression ==============================================
 

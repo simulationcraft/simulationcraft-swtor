@@ -184,7 +184,6 @@ struct sage_sorcerer_t : public player_t
     }
 
     create_talents();
-    create_glyphs();
     create_options();
   }
 
