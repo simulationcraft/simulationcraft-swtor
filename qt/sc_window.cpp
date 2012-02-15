@@ -190,7 +190,7 @@ void SimulationCraftWindow::decodeOptions( QString encoding )
      // armorySpecChoice->setCurrentIndex( tokens[  9 ].toInt() );
      defaultRoleChoice->setCurrentIndex( tokens[ 10 ].toInt() );
          latencyChoice->setCurrentIndex( tokens[ 11 ].toInt() );
-     targetLevelChoice->setCurrentIndex( tokens[ 12 ].toInt() );
+     //targetLevelChoice->setCurrentIndex( tokens[ 12 ].toInt() );
       reportpetsChoice->setCurrentIndex( tokens[ 13 ].toInt() );
   }
 
@@ -248,7 +248,7 @@ QString SimulationCraftWindow::encodeOptions()
     //.arg(    armorySpecChoice->currentIndex() )
     .arg(   defaultRoleChoice->currentIndex() )
     .arg(       latencyChoice->currentIndex() )
-    .arg(   targetLevelChoice->currentIndex() )
+    //.arg(   targetLevelChoice->currentIndex() )
     .arg(    reportpetsChoice->currentIndex() )
     ;
 
@@ -539,7 +539,7 @@ void SimulationCraftWindow::createGlobalsTab()
   globalsLayout->addRow(   "Length (sec)",   fightLengthChoice = createChoice( 9, "100", "150", "200", "250", "300", "350", "400", "450", "500" ) );
   globalsLayout->addRow(    "Vary Length", fightVarianceChoice = createChoice( 3, "0%", "10%", "20%" ) );
   globalsLayout->addRow(    "Fight Style",    fightStyleChoice = createChoice( 5, "Patchwerk", "HelterSkelter", "Ultraxion", "LightMovement", "HeavyMovement" ) );
-  globalsLayout->addRow(   "Target Level",   targetLevelChoice = createChoice( 3, "Raid Boss", "5-man heroic", "5-man normal" ) );
+  //globalsLayout->addRow(   "Target Level",   targetLevelChoice = createChoice( 3, "Raid Boss", "5-man heroic", "5-man normal" ) );
   globalsLayout->addRow(    "Target Race",    targetRaceChoice = createChoice( 7, "humanoid", "beast", "demon", "dragonkin", "elemental", "giant", "undead" ) );
   globalsLayout->addRow(   "Player Skill",   playerSkillChoice = createChoice( 4, "Elite", "Good", "Average", "Ouch! Fire is hot!" ) );
   globalsLayout->addRow(        "Threads",       threadsChoice = createChoice( 4, "1", "2", "4", "8" ) );
@@ -931,7 +931,7 @@ void SimulationCraftWindow::createToolTips()
 
   targetRaceChoice->setToolTip( "Race of the target and any adds." );
 
-  targetLevelChoice->setToolTip( "Level of the target and any adds." );
+  //targetLevelChoice->setToolTip( "Level of the target and any adds." );
 
   playerSkillChoice->setToolTip( "Elite:       No mistakes.  No cheating either.\n"
                                  "Fire-is-Hot: Frequent DoT-clipping and skipping high-priority abilities." );
@@ -1336,10 +1336,12 @@ QString SimulationCraftWindow::mergeOptions()
   options += "\n";
   options += "fight_style=" + fightStyleChoice->currentText() + "\n";
 
+#if 0
   static const char* const targetlevel[] = { "53", "52", "50" };
   options += "target_level=";
   options += targetlevel[ targetLevelChoice->currentIndex() ];
   options += "\n";
+#endif
 
   options += "target_race=" + targetRaceChoice->currentText() + "\n";
   options += "default_skill=";

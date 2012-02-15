@@ -388,7 +388,7 @@ action_t* enemy_t::create_action( const std::string& name,
 
 void enemy_t::init()
 {
-  level = sim -> max_player_level + 3;
+  level = sim -> max_player_level;
 
   if ( sim -> target_level >= 0 )
     level = sim -> target_level;
