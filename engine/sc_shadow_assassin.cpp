@@ -196,9 +196,9 @@ struct shadow_assassin_spell_t : public spell_t
 
 };
 
-struct force_valor_t : public shadow_assassin_spell_t
+struct mark_of_power_t : public shadow_assassin_spell_t
 {
-  force_valor_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
+  mark_of_powerr_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
     shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE )
   {
     parse_options( 0, options_str );
@@ -213,62 +213,69 @@ struct force_valor_t : public shadow_assassin_spell_t
     for ( player_t* p = sim -> player_list; p; p = p -> next )
     {
       if ( p -> ooc_buffs() )
-        p -> buffs.force_valor -> override();
+        p -> buffs.mark_of_power -> override();
     }
   }
 
   virtual bool ready()
   {
-    if ( player -> buffs.force_valor -> check() )
+    if ( player -> buffs.mark_of_power -> check() )
       return false;
 
     return shadow_assassin_spell_t::ready();
   }
 };
 
-struct project_t : public shadow_assassin_spell_t
+struct shock_t : public shadow_assassin_spell_t
 {
-  shadow_assassin_spell_t* upheaval;
+  shadow_assassin_spell_t* chain_shock;
 
-  project_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str, bool is_upheaval = false ) :
-    shadow_assassin_spell_t( ( n + std::string( is_upheaval ? "_upheaval" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
-    upheaval( 0 )
+  shock_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str, bool is_chain_shock = false ) :
+    shadow_assassin_spell_t( ( n + std::string( is_chain_shock ? "_chain_shock" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
+    chain_shock( 0 )
   {
     parse_options( 0, options_str );
-    base_dd_min = 219.0; base_dd_max = 283.4;
+    base_dd_min = 254.93; base_dd_max = 316.73;
     base_cost = 45.0;
     range = 10.0;
     direct_power_mod = 1.85;
 
     cooldown -> duration = timespan_t::from_seconds( 6.0 );
+    
+    if ( player -> is_sith_assassin() )
+    {
+      sith_assassin_t* p = player -> cast_sith_assassin();
 
+      if ( !is_chain_shock && p -> talents.chain_shock -> rank() > 0 )
+      {
+        chain_shock = new chain_shock_t( p, n, options_str, true );
+        chain_shock -> base_multiplier *= 0.50;
+        chain_shock -> base_cost = 0.0;
+        chain_shock -> background = true;
+        add_child( chain_shock );
+      }
+    }
   }
 
-};
-
-struct telekinetic_throw_t : public shadow_assassin_spell_t
-{
-
-  telekinetic_throw_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
-    shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
+  virtual void execute()
   {
-    parse_options( 0, options_str );
-    base_td = 127.2;
-    base_cost = 10.0;
-    if ( player -> set_bonus.indomitable -> two_pc() > 0 )
-      base_cost -= 2.0;
-    range = 30.0;
-    tick_power_mod = 0.79;
-    num_ticks = 3;
-    base_tick_time = timespan_t::from_seconds( 1.0 );
-    may_crit = false;
-    channeled = true;
-    tick_zero = true;
+    sith_assassin_spell_t::execute();
 
-    cooldown -> duration = timespan_t::from_seconds( 6.0 );
+    if ( chain_shock )
+    {
+      if ( player -> is_sith_assassin() )
+      {
+        sith_assassin_t* p = player -> cast_sith_assassin();
 
+        if ( p -> rng_chain_shock -> roll( p -> talents.chain_shock -> rank() * 0.15 ) )
+          chain_shock -> execute();
+      }
+    }
   }
+
 };
+
+
 
 
 } // ANONYMOUS NAMESPACE ====================================================
