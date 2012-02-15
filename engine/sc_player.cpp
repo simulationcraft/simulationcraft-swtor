@@ -244,6 +244,10 @@ std::pair<int, int> wowhead_talent_decode_pair( char c )
   throw wowhead_bad_talent_encoding( c );
 }
 
+inline double swtor_diminishing_return( double cap, double divisor, int level, double rating )
+{
+  return cap * ( 1.0 - std::pow( ( 1.0 - ( 0.01 / cap ) ), std::max( rating, 0.0 ) / std::max( 20, level ) / divisor ) );
+}
 } // ANONYMOUS NAMESPACE ====================================================
 
 // ==========================================================================
@@ -258,7 +262,7 @@ player_t::player_t( sim_t*             s,
                     race_type          r ) :
   sim( s ), name_str( n ),
   region_str( s -> default_region_str ), server_str( s -> default_server_str ), origin_str( "unknown" ),
-  next( 0 ), index( -1 ), type( t ), role( ROLE_HYBRID ), target( 0 ), level( is_enemy() ? 53 : 50 ), use_pre_potion( 0 ),
+  next( 0 ), index( -1 ), type( t ), role( ROLE_HYBRID ), target( 0 ), level( 50 ), use_pre_potion( 0 ),
   party( 0 ), member( 0 ),
   skill( 0 ), initial_skill( s -> default_skill ), distance( 0 ), default_distance( 0 ), gcd_ready( timespan_t::zero ), base_gcd( timespan_t::from_seconds( 1.5 ) ),
   potion_used( 0 ), sleeping( 1 ), initial_sleeping( 0 ), initialized( 0 ),
@@ -3611,44 +3615,25 @@ void player_t::register_direct_heal_callback( int64_t mask,
 
 void player_t::recalculate_alacrity()
 {
-  double hr = alacrity_rating;
-
-  if ( hr < 0 )
-    hr = 0;
-
-  spell_alacrity =  1.0 - 0.3 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.3 ) ), hr / std::max( 20, level ) / 0.55 ) );
-  attack_alacrity = spell_alacrity;
+  attack_alacrity = spell_alacrity = 1.0 - swtor_diminishing_return( 0.3, 0.55, level, alacrity_rating );
 }
 
 // player_t::recalculate_crit ==============================================
 
 void player_t::recalculate_crit()
 {
-  double cr = crit_rating; double wp = willpower();
+  double crit_from_rating = swtor_diminishing_return( 0.3, 0.45, level, crit_rating );
+  double crit_from_willpower = swtor_diminishing_return( 0.3, 2.5, level, willpower() );
 
-  if ( cr < 0 )
-    cr = 0;
-
-  if ( wp < 0 )
-    wp = 0;
-
-  double crit_tmp = 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), cr / std::max( 20, level ) / 0.45 ) )
-                  + 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), wp / std::max( 20, level ) / 2.5 ) );
-
-  spell_crit  = base_spell_crit + crit_tmp;
-  attack_crit = base_attack_crit + crit_tmp;
+  spell_crit  = base_spell_crit + crit_from_rating + crit_from_willpower;
+  attack_crit = base_attack_crit + crit_from_rating + crit_from_willpower;
 }
 
 // player_t::recalculate_accuracy ==============================================
 
 void player_t::recalculate_accuracy()
 {
-  double ar = accuracy_rating;
-
-  if ( ar < 0 )
-    ar = 0;
-
-  double acc = 0.3 * ( 1.0 - std::pow( 1.0 - ( 0.01 / 0.3 ), ar / std::max( 20, level ) / 0.55 ) );
+  double acc = swtor_diminishing_return( 0.3, 0.55, level, accuracy_rating );
 
   spell_hit  = base_spell_hit + acc;
   attack_hit = base_attack_hit + acc;
@@ -3658,16 +3643,7 @@ void player_t::recalculate_accuracy()
 
 void player_t::recalculate_surge()
 {
-  double sr = surge_rating;
-
-  if ( sr < 0 )
-    sr = 0;
-
-  // FIXME: Remove once
-  if ( dbc.ptr )
-    surge_bonus = 0.3 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.3 ) ), sr / std::max( 20, level ) / 0.11 ) );
-  else
-    surge_bonus = 0.5 * ( 1.0 - std::pow ( ( 1.0 - ( 0.01 / 0.5 ) ), sr / std::max( 20, level ) / 0.10 ) );
+  surge_bonus = swtor_diminishing_return( 0.3, 0.11, level, surge_rating );
 }
 
 // player_t::recent_cast ====================================================
