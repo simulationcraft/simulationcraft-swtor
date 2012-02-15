@@ -150,7 +150,7 @@ struct sage_sorcerer_t : public player_t
   talents_t talents;
 
   sage_sorcerer_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
-    player_t( sim, pt == SITH_SORCERER ? SITH_SORCERER : JEDI_SAGE, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
+    player_t( sim, pt == SITH_SORCERER ? SITH_SORCERER : JEDI_SAGE, name, ( r == RACE_NONE ) ? RACE_HUMAN : r ),
     psychic_projection_dd_chance( 1.0 )
   {
     if ( pt == SITH_SORCERER )
