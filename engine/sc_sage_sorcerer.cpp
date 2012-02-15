@@ -58,38 +58,56 @@ void register_sith_sorcerer_targetdata( sim_t*  sim  )
 struct sage_sorcerer_t : public player_t
 {
   // Buffs
-  buff_t* buffs_concentration;
-  buff_t* buffs_psychic_projection;
-  buff_t* buffs_tidal_force;
-  buff_t* buffs_telekinetic_effusion;
-  buff_t* buffs_tremors;
-  buff_t* buffs_presence_of_mind;
-  buff_t* buffs_force_suppression;
-  buff_t* buffs_mental_alacrity;
-  buff_t* buffs_force_potency;
-  buff_t* buffs_psychic_projection_dd;
-  buff_t* buffs_indomitable_4pc;
+  struct buffs_t
+  {
+    buff_t* concentration;
+    buff_t* psychic_projection;
+    buff_t* tidal_force;
+    buff_t* telekinetic_effusion;
+    buff_t* tremors;
+    buff_t* presence_of_mind;
+    buff_t* force_suppression;
+    buff_t* mental_alacrity;
+    buff_t* force_potency;
+    buff_t* psychic_projection_dd;
+    buff_t* indomitable_4pc;
+  } buffs;
 
   // Gains
-  gain_t* gains_concentration;
-  gain_t* gains_focused_insight;
-  gain_t* gains_psychic_barrier;
+  struct gains_t
+  {
+    gain_t* concentration;
+    gain_t* focused_insight;
+    gain_t* psychic_barrier;
+  } gains;
 
   // Procs
-  //proc_t* procs_<procname>;
+  struct procs_t
+  {
+    //proc_t* procs_<procname>;
+  } procs;
 
-  // RNG
-  rng_t* rng_psychic_barrier;
-  rng_t* rng_upheaval;
-  rng_t* rng_tm;
-  rng_t* rng_psychic_projection_dd;
+  // rngs
+  struct rngs_t
+  {
+    rng_t* psychic_barrier;
+    rng_t* upheaval;
+    rng_t* tm;
+    rng_t* psychic_projection_dd;
+  } rngs;
 
-  benefit_t* benefits_turbulence;
-  benefit_t* benefits_fs_weaken_mind;
-  benefit_t* benefits_fs_mind_crush;
-  benefit_t* benefits_fs_sever_force;
+  struct benefits_t
+  {
+    benefit_t* turbulence;
+    benefit_t* fs_weaken_mind;
+    benefit_t* fs_mind_crush;
+    benefit_t* fs_sever_force;
+  } benefits;
 
-  cooldown_t* cooldowns_telekinetic_wave;
+  struct cooldowns_t
+  {
+    cooldown_t* telekinetic_wave;
+  } cooldowns;
 
   double psychic_projection_dd_chance;
 
@@ -155,14 +173,14 @@ struct sage_sorcerer_t : public player_t
       tree_type[ SITH_SORCERER_CORRUPTION ] = TREE_CORRUPTION;
       tree_type[ SITH_SORCERER_LIGHTNING ]  = TREE_LIGHTNING;
       tree_type[ SITH_SORCERER_MADNESS ]    = TREE_MADNESS;
-      cooldowns_telekinetic_wave = get_cooldown( "chain_lightning" );
+      cooldowns.telekinetic_wave = get_cooldown( "chain_lightning" );
     }
     else
     {
       tree_type[ JEDI_SAGE_SEER ]         = TREE_SEER;
       tree_type[ JEDI_SAGE_TELEKINETICS ] = TREE_TELEKINETICS;
       tree_type[ JEDI_SAGE_BALANCE ]      = TREE_BALANCE;
-      cooldowns_telekinetic_wave = get_cooldown( "telekinetic_wave" );
+      cooldowns.telekinetic_wave = get_cooldown( "telekinetic_wave" );
     }
 
     create_talents();
@@ -191,9 +209,9 @@ struct sage_sorcerer_t : public player_t
 
   void trigger_tidal_force( double pc )
   {
-    if ( talents.tidal_force -> rank() && buffs_tidal_force -> trigger( 1, 0, pc ) )
+    if ( talents.tidal_force -> rank() && buffs.tidal_force -> trigger( 1, 0, pc ) )
     {
-      cooldowns_telekinetic_wave -> reset();
+      cooldowns.telekinetic_wave -> reset();
     }
   }
 };
@@ -243,7 +261,7 @@ struct jedi_sage_spell_t : public spell_t
 
     sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
-    if ( base_execute_time > timespan_t::zero && p -> buffs_presence_of_mind -> up() )
+    if ( base_execute_time > timespan_t::zero && p -> buffs.presence_of_mind -> up() )
       et = timespan_t::zero;
 
     return et;
@@ -256,10 +274,10 @@ struct jedi_sage_spell_t : public spell_t
     sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     if ( base_execute_time > timespan_t::zero )
-      p -> buffs_presence_of_mind -> expire();
+      p -> buffs.presence_of_mind -> expire();
 
     if ( base_dd_min > 0 )
-      p -> buffs_force_potency -> decrement();
+      p -> buffs.force_potency -> decrement();
   }
 
   virtual void player_buff()
@@ -268,10 +286,10 @@ struct jedi_sage_spell_t : public spell_t
 
     sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
-    if ( base_execute_time > timespan_t::zero && p -> buffs_presence_of_mind -> up() )
+    if ( base_execute_time > timespan_t::zero && p -> buffs.presence_of_mind -> up() )
       player_dd_multiplier *= 1.20;
 
-    if ( base_dd_min > 0 && p -> buffs_force_potency -> up() )
+    if ( base_dd_min > 0 && p -> buffs.force_potency -> up() )
       player_crit += 0.60;
   }
 
@@ -285,7 +303,7 @@ struct jedi_sage_spell_t : public spell_t
 
     // Assume channeled spells don't profit
     if ( p -> talents.force_suppression -> rank() > 0 && base_td > 0 && !channeled )
-      if ( p -> buffs_force_suppression -> up() )
+      if ( p -> buffs.force_suppression -> up() )
         target_td_multiplier *= 1.20;
   }
 
@@ -299,7 +317,7 @@ struct jedi_sage_spell_t : public spell_t
 
     if ( dmg_result == RESULT_CRIT && p -> talents.telekinetic_effusion -> rank() > 0 )
     {
-      p -> buffs_telekinetic_effusion -> trigger( 2 );
+      p -> buffs.telekinetic_effusion -> trigger( 2 );
     }
   }
 
@@ -315,7 +333,7 @@ struct jedi_sage_spell_t : public spell_t
       c = ceil( c ); // 17/01/2012 According to http://sithwarrior.com/forums/Thread-Sorcerer-Sage-Mechanics-and-Quirks
     }
 
-    if ( p -> buffs_telekinetic_effusion -> check() > 0 )
+    if ( p -> buffs.telekinetic_effusion -> check() > 0 )
     {
       c *= 0.5;
       c = floor( c ); // FIXME: floor or ceil?
@@ -330,7 +348,7 @@ struct jedi_sage_spell_t : public spell_t
 
     sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
-    p -> buffs_telekinetic_effusion -> up();
+    p -> buffs.telekinetic_effusion -> up();
   }
 
   virtual void tick( dot_t* d )
@@ -340,12 +358,12 @@ struct jedi_sage_spell_t : public spell_t
     sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     if ( tick_dmg > 0 && !channeled )
-      p -> buffs_force_suppression -> decrement();
+      p -> buffs.force_suppression -> decrement();
 
     if ( tick_dmg > 0 && p -> talents.focused_insight -> rank() > 0 )
     {
       double hp = p -> resource_max[ RESOURCE_HEALTH ] * p -> talents.focused_insight -> rank() * 0.005;
-      p -> resource_gain( RESOURCE_HEALTH, hp , p -> gains_focused_insight );
+      p -> resource_gain( RESOURCE_HEALTH, hp , p -> gains.focused_insight );
     }
   }
 };
@@ -421,7 +439,7 @@ struct project_t : public jedi_sage_spell_t
     {
       sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
-      if ( p -> rng_upheaval -> roll( p -> talents.upheaval -> rank() * 0.15 ) )
+      if ( p -> rngs.upheaval -> roll( p -> talents.upheaval -> rank() * 0.15 ) )
         upheaval -> execute();
     }
   }
@@ -462,14 +480,14 @@ struct telekinetic_throw_t : public jedi_sage_spell_t
   {
     sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
-    if ( p -> buffs_psychic_projection -> up()
-         || ( p -> buffs_psychic_projection_dd -> up() && p -> rng_psychic_projection_dd -> roll ( p -> psychic_projection_dd_chance ) )
+    if ( p -> buffs.psychic_projection -> up()
+         || ( p -> buffs.psychic_projection_dd -> up() && p -> rngs.psychic_projection_dd -> roll ( p -> psychic_projection_dd_chance ) )
          )
     {
       is_buffed_by_psychic_projection = true;
-      if ( p -> bugs && p -> buffs_psychic_projection -> check() )
+      if ( p -> bugs && p -> buffs.psychic_projection -> check() )
       {
-        p -> buffs_psychic_projection_dd -> trigger();
+        p -> buffs.psychic_projection_dd -> trigger();
       }
     }
     else
@@ -495,7 +513,7 @@ struct telekinetic_throw_t : public jedi_sage_spell_t
     sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     if ( is_buffed_by_psychic_projection )
-      p -> buffs_psychic_projection -> expire();
+      p -> buffs.psychic_projection -> expire();
   }
 
   virtual void tick( dot_t* d )
@@ -506,12 +524,12 @@ struct telekinetic_throw_t : public jedi_sage_spell_t
     {
       sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
-      if ( p -> talents.psychic_barrier -> rank() > 0 && p -> rng_psychic_barrier -> roll( p -> talents.psychic_barrier -> rank() * ( 1 / 3.0 ) ) )
+      if ( p -> talents.psychic_barrier -> rank() > 0 && p -> rngs.psychic_barrier -> roll( p -> talents.psychic_barrier -> rank() * ( 1 / 3.0 ) ) )
       {
         double f = p -> resource_max[ RESOURCE_FORCE ] * 0.01;
-        p -> resource_gain( RESOURCE_FORCE, f , p -> gains_psychic_barrier );
+        p -> resource_gain( RESOURCE_FORCE, f , p -> gains.psychic_barrier );
       }
-      p -> buffs_presence_of_mind -> trigger();
+      p -> buffs.presence_of_mind -> trigger();
     }
   }
 };
@@ -558,7 +576,7 @@ struct disturbance_t : public jedi_sage_spell_t
     {
       sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
-      p -> buffs_concentration -> trigger();
+      p -> buffs.concentration -> trigger();
 
       // Does the TM version also proc Tidal Force?
       p -> trigger_tidal_force( 0.3 );
@@ -573,10 +591,10 @@ struct disturbance_t : public jedi_sage_spell_t
     {
       sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
-      if ( p -> rng_tm -> roll( p -> talents.telekinetic_momentum -> rank() * 0.10 ) )
+      if ( p -> rngs.tm -> roll( p -> talents.telekinetic_momentum -> rank() * 0.10 ) )
       {
         tm -> execute();
-        p -> buffs_tremors -> trigger( 1 );
+        p -> buffs.tremors -> trigger( 1 );
       }
     }
   }
@@ -606,7 +624,7 @@ struct mind_crush_dot_t : public jedi_sage_spell_t
     sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     if ( p -> talents.force_suppression -> rank() > 0 )
-      p -> benefits_fs_mind_crush -> update( p -> buffs_force_suppression -> check() > 0 );
+      p -> benefits.fs_mind_crush -> update( p -> buffs.force_suppression -> check() > 0 );
   }
 };
 
@@ -665,10 +683,10 @@ struct weaken_mind_t : public jedi_sage_spell_t
 
     if ( result == RESULT_CRIT && p -> talents.psychic_projection -> rank() > 0 )
     {
-      p -> buffs_psychic_projection -> trigger( p -> buffs_psychic_projection -> max_stack );
+      p -> buffs.psychic_projection -> trigger( p -> buffs.psychic_projection -> max_stack );
     }
 
-    p -> buffs_indomitable_4pc -> trigger();
+    p -> buffs.indomitable_4pc -> trigger();
   }
 
   virtual void target_debuff( player_t* t, int dmg_type )
@@ -678,7 +696,7 @@ struct weaken_mind_t : public jedi_sage_spell_t
     sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     if ( p -> talents.force_suppression -> rank() > 0 )
-      p -> benefits_fs_weaken_mind -> update( p -> buffs_force_suppression -> check() > 0 );
+      p -> benefits.fs_weaken_mind -> update( p -> buffs.force_suppression -> check() > 0 );
   }
 };
 
@@ -731,7 +749,7 @@ struct turbulence_t : public jedi_sage_spell_t
     else
       assert( 0 );
 
-    player -> cast_sage_sorcerer() -> benefits_turbulence -> update( t );
+    player -> cast_sage_sorcerer() -> benefits.turbulence -> update( t );
   }
 };
 
@@ -762,7 +780,7 @@ struct force_in_balance_t : public jedi_sage_spell_t
 
     sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
-    p -> buffs_force_suppression -> trigger( 10 );
+    p -> buffs.force_suppression -> trigger( 10 );
   }
 };
 
@@ -793,7 +811,7 @@ struct sever_force_t : public jedi_sage_spell_t
     sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     if ( p -> talents.force_suppression -> rank() > 0 )
-      p -> benefits_fs_sever_force -> update( p -> buffs_force_suppression -> check() > 0 );
+      p -> benefits.fs_sever_force -> update( p -> buffs.force_suppression -> check() > 0 );
   }
 };
 
@@ -817,7 +835,7 @@ struct mental_alacrity_t : public jedi_sage_spell_t
 
     sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
-    p -> buffs_mental_alacrity -> trigger();
+    p -> buffs.mental_alacrity -> trigger();
   }
 };
 
@@ -864,10 +882,10 @@ struct telekinetic_wave_t : public jedi_sage_spell_t
     {
       sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
-      if ( p -> rng_tm -> roll( p -> talents.telekinetic_momentum -> rank() * 0.10 ) )
+      if ( p -> rngs.tm -> roll( p -> talents.telekinetic_momentum -> rank() * 0.10 ) )
       {
         tm -> execute();
-        p -> buffs_tremors -> trigger( 1 );
+        p -> buffs.tremors -> trigger( 1 );
       }
     }
   }
@@ -878,7 +896,7 @@ struct telekinetic_wave_t : public jedi_sage_spell_t
 
     sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
-    if ( p -> buffs_tidal_force -> up() )
+    if ( p -> buffs.tidal_force -> up() )
       et = timespan_t::zero;
 
     return et;
@@ -890,7 +908,7 @@ struct telekinetic_wave_t : public jedi_sage_spell_t
 
     sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
-    p -> buffs_tidal_force -> expire();
+    p -> buffs.tidal_force -> expire();
   }
 };
 
@@ -912,7 +930,7 @@ struct force_potency_t : public jedi_sage_spell_t
 
     sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
-    p -> buffs_force_potency -> trigger( 2 );
+    p -> buffs.force_potency -> trigger( 2 );
   }
 };
 
@@ -1040,17 +1058,17 @@ void sage_sorcerer_t::init_benefits()
 
   if ( type == SITH_SORCERER )
   {
-    benefits_turbulence = get_benefit( "Thundering Blast automatic crit" );
-    benefits_fs_weaken_mind = get_benefit( "Affliction ticks with Deathmark");
-    benefits_fs_mind_crush = get_benefit( "Crushing Darkness ticks with Deathmark");
-    benefits_fs_sever_force = get_benefit( "Creeping Terror ticks with Deathmark");
+    benefits.turbulence = get_benefit( "Thundering Blast automatic crit" );
+    benefits.fs_weaken_mind = get_benefit( "Affliction ticks with Deathmark");
+    benefits.fs_mind_crush = get_benefit( "Crushing Darkness ticks with Deathmark");
+    benefits.fs_sever_force = get_benefit( "Creeping Terror ticks with Deathmark");
   }
   else
   {
-    benefits_turbulence = get_benefit( "Turbulence automatic crit" );
-    benefits_fs_weaken_mind = get_benefit( "Weaken Mind ticks with Force Suppression");
-    benefits_fs_mind_crush = get_benefit( "Mind Crush ticks with Force Suppression");
-    benefits_fs_sever_force = get_benefit( "Sever Force ticks with Force Suppression");
+    benefits.turbulence = get_benefit( "Turbulence automatic crit" );
+    benefits.fs_weaken_mind = get_benefit( "Weaken Mind ticks with Force Suppression");
+    benefits.fs_mind_crush = get_benefit( "Mind Crush ticks with Force Suppression");
+    benefits.fs_sever_force = get_benefit( "Sever Force ticks with Force Suppression");
   }
 }
 
@@ -1060,23 +1078,23 @@ void sage_sorcerer_t::init_buffs()
 {
   player_t::init_buffs();
 
-  // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-  // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-  // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
+  // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rngs.type=rngs.CYCLIC, activated=true )
+  // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rngs.type=rngs.CYCLIC, activated=true )
+  // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rngs.type=rngs.CYCLIC, activated=true )
 
   bool is_sage = ( type == JEDI_SAGE );
 
-  buffs_concentration = new buff_t( this, is_sage ? "concentration" : "subversion", 3, timespan_t::from_seconds( 10.0 ), timespan_t::zero, 0.5 * talents.concentration -> rank() );
-  buffs_psychic_projection = new buff_t( this, is_sage ? "psychic_projection" : "lightning_barrage", 1, timespan_t::zero, timespan_t::from_seconds( 10.0 ), 0.5 * talents.psychic_projection -> rank() );
-  buffs_tidal_force = new buff_t( this, is_sage ? "tidal_force" : "lightning_storm", 1, timespan_t::zero, timespan_t::from_seconds( 10.0 ) );
-  buffs_telekinetic_effusion = new buff_t( this, is_sage ? "telekinetic_effusion" : "lightning_effusion", 2, timespan_t::zero, timespan_t::zero, 0.5 * talents.telekinetic_effusion -> rank() );
-  buffs_tremors = new buff_t( this, is_sage ? "tremors" : "conduction", 3, timespan_t::from_seconds( 30.0 ) );
-  buffs_presence_of_mind = new buff_t( this, is_sage ? "presence_of_mind" : "wrath", 1, timespan_t::zero, timespan_t::zero, talents.presence_of_mind -> rank() * 0.3 );
-  buffs_force_suppression = new buff_t( this, is_sage ? "force_suppression" : "deathmark", 10, timespan_t::from_seconds( 30.0 ), timespan_t::zero, talents.force_suppression -> rank() );
-  buffs_mental_alacrity = new buff_t( this, is_sage ? "mental_alacrity" : "polarity_shift", 1, timespan_t::from_seconds( 10.0 ) );
-  buffs_force_potency = new buff_t( this, is_sage ? "force_potency" : "recklessness", 2, timespan_t::from_seconds( 20.0 ) );
-  buffs_psychic_projection_dd = new buff_t( this, is_sage ? "psychic_projection_dd" : "lightning_barrage_dd", 1, timespan_t::from_seconds( 2.0 ), timespan_t::zero );
-  buffs_indomitable_4pc = new buff_t( this, "indomitable_4pc", 1, timespan_t::from_seconds( 15.0 ), timespan_t::from_seconds( 20.0 ), set_bonus.indomitable -> four_pc() > 0 ? 0.10 : 0.0 );
+  buffs.concentration = new buff_t( this, is_sage ? "concentration" : "subversion", 3, timespan_t::from_seconds( 10.0 ), timespan_t::zero, 0.5 * talents.concentration -> rank() );
+  buffs.psychic_projection = new buff_t( this, is_sage ? "psychic_projection" : "lightning_barrage", 1, timespan_t::zero, timespan_t::from_seconds( 10.0 ), 0.5 * talents.psychic_projection -> rank() );
+  buffs.tidal_force = new buff_t( this, is_sage ? "tidal_force" : "lightning_storm", 1, timespan_t::zero, timespan_t::from_seconds( 10.0 ) );
+  buffs.telekinetic_effusion = new buff_t( this, is_sage ? "telekinetic_effusion" : "lightning_effusion", 2, timespan_t::zero, timespan_t::zero, 0.5 * talents.telekinetic_effusion -> rank() );
+  buffs.tremors = new buff_t( this, is_sage ? "tremors" : "conduction", 3, timespan_t::from_seconds( 30.0 ) );
+  buffs.presence_of_mind = new buff_t( this, is_sage ? "presence_of_mind" : "wrath", 1, timespan_t::zero, timespan_t::zero, talents.presence_of_mind -> rank() * 0.3 );
+  buffs.force_suppression = new buff_t( this, is_sage ? "force_suppression" : "deathmark", 10, timespan_t::from_seconds( 30.0 ), timespan_t::zero, talents.force_suppression -> rank() );
+  buffs.mental_alacrity = new buff_t( this, is_sage ? "mental_alacrity" : "polarity_shift", 1, timespan_t::from_seconds( 10.0 ) );
+  buffs.force_potency = new buff_t( this, is_sage ? "force_potency" : "recklessness", 2, timespan_t::from_seconds( 20.0 ) );
+  buffs.psychic_projection_dd = new buff_t( this, is_sage ? "psychic_projection_dd" : "lightning_barrage_dd", 1, timespan_t::from_seconds( 2.0 ), timespan_t::zero );
+  buffs.indomitable_4pc = new buff_t( this, "indomitable_4pc", 1, timespan_t::from_seconds( 15.0 ), timespan_t::from_seconds( 20.0 ), set_bonus.indomitable -> four_pc() > 0 ? 0.10 : 0.0 );
 
 }
 
@@ -1088,9 +1106,9 @@ void sage_sorcerer_t::init_gains()
 
   bool is_sage = ( type == JEDI_SAGE );
 
-  gains_concentration   = get_gain( is_sage ? "concentration" : "subversion" );
-  gains_focused_insight = get_gain( is_sage ? "focused_insight" : "parasitism" );
-  gains_psychic_barrier = get_gain( is_sage ? "psychic_barrier" : "sith_efficacy" );
+  gains.concentration   = get_gain( is_sage ? "concentration" : "subversion" );
+  gains.focused_insight = get_gain( is_sage ? "focused_insight" : "parasitism" );
+  gains.psychic_barrier = get_gain( is_sage ? "psychic_barrier" : "sith_efficacy" );
 }
 
 // sage_sorcerer_t::init_procs =======================================================
@@ -1100,16 +1118,16 @@ void sage_sorcerer_t::init_procs()
   player_t::init_procs();
 }
 
-// sage_sorcerer_t::init_rng =========================================================
+// sage_sorcerer_t::init_rngs =========================================================
 
 void sage_sorcerer_t::init_rng()
 {
   player_t::init_rng();
 
-  rng_psychic_barrier = get_rng( "psychic_barrier" );
-  rng_upheaval = get_rng( "upheaval" );
-  rng_tm = get_rng( "telekinetic_momentum" );
-  rng_psychic_projection_dd = get_rng( type == JEDI_SAGE ? "psychic_projection_dd" : "lightning_barrage_dd" );
+  rngs.psychic_barrier = get_rng( "psychic_barrier" );
+  rngs.upheaval = get_rng( "upheaval" );
+  rngs.tm = get_rng( "telekinetic_momentum" );
+  rngs.psychic_projection_dd = get_rng( type == JEDI_SAGE ? "psychic_projection_dd" : "lightning_barrage_dd" );
 }
 
 // sage_sorcerer_t::init_actions =====================================================
@@ -1294,10 +1312,10 @@ void sage_sorcerer_t::regen( timespan_t periodicity )
 {
   player_t::regen( periodicity );
 
-  if ( buffs_concentration -> up() )
+  if ( buffs.concentration -> up() )
   {
-    double force_regen = periodicity.total_seconds() * force_regen_per_second() * buffs_concentration -> check() * 0.10;
-    resource_gain( RESOURCE_FORCE, force_regen, gains_concentration );
+    double force_regen = periodicity.total_seconds() * force_regen_per_second() * buffs.concentration -> check() * 0.10;
+    resource_gain( RESOURCE_FORCE, force_regen, gains.concentration );
   }
 }
 
@@ -1307,7 +1325,7 @@ double sage_sorcerer_t::composite_force_damage_bonus() const
 {
   double sp = player_t::composite_force_damage_bonus();
 
-  sp *= 1.0 + buffs_tremors -> stack() * 0.01;
+  sp *= 1.0 + buffs.tremors -> stack() * 0.01;
 
   return sp;
 }
@@ -1318,9 +1336,9 @@ double sage_sorcerer_t::composite_spell_alacrity() const
 {
   double sh = player_t::composite_spell_alacrity();
 
-  sh -= buffs_mental_alacrity -> stack() * 0.20;
+  sh -= buffs.mental_alacrity -> stack() * 0.20;
 
-  sh -= buffs_indomitable_4pc -> up() * 0.05;
+  sh -= buffs.indomitable_4pc -> up() * 0.05;
 
   return sh;
 }
