@@ -1,0 +1,26 @@
+#!./simc 
+
+sith_assassin=Sith_Assassin_Deception
+origin="create_Sith_Assassin.simc"
+level=50
+race=human
+position=back
+role=hybrid
+use_pre_potion=0
+talents=http://www.torhead.com/skill-calc#200McZhGMRkhMrtzZcM.1
+actions=stim,type=exotech_resolve
+actions+=/mark_of_power
+actions+=/snapshot_stats
+actions+=/shock
+head=foo_stalker_headgear
+shirt=foo,stats=1303willpower_510crit_151power_1224forcepower_153surge
+chest=foo_stalker_vestments
+legs=foo_stalker_lower_robe
+hands=foo_stalker_gloves
+# Gear Summary
+# gear_crit_rating=510
+# gear_power=151
+# gear_forcepower=1224
+# gear_willpower=1303
+# gear_surge_rating=153
+# Set Bonuses

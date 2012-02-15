@@ -89,7 +89,7 @@ struct shadow_assassin_t : public player_t
     talent_t* darkswell;
     talent_t* deceptive_power;
     talent_t* entropic_field;
-    talent_t* saber_conduct;
+    talent_t* saber_conduit;
     talent_t* fade;
     talent_t* static_cling;
     talent_t* resourcefulness;
@@ -287,11 +287,12 @@ struct shock_t : public shadow_assassin_spell_t
 action_t* shadow_assassin_t::create_action( const std::string& name,
                                  const std::string& options_str )
 {
-#if 0
+
   if ( type == SITH_ASSASSIN )
   {
     if ( name == "mark_of_power"      ) return new     mark_of_power_t( this, "mark_of_power", options_str );
     if ( name == "shock"              ) return new             shock_t( this, "shock", options_str );
+#if 0
     if ( name == "force_lightning"    ) return new   force_lightning_t( this, "force_lightning", options_str );
     if ( name == "crushing_darkness"  ) return new crushing_darkness_t( this, "crushing_darkness", options_str );
     if ( name == "death_field"        ) return new       death_field_t( this, "death_field", options_str );
@@ -310,11 +311,13 @@ action_t* shadow_assassin_t::create_action( const std::string& name,
     if ( name == "maul"               ) return new              maul_t( this, "maul", options_str );
     if ( name == "saber_strike"       ) return new      saber_strike_t( this, "saber_strike", options_str );
     if ( name == "thrash"             ) return new            thrash_t( this, "thrash", options_str );
+#endif
   }
   else if ( type == JEDI_SHADOW )
   {
-    if ( name == "force_valor"        ) return new        force_valor_t( this, "mark_of_power", options_str );
-    if ( name == "project"            ) return new            project_t( this, "shock", options_str );
+    if ( name == "force_valor"        ) return new      mark_of_power_t( this, "force_valor", options_str );
+    if ( name == "project"            ) return new              shock_t( this, "project", options_str );
+#if 0
     if ( name == "telekinetic_throw"  ) return new  telekinetic_throw_t( this, "force_lightning", options_str );
     if ( name == "mind_crush"         ) return new         mind_crush_t( this, "crushing_darkness", options_str );
     if ( name == "force_in_balance"   ) return new   force_in_balance_t( this, "death_field", options_str );
@@ -333,8 +336,8 @@ action_t* shadow_assassin_t::create_action( const std::string& name,
     if ( name == "shadow_strike"      ) return new      shadow_strike_t( this, "maul", options_str );
     if ( name == "saber_strike"       ) return new       saber_strike_t( this, "saber_strike", options_str );
     if ( name == "double_strike"      ) return new      double_strike_t( this, "thrash", options_str );
-  }
 #endif
+  }
 
   return player_t::create_action( name, options_str );
 }
@@ -361,7 +364,7 @@ void shadow_assassin_t::init_talents()
     talents.darkswell = find_talent( "Darkswell" );
     talents.deceptive_power = find_talent( "Deceptive Power" );
     talents.entropic_field = find_talent( "Entropic Field" );
-    talents.saber_conduct = find_talent( "Saber Conduct" );
+    talents.saber_conduit = find_talent( "Saber Conduit" );
     talents.fade = find_talent( "Fade" );
     talents.static_cling = find_talent( "Static Cling" );
     talents.resourcefulness = find_talent( "Resourcefulness" );
@@ -380,7 +383,7 @@ void shadow_assassin_t::init_talents()
     talents.torment = find_talent( "Torment" );
     talents.death_field = find_talent( "Death Field" );
     talents.fanaticism = find_talent( "Fanaticism" );
-    talents.claws_of_decay = find_talent( "Claws Of Decay" );
+    talents.claws_of_decay = find_talent( "Claws of Decay" );
     talents.haunted_dreams = find_talent( "Haunted Dreams" );
     talents.corrupted_flesh = find_talent( "Corrupted Flesh" );
     talents.raze = find_talent( "Raze" );
