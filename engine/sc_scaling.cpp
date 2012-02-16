@@ -40,8 +40,6 @@ static bool is_scaling_stat( sim_t* sim,
 static bool stat_may_cap( int stat )
 {
   if ( stat == STAT_HIT_RATING ) return true;
-  if ( stat == STAT_EXPERTISE_RATING ) return true;
-  if ( stat == STAT_SPIRIT ) return true;
   return false;
 }
 
@@ -152,7 +150,6 @@ double scaling_t::progress( std::string& phase )
 void scaling_t::init_deltas()
 {
   assert ( scale_delta_multiplier != 0 );
-  if ( stats.attribute[ ATTR_SPIRIT ] == 0 ) stats.attribute[ ATTR_SPIRIT ] = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
 
   for ( int i=ATTRIBUTE_NONE+1; i < ATTRIBUTE_MAX; i++ )
   {
@@ -528,11 +525,11 @@ void scaling_t::create_options()
     { "scale_lag",                      OPT_BOOL,   &( scale_lag                            ) },
     { "scale_factor_noise",             OPT_FLT,    &( scale_factor_noise                   ) },
     { "scale_strength",                 OPT_FLT,    &( stats.attribute[ ATTR_STRENGTH  ]    ) },
-    { "scale_agility",                  OPT_FLT,    &( stats.attribute[ ATTR_AGILITY   ]    ) },
-    { "scale_stamina",                  OPT_FLT,    &( stats.attribute[ ATTR_STAMINA   ]    ) },
-    { "scale_intellect",                OPT_FLT,    &( stats.attribute[ ATTR_INTELLECT ]    ) },
-    { "scale_spirit",                   OPT_FLT,    &( stats.attribute[ ATTR_SPIRIT    ]    ) },
+    { "scale_aim",                      OPT_FLT,    &( stats.attribute[ ATTR_AIM       ]    ) },
+    { "scale_cunning",                  OPT_FLT,    &( stats.attribute[ ATTR_CUNNING   ]    ) },
     { "scale_willpower",                OPT_FLT,    &( stats.attribute[ ATTR_WILLPOWER ]    ) },
+    { "scale_endurance",                OPT_FLT,    &( stats.attribute[ ATTR_ENDURANCE ]    ) },
+    { "scale_presence",                 OPT_FLT,    &( stats.attribute[ ATTR_PRESENCE  ]    ) },
     { "scale_spell_power",              OPT_FLT,    &( stats.spell_power                    ) },
     { "scale_attack_power",             OPT_FLT,    &( stats.attack_power                   ) },
     { "scale_expertise_rating",         OPT_FLT,    &( stats.expertise_rating               ) },

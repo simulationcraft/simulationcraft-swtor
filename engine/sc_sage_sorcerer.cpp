@@ -1095,7 +1095,8 @@ void sage_sorcerer_t::init_base()
 {
   player_t::init_base();
 
-  attribute_base[ ATTR_WILLPOWER ] = 250;
+  attribute_base[ ATTR_WILLPOWER ] = 50 + 4 * level;
+  attribute_base[ ATTR_STRENGTH  ] = 20 + 1.6 * level;
 
   distance = default_distance = 30;
 

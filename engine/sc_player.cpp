@@ -433,7 +433,7 @@ player_t::player_t( sim_t*             s,
   // Attacks
   main_hand_attack( 0 ), off_hand_attack( 0 ), ranged_attack( 0 ),
   // Resources
-  mana_per_intellect( 0 ), health_per_stamina( 0 ),
+  health_per_endurance( 0 ),
   // Consumables
   elixir_guardian( ELIXIR_NONE ),
   elixir_battle( ELIXIR_NONE ),
@@ -772,14 +772,15 @@ void player_t::init_base()
 {
   if ( sim -> debug ) log_t::output( sim, "Initializing base for player (%s)", name() );
 
-  attribute_base[ ATTR_STRENGTH  ] = 50;
-  attribute_base[ ATTR_AGILITY   ] = 0;
-  attribute_base[ ATTR_STAMINA   ] = 225;
-  attribute_base[ ATTR_INTELLECT ] = 0;
-  attribute_base[ ATTR_SPIRIT    ] = 0;
-  attribute_base[ ATTR_WILLPOWER ] = 50;
+  attribute_base[ ATTR_STRENGTH    ] =
+    attribute_base[ ATTR_AIM       ] =
+    attribute_base[ ATTR_CUNNING   ] =
+    attribute_base[ ATTR_WILLPOWER ] = 10 + 0.8 * level;
+  attribute_base[ ATTR_ENDURANCE   ] =
+    attribute_base[ ATTR_PRESENCE  ] = 45 + 3.6 * level;
+
   resource_base[ RESOURCE_HEALTH ] = 2500;
-  resource_base[ RESOURCE_MANA   ] = 0;
+
   base_spell_crit                  = 0.05;
   base_attack_crit                 = 0.05;
   initial_attack_crit_per_agility  = 0;
@@ -797,7 +798,7 @@ void player_t::init_base()
   initial_attack_crit_per_agility  = rating_t::get_attribute_base( sim, dbc, level, type, race, BASE_STAT_MELEE_CRIT_PER_AGI );
   base_mp5                         = rating_t::get_attribute_base( sim, dbc, level, type, race, BASE_STAT_MP5 );
 */
-  health_per_stamina = 10;
+  health_per_endurance = 10;
 
   if ( world_lag_stddev < timespan_t::zero  ) world_lag_stddev = world_lag * 0.1;
   if ( brain_lag_stddev < timespan_t::zero  ) brain_lag_stddev = brain_lag * 0.1;
@@ -1108,15 +1109,10 @@ void player_t::init_resources( bool force )
     {
       resource_initial[ i ] = resource_base[ i ] + gear.resource[ i ] + enchant.resource[ i ] + ( is_pet() ? 0 : sim -> enchant.resource[ i ] );
 
-      if ( i == RESOURCE_MANA )
-      {
-        double adjust = ( is_pet() || is_enemy() || is_add() ) ? 0 : std::min( 20, ( int ) floor( intellect() ) );
-        resource_initial[ i ] += ( floor( intellect() ) - adjust ) * mana_per_intellect + adjust;
-      }
       if ( i == RESOURCE_HEALTH )
       {
-        double adjust = ( is_pet() || is_enemy() || is_add() ) ? 0 : std::min( 20, ( int ) floor( stamina() ) );
-        resource_initial[ i ] += ( floor( stamina() ) - adjust ) * health_per_stamina + adjust;
+        double adjust = ( is_pet() || is_enemy() || is_add() ) ? 0 : std::min( 20, ( int ) floor( endurance() ) );
+        resource_initial[ i ] += ( floor( endurance() ) - adjust ) * health_per_endurance + adjust;
       }
     }
     resource_current[ i ] = resource_max[ i ] = resource_initial[ i ];
@@ -1593,12 +1589,12 @@ void player_t::init_scaling()
     int spell  = ( ( role == ROLE_SPELL  ) || ( role == ROLE_HYBRID ) || ( role == ROLE_HEAL ) ) ? 1 : 0;
     int tank   = role == ROLE_TANK ? 1 : 0;
 
-    scales_with[ STAT_STRENGTH  ] = 0;
-    scales_with[ STAT_AGILITY   ] = 0;
-    scales_with[ STAT_STAMINA   ] = 0;
-    scales_with[ STAT_INTELLECT ] = 0;
-    scales_with[ STAT_SPIRIT    ] = 0;
+    scales_with[ STAT_STRENGTH  ] = attack;
+    scales_with[ STAT_AIM       ] = 0;
+    scales_with[ STAT_CUNNING   ] = 0;
     scales_with[ STAT_WILLPOWER ] = spell;
+    scales_with[ STAT_ENDURANCE ] = 0;
+    scales_with[ STAT_PRESENCE  ] = 0;
 
     scales_with[ STAT_HEALTH ] = 0;
     scales_with[ STAT_MANA   ] = 0;
@@ -1616,7 +1612,7 @@ void player_t::init_scaling()
 
     scales_with[ STAT_HIT_RATING                ] = 0;
     scales_with[ STAT_CRIT_RATING               ] = spell || attack;
-    scales_with[ STAT_ALACRITY_RATING              ] = spell || attack;
+    scales_with[ STAT_ALACRITY_RATING           ] = spell || attack;
 
     scales_with[ STAT_WEAPON_DPS   ] = attack;
     scales_with[ STAT_WEAPON_SPEED ] = sim -> weapon_speed_scale_factors ? attack : 0;
@@ -1643,11 +1639,11 @@ void player_t::init_scaling()
       switch ( sim -> scaling -> scale_stat )
       {
       case STAT_STRENGTH:  attribute_initial[ ATTR_STRENGTH  ] += v; break;
-      case STAT_AGILITY:   attribute_initial[ ATTR_AGILITY   ] += v; break;
-      case STAT_STAMINA:   attribute_initial[ ATTR_STAMINA   ] += v; break;
-      case STAT_INTELLECT: attribute_initial[ ATTR_INTELLECT ] += v; break;
-      case STAT_SPIRIT:    attribute_initial[ ATTR_SPIRIT    ] += v; break;
+      case STAT_AIM:       attribute_initial[ ATTR_AIM       ] += v; break;
+      case STAT_CUNNING:   attribute_initial[ ATTR_CUNNING   ] += v; break;
       case STAT_WILLPOWER: attribute_initial[ ATTR_WILLPOWER ] += v; break;
+      case STAT_ENDURANCE: attribute_initial[ ATTR_ENDURANCE ] += v; break;
+      case STAT_PRESENCE:  attribute_initial[ ATTR_PRESENCE  ] += v; break;
 
       case STAT_SPELL_POWER:       initial_spell_power[ SCHOOL_MAX ] += v; break;
       case STAT_SPELL_PENETRATION: initial_spell_penetration         += v; break;
@@ -1830,7 +1826,7 @@ double player_t::composite_attack_power() const
   double ap = attack_power;
 
   ap += attack_power_per_strength * ( strength() - 10 );
-  ap += attack_power_per_agility  * ( agility() - 10 );
+  //ap += attack_power_per_agility  * ( agility() - 10 );
 
   if ( vengeance_enabled )
     ap += vengeance_value;
@@ -1842,7 +1838,7 @@ double player_t::composite_attack_power() const
 
 double player_t::composite_attack_crit() const
 {
-  double ac = attack_crit + attack_crit_per_agility * agility();
+  double ac = attack_crit; // + attack_crit_per_agility * agility();
 
   if ( buffs.coordination -> up() )
     ac += 0.05;
@@ -1853,11 +1849,7 @@ double player_t::composite_attack_crit() const
 // player_t::composite_attack_hit ===========================================
 
 double player_t::composite_attack_hit() const
-{
-  double ah = attack_hit;
-
-  return ah;
-}
+{ return attack_hit; }
 
 // player_t::composite_armor ================================================
 
@@ -1911,7 +1903,7 @@ double player_t::composite_tank_dodge() const
 {
   double d = dodge;
 
-  d += agility() * dodge_per_agility;
+  // d += agility() * dodge_per_agility;
 
   return d;
 }
@@ -1969,7 +1961,7 @@ double player_t::diminished_dodge() const
 
   double d = stats.dodge_rating / rating.dodge;
 
-  d += dodge_per_agility * stats.attribute[ ATTR_AGILITY ] * composite_attribute_multiplier( ATTR_AGILITY );
+  d += dodge_per_agility * stats.attribute[ ATTR_AIM ] * composite_attribute_multiplier( ATTR_AIM );
 
   if ( d == 0 ) return 0;
 
@@ -2071,13 +2063,6 @@ double player_t::composite_spell_hit() const
   return sh;
 }
 
-// player_t::composite_mp5 ==================================================
-
-double player_t::composite_mp5() const
-{
-  return mp5 + mp5_per_intellect * floor( intellect() );
-}
-
 // player_t::composite_attack_power_multiplier ==============================
 
 double player_t::composite_attack_power_multiplier() const
@@ -2166,76 +2151,35 @@ double player_t::composite_force_damage_bonus() const
   return dmg_bonus;
 }
 
-// player_t::willpower =======================================
-
-double player_t::willpower() const
-{
-  double wp = attribute[ ATTR_WILLPOWER ];
-
-  wp *= composite_attribute_multiplier( ATTR_WILLPOWER );
-
-  return wp;
-}
-
 // player_t::strength() =====================================================
 
 double player_t::strength() const
-{
-  double a = attribute[ ATTR_STRENGTH ];
+{ return get_stat_helper( ATTR_STRENGTH ); }
 
-  a *= composite_attribute_multiplier( ATTR_STRENGTH );
+// player_t::aim() ==========================================================
 
-  return a;
-}
+double player_t::aim() const
+{ return get_stat_helper( ATTR_AIM ); }
 
-// player_t::agility() ======================================================
+// player_t::cunning() ======================================================
 
-double player_t::agility() const
-{
-  double a = attribute[ ATTR_AGILITY ];
+double player_t::cunning() const
+{ return get_stat_helper( ATTR_CUNNING ); }
 
-  a *= composite_attribute_multiplier( ATTR_AGILITY );
+// player_t::willpower =======================================
 
-  return a;
-}
+double player_t::willpower() const
+{ return get_stat_helper( ATTR_WILLPOWER ); }
 
-// player_t::stamina() ======================================================
+// player_t::endurance() ====================================================
 
-double player_t::stamina() const
-{
-  double a = attribute[ ATTR_STAMINA ];
+double player_t::endurance() const
+{ return get_stat_helper( ATTR_ENDURANCE ); }
 
-  a *= composite_attribute_multiplier( ATTR_STAMINA );
+// player_t::presence() =====================================================
 
-  return a;
-}
-
-// player_t::intellect() ====================================================
-
-double player_t::intellect() const
-{
-  double a = attribute[ ATTR_INTELLECT ];
-
-  a *= composite_attribute_multiplier( ATTR_INTELLECT );
-
-  return a;
-}
-
-// player_t::spirit() =======================================================
-
-double player_t::spirit() const
-{
-  double a = attribute[ ATTR_SPIRIT ];
-
-  if ( race == RACE_HUMAN )
-  {
-    a += ( a - attribute_base[ ATTR_SPIRIT ] ) * 0.03;
-  }
-
-  a *= composite_attribute_multiplier( ATTR_SPIRIT );
-
-  return a;
-}
+double player_t::presence() const
+{ return get_stat_helper( ATTR_PRESENCE ); }
 
 // player_t::combat_begin ===================================================
 
@@ -2913,26 +2857,6 @@ void player_t::regen( const timespan_t periodicity )
     resource_gain( RESOURCE_AMMO, ammo_regen, gains.ammo_regen );
   }
 
-  else if ( resource_type == RESOURCE_MANA )
-  {
-    if ( mana_regen_while_casting > 0 )
-    {
-      double spirit_regen = periodicity.total_seconds() * sqrt( floor( intellect() ) ) * floor( spirit() ) * mana_regen_base;
-
-      spirit_regen *= mana_regen_while_casting;
-
-      resource_gain( RESOURCE_MANA, spirit_regen, gains.spirit_intellect_regen );
-    }
-
-    double cmp5 = composite_mp5();
-    if ( cmp5 > 0 )
-    {
-      double mp5_regen = periodicity.total_seconds() * cmp5 / 5.0;
-
-      resource_gain( RESOURCE_MANA, mp5_regen, gains.mp5_regen );
-    }
-  }
-
   int index = ( int ) ( sim -> current_time.total_seconds() );
 
   for ( int i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
@@ -3063,18 +2987,10 @@ void player_t::recalculate_resource_max( int resource )
 
   switch ( resource )
   {
-  case RESOURCE_MANA:
-  {
-    double adjust = ( is_pet() || is_enemy() || is_add() ) ? 0 : std::min( 20, ( int ) floor( intellect() ) );
-    resource_max[ resource ] += ( floor( intellect() ) - adjust ) * mana_per_intellect + adjust;
-    // Arcane Brilliance needs to be done here as a generic resource, otherwise override will
-    // not (and did not previously) work
-    break;
-  }
   case RESOURCE_HEALTH:
   {
-    double adjust = ( is_pet() || is_enemy() || is_add() ) ? 0 : std::min( 20, ( int ) floor( stamina() ) );
-    resource_max[ resource ] += ( floor( stamina() ) - adjust ) * health_per_stamina + adjust;
+    double adjust = ( is_pet() || is_enemy() || is_add() ) ? 0 : std::min( 20, ( int ) floor( endurance() ) );
+    resource_max[ resource ] += ( floor( endurance() ) - adjust ) * health_per_endurance + adjust;
 
     break;
   }
@@ -3189,12 +3105,12 @@ void player_t::stat_gain( int       stat,
   int temp_value = temporary_stat ? 1 : 0;
   switch ( stat )
   {
-  case STAT_STRENGTH:  stats.attribute[ ATTR_STRENGTH  ] += amount; attribute[ ATTR_STRENGTH  ] += amount; temporary.attribute[ ATTR_STRENGTH  ] += temp_value * amount; break;
-  case STAT_AGILITY:   stats.attribute[ ATTR_AGILITY   ] += amount; attribute[ ATTR_AGILITY   ] += amount; temporary.attribute[ ATTR_AGILITY   ] += temp_value * amount; break;
-  case STAT_STAMINA:   stats.attribute[ ATTR_STAMINA   ] += amount; attribute[ ATTR_STAMINA   ] += amount; temporary.attribute[ ATTR_STAMINA   ] += temp_value * amount; recalculate_resource_max( RESOURCE_HEALTH ); break;
-  case STAT_INTELLECT: stats.attribute[ ATTR_INTELLECT ] += amount; attribute[ ATTR_INTELLECT ] += amount; temporary.attribute[ ATTR_INTELLECT ] += temp_value * amount; recalculate_resource_max( RESOURCE_MANA ); break;
-  case STAT_SPIRIT:    stats.attribute[ ATTR_SPIRIT    ] += amount; attribute[ ATTR_SPIRIT    ] += amount; temporary.attribute[ ATTR_SPIRIT    ] += temp_value * amount; break;
+  case STAT_STRENGTH:  stats.attribute[ ATTR_STRENGTH  ] += amount; attribute[ ATTR_STRENGTH  ] += amount; temporary.attribute[ ATTR_STRENGTH  ] += temp_value * amount; recalculate_crit(); break;
+  case STAT_AIM:       stats.attribute[ ATTR_AIM       ] += amount; attribute[ ATTR_AIM       ] += amount; temporary.attribute[ ATTR_AIM       ] += temp_value * amount; recalculate_crit(); break;
+  case STAT_CUNNING:   stats.attribute[ ATTR_CUNNING   ] += amount; attribute[ ATTR_CUNNING   ] += amount; temporary.attribute[ ATTR_CUNNING   ] += temp_value * amount; recalculate_crit(); break;
   case STAT_WILLPOWER: stats.attribute[ ATTR_WILLPOWER ] += amount; attribute[ ATTR_WILLPOWER ] += amount; temporary.attribute[ ATTR_WILLPOWER ] += temp_value * amount; recalculate_crit(); break;
+  case STAT_ENDURANCE: stats.attribute[ ATTR_ENDURANCE ] += amount; attribute[ ATTR_ENDURANCE ] += amount; temporary.attribute[ ATTR_ENDURANCE ] += temp_value * amount; recalculate_resource_max( RESOURCE_HEALTH ); break;
+  case STAT_PRESENCE:  stats.attribute[ ATTR_PRESENCE  ] += amount; attribute[ ATTR_PRESENCE  ] += amount; temporary.attribute[ ATTR_PRESENCE  ] += temp_value * amount; break;
 
   case STAT_MAX: for ( int i=0; i < ATTRIBUTE_MAX; i++ ) { stats.attribute[ i ] += amount; temporary.attribute[ i ] += temp_value * amount; attribute[ i ] += amount; } break;
 
@@ -3272,12 +3188,12 @@ void player_t::stat_loss( int       stat,
   int temp_value = temporary_buff ? 1 : 0;
   switch ( stat )
   {
-  case STAT_STRENGTH:  stats.attribute[ ATTR_STRENGTH  ] -= amount; temporary.attribute[ ATTR_STRENGTH  ] -= temp_value * amount; attribute[ ATTR_STRENGTH  ] -= amount; break;
-  case STAT_AGILITY:   stats.attribute[ ATTR_AGILITY   ] -= amount; temporary.attribute[ ATTR_AGILITY   ] -= temp_value * amount; attribute[ ATTR_AGILITY   ] -= amount; break;
-  case STAT_STAMINA:   stats.attribute[ ATTR_STAMINA   ] -= amount; temporary.attribute[ ATTR_STAMINA   ] -= temp_value * amount; attribute[ ATTR_STAMINA   ] -= amount; stat_loss( STAT_MAX_HEALTH, floor( amount * composite_attribute_multiplier( ATTR_STAMINA ) ) * health_per_stamina, action ); break;
-  case STAT_INTELLECT: stats.attribute[ ATTR_INTELLECT ] -= amount; temporary.attribute[ ATTR_INTELLECT ] -= temp_value * amount; attribute[ ATTR_INTELLECT ] -= amount; stat_loss( STAT_MAX_MANA, floor( amount * composite_attribute_multiplier( ATTR_INTELLECT ) ) * mana_per_intellect, action ); break;
-  case STAT_SPIRIT:    stats.attribute[ ATTR_SPIRIT    ] -= amount; temporary.attribute[ ATTR_SPIRIT    ] -= temp_value * amount; attribute[ ATTR_SPIRIT    ] -= amount; break;
+  case STAT_STRENGTH:  stats.attribute[ ATTR_STRENGTH  ] -= amount; temporary.attribute[ ATTR_STRENGTH  ] -= temp_value * amount; attribute[ ATTR_STRENGTH  ] -= amount; recalculate_crit(); break;
+  case STAT_AIM:       stats.attribute[ ATTR_AIM       ] -= amount; temporary.attribute[ ATTR_AIM       ] -= temp_value * amount; attribute[ ATTR_AIM       ] -= amount; recalculate_crit(); break;
+  case STAT_CUNNING:   stats.attribute[ ATTR_CUNNING   ] -= amount; temporary.attribute[ ATTR_CUNNING   ] -= temp_value * amount; attribute[ ATTR_CUNNING   ] -= amount; recalculate_crit(); break;
   case STAT_WILLPOWER: stats.attribute[ ATTR_WILLPOWER ] -= amount; temporary.attribute[ ATTR_WILLPOWER ] -= temp_value * amount; attribute[ ATTR_WILLPOWER ] -= amount; recalculate_crit(); break;
+  case STAT_ENDURANCE: stats.attribute[ ATTR_ENDURANCE ] -= amount; temporary.attribute[ ATTR_ENDURANCE ] -= temp_value * amount; attribute[ ATTR_ENDURANCE ] -= amount; stat_loss( STAT_MAX_HEALTH, floor( amount * composite_attribute_multiplier( ATTR_ENDURANCE ) ) * health_per_endurance, action ); break;
+  case STAT_PRESENCE:  stats.attribute[ ATTR_PRESENCE  ] -= amount; temporary.attribute[ ATTR_PRESENCE  ] -= temp_value * amount; attribute[ ATTR_PRESENCE  ] -= amount; break;
 
   case STAT_MAX: for ( int i=0; i < ATTRIBUTE_MAX; i++ ) { stats.attribute[ i ] -= amount; temporary.attribute[ i ] -= temp_value * amount; attribute[ i ] -= amount; } break;
 
@@ -4412,11 +4328,11 @@ struct snapshot_stats_t : public action_t
     p -> buffed_attack_speed = p -> composite_attack_speed();
 
     p -> attribute_buffed[ ATTR_STRENGTH  ] = floor( p -> strength()  );
-    p -> attribute_buffed[ ATTR_AGILITY   ] = floor( p -> agility()   );
-    p -> attribute_buffed[ ATTR_STAMINA   ] = floor( p -> stamina()   );
-    p -> attribute_buffed[ ATTR_INTELLECT ] = floor( p -> intellect() );
-    p -> attribute_buffed[ ATTR_SPIRIT    ] = floor( p -> spirit()    );
+    p -> attribute_buffed[ ATTR_AIM       ] = floor( p -> aim()       );
+    p -> attribute_buffed[ ATTR_CUNNING   ] = floor( p -> cunning()   );
     p -> attribute_buffed[ ATTR_WILLPOWER ] = floor( p -> willpower() );
+    p -> attribute_buffed[ ATTR_ENDURANCE ] = floor( p -> endurance() );
+    p -> attribute_buffed[ ATTR_PRESENCE  ] = floor( p -> presence()  );
 
     for ( int i=0; i < RESOURCE_MAX; i++ ) p -> resource_buffed[ i ] = p -> resource_max[ i ];
 
@@ -4424,7 +4340,6 @@ struct snapshot_stats_t : public action_t
     p -> buffed_spell_hit         = p -> composite_spell_hit();
     p -> buffed_spell_crit        = p -> composite_spell_crit();
     p -> buffed_spell_penetration = p -> composite_spell_penetration();
-    p -> buffed_mp5               = p -> composite_mp5();
     p -> buffed_power             = p -> composite_power();
     p -> buffed_force_power       = p -> composite_force_power();
     p -> buffed_surge             = p -> surge_bonus;
@@ -5302,11 +5217,11 @@ action_expr_t* player_t::create_expression( action_t* a,
       switch ( stat )
       {
         case STAT_STRENGTH:         p_stat = &( a -> player -> temporary.attribute[ ATTR_STRENGTH  ] ); attr = ATTR_STRENGTH;  break;
-        case STAT_AGILITY:          p_stat = &( a -> player -> temporary.attribute[ ATTR_AGILITY   ] ); attr = ATTR_AGILITY;   break;
-        case STAT_STAMINA:          p_stat = &( a -> player -> temporary.attribute[ ATTR_STAMINA   ] ); attr = ATTR_STAMINA;   break;
-        case STAT_INTELLECT:        p_stat = &( a -> player -> temporary.attribute[ ATTR_INTELLECT ] ); attr = ATTR_INTELLECT; break;
-        case STAT_SPIRIT:           p_stat = &( a -> player -> temporary.attribute[ ATTR_SPIRIT    ] ); attr = ATTR_SPIRIT;    break;
+        case STAT_AIM:              p_stat = &( a -> player -> temporary.attribute[ ATTR_AIM       ] ); attr = ATTR_AIM;       break;
+        case STAT_CUNNING:          p_stat = &( a -> player -> temporary.attribute[ ATTR_CUNNING   ] ); attr = ATTR_CUNNING;   break;
         case STAT_WILLPOWER:        p_stat = &( a -> player -> temporary.attribute[ ATTR_WILLPOWER ] ); attr = ATTR_WILLPOWER; break;
+        case STAT_ENDURANCE:        p_stat = &( a -> player -> temporary.attribute[ ATTR_ENDURANCE ] ); attr = ATTR_ENDURANCE; break;
+        case STAT_PRESENCE:         p_stat = &( a -> player -> temporary.attribute[ ATTR_PRESENCE  ] ); attr = ATTR_PRESENCE;  break;
         case STAT_SPELL_POWER:      p_stat = &( a -> player -> temporary.spell_power                 ); break;
         case STAT_ATTACK_POWER:     p_stat = &( a -> player -> temporary.attack_power                ); break;
         case STAT_EXPERTISE_RATING: p_stat = &( a -> player -> temporary.expertise_rating            ); break;
@@ -5348,10 +5263,7 @@ action_expr_t* player_t::create_expression( action_t* a,
             {
               result_num += action -> player -> temporary.attribute[ ATTR_STRENGTH ] *
                             action -> player -> composite_attribute_multiplier( ATTR_STRENGTH ) *
-                            action -> player -> attack_power_per_strength +
-                            action -> player -> temporary.attribute[ ATTR_AGILITY ] *
-                            action -> player -> composite_attribute_multiplier( ATTR_AGILITY ) *
-                            action -> player -> attack_power_per_agility;
+                            action -> player -> attack_power_per_strength;
 
               result_num *= action -> player -> composite_attack_power_multiplier();
             }
@@ -5658,11 +5570,11 @@ bool player_t::create_profile( std::string& profile_str, int save_type, bool sav
     }
 
     if ( enchant.attribute[ ATTR_STRENGTH  ] != 0 )  profile_str += "enchant_strength="         + util_t::to_string( enchant.attribute[ ATTR_STRENGTH  ] ) + term;
-    if ( enchant.attribute[ ATTR_AGILITY   ] != 0 )  profile_str += "enchant_agility="          + util_t::to_string( enchant.attribute[ ATTR_AGILITY   ] ) + term;
-    if ( enchant.attribute[ ATTR_STAMINA   ] != 0 )  profile_str += "enchant_stamina="          + util_t::to_string( enchant.attribute[ ATTR_STAMINA   ] ) + term;
-    if ( enchant.attribute[ ATTR_INTELLECT ] != 0 )  profile_str += "enchant_intellect="        + util_t::to_string( enchant.attribute[ ATTR_INTELLECT ] ) + term;
-    if ( enchant.attribute[ ATTR_SPIRIT    ] != 0 )  profile_str += "enchant_spirit="           + util_t::to_string( enchant.attribute[ ATTR_SPIRIT    ] ) + term;
+    if ( enchant.attribute[ ATTR_AIM       ] != 0 )  profile_str += "enchant_aim="              + util_t::to_string( enchant.attribute[ ATTR_AIM       ] ) + term;
+    if ( enchant.attribute[ ATTR_CUNNING   ] != 0 )  profile_str += "enchant_cunning="          + util_t::to_string( enchant.attribute[ ATTR_CUNNING   ] ) + term;
     if ( enchant.attribute[ ATTR_WILLPOWER ] != 0 )  profile_str += "enchant_willpower="        + util_t::to_string( enchant.attribute[ ATTR_WILLPOWER ] ) + term;
+    if ( enchant.attribute[ ATTR_ENDURANCE ] != 0 )  profile_str += "enchant_endurance="        + util_t::to_string( enchant.attribute[ ATTR_ENDURANCE ] ) + term;
+    if ( enchant.attribute[ ATTR_PRESENCE  ] != 0 )  profile_str += "enchant_presence="         + util_t::to_string( enchant.attribute[ ATTR_PRESENCE  ] ) + term;
     if ( enchant.spell_power                 != 0 )  profile_str += "enchant_spell_power="      + util_t::to_string( enchant.spell_power ) + term;
     if ( enchant.mp5                         != 0 )  profile_str += "enchant_mp5="              + util_t::to_string( enchant.mp5 ) + term;
     if ( enchant.power                       != 0 )  profile_str += "enchant_power="            + util_t::to_string( enchant.power ) + term;
@@ -5801,11 +5713,11 @@ void player_t::create_options()
 
     // Gear Stats
     { "gear_strength",                        OPT_FLT,  &( gear.attribute[ ATTR_STRENGTH  ]           ) },
-    { "gear_agility",                         OPT_FLT,  &( gear.attribute[ ATTR_AGILITY   ]           ) },
-    { "gear_stamina",                         OPT_FLT,  &( gear.attribute[ ATTR_STAMINA   ]           ) },
-    { "gear_intellect",                       OPT_FLT,  &( gear.attribute[ ATTR_INTELLECT ]           ) },
-    { "gear_spirit",                          OPT_FLT,  &( gear.attribute[ ATTR_SPIRIT    ]           ) },
-    { "gear_willpower",                       OPT_FLT,  &( gear.attribute[ ATTR_WILLPOWER    ]           ) },
+    { "gear_aim",                             OPT_FLT,  &( gear.attribute[ ATTR_AIM       ]           ) },
+    { "gear_cunning",                         OPT_FLT,  &( gear.attribute[ ATTR_CUNNING   ]           ) },
+    { "gear_willpower",                       OPT_FLT,  &( gear.attribute[ ATTR_WILLPOWER ]           ) },
+    { "gear_endurance",                       OPT_FLT,  &( gear.attribute[ ATTR_ENDURANCE ]           ) },
+    { "gear_presence",                        OPT_FLT,  &( gear.attribute[ ATTR_PRESENCE  ]           ) },
     { "gear_spell_power",                     OPT_FLT,  &( gear.spell_power                           ) },
     { "gear_mp5",                             OPT_FLT,  &( gear.mp5                                   ) },
     { "gear_power",                           OPT_FLT,  &( gear.power                                 ) },
@@ -5823,11 +5735,11 @@ void player_t::create_options()
     { "gear_armor",                           OPT_FLT,  &( gear.armor                                 ) },
     // Stat Enchants
     { "enchant_strength",                     OPT_FLT,  &( enchant.attribute[ ATTR_STRENGTH  ]        ) },
-    { "enchant_agility",                      OPT_FLT,  &( enchant.attribute[ ATTR_AGILITY   ]        ) },
-    { "enchant_stamina",                      OPT_FLT,  &( enchant.attribute[ ATTR_STAMINA   ]        ) },
-    { "enchant_intellect",                    OPT_FLT,  &( enchant.attribute[ ATTR_INTELLECT ]        ) },
-    { "enchant_spirit",                       OPT_FLT,  &( enchant.attribute[ ATTR_SPIRIT    ]        ) },
-    { "enchant_willpower",                    OPT_FLT,  &( enchant.attribute[ ATTR_WILLPOWER    ]        ) },
+    { "enchant_aim",                          OPT_FLT,  &( enchant.attribute[ ATTR_AIM       ]        ) },
+    { "enchant_cunning",                      OPT_FLT,  &( enchant.attribute[ ATTR_CUNNING   ]        ) },
+    { "enchant_willpower",                    OPT_FLT,  &( enchant.attribute[ ATTR_WILLPOWER ]        ) },
+    { "enchant_endurance",                    OPT_FLT,  &( enchant.attribute[ ATTR_ENDURANCE ]        ) },
+    { "enchant_presence",                     OPT_FLT,  &( enchant.attribute[ ATTR_PRESENCE  ]        ) },
     { "enchant_spell_power",                  OPT_FLT,  &( enchant.spell_power                        ) },
     { "enchant_mp5",                          OPT_FLT,  &( enchant.mp5                                ) },
     { "enchant_power",                        OPT_FLT,  &( enchant.power                              ) },

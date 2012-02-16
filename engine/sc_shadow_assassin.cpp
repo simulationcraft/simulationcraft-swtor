@@ -160,7 +160,6 @@ struct shadow_assassin_t : public player_t
 
 namespace { // ANONYMOUS NAMESPACE ==========================================
 
-
 // ==========================================================================
 // Sith assassin Abilities
 // ==========================================================================
@@ -915,18 +914,13 @@ void shadow_assassin_t::init_base()
 {
   player_t::init_base();
 
-  attribute_base[ ATTR_WILLPOWER ] = 250;
+  attribute_base[ ATTR_WILLPOWER ] = 50 + 4 * level;
+  attribute_base[ ATTR_STRENGTH  ] = 20 + 1.6 * level;
 
-  default_distance = 3;
-  distance = default_distance;
+  distance = default_distance = 3;
 
   base_force_regen_per_second = 8.0;
   resource_base[  RESOURCE_FORCE  ] += 100;
-
-  // FIXME: Add defensive constants
-  //diminished_kfactor    = 0;
-  //diminished_dodge_capi = 0;
-  //diminished_parry_capi = 0;
 }
 // shadow_assassin_t::init_benefits =======================================================
 

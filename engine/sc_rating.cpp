@@ -175,11 +175,13 @@ double rating_t::get_attribute_base( sim_t* /* sim */, dbc_t& dbc, int level, pl
   switch ( stat_type )
   {
   case BASE_STAT_STRENGTH:           res = dbc.race_base( race ).strength + dbc.attribute_base( class_type, level ).strength; break;
+#if 0
   case BASE_STAT_AGILITY:            res = dbc.race_base( race ).agility + dbc.attribute_base( class_type, level ).agility; break;
   case BASE_STAT_STAMINA:            res = dbc.race_base( race ).stamina + dbc.attribute_base( class_type, level ).stamina; break;
   case BASE_STAT_INTELLECT:          res = dbc.race_base( race ).intellect + dbc.attribute_base( class_type, level ).intellect; break;
   case BASE_STAT_SPIRIT:             res = dbc.race_base( race ).spirit + dbc.attribute_base( class_type, level ).spirit;
                                      if ( race == RACE_HUMAN ) res *= 1.03; break;
+#endif
   case BASE_STAT_HEALTH:             res = dbc.attribute_base( class_type, level ).base_health; break;
   case BASE_STAT_MANA:               res = dbc.attribute_base( class_type, level ).base_resource; break;
   case BASE_STAT_MELEE_CRIT_PER_AGI: res = dbc.melee_crit_scaling( class_type, level ); break;

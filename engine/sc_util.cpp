@@ -407,12 +407,13 @@ const char* util_t::attribute_type_string( int type )
   switch ( type )
   {
   case ATTR_STRENGTH:  return "strength";
-  case ATTR_AGILITY:   return "agility";
-  case ATTR_STAMINA:   return "stamina";
-  case ATTR_INTELLECT: return "intellect";
-  case ATTR_SPIRIT:    return "spirit";
+  case ATTR_AIM:       return "aim";
+  case ATTR_CUNNING:   return "cunning";
+  case ATTR_WILLPOWER: return "willpower";
+  case ATTR_ENDURANCE: return "endurance";
+  case ATTR_PRESENCE:  return "presence";
+  default:             return "unknown";
   }
-  return "unknown";
 }
 
 // util_t::parse_attribute_type =============================================
@@ -949,11 +950,11 @@ const char* util_t::stat_type_string( int stat )
   switch ( stat )
   {
   case STAT_STRENGTH:  return "strength";
-  case STAT_AGILITY:   return "agility";
-  case STAT_STAMINA:   return "stamina";
-  case STAT_INTELLECT: return "intellect";
-  case STAT_SPIRIT:    return "spirit";
+  case STAT_AIM:       return "aim";
+  case STAT_CUNNING:   return "cunning";
+  case STAT_ENDURANCE: return "endurance";
   case STAT_WILLPOWER: return "willpower";
+  case STAT_PRESENCE:  return "presence";
 
   case STAT_HEALTH: return "health";
   case STAT_MANA:   return "mana";
@@ -1006,11 +1007,11 @@ const char* util_t::stat_type_abbrev( int stat )
   switch ( stat )
   {
   case STAT_STRENGTH:  return "Str";
-  case STAT_AGILITY:   return "Agi";
-  case STAT_STAMINA:   return "Sta";
-  case STAT_INTELLECT: return "Int";
-  case STAT_SPIRIT:    return "Spi";
-  case STAT_WILLPOWER: return "Willpower";
+  case STAT_AIM:       return "Aim";
+  case STAT_CUNNING:   return "Cun";
+  case STAT_WILLPOWER: return "Wil";
+  case STAT_ENDURANCE: return "End";
+  case STAT_PRESENCE:  return "Pre";
 
   case STAT_HEALTH: return "Health";
   case STAT_MANA:   return "Mana";
@@ -1062,11 +1063,11 @@ const char* util_t::stat_type_wowhead( int stat )
   switch ( stat )
   {
   case STAT_STRENGTH:  return "str";
-  case STAT_AGILITY:   return "agi";
-  case STAT_STAMINA:   return "sta";
-  case STAT_INTELLECT: return "int";
-  case STAT_SPIRIT:    return "spr";
-  case STAT_WILLPOWER: return "willpower";
+  case STAT_AIM:       return "aim";
+  case STAT_CUNNING:   return "cun";
+  case STAT_WILLPOWER: return "wil";
+  case STAT_ENDURANCE: return "end";
+  case STAT_PRESENCE:  return "pre";
 
   case STAT_HEALTH: return "health";
   case STAT_MANA:   return "mana";
@@ -1127,7 +1128,6 @@ stat_type util_t::parse_stat_type( const std::string& name )
   if ( name == "resiliencertng" ) return STAT_RESILIENCE_RATING;
   if ( name == "splpwr"         ) return STAT_SPELL_POWER;
   if ( name == "splpen"         ) return STAT_SPELL_PENETRATION;
-  if ( name == "spi"            ) return STAT_SPIRIT;
   if ( util_t::str_compare_ci( name, "__wpds"   ) ) return STAT_WEAPON_DPS;
   if ( util_t::str_compare_ci( name, "__wspeed" ) ) return STAT_WEAPON_SPEED;
 
@@ -1146,7 +1146,6 @@ stat_type util_t::parse_reforge_type( const std::string& name )
   case STAT_HIT_RATING:
   case STAT_CRIT_RATING:
   case STAT_ALACRITY_RATING:
-  case STAT_SPIRIT:
   case STAT_DODGE_RATING:
   case STAT_PARRY_RATING:
     return s;
@@ -1295,11 +1294,7 @@ stat_type util_t::translate_item_mod( int item_mod )
 {
   switch ( item_mod )
   {
-  case ITEM_MOD_AGILITY:             return STAT_AGILITY;
   case ITEM_MOD_STRENGTH:            return STAT_STRENGTH;
-  case ITEM_MOD_INTELLECT:           return STAT_INTELLECT;
-  case ITEM_MOD_SPIRIT:              return STAT_SPIRIT;
-  case ITEM_MOD_STAMINA:             return STAT_STAMINA;
   case ITEM_MOD_DODGE_RATING:        return STAT_DODGE_RATING;
   case ITEM_MOD_PARRY_RATING:        return STAT_PARRY_RATING;
   case ITEM_MOD_BLOCK_RATING:        return STAT_BLOCK_RATING;

@@ -717,47 +717,25 @@ static void print_html_stats ( FILE* file, player_t* a )
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Agility</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Aim</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> attribute_buffed[ ATTR_AGILITY   ],
-             a -> agility(),
-             a -> stats.attribute[ ATTR_AGILITY   ] );
-
-    fprintf( file,
-             "\t\t\t\t\t\t\t\t\t<tr>\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Stamina</th>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> attribute_buffed[ ATTR_STAMINA   ],
-             a -> stamina(),
-             a -> stats.attribute[ ATTR_STAMINA   ] );
+             a -> attribute_buffed[ ATTR_AIM ],
+             a -> aim(),
+             a -> stats.attribute[ ATTR_AIM ] );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Intellect</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Cunning</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> attribute_buffed[ ATTR_INTELLECT ],
-             a -> intellect(),
-             a -> stats.attribute[ ATTR_INTELLECT ] );
-
-    fprintf( file,
-             "\t\t\t\t\t\t\t\t\t<tr>\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Spirit</th>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> attribute_buffed[ ATTR_SPIRIT    ],
-             a -> spirit(),
-             a -> stats.attribute[ ATTR_SPIRIT    ] );
+             a -> attribute_buffed[ ATTR_CUNNING ],
+             a -> cunning(),
+             a -> stats.attribute[ ATTR_CUNNING ] );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
@@ -769,6 +747,28 @@ static void print_html_stats ( FILE* file, player_t* a )
              a -> attribute_buffed[ ATTR_WILLPOWER  ],
              a -> willpower(),
              a -> stats.attribute[ ATTR_WILLPOWER  ] );
+
+    fprintf( file,
+             "\t\t\t\t\t\t\t\t\t<tr>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Endurance</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t</tr>\n",
+             a -> attribute_buffed[ ATTR_ENDURANCE ],
+             a -> endurance(),
+             a -> stats.attribute[ ATTR_ENDURANCE ] );
+
+    fprintf( file,
+             "\t\t\t\t\t\t\t\t\t<tr>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Presence</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t</tr>\n",
+             a -> attribute_buffed[ ATTR_PRESENCE ],
+             a -> presence(),
+             a -> stats.attribute[ ATTR_PRESENCE ] );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
@@ -846,17 +846,6 @@ static void print_html_stats ( FILE* file, player_t* a )
              100 * a -> buffed_spell_penetration,
              100 * a -> composite_spell_penetration(),
              a -> stats.spell_penetration );
-
-    fprintf( file,
-             "\t\t\t\t\t\t\t\t\t<tr>\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Mana Per 5</th>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> buffed_mp5,
-             a -> composite_mp5(),
-             a -> stats.mp5 );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
