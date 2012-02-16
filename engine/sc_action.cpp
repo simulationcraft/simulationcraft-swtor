@@ -1350,13 +1350,16 @@ void action_t::init()
   }
 
   if ( dd_standardhealthpercentmin > 0 )
-    base_dd_min = dd_standardhealthpercentmin * rating_t::standardhealth( player );
+    base_dd_min = dd_standardhealthpercentmin * rating_t::standardhealth_damage( player -> level );
 
   if ( dd_standardhealthpercentmax > 0 )
-    base_dd_max = dd_standardhealthpercentmax * rating_t::standardhealth( player );
+    base_dd_max = dd_standardhealthpercentmax * rating_t::standardhealth_damage( player -> level );
 
   if ( td_standardhealthpercentmin > 0 && td_standardhealthpercentmax >= td_standardhealthpercentmin )
-    base_td = ( td_standardhealthpercentmin + td_standardhealthpercentmax ) / 2.0 * rating_t::standardhealth( player );
+  {
+    base_td  = ( td_standardhealthpercentmin + td_standardhealthpercentmax ) / 2.0;
+    base_td *= rating_t::standardhealth_damage( player -> level );
+  }
 
   if ( ! sync_str.empty() )
   {
