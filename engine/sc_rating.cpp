@@ -13,6 +13,7 @@ namespace { // ANONYMOUS ====================================================
 struct standard_health_t
 { int damage, healing; };
 
+// Source: http://sithwarrior.com/forums/Thread-SWTOR-formula-list?pid=3547#pid3547
 const standard_health_t standard_health_table[] = {
   /*  0 */ {    0,    0 },
   /*  1 */ {  180,  375 },
