@@ -716,26 +716,29 @@ player_t* player_t::create_sith_assassin( sim_t* sim, const std::string& name, r
 
 // player_t::shadow_assassin_init ======================================================
 
-void player_t::shadow_assassin_init( sim_t* sim )
+void player_t::shadow_assassin_init( sim_t* /* sim */ )
 {
+#if 0
   for ( unsigned int i = 0; i < sim -> actor_list.size(); i++ )
   {
     //player_t* p = sim -> actor_list[i];
     // Force Valor || Mark of Power constructed in sage_sorcerer_init !!!
   }
+#endif
 }
 
 // player_t::shadow_assassin_combat_begin ==============================================
 
-void player_t::shadow_assassin_combat_begin( sim_t* sim )
+void player_t::shadow_assassin_combat_begin( sim_t* /* sim */ )
 {
+#if 0
   for ( player_t* p = sim -> player_list; p; p = p -> next )
   {
     if ( p -> ooc_buffs() )
     {
-      if ( sim -> overrides.force_valor )
-        p -> buffs.force_valor -> override();
+      // Force Valor || Mark of Power is taken care of in sage_sorcerer_combat_begin !!!
     }
   }
+#endif
 }
 
