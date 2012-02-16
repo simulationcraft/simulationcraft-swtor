@@ -539,14 +539,21 @@ struct disturbance_t : public jedi_sage_spell_t
     jedi_sage_spell_t( ( n + std::string( is_tm ? "_tm" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
     tm( 0 )
   {
+    static const int ranks[] = { 10, 13, 16, 25, 36, 45, 50 };
+    range::copy( ranks, std::back_inserter( rank_level_list ) );
+
     parse_options( 0, options_str );
-    base_dd_min = 180.3; base_dd_max = 244.7;
+
+    dd_standardhealthpercentmin = .112;
+    dd_standardhealthpercentmax = .152;
+    direct_power_mod = 1.32;
+
     base_execute_time = timespan_t::from_seconds( 1.5 );
+
     base_cost = 30.0;
     if ( player -> set_bonus.rakata_force_masters -> two_pc() )
       base_cost -= 2.0;
     range = 30.0;
-    direct_power_mod = 1.32;
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
 
@@ -554,7 +561,9 @@ struct disturbance_t : public jedi_sage_spell_t
 
     if ( is_tm )
     {
-      base_multiplier *= 0.30;
+      dd_standardhealthpercentmin = .03;
+      dd_standardhealthpercentmax = .05;
+      direct_power_mod = 0.4;
       base_cost = 0.0;
       background = true;
     }

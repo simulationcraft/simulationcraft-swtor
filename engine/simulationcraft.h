@@ -4522,6 +4522,10 @@ struct action_t
   timespan_t last_reaction_time;
   int targetdata_dot_offset;
 
+protected:
+  std::vector<int> rank_level_list;
+  int rank_level;
+
 private:
   mutable player_t* cached_targetdata_target;
   mutable targetdata_t* cached_targetdata;

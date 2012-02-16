@@ -182,6 +182,8 @@ void action_t::init_action_t_()
 
     background = true; // prevent action from being executed
   }
+
+  rank_level = 0;
 }
 
 void action_t::init_dot( const std::string& name )
@@ -1349,16 +1351,29 @@ void action_t::init()
     rng[ i ] = player -> get_rng( buffer, ( ( i == RESULT_CRIT ) ? RNG_DISTRIBUTED : RNG_CYCLIC ) );
   }
 
+  if ( ! rank_level )
+  {
+    if ( rank_level_list.empty() )
+      rank_level = player -> level;
+    else
+    {
+      for ( unsigned i = 0 ; i < rank_level_list.size() && player -> level >= rank_level_list[ i ]; ++i )
+        rank_level = rank_level_list[ i ];
+    }
+  }
+
+  double standard_rank_damage = rating_t::standardhealth_damage( rank_level );
+
   if ( dd_standardhealthpercentmin > 0 )
-    base_dd_min = dd_standardhealthpercentmin * rating_t::standardhealth_damage( player -> level );
+    base_dd_min = dd_standardhealthpercentmin * standard_rank_damage;
 
   if ( dd_standardhealthpercentmax > 0 )
-    base_dd_max = dd_standardhealthpercentmax * rating_t::standardhealth_damage( player -> level );
+    base_dd_max = dd_standardhealthpercentmax * standard_rank_damage;
 
   if ( td_standardhealthpercentmin > 0 && td_standardhealthpercentmax >= td_standardhealthpercentmin )
   {
     base_td  = ( td_standardhealthpercentmin + td_standardhealthpercentmax ) / 2.0;
-    base_td *= rating_t::standardhealth_damage( player -> level );
+    base_td *= standard_rank_damage;
   }
 
   if ( ! sync_str.empty() )
