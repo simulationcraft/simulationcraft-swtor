@@ -606,48 +606,58 @@ struct disturbance_t : public jedi_sage_spell_t
   }
 };
 
-struct mind_crush_dot_t : public jedi_sage_spell_t
-{
-  mind_crush_dot_t( sage_sorcerer_t* p, const std::string& n ) :
-    jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
-  {
-    base_td = 47.5;
-    base_tick_time = timespan_t::from_seconds( 1.0 );
-    num_ticks = 6 + p -> talents.assertion -> rank() * 1;
-    range = 30.0;
-    tick_power_mod = 0.295;
-    influenced_by_inner_strength = false;
-    background = true;
-    may_crit = false;
-
-    base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
-  }
-
-  virtual void target_debuff( player_t* t, int dmg_type )
-  {
-    jedi_sage_spell_t::target_debuff( t, dmg_type );
-
-    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
-
-    if ( p -> talents.force_suppression -> rank() > 0 )
-      p -> benefits.fs_mind_crush -> update( p -> buffs.force_suppression -> check() > 0 );
-  }
-};
-
 struct mind_crush_t : public jedi_sage_spell_t
 {
-  jedi_sage_spell_t* dot_spell;
+  struct mind_crush_dot_t : public jedi_sage_spell_t
+  {
+    mind_crush_dot_t( sage_sorcerer_t* p, const std::string& n ) :
+      jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
+    {
+      static const int ranks[] = { 14, 19, 30, 41, 50 };
+      range::copy( ranks, std::back_inserter( rank_level_list ) );
+
+      td_standardhealthpercentmin = td_standardhealthpercentmax = .0295;
+      tick_power_mod = 0.295;
+
+      base_tick_time = timespan_t::from_seconds( 1.0 );
+      num_ticks = 6 + p -> talents.assertion -> rank() * 1;
+      range = 30.0;
+      influenced_by_inner_strength = false;
+      background = true;
+      may_crit = false;
+
+      base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
+    }
+
+    virtual void target_debuff( player_t* t, int dmg_type )
+    {
+      jedi_sage_spell_t::target_debuff( t, dmg_type );
+
+      sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+
+      if ( p -> talents.force_suppression -> rank() > 0 )
+        p -> benefits.fs_mind_crush -> update( p -> buffs.force_suppression -> check() > 0 );
+    }
+  };
+
+  mind_crush_dot_t* dot_spell;
 
   mind_crush_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
     jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
     dot_spell( new mind_crush_dot_t( p, n + "_dot" ) )
   {
+    static const int ranks[] = { 14, 19, 30, 41, 50 };
+    range::copy( ranks, std::back_inserter( rank_level_list ) );
+
     parse_options( 0, options_str );
-    base_dd_min = 165.83; base_dd_max = 230.23;
+
+    dd_standardhealthpercentmin = .103;
+    dd_standardhealthpercentmax = .143;
+    direct_power_mod = 1.23;
+
     base_execute_time = timespan_t::from_seconds( 2.0 );
     base_cost = 40.0;
     range = 30.0;
-    direct_power_mod = 1.23;
     cooldown -> duration = timespan_t::from_seconds( 15.0 );
     if ( player -> set_bonus.battlemaster_force_masters -> two_pc() )
       cooldown -> duration -= timespan_t::from_seconds( 1.5 );
