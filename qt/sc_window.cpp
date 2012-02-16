@@ -175,24 +175,40 @@ void ReforgeButtonGroup::setSelected( int state )
 
 void SimulationCraftWindow::decodeOptions( QString encoding )
 {
+  int i = 0;
   QStringList tokens = encoding.split( ' ' );
-  if ( tokens.count() >= 15 )
-  {
-         versionChoice->setCurrentIndex( tokens[  0 ].toInt() );
-      iterationsChoice->setCurrentIndex( tokens[  1 ].toInt() );
-     fightLengthChoice->setCurrentIndex( tokens[  2 ].toInt() );
-   fightVarianceChoice->setCurrentIndex( tokens[  3 ].toInt() );
-      fightStyleChoice->setCurrentIndex( tokens[  4 ].toInt() );
-      targetRaceChoice->setCurrentIndex( tokens[  5 ].toInt() );
-     playerSkillChoice->setCurrentIndex( tokens[  6 ].toInt() );
-         threadsChoice->setCurrentIndex( tokens[  7 ].toInt() );
-    //armoryRegionChoice->setCurrentIndex( tokens[  8 ].toInt() );
-     // armorySpecChoice->setCurrentIndex( tokens[  9 ].toInt() );
-     defaultRoleChoice->setCurrentIndex( tokens[ 10 ].toInt() );
-         latencyChoice->setCurrentIndex( tokens[ 11 ].toInt() );
-     //targetLevelChoice->setCurrentIndex( tokens[ 12 ].toInt() );
-      reportpetsChoice->setCurrentIndex( tokens[ 13 ].toInt() );
-  }
+  if ( i < tokens.count() )
+          versionChoice->setCurrentIndex( tokens[ i++ ].toInt() );
+  if ( i < tokens.count() )
+       iterationsChoice->setCurrentIndex( tokens[ i++ ].toInt() );
+  if ( i < tokens.count() )
+      fightLengthChoice->setCurrentIndex( tokens[ i++ ].toInt() );
+  if ( i < tokens.count() )
+    fightVarianceChoice->setCurrentIndex( tokens[ i++ ].toInt() );
+  if ( i < tokens.count() )
+       fightStyleChoice->setCurrentIndex( tokens[ i++ ].toInt() );
+  if ( i < tokens.count() )
+       targetRaceChoice->setCurrentIndex( tokens[ i++ ].toInt() );
+  if ( i < tokens.count() )
+      playerSkillChoice->setCurrentIndex( tokens[ i++ ].toInt() );
+  if ( i < tokens.count() )
+          threadsChoice->setCurrentIndex( tokens[ i++ ].toInt() );
+#if 0
+  if ( i < tokens.count() )
+     armoryRegionChoice->setCurrentIndex( tokens[ i++ ].toInt() );
+  if ( i < tokens.count() )
+       armorySpecChoice->setCurrentIndex( tokens[ i++ ].toInt() );
+#endif
+  if ( i < tokens.count() )
+      defaultRoleChoice->setCurrentIndex( tokens[ i++ ].toInt() );
+  if ( i < tokens.count() )
+          latencyChoice->setCurrentIndex( tokens[ i++ ].toInt() );
+#if 0
+  if ( i < tokens.count() )
+      targetLevelChoice->setCurrentIndex( tokens[ i++ ].toInt() );
+#endif
+  if ( i < tokens.count() )
+       reportpetsChoice->setCurrentIndex( tokens[ i++ ].toInt() );
 
   QList<QAbstractButton*>       buff_buttons  =        buffsButtonGroup->buttons();
   QList<QAbstractButton*>     debuff_buttons  =      debuffsButtonGroup->buttons();
@@ -206,7 +222,7 @@ void SimulationCraftWindow::decodeOptions( QString encoding )
   OptionEntry*        plots = getPlotOptions();
   OptionEntry* reforgeplots = getReforgePlotOptions();
 
-  for ( int i = 13; i < tokens.count(); i++ )
+  for ( ; i < tokens.count(); i++ )
   {
     QStringList opt_tokens = tokens[ i ].split( ':' );
 
@@ -235,82 +251,73 @@ void SimulationCraftWindow::decodeOptions( QString encoding )
 
 QString SimulationCraftWindow::encodeOptions()
 {
-  QString encoded = QString( "%1 %2 %3 %4 %5 %6 %7 %8 %9 %10 %11 %12 %13 %14" )
-    .arg(       versionChoice->currentIndex() )
-    .arg(    iterationsChoice->currentIndex() )
-    .arg(   fightLengthChoice->currentIndex() )
-    .arg( fightVarianceChoice->currentIndex() )
-    .arg(    fightStyleChoice->currentIndex() )
-    .arg(    targetRaceChoice->currentIndex() )
-    .arg(   playerSkillChoice->currentIndex() )
-    .arg(       threadsChoice->currentIndex() )
-    //.arg(  armoryRegionChoice->currentIndex() )
-    //.arg(    armorySpecChoice->currentIndex() )
-    .arg(   defaultRoleChoice->currentIndex() )
-    .arg(       latencyChoice->currentIndex() )
-    //.arg(   targetLevelChoice->currentIndex() )
-    .arg(    reportpetsChoice->currentIndex() )
-    ;
+  QString encoded;
+  QTextStream ss( &encoded );
+
+  ss << versionChoice->currentIndex();
+  ss << ' ' << iterationsChoice->currentIndex();
+  ss << ' ' << fightLengthChoice->currentIndex();
+  ss << ' ' << fightVarianceChoice->currentIndex();
+  ss << ' ' << fightStyleChoice->currentIndex();
+  ss << ' ' << targetRaceChoice->currentIndex();
+  ss << ' ' << playerSkillChoice->currentIndex();
+  ss << ' ' << threadsChoice->currentIndex();
+  //ss << ' ' << armoryRegionChoice->currentIndex();
+  //ss << ' ' << armorySpecChoice->currentIndex();
+  ss << ' ' << defaultRoleChoice->currentIndex();
+  ss << ' ' << latencyChoice->currentIndex();
+  //ss << ' ' << targetLevelChoice->currentIndex();
+  ss << ' ' << reportpetsChoice->currentIndex();
 
   QList<QAbstractButton*> buttons = buffsButtonGroup->buttons();
   OptionEntry* buffs = getBuffOptions();
   for ( int i=1; buffs[ i ].label; i++ )
   {
-    encoded += " buff:";
-    encoded += buffs[ i ].option;
-    encoded += "=";
-    encoded += buttons.at( i )->isChecked() ? "1" : "0";
+    ss << " buff:" << buffs[ i ].option << '='
+       << ( buttons.at( i ) -> isChecked() ? '1' : '0' );
   }
 
   buttons = debuffsButtonGroup->buttons();
   OptionEntry* debuffs = getDebuffOptions();
   for ( int i=1; debuffs[ i ].label; i++ )
   {
-    encoded += " debuff:";
-    encoded += debuffs[ i ].option;
-    encoded += "=";
-    encoded += buttons.at( i )->isChecked() ? "1" : "0";
+    ss << " debuff:" << debuffs[ i ].option << '='
+       << ( buttons.at( i ) -> isChecked() ? '1' : '0' );
   }
 
   buttons = scalingButtonGroup->buttons();
   OptionEntry* scaling = getScalingOptions();
   for ( int i=2; scaling[ i ].label; i++ )
   {
-    encoded += " scaling:";
-    encoded += scaling[ i ].option;
-    encoded += "=";
-    encoded += buttons.at( i )->isChecked() ? "1" : "0";
+    ss << " scaling:" << scaling[ i ].option << '='
+       << ( buttons.at( i ) -> isChecked() ? '1' : '0' );
   }
 
   buttons = plotsButtonGroup->buttons();
   OptionEntry* plots = getPlotOptions();
   for ( int i=0; plots[ i ].label; i++ )
   {
-    encoded += " plots:";
-    encoded += plots[ i ].option;
-    encoded += "=";
-    encoded += buttons.at( i )->isChecked() ? "1" : "0";
+    ss << " plots:" << plots[ i ].option << '='
+       << ( buttons.at( i ) -> isChecked() ? '1' : '0' );
   }
 
   buttons = reforgeplotsButtonGroup->buttons();
   OptionEntry* reforgeplots = getReforgePlotOptions();
   for ( int i=0; reforgeplots[ i ].label; i++ )
   {
-    encoded += " reforge_plots:";
-    encoded += reforgeplots[ i ].option;
-    encoded += "=";
-    encoded += buttons.at( i )->isChecked() ? "1" : "0";
+    ss << " reforge_plots:" << reforgeplots[ i ].option << '='
+       << ( buttons.at( i ) -> isChecked() ? '1' : '0' );
   }
 
   /*if ( itemDbOrder -> count() > 0 )
   {
-    encoded += " item_db_source:";
+    ss << " item_db_source:";
     for ( int i = 0; i < itemDbOrder -> count(); i++ )
     {
       QListWidgetItem *it = itemDbOrder -> item( i );
-      encoded += it -> data( Qt::UserRole ).toString();
+      ss << it -> data( Qt::UserRole ).toString();
       if ( i < itemDbOrder -> count() - 1 )
-        encoded += "/";
+        ss << '/';
     }
   }*/
 

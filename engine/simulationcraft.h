@@ -3719,7 +3719,7 @@ struct player_t : public noncopyable
   int tree_type[ MAX_TALENT_TREES ];
   int talent_tab_points[ MAX_TALENT_TREES ];
   std::vector<talent_t*> talent_trees[ MAX_TALENT_TREES ];
-  std::vector<glyph_t*> glyphs;
+  //std::vector<glyph_t*> glyphs;
 
   std::list<spell_id_t*> spell_list;
 
@@ -4024,7 +4024,7 @@ struct player_t : public noncopyable
 
   virtual targetdata_t* new_targetdata( player_t* source, player_t* target );
   virtual void init();
-  virtual void init_glyphs();
+  //virtual void init_glyphs();
   virtual void init_base() = 0;
   virtual void init_items();
   virtual void init_meta_gem( gear_stats_t& );
@@ -4147,8 +4147,8 @@ struct player_t : public noncopyable
   virtual int    primary_resource() const { return RESOURCE_NONE; }
   virtual int    primary_role() const;
   virtual int    primary_tree() const;
-  virtual int    primary_tab();
-  virtual const char* primary_tree_name() const;
+  int            primary_tab() const;
+  const char*    primary_tree_name() const;
   virtual int    normalize_by() const;
 
   virtual double health_percentage() const;
@@ -4192,10 +4192,10 @@ struct player_t : public noncopyable
   virtual bool parse_talents_wowhead( const std::string& talent_string );
 
   virtual void create_talents();
-  virtual void create_glyphs();
+  //virtual void create_glyphs();
 
   virtual talent_t* find_talent( const std::string& name, int tree = TALENT_TAB_NONE );
-  virtual glyph_t*  find_glyph ( const std::string& name );
+  //virtual glyph_t*  find_glyph ( const std::string& name );
 
   virtual action_expr_t* create_expression( action_t*, const std::string& name );
 

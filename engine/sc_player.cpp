@@ -444,8 +444,7 @@ player_t::player_t( sim_t*             s,
 
 player_t::~player_t()
 {
-  for ( std::vector<targetdata_t*>::iterator i = targetdata.begin(); i != targetdata.end(); ++i )
-    delete *i;
+  range::dispose( targetdata );
 
   while ( action_t* a = action_list )
   {
@@ -508,7 +507,7 @@ player_t::~player_t()
   for ( size_t i=0; i < sizeof_array( talent_trees ); i++ )
     range::dispose( talent_trees[ i ] );
 
-  range::dispose( glyphs );
+  //range::dispose( glyphs );
   range::dispose( spell_list );
 }
 
@@ -630,7 +629,7 @@ void player_t::init()
   init_target();
   init_talents();
   init_spells();
-  init_glyphs();
+  //init_glyphs();
   init_race();
   init_base();
   init_racials();
@@ -1351,6 +1350,7 @@ void player_t::init_talents()
   specialization = primary_tab();
 }
 
+#if 0
 // player_t::init_glyphs ====================================================
 
 void player_t::init_glyphs()
@@ -1365,6 +1365,7 @@ void player_t::init_glyphs()
     if ( g ) g -> enable();
   }
 }
+#endif
 
 // player_t::init_spells ====================================================
 
@@ -2976,25 +2977,21 @@ void player_t::recalculate_resource_max( int resource )
 
 // player_t::primary_tab ====================================================
 
-int player_t::primary_tab()
+int player_t::primary_tab() const
 {
-  specialization = TALENT_TAB_NONE;
-
+  int spec = TALENT_TAB_NONE;
   int max_points = 0;
 
   for ( int i=0; i < MAX_TALENT_TREES; i++ )
   {
-    if ( talent_tab_points[ i ] > 0 )
+    if ( talent_tab_points[ i ] > max_points )
     {
-      if ( specialization == TALENT_TAB_NONE || ( talent_tab_points[ i ] > max_points ) )
-      {
-        specialization = i;
-        max_points = talent_tab_points[ i ];
-      }
+      spec = i;
+      max_points = talent_tab_points[ i ];
     }
   }
 
-  return specialization;
+  return spec;
 }
 
 // player_t::primary_role ===================================================
@@ -4880,6 +4877,7 @@ talent_t* player_t::find_talent( const std::string& n,
   return 0;
 }
 
+#if 0
 // player_t::create_glyphs ==================================================
 
 void player_t::create_glyphs()
@@ -4907,6 +4905,7 @@ glyph_t* player_t::find_glyph( const std::string& n )
 
   return 0;
 }
+#endif
 
 // player_t::create_expression ==============================================
 

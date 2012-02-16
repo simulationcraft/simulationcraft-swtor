@@ -140,7 +140,6 @@ struct shadow_assassin_t : public player_t
     }
 
     create_talents();
-    create_glyphs();
     create_options();
   }
 
@@ -246,7 +245,7 @@ struct shock_t : public shadow_assassin_spell_t
     direct_power_mod = 1.85;
 
     cooldown -> duration = timespan_t::from_seconds( 6.0 );
-    
+
     if ( !is_chain_shock && p -> talents.chain_shock -> rank() > 0 )
     {
       chain_shock = new shock_t( p, n, options_str, true );
