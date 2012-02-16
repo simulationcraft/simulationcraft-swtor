@@ -21,18 +21,21 @@ actions+=/crushing_darkness,if=buff.wrath.react
 actions+=/chain_lightning,if=buff.wrath.react&force>76+6*target.health_pct&cooldown.crushing_darkness.remains>4
 actions+=/force_lightning
 actions+=/shock,moving=1,if=force>120
-head=rakata_force_masters_headgear
-shirt=foo,stats=1487willpower_410crit_346alacrity_218power_1224forcepower_153surge
-chest=rakata_force_masters_vestments
-legs=rakata_force_masters_lower_robe
-hands=rakata_force_masters_gloves
+head=rakata_force_masters_headgear,stats=105sta_122willpower_48power_51alacrity_44sta_61willpower_37sta_61willpower_11power_24sta_37power_51alacrity
+chest=rakata_force_masters_vestments,stats=108sta_99willpower_74crit_51alacrity_55sta_51willpower_29sta_48willpower_37crit_24sta_37crit_51alacrity
+waist=columi_force_masters_sash,stats=69sta_80willpower_34power
+legs=rakata_force_masters_lower_robe,stats=105sta_122willpower_48crit_51alacrity_44sta_61willpower_37sta_61willpower_11crit_24sta_37crit_51alacrity
+feet=rakata_force_masters_boots,stats=108sta_99willpower_74crit_51alacrity_55sta_51willpower_29sta_48willpower_37crit_24sta_37crit_51alacrity
+hands=rakata_force_masters_gloves,stats=105sta_122willpower_48power_51alacrity_44sta_61willpower_37sta_61willpower_11power_24sta_37power_51alacrity
+finger1=rakata_stalkers_implants,stats=85sta_103willpower_44crit_51surge
+finger2=rakata_stalkers_implants,stats=85sta_103willpower_44crit_51surge
 # Gear Summary
-# gear_crit_rating=410
-# gear_alacrity_rating=346
-# gear_power=218
-# gear_forcepower=1224
-# gear_willpower=1487
-# gear_surge_rating=153
+# gear_stamina=1301
+# gear_crit_rating=480
+# gear_alacrity_rating=510
+# gear_power=226
+# gear_willpower=1414
+# gear_surge_rating=102
 # Set Bonuses
 # set_bonus=rakata_force_masters_2pc
 # set_bonus=rakata_force_masters_4pc
