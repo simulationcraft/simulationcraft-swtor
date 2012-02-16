@@ -529,6 +529,7 @@ bool player_t::init( sim_t* sim )
     log_t::output( sim, "Initializing Auras, Buffs, and De-Buffs." );
 
   player_t::jedi_sage_init( sim );
+  player_t::shadow_assassin_init( sim );
   player_t::enemy_init( sim );
 
   if ( sim -> debug )
@@ -2133,6 +2134,7 @@ double player_t::spirit() const
 void player_t::combat_begin( sim_t* sim )
 {
   player_t::jedi_sage_combat_begin( sim );
+  player_t::shadow_assassin_combat_begin( sim );
   player_t::enemy_combat_begin( sim );
 
   // FIXME: Move to correct classes
@@ -2190,6 +2192,7 @@ void player_t::combat_begin()
 void player_t::combat_end( sim_t* sim )
 {
   player_t::jedi_sage_combat_end( sim );
+  player_t::shadow_assassin_combat_end( sim );
   player_t::enemy_combat_end( sim );
 }
 

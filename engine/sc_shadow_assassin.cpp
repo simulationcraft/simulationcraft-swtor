@@ -199,7 +199,6 @@ struct shadow_assassin_spell_t : public spell_t
     may_crit   = true;
     tick_may_crit = true;
   }
-
 };
 
 struct mark_of_power_t : public shadow_assassin_spell_t
@@ -270,10 +269,7 @@ struct shock_t : public shadow_assassin_spell_t
         chain_shock -> execute();
     }
   }
-
 };
-
-
 
 
 } // ANONYMOUS NAMESPACE ====================================================
@@ -315,27 +311,27 @@ action_t* shadow_assassin_t::create_action( const std::string& name,
   }
   else if ( type == JEDI_SHADOW )
   {
-    if ( name == "force_valor"        ) return new      mark_of_power_t( this, "force_valor", options_str );
-    if ( name == "project"            ) return new              shock_t( this, "project", options_str );
+    if ( name == "force_valor"        ) return new     mark_of_power_t( this, "force_valor", options_str );
+    if ( name == "project"            ) return new             shock_t( this, "project", options_str );
 #if 0
-    if ( name == "telekinetic_throw"  ) return new  telekinetic_throw_t( this, "force_lightning", options_str );
-    if ( name == "mind_crush"         ) return new         mind_crush_t( this, "crushing_darkness", options_str );
-    if ( name == "force_in_balance"   ) return new   force_in_balance_t( this, "death_field", options_str );
-    if ( name == "sever_force"        ) return new        sever_force_t( this, "creeping_terror", options_str );
-    if ( name == "force_potency"      ) return new      force_potency_t( this, "recklessness", options_str );
-    if ( name == "force_technique"    ) return new    force_technique_t( this, "lightning_charge", options_str );
-    if ( name == "shadow_technique"   ) return new   shadow_technique_t( this, "surging_charge", options_str );
-    if ( name == "low_slash"          ) return new          low_slash_t( this, "low_slash", options_str );
-    if ( name == "clairvoyant_strike" ) return new clairvoyant_strike_t( this, "voltaic_slash", options_str );
-    if ( name == "battle_readiness"   ) return new   battle_readiness_t( this, "overcharge_saber", options_str );
-    if ( name == "spinning_strike"    ) return new    spinning_strike_t( this, "assassinate", options_str );
-    if ( name == "whirling_blow"      ) return new      whirling_blow_t( this, "lacerate", options_str );
-    if ( name == "blackout"           ) return new           blackout_t( this, "blackout", options_str );
-    if ( name == "force_cloak"        ) return new        force_cloak_t( this, "force_cloak", options_str );
-    if ( name == "force_breach"       ) return new       force_breach_t( this, "discharge", options_str );
-    if ( name == "shadow_strike"      ) return new      shadow_strike_t( this, "maul", options_str );
-    if ( name == "saber_strike"       ) return new       saber_strike_t( this, "saber_strike", options_str );
-    if ( name == "double_strike"      ) return new      double_strike_t( this, "thrash", options_str );
+    if ( name == "telekinetic_throw"  ) return new   force_lightning_t( this, "telekinetic_throw", options_str );
+    if ( name == "mind_crush"         ) return new crushing_darkness_t( this, "mind_crush", options_str );
+    if ( name == "force_in_balance"   ) return new       death_field_t( this, "force_in_balance", options_str );
+    if ( name == "sever_force"        ) return new   creeping_terror_t( this, "sever_force", options_str );
+    if ( name == "force_potency"      ) return new      recklessness_t( this, "force_potency", options_str );
+    if ( name == "force_technique"    ) return new  lightning_charge_t( this, "force_technique", options_str );
+    if ( name == "shadow_technique"   ) return new    surging_charge_t( this, "shadow_technique", options_str );
+    if ( name == "low_slash"          ) return new         low_slash_t( this, "low_slash", options_str );
+    if ( name == "clairvoyant_strike" ) return new     voltaic_slash_t( this, "clairvoyant_strike", options_str );
+    if ( name == "battle_readiness"   ) return new  overcharge_saber_t( this, "battle_readiness", options_str );
+    if ( name == "spinning_strike"    ) return new       assassinate_t( this, "spinning_strike", options_str );
+    if ( name == "whirling_blow"      ) return new          lacerate_t( this, "whirling_blow", options_str );
+    if ( name == "blackout"           ) return new          blackout_t( this, "blackout", options_str );
+    if ( name == "force_cloak"        ) return new       force_cloak_t( this, "force_cloak", options_str );
+    if ( name == "force_breach"       ) return new         discharge_t( this, "force_breach", options_str );
+    if ( name == "shadow_strike"      ) return new              maul_t( this, "shadow_strike", options_str );
+    if ( name == "saber_strike"       ) return new      saber_strike_t( this, "saber_strike", options_str );
+    if ( name == "double_strike"      ) return new            thrash_t( this, "double_strike", options_str );
 #endif
   }
 
@@ -349,50 +345,50 @@ void shadow_assassin_t::init_talents()
   player_t::init_talents();
 
      // TREE_DARKNESS
-    talents.thrashing_blades = find_talent( "Thrashing Blades" );
-    talents.charge_mastery = find_talent( "Charge Mastery" );
+    talents.thrashing_blades      = find_talent( "Thrashing Blades" );
+    talents.charge_mastery        = find_talent( "Charge Mastery" );
 
     // TREE_DECEPTION
-    talents.insulation = find_talent( "Insulation" );
-    talents.duplicity = find_talent( "Duplicity" );
-    talents.dark_embrace = find_talent( "Dark Embrace" );
-    talents.obfuscation = find_talent( "Obfuscation" );
-    talents.recirculation = find_talent( "Recirculation" );
-    talents.avoidance = find_talent( "Avoidance" );
-    talents.induction = find_talent( "Induction" );
-    talents.surging_charge = find_talent( "Surging Charge" );
-    talents.darkswell = find_talent( "Darkswell" );
-    talents.deceptive_power = find_talent( "Deceptive Power" );
-    talents.entropic_field = find_talent( "Entropic Field" );
-    talents.saber_conduit = find_talent( "Saber Conduit" );
-    talents.fade = find_talent( "Fade" );
-    talents.static_cling = find_talent( "Static Cling" );
-    talents.resourcefulness = find_talent( "Resourcefulness" );
-    talents.static_charges = find_talent( "Static Charges" );
-    talents.low_slash = find_talent( "Low Slash" );
-    talents.crackling_blasts = find_talent( "Crackling Blasts" );
-    talents.voltaic_slash = find_talent( "Voltaic Slash" );
+    talents.insulation            = find_talent( "Insulation" );
+    talents.duplicity             = find_talent( "Duplicity" );
+    talents.dark_embrace          = find_talent( "Dark Embrace" );
+    talents.obfuscation           = find_talent( "Obfuscation" );
+    talents.recirculation         = find_talent( "Recirculation" );
+    talents.avoidance             = find_talent( "Avoidance" );
+    talents.induction             = find_talent( "Induction" );
+    talents.surging_charge        = find_talent( "Surging Charge" );
+    talents.darkswell             = find_talent( "Darkswell" );
+    talents.deceptive_power       = find_talent( "Deceptive Power" );
+    talents.entropic_field        = find_talent( "Entropic Field" );
+    talents.saber_conduit         = find_talent( "Saber Conduit" );
+    talents.fade                  = find_talent( "Fade" );
+    talents.static_cling          = find_talent( "Static Cling" );
+    talents.resourcefulness       = find_talent( "Resourcefulness" );
+    talents.static_charges        = find_talent( "Static Charges" );
+    talents.low_slash             = find_talent( "Low Slash" );
+    talents.crackling_blasts      = find_talent( "Crackling Blasts" );
+    talents.voltaic_slash         = find_talent( "Voltaic Slash" );
 
     // TREE_MADNESS
-    talents.exploitive_strikes = find_talent( "Exploitive Strikes" );
-    talents.sith_defiance = find_talent( "Sith Defiance" );
-    talents.crackling_charge = find_talent( "Crackling Charge" );
-    talents.oppressing_force = find_talent( "Oppressing Force" );
-    talents.chain_shock = find_talent( "Chain Shock" );
-    talents.parasitism = find_talent( "Parasitism" );
-    talents.torment = find_talent( "Torment" );
-    talents.death_field = find_talent( "Death Field" );
-    talents.fanaticism = find_talent( "Fanaticism" );
-    talents.claws_of_decay = find_talent( "Claws of Decay" );
-    talents.haunted_dreams = find_talent( "Haunted Dreams" );
-    talents.corrupted_flesh = find_talent( "Corrupted Flesh" );
-    talents.raze = find_talent( "Raze" );
-    talents.deathmark = find_talent( "Deathmark" );
-    talents.calculating_mind = find_talent( "Calculating Mind" );
-    talents.unearthed_knowledge = find_talent( "Unearthed Knowledge" );
-    talents.creeping_death = find_talent( "Creeping Death" );
-    talents.devour = find_talent( "Devour" );
-    talents.creeping_terror = find_talent( "Creeping Terror" );
+    talents.exploitive_strikes    = find_talent( "Exploitive Strikes" );
+    talents.sith_defiance         = find_talent( "Sith Defiance" );
+    talents.crackling_charge      = find_talent( "Crackling Charge" );
+    talents.oppressing_force      = find_talent( "Oppressing Force" );
+    talents.chain_shock           = find_talent( "Chain Shock" );
+    talents.parasitism            = find_talent( "Parasitism" );
+    talents.torment               = find_talent( "Torment" );
+    talents.death_field           = find_talent( "Death Field" );
+    talents.fanaticism            = find_talent( "Fanaticism" );
+    talents.claws_of_decay        = find_talent( "Claws of Decay" );
+    talents.haunted_dreams        = find_talent( "Haunted Dreams" );
+    talents.corrupted_flesh       = find_talent( "Corrupted Flesh" );
+    talents.raze                  = find_talent( "Raze" );
+    talents.deathmark             = find_talent( "Deathmark" );
+    talents.calculating_mind      = find_talent( "Calculating Mind" );
+    talents.unearthed_knowledge   = find_talent( "Unearthed Knowledge" );
+    talents.creeping_death        = find_talent( "Creeping Death" );
+    talents.devour                = find_talent( "Devour" );
+    talents.creeping_terror       = find_talent( "Creeping Terror" );
 
  // talents.name = find_talent( "NAME" );
 
@@ -458,7 +454,6 @@ void shadow_assassin_t::init_gains()
   gains.dark_embrace     = get_gain( "dark_embrace"     );
   gains.parasitism       = get_gain( "parasitism"       );
   gains.calculating_mind = get_gain( "calculating_mind" );
-
 }
 
 // shadow_assassin_t::init_procs =======================================================
@@ -493,27 +488,24 @@ void shadow_assassin_t::init_actions()
   {
     if ( type == JEDI_SHADOW )
     {
-      switch ( primary_tree() )
-      {
-      case TREE_BALANCE:
-
       action_list_str += "stim,type=exotech_resolve";
 
       action_list_str += "/force_valor";
 
       action_list_str += "/snapshot_stats";
+
+      switch ( primary_tree() )
+      {
+      case TREE_BALANCE:
+
+      // Balance Actions
 
       break;
 
 
       case TREE_INFILTRATION:
 
-      action_list_str += "stim,type=exotech_resolve";
-
-      action_list_str += "/force_valor";
-
-      action_list_str += "/snapshot_stats";
-
+      // Infiltration Actions
 
       break;
 
@@ -526,15 +518,15 @@ void shadow_assassin_t::init_actions()
     // Sith ASSASSIN
     else
     {
-      switch ( primary_tree() )
-      {
-      case TREE_MADNESS:
-
       action_list_str += "stim,type=exotech_resolve";
 
       action_list_str += "/mark_of_power";
 
       action_list_str += "/snapshot_stats";
+
+      switch ( primary_tree() )
+      {
+      case TREE_MADNESS:
 
       action_list_str += "/power_potion";
 
@@ -564,12 +556,6 @@ void shadow_assassin_t::init_actions()
 
 
       case TREE_DECEPTION:
-
-      action_list_str += "stim,type=exotech_resolve";
-
-      action_list_str += "/mark_of_power";
-
-      action_list_str += "/snapshot_stats";
 
       action_list_str += "/power_potion";
 
@@ -736,7 +722,7 @@ void player_t::shadow_assassin_init( sim_t* sim )
   for ( unsigned int i = 0; i < sim -> actor_list.size(); i++ )
   {
     //player_t* p = sim -> actor_list[i];
-    //p -> buffs.force_valor = new buff_t( p, "force_valor_mark_of_power", 1 );
+    // Force Valor || Mark of Power constructed in sage_sorcerer_init !!!
   }
 }
 
