@@ -215,7 +215,7 @@ struct mark_of_power_t : public shadow_assassin_spell_t
     for ( player_t* p = sim -> player_list; p; p = p -> next )
     {
       if ( p -> ooc_buffs() )
-        p -> buffs.force_valor -> override();
+        p -> buffs.force_valor -> trigger();
     }
   }
 

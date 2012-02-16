@@ -382,7 +382,7 @@ struct force_valor_t : public jedi_sage_spell_t
     for ( player_t* p = sim -> player_list; p; p = p -> next )
     {
       if ( p -> ooc_buffs() )
-        p -> buffs.force_valor -> override();
+        p -> buffs.force_valor -> trigger();
     }
   }
 
