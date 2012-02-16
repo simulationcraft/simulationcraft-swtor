@@ -114,11 +114,11 @@ struct sage_sorcerer_t : public player_t
   // Talents
   struct talents_t
   {
-    // TREE_SEER
+    // Seer|Corruption
     talent_t* penetrating_light;
     talent_t* psychic_suffusion;
 
-    // TREE_TELEKINETICS
+    // Telekinetics|Lightning
     talent_t* inner_strength;
     talent_t* mental_longevity;
     talent_t* clamoring_force;
@@ -139,7 +139,7 @@ struct sage_sorcerer_t : public player_t
     talent_t* reverberation;
     talent_t* turbulence;
 
-    // TREE_BALANCE
+    // Balance|Madness
     talent_t* empowered_throw;
     talent_t* jedi_resistance;
     talent_t* will_of_the_jedi;
@@ -160,9 +160,7 @@ struct sage_sorcerer_t : public player_t
     talent_t* psychic_absorption;
     talent_t* sever_force;
 
-    talents_t() { memset( ( void* ) this, 0x0, sizeof( talents_t ) ); }
-  };
-  talents_t talents;
+  } talents;
 
   sage_sorcerer_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
     player_t( sim, pt == SITH_SORCERER ? SITH_SORCERER : JEDI_SAGE, name, ( r == RACE_NONE ) ? RACE_HUMAN : r ),
@@ -1359,7 +1357,7 @@ void sage_sorcerer_t::create_talents()
     { "Resplendence", 2 }, { "Clairvoyance", 3 }, { "Salvation", 1 },
     { 0, 0 },
 
-    // TK|Lightning
+    // Telekinetics|Lightning
     { "Inner Strength", 3 }, { "Mental Longevity", 2 }, { "Clamoring Force", 3 }, { "Minds Eye", 1 },
     { "Disturb Mind", 2 }, { "Concentration", 2 }, { "Telekinetic Defense",  2 }, { "Blockout", 2 },
     { "Telekinetic Wave", 1 }, { "Psychic Projection", 2 }, { "Force Wake", 2 },

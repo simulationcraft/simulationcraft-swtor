@@ -73,11 +73,11 @@ struct shadow_assassin_t : public player_t
   // Talents
   struct talents_t
   {
-    // TREE_DARKNESS
+    // Darkness|Kinetic Combat
     talent_t* thrashing_blades;
     talent_t* charge_mastery;
 
-    // TREE_DECEPTION
+    // Deception|Infiltration
     talent_t* insulation;
     talent_t* duplicity;
     talent_t* dark_embrace;
@@ -98,7 +98,7 @@ struct shadow_assassin_t : public player_t
     talent_t* crackling_blasts;
     talent_t* voltaic_slash;
 
-    // TREE_MADNESS
+    // Madness|Balance
     talent_t* exploitive_strikes;
     talent_t* sith_defiance;
     talent_t* crackling_charge;
@@ -119,9 +119,7 @@ struct shadow_assassin_t : public player_t
     talent_t* devour;
     talent_t* creeping_terror;
 
-    talents_t() { memset( ( void* ) this, 0x0, sizeof( talents_t ) ); }
-  };
-  talents_t talents;
+  } talents;
 
   shadow_assassin_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
     player_t( sim, pt == SITH_ASSASSIN ? SITH_ASSASSIN : JEDI_SHADOW, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
