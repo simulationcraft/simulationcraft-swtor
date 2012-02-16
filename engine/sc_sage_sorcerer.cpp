@@ -749,11 +749,14 @@ struct turbulence_t : public jedi_sage_spell_t
     check_talent( p -> talents.turbulence -> rank() );
 
     parse_options( 0, options_str );
-    base_dd_min = 222.2; base_dd_max = 286.6;
+
+    dd_standardhealthpercentmin = .138;
+    dd_standardhealthpercentmax = .178;
+    direct_power_mod = 1.58;
+
     base_execute_time = timespan_t::from_seconds( 2.0 );
     base_cost = 45.0;
     range = 30.0;
-    direct_power_mod = 1.58;
     crit_bonus += p -> talents.reverberation -> rank() * 0.1;
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
@@ -800,11 +803,14 @@ struct force_in_balance_t : public jedi_sage_spell_t
     check_talent( p -> talents.force_in_balance -> rank() );
 
     parse_options( 0, options_str );
-    base_dd_min = 268.9; base_dd_max = 333.3;
+
+    dd_standardhealthpercentmin = .167;
+    dd_standardhealthpercentmax = .207;
+    direct_power_mod = 1.87;
+
     ability_lag = timespan_t::from_seconds( 0.2 );
     base_cost = 50.0;
     range = 30.0;
-    direct_power_mod = 1.87;
     aoe = 2;
 
     cooldown -> duration = timespan_t::from_seconds( 15.0 );
@@ -831,12 +837,14 @@ struct sever_force_t : public jedi_sage_spell_t
     check_talent( p -> talents.sever_force -> rank() );
 
     parse_options( 0, options_str );
-    base_td = 50;
+
+    td_standardhealthpercentmin = td_standardhealthpercentmax = .031;
+    tick_power_mod = 0.311;
+
     base_tick_time = timespan_t::from_seconds( 3.0 );
     num_ticks = 6;
     base_cost = 20.0;
     range = 30.0;
-    tick_power_mod = 0.311;
     may_crit = false;
     cooldown -> duration = timespan_t::from_seconds( 9.0 );
     tick_zero = true;
@@ -889,28 +897,38 @@ struct telekinetic_wave_t : public jedi_sage_spell_t
     check_talent( p -> talents.telekinetic_wave -> rank() );
 
     parse_options( 0, options_str );
-    base_cost = 50.0;
-    cooldown -> duration = timespan_t::from_seconds( 6.0 );
-    base_dd_min = 293.02; base_dd_max = 357.42;
-    base_execute_time = timespan_t::from_seconds( 3.0 );
+
+    if ( is_tm )
+    {
+      dd_standardhealthpercentmin = .041;
+      dd_standardhealthpercentmax = .081;
+      direct_power_mod = .61;
+
+      base_cost = 0.0;
+      background = true;
+    }
+    else
+    {
+      dd_standardhealthpercentmin = .182;
+      dd_standardhealthpercentmax = .222;
+      direct_power_mod = 2.02;
+
+      base_cost = 50.0;
+      cooldown -> duration = timespan_t::from_seconds( 6.0 );
+      base_execute_time = timespan_t::from_seconds( 3.0 );
+
+      if ( p -> talents.telekinetic_momentum -> rank() > 0 )
+      {
+        tm = new telekinetic_wave_t( p, n, options_str, true );
+        add_child( tm );
+      }
+    }
+
     range = 30.0;
-    direct_power_mod = 2.02;
     aoe = 4;
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02 + p -> talents.psychic_suffusion -> rank() * 0.05;
     crit_bonus += p -> talents.reverberation -> rank() * 0.1;
-
-    if ( is_tm )
-    {
-      base_multiplier *= 0.30;
-      base_cost = 0.0;
-      background = true;
-    }
-    else if ( p -> talents.telekinetic_momentum -> rank() > 0 )
-    {
-      tm = new telekinetic_wave_t( p, n, options_str, true );
-      add_child( tm );
-    }
   }
 
   virtual void execute()
@@ -1069,7 +1087,6 @@ void sage_sorcerer_t::init_talents()
   talents.mental_scarring = find_talent( "Mental Scarring" );
   talents.psychic_absorption = find_talent( "Psychic Absorption" );
   talents.sever_force = find_talent( "Sever Force" );
-
 }
 
 // sage_sorcerer_t::init_base ========================================================
