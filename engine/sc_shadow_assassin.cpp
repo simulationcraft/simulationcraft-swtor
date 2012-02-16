@@ -269,6 +269,604 @@ struct shock_t : public shadow_assassin_spell_t
 };
 
 
+
+// ==========================================================================
+// force_lightning // telekinetic_throw
+//      base_dd_min      = 127.19; // StandardHealthPercentMin=>0.079
+//      base_dd_max      = 127.19; // StandardHealthPercentMax=>0.079
+//      direct_power_mod = 0.79  ; // Energy
+//      base_cost = 30.0;
+//      range = 10.0;
+//      cooldown -> duration = timespan_t::from_seconds( 6.0 );
+
+struct force_lightning_t : public shadow_assassin_spell_t
+{
+  force_lightning_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
+    shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
+  {
+    parse_options( 0, options_str );
+    base_td = 127.2;
+    base_cost = 30.0;
+    range = 30.0;
+    tick_power_mod = 0.79;
+    num_ticks = 3;
+    base_tick_time = timespan_t::from_seconds( 1.0 );
+    may_crit = false;
+    channeled = true;
+    tick_zero = true;
+
+    cooldown -> duration = timespan_t::from_seconds( 6.0 );
+  }
+
+  virtual void execute()
+  {
+    shadow_assassin_spell_t::execute();
+  }
+};
+
+// crushing_darkness // mind_crush
+//      DD:  StandardHealthPercentMin=>0.103  => base_dd_min      = 165.83;
+//      DD:  StandardHealthPercentMax=>0.143  => base_dd_max      = 230.23;
+//      DD:  direct_power_mod = 1.23  ; Kinetic
+//      DOT: StandardHealthPercentMin=>0.0295 => base_dd_min      = 47.495;
+//      DOT: StandardHealthPercentMax=>0.0295 => base_dd_max      = 47.495;
+//      DOT: direct_power_mod = 0.295 ; Kinetic
+
+struct crushing_darkness_dot_t : public shadow_assassin_spell_t
+{
+  crushing_darkness_dot_t( shadow_assassin_t* p, const std::string& n ) :
+    shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
+  {
+    base_td = 47.5;
+    base_tick_time = timespan_t::from_seconds( 1.0 );
+    num_ticks = 6;
+    range = 10.0;
+    tick_power_mod = 0.295;
+    background = true;
+    may_crit = false;
+  }
+
+  virtual void target_debuff( player_t* t, int dmg_type )
+  {
+    shadow_assassin_spell_t::target_debuff( t, dmg_type );
+
+    shadow_assassin_t* p = player -> cast_shadow_assassin();
+  }
+};
+
+struct crushing_darkness_t : public shadow_assassin_spell_t
+{
+  shadow_assassin_spell_t* dot_spell;
+
+  crushing_darkness_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
+    shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
+    dot_spell( new crushing_darkness_dot_t( p, n + "_dot" ) )
+  {
+    parse_options( 0, options_str );
+    base_dd_min = 165.83; base_dd_max = 230.23;
+    base_execute_time = timespan_t::from_seconds( 2.0 );
+    base_cost = 40.0;
+    range = 10.0;
+    direct_power_mod = 1.23;
+    cooldown -> duration = timespan_t::from_seconds( 15.0 );
+
+    add_child( dot_spell );
+  }
+
+  virtual void execute()
+  {
+    shadow_assassin_spell_t::execute();
+    dot_spell -> execute();
+  }
+};
+
+
+// ==========================================================================
+// death_field // force_in_balance
+//      base_dd_min      = 268.87; // StandardHealthPercentMin=>0.167
+//      base_dd_max      = 333.27; // StandardHealthPercentMax=>0.207
+//      direct_power_mod = 1.87  ; // Internal
+//      base_cost = 50.0;
+//      range = 30.0;
+//      cooldown -> duration = timespan_t::from_seconds( 15.0 );
+
+struct death_field_t : public shadow_assassin_spell_t
+{
+  death_field_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
+    shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+  {
+    check_talent( p -> talents.death_field -> rank() );
+
+    parse_options( 0, options_str );
+    base_dd_min = 268.9; base_dd_max = 333.3;
+    ability_lag = timespan_t::from_seconds( 0.2 );
+    base_cost = 50.0;
+    range = 30.0;
+    direct_power_mod = 1.87;
+    aoe = 2;
+
+    cooldown -> duration = timespan_t::from_seconds( 15.0 );
+  }
+
+  virtual void calculate_result()
+  {
+    shadow_assassin_spell_t::calculate_result();
+
+    shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+    p -> buffs.deathmark-> trigger( 10 );
+  }
+};
+
+// creeping_terror // sever_force
+//      base_dd_min      = 49.91; // StandardHealthPercentMin=>0.031
+//      base_dd_max      = 49.91; // StandardHealthPercentMax=>0.031
+//      direct_power_mod = 0.311  ; // Internal
+//      base_cost = 20.0;
+//      range = 30.0;
+//      cooldown -> duration = timespan_t::from_seconds( 9.0 );
+
+
+struct creeping_terror_t : public shadow_assassin_spell_t
+{
+  creeping_terror_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
+    shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+  {
+    check_talent( p -> talents.creeping_terror -> rank() );
+
+    parse_options( 0, options_str );
+    base_td = 50;
+    base_tick_time = timespan_t::from_seconds( 3.0 );
+    num_ticks = 6;
+    base_cost = 20.0;
+    range = 30.0;
+    tick_power_mod = 0.311;
+    may_crit = false;
+    cooldown -> duration = timespan_t::from_seconds( 9.0 );
+    tick_zero = true;
+  }
+
+  virtual void target_debuff( player_t* t, int dmg_type )
+  {
+    shadow_assassin_spell_t::target_debuff( t, dmg_type );
+
+    shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+//    if ( p -> talents.deathmark -> rank() > 0 )
+//      p -> benefits.fs_creeping_terror -> update( p -> buffs.deathmark -> check() > 0 );
+  }
+};
+
+// recklessness // force_potency
+
+struct recklessness_t : public shadow_assassin_spell_t
+{
+  recklessness_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
+    shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+  {
+    parse_options( 0, options_str );
+    cooldown -> duration = timespan_t::from_seconds( 90.0 );
+    harmful = false;
+
+    trigger_gcd = timespan_t::zero;
+  }
+
+  virtual void execute()
+  {
+    shadow_assassin_spell_t::execute();
+
+    shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+    p -> buffs.recklessness -> trigger( 2 );
+  }
+};
+
+// lightning_charge // force_technique
+//      base_dd_min      = 27.37; // StandardHealthPercentMin=>0.017
+//      base_dd_max      = 27.37; // StandardHealthPercentMax=>0.017
+//      direct_power_mod = 0.165  ; // Energy
+//FIXME Proc: 50%  This effect cannot occur more than once every 1.5 seconds.
+
+
+struct lightning_charge_t : public shadow_assassin_spell_t
+{
+  lightning_charge_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
+    shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
+  {
+    parse_options( 0, options_str );
+    proc = true;
+    background = true;
+    base_cost= 0.0;
+    trigger_gcd = timespan_t::zero;
+    cooldown -> duration = timespan_t::from_seconds( 1.5 );
+    harmful = false;
+//  chance = 0.5;
+    base_dd_min      = 27.37;
+    base_dd_max      = 27.37;
+    direct_power_mod = 0.165;
+  }
+
+  virtual void execute()
+  {
+    shadow_assassin_spell_t::execute();
+  }
+};
+
+// surging_charge // shadow_technique
+//      base_dd_min      = 54.74; // StandardHealthPercentMin=>0.034
+//      base_dd_max      = 54.74; // StandardHealthPercentMax=>0.034
+//      direct_power_mod = 0.344  ; // Energy
+//FIXME: Proc: 25%  This effect cannot occur more than once every 1.5 seconds.
+//FIXME: Energy School to define?
+
+struct surging_charge_t : public shadow_assassin_spell_t
+{
+  surging_charge_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
+    shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
+  {
+    parse_options( 0, options_str );
+    proc = true;
+    background = true;
+    base_cost= 0.0;
+    trigger_gcd = timespan_t::zero;
+    cooldown -> duration = timespan_t::from_seconds( 1.5 );
+    harmful = false;
+//  chance = 0.25;
+    base_dd_min      = 54.74;
+    base_dd_max      = 54.74;
+    direct_power_mod = 0.344;
+  }
+
+  virtual void execute()
+  {
+    shadow_assassin_spell_t::execute();
+  }
+};
+
+
+// low_slash // low_slash
+//      base_dd_min      = 212.52; // StandardHealthPercentMin=>0.132
+//      base_dd_max      = 212.52; // StandardHealthPercentMax=>0.132
+//      direct_power_mod = 1.32  ; // PHYSICAL
+//      base_cost = 30.0;
+//      range = 4.0;
+//      cooldown -> duration = timespan_t::from_seconds( 15.0 );
+
+struct low_slash_t : public shadow_assassin_attack_t
+{
+  low_slash_t( shadow_assassin_t* p,const std::string& n,const std::string& options_str) :
+  shadow_assassin_attack_t(n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
+  {
+    parse_options( 0, options_str );
+    base_dd_min = 212.52;
+    base_dd_max = 212.52;
+    base_cost = 30;
+    range = 4.0;
+    direct_power_mod = 1.32;
+    cooldown -> duration = timespan_t::from_seconds( 15 );
+  }
+
+  virtual void execute()
+  {
+    shadow_assassin_attack_t::execute();
+  }
+};
+
+// voltaic_slash // clairvoyant_strike
+//      base_dd_min      = 257.6; // StandardHealthPercentMin=>0.08
+//      base_dd_max      = 257.6; // StandardHealthPercentMax=>0.08
+//      direct_power_mod = 0.8  ; // PHYSICAL
+//      base_cost = 30.0;
+//      range = 4.0;
+//      cooldown -> duration = timespan_t::from_seconds( 15.0 );
+// FIXME: Actually strike the target twice (Double proc chance etc.)
+// TODO : Each use of this ability increases the damage dealt by your next Shock by 15%.
+//        Stacks up to 2 times.
+
+
+struct voltaic_slash_t : public shadow_assassin_attack_t
+{
+  voltaic_slash_t( shadow_assassin_t* p,const std::string& n,const std::string& options_str) :
+  shadow_assassin_attack_t(n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
+  {
+    parse_options( 0, options_str );
+    base_dd_min = 257.6; //128.8 * 2
+    base_dd_max = 257.6; //128.8 * 2
+    base_cost = 25;
+    range = 4.0;
+    direct_power_mod = 0.8;
+  }
+
+  virtual void execute()
+  {
+    shadow_assassin_attack_t::execute();
+  }
+};
+
+// overcharge_saber // battle_readiness
+
+struct overcharge_saber_t : public shadow_assassin_spell_t
+{
+  overcharge_saber_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
+    shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+  {
+    parse_options( 0, options_str );
+    cooldown -> duration = timespan_t::from_seconds( 120.0 );
+    harmful = false;
+
+    trigger_gcd = timespan_t::zero;
+  }
+
+  virtual void execute()
+  {
+    shadow_assassin_spell_t::execute();
+
+    shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+    p -> buffs.overcharge_saber -> trigger();
+  }
+};
+
+// assassinate // spinning_strike
+//      base_dd_min      = 497.49; // StandardHealthPercentMin=>0.309
+//      base_dd_max      = 497.49; // StandardHealthPercentMax=>0.309
+//      direct_power_mod = 3.09  ; // PHYSICAL
+//      base_cost = 25.0;
+//      range = 4.0;
+//      cooldown -> duration = timespan_t::from_seconds( 6.0 );
+//FIXME: Need to add target health condition (<=30%)
+
+struct assassinate_t : public shadow_assassin_attack_t
+{
+  assassinate_t( shadow_assassin_t* p,const std::string& n,const std::string& options_str) :
+  shadow_assassin_attack_t(n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
+  {
+    parse_options( 0, options_str );
+    base_dd_min = 497.49;
+    base_dd_max = 497.49;
+    base_cost = 25;
+    range = 4.0;
+    direct_power_mod = 3.09;
+    cooldown -> duration = timespan_t::from_seconds( 6.0 );
+  }
+
+  virtual void execute()
+  {
+    shadow_assassin_attack_t::execute();
+  }
+};
+
+
+// lacerate // whirling_blow
+//      base_dd_min      = 114.31; // StandardHealthPercentMin=>0.071
+//      base_dd_max      = 114.31; // StandardHealthPercentMax=>0.071
+//      direct_power_mod = 0.71  ; // PHYSICAL
+//      base_cost = 40.0;
+//      range = 4.0;
+
+struct lacerate_t : public shadow_assassin_attack_t
+{
+  lacerate_t( shadow_assassin_t* p,const std::string& n,const std::string& options_str) :
+  shadow_assassin_attack_t(n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
+  {
+    parse_options( 0, options_str );
+    base_dd_min = 114.61;
+    base_dd_max = 114.31;
+    base_cost = 40;
+    range = 4.0;
+    direct_power_mod = 0.71;
+  }
+
+  virtual void execute()
+  {
+    shadow_assassin_attack_t::execute();
+  }
+};
+
+// blackout // blackout
+
+struct blackout_t : public shadow_assassin_spell_t
+{
+  blackout_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
+    shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+  {
+    parse_options( 0, options_str );
+    cooldown -> duration = timespan_t::from_seconds( 60.0 );
+    harmful = false;
+
+//CHECK    trigger_gcd = timespan_t::zero;
+  }
+
+  virtual void execute()
+  {
+    shadow_assassin_spell_t::execute();
+
+    shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+    p -> buffs.dark_embrace -> trigger( 1 );
+  }
+};
+
+// force_cloak // force_cloak
+
+struct force_cloak_t : public shadow_assassin_spell_t
+{
+  force_cloak_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
+    shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+  {
+    parse_options( 0, options_str );
+    cooldown -> duration = timespan_t::from_seconds( 180.0 );
+    harmful = false;
+
+//CHECK    trigger_gcd = timespan_t::zero;
+  }
+
+  virtual void execute()
+  {
+    shadow_assassin_spell_t::execute();
+
+    shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+    p -> buffs.dark_embrace -> trigger( 1 );
+  }
+};
+
+// discharge_lightning
+//      DOT: StandardHealthPercentMin=>0.038 => base_dd_min      = 61.18;
+//      DOT: StandardHealthPercentMax=>0.038 => base_dd_max      = 61.18;
+//      DOT: direct_power_mod = 0.38 ; Kinetic
+
+
+struct discharge_lightning_t : public shadow_assassin_spell_t
+{
+  discharge_lightning_t( shadow_assassin_t* p, const std::string& n ) :
+    shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
+  {
+    base_td = 61.18;
+    base_tick_time = timespan_t::from_seconds( 3.0 );
+    num_ticks = 6;
+    range = 10.0;
+    tick_power_mod = 0.38;
+    background = true;
+    may_crit = false;
+    tick_zero = true;
+  }
+
+  virtual void target_debuff( player_t* t, int dmg_type )
+  {
+    shadow_assassin_spell_t::target_debuff( t, dmg_type );
+
+    shadow_assassin_t* p = player -> cast_shadow_assassin();
+  }
+};
+
+// discharge_surging
+//      DD: StandardHealthPercentMin=>0.054 => base_dd_min      = 86.94;
+//      DD: StandardHealthPercentMax=>0.094 => base_dd_max      = 151.34;
+//      DD: direct_power_mod = 0.74 ; Kinetic
+
+struct discharge_surging_t : public shadow_assassin_spell_t
+{
+  discharge_surging_t( shadow_assassin_t* p, const std::string& n ) :
+    shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL)
+  {
+    base_dd_min = 86.94;
+    base_dd_max = 151.34;
+    base_cost = 0;
+    range = 10.0;
+    direct_power_mod = 0.74;
+  }
+  virtual void target_debuff( player_t* t, int dmg_type )
+  {
+    shadow_assassin_t* p = player -> cast_shadow_assassin();
+  }
+};
+
+
+// discharge // force_breach
+//FIX ME: Add check on current charge used, and apply proper spell. (Surging Charge or Lightning Charge)
+
+
+struct discharge_t : public shadow_assassin_spell_t
+{
+  shadow_assassin_spell_t* dot_spell;
+
+  discharge_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
+    shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
+    dot_spell( new discharge_lightning_t( p, n + "_dot" ) )
+  {
+    add_child( dot_spell );
+  }
+
+  virtual void execute()
+  {
+    shadow_assassin_spell_t::execute();
+    dot_spell -> execute();
+  }
+};
+
+// maul // shadow_strike
+//      base_dd_min      = 379.96; // StandardHealthPercentMin=>0.236
+//      base_dd_max      = 379.96; // StandardHealthPercentMax=>0.236
+//      direct_power_mod = 2.37  ; // PHYSICAL
+//      base_cost = 50.0;
+//      range = 4.0;
+
+
+struct maul_t : public shadow_assassin_attack_t
+{
+  maul_t( shadow_assassin_t* p,const std::string& n,const std::string& options_str) :
+  shadow_assassin_attack_t(n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
+  {
+    parse_options( 0, options_str );
+    base_dd_min = 379.96;
+    base_dd_max = 379.96;
+    base_cost = 50;
+    range = 4.0;
+    direct_power_mod = 2.37;
+  }
+
+  virtual void execute()
+  {
+    shadow_assassin_attack_t::execute();
+  }
+};
+
+// saber_strike // saber_strike
+//      base_dd_min      = 379.96; // StandardHealthPercentMin=>0.236
+//      base_dd_max      = 379.96; // StandardHealthPercentMax=>0.236
+//      direct_power_mod = 2.37  ; // PHYSICAL
+//      range = 4.0;
+//FIX ME: no idea how to find the dd min and max for this spell.
+
+struct saber_strike_t : public shadow_assassin_attack_t
+  {
+    saber_strike_t( shadow_assassin_t* p,const std::string& n,const std::string& options_str) :
+    shadow_assassin_attack_t(n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
+    {
+      parse_options( 0, options_str );
+      base_dd_min = 1.00;
+      base_dd_max = 1.00;
+      base_cost = 0;
+      range = 4.0;
+      direct_power_mod = 1;
+    }
+  virtual void execute()
+  {
+    shadow_assassin_attack_t::execute();
+  }
+
+};
+
+
+// thrash // double_strike
+//      base_dd_min      = 238.28; // StandardHealthPercentMin=>0.074 * 2
+//      base_dd_max      = 238.28; // StandardHealthPercentMax=>0.074 * 2
+//      direct_power_mod = 0.74  ; // PHYSICAL
+//      base_cost = 25.0;
+//      range = 4.0;
+//FIX ME: Thrash hit twice.
+// ==========================================================================
+
+struct thrash_t : public shadow_assassin_spell_t
+{
+  thrash_t( shadow_assassin_t* p,const std::string& n,const std::string& options_str) :
+  shadow_assassin_spell_t(n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
+  {
+    parse_options( 0, options_str );
+    base_dd_min = 238.28;
+    base_dd_max = 238.28;
+    base_cost = 25;
+    range = 4.0;
+    direct_power_mod = 0.74;
+  }
+
+  virtual void execute()
+  {
+    shadow_assassin_spell_t::execute();
+  }
+};
+
 } // ANONYMOUS NAMESPACE ====================================================
 
 // ==========================================================================
@@ -285,7 +883,6 @@ action_t* shadow_assassin_t::create_action( const std::string& name,
   {
     if ( name == "mark_of_power"      ) return new     mark_of_power_t( this, "mark_of_power", options_str );
     if ( name == "shock"              ) return new             shock_t( this, "shock", options_str );
-#if 0
     if ( name == "force_lightning"    ) return new   force_lightning_t( this, "force_lightning", options_str );
     if ( name == "crushing_darkness"  ) return new crushing_darkness_t( this, "crushing_darkness", options_str );
     if ( name == "death_field"        ) return new       death_field_t( this, "death_field", options_str );
@@ -304,13 +901,11 @@ action_t* shadow_assassin_t::create_action( const std::string& name,
     if ( name == "maul"               ) return new              maul_t( this, "maul", options_str );
     if ( name == "saber_strike"       ) return new      saber_strike_t( this, "saber_strike", options_str );
     if ( name == "thrash"             ) return new            thrash_t( this, "thrash", options_str );
-#endif
   }
   else if ( type == JEDI_SHADOW )
   {
     if ( name == "force_valor"        ) return new     mark_of_power_t( this, "force_valor", options_str );
     if ( name == "project"            ) return new             shock_t( this, "project", options_str );
-#if 0
     if ( name == "telekinetic_throw"  ) return new   force_lightning_t( this, "telekinetic_throw", options_str );
     if ( name == "mind_crush"         ) return new crushing_darkness_t( this, "mind_crush", options_str );
     if ( name == "force_in_balance"   ) return new       death_field_t( this, "force_in_balance", options_str );
@@ -329,7 +924,6 @@ action_t* shadow_assassin_t::create_action( const std::string& name,
     if ( name == "shadow_strike"      ) return new              maul_t( this, "shadow_strike", options_str );
     if ( name == "saber_strike"       ) return new      saber_strike_t( this, "saber_strike", options_str );
     if ( name == "double_strike"      ) return new            thrash_t( this, "double_strike", options_str );
-#endif
   }
 
   return player_t::create_action( name, options_str );
