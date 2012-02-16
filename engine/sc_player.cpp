@@ -437,7 +437,8 @@ player_t::player_t( sim_t*             s,
 
   if ( reaction_stddev == timespan_t::zero ) reaction_stddev = reaction_mean * 0.25;
 
-  set_bonus.indomitable = get_set_bonus( "indomitable", "_force_masters_" );
+  set_bonus.rakata_force_masters = get_set_bonus( "rakata_force_masters", std::vector<std::string> ( 1, "_force_masters_" ) );
+  set_bonus.battlemaster_force_masters = get_set_bonus( "battlemaster_force_masters", std::vector<std::string> ( 1, "battlemaster_force_masters_" ) );
 }
 
 // player_t::~player_t ======================================================
@@ -3965,7 +3966,7 @@ rng_t* player_t::get_rng( const std::string& n, int type )
 
 // player_t::get_set_bonus =======================================================
 
-set_bonus_t* player_t::get_set_bonus( const std::string& name, std::string filter )
+set_bonus_t* player_t::get_set_bonus( const std::string& name, std::vector<std::string> filter )
 {
   set_bonus_t* sb=0;
 
@@ -3975,8 +3976,8 @@ set_bonus_t* player_t::get_set_bonus( const std::string& name, std::string filte
       return sb;
   }
 
-  if ( filter.empty() )
-    filter = name;
+  if ( filter.size() == 0 )
+    filter.push_back( name );
 
   sb = new set_bonus_t( this, name, filter );
 

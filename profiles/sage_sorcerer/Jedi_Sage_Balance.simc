@@ -7,6 +7,7 @@ race=human
 position=front
 role=spell
 use_pre_potion=0
+professions=biochem=400
 talents=http://www.torhead.com/skill-calc#600hZbcMZcMfRsMkrfz.1
 actions=stim,type=exotech_resolve
 actions+=/force_valor
@@ -32,5 +33,5 @@ hands=foo_force_masters_gloves
 # gear_willpower=1487
 # gear_surge_rating=153
 # Set Bonuses
-# set_bonus=indomitable_2pc
-# set_bonus=indomitable_4pc
+# set_bonus=rakata_force_masters_2pc
+# set_bonus=rakata_force_masters_4pc

@@ -3655,10 +3655,10 @@ struct set_bonus_t
   set_bonus_t* next;
   player_t* player;
   std::string name_str;
-  std::string filter_str;
+  std::vector<std::string> filter_str;
   int count;
 
-  set_bonus_t( player_t*, const std::string, const std::string );
+  set_bonus_t( player_t*, const std::string, const std::vector<std::string> );
 
   int two_pc() const; int four_pc() const;
   bool decode( player_t*, item_t& item ) const;
@@ -4008,7 +4008,8 @@ struct player_t : public noncopyable
 
   struct set_bonuses_t
   {
-    set_bonus_t* indomitable;
+    set_bonus_t* rakata_force_masters;
+    set_bonus_t* battlemaster_force_masters;
     void reset() { *this = set_bonuses_t(); }
   };
   set_bonuses_t set_bonus;
@@ -4284,7 +4285,7 @@ struct player_t : public noncopyable
   benefit_t*  get_benefit ( const std::string& name );
   uptime_t*   get_uptime  ( const std::string& name );
   rng_t*      get_rng     ( const std::string& name, int type=RNG_DEFAULT );
-  set_bonus_t* get_set_bonus( const std::string& name, std::string filter="" );
+  set_bonus_t* get_set_bonus( const std::string& name, std::vector<std::string> filter );
   double      get_player_distance( const player_t* p ) const;
   double      get_position_distance( double m=0, double v=0 ) const;
   action_priority_list_t* get_action_priority_list( const std::string& name );

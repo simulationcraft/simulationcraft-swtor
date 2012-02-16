@@ -7,7 +7,7 @@
 
 // set_bonus_t::set_bonus_t =================================================
 
-set_bonus_t::set_bonus_t( player_t* p , const std::string n, const std::string f ) :
+set_bonus_t::set_bonus_t( player_t* p , const std::string n, const std::vector<std::string> f ) :
  next( 0 ), player( p ), name_str( n ), filter_str( f ), count( 0 )
 {
 
@@ -53,8 +53,11 @@ bool set_bonus_t::decode_set( item_t& item, const set_bonus_t* sb ) const
 {
   const char* s = item.name();
 
-  if ( strstr( s, sb -> filter_str.c_str() ) )
+  for ( unsigned int i = 0; i < sb -> filter_str.size(); i++ )
+  {
+    if ( strstr( s, sb -> filter_str[ i ].c_str() ) )
       return true;
+  }
 
   return false;
 }
