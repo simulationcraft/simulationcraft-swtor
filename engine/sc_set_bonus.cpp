@@ -7,59 +7,43 @@
 
 // set_bonus_t::set_bonus_t =================================================
 
-set_bonus_t::set_bonus_t( player_t* p , const std::string n, const std::vector<std::string> f ) :
- next( 0 ), player( p ), name_str( n ), filter_str( f ), count( 0 )
+set_bonus_t::set_bonus_t( const std::string& n, const std::vector<std::string>& f ) :
+ next( 0 ), name( n ), filters( f ), count( 0 )
 {
-
+  if ( filters.empty() )
+    filters.push_back( name );
 }
-
-// set_bonus_t::tier11 ======================================================
-
-int set_bonus_t::two_pc() const { return ( count >= 2 ) ? 1 : 0; }
-
-int set_bonus_t::four_pc() const { return ( count >= 4 ) ? 1 : 0; }
 
 // set_bonus_t::decode ======================================================
 
-bool set_bonus_t::decode( player_t* /* p */,
-                         item_t&   item ) const
+bool set_bonus_t::decode( const item_t& item ) const
 {
-  if ( ! item.name() )
-    return SET_NONE;
+  if ( item.name() )
+  {
+    std::string s = item.name();
 
-  int set = decode_set( item, this );
+    for ( unsigned int i = 0; i < filters.size(); i++ )
+    {
+      if ( s.find( filters[ i ] ) != s.npos )
+        return true;
+    }
+  }
 
-  return ( set > 0 );
+  return false;
 }
 
 // set_bonus_t::init ========================================================
 
-bool set_bonus_t::init( player_t* p )
+void set_bonus_t::init( const player_t& p )
 {
-  int num_items = ( int ) p -> items.size();
+  count = 0;
 
+  int num_items = p.items.size();
   for ( int i=0; i < num_items; i++ )
   {
-    if ( decode( p, p -> items[ i ] ) )
-      count += 1;
+    if ( decode( p.items[ i ] ) )
+      ++count;
   }
-
-  return true;
-}
-
-// set_bonus_t::decode_set =====================================================
-
-bool set_bonus_t::decode_set( item_t& item, const set_bonus_t* sb ) const
-{
-  const char* s = item.name();
-
-  for ( unsigned int i = 0; i < sb -> filter_str.size(); i++ )
-  {
-    if ( strstr( s, sb -> filter_str[ i ].c_str() ) )
-      return true;
-  }
-
-  return false;
 }
 
 

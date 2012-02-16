@@ -3654,22 +3654,22 @@ struct item_database_t
 
 struct set_bonus_t
 {
-
   set_bonus_t* next;
-  player_t* player;
-  std::string name_str;
-  std::vector<std::string> filter_str;
+  std::string name;
+  std::vector<std::string> filters;
   int count;
 
-  set_bonus_t( player_t*, const std::string, const std::vector<std::string> );
+  set_bonus_t( const std::string& name, const std::vector<std::string>& filters );
 
-  int two_pc() const; int four_pc() const;
-  bool decode( player_t*, item_t& item ) const;
-  bool init( player_t* );
-  virtual bool decode_set( item_t& item, const set_bonus_t* ) const;
+  void init( const player_t& );
 
+  bool two_pc() const { return ( count >= 2 ); }
+  bool four_pc() const { return ( count >= 4 ); }
 
   //action_expr_t* create_expression( action_t*, const std::string& type );
+
+private:
+  bool decode( const item_t& item ) const;
 };
 
 // Player ===================================================================

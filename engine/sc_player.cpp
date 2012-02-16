@@ -786,7 +786,7 @@ void player_t::init_items()
 
   for ( set_bonus_t* sb = set_bonus_list; sb; sb = sb -> next )
   {
-    sb -> init( this );
+    sb -> init( *this );
   }
 }
 
@@ -3733,7 +3733,7 @@ set_bonus_t* player_t::find_set_bonus( const std::string& name )
 
   for ( sb = set_bonus_list; sb; sb = sb -> next )
   {
-    if ( sb -> name_str == name )
+    if ( sb -> name == name )
       return sb;
   }
 
@@ -3972,18 +3972,15 @@ set_bonus_t* player_t::get_set_bonus( const std::string& name, std::vector<std::
 
   for ( sb = set_bonus_list; sb; sb = sb -> next )
   {
-    if ( sb -> name_str == name )
+    if ( sb -> name == name )
       return sb;
   }
 
-  if ( filter.size() == 0 )
-    filter.push_back( name );
-
-  sb = new set_bonus_t( this, name, filter );
+  sb = new set_bonus_t( name, filter );
 
   set_bonus_t** tail = &set_bonus_list;
 
-  while ( *tail && name > ( ( *tail ) -> name_str ) )
+  while ( *tail && name > ( ( *tail ) -> name ) )
   {
     tail = &( ( *tail ) -> next );
   }
@@ -5625,8 +5622,8 @@ bool player_t::create_profile( std::string& profile_str, int save_type, bool sav
     profile_str += "# Set Bonuses" + term;
     for ( set_bonus_t* sb = set_bonus_list; sb; sb = sb -> next )
     {
-      if ( sb -> two_pc()    != 0 )  profile_str += "# set_bonus=" + sb -> name_str + "_2pc" + term ;
-      if ( sb -> four_pc()   != 0 )  profile_str += "# set_bonus=" + sb -> name_str + "_4pc" + term ;
+      if ( sb -> two_pc() )  profile_str += "# set_bonus=" + sb -> name + "_2pc" + term ;
+      if ( sb -> four_pc() ) profile_str += "# set_bonus=" + sb -> name + "_4pc" + term ;
     }
     if ( meta_gem != META_GEM_NONE )
     {

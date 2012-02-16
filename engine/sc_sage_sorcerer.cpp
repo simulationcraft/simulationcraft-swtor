@@ -453,7 +453,7 @@ struct telekinetic_throw_t : public jedi_sage_spell_t
     parse_options( 0, options_str );
     base_td = 127.2;
     base_cost = 30.0;
-    if ( player -> set_bonus.rakata_force_masters -> two_pc() > 0 )
+    if ( player -> set_bonus.rakata_force_masters -> two_pc() )
       base_cost -= 2.0;
     range = 30.0;
     tick_power_mod = 0.79;
@@ -543,7 +543,7 @@ struct disturbance_t : public jedi_sage_spell_t
     base_dd_min = 180.3; base_dd_max = 244.7;
     base_execute_time = timespan_t::from_seconds( 1.5 );
     base_cost = 30.0;
-    if ( player -> set_bonus.rakata_force_masters -> two_pc() > 0 )
+    if ( player -> set_bonus.rakata_force_masters -> two_pc() )
       base_cost -= 2.0;
     range = 30.0;
     direct_power_mod = 1.32;
@@ -640,7 +640,7 @@ struct mind_crush_t : public jedi_sage_spell_t
     range = 30.0;
     direct_power_mod = 1.23;
     cooldown -> duration = timespan_t::from_seconds( 15.0 );
-    if ( player -> set_bonus.battlemaster_force_masters -> two_pc() > 0 )
+    if ( player -> set_bonus.battlemaster_force_masters -> two_pc() )
       cooldown -> duration -= timespan_t::from_seconds( 1.5 );
     influenced_by_inner_strength = false;
 
@@ -1093,8 +1093,7 @@ void sage_sorcerer_t::init_buffs()
   buffs.mental_alacrity = new buff_t( this, is_sage ? "mental_alacrity" : "polarity_shift", 1, timespan_t::from_seconds( 10.0 ) );
   buffs.force_potency = new buff_t( this, is_sage ? "force_potency" : "recklessness", 2, timespan_t::from_seconds( 20.0 ) );
   buffs.psychic_projection_dd = new buff_t( this, is_sage ? "psychic_projection_dd" : "lightning_barrage_dd", 1, timespan_t::from_seconds( 2.0 ), timespan_t::zero );
-  buffs.rakata_force_masters_4pc = new buff_t( this, "rakata_force_masters_4pc", 1, timespan_t::from_seconds( 15.0 ), timespan_t::from_seconds( 20.0 ), set_bonus.rakata_force_masters -> four_pc() > 0 ? 0.10 : 0.0 );
-
+  buffs.rakata_force_masters_4pc = new buff_t( this, "rakata_force_masters_4pc", 1, timespan_t::from_seconds( 15.0 ), timespan_t::from_seconds( 20.0 ), set_bonus.rakata_force_masters -> four_pc() ? 0.10 : 0.0 );
 }
 
 // sage_sorcerer_t::init_gains =======================================================
@@ -1133,12 +1132,11 @@ void sage_sorcerer_t::init_rng()
 
 void sage_sorcerer_t::init_actions()
 {
-
-//======================================================================================
-//
-//   Please Mirror all changes between Jedi Sage and Sith Sorcerer!!!
-//
-//======================================================================================
+  //======================================================================================
+  //
+  //   Please Mirror all changes between Jedi Sage and Sith Sorcerer!!!
+  //
+  //======================================================================================
 
   if ( action_list_str.empty() )
   {
