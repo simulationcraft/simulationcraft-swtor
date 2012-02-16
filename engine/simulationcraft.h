@@ -3455,6 +3455,7 @@ struct rating_t : public internal::rating_t
   void init( sim_t*, dbc_t& pData, int level, int type );
   static double interpolate( int level, double val_60, double val_70, double val_80, double val_85 = -1 );
   static double get_attribute_base( sim_t*, dbc_t& pData, int level, player_type class_type, race_type race, base_stat_type stat_type );
+  static double standardhealth( player_t* );
 };
 
 // Weapon ===================================================================
@@ -4462,6 +4463,7 @@ struct action_t
   timespan_t base_execute_time;
   timespan_t base_tick_time;
   double base_cost;
+  double dd_standardhealthpercentmin, dd_standardhealthpercentmax, td_standardhealthpercentmin, td_standardhealthpercentmax;
   double base_dd_min, base_dd_max, base_td, base_td_init;
   double   base_dd_multiplier,   base_td_multiplier;
   double player_dd_multiplier, player_td_multiplier;

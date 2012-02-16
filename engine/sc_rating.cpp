@@ -126,3 +126,13 @@ double rating_t::get_attribute_base( sim_t* /* sim */, dbc_t& dbc, int level, pl
 
   return res;
 }
+
+// rating_t::standardhealth =============================================
+
+double rating_t::standardhealth( player_t* p )
+{
+  if ( p -> level == 50 )
+    return 1610.0;
+
+  return 0.0;
+}

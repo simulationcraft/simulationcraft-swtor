@@ -405,7 +405,7 @@ struct project_t : public jedi_sage_spell_t
     upheaval( 0 )
   {
     parse_options( 0, options_str );
-    base_dd_min = 219.0; base_dd_max = 283.4;
+    dd_standardhealthpercentmin = 0.136; dd_standardhealthpercentmax = 0.176;
     base_cost = 45.0;
     range = 30.0;
     direct_power_mod = 1.85;

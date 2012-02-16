@@ -59,6 +59,10 @@ void action_t::init_action_t_()
   base_execute_time              = timespan_t::zero;
   base_tick_time                 = timespan_t::zero;
   base_cost                      = 0.0;
+  dd_standardhealthpercentmin    = 0.0;
+  dd_standardhealthpercentmax    = 0.0;
+  td_standardhealthpercentmin    = 0.0;
+  td_standardhealthpercentmax    = 0.0;
   base_dd_min                    = 0.0;
   base_dd_max                    = 0.0;
   base_td                        = 0.0;
@@ -1344,6 +1348,15 @@ void action_t::init()
     buffer += util_t::result_type_string( i );
     rng[ i ] = player -> get_rng( buffer, ( ( i == RESULT_CRIT ) ? RNG_DISTRIBUTED : RNG_CYCLIC ) );
   }
+
+  if ( dd_standardhealthpercentmin > 0 )
+    base_dd_min = dd_standardhealthpercentmin * rating_t::standardhealth( player );
+
+  if ( dd_standardhealthpercentmax > 0 )
+    base_dd_max = dd_standardhealthpercentmax * rating_t::standardhealth( player );
+
+  if ( td_standardhealthpercentmin > 0 && td_standardhealthpercentmax >= td_standardhealthpercentmin )
+    base_td = ( td_standardhealthpercentmin + td_standardhealthpercentmax ) / 2.0 * rating_t::standardhealth( player );
 
   if ( ! sync_str.empty() )
   {
