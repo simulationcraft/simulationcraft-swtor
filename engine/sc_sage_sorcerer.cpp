@@ -397,34 +397,44 @@ struct force_valor_t : public jedi_sage_spell_t
 
 struct project_t : public jedi_sage_spell_t
 {
-  jedi_sage_spell_t* upheaval;
-
+  project_t* upheaval;
 
   project_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str, bool is_upheaval = false ) :
     jedi_sage_spell_t( ( n + std::string( is_upheaval ? "_upheaval" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
     upheaval( 0 )
   {
-    parse_options( 0, options_str );
-    dd_standardhealthpercentmin = 0.136; dd_standardhealthpercentmax = 0.176;
-    base_cost = 45.0;
-    range = 30.0;
-    direct_power_mod = 1.85;
+    static const int ranks[] = { 1, 4, 7, 11, 14, 17, 23, 34, 47, 50 };
+    range::copy( ranks, std::back_inserter( rank_level_list ) );
 
-    cooldown -> duration = timespan_t::from_seconds( 6.0 );
+    parse_options( 0, options_str );
+
+    range = 30.0;
 
     if ( p -> type == JEDI_SAGE )
       travel_speed = 40.0; // 0.5s travel time for range=20, 0.75s for range=30
 
     if ( is_upheaval )
     {
-      base_multiplier *= 0.50;
-      base_cost = 0.0;
+      dd_standardhealthpercentmin = 0.058;
+      dd_standardhealthpercentmax = 0.098;
+      direct_power_mod = 0.78;
       background = true;
     }
-    else if ( p -> talents.upheaval -> rank() > 0 )
+    else
     {
-      upheaval = new project_t( p, n, options_str, true );
-      add_child( upheaval );
+      dd_standardhealthpercentmin = 0.136;
+      dd_standardhealthpercentmax = 0.176;
+      direct_power_mod = 1.56;
+
+      base_cost = 45.0;
+
+      cooldown -> duration = timespan_t::from_seconds( 6.0 );
+
+      if ( p -> talents.upheaval -> rank() > 0 )
+      {
+        upheaval = new project_t( p, n, options_str, true );
+        add_child( upheaval );
+      }
     }
   }
 
@@ -450,27 +460,33 @@ struct telekinetic_throw_t : public jedi_sage_spell_t
     jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
     is_buffed_by_psychic_projection( false )
   {
+    static const int ranks[] = { 2, 5, 8, 11, 14, 19, 27, 39, 50 };
+    range::copy( ranks, std::back_inserter( rank_level_list ) );
+
     parse_options( 0, options_str );
-    base_td = 127.2;
+
+    td_standardhealthpercentmin = td_standardhealthpercentmax = .079;
+    tick_power_mod = 0.79;
+
     base_cost = 30.0;
     if ( player -> set_bonus.rakata_force_masters -> two_pc() )
       base_cost -= 2.0;
     range = 30.0;
-    tick_power_mod = 0.79;
+
     num_ticks = 3;
     base_tick_time = timespan_t::from_seconds( 1.0 );
     may_crit = false;
     channeled = true;
     tick_zero = true;
 
-    cooldown -> duration = timespan_t::from_seconds( 6.0 );
+    if ( p -> talents.telekinetic_balance -> rank() > 0 )
+      cooldown -> duration = timespan_t::zero;
+    else
+      cooldown -> duration = timespan_t::from_seconds( 6.0 );
 
     base_crit += p -> talents.critical_kinesis -> rank() * 0.05;
 
     base_multiplier *= 1.0 + p -> talents.empowered_throw -> rank() * 0.04;
-
-    if ( p -> talents.telekinetic_balance -> rank() > 0 )
-      cooldown -> duration = timespan_t::zero;
   }
 
   virtual void execute()
@@ -680,13 +696,18 @@ struct weaken_mind_t : public jedi_sage_spell_t
   weaken_mind_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
     jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
   {
+    static const int ranks[] = { 16, 22, 33, 44, 50 };
+    range::copy( ranks, std::back_inserter( rank_level_list ) );
+
     parse_options( 0, options_str );
-    base_td = 49.91;
+
+    td_standardhealthpercentmin = td_standardhealthpercentmax = .031;
+    tick_power_mod = 0.31;
+
     base_tick_time = timespan_t::from_seconds( 3.0 );
     num_ticks = 5 + p -> talents.disturb_mind -> rank();
     base_cost = 35.0;
     range = 30.0;
-    tick_power_mod = 0.31;
     may_crit = false;
     crit_bonus += p -> talents.reverberation -> rank() * 0.1;
     base_multiplier *= 1.0 + p -> talents.drain_thoughts -> rank() * 0.075;
