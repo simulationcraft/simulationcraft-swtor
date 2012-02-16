@@ -4192,9 +4192,10 @@ struct player_t : public noncopyable
   virtual void register_tick_heal_callback    ( int64_t result_mask, action_callback_t* );
   virtual void register_direct_heal_callback  ( int64_t result_mask, action_callback_t* );
 
-  virtual bool parse_talent_trees( const int talents[MAX_TALENT_SLOTS] );
-  virtual bool parse_talents_armory ( const std::string& talent_string );
-  virtual bool parse_talents_wowhead( const std::string& talent_string );
+  bool parse_talent_trees( const int talents[MAX_TALENT_SLOTS] );
+  bool parse_talents_armory ( const std::string& talent_string );
+  bool parse_talents_wowhead( const std::string& talent_string );
+  bool parse_talents_knotor( const std::string& talent_string );
 
   virtual void create_talents();
   //virtual void create_glyphs();
