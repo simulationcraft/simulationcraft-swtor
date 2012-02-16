@@ -4,10 +4,10 @@ talents=http://www.torhead.com/skill-calc#201hZbcMZfrfRs0krcz.1
 position=front
 professions=biochem=400
 shirt=foo,stats=1487willpower_410crit_346alacrity_218power_1224forcepower_153surge
-chest=foo_force_masters_vestments
-hands=foo_force_masters_gloves
-legs=foo_force_masters_lower_robe
-head=foo_force_masters_headgear
+chest=rakata_force_masters_vestments
+hands=rakata_force_masters_gloves
+legs=rakata_force_masters_lower_robe
+head=rakata_force_masters_headgear
 save=Sith_Sorcerer_Madness.simc
 
 copy=Sith_Sorcerer_Lightning,Sith_Sorcerer_Madness

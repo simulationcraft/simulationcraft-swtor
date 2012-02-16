@@ -21,11 +21,11 @@ actions+=/telekinetic_wave,if=buff.presence_of_mind.react|buff.tidal_force.react
 actions+=/mind_crush,if=buff.presence_of_mind.react
 actions+=/telekinetic_throw
 actions+=/project,moving=1
-head=foo_force_masters_headgear
+head=rakata_force_masters_headgear
 shirt=foo,stats=1487willpower_410crit_346alacrity_218power_1224forcepower_153surge
-chest=foo_force_masters_vestments
-legs=foo_force_masters_lower_robe
-hands=foo_force_masters_gloves
+chest=rakata_force_masters_vestments
+legs=rakata_force_masters_lower_robe
+hands=rakata_force_masters_gloves
 # Gear Summary
 # gear_crit_rating=410
 # gear_alacrity_rating=346

@@ -3656,10 +3656,11 @@ struct set_bonus_t
 {
   set_bonus_t* next;
   std::string name;
-  std::vector<std::string> filters;
+  std::string filters;
+  std::vector<std::string> split_filters;
   int count;
 
-  set_bonus_t( const std::string& name, const std::vector<std::string>& filters );
+  set_bonus_t( const std::string& name, const std::string& filters );
 
   void init( const player_t& );
 
@@ -4288,7 +4289,7 @@ struct player_t : public noncopyable
   benefit_t*  get_benefit ( const std::string& name );
   uptime_t*   get_uptime  ( const std::string& name );
   rng_t*      get_rng     ( const std::string& name, int type=RNG_DEFAULT );
-  set_bonus_t* get_set_bonus( const std::string& name, std::vector<std::string> filter );
+  set_bonus_t* get_set_bonus( const std::string& name, std::string filter );
   double      get_player_distance( const player_t* p ) const;
   double      get_position_distance( double m=0, double v=0 ) const;
   action_priority_list_t* get_action_priority_list( const std::string& name );
