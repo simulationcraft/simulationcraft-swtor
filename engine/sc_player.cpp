@@ -775,13 +775,13 @@ void player_t::init_base()
   attribute_base[ ATTR_STRENGTH    ] =
     attribute_base[ ATTR_AIM       ] =
     attribute_base[ ATTR_CUNNING   ] =
-    attribute_base[ ATTR_WILLPOWER ] = 10 + 0.8 * level;
+    attribute_base[ ATTR_WILLPOWER ] = floor( 10 + 0.8 * level );
   attribute_base[ ATTR_ENDURANCE   ] =
-    attribute_base[ ATTR_PRESENCE  ] = 45 + 3.6 * level;
+    attribute_base[ ATTR_PRESENCE  ] = floor( 45 + 3.6 * level );
 
   assert( primary_attribute != secondary_attribute );
-  attribute_base[ primary_attribute   ] = 50 + 4 * level;
-  attribute_base[ secondary_attribute ] = 20 + 1.6 * level;
+  attribute_base[ primary_attribute   ] = floor( 50 + 4 * level );
+  attribute_base[ secondary_attribute ] = floor( 20 + 1.6 * level );
 
   resource_base[ RESOURCE_HEALTH ] = 2500; // FIXME: level scaling.
 
