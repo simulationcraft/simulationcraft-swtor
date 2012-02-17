@@ -44,6 +44,7 @@ struct shadow_assassin_t : public player_t
     buff_t* exploitive_strikes;
     buff_t* raze;
     buff_t* unearthed_knowledge;
+    buff_t* recklessness;
   } buffs;
 
   // Gains
@@ -271,12 +272,7 @@ struct shock_t : public shadow_assassin_spell_t
 
 // ==========================================================================
 // force_lightning // telekinetic_throw
-//      base_dd_min      = 127.19; // StandardHealthPercentMin=>0.079
-//      base_dd_max      = 127.19; // StandardHealthPercentMax=>0.079
-//      direct_power_mod = 0.79  ; // Energy
-//      base_cost = 30.0;
-//      range = 10.0;
-//      cooldown -> duration = timespan_t::from_seconds( 6.0 );
+
 
 struct force_lightning_t : public shadow_assassin_spell_t
 {
@@ -290,29 +286,20 @@ struct force_lightning_t : public shadow_assassin_spell_t
 
     td_standardhealthpercentmin = td_standardhealthpercentmax = .079;
     tick_power_mod = 0.79;
-
     base_cost = 30.0;
     if ( player -> set_bonus.rakata_force_masters -> two_pc() )
       base_cost -= 2.0;
-
-    range = 30.0;
+    range = 10.0;
     num_ticks = 3;
     base_tick_time = timespan_t::from_seconds( 1.0 );
     may_crit = false;
     channeled = true;
     tick_zero = true;
-
     cooldown -> duration = timespan_t::from_seconds( 6.0 );
   }
 };
 
 // crushing_darkness // mind_crush
-//      DD:  StandardHealthPercentMin=>0.103  => base_dd_min      = 165.83;
-//      DD:  StandardHealthPercentMax=>0.143  => base_dd_max      = 230.23;
-//      DD:  direct_power_mod = 1.23  ; Kinetic
-//      DOT: StandardHealthPercentMin=>0.0295 => base_dd_min      = 47.495;
-//      DOT: StandardHealthPercentMax=>0.0295 => base_dd_max      = 47.495;
-//      DOT: direct_power_mod = 0.295 ; Kinetic
 
 struct crushing_darkness_t : public shadow_assassin_spell_t
 {
@@ -330,16 +317,8 @@ struct crushing_darkness_t : public shadow_assassin_spell_t
       base_tick_time = timespan_t::from_seconds( 1.0 );
       num_ticks = 6;
       range = 10.0;
-      tick_power_mod = 0.295;
       background = true;
       may_crit = false;
-    }
-
-    virtual void target_debuff( player_t* t, int dmg_type )
-    {
-      shadow_assassin_spell_t::target_debuff( t, dmg_type );
-
-      shadow_assassin_t* p = player -> cast_shadow_assassin();
     }
   };
 
@@ -353,7 +332,6 @@ struct crushing_darkness_t : public shadow_assassin_spell_t
     range::copy( ranks, std::back_inserter( rank_level_list ) );
 
     parse_options( 0, options_str );
-
 
     dd_standardhealthpercentmin = .103;
     dd_standardhealthpercentmax = .143;
@@ -379,12 +357,6 @@ struct crushing_darkness_t : public shadow_assassin_spell_t
 
 // ==========================================================================
 // death_field // force_in_balance
-//      base_dd_min      = 268.87; // StandardHealthPercentMin=>0.167
-//      base_dd_max      = 333.27; // StandardHealthPercentMax=>0.207
-//      direct_power_mod = 1.87  ; // Internal
-//      base_cost = 50.0;
-//      range = 30.0;
-//      cooldown -> duration = timespan_t::from_seconds( 15.0 );
 
 struct death_field_t : public shadow_assassin_spell_t
 {
@@ -411,19 +383,13 @@ struct death_field_t : public shadow_assassin_spell_t
   {
     shadow_assassin_spell_t::calculate_result();
 
-    shadow_assassin_t* p = player -> cast_shadow_assassin();
+    //shadow_assassin_t* p = player -> cast_shadow_assassin();
 
     //p -> buffs.deathmark -> trigger( 10 );
   }
 };
 
 // creeping_terror // sever_force
-//      base_dd_min      = 49.91; // StandardHealthPercentMin=>0.031
-//      base_dd_max      = 49.91; // StandardHealthPercentMax=>0.031
-//      direct_power_mod = 0.311  ; // Internal
-//      base_cost = 20.0;
-//      range = 30.0;
-//      cooldown -> duration = timespan_t::from_seconds( 9.0 );
 
 
 struct creeping_terror_t : public shadow_assassin_spell_t
@@ -451,7 +417,7 @@ struct creeping_terror_t : public shadow_assassin_spell_t
   {
     shadow_assassin_spell_t::target_debuff( t, dmg_type );
 
-    shadow_assassin_t* p = player -> cast_shadow_assassin();
+    //shadow_assassin_t* p = player -> cast_shadow_assassin();
 
 //    if ( p -> talents.deathmark -> rank() > 0 )
 //      p -> benefits.fs_creeping_terror -> update( p -> buffs.deathmark -> check() > 0 );
@@ -478,14 +444,11 @@ struct recklessness_t : public shadow_assassin_spell_t
 
     shadow_assassin_t* p = player -> cast_shadow_assassin();
 
-    //p -> buffs.recklessness -> trigger( 2 );
+    p -> buffs.recklessness -> trigger( 2 );
   }
 };
 
 // lightning_charge // force_technique
-//      base_dd_min      = 27.37; // StandardHealthPercentMin=>0.017
-//      base_dd_max      = 27.37; // StandardHealthPercentMax=>0.017
-//      direct_power_mod = 0.165  ; // Energy
 //FIXME Proc: 50%  This effect cannot occur more than once every 1.5 seconds.
 
 
@@ -510,9 +473,6 @@ struct lightning_charge_t : public shadow_assassin_spell_t
 };
 
 // surging_charge // shadow_technique
-//      base_dd_min      = 54.74; // StandardHealthPercentMin=>0.034
-//      base_dd_max      = 54.74; // StandardHealthPercentMax=>0.034
-//      direct_power_mod = 0.344  ; // Energy
 //FIXME: Proc: 25%  This effect cannot occur more than once every 1.5 seconds.
 //FIXME: Energy School to define?
 
@@ -543,12 +503,6 @@ struct surging_charge_t : public shadow_assassin_spell_t
 
 
 // low_slash // low_slash
-//      base_dd_min      = 212.52; // StandardHealthPercentMin=>0.132
-//      base_dd_max      = 212.52; // StandardHealthPercentMax=>0.132
-//      direct_power_mod = 1.32  ; // PHYSICAL
-//      base_cost = 30.0;
-//      range = 4.0;
-//      cooldown -> duration = timespan_t::from_seconds( 15.0 );
 // FIXME: AmountModiferPercent = -0.12
 
 struct low_slash_t : public shadow_assassin_attack_t
@@ -568,12 +522,7 @@ struct low_slash_t : public shadow_assassin_attack_t
 };
 
 // voltaic_slash // clairvoyant_strike
-//      base_dd_min      = 257.6; // StandardHealthPercentMin=>0.08
-//      base_dd_max      = 257.6; // StandardHealthPercentMax=>0.08
-//      direct_power_mod = 0.8  ; // PHYSICAL
-//      base_cost = 30.0;
-//      range = 4.0;
-//      cooldown -> duration = timespan_t::from_seconds( 15.0 );
+//
 // FIXME: AmountModiferPercent = -0.465
 // FIXME: Actually strike the target twice (Double proc chance etc.)
 // TODO : Each use of this ability increases the damage dealt by your next Shock by 15%
@@ -589,8 +538,10 @@ struct voltaic_slash_t : public shadow_assassin_attack_t
     dd_standardhealthpercentmin = dd_standardhealthpercentmax = 2 * .08;
     direct_power_mod = 2 * 0.8;
 
-    base_cost = 25;
+    base_cost = 25.0;
     range = 4.0;
+
+    cooldown -> duration = timespan_t::from_seconds( 15.0 );
   }
 };
 
@@ -612,19 +563,13 @@ struct overcharge_saber_t : public shadow_assassin_spell_t
   {
     shadow_assassin_spell_t::execute();
 
-    shadow_assassin_t* p = player -> cast_shadow_assassin();
+    //shadow_assassin_t* p = player -> cast_shadow_assassin();
 
     //p -> buffs.overcharge_saber -> trigger();
   }
 };
 
 // assassinate // spinning_strike
-//      base_dd_min      = 497.49; // StandardHealthPercentMin=>0.309
-//      base_dd_max      = 497.49; // StandardHealthPercentMax=>0.309
-//      direct_power_mod = 3.09  ; // PHYSICAL
-//      base_cost = 25.0;
-//      range = 4.0;
-//      cooldown -> duration = timespan_t::from_seconds( 6.0 );
 //FIXME: Need to add target health condition (<=30%)
 //FIXME: AmountModifierPercent = 1.06
 
@@ -638,7 +583,7 @@ struct assassinate_t : public shadow_assassin_attack_t
     dd_standardhealthpercentmin = dd_standardhealthpercentmax = .309;
     direct_power_mod = 3.09;
 
-    base_cost = 25;
+    base_cost = 25.0;
     range = 4.0;
     cooldown -> duration = timespan_t::from_seconds( 6.0 );
   }
@@ -646,11 +591,6 @@ struct assassinate_t : public shadow_assassin_attack_t
 
 
 // lacerate // whirling_blow
-//      base_dd_min      = 114.31; // StandardHealthPercentMin=>0.071
-//      base_dd_max      = 114.31; // StandardHealthPercentMax=>0.071
-//      direct_power_mod = 0.71  ; // PHYSICAL
-//      base_cost = 40.0;
-//      range = 4.0;
 // FIXME: AmountModifierPercent = -0.52
 
 struct lacerate_t : public shadow_assassin_attack_t
@@ -717,10 +657,6 @@ struct force_cloak_t : public shadow_assassin_spell_t
 };
 
 // discharge_lightning
-//      DOT: StandardHealthPercentMin=>0.038 => base_dd_min      = 61.18;
-//      DOT: StandardHealthPercentMax=>0.038 => base_dd_max      = 61.18;
-//      DOT: direct_power_mod = 0.38 ; Kinetic
-
 
 struct discharge_lightning_t : public shadow_assassin_spell_t
 {
@@ -742,7 +678,7 @@ struct discharge_lightning_t : public shadow_assassin_spell_t
   {
     shadow_assassin_spell_t::target_debuff( t, dmg_type );
 
-    shadow_assassin_t* p = player -> cast_shadow_assassin();
+    //shadow_assassin_t* p = player -> cast_shadow_assassin();
   }
 };
 
@@ -767,7 +703,7 @@ struct discharge_surging_t : public shadow_assassin_spell_t
 
   virtual void target_debuff( player_t* t, int dmg_type )
   {
-    shadow_assassin_t* p = player -> cast_shadow_assassin();
+    //shadow_assassin_t* p = player -> cast_shadow_assassin();
   }
 };
 
@@ -784,6 +720,7 @@ struct discharge_t : public shadow_assassin_spell_t
     shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
     dot_spell( new discharge_lightning_t( p, n + "_dot" ) )
   {
+    parse_options( 0, options_str );
     add_child( dot_spell );
   }
 
@@ -795,11 +732,6 @@ struct discharge_t : public shadow_assassin_spell_t
 };
 
 // maul // shadow_strike
-//      base_dd_min      = 379.96; // StandardHealthPercentMin=>0.236
-//      base_dd_max      = 379.96; // StandardHealthPercentMax=>0.236
-//      direct_power_mod = 2.37  ; // PHYSICAL
-//      base_cost = 50.0;
-//      range = 4.0;
 // FIXME: AmountModifierPercent = 0.58
 
 struct maul_t : public shadow_assassin_attack_t
@@ -842,11 +774,6 @@ struct saber_strike_t : public shadow_assassin_attack_t
 };
 
 // thrash // double_strike
-//      base_dd_min      = 238.28; // StandardHealthPercentMin=>0.074 * 2
-//      base_dd_max      = 238.28; // StandardHealthPercentMax=>0.074 * 2
-//      direct_power_mod = 0.74  ; // PHYSICAL
-//      base_cost = 25.0;
-//      range = 4.0;
 //FIX ME: Split into two hits.
 //FIXME: AmountModifierPercent = -0.505
 
@@ -1015,7 +942,7 @@ void shadow_assassin_t::init_buffs()
   // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
 
-  // bool is_shadow = ( type == JEDI_SHADOW );
+  bool is_shadow = ( type == JEDI_SHADOW );
 
   buffs.exploit_weakness = new buff_t( this, "exploit_weakness", 1, timespan_t::from_seconds( 10.0 ), timespan_t::from_seconds( 10.0 ) );
   buffs.induction = new buff_t( this, "induction", 2, timespan_t::from_seconds( 10.0 ), timespan_t::zero );
@@ -1024,6 +951,8 @@ void shadow_assassin_t::init_buffs()
   buffs.exploitive_strikes = new buff_t( this, "exploitive_strikes", 1, timespan_t::from_seconds( 10.0 ), timespan_t::zero );
   buffs.raze = new buff_t( this, "raze", 1, timespan_t::from_seconds( 15.0 ), timespan_t::from_seconds( 7.5 ), talents.raze -> rank() * 0.6 );
   buffs.unearthed_knowledge = new buff_t( this, "unearthed_knowledge", 1, timespan_t::from_seconds( 20.0 ), timespan_t::zero, talents.unearthed_knowledge -> rank() * 0.5 );
+  buffs.recklessness = new buff_t( this, is_shadow ? "force_potency" : "recklessness", 2, timespan_t::from_seconds( 20.0 ) );
+
 }
 
 // shadow_assassin_t::init_gains =======================================================
