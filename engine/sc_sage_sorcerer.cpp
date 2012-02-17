@@ -22,10 +22,10 @@ void register_jedi_sage_targetdata( sim_t*  sim  )
   player_type t = JEDI_SAGE;
   typedef jedi_sage_targetdata_t type;
 
-  REGISTER_DOT( telekinetic_throw );
-  REGISTER_DOT( mind_crush );
-  REGISTER_DOT( weaken_mind );
-  REGISTER_DOT( sever_force );
+  REGISTER_DOT( telekinetic_throw, telekinetic_throw );
+  REGISTER_DOT( mind_crush, mind_crush );
+  REGISTER_DOT( weaken_mind, weaken_mind );
+  REGISTER_DOT( sever_force, sever_force );
 }
 
 struct sith_sorcerer_targetdata_t : public targetdata_t
@@ -44,11 +44,6 @@ void register_sith_sorcerer_targetdata( sim_t*  sim  )
 {
   player_type t = SITH_SORCERER;
   typedef sith_sorcerer_targetdata_t type;
-
-  REGISTER_DOT( telekinetic_throw );
-  REGISTER_DOT( crushing_darkness );
-  REGISTER_DOT( affliction );
-  REGISTER_DOT( creeping_terror );
 }
 
 // ==========================================================================

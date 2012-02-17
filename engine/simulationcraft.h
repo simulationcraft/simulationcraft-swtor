@@ -3057,7 +3057,7 @@ public:
 
 // Simulation Engine ========================================================
 
-#define REGISTER_DOT(n) sim->register_targetdata_item(DATA_DOT, #n, t, nonpod_offsetof(type, dots_##n))
+#define REGISTER_DOT(n, q) sim->register_targetdata_item(DATA_DOT, #q, t, nonpod_offsetof(type, dots_##n))
 #define REGISTER_BUFF(n) sim->register_targetdata_item(DATA_AURA, #n, t, nonpod_offsetof(type, buffs_##n))
 #define REGISTER_DEBUFF(n) sim->register_targetdata_item(DATA_AURA, #n, t, nonpod_offsetof(type, debuffs_##n))
 
@@ -4310,6 +4310,7 @@ struct targetdata_t : public noncopyable
 
   jedi_sage_targetdata_t* cast_jedi_sage() { assert( source->type == JEDI_SAGE  ); return ( jedi_sage_targetdata_t* ) this; }
   sith_sorcerer_targetdata_t* cast_sith_sorcerer() { assert( source->type == SITH_SORCERER ); return ( sith_sorcerer_targetdata_t* ) this; }
+  shadow_assassin_targetdata_t* cast_shadow_assassin() { assert( source->type == JEDI_SAGE || source -> type == SITH_ASSASSIN ); return ( shadow_assassin_targetdata_t* ) this; }
 
 protected:
   dot_t* add_dot( dot_t* d );
