@@ -21,9 +21,9 @@ void register_shadow_assassin_targetdata( sim_t* sim )
   player_type t = SITH_ASSASSIN;
   typedef shadow_assassin_targetdata_t type;
 
-  REGISTER_DOT( crushing_darkness, blub );
-  REGISTER_DOT( creeping_terror, blub );
-  REGISTER_DOT( discharge, blub );
+  REGISTER_DOT( crushing_darkness, crushing_darkness );
+  REGISTER_DOT( creeping_terror, creeping_terror );
+  REGISTER_DOT( discharge, discharge );
 }
 
 
@@ -209,35 +209,21 @@ struct shadow_assassin_attack_t : public attack_t
     may_glance = false;
   }
 
-  virtual void init()
+  virtual void impact( player_t* t, int impact_result, double travel_dmg )
   {
-    attack_t::init();
-
-    shadow_assassin_t* p = player -> cast_shadow_assassin();
-  }
-
-  virtual void execute()
-  {
-    attack_t::execute();
-
-    shadow_assassin_t* p = player -> cast_shadow_assassin();
-  }
-
-  virtual void assess_damage( player_t* t, double dmg_amount, int dmg_type, int dmg_result )
-  {
-    attack_t::assess_damage( t, dmg_amount, dmg_type, dmg_result );
+    attack_t::impact( t, impact_result, travel_dmg );
 
     shadow_assassin_t* p = player -> cast_shadow_assassin();
     shadow_assassin_targetdata_t* td = targetdata() -> cast_shadow_assassin();
 
-    if (dmg_result == RESULT_HIT|RESULT_CRIT)
+    if ( result_is_hit( impact_result ) )
     {
         if ( p -> talents.duplicity -> rank() > 0 && p -> rngs.exploit_weakness -> roll ( p -> talents.duplicity -> rank () * 0.1 ) )
         {
              p -> buffs.exploit_weakness -> trigger();
         }
 
-        if ( p -> talents.raze -> rank() > 0 && td -> dots_discharge -> ticking)
+        if ( p -> talents.raze -> rank() > 0 && td -> dots_discharge -> ticking )
         {
              p -> buffs.raze -> trigger();
         }
@@ -1435,4 +1421,3 @@ void player_t::shadow_assassin_combat_begin( sim_t* /* sim */ )
   }
 #endif
 }
-

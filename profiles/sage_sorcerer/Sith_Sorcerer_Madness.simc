@@ -7,6 +7,7 @@ race=human
 position=front
 role=spell
 use_pre_potion=0
+professions=biochem=400
 talents=http://www.torhead.com/skill-calc#201hZbcMZfrfRs0krcz.1
 actions=stim,type=exotech_resolve
 actions+=/mark_of_power
@@ -19,11 +20,11 @@ actions+=/crushing_darkness,if=buff.wrath.react
 actions+=/creeping_terror,if=!ticking
 actions+=/force_lightning
 actions+=/shock,moving=1,if=force>120
-head=foo_force_masters_headgear
+head=rakata_force_masters_headgear
 shirt=foo,stats=1487willpower_410crit_346alacrity_218power_1224forcepower_153surge
-chest=foo_force_masters_vestments
-legs=foo_force_masters_lower_robe
-hands=foo_force_masters_gloves
+chest=rakata_force_masters_vestments
+legs=rakata_force_masters_lower_robe
+hands=rakata_force_masters_gloves
 # Gear Summary
 # gear_crit_rating=410
 # gear_alacrity_rating=346
@@ -32,5 +33,5 @@ hands=foo_force_masters_gloves
 # gear_willpower=1487
 # gear_surge_rating=153
 # Set Bonuses
-# set_bonus=indomitable_2pc
-# set_bonus=indomitable_4pc
+# set_bonus=rakata_force_masters_2pc
+# set_bonus=rakata_force_masters_4pc

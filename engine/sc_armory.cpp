@@ -583,10 +583,11 @@ void armory_t::fuzzy_stats( std::string&       encoding_str,
   stat_search( encoding_str, splits, STAT_MAX,  "to all stats" );
 
   stat_search( encoding_str, splits, STAT_STRENGTH,  "strength" );
-  stat_search( encoding_str, splits, STAT_AGILITY,   "agility" );
-  stat_search( encoding_str, splits, STAT_STAMINA,   "stamina" );
-  stat_search( encoding_str, splits, STAT_INTELLECT, "intellect" );
-  stat_search( encoding_str, splits, STAT_SPIRIT,    "spirit" );
+  stat_search( encoding_str, splits, STAT_AIM,       "aim" );
+  stat_search( encoding_str, splits, STAT_CUNNING,   "cunning" );
+  stat_search( encoding_str, splits, STAT_WILLPOWER, "willpower" );
+  stat_search( encoding_str, splits, STAT_ENDURANCE, "endurance" );
+  stat_search( encoding_str, splits, STAT_PRESENCE,  "presence" );
 
   stat_search( encoding_str, splits, STAT_SPELL_POWER, "spell power" );
   stat_search( encoding_str, splits, STAT_MP5,         "mana regen" );

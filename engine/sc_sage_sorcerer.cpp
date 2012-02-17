@@ -30,7 +30,7 @@ void register_jedi_sage_targetdata( sim_t*  sim  )
 
 struct sith_sorcerer_targetdata_t : public targetdata_t
 {
-  dot_t* dots_telekinetic_throw;
+  dot_t* dots_force_lightning;
   dot_t* dots_crushing_darkness;
   dot_t* dots_affliction;
   dot_t* dots_creeping_terror;
@@ -44,6 +44,11 @@ void register_sith_sorcerer_targetdata( sim_t*  sim  )
 {
   player_type t = SITH_SORCERER;
   typedef sith_sorcerer_targetdata_t type;
+
+  REGISTER_DOT( force_lightning, force_lightning );
+  REGISTER_DOT( crushing_darkness, crushing_darkness );
+  REGISTER_DOT( affliction, affliction );
+  REGISTER_DOT( creeping_terror, creeping_terror );
 }
 
 // ==========================================================================
@@ -65,7 +70,7 @@ struct sage_sorcerer_t : public player_t
     buff_t* mental_alacrity;
     buff_t* force_potency;
     buff_t* psychic_projection_dd;
-    buff_t* indomitable_4pc;
+    buff_t* rakata_force_masters_4pc;
   } buffs;
 
   // Gains
@@ -109,11 +114,11 @@ struct sage_sorcerer_t : public player_t
   // Talents
   struct talents_t
   {
-    // TREE_SEER
+    // Seer|Corruption
     talent_t* penetrating_light;
     talent_t* psychic_suffusion;
 
-    // TREE_TELEKINETICS
+    // Telekinetics|Lightning
     talent_t* inner_strength;
     talent_t* mental_longevity;
     talent_t* clamoring_force;
@@ -134,7 +139,7 @@ struct sage_sorcerer_t : public player_t
     talent_t* reverberation;
     talent_t* turbulence;
 
-    // TREE_BALANCE
+    // Balance|Madness
     talent_t* empowered_throw;
     talent_t* jedi_resistance;
     talent_t* will_of_the_jedi;
@@ -155,9 +160,7 @@ struct sage_sorcerer_t : public player_t
     talent_t* psychic_absorption;
     talent_t* sever_force;
 
-    talents_t() { memset( ( void* ) this, 0x0, sizeof( talents_t ) ); }
-  };
-  talents_t talents;
+  } talents;
 
   sage_sorcerer_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
     player_t( sim, pt == SITH_SORCERER ? SITH_SORCERER : JEDI_SAGE, name, ( r == RACE_NONE ) ? RACE_HUMAN : r ),
@@ -177,6 +180,9 @@ struct sage_sorcerer_t : public player_t
       tree_type[ JEDI_SAGE_BALANCE ]      = TREE_BALANCE;
       cooldowns.telekinetic_wave = get_cooldown( "telekinetic_wave" );
     }
+
+    primary_attribute   = ATTR_WILLPOWER;
+    secondary_attribute = ATTR_STRENGTH;
 
     create_talents();
     create_options();
@@ -379,7 +385,7 @@ struct force_valor_t : public jedi_sage_spell_t
     for ( player_t* p = sim -> player_list; p; p = p -> next )
     {
       if ( p -> ooc_buffs() )
-        p -> buffs.force_valor -> override();
+        p -> buffs.force_valor -> trigger();
     }
   }
 
@@ -394,34 +400,44 @@ struct force_valor_t : public jedi_sage_spell_t
 
 struct project_t : public jedi_sage_spell_t
 {
-  jedi_sage_spell_t* upheaval;
-
+  project_t* upheaval;
 
   project_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str, bool is_upheaval = false ) :
     jedi_sage_spell_t( ( n + std::string( is_upheaval ? "_upheaval" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
     upheaval( 0 )
   {
-    parse_options( 0, options_str );
-    base_dd_min = 219.0; base_dd_max = 283.4;
-    base_cost = 45.0;
-    range = 30.0;
-    direct_power_mod = 1.85;
+    static const int ranks[] = { 1, 4, 7, 11, 14, 17, 23, 34, 47, 50 };
+    range::copy( ranks, std::back_inserter( rank_level_list ) );
 
-    cooldown -> duration = timespan_t::from_seconds( 6.0 );
+    parse_options( 0, options_str );
+
+    range = 30.0;
 
     if ( p -> type == JEDI_SAGE )
       travel_speed = 40.0; // 0.5s travel time for range=20, 0.75s for range=30
 
     if ( is_upheaval )
     {
-      base_multiplier *= 0.50;
-      base_cost = 0.0;
+      dd_standardhealthpercentmin = 0.058;
+      dd_standardhealthpercentmax = 0.098;
+      direct_power_mod = 0.78;
       background = true;
     }
-    else if ( p -> talents.upheaval -> rank() > 0 )
+    else
     {
-      upheaval = new project_t( p, n, options_str, true );
-      add_child( upheaval );
+      dd_standardhealthpercentmin = 0.136;
+      dd_standardhealthpercentmax = 0.176;
+      direct_power_mod = 1.56;
+
+      base_cost = 45.0;
+
+      cooldown -> duration = timespan_t::from_seconds( 6.0 );
+
+      if ( p -> talents.upheaval -> rank() > 0 )
+      {
+        upheaval = new project_t( p, n, options_str, true );
+        add_child( upheaval );
+      }
     }
   }
 
@@ -447,27 +463,33 @@ struct telekinetic_throw_t : public jedi_sage_spell_t
     jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
     is_buffed_by_psychic_projection( false )
   {
+    static const int ranks[] = { 2, 5, 8, 11, 14, 19, 27, 39, 50 };
+    range::copy( ranks, std::back_inserter( rank_level_list ) );
+
     parse_options( 0, options_str );
-    base_td = 127.2;
-    base_cost = 30.0;
-    if ( player -> set_bonus.indomitable -> two_pc() > 0 )
-      base_cost -= 2.0;
-    range = 30.0;
+
+    td_standardhealthpercentmin = td_standardhealthpercentmax = .079;
     tick_power_mod = 0.79;
+
+    base_cost = 30.0;
+    if ( player -> set_bonus.rakata_force_masters -> two_pc() )
+      base_cost -= 2.0;
+
+    range = 30.0;
     num_ticks = 3;
     base_tick_time = timespan_t::from_seconds( 1.0 );
     may_crit = false;
     channeled = true;
     tick_zero = true;
 
-    cooldown -> duration = timespan_t::from_seconds( 6.0 );
+    if ( p -> talents.telekinetic_balance -> rank() > 0 )
+      cooldown -> duration = timespan_t::zero;
+    else
+      cooldown -> duration = timespan_t::from_seconds( 6.0 );
 
     base_crit += p -> talents.critical_kinesis -> rank() * 0.05;
 
     base_multiplier *= 1.0 + p -> talents.empowered_throw -> rank() * 0.04;
-
-    if ( p -> talents.telekinetic_balance -> rank() > 0 )
-      cooldown -> duration = timespan_t::zero;
   }
 
   virtual void execute()
@@ -536,14 +558,21 @@ struct disturbance_t : public jedi_sage_spell_t
     jedi_sage_spell_t( ( n + std::string( is_tm ? "_tm" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
     tm( 0 )
   {
+    static const int ranks[] = { 10, 13, 16, 25, 36, 45, 50 };
+    range::copy( ranks, std::back_inserter( rank_level_list ) );
+
     parse_options( 0, options_str );
-    base_dd_min = 180.3; base_dd_max = 244.7;
+
+    dd_standardhealthpercentmin = .112;
+    dd_standardhealthpercentmax = .152;
+    direct_power_mod = 1.32;
+
     base_execute_time = timespan_t::from_seconds( 1.5 );
+
     base_cost = 30.0;
-    if ( player -> set_bonus.indomitable -> two_pc() > 0 )
+    if ( player -> set_bonus.rakata_force_masters -> two_pc() )
       base_cost -= 2.0;
     range = 30.0;
-    direct_power_mod = 1.32;
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
 
@@ -551,7 +580,9 @@ struct disturbance_t : public jedi_sage_spell_t
 
     if ( is_tm )
     {
-      base_multiplier *= 0.30;
+      dd_standardhealthpercentmin = .03;
+      dd_standardhealthpercentmax = .05;
+      direct_power_mod = 0.4;
       base_cost = 0.0;
       background = true;
     }
@@ -594,49 +625,61 @@ struct disturbance_t : public jedi_sage_spell_t
   }
 };
 
-struct mind_crush_dot_t : public jedi_sage_spell_t
-{
-  mind_crush_dot_t( sage_sorcerer_t* p, const std::string& n ) :
-    jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
-  {
-    base_td = 47.5;
-    base_tick_time = timespan_t::from_seconds( 1.0 );
-    num_ticks = 6 + p -> talents.assertion -> rank() * 1;
-    range = 30.0;
-    tick_power_mod = 0.295;
-    influenced_by_inner_strength = false;
-    background = true;
-    may_crit = false;
-
-    base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
-  }
-
-  virtual void target_debuff( player_t* t, int dmg_type )
-  {
-    jedi_sage_spell_t::target_debuff( t, dmg_type );
-
-    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
-
-    if ( p -> talents.force_suppression -> rank() > 0 )
-      p -> benefits.fs_mind_crush -> update( p -> buffs.force_suppression -> check() > 0 );
-  }
-};
-
 struct mind_crush_t : public jedi_sage_spell_t
 {
-  jedi_sage_spell_t* dot_spell;
+  struct mind_crush_dot_t : public jedi_sage_spell_t
+  {
+    mind_crush_dot_t( sage_sorcerer_t* p, const std::string& n ) :
+      jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
+    {
+      static const int ranks[] = { 14, 19, 30, 41, 50 };
+      range::copy( ranks, std::back_inserter( rank_level_list ) );
+
+      td_standardhealthpercentmin = td_standardhealthpercentmax = .0295;
+      tick_power_mod = 0.295;
+
+      base_tick_time = timespan_t::from_seconds( 1.0 );
+      num_ticks = 6 + p -> talents.assertion -> rank() * 1;
+      range = 30.0;
+      influenced_by_inner_strength = false;
+      background = true;
+      may_crit = false;
+
+      base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
+    }
+
+    virtual void target_debuff( player_t* t, int dmg_type )
+    {
+      jedi_sage_spell_t::target_debuff( t, dmg_type );
+
+      sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+
+      if ( p -> talents.force_suppression -> rank() > 0 )
+        p -> benefits.fs_mind_crush -> update( p -> buffs.force_suppression -> check() > 0 );
+    }
+  };
+
+  mind_crush_dot_t* dot_spell;
 
   mind_crush_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
     jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
     dot_spell( new mind_crush_dot_t( p, n + "_dot" ) )
   {
+    static const int ranks[] = { 14, 19, 30, 41, 50 };
+    range::copy( ranks, std::back_inserter( rank_level_list ) );
+
     parse_options( 0, options_str );
-    base_dd_min = 165.83; base_dd_max = 230.23;
+
+    dd_standardhealthpercentmin = .103;
+    dd_standardhealthpercentmax = .143;
+    direct_power_mod = 1.23;
+
     base_execute_time = timespan_t::from_seconds( 2.0 );
     base_cost = 40.0;
     range = 30.0;
-    direct_power_mod = 1.23;
     cooldown -> duration = timespan_t::from_seconds( 15.0 );
+    if ( player -> set_bonus.battlemaster_force_masters -> two_pc() )
+      cooldown -> duration -= timespan_t::from_seconds( 1.5 );
     influenced_by_inner_strength = false;
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
@@ -656,13 +699,18 @@ struct weaken_mind_t : public jedi_sage_spell_t
   weaken_mind_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
     jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
   {
+    static const int ranks[] = { 16, 22, 33, 44, 50 };
+    range::copy( ranks, std::back_inserter( rank_level_list ) );
+
     parse_options( 0, options_str );
-    base_td = 49.91;
+
+    td_standardhealthpercentmin = td_standardhealthpercentmax = .031;
+    tick_power_mod = 0.31;
+
     base_tick_time = timespan_t::from_seconds( 3.0 );
     num_ticks = 5 + p -> talents.disturb_mind -> rank();
     base_cost = 35.0;
     range = 30.0;
-    tick_power_mod = 0.31;
     may_crit = false;
     crit_bonus += p -> talents.reverberation -> rank() * 0.1;
     base_multiplier *= 1.0 + p -> talents.drain_thoughts -> rank() * 0.075;
@@ -680,7 +728,7 @@ struct weaken_mind_t : public jedi_sage_spell_t
       p -> buffs.psychic_projection -> trigger( p -> buffs.psychic_projection -> max_stack );
     }
 
-    p -> buffs.indomitable_4pc -> trigger();
+    p -> buffs.rakata_force_masters_4pc -> trigger();
   }
 
   virtual void target_debuff( player_t* t, int dmg_type )
@@ -704,11 +752,14 @@ struct turbulence_t : public jedi_sage_spell_t
     check_talent( p -> talents.turbulence -> rank() );
 
     parse_options( 0, options_str );
-    base_dd_min = 222.2; base_dd_max = 286.6;
+
+    dd_standardhealthpercentmin = .138;
+    dd_standardhealthpercentmax = .178;
+    direct_power_mod = 1.58;
+
     base_execute_time = timespan_t::from_seconds( 2.0 );
     base_cost = 45.0;
     range = 30.0;
-    direct_power_mod = 1.58;
     crit_bonus += p -> talents.reverberation -> rank() * 0.1;
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
@@ -755,11 +806,14 @@ struct force_in_balance_t : public jedi_sage_spell_t
     check_talent( p -> talents.force_in_balance -> rank() );
 
     parse_options( 0, options_str );
-    base_dd_min = 268.9; base_dd_max = 333.3;
+
+    dd_standardhealthpercentmin = .167;
+    dd_standardhealthpercentmax = .207;
+    direct_power_mod = 1.87;
+
     ability_lag = timespan_t::from_seconds( 0.2 );
     base_cost = 50.0;
     range = 30.0;
-    direct_power_mod = 1.87;
     aoe = 2;
 
     cooldown -> duration = timespan_t::from_seconds( 15.0 );
@@ -786,12 +840,14 @@ struct sever_force_t : public jedi_sage_spell_t
     check_talent( p -> talents.sever_force -> rank() );
 
     parse_options( 0, options_str );
-    base_td = 50;
+
+    td_standardhealthpercentmin = td_standardhealthpercentmax = .031;
+    tick_power_mod = 0.311;
+
     base_tick_time = timespan_t::from_seconds( 3.0 );
     num_ticks = 6;
     base_cost = 20.0;
     range = 30.0;
-    tick_power_mod = 0.311;
     may_crit = false;
     cooldown -> duration = timespan_t::from_seconds( 9.0 );
     tick_zero = true;
@@ -844,28 +900,38 @@ struct telekinetic_wave_t : public jedi_sage_spell_t
     check_talent( p -> talents.telekinetic_wave -> rank() );
 
     parse_options( 0, options_str );
-    base_cost = 50.0;
-    cooldown -> duration = timespan_t::from_seconds( 6.0 );
-    base_dd_min = 293.02; base_dd_max = 357.42;
-    base_execute_time = timespan_t::from_seconds( 3.0 );
+
+    if ( is_tm )
+    {
+      dd_standardhealthpercentmin = .041;
+      dd_standardhealthpercentmax = .081;
+      direct_power_mod = .61;
+
+      base_cost = 0.0;
+      background = true;
+    }
+    else
+    {
+      dd_standardhealthpercentmin = .182;
+      dd_standardhealthpercentmax = .222;
+      direct_power_mod = 2.02;
+
+      base_cost = 50.0;
+      cooldown -> duration = timespan_t::from_seconds( 6.0 );
+      base_execute_time = timespan_t::from_seconds( 3.0 );
+
+      if ( p -> talents.telekinetic_momentum -> rank() > 0 )
+      {
+        tm = new telekinetic_wave_t( p, n, options_str, true );
+        add_child( tm );
+      }
+    }
+
     range = 30.0;
-    direct_power_mod = 2.02;
     aoe = 4;
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02 + p -> talents.psychic_suffusion -> rank() * 0.05;
     crit_bonus += p -> talents.reverberation -> rank() * 0.1;
-
-    if ( is_tm )
-    {
-      base_multiplier *= 0.30;
-      base_cost = 0.0;
-      background = true;
-    }
-    else if ( p -> talents.telekinetic_momentum -> rank() > 0 )
-    {
-      tm = new telekinetic_wave_t( p, n, options_str, true );
-      add_child( tm );
-    }
   }
 
   virtual void execute()
@@ -1024,7 +1090,6 @@ void sage_sorcerer_t::init_talents()
   talents.mental_scarring = find_talent( "Mental Scarring" );
   talents.psychic_absorption = find_talent( "Psychic Absorption" );
   talents.sever_force = find_talent( "Sever Force" );
-
 }
 
 // sage_sorcerer_t::init_base ========================================================
@@ -1032,8 +1097,6 @@ void sage_sorcerer_t::init_talents()
 void sage_sorcerer_t::init_base()
 {
   player_t::init_base();
-
-  attribute_base[ ATTR_WILLPOWER ] = 250;
 
   distance = default_distance = 30;
 
@@ -1088,8 +1151,7 @@ void sage_sorcerer_t::init_buffs()
   buffs.mental_alacrity = new buff_t( this, is_sage ? "mental_alacrity" : "polarity_shift", 1, timespan_t::from_seconds( 10.0 ) );
   buffs.force_potency = new buff_t( this, is_sage ? "force_potency" : "recklessness", 2, timespan_t::from_seconds( 20.0 ) );
   buffs.psychic_projection_dd = new buff_t( this, is_sage ? "psychic_projection_dd" : "lightning_barrage_dd", 1, timespan_t::from_seconds( 2.0 ), timespan_t::zero );
-  buffs.indomitable_4pc = new buff_t( this, "indomitable_4pc", 1, timespan_t::from_seconds( 15.0 ), timespan_t::from_seconds( 20.0 ), set_bonus.indomitable -> four_pc() > 0 ? 0.10 : 0.0 );
-
+  buffs.rakata_force_masters_4pc = new buff_t( this, "rakata_force_masters_4pc", 1, timespan_t::from_seconds( 15.0 ), timespan_t::from_seconds( 20.0 ), set_bonus.rakata_force_masters -> four_pc() ? 0.10 : 0.0 );
 }
 
 // sage_sorcerer_t::init_gains =======================================================
@@ -1128,12 +1190,11 @@ void sage_sorcerer_t::init_rng()
 
 void sage_sorcerer_t::init_actions()
 {
-
-//======================================================================================
-//
-//   Please Mirror all changes between Jedi Sage and Sith Sorcerer!!!
-//
-//======================================================================================
+  //======================================================================================
+  //
+  //   Please Mirror all changes between Jedi Sage and Sith Sorcerer!!!
+  //
+  //======================================================================================
 
   if ( action_list_str.empty() )
   {
@@ -1332,7 +1393,7 @@ double sage_sorcerer_t::composite_spell_alacrity() const
 
   sh -= buffs.mental_alacrity -> stack() * 0.20;
 
-  sh -= buffs.indomitable_4pc -> up() * 0.05;
+  sh -= buffs.rakata_force_masters_4pc -> up() * 0.05;
 
   return sh;
 }
@@ -1354,7 +1415,7 @@ void sage_sorcerer_t::create_talents()
     { "Resplendence", 2 }, { "Clairvoyance", 3 }, { "Salvation", 1 },
     { 0, 0 },
 
-    // TK|Lightning
+    // Telekinetics|Lightning
     { "Inner Strength", 3 }, { "Mental Longevity", 2 }, { "Clamoring Force", 3 }, { "Minds Eye", 1 },
     { "Disturb Mind", 2 }, { "Concentration", 2 }, { "Telekinetic Defense",  2 }, { "Blockout", 2 },
     { "Telekinetic Wave", 1 }, { "Psychic Projection", 2 }, { "Force Wake", 2 },

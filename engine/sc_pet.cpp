@@ -27,8 +27,7 @@ void pet_t::init_pet_t_()
   base_spell_crit  = 0.05;
   base_attack_crit = 0.05;
 
-  stamina_per_owner = 0.75;
-  intellect_per_owner = 0.30;
+  endurance_per_owner = 0.75;
 
   party = owner -> party;
 
@@ -55,22 +54,13 @@ pet_t::pet_t( sim_t*             s,
   init_pet_t_();
 }
 
-// pet_t::stamina ===========================================================
+// pet_t::endurance =========================================================
 
-double pet_t::stamina() const
+double pet_t::endurance() const
 {
-  double a = composite_attribute_multiplier( ATTR_STAMINA ) * ( stamina_per_owner * owner -> stamina() );
+  double a = composite_attribute_multiplier( ATTR_ENDURANCE ) * ( endurance_per_owner * owner -> endurance() );
 
-  return player_t::stamina() + a;
-}
-
-// pet_t::intellect =========================================================
-
-double pet_t::intellect() const
-{
-  double a = composite_attribute_multiplier( ATTR_INTELLECT ) * ( intellect_per_owner * owner -> intellect() );
-
-  return player_t::intellect() + a;
+  return player_t::endurance() + a;
 }
 
 // player_t::id =============================================================

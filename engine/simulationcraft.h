@@ -256,9 +256,9 @@ enum stats_type { STATS_DMG, STATS_HEAL, STATS_ABSORB };
 
 enum dot_behavior_type { DOT_CLIP=0, DOT_REFRESH };
 
-enum attribute_type { ATTRIBUTE_NONE=0, ATTR_STRENGTH, ATTR_AGILITY, ATTR_STAMINA, ATTR_INTELLECT, ATTR_SPIRIT, ATTR_WILLPOWER, ATTRIBUTE_MAX };
+enum attribute_type { ATTRIBUTE_NONE=0, ATTR_STRENGTH, ATTR_AIM, ATTR_CUNNING, ATTR_WILLPOWER, ATTR_ENDURANCE, ATTR_PRESENCE, ATTRIBUTE_MAX };
 
-enum base_stat_type { BASE_STAT_STRENGTH=0, BASE_STAT_AGILITY, BASE_STAT_STAMINA, BASE_STAT_INTELLECT, BASE_STAT_SPIRIT,
+enum base_stat_type { BASE_STAT_STRENGTH=0, BASE_STAT_AIM, BASE_STAT_CUNNING, BASE_STAT_WILLPOWER, BASE_STAT_ENDURANCE, BASE_STAT_PRESENCE,
                       BASE_STAT_HEALTH, BASE_STAT_MANA,
                       BASE_STAT_MELEE_CRIT_PER_AGI, BASE_STAT_SPELL_CRIT_PER_INT,
                       BASE_STAT_DODGE_PER_AGI,
@@ -448,21 +448,21 @@ enum meta_gem_type
   META_GEM_MAX
 };
 
+// Keep this in sync with enum attribute_type
 enum stat_type
 {
   STAT_NONE=0,
-  STAT_STRENGTH, STAT_AGILITY, STAT_STAMINA, STAT_INTELLECT, STAT_SPIRIT,
+  STAT_STRENGTH, STAT_AIM, STAT_CUNNING, STAT_WILLPOWER, STAT_ENDURANCE, STAT_PRESENCE,
   STAT_HEALTH, STAT_MANA, STAT_RAGE, STAT_ENERGY, STAT_AMMO,
   STAT_MAX_HEALTH, STAT_MAX_MANA, STAT_MAX_RAGE, STAT_MAX_ENERGY, STAT_MAX_AMMO,
   STAT_SPELL_POWER, STAT_SPELL_PENETRATION, STAT_MP5,
   STAT_ATTACK_POWER, STAT_EXPERTISE_RATING, STAT_EXPERTISE_RATING2,
-  STAT_HIT_RATING, STAT_HIT_RATING2,STAT_CRIT_RATING, STAT_ALACRITY_RATING,
+  STAT_HIT_RATING, STAT_HIT_RATING2, STAT_CRIT_RATING, STAT_ALACRITY_RATING,
   STAT_WEAPON_DPS, STAT_WEAPON_SPEED,
   STAT_WEAPON_OFFHAND_DPS, STAT_WEAPON_OFFHAND_SPEED,
   STAT_ARMOR, STAT_BONUS_ARMOR, STAT_RESILIENCE_RATING, STAT_DODGE_RATING, STAT_PARRY_RATING,
   STAT_BLOCK_RATING,
   STAT_POWER, STAT_FORCE_POWER,
-  STAT_WILLPOWER,
   STAT_SURGE_RATING,
   STAT_MAX
 };
@@ -3453,8 +3453,11 @@ struct rating_t : public internal::rating_t
   rating_t() : base_t( base_t() ) {}
 
   void init( sim_t*, dbc_t& pData, int level, int type );
+
   static double interpolate( int level, double val_60, double val_70, double val_80, double val_85 = -1 );
   static double get_attribute_base( sim_t*, dbc_t& pData, int level, player_type class_type, race_type race, base_stat_type stat_type );
+  static double standardhealth_damage( int level );
+  static double standardhealth_healing( int level );
 };
 
 // Weapon ===================================================================
@@ -3651,22 +3654,23 @@ struct item_database_t
 
 struct set_bonus_t
 {
-
   set_bonus_t* next;
-  player_t* player;
-  std::string name_str;
-  std::string filter_str;
+  std::string name;
+  std::string filters;
+  std::vector<std::string> split_filters;
   int count;
 
-  set_bonus_t( player_t*, const std::string, const std::string );
+  set_bonus_t( const std::string& name, const std::string& filters );
 
-  int two_pc() const; int four_pc() const;
-  bool decode( player_t*, item_t& item ) const;
-  bool init( player_t* );
-  virtual bool decode_set( item_t& item, const set_bonus_t* ) const;
+  void init( const player_t& );
 
+  bool two_pc() const { return ( count >= 2 ); }
+  bool four_pc() const { return ( count >= 4 ); }
 
   //action_expr_t* create_expression( action_t*, const std::string& type );
+
+private:
+  bool decode( const item_t& item ) const;
 };
 
 // Player ===================================================================
@@ -3737,15 +3741,16 @@ struct player_t : public noncopyable
   double initial_accuracy_rating, accuracy_rating;
   double initial_surge_rating, surge_rating;
 
+  double surge_bonus, buffed_surge;
+
   // Attributes
+  attribute_type primary_attribute, secondary_attribute;
   double attribute                   [ ATTRIBUTE_MAX ];
   double attribute_base              [ ATTRIBUTE_MAX ];
   double attribute_initial           [ ATTRIBUTE_MAX ];
   double attribute_multiplier        [ ATTRIBUTE_MAX ];
   double attribute_multiplier_initial[ ATTRIBUTE_MAX ];
   double attribute_buffed            [ ATTRIBUTE_MAX ];
-
-  double surge_bonus, buffed_surge;
 
   // Spell Mechanics
   double base_power, initial_power, power, buffed_power;
@@ -3755,7 +3760,6 @@ struct player_t : public noncopyable
   double base_spell_hit,         spell_hit,                   buffed_spell_hit;
   double base_spell_crit,        spell_crit,                  buffed_spell_crit;
   double base_spell_penetration, initial_spell_penetration,           spell_penetration,           buffed_spell_penetration;
-  double base_mp5,               initial_mp5,                         mp5,                         buffed_mp5;
   double spell_power_multiplier,    initial_spell_power_multiplier;
   double mp5_per_intellect;
   double mana_regen_base;
@@ -3813,8 +3817,7 @@ struct player_t : public noncopyable
   double  resource_max    [ RESOURCE_MAX ];
   double  resource_current[ RESOURCE_MAX ];
   double  resource_buffed [ RESOURCE_MAX ];
-  double  mana_per_intellect;
-  double  health_per_stamina;
+  double  health_per_endurance;
   uptime_t* primary_resource_cap;
 
   // Replenishment
@@ -4008,7 +4011,8 @@ struct player_t : public noncopyable
 
   struct set_bonuses_t
   {
-    set_bonus_t* indomitable;
+    set_bonus_t* rakata_force_masters;
+    set_bonus_t* battlemaster_force_masters;
     void reset() { *this = set_bonuses_t(); }
   };
   set_bonuses_t set_bonus;
@@ -4082,7 +4086,6 @@ struct player_t : public noncopyable
   virtual double composite_spell_crit() const;
   virtual double composite_spell_hit() const;
   virtual double composite_spell_penetration() const { return spell_penetration; }
-  virtual double composite_mp5() const;
 
 
   virtual double composite_armor()                 const;
@@ -4119,12 +4122,17 @@ struct player_t : public noncopyable
 
   virtual double composite_force_damage_bonus() const;
 
-  virtual double willpower() const;
+private:
+  double get_stat_helper( attribute_type a ) const
+  { return attribute[ a ] * composite_attribute_multiplier( a ); }
+
+public:
   virtual double strength() const;
-  virtual double agility() const;
-  virtual double stamina() const;
-  virtual double intellect() const;
-  virtual double spirit() const;
+  virtual double aim() const;
+  virtual double cunning() const;
+  virtual double willpower() const;
+  virtual double endurance() const;
+  virtual double presence() const;
 
   virtual void      interrupt();
   virtual void      halt();
@@ -4187,9 +4195,9 @@ struct player_t : public noncopyable
   virtual void register_tick_heal_callback    ( int64_t result_mask, action_callback_t* );
   virtual void register_direct_heal_callback  ( int64_t result_mask, action_callback_t* );
 
-  virtual bool parse_talent_trees( const int talents[MAX_TALENT_SLOTS] );
-  virtual bool parse_talents_armory ( const std::string& talent_string );
-  virtual bool parse_talents_wowhead( const std::string& talent_string );
+  bool parse_talent_trees( const int talents[MAX_TALENT_SLOTS] );
+  bool parse_talents_armory ( const std::string& talent_string );
+  bool parse_talents_wowhead( const std::string& talent_string );
 
   virtual void create_talents();
   //virtual void create_glyphs();
@@ -4284,7 +4292,7 @@ struct player_t : public noncopyable
   benefit_t*  get_benefit ( const std::string& name );
   uptime_t*   get_uptime  ( const std::string& name );
   rng_t*      get_rng     ( const std::string& name, int type=RNG_DEFAULT );
-  set_bonus_t* get_set_bonus( const std::string& name, std::string filter="" );
+  set_bonus_t* get_set_bonus( const std::string& name, std::string filter );
   double      get_player_distance( const player_t* p ) const;
   double      get_position_distance( double m=0, double v=0 ) const;
   action_priority_list_t* get_action_priority_list( const std::string& name );
@@ -4324,8 +4332,7 @@ struct pet_t : public player_t
   std::string full_name_str;
   player_t* owner;
   pet_t* next_pet;
-  double stamina_per_owner;
-  double intellect_per_owner;
+  double endurance_per_owner;
   bool summoned;
   pet_type_t pet_type;
   event_t* expiration;
@@ -4343,8 +4350,7 @@ public:
   virtual double composite_attack_hit()       const { return floor( 100.0 * owner -> composite_attack_hit() ) / 100.0; }
   virtual double composite_spell_hit()        const { return floor( 100.0 * owner -> composite_spell_hit() ) / 100.0;  }
 
-  virtual double stamina() const;
-  virtual double intellect() const;
+  virtual double endurance() const;
 
   virtual void init_base();
   virtual void init_talents();
@@ -4462,6 +4468,7 @@ struct action_t
   timespan_t base_execute_time;
   timespan_t base_tick_time;
   double base_cost;
+  double dd_standardhealthpercentmin, dd_standardhealthpercentmax, td_standardhealthpercentmin, td_standardhealthpercentmax;
   double base_dd_min, base_dd_max, base_td, base_td_init;
   double   base_dd_multiplier,   base_td_multiplier;
   double player_dd_multiplier, player_td_multiplier;
@@ -4516,6 +4523,10 @@ struct action_t
   std::string label_str;
   timespan_t last_reaction_time;
   int targetdata_dot_offset;
+
+protected:
+  std::vector<int> rank_level_list;
+  int rank_level;
 
 private:
   mutable player_t* cached_targetdata_target;
@@ -5396,6 +5407,12 @@ namespace wowreforge
 {
 player_t* download_player( sim_t* sim, const std::string& id, cache::behavior_t b=cache::players() );
 };
+
+// Knotor ===================================================================
+
+namespace knotor {
+bool parse_talents( player_t* player, const std::string& encoding );
+}
 
 // HTTP Download  ===========================================================
 

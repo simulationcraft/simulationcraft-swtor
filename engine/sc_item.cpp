@@ -719,7 +719,7 @@ bool item_t::decode_enchant()
        encoded_enchant_str == "darkglow_embroidery" ||
        encoded_enchant_str == "darkglow_embroidery_old" )
   {
-    stats.add_stat( STAT_SPIRIT, 1 );
+    //stats.add_stat( STAT_SPIRIT, 1 );
   }
 
   std::string use_str;
