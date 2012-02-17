@@ -4,7 +4,6 @@
 // ==========================================================================
 
 #include "simulationcraft.h"
-#include <stdexcept>
 
 namespace { // ANONYMOUS NAMESPACE ==========================================
 
@@ -76,7 +75,7 @@ static bool parse_talent_url( sim_t* sim,
   {
     // http://knotor.com/skills#.....
     if ( ( cut_pt = url.find( '#' ) ) != url.npos )
-      return p -> parse_talents_knotor( url.substr( cut_pt + 1 ) );
+      return knotor::parse_talents( p, url.substr( cut_pt + 1 ) );
   }
 
   else
@@ -215,6 +214,11 @@ static bool parse_brain_lag_stddev( sim_t* sim,
   return true;
 }
 
+inline double swtor_diminishing_return( double cap, double divisor, int level, double rating )
+{
+  return cap * ( 1.0 - std::pow( ( 1.0 - ( 0.01 / cap ) ), std::max( rating, 0.0 ) / std::max( 20, level ) / divisor ) );
+}
+
 // The wowhead encoding that represents pairs of integers in [0..5] with a
 // single character. The character at index i in this array encodes the pair
 // ( floor( i / 6 ), i % 6 ).
@@ -255,10 +259,6 @@ std::pair<int, int> wowhead_talent_decode_pair( char c )
   throw wowhead_bad_talent_encoding( c );
 }
 
-inline double swtor_diminishing_return( double cap, double divisor, int level, double rating )
-{
-  return cap * ( 1.0 - std::pow( ( 1.0 - ( 0.01 / cap ) ), std::max( rating, 0.0 ) / std::max( 20, level ) / divisor ) );
-}
 std::string wowhead_encode_tree( const std::vector<talent_t*>& tree )
 {
   std::string result;
@@ -4946,121 +4946,6 @@ bool player_t::parse_talents_wowhead( const std::string& talent_string )
   }
 
   return parse_talent_trees( encoding );
-}
-
-// player_t::parse_talents_knotor ===========================================
-
-namespace {
-
-static const std::string B64("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-=");
-
-struct knotor_bad_encoding {};
-
-
-
-player_type knotor_advanced_class_decode( int ac )
-{
-  switch( ac )
-  {
-  case  0: return IA_OPERATIVE;
-  case  1: return JEDI_SAGE;
-  case  2: return JEDI_GUARDIAN;
-  case  3: return BH_POWERTECH;
-  case  4: return SITH_MARAUDER;
-  case  5: return S_GUNSLINGER;
-  case  6: return IA_SNIPER;
-  case  7: return SITH_SORCERER;
-  case  8: return S_SCOUNDREL;
-  case  9: return T_COMMANDO;
-  case 10: return JEDI_SHADOW;
-  case 11: return T_VANGUARD;
-  case 12: return BH_MERCENARY;
-  case 13: return JEDI_SENTINEL;
-  case 14: return SITH_ASSASSIN;
-  case 15: return SITH_JUGGERNAUT;
-  default: return PLAYER_NONE;
-  }
-}
-
-uint8_t knotor_base64_decode_one( char c )
-{
-  std::string::size_type pos = B64.find( c );
-  if ( pos == B64.npos )
-    throw knotor_bad_encoding();
-  return pos;
-}
-
-std::vector<uint8_t> knotor_base64_decode( const std::string& encoded )
-{
-  typedef std::string::const_iterator iter;
-
-  std::vector<uint8_t> decoded;
-
-  iter i = encoded.begin();
-  while ( i != encoded.end() )
-  {
-    uint8_t o1 = knotor_base64_decode_one( *i++ );
-    uint8_t o2 = (i != encoded.end() ? knotor_base64_decode_one( *i++ ) : 0);
-    uint8_t o3 = (i != encoded.end() ? knotor_base64_decode_one( *i++ ) : 0);
-    uint8_t o4 = (i != encoded.end() ? knotor_base64_decode_one( *i++ ) : 0);
-    decoded.push_back( (o1 << 2) | (o2 >> 4) );
-    decoded.push_back( ((o2 & 0xf) << 4) | (o3 >> 2) );
-    decoded.push_back( ((o3 & 0x3) << 6) | o4 );
-  }
-
-  return decoded;
-}
-
-}
-
-bool player_t::parse_talents_knotor( const std::string& encoded_talent_data )
-{
-  int talents[ MAX_TALENT_SLOTS ];
-  range::fill( talents, 0 );
-
-  std::vector<uint8_t> talent_data = knotor_base64_decode( encoded_talent_data );
-
-  unsigned i = 0;
-
-  try
-  {
-    // version of the talent tree; ignore.
-    uint8_t version = talent_data.at( i++ );
-    ( void )version;
-
-    // AC identifier; maybe warn if different from this -> type
-    uint8_t advanced_class = talent_data.at( i++ );
-    ( void )advanced_class;
-
-    // talent points invested in each of the 3 trees.
-    int tree_points[3];
-    for ( unsigned tree = 0; tree < 3; ++tree ) tree_points[ tree ] = talent_data.at( i++ );
-    for ( unsigned tree = 0; tree < 3; ++tree )
-    {
-      while ( tree_points[ tree ] > 0 )
-      {
-        if ( i >= talent_data.size() )
-        {
-          // Malformed input
-          return false;
-        }
-
-        unsigned item = talent_data[ i++ ];
-        unsigned row = item >> 5;
-        unsigned col = (item >> 3) & 3;
-        unsigned points = item & 7;
-
-        tree_points[ tree ] -= points;
-      }
-    }
-  }
-
-  catch ( std::out_of_range )
-  {
-    return false;
-  }
-
-  return false;
 }
 
 // player_t::create_talents =================================================

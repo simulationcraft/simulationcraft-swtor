@@ -4195,7 +4195,6 @@ struct player_t : public noncopyable
   bool parse_talent_trees( const int talents[MAX_TALENT_SLOTS] );
   bool parse_talents_armory ( const std::string& talent_string );
   bool parse_talents_wowhead( const std::string& talent_string );
-  bool parse_talents_knotor( const std::string& talent_string );
 
   virtual void create_talents();
   //virtual void create_glyphs();
@@ -5406,6 +5405,12 @@ namespace wowreforge
 {
 player_t* download_player( sim_t* sim, const std::string& id, cache::behavior_t b=cache::players() );
 };
+
+// Knotor ===================================================================
+
+namespace knotor {
+bool parse_talents( player_t* player, const std::string& encoding );
+}
 
 // HTTP Download  ===========================================================
 
