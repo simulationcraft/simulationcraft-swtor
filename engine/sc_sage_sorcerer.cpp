@@ -471,8 +471,8 @@ struct telekinetic_throw_t : public jedi_sage_spell_t
     base_cost = 30.0;
     if ( player -> set_bonus.rakata_force_masters -> two_pc() )
       base_cost -= 2.0;
-    range = 30.0;
 
+    range = 30.0;
     num_ticks = 3;
     base_tick_time = timespan_t::from_seconds( 1.0 );
     may_crit = false;
