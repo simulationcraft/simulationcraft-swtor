@@ -3656,11 +3656,10 @@ struct set_bonus_t
 {
   set_bonus_t* next;
   std::string name;
-  std::string filters;
-  std::vector<std::string> split_filters;
+  std::vector<std::string> filters;
   int count;
 
-  set_bonus_t( const std::string& name, const std::string& filters );
+  set_bonus_t( const std::string& name, const std::string& filters=std::string() );
 
   void init( const player_t& );
 
