@@ -181,6 +181,9 @@ struct sage_sorcerer_t : public player_t
       cooldowns.telekinetic_wave = get_cooldown( "telekinetic_wave" );
     }
 
+    primary_attribute   = ATTR_WILLPOWER;
+    secondary_attribute = ATTR_STRENGTH;
+
     create_talents();
     create_options();
   }
@@ -1094,9 +1097,6 @@ void sage_sorcerer_t::init_talents()
 void sage_sorcerer_t::init_base()
 {
   player_t::init_base();
-
-  attribute_base[ ATTR_WILLPOWER ] = 50 + 4 * level;
-  attribute_base[ ATTR_STRENGTH  ] = 20 + 1.6 * level;
 
   distance = default_distance = 30;
 

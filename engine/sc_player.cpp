@@ -390,6 +390,7 @@ player_t::player_t( sim_t*             s,
   initial_accuracy_rating( 0 ), accuracy_rating( 0 ),
   initial_surge_rating( 0 ), surge_rating( 0 ),
   surge_bonus( 0 ), buffed_surge( 0 ),
+  primary_attribute( ATTRIBUTE_NONE ), secondary_attribute( ATTRIBUTE_NONE ),
   // Spell Mechanics
   base_power( 0.0 ), initial_power( 0.0 ), power( 0.0 ), buffed_power( 0.0 ),
   base_force_power( 0.0 ), initial_force_power( 0.0 ), force_power( 0.0 ), buffed_force_power( 0.0 ),
@@ -398,7 +399,6 @@ player_t::player_t( sim_t*             s,
   base_spell_hit( 0 ), spell_hit( 0 ), buffed_spell_hit( 0 ),
   base_spell_crit( 0 ), spell_crit( 0 ), buffed_spell_crit( 0 ),
   base_spell_penetration( 0 ), initial_spell_penetration( 0 ), spell_penetration( 0 ), buffed_spell_penetration( 0 ),
-  base_mp5( 0 ),               initial_mp5( 0 ),               mp5( 0 ),               buffed_mp5( 0 ),
   spell_power_multiplier( 1.0 ),  initial_spell_power_multiplier( 1.0 ),
   mp5_per_intellect( 0 ),
   mana_regen_base( 0 ), mana_regen_while_casting( 0 ),
@@ -779,12 +779,15 @@ void player_t::init_base()
   attribute_base[ ATTR_ENDURANCE   ] =
     attribute_base[ ATTR_PRESENCE  ] = 45 + 3.6 * level;
 
-  resource_base[ RESOURCE_HEALTH ] = 2500;
+  assert( primary_attribute != secondary_attribute );
+  attribute_base[ primary_attribute   ] = 50 + 4 * level;
+  attribute_base[ secondary_attribute ] = 20 + 1.6 * level;
+
+  resource_base[ RESOURCE_HEALTH ] = 2500; // FIXME: level scaling.
 
   base_spell_crit                  = 0.05;
   base_attack_crit                 = 0.05;
   initial_attack_crit_per_agility  = 0;
-  base_mp5                         = 0;
 
   /*
   attribute_base[ ATTR_STRENGTH  ] = rating_t::get_attribute_base( sim, dbc, level, type, race, BASE_STAT_STRENGTH );
@@ -998,8 +1001,6 @@ void player_t::init_spell()
   initial_spell_power[ SCHOOL_MAX ] = base_spell_power + initial_stats.spell_power;
 
   initial_spell_penetration = base_spell_penetration + initial_stats.spell_penetration;
-
-  initial_mp5 = base_mp5 + initial_stats.mp5;
 
   if ( type != ENEMY && type != ENEMY_ADD )
     mana_regen_base = dbc.regen_spirit( type, level );
@@ -1647,7 +1648,6 @@ void player_t::init_scaling()
 
       case STAT_SPELL_POWER:       initial_spell_power[ SCHOOL_MAX ] += v; break;
       case STAT_SPELL_PENETRATION: initial_spell_penetration         += v; break;
-      case STAT_MP5:               initial_mp5                       += v; break;
       case STAT_POWER:             initial_power                     += v; break;
       case STAT_FORCE_POWER:       initial_force_power               += v; break;
 
@@ -2078,9 +2078,20 @@ double player_t::composite_attribute_multiplier( int attr ) const
 {
   double m = attribute_multiplier[ attr ];
 
-  if ( attr == ATTR_STRENGTH || attr ==  ATTR_WILLPOWER ) // TODO: Add Aim and Cunning
-    if ( buffs.force_valor -> up() )
+  if ( buffs.force_valor -> up() )
+  {
+    switch( attr )
+    {
+    case ATTR_STRENGTH:
+    case ATTR_AIM:
+    case ATTR_CUNNING:
+    case ATTR_WILLPOWER:
       m += 0.05;
+      break;
+    default:
+      break;
+    }
+  }
 
   return m;
 }
@@ -2433,7 +2444,6 @@ void player_t::reset()
   }
 
   spell_penetration = initial_spell_penetration;
-  mp5               = initial_mp5;
 
   attack_power       = initial_attack_power;
   attack_expertise   = initial_attack_expertise;
@@ -3046,16 +3056,12 @@ int player_t::primary_tree() const
 int player_t::normalize_by() const
 {
   if ( sim -> normalized_stat != STAT_NONE )
-  {
     return sim -> normalized_stat;
-  }
 
-  if ( primary_role() == ROLE_SPELL || primary_role() == ROLE_HEAL )
-    return STAT_WILLPOWER;
-  else if ( primary_role() == ROLE_TANK )
+  if ( primary_role() == ROLE_TANK )
     return STAT_ARMOR;
 
-  return STAT_ATTACK_POWER;
+  return primary_attribute;
 }
 
 // player_t::health_percentage() ============================================
@@ -3128,7 +3134,6 @@ void player_t::stat_gain( int       stat,
 
   case STAT_SPELL_POWER:       stats.spell_power       += amount; temporary.spell_power += temp_value * amount; spell_power[ SCHOOL_MAX ] += amount; break;
   case STAT_SPELL_PENETRATION: stats.spell_penetration += amount; spell_penetration         += amount; break;
-  case STAT_MP5:               stats.mp5               += amount; mp5                       += amount; break;
   case STAT_POWER:             stats.power             += amount; power                     += amount; break;
   case STAT_FORCE_POWER:       stats.force_power       += amount; force_power               += amount; break;
 
@@ -3221,7 +3226,6 @@ void player_t::stat_loss( int       stat,
 
   case STAT_SPELL_POWER:       stats.spell_power       -= amount; temporary.spell_power -= temp_value * amount; spell_power[ SCHOOL_MAX ] -= amount; break;
   case STAT_SPELL_PENETRATION: stats.spell_penetration -= amount; spell_penetration         -= amount; break;
-  case STAT_MP5:               stats.mp5               -= amount; mp5                       -= amount; break;
   case STAT_POWER:             stats.power             -= amount; power                     -= amount; break;
   case STAT_FORCE_POWER:       stats.force_power       -= amount; force_power               -= amount; break;
 
@@ -3646,10 +3650,10 @@ void player_t::recalculate_alacrity()
 void player_t::recalculate_crit()
 {
   double crit_from_rating = swtor_diminishing_return( 0.3, 0.45, level, crit_rating );
-  double crit_from_willpower = swtor_diminishing_return( 0.3, 2.5, level, willpower() );
+  double crit_from_primary = swtor_diminishing_return( 0.3, 2.5, level, get_stat_helper( primary_attribute) );
 
-  spell_crit  = base_spell_crit + crit_from_rating + crit_from_willpower;
-  attack_crit = base_attack_crit + crit_from_rating + crit_from_willpower;
+  spell_crit  = base_spell_crit + crit_from_rating + crit_from_primary;
+  attack_crit = base_attack_crit + crit_from_rating + crit_from_primary;
 }
 
 // player_t::recalculate_accuracy ==============================================

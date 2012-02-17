@@ -135,6 +135,9 @@ struct shadow_assassin_t : public player_t
       tree_type[ JEDI_SHADOW_BALANCE ]        = TREE_BALANCE;
     }
 
+    primary_attribute   = ATTR_WILLPOWER;
+    secondary_attribute = ATTR_STRENGTH;
+
     create_talents();
     create_options();
   }
@@ -701,7 +704,7 @@ struct discharge_surging_t : public shadow_assassin_spell_t
     range = 10.0;
   }
 
-  virtual void target_debuff( player_t* t, int dmg_type )
+  virtual void target_debuff( player_t* /* target */, int /* dmg_type */ )
   {
     //shadow_assassin_t* p = player -> cast_shadow_assassin();
   }
@@ -914,9 +917,6 @@ void shadow_assassin_t::init_base()
 {
   player_t::init_base();
 
-  attribute_base[ ATTR_WILLPOWER ] = 50 + 4 * level;
-  attribute_base[ ATTR_STRENGTH  ] = 20 + 1.6 * level;
-
   distance = default_distance = 3;
 
   base_force_regen_per_second = 8.0;
@@ -949,7 +949,6 @@ void shadow_assassin_t::init_buffs()
   buffs.raze = new buff_t( this, "raze", 1, timespan_t::from_seconds( 15.0 ), timespan_t::from_seconds( 7.5 ), talents.raze -> rank() * 0.6 );
   buffs.unearthed_knowledge = new buff_t( this, "unearthed_knowledge", 1, timespan_t::from_seconds( 20.0 ), timespan_t::zero, talents.unearthed_knowledge -> rank() * 0.5 );
   buffs.recklessness = new buff_t( this, is_shadow ? "force_potency" : "recklessness", 2, timespan_t::from_seconds( 20.0 ) );
-
 }
 
 // shadow_assassin_t::init_gains =======================================================

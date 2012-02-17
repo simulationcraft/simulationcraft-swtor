@@ -448,6 +448,7 @@ enum meta_gem_type
   META_GEM_MAX
 };
 
+// Keep this in sync with enum attribute_type
 enum stat_type
 {
   STAT_NONE=0,
@@ -3740,15 +3741,16 @@ struct player_t : public noncopyable
   double initial_accuracy_rating, accuracy_rating;
   double initial_surge_rating, surge_rating;
 
+  double surge_bonus, buffed_surge;
+
   // Attributes
+  attribute_type primary_attribute, secondary_attribute;
   double attribute                   [ ATTRIBUTE_MAX ];
   double attribute_base              [ ATTRIBUTE_MAX ];
   double attribute_initial           [ ATTRIBUTE_MAX ];
   double attribute_multiplier        [ ATTRIBUTE_MAX ];
   double attribute_multiplier_initial[ ATTRIBUTE_MAX ];
   double attribute_buffed            [ ATTRIBUTE_MAX ];
-
-  double surge_bonus, buffed_surge;
 
   // Spell Mechanics
   double base_power, initial_power, power, buffed_power;
@@ -3758,7 +3760,6 @@ struct player_t : public noncopyable
   double base_spell_hit,         spell_hit,                   buffed_spell_hit;
   double base_spell_crit,        spell_crit,                  buffed_spell_crit;
   double base_spell_penetration, initial_spell_penetration,           spell_penetration,           buffed_spell_penetration;
-  double base_mp5,               initial_mp5,                         mp5,                         buffed_mp5;
   double spell_power_multiplier,    initial_spell_power_multiplier;
   double mp5_per_intellect;
   double mana_regen_base;
