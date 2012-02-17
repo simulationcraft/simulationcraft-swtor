@@ -28,7 +28,7 @@ void register_shadow_assassin_targetdata( sim_t* sim )
 
 
 // ==========================================================================
-// Shadow Assassin
+// Jedi Shadow | Sith Assassin
 // ==========================================================================
 
 struct shadow_assassin_t : public player_t
@@ -185,6 +185,8 @@ struct shadow_assassin_spell_t : public spell_t
   }
 };
 
+// Mark of Power | Force Valor =======================
+
 struct mark_of_power_t : public shadow_assassin_spell_t
 {
   mark_of_power_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
@@ -214,6 +216,8 @@ struct mark_of_power_t : public shadow_assassin_spell_t
     return shadow_assassin_spell_t::ready();
   }
 };
+
+// Shock | Project =======================
 
 struct shock_t : public shadow_assassin_spell_t
 {
@@ -268,11 +272,7 @@ struct shock_t : public shadow_assassin_spell_t
   }
 };
 
-
-
-// ==========================================================================
-// force_lightning // telekinetic_throw
-
+// Force Lightning | Telekinetic Throw ======
 
 struct force_lightning_t : public shadow_assassin_spell_t
 {
@@ -299,7 +299,7 @@ struct force_lightning_t : public shadow_assassin_spell_t
   }
 };
 
-// crushing_darkness // mind_crush
+// Crushing Darkness | Mind Crush =====================
 
 struct crushing_darkness_t : public shadow_assassin_spell_t
 {
@@ -354,9 +354,7 @@ struct crushing_darkness_t : public shadow_assassin_spell_t
   }
 };
 
-
-// ==========================================================================
-// death_field // force_in_balance
+// Death Field | Force in Balance =======================
 
 struct death_field_t : public shadow_assassin_spell_t
 {
@@ -389,8 +387,7 @@ struct death_field_t : public shadow_assassin_spell_t
   }
 };
 
-// creeping_terror // sever_force
-
+// Creeping Terror | Sever Force ==================================
 
 struct creeping_terror_t : public shadow_assassin_spell_t
 {
@@ -424,7 +421,7 @@ struct creeping_terror_t : public shadow_assassin_spell_t
   }
 };
 
-// recklessness // force_potency
+// Recklessness | Force Potency ==================
 
 struct recklessness_t : public shadow_assassin_spell_t
 {
@@ -448,9 +445,9 @@ struct recklessness_t : public shadow_assassin_spell_t
   }
 };
 
-// lightning_charge // force_technique
-//FIXME Proc: 50%  This effect cannot occur more than once every 1.5 seconds.
+// Lightning Charge | Force Technique ===========
 
+//FIXME Proc: 50%  This effect cannot occur more than once every 1.5 seconds.
 
 struct lightning_charge_t : public shadow_assassin_spell_t
 {
@@ -472,7 +469,8 @@ struct lightning_charge_t : public shadow_assassin_spell_t
   }
 };
 
-// surging_charge // shadow_technique
+// Surging Charge | Shadow Technique ========================
+
 //FIXME: Proc: 25%  This effect cannot occur more than once every 1.5 seconds.
 //FIXME: Energy School to define?
 
@@ -501,8 +499,8 @@ struct surging_charge_t : public shadow_assassin_spell_t
   }
 };
 
+// Low Slash =====================================
 
-// low_slash // low_slash
 // FIXME: AmountModiferPercent = -0.12
 
 struct low_slash_t : public shadow_assassin_attack_t
@@ -521,8 +519,8 @@ struct low_slash_t : public shadow_assassin_attack_t
   }
 };
 
-// voltaic_slash // clairvoyant_strike
-//
+// Voltaic Slash | Clairvoyant Strike ===============
+
 // FIXME: AmountModiferPercent = -0.465
 // FIXME: Actually strike the target twice (Double proc chance etc.)
 // TODO : Each use of this ability increases the damage dealt by your next Shock by 15%
@@ -545,7 +543,7 @@ struct voltaic_slash_t : public shadow_assassin_attack_t
   }
 };
 
-// overcharge_saber // battle_readiness
+// Overcharge Saber | Battle Readiness ================
 
 struct overcharge_saber_t : public shadow_assassin_spell_t
 {
@@ -569,7 +567,8 @@ struct overcharge_saber_t : public shadow_assassin_spell_t
   }
 };
 
-// assassinate // spinning_strike
+// Assassinate | Spinning Strike ==============================================
+
 //FIXME: Need to add target health condition (<=30%)
 //FIXME: AmountModifierPercent = 1.06
 
@@ -589,8 +588,8 @@ struct assassinate_t : public shadow_assassin_attack_t
   }
 };
 
+// Lacerate | Whirling Blow ==================================
 
-// lacerate // whirling_blow
 // FIXME: AmountModifierPercent = -0.52
 
 struct lacerate_t : public shadow_assassin_attack_t
@@ -608,7 +607,7 @@ struct lacerate_t : public shadow_assassin_attack_t
   }
 };
 
-// blackout // blackout
+// Blackout ================================
 
 struct blackout_t : public shadow_assassin_spell_t
 {
@@ -632,7 +631,7 @@ struct blackout_t : public shadow_assassin_spell_t
   }
 };
 
-// force_cloak // force_cloak
+// Force Cloak ==========================================
 
 struct force_cloak_t : public shadow_assassin_spell_t
 {
@@ -656,7 +655,7 @@ struct force_cloak_t : public shadow_assassin_spell_t
   }
 };
 
-// discharge_lightning
+// Discharge Lightning =======================================
 
 struct discharge_lightning_t : public shadow_assassin_spell_t
 {
@@ -681,6 +680,8 @@ struct discharge_lightning_t : public shadow_assassin_spell_t
     //shadow_assassin_t* p = player -> cast_shadow_assassin();
   }
 };
+
+// Discharge Surging =========================
 
 // FIXME: These appear to be the numbers for Dark Discharge, not Surging.
 // discharge_surging
@@ -707,10 +708,9 @@ struct discharge_surging_t : public shadow_assassin_spell_t
   }
 };
 
+// Discharge | Force Breach ==============================
 
-// discharge // force_breach
 //FIX ME: Add check on current charge used, and apply proper spell. (Surging Charge or Lightning Charge)
-
 
 struct discharge_t : public shadow_assassin_spell_t
 {
@@ -731,7 +731,8 @@ struct discharge_t : public shadow_assassin_spell_t
   }
 };
 
-// maul // shadow_strike
+// Maul | Shadow Strike ===================
+
 // FIXME: AmountModifierPercent = 0.58
 
 struct maul_t : public shadow_assassin_attack_t
@@ -750,7 +751,8 @@ struct maul_t : public shadow_assassin_attack_t
   }
 };
 
-// saber_strike // saber_strike
+// Saber Strike ==================================
+
 //      base_dd_min      = 379.96; // StandardHealthPercentMin=>0.236
 //      base_dd_max      = 379.96; // StandardHealthPercentMax=>0.236
 //      direct_power_mod = 2.37  ; // PHYSICAL
@@ -773,7 +775,8 @@ struct saber_strike_t : public shadow_assassin_attack_t
   }
 };
 
-// thrash // double_strike
+// Thrash | Double Strike ==================================
+
 //FIX ME: Split into two hits.
 //FIXME: AmountModifierPercent = -0.505
 
@@ -1184,14 +1187,14 @@ void shadow_assassin_t::create_talents()
 // PLAYER_T EXTENSIONS
 // ==========================================================================
 
-// player_t::create_shadow_assassin  ===================================================
+// player_t::create_jedi_shadow  ===================================================
 
 player_t* player_t::create_jedi_shadow( sim_t* sim, const std::string& name, race_type r )
 {
   return new shadow_assassin_t( sim, JEDI_SHADOW, name, r );
 }
 
-// player_t::create_sith_sorcerer  ===================================================
+// player_t::create_sith_assassin  ===================================================
 
 player_t* player_t::create_sith_assassin( sim_t* sim, const std::string& name, race_type r )
 {
