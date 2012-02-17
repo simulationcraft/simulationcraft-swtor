@@ -750,7 +750,6 @@ void SimulationCraftWindow::createBestInSlotTab()
   // Main loop through all subfolders of ./profiles/
   for ( int i=0; i < tnumProfiles; i++ )
   {
-
 #ifndef Q_WS_MAC
     QDir dir = QString( "profiles/" + tprofileList[ i ] );
 #else
@@ -773,6 +772,10 @@ void SimulationCraftWindow::createBestInSlotTab()
     int numProfiles = profileList.count();
     for ( int i=0; i < numProfiles; i++ )
     {
+      // exclude generate/create profiles
+      if ( profileList[ i ].contains( "generate" ) || profileList[ i ].contains( "create" ))
+        continue;
+
       QString profile = dir.absolutePath() + "/";
       profile = QDir::toNativeSeparators( profile );
       profile += profileList[ i ];
