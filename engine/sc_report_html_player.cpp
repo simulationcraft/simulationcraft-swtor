@@ -1008,8 +1008,8 @@ static void print_html_stats ( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> buffed_surge,
-             a -> surge_bonus,
+             100 * a -> buffed_surge,
+             100 * a -> surge_bonus,
              a -> stats.surge_rating );
 
     fprintf( file,
