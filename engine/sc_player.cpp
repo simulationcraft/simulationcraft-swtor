@@ -1112,8 +1112,7 @@ void player_t::init_resources( bool force )
 
       if ( i == RESOURCE_HEALTH )
       {
-        double adjust = ( is_pet() || is_enemy() || is_add() ) ? 0 : std::min( 20, ( int ) floor( endurance() ) );
-        resource_initial[ i ] += ( floor( endurance() ) - adjust ) * health_per_endurance + adjust;
+        resource_initial[ i ] += floor( endurance() ) * health_per_endurance;
       }
     }
     resource_current[ i ] = resource_max[ i ] = resource_initial[ i ];
