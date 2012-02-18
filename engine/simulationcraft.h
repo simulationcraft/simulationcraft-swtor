@@ -3458,6 +3458,7 @@ struct rating_t : public internal::rating_t
   static double get_attribute_base( sim_t*, dbc_t& pData, int level, player_type class_type, race_type race, base_stat_type stat_type );
   static double standardhealth_damage( int level );
   static double standardhealth_healing( int level );
+  static int get_base_health( int level );
 };
 
 // Weapon ===================================================================

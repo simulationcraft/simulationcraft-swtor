@@ -783,7 +783,7 @@ void player_t::init_base()
   attribute_base[ primary_attribute   ] = floor( 50 + 4 * level );
   attribute_base[ secondary_attribute ] = floor( 20 + 1.6 * level );
 
-  resource_base[ RESOURCE_HEALTH ] = 2500; // FIXME: level scaling.
+  resource_base[ RESOURCE_HEALTH ] = rating_t::get_base_health( level );
 
   base_spell_crit                  = 0.05;
   base_attack_crit                 = 0.05;
