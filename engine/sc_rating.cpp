@@ -10,9 +10,67 @@
 // ==========================================================================
 
 namespace { // ANONYMOUS ====================================================
+
+// Source: http://sithwarrior.com/forums/Thread-SWTOR-formula-list?pid=8298#pid8298
+// Which he supposedly datamined with Nodeviewer.
+const int base_health_table[] = {
+  /*  0 */    0,
+  /*  1 */  130,
+  /*  2 */  140,
+  /*  3 */  150,
+  /*  4 */  160,
+  /*  5 */  170,
+  /*  6 */  185,
+  /*  7 */  200,
+  /*  8 */  220,
+  /*  9 */  240,
+  /* 10 */  260,
+  /* 11 */  285,
+  /* 12 */  310,
+  /* 13 */  335,
+  /* 14 */  365,
+  /* 15 */  395,
+  /* 16 */  430,
+  /* 17 */  465,
+  /* 18 */  500,
+  /* 19 */  540,
+  /* 20 */  580,
+  /* 21 */  620,
+  /* 22 */  665,
+  /* 23 */  710,
+  /* 24 */  755,
+  /* 25 */  805,
+  /* 26 */  855,
+  /* 27 */  905,
+  /* 28 */  960,
+  /* 29 */ 1015,
+  /* 30 */ 1070,
+  /* 31 */ 1125,
+  /* 32 */ 1185,
+  /* 33 */ 1245,
+  /* 34 */ 1305,
+  /* 35 */ 1370,
+  /* 36 */ 1435,
+  /* 37 */ 1500,
+  /* 38 */ 1570,
+  /* 39 */ 1640,
+  /* 40 */ 1710,
+  /* 41 */ 1780,
+  /* 42 */ 1855,
+  /* 43 */ 1930,
+  /* 44 */ 2005,
+  /* 45 */ 2085,
+  /* 46 */ 2165,
+  /* 47 */ 2245,
+  /* 48 */ 2330,
+  /* 49 */ 2415,
+  /* 50 */ 2500,
+};
+
 struct standard_health_t
 { int damage, healing; };
 
+// Source: http://sithwarrior.com/forums/Thread-SWTOR-formula-list?pid=3547#pid3547
 const standard_health_t standard_health_table[] = {
   /*  0 */ {    0,    0 },
   /*  1 */ {  180,  375 },
@@ -174,11 +232,13 @@ double rating_t::get_attribute_base( sim_t* /* sim */, dbc_t& dbc, int level, pl
   switch ( stat_type )
   {
   case BASE_STAT_STRENGTH:           res = dbc.race_base( race ).strength + dbc.attribute_base( class_type, level ).strength; break;
+#if 0
   case BASE_STAT_AGILITY:            res = dbc.race_base( race ).agility + dbc.attribute_base( class_type, level ).agility; break;
   case BASE_STAT_STAMINA:            res = dbc.race_base( race ).stamina + dbc.attribute_base( class_type, level ).stamina; break;
   case BASE_STAT_INTELLECT:          res = dbc.race_base( race ).intellect + dbc.attribute_base( class_type, level ).intellect; break;
   case BASE_STAT_SPIRIT:             res = dbc.race_base( race ).spirit + dbc.attribute_base( class_type, level ).spirit;
                                      if ( race == RACE_HUMAN ) res *= 1.03; break;
+#endif
   case BASE_STAT_HEALTH:             res = dbc.attribute_base( class_type, level ).base_health; break;
   case BASE_STAT_MANA:               res = dbc.attribute_base( class_type, level ).base_resource; break;
   case BASE_STAT_MELEE_CRIT_PER_AGI: res = dbc.melee_crit_scaling( class_type, level ); break;
@@ -203,3 +263,13 @@ double rating_t::standardhealth_damage( int level )
 
 double rating_t::standardhealth_healing( int level )
 { return get_standard_health( level ).healing; }
+
+// rating_t::get_base_health ================================================
+
+int rating_t::get_base_health( int level )
+{
+  unsigned index = level;
+  if ( index >= sizeof( base_health_table ) / sizeof( base_health_table[ 0 ] ) )
+    index = 0;
+  return base_health_table[ index ];
+}

@@ -89,6 +89,7 @@ SRC = \
 	sc_item.cpp \
 	sc_item_data.cpp \
 	sc_js.cpp \
+    sc_knotor.cpp \
 	sc_log.cpp \
 	sc_main.cpp \
 	sc_mmo_champion.cpp \

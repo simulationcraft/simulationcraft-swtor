@@ -61,6 +61,7 @@ SOURCES += engine/sc_http.cpp
 SOURCES += engine/sc_item.cpp
 SOURCES += engine/sc_item_data.cpp
 SOURCES += engine/sc_js.cpp
+SOURCES += engine/sc_knotor.cpp
 SOURCES += engine/sc_log.cpp
 SOURCES += engine/sc_mmo_champion.cpp
 SOURCES += engine/sc_option.cpp

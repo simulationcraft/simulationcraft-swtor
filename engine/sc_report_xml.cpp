@@ -340,16 +340,14 @@ void print_xml_player_stats( xml_writer_t & writer, player_t * p )
 {
   print_xml_player_attribute( writer, "strength",
                               p -> strength(),  p -> stats.attribute[ ATTR_STRENGTH  ], p -> attribute_buffed[ ATTR_STRENGTH  ] );
-  print_xml_player_attribute( writer, "agility",
-                              p -> agility(),   p -> stats.attribute[ ATTR_AGILITY   ], p -> attribute_buffed[ ATTR_AGILITY   ] );
-  print_xml_player_attribute( writer, "stamina",
-                              p -> stamina(),   p -> stats.attribute[ ATTR_STAMINA   ], p -> attribute_buffed[ ATTR_STAMINA   ] );
-  print_xml_player_attribute( writer, "intellect",
-                              p -> intellect(), p -> stats.attribute[ ATTR_INTELLECT ], p -> attribute_buffed[ ATTR_INTELLECT ] );
-  print_xml_player_attribute( writer, "spirit",
-                              p -> spirit(),    p -> stats.attribute[ ATTR_SPIRIT    ], p -> attribute_buffed[ ATTR_SPIRIT    ] );
+  print_xml_player_attribute( writer, "aim",
+                              p -> aim(),       p -> stats.attribute[ ATTR_AIM       ], p -> attribute_buffed[ ATTR_AIM       ] );
+  print_xml_player_attribute( writer, "cunning",
+                              p -> cunning(),   p -> stats.attribute[ ATTR_CUNNING   ], p -> attribute_buffed[ ATTR_CUNNING   ] );
   print_xml_player_attribute( writer, "willpower",
-                                p -> willpower(),    p -> stats.attribute[ ATTR_WILLPOWER    ], p -> attribute_buffed[ ATTR_WILLPOWER    ] );
+                              p -> willpower(), p -> stats.attribute[ ATTR_WILLPOWER ], p -> attribute_buffed[ ATTR_WILLPOWER ] );
+  print_xml_player_attribute( writer, "presence",
+                              p -> presence(),  p -> stats.attribute[ ATTR_PRESENCE  ], p -> attribute_buffed[ ATTR_PRESENCE  ] );
   print_xml_player_attribute( writer, "spellpower",
                               p -> composite_spell_power( SCHOOL_MAX ) * p -> composite_spell_power_multiplier(), p -> stats.spell_power, p -> buffed_spell_power );
   print_xml_player_attribute( writer, "spellhit",
@@ -360,8 +358,6 @@ void print_xml_player_stats( xml_writer_t & writer, player_t * p )
                               100 * p -> composite_spell_penetration(), p -> stats.spell_penetration, 100 * p -> buffed_spell_penetration );
   print_xml_player_attribute( writer, "spellalacrity",
                               100 * ( 1 / p -> spell_alacrity - 1 ), p -> stats.alacrity_rating, 100 * ( 1 / p -> buffed_spell_alacrity - 1 ) );
-  print_xml_player_attribute( writer, "mp5",
-                              p -> composite_mp5(), p -> stats.mp5, p -> buffed_mp5 );
   print_xml_player_attribute( writer, "attackpower",
                               p -> composite_attack_power() * p -> composite_attack_power_multiplier(), p -> stats.attack_power, p -> buffed_attack_power );
   print_xml_player_attribute( writer, "attackhit",

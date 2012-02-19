@@ -1759,16 +1759,17 @@ const char* chart_t::gear_weights_lootrank( std::string& s,
     switch ( i )
     {
     case STAT_STRENGTH:                 name = "Str";  break;
-    case STAT_AGILITY:                  name = "Agi";  break;
-    case STAT_STAMINA:                  name = "Sta";  break;
-    case STAT_INTELLECT:                name = "Int";  break;
-    case STAT_SPIRIT:                   name = "Spi";  break;
+    case STAT_AIM:                      name = "Aim";  break;
+    case STAT_CUNNING:                  name = "Cun";  break;
+    case STAT_WILLPOWER:                name = "Wil";  break;
+    case STAT_ENDURANCE:                name = "End";  break;
+    case STAT_PRESENCE:                 name = "Pre";  break;
     case STAT_SPELL_POWER:              name = "spd";  break;
     case STAT_ATTACK_POWER:             name = "map";  break;
     case STAT_EXPERTISE_RATING:         name = "Exp";  break;
     case STAT_HIT_RATING:               name = "mhit"; break;
     case STAT_CRIT_RATING:              name = "mcr";  break;
-    case STAT_ALACRITY_RATING:             name = "mh";   break;
+    case STAT_ALACRITY_RATING:          name = "Ala";  break;
     case STAT_ARMOR:                    name = "Arm";  break;
     case STAT_WEAPON_DPS:               name = "dps";  break;
     case STAT_WEAPON_OFFHAND_DPS:       name = "odps"; break;
@@ -1823,10 +1824,6 @@ const char* chart_t::gear_weights_wowhead( std::string& s,
     switch ( i )
     {
     case STAT_STRENGTH:                 id = 20;  break;
-    case STAT_AGILITY:                  id = 21;  break;
-    case STAT_STAMINA:                  id = 22;  break;
-    case STAT_INTELLECT:                id = 23;  break;
-    case STAT_SPIRIT:                   id = 24;  break;
     case STAT_SPELL_POWER:              id = 123; break;
     case STAT_ATTACK_POWER:             id = 77;  break;
     case STAT_EXPERTISE_RATING:         id = 117; break;
@@ -1934,7 +1931,6 @@ const char* chart_t::gear_weights_pawn( std::string& s,
   s += buffer;
 
   double maxR = 0;
-  double maxB = 0;
   double maxY = 0;
 
   for ( int i=0; i < STAT_MAX; i++ )
@@ -1952,10 +1948,6 @@ const char* chart_t::gear_weights_pawn( std::string& s,
     switch ( stat )
     {
     case STAT_STRENGTH:                 name = "Strength";         if ( value*20 > maxR ) maxR = value*20; break;
-    case STAT_AGILITY:                  name = "Agility";          if ( value*20 > maxR ) maxR = value*20; break;
-    case STAT_STAMINA:                  name = "Stamina";          if ( value*20 > maxB ) maxB = value*20; break;
-    case STAT_INTELLECT:                name = "Intellect";        if ( value*20 > maxY ) maxY = value*20; break;
-    case STAT_SPIRIT:                   name = "Spirit";           if ( value*20 > maxB ) maxB = value*20; break;
     case STAT_SPELL_POWER:              name = "SpellDamage";      if ( value*20 > maxR ) maxR = value*20; break;
     case STAT_ATTACK_POWER:             name = "Ap";               if ( value*20 > maxR ) maxR = value*20; break;
     case STAT_EXPERTISE_RATING:         name = "ExpertiseRating";  if ( value*20 > maxR ) maxR = value*20; break;

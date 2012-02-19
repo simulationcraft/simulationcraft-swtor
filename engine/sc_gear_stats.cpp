@@ -19,11 +19,11 @@ void gear_stats_t::add_stat( int    stat,
   case STAT_NONE: break;
 
   case STAT_STRENGTH:  attribute[ ATTR_STRENGTH  ] += value; break;
-  case STAT_AGILITY:   attribute[ ATTR_AGILITY   ] += value; break;
-  case STAT_STAMINA:   attribute[ ATTR_STAMINA   ] += value; break;
-  case STAT_INTELLECT: attribute[ ATTR_INTELLECT ] += value; break;
-  case STAT_SPIRIT:    attribute[ ATTR_SPIRIT    ] += value; break;
+  case STAT_AIM:       attribute[ ATTR_AIM       ] += value; break;
+  case STAT_CUNNING:   attribute[ ATTR_CUNNING   ] += value; break;
   case STAT_WILLPOWER: attribute[ ATTR_WILLPOWER ] += value; break;
+  case STAT_ENDURANCE: attribute[ ATTR_ENDURANCE ] += value; break;
+  case STAT_PRESENCE:  attribute[ ATTR_PRESENCE  ] += value; break;
 
   case STAT_HEALTH: resource[ RESOURCE_HEALTH ] += value; break;
   case STAT_MANA:   resource[ RESOURCE_MANA   ] += value; break;
@@ -86,11 +86,11 @@ void gear_stats_t::set_stat( int    stat,
   case STAT_NONE: break;
 
   case STAT_STRENGTH:  attribute[ ATTR_STRENGTH  ] = value; break;
-  case STAT_AGILITY:   attribute[ ATTR_AGILITY   ] = value; break;
-  case STAT_STAMINA:   attribute[ ATTR_STAMINA   ] = value; break;
-  case STAT_INTELLECT: attribute[ ATTR_INTELLECT ] = value; break;
-  case STAT_SPIRIT:    attribute[ ATTR_SPIRIT    ] = value; break;
+  case STAT_AIM:       attribute[ ATTR_AIM       ] = value; break;
+  case STAT_CUNNING:   attribute[ ATTR_CUNNING   ] = value; break;
   case STAT_WILLPOWER: attribute[ ATTR_WILLPOWER ] = value; break;
+  case STAT_ENDURANCE: attribute[ ATTR_ENDURANCE ] = value; break;
+  case STAT_PRESENCE:  attribute[ ATTR_PRESENCE ] = value; break;
 
   case STAT_HEALTH: resource[ RESOURCE_HEALTH ] = value; break;
   case STAT_MANA:   resource[ RESOURCE_MANA   ] = value; break;
@@ -152,11 +152,11 @@ double gear_stats_t::get_stat( int stat ) const
   case STAT_NONE: return 0;
 
   case STAT_STRENGTH:  return attribute[ ATTR_STRENGTH  ];
-  case STAT_AGILITY:   return attribute[ ATTR_AGILITY   ];
-  case STAT_STAMINA:   return attribute[ ATTR_STAMINA   ];
-  case STAT_INTELLECT: return attribute[ ATTR_INTELLECT ];
-  case STAT_SPIRIT:    return attribute[ ATTR_SPIRIT    ];
+  case STAT_AIM:       return attribute[ ATTR_AIM       ];
+  case STAT_CUNNING:   return attribute[ ATTR_CUNNING ];
   case STAT_WILLPOWER: return attribute[ ATTR_WILLPOWER ];
+  case STAT_ENDURANCE: return attribute[ ATTR_ENDURANCE ];
+  case STAT_PRESENCE:  return attribute[ ATTR_PRESENCE ];
 
   case STAT_HEALTH: return resource[ RESOURCE_HEALTH ];
   case STAT_MANA:   return resource[ RESOURCE_MANA   ];
