@@ -318,10 +318,10 @@ enum school_type
   SCHOOL_FIRESTORM,   SCHOOL_FROSTSTRIKE, SCHOOL_HOLYFROST,   SCHOOL_FROSTSTORM,  SCHOOL_SHADOWSTRIKE,
   SCHOOL_SHADOWLIGHT, SCHOOL_SHADOWFLAME, SCHOOL_SHADOWSTORM, SCHOOL_SHADOWFROST, SCHOOL_SPELLSTRIKE,
   SCHOOL_DIVINE,      SCHOOL_SPELLFIRE,   SCHOOL_SPELLSTORM,  SCHOOL_SPELLFROST,  SCHOOL_SPELLSHADOW,
-  SCHOOL_ELEMENTAL,   SCHOOL_CHROMATIC,   SCHOOL_MAGIC,       SCHOOL_CHAOS,       SCHOOL_BLEED,
+  SCHOOL_CHROMATIC,   SCHOOL_MAGIC,       SCHOOL_CHAOS,       SCHOOL_BLEED,
   SCHOOL_DRAIN,
 
-  SCHOOL_INTERNAL, SCHOOL_KINETIC,
+  SCHOOL_INTERNAL, SCHOOL_KINETIC, SCHOOL_ELEMENTAL, SCHOOL_ENERGY,
   SCHOOL_MAX
 };
 
@@ -348,7 +348,8 @@ const int64_t SCHOOL_SPELL_MASK  ( ( int64_t( 1 ) << SCHOOL_ARCANE )         | (
                                    ( int64_t( 1 ) << SCHOOL_ELEMENTAL )      | ( int64_t( 1 ) << SCHOOL_CHROMATIC )    |
                                    ( int64_t( 1 ) << SCHOOL_MAGIC )          | ( int64_t( 1 ) << SCHOOL_CHAOS )        |
                                    ( int64_t( 1 ) << SCHOOL_BLEED )          | ( int64_t( 1 ) << SCHOOL_DRAIN )        |
-                                   ( int64_t( 1 ) << SCHOOL_INTERNAL )       | ( int64_t( 1 ) << SCHOOL_KINETIC )        );
+                                   ( int64_t( 1 ) << SCHOOL_INTERNAL )       | ( int64_t( 1 ) << SCHOOL_KINETIC )      |
+                                   ( int64_t( 1 ) << SCHOOL_ELEMENTAL )      | ( int64_t( 1 ) << SCHOOL_ENERGY )         );
 #define SCHOOL_ALL_MASK    ( int64_t( -1 ) )
 
 enum talent_tree_type

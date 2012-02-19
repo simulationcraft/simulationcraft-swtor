@@ -596,12 +596,13 @@ const char* util_t::school_type_string( int school )
   case SCHOOL_SPELLSTORM:       return "spellstorm";
   case SCHOOL_SPELLFROST:       return "spellfrost";
   case SCHOOL_SPELLSHADOW:      return "spellshadow";
-  case SCHOOL_ELEMENTAL:        return "elemental";
   case SCHOOL_CHROMATIC:        return "chromatic";
   case SCHOOL_MAGIC:            return "magic";
   case SCHOOL_DRAIN:            return "drain";
   case SCHOOL_KINETIC:          return "kinetic";
   case SCHOOL_INTERNAL:         return "internal";
+  case SCHOOL_ELEMENTAL:        return "elemental";
+  case SCHOOL_ENERGY:           return "energy";
   }
   return "unknown";
 }

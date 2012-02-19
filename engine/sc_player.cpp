@@ -3414,7 +3414,7 @@ double player_t::target_mitigation( double            amount,
     if ( mitigated_amount < 0 ) return 0;
   }
 
-  if ( school == SCHOOL_PHYSICAL || school == SCHOOL_KINETIC )
+  if ( school == SCHOOL_PHYSICAL || school == SCHOOL_KINETIC || school == SCHOOL_ENERGY )
   {
 
     // Armor
