@@ -390,11 +390,11 @@ enum glyph_type
   GLYPH_MAX
 };
 
-enum slot_type   // these enum values match armory settings
+enum slot_type   // these enum values should match armory settings
 {
   SLOT_NONE      = -1,
   SLOT_HEAD      = 0,
-  SLOT_NECK      = 1,
+  SLOT_EAR       = 1,
   SLOT_SHOULDERS = 2,
   SLOT_SHIRT     = 3,
   SLOT_CHEST     = 4,
@@ -403,10 +403,10 @@ enum slot_type   // these enum values match armory settings
   SLOT_FEET      = 7,
   SLOT_WRISTS    = 8,
   SLOT_HANDS     = 9,
-  SLOT_FINGER_1  = 10,
-  SLOT_FINGER_2  = 11,
-  SLOT_TRINKET_1 = 12,
-  SLOT_TRINKET_2 = 13,
+  SLOT_IMPLANT_1 = 10,
+  SLOT_IMPLANT_2 = 11,
+  SLOT_RELIC_1   = 12,
+  SLOT_RELIC_2   = 13,
   SLOT_BACK      = 14,
   SLOT_MAIN_HAND = 15,
   SLOT_OFF_HAND  = 16,

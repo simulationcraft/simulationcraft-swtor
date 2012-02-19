@@ -508,7 +508,7 @@ static const char* translate_inventory_id( int slot )
   switch ( slot )
   {
   case SLOT_HEAD:      return "inventory/1";
-  case SLOT_NECK:      return "inventory/2";
+  case SLOT_EAR:       return "inventory/2";
   case SLOT_SHOULDERS: return "inventory/3";
   case SLOT_SHIRT:     return "inventory/4";
   case SLOT_CHEST:     return "inventory/5";
@@ -517,10 +517,10 @@ static const char* translate_inventory_id( int slot )
   case SLOT_FEET:      return "inventory/8";
   case SLOT_WRISTS:    return "inventory/9";
   case SLOT_HANDS:     return "inventory/10";
-  case SLOT_FINGER_1:  return "inventory/11";
-  case SLOT_FINGER_2:  return "inventory/12";
-  case SLOT_TRINKET_1: return "inventory/13";
-  case SLOT_TRINKET_2: return "inventory/14";
+  case SLOT_IMPLANT_1: return "inventory/11";
+  case SLOT_IMPLANT_2: return "inventory/12";
+  case SLOT_RELIC_1:   return "inventory/13";
+  case SLOT_RELIC_2:   return "inventory/14";
   case SLOT_BACK:      return "inventory/15";
   case SLOT_MAIN_HAND: return "inventory/16";
   case SLOT_OFF_HAND:  return "inventory/17";

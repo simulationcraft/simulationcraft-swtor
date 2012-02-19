@@ -903,7 +903,7 @@ const char* util_t::slot_type_string( int slot )
   switch ( slot )
   {
   case SLOT_HEAD:      return "head";
-  case SLOT_NECK:      return "neck";
+  case SLOT_EAR:       return "ear";
   case SLOT_SHOULDERS: return "shoulders";
   case SLOT_SHIRT:     return "shirt";
   case SLOT_CHEST:     return "chest";
@@ -912,10 +912,10 @@ const char* util_t::slot_type_string( int slot )
   case SLOT_FEET:      return "feet";
   case SLOT_WRISTS:    return "wrists";
   case SLOT_HANDS:     return "hands";
-  case SLOT_FINGER_1:  return "finger1";
-  case SLOT_FINGER_2:  return "finger2";
-  case SLOT_TRINKET_1: return "trinket1";
-  case SLOT_TRINKET_2: return "trinket2";
+  case SLOT_IMPLANT_1: return "implant1";
+  case SLOT_IMPLANT_2: return "implant2";
+  case SLOT_RELIC_1:   return "relic1";
+  case SLOT_RELIC_2:   return "relic2";
   case SLOT_BACK:      return "back";
   case SLOT_MAIN_HAND: return "main_hand";
   case SLOT_OFF_HAND:  return "off_hand";
@@ -1366,7 +1366,7 @@ slot_type util_t::translate_invtype( int inv_type )
   case INVTYPE_FEET:
     return SLOT_FEET;
   case INVTYPE_FINGER:
-    return SLOT_FINGER_1;
+    return SLOT_IMPLANT_1;
   case INVTYPE_HANDS:
     return SLOT_HANDS;
   case INVTYPE_HEAD:
@@ -1374,13 +1374,13 @@ slot_type util_t::translate_invtype( int inv_type )
   case INVTYPE_LEGS:
     return SLOT_LEGS;
   case INVTYPE_NECK:
-    return SLOT_NECK;
+    return SLOT_EAR;
   case INVTYPE_SHOULDERS:
     return SLOT_SHOULDERS;
   case INVTYPE_TABARD:
     return SLOT_TABARD;
   case INVTYPE_TRINKET:
-    return SLOT_TRINKET_1;
+    return SLOT_RELIC_1;
   case INVTYPE_WAIST:
     return SLOT_WAIST;
   case INVTYPE_WRISTS:
