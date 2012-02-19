@@ -3,6 +3,32 @@
 // Send questions to natehieter@gmail.com
 // ==========================================================================
 
+// ==========================================================================
+// Tyrus ToDo List
+// ==========================================================================
+// ----------
+// Abilities |
+// ---------- 
+//
+// Discharge : Lightning OK | Surging NYI
+// Stealth : NYI
+//
+// ----------
+// Procs     |
+// ---------- 
+//
+// [FIXME] Lightning Charge Proc : occuring | no damage
+// Surging Charge Proc : NYI
+//
+// ----------
+// Talents   |
+// ---------- 
+//
+// MADNESS Tree mostly done - Double check needed on some talents and proc type (melee vs spells procs)
+// DECEPTION: NYI (only Exploit Weakness implemented so far
+// DARKNESS : Thrashing Blades and Charge mastery only
+// ==========================================================================
+
 #include "simulationcraft.h"
 
 struct shadow_assassin_targetdata_t : public targetdata_t
@@ -161,6 +187,9 @@ struct shadow_assassin_t : public player_t
       cooldowns.crushing_darkness = get_cooldown( "mind_crush");
     }
 
+    primary_attribute   = ATTR_WILLPOWER;
+    secondary_attribute = ATTR_STRENGTH;
+
     create_talents();
     create_options();
   }
@@ -182,14 +211,6 @@ struct shadow_assassin_t : public player_t
   virtual double    composite_force_damage_bonus() const;
   virtual double    composite_spell_alacrity() const;
   virtual void      create_talents();
-
-  void trigger_raze( double pc )
-  {
-    if ( talents.raze -> rank() && buffs.raze -> trigger(1, 0, pc) )
-    {
-      cooldowns.crushing_darkness -> reset();
-    }
-  }
 
 };
 
@@ -226,7 +247,13 @@ struct shadow_assassin_attack_t : public attack_t
         if ( p -> talents.raze -> rank() > 0 && td -> dots_discharge -> ticking )
         {
              p -> buffs.raze -> trigger();
+             if ( p -> buffs.raze -> up() )
+             p -> cooldowns.crushing_darkness -> reset();
         }
+
+        if ( p -> rngs.lightning_charge -> roll( 0.5 ) )
+             p -> procs.lightning_charge -> occur();
+
     }
   }
 
@@ -238,6 +265,8 @@ struct shadow_assassin_attack_t : public attack_t
 
     if ( p -> buffs.exploitive_strikes -> up() )
         player_crit += p -> talents.exploitive_strikes -> rank() * 0.03;
+    if ( p -> buffs.unearthed_knowledge -> up() )
+        player_dd_multiplier *= 1.10;
   }
 };
 
@@ -300,12 +329,15 @@ struct shadow_assassin_spell_t : public spell_t
 
     shadow_assassin_t* p = player -> cast_shadow_assassin();
 
-    if ( tick_dmg > 0 && !channeled )
-      p -> buffs.deathmark -> decrement();
-
-    if ( tick_dmg > 0 && p -> talents.parasitism -> rank() > 0 )
+    if ( tick_dmg > 0 && !channeled && p ->buffs.deathmark -> up() )
     {
-      double hp = p -> resource_max[ RESOURCE_HEALTH ] * p -> talents.parasitism -> rank() * 0.005;
+      p -> buffs.deathmark -> decrement();
+      p -> resource_gain( RESOURCE_FORCE, p -> talents.calculating_mind -> rank() , p -> gains.calculating_mind );
+    }
+
+    if ( result == RESULT_CRIT  && p -> talents.parasitism -> rank() > 0 )
+    {
+        double hp = p -> resource_max[ RESOURCE_HEALTH ] * p -> talents.parasitism -> rank() * 0.005 * (1 + p -> talents.devour -> rank() * 0.5);
       p -> resource_gain( RESOURCE_HEALTH, hp , p -> gains.parasitism );
     }
   }
@@ -318,7 +350,7 @@ struct shadow_assassin_spell_t : public spell_t
 
     if ( dmg_result == RESULT_CRIT && p -> talents.exploitive_strikes -> rank() > 0 )
     {
-      p -> buffs.exploitive_strikes -> trigger( 1 );
+      p -> buffs.exploitive_strikes -> trigger();
     }
   }
 };
@@ -400,10 +432,12 @@ struct shock_t : public shadow_assassin_spell_t
   {
     shadow_assassin_spell_t::execute();
 
+    shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+    p -> buffs.unearthed_knowledge -> trigger();
+
     if ( chain_shock )
     {
-      shadow_assassin_t* p = player -> cast_shadow_assassin();
-
       if ( p -> rngs.chain_shock -> roll( p -> talents.chain_shock -> rank() * 0.15 ) )
         chain_shock -> execute();
     }
@@ -474,18 +508,10 @@ struct crushing_darkness_t : public shadow_assassin_spell_t
     dd_standardhealthpercentmin = .103;
     dd_standardhealthpercentmax = .143;
     direct_power_mod = 1.23;
-
     base_execute_time = timespan_t::from_seconds( 2.0 );
-
     base_cost = 40.0;
-
-    if (p -> buffs.raze -> up() )
-    base_cost = 0.0;
-
     range = 10.0;
     cooldown -> duration = timespan_t::from_seconds( 15.0 );
-    if ( player -> set_bonus.battlemaster_force_masters -> two_pc() )
-      cooldown -> duration -= timespan_t::from_seconds( 1.5 );
 
     add_child( dot_spell );
   }
@@ -494,10 +520,15 @@ struct crushing_darkness_t : public shadow_assassin_spell_t
   {
     shadow_assassin_t* p = player -> cast_shadow_assassin();
 
+    if (p -> buffs.raze -> up() )
+    {
+        base_cost = 0.0;
+    }
+
     shadow_assassin_spell_t::execute();
     dot_spell -> execute();
-    p -> buffs.raze -> expire();
-      }
+
+  }
 
   virtual timespan_t execute_time() const
   {
@@ -510,8 +541,14 @@ struct crushing_darkness_t : public shadow_assassin_spell_t
     return et;
   }
 
+  virtual void update_ready()
+  {
+    shadow_assassin_spell_t::update_ready();
 
+    shadow_assassin_t* p = player -> cast_shadow_assassin();
 
+    p -> buffs.raze -> expire();
+  }
 };
 
 // Death Field | Force in Balance =======================
@@ -529,8 +566,10 @@ struct death_field_t : public shadow_assassin_spell_t
     dd_standardhealthpercentmax = .207;
     direct_power_mod = 1.87;
 
+    crit_bonus += p -> talents.creeping_death -> rank() * 0.1 ;
+
     ability_lag = timespan_t::from_seconds( 0.2 );
-    base_cost = 50.0 / ( 1 - p -> talents.fanaticism -> rank() * 0.25 );
+    base_cost = 50.0 * ( 1 - p -> talents.fanaticism -> rank() * 0.25 );
     range = 30.0;
     aoe = 3;
 
@@ -606,9 +645,6 @@ struct recklessness_t : public shadow_assassin_spell_t
 };
 
 // Lightning Charge | Force Technique ===========
-
-//FIXME Proc: 50%  This effect cannot occur more than once every 1.5 seconds.
-
 struct lightning_charge_t : public shadow_assassin_spell_t
 {
   lightning_charge_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
@@ -624,7 +660,6 @@ struct lightning_charge_t : public shadow_assassin_spell_t
     base_cost = 0.0;
     trigger_gcd = timespan_t::zero;
     cooldown -> duration = timespan_t::from_seconds( 1.5 );
-    harmful = false;
 
     base_crit *= 1.0 + p -> talents.charge_mastery -> rank() * 0.01;
     base_multiplier *= 1.0 + p -> talents.charge_mastery -> rank() * 0.06;
