@@ -518,16 +518,28 @@ struct crushing_darkness_t : public shadow_assassin_spell_t
 
   virtual void execute()
   {
+    shadow_assassin_spell_t::execute();
+
+    dot_spell -> execute();
+  }
+
+  virtual double cost() const
+  {
     shadow_assassin_t* p = player -> cast_shadow_assassin();
 
-    if (p -> buffs.raze -> up() )
-    {
-        base_cost = 0.0;
-    }
+    if ( p -> buffs.raze -> check() > 0 )
+        return 0.0;
 
-    shadow_assassin_spell_t::execute();
-    dot_spell -> execute();
+    return shadow_assassin_spell_t::cost();
+  }
 
+  virtual void consume_resource()
+  {
+    shadow_assassin_spell_t::consume_resource();
+
+    shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+    p -> buffs.raze -> up();
   }
 
   virtual timespan_t execute_time() const
@@ -538,6 +550,7 @@ struct crushing_darkness_t : public shadow_assassin_spell_t
 
     if ( p -> buffs.raze -> up() )
       et = timespan_t::zero;
+
     return et;
   }
 
@@ -576,11 +589,13 @@ struct death_field_t : public shadow_assassin_spell_t
     cooldown -> duration = timespan_t::from_seconds( 15.0 );
   }
 
-  virtual void calculate_result()
+  virtual void execute()
   {
-    shadow_assassin_spell_t::calculate_result();
+    shadow_assassin_spell_t::execute();
 
     shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+    // ToDo: Move buff to targetdata and buff trigger to impact
 
     p -> buffs.deathmark -> trigger( 10 );
   }
@@ -645,6 +660,7 @@ struct recklessness_t : public shadow_assassin_spell_t
 };
 
 // Lightning Charge | Force Technique ===========
+
 struct lightning_charge_t : public shadow_assassin_spell_t
 {
   lightning_charge_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
@@ -663,37 +679,6 @@ struct lightning_charge_t : public shadow_assassin_spell_t
 
     base_crit *= 1.0 + p -> talents.charge_mastery -> rank() * 0.01;
     base_multiplier *= 1.0 + p -> talents.charge_mastery -> rank() * 0.06;
-  }
-};
-
-// Surging Charge | Shadow Technique ========================
-
-//FIXME: Proc: 25%  This effect cannot occur more than once every 1.5 seconds.
-//FIXME: Energy School to define?
-
-struct surging_charge_t : public shadow_assassin_spell_t
-{
-  surging_charge_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
-    shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
-  {
-    parse_options( 0, options_str );
-
-    dd_standardhealthpercentmin = dd_standardhealthpercentmax = .034;
-    direct_power_mod = 0.344;
-
-    proc = true;
-    background = true;
-    base_cost = 0.0;
-    trigger_gcd = timespan_t::zero;
-    cooldown -> duration = timespan_t::from_seconds( 1.5 );
-    harmful = false;
-
-    player_penetration += p -> talents.charge_mastery -> rank() * 0.03;
-  }
-
-  virtual void execute()
-  {
-    shadow_assassin_spell_t::execute();
   }
 };
 
@@ -766,7 +751,6 @@ struct overcharge_saber_t : public shadow_assassin_spell_t
 
 // Assassinate | Spinning Strike ==============================================
 
-//FIXME: Need to add target health condition (<=30%)
 //FIXME: AmountModifierPercent = 1.06
 
 struct assassinate_t : public shadow_assassin_attack_t
@@ -782,6 +766,14 @@ struct assassinate_t : public shadow_assassin_attack_t
     base_cost = 25.0;
     range = 4.0;
     cooldown -> duration = timespan_t::from_seconds( 6.0 );
+  }
+
+  virtual bool ready()
+  {
+    if ( target -> health_percentage() >= 30 )
+      return false;
+
+    return shadow_assassin_attack_t::ready();
   }
 };
 
@@ -877,7 +869,7 @@ struct discharge_t : public shadow_assassin_spell_t
     base_multiplier *= 1 + p -> talents.crackling_charge -> rank() * 0.08;
     cooldown -> duration = timespan_t::from_seconds( 15.0 - p -> talents.recirculation -> rank() * 1.5) ;
 
-    if (p -> talents.crackling_charge -> rank() > 0)
+    if ( p -> talents.crackling_charge -> rank() > 0 )
        cooldown -> duration -= cooldown -> duration * p -> talents.crackling_charge -> rank() * 0.25 ;
   }
 
@@ -994,6 +986,34 @@ struct thrash_t : public shadow_assassin_spell_t
     crit_bonus += p -> talents.claws_of_decay -> rank() * 0.25;
   }
 };
+
+
+// Surging Charge | Shadow Technique ========================
+
+//FIXME: Proc: 25%  This effect cannot occur more than once every 1.5 seconds.
+//FIXME: Energy School to define?
+
+struct surging_charge_t : public shadow_assassin_spell_t
+{
+  surging_charge_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
+    shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
+  {
+    parse_options( 0, options_str );
+
+    dd_standardhealthpercentmin = dd_standardhealthpercentmax = .034;
+    direct_power_mod = 0.344;
+
+    proc = true;
+    background = true;
+    base_cost = 0.0;
+    trigger_gcd = timespan_t::zero;
+    cooldown -> duration = timespan_t::from_seconds( 1.5 );
+    harmful = false;
+
+    player_penetration += p -> talents.charge_mastery -> rank() * 0.03;
+  }
+};
+
 
 } // ANONYMOUS NAMESPACE ====================================================
 
@@ -1128,6 +1148,7 @@ void shadow_assassin_t::init_base()
   //diminished_dodge_capi = 0;
   //diminished_parry_capi = 0;
 }
+
 // shadow_assassin_t::init_benefits =======================================================
 
 void shadow_assassin_t::init_benefits()
@@ -1171,7 +1192,6 @@ void shadow_assassin_t::init_buffs()
   buffs.recklessness = new buff_t( this, is_shadow ? "force_potency" : "recklessness", 2, timespan_t::from_seconds( 20.0 ) );
   buffs.deathmark = new buff_t( this, "deathmark", 10, timespan_t::from_seconds( 30.0 ), timespan_t::zero );
 
-
 }
 
 // shadow_assassin_t::init_gains =======================================================
@@ -1191,11 +1211,11 @@ void shadow_assassin_t::init_procs()
 {
   player_t::init_procs();
 
-  procs.exploitive_strikes  = get_proc("exploitive_strikes" );
-  procs.exploit_weakness    = get_proc("exploit_weakness");
-  procs.raze                = get_proc("raze"               );
-  procs.lightning_charge    = get_proc("lightning_charge"   );
-  procs.surging_charge      = get_proc("surging_charge"     );
+  procs.exploitive_strikes  = get_proc( "exploitive_strikes" );
+  procs.exploit_weakness    = get_proc( "exploit_weakness"   );
+  procs.raze                = get_proc( "raze"               );
+  procs.lightning_charge    = get_proc( "lightning_charge"   );
+  procs.surging_charge      = get_proc( "surging_charge"     );
 }
 
 // shadow_assassin_t::init_rng =========================================================

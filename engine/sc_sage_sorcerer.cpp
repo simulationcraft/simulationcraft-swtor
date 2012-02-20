@@ -824,11 +824,13 @@ struct force_in_balance_t : public jedi_sage_spell_t
     base_multiplier *= 1.0 + p -> talents.psychic_suffusion -> rank() * 0.05;
   }
 
-  virtual void calculate_result()
+  virtual void execute()
   {
-    jedi_sage_spell_t::calculate_result();
+    jedi_sage_spell_t::execute();
 
     sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+
+    // ToDo: Move buff to targetdata and buff trigger to impact
 
     p -> buffs.force_suppression -> trigger( 10 );
   }

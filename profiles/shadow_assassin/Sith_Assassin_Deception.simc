@@ -27,9 +27,9 @@ chest=foo_stalker_vestments
 legs=foo_stalker_lower_robe
 hands=foo_stalker_gloves
 # Gear Summary
+# gear_willpower=1303
 # gear_crit_rating=510
 # gear_power=151
 # gear_forcepower=1224
-# gear_willpower=1303
 # gear_surge_rating=153
 # Set Bonuses
