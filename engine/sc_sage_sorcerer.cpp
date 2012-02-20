@@ -358,12 +358,14 @@ struct jedi_sage_spell_t : public spell_t
     sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     if ( tick_dmg > 0 && !channeled )
+    {
       p -> buffs.force_suppression -> decrement();
 
-    if ( tick_dmg > 0 && p -> talents.focused_insight -> rank() > 0 )
-    {
-      double hp = p -> resource_max[ RESOURCE_HEALTH ] * p -> talents.focused_insight -> rank() * 0.005;
-      p -> resource_gain( RESOURCE_HEALTH, hp , p -> gains.focused_insight );
+      if ( p -> talents.focused_insight -> rank() && result == RESULT_CRIT )
+      {
+        double hp = p -> resource_max[ RESOURCE_HEALTH ] * p -> talents.focused_insight -> rank() * 0.005;
+        p -> resource_gain( RESOURCE_HEALTH, hp, p -> gains.focused_insight );
+      }
     }
   }
 };
@@ -1200,7 +1202,7 @@ void sage_sorcerer_t::init_actions()
 
   if ( action_list_str.empty() )
   {
-    std::string use_item_actions = init_use_item_actions();
+    const std::string use_item_actions = init_use_item_actions();
 
     if ( type == JEDI_SAGE )
     {
