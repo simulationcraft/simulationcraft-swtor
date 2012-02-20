@@ -939,15 +939,15 @@ bool unique_gear_t::get_use_encoding( std::string&       encoding,
   std::string e;
 
   // SWTOR Use Relics
-       if ( name == "rakata_relic_of_primeval_fatesealer" ) e = "380Alacrity_120cd_20dur";
-  else if ( name == "rakata_relic_of_forbidden_secrets"   ) e = "235Crit_235Surge_120cd_20dur";
-  else if ( name == "rakata_relic_of_boundless_ages"      ) e = "380Power_120cd_20dur";
-  else if ( name == "columi_relic_of_primeval_fatesealer" ) e = "355Alacrity_120cd_20dur";
-  else if ( name == "columi_relic_of_forbidden_secrets"   ) e = "220Crit_220Surge_120cd_20dur";
-  else if ( name == "columi_relic_of_boundless_ages"      ) e = "355Power_120cd_20dur";
-  else if ( name == "relic_of_primeval_fatesealer"        ) e = "300Alacrity_120cd_20dur";
-  else if ( name == "relic_of_forbidden_secrets"          ) e = "185Crit_185Surge_120cd_20dur";
-  else if ( name == "relic_of_boundless_ages"             ) e = "300Power_120cd_20dur";
+       if ( name == "rakata_relic_of_the_primeval_fatesealer" ) e = "380Alacrity_120cd_20dur";
+  else if ( name == "rakata_relic_of_forbidden_secrets"       ) e = "235Crit_235Surge_120cd_20dur";
+  else if ( name == "rakata_relic_of_boundless_ages"          ) e = "380Power_120cd_20dur";
+  else if ( name == "columi_relic_of_primeval_fatesealer"     ) e = "355Alacrity_120cd_20dur";
+  else if ( name == "columi_relic_of_forbidden_secrets"       ) e = "220Crit_220Surge_120cd_20dur";
+  else if ( name == "columi_relic_of_boundless_ages"          ) e = "355Power_120cd_20dur";
+  else if ( name == "relic_of_primeval_fatesealer"            ) e = "300Alacrity_120cd_20dur";
+  else if ( name == "relic_of_forbidden_secrets"              ) e = "185Crit_185Surge_120cd_20dur";
+  else if ( name == "relic_of_boundless_ages"                 ) e = "300Power_120cd_20dur";
 
   if ( e.empty() ) return false;
 
