@@ -1028,6 +1028,18 @@ bool item_t::decode_special( special_effect_t& effect,
       effect.trigger_type = PROC_DAMAGE;
       effect.trigger_mask = ( int64_t( 1 ) << SCHOOL_KINETIC );
     }
+    else if ( t.full == "onelementaldamage" )
+    {
+      effect.trigger_str  = t.full;
+      effect.trigger_type = PROC_DAMAGE;
+      effect.trigger_mask = ( int64_t( 1 ) << SCHOOL_ELEMENTAL );
+    }
+    else if ( t.full == "onenergydamage" )
+    {
+      effect.trigger_str  = t.full;
+      effect.trigger_type = PROC_DAMAGE;
+      effect.trigger_mask = ( int64_t( 1 ) << SCHOOL_ENERGY );
+    }
     else if ( t.full == "oninternaldamage" )
     {
       effect.trigger_str  = t.full;

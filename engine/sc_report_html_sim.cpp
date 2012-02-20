@@ -1377,7 +1377,7 @@ void report_t::print_html( sim_t* sim )
     fprintf( file,
              "\t\t<script type=\"text/javascript\" src=\"http://www.simulationcraft.org/js/ga.js\"></script>\n"
              "\t\t<script type=\"text/javascript\" src=\"http://www.simulationcraft.org/js/rep.js\"></script>\n"
-             "\t\t<script type=\"text/javascript\" src=\"http://static.torhead.com/widgets/power.js\"></script>\n" );
+             "\t\t<script type=\"text/javascript\" src=\"http://i4.knocdn.com/assets/tooltips.js\"></script>\n" );
   }
   else
   {

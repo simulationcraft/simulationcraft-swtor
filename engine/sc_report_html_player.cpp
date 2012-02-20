@@ -220,7 +220,7 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
            "\t\t\t\t\t\t\t\t<td class=\"left small\">" );
   if ( p -> sim -> report_details )
     fprintf( file,
-             "<a href=\"#\" class=\"toggle-details\" rel=\"spell=%i\">%s</a></td>\n",
+             "<a href=\"http://knotor.com/abilities/%i\" class=\"toggle-details\">%s</a></td>\n",
              id,
              s -> name_str.c_str() );
   else

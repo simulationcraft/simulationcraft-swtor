@@ -84,14 +84,14 @@ static const char* school_color( int type )
   case SCHOOL_CHAOS:      	return class_color( SITH_MARAUDER );
   case SCHOOL_FIRE:       	return class_color( SITH_MARAUDER );
   case SCHOOL_FROST:      	return class_color( SITH_ASSASSIN );
-  case SCHOOL_FROSTFIRE:  	return class_color( SITH_SORCERER );
+  case SCHOOL_ELEMENTAL:  	return class_color( SITH_SORCERER );
   case SCHOOL_HOLY:       	return class_color( JEDI_SAGE );
   case SCHOOL_NATURE:     	return class_color( BH_MERCENARY );
   case SCHOOL_PHYSICAL:   	return class_color( JEDI_SENTINEL );
   case SCHOOL_KINETIC:     	return class_color( SITH_SORCERER );
   case SCHOOL_FROSTSTORM:   return "2C6080";
   case SCHOOL_SPELLSTORM: 	return "8AD0B1"; // Half way between BOUNTY_HUNTER "green" and Mage "blue" (spellstorm = arcane/nature damage)
-  case SCHOOL_SHADOWFROST: 	return "000066"; // Shadowfrost???
+  case SCHOOL_ENERGY: 	    return "000066";
   case SCHOOL_SHADOWFLAME:	return "435133";
   case SCHOOL_SHADOWSTRIKE: return "0099CC";
   case SCHOOL_NONE:         return "FFFFFF";

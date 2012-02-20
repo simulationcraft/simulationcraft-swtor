@@ -387,14 +387,14 @@ int item_database_t::random_suffix_type( const item_t& item )
   case SLOT_WAIST:
   case SLOT_FEET:
   case SLOT_HANDS:
-  case SLOT_TRINKET_1:
-  case SLOT_TRINKET_2:
+  case SLOT_RELIC_1:
+  case SLOT_RELIC_2:
     return 1;
 
-  case SLOT_NECK:
+  case SLOT_EAR:
   case SLOT_WRISTS:
-  case SLOT_FINGER_1:
-  case SLOT_FINGER_2:
+  case SLOT_IMPLANT_1:
+  case SLOT_IMPLANT_2:
   case SLOT_OFF_HAND: // Shields, off hand items
   case SLOT_BACK:
     return 2;
