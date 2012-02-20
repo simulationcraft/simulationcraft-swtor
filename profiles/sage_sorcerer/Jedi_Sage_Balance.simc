@@ -33,14 +33,14 @@ implant1=rakata_stalker_implant,stats=85end_103willpower_44crit_51surge
 implant2=rakata_stalker_implant,stats=85end_103willpower_44crit_51surge
 relic1=matrix_cube_m7r3,stats=50end_58willpower_24crit
 relic2=plasma_burst_device,stats=77end,equip=ondamage_168elemental_30%_4.5cd
-main_hand=foo,stats=98end_85willpower_612forcepower_41power_82crit_51surge_44end_61willpower
-off_hand=foo,stats=612forcepower_37end_61willpower_11power_24end_37power_51alacrity
+main_hand=echo_of_xoxaan,stats=41power_612forcepower_44end_61willpower_37end_61willpower_11power_37end_61willpower_11power_24end_37power_51alacrity
+off_hand=rakata_stalkers_power_generator,stats=85end_103willpower_612forcepower_77crit_51surge
 # Gear Summary
-# gear_willpower=1384
-# gear_endurance=1258
-# gear_crit_rating=445
+# gear_willpower=1463
+# gear_endurance=1282
+# gear_crit_rating=440
 # gear_alacrity_rating=357
-# gear_power=196
+# gear_power=207
 # gear_forcepower=1224
 # gear_surge_rating=153
 # Set Bonuses
