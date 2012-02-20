@@ -175,17 +175,18 @@ struct discharge_proc_callback_t : public action_callback_t
       }
     };
 
-    cooldown = p -> get_cooldown( name_str );
-    cooldown -> duration = cd;
-
     if ( amount > 0 )
     {
+      cooldown = p -> get_cooldown( "damage_discharge_" + util_t::to_string( cd.total_seconds() ) + "cd" );
       discharge_action = new discharge_spell_t( name_str.c_str(), p, amount, scaling, school, no_crit, no_buffs, no_debuffs );
     }
     else
     {
+      cooldown = p -> get_cooldown( name_str );
       discharge_action = new discharge_attack_t( name_str.c_str(), p, -amount, scaling, school, no_crit, no_buffs, no_debuffs );
     }
+
+    cooldown -> duration = cd;
 
     proc = p -> get_proc( name_str.c_str() );
     rng  = p -> get_rng ( name_str.c_str(), rng_type );  // default is CYCLIC since discharge should not have duration
@@ -297,17 +298,18 @@ struct chance_discharge_proc_callback_t : public action_callback_t
       }
     };
 
-    cooldown = p -> get_cooldown( name_str );
-    cooldown -> duration = cd;
-
     if ( amount > 0 )
     {
+      cooldown = p -> get_cooldown( "damage_discharge_" + util_t::to_string( cd.total_seconds() ) + "cd" );
       discharge_action = new discharge_spell_t( name_str.c_str(), p, amount, scaling, school, no_crit, no_buffs, no_debuffs );
     }
     else
     {
+      cooldown = p -> get_cooldown( name_str );
       discharge_action = new discharge_attack_t( name_str.c_str(), p, -amount, scaling, school, no_crit, no_buffs, no_debuffs );
     }
+
+    cooldown -> duration = cd;
 
     proc = p -> get_proc( name_str.c_str() );
     rng  = p -> get_rng ( name_str.c_str(), rng_type );  // default is CYCLIC since discharge should not have duration
