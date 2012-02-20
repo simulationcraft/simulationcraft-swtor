@@ -783,7 +783,7 @@ void player_t::init_base()
   attribute_base[ primary_attribute   ] = floor( 50 + 4 * level );
   attribute_base[ secondary_attribute ] = floor( 20 + 1.6 * level );
 
-  resource_base[ RESOURCE_HEALTH ] = 2500; // FIXME: level scaling.
+  resource_base[ RESOURCE_HEALTH ] = rating_t::get_base_health( level );
 
   base_spell_crit                  = 0.05;
   base_attack_crit                 = 0.05;
@@ -1112,8 +1112,7 @@ void player_t::init_resources( bool force )
 
       if ( i == RESOURCE_HEALTH )
       {
-        double adjust = ( is_pet() || is_enemy() || is_add() ) ? 0 : std::min( 20, ( int ) floor( endurance() ) );
-        resource_initial[ i ] += ( floor( endurance() ) - adjust ) * health_per_endurance + adjust;
+        resource_initial[ i ] += floor( endurance() ) * health_per_endurance;
       }
     }
     resource_current[ i ] = resource_max[ i ] = resource_initial[ i ];
@@ -3415,7 +3414,7 @@ double player_t::target_mitigation( double            amount,
     if ( mitigated_amount < 0 ) return 0;
   }
 
-  if ( school == SCHOOL_PHYSICAL || school == SCHOOL_KINETIC )
+  if ( school == SCHOOL_PHYSICAL || school == SCHOOL_KINETIC || school == SCHOOL_ENERGY )
   {
 
     // Armor
@@ -5689,7 +5688,7 @@ void player_t::create_options()
     { "items",                                OPT_STRING,   &( items_str                              ) },
     { "items+",                               OPT_APPEND,   &( items_str                              ) },
     { "head",                                 OPT_STRING,   &( items[ SLOT_HEAD      ].options_str    ) },
-    { "neck",                                 OPT_STRING,   &( items[ SLOT_NECK      ].options_str    ) },
+    { "ear",                                  OPT_STRING,   &( items[ SLOT_EAR       ].options_str    ) },
     { "shoulders",                            OPT_STRING,   &( items[ SLOT_SHOULDERS ].options_str    ) },
     { "shoulder",                             OPT_STRING,   &( items[ SLOT_SHOULDERS ].options_str    ) },
     { "shirt",                                OPT_STRING,   &( items[ SLOT_SHIRT     ].options_str    ) },
@@ -5703,12 +5702,10 @@ void player_t::create_options()
     { "wrist",                                OPT_STRING,   &( items[ SLOT_WRISTS    ].options_str    ) },
     { "hands",                                OPT_STRING,   &( items[ SLOT_HANDS     ].options_str    ) },
     { "hand",                                 OPT_STRING,   &( items[ SLOT_HANDS     ].options_str    ) },
-    { "finger1",                              OPT_STRING,   &( items[ SLOT_FINGER_1  ].options_str    ) },
-    { "finger2",                              OPT_STRING,   &( items[ SLOT_FINGER_2  ].options_str    ) },
-    { "ring1",                                OPT_STRING,   &( items[ SLOT_FINGER_1  ].options_str    ) },
-    { "ring2",                                OPT_STRING,   &( items[ SLOT_FINGER_2  ].options_str    ) },
-    { "trinket1",                             OPT_STRING,   &( items[ SLOT_TRINKET_1 ].options_str    ) },
-    { "trinket2",                             OPT_STRING,   &( items[ SLOT_TRINKET_2 ].options_str    ) },
+    { "implant1",                             OPT_STRING,   &( items[ SLOT_IMPLANT_1 ].options_str    ) },
+    { "implant2",                             OPT_STRING,   &( items[ SLOT_IMPLANT_2 ].options_str    ) },
+    { "relic1",                               OPT_STRING,   &( items[ SLOT_RELIC_1   ].options_str    ) },
+    { "relic2",                               OPT_STRING,   &( items[ SLOT_RELIC_2   ].options_str    ) },
     { "back",                                 OPT_STRING,   &( items[ SLOT_BACK      ].options_str    ) },
     { "main_hand",                            OPT_STRING,   &( items[ SLOT_MAIN_HAND ].options_str    ) },
     { "off_hand",                             OPT_STRING,   &( items[ SLOT_OFF_HAND  ].options_str    ) },

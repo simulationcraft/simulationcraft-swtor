@@ -8,12 +8,12 @@
 // set_bonus_t::set_bonus_t =================================================
 
 set_bonus_t::set_bonus_t( const std::string& n, const std::string& f ) :
- next( 0 ), name( n ), filters( f ), count( 0 )
+ next( 0 ), name( n ), count( 0 )
 {
-  if ( filters.empty() )
-    filters = name;
-
-  util_t::string_split( split_filters, filters, "/" );
+  if ( f.empty() )
+    filters.push_back( name );
+  else
+    util_t::string_split( filters, f, "/" );
 }
 
 // set_bonus_t::decode ======================================================
@@ -24,11 +24,9 @@ bool set_bonus_t::decode( const item_t& item ) const
   {
     std::string s = item.name();
 
-
-
-    for ( unsigned int i = 0; i < split_filters.size(); i++ )
+    for ( unsigned int i = 0; i < filters.size(); i++ )
     {
-      if ( s.find( split_filters[ i ] ) != s.npos )
+      if ( s.find( filters[ i ] ) != s.npos )
         return true;
     }
   }

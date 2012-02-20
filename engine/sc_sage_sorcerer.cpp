@@ -468,6 +468,8 @@ struct telekinetic_throw_t : public jedi_sage_spell_t
 
     parse_options( 0, options_str );
 
+    id = p -> type == SITH_SORCERER ? 188186 : 189258;
+
     td_standardhealthpercentmin = td_standardhealthpercentmax = .079;
     tick_power_mod = 0.79;
 

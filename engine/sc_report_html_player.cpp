@@ -220,7 +220,7 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
            "\t\t\t\t\t\t\t\t<td class=\"left small\">" );
   if ( p -> sim -> report_details )
     fprintf( file,
-             "<a href=\"#\" class=\"toggle-details\" rel=\"spell=%i\">%s</a></td>\n",
+             "<a href=\"http://knotor.com/abilities/%i\" class=\"toggle-details\">%s</a></td>\n",
              id,
              s -> name_str.c_str() );
   else
@@ -1008,8 +1008,8 @@ static void print_html_stats ( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> buffed_surge,
-             a -> surge_bonus,
+             100 * a -> buffed_surge,
+             100 * a -> surge_bonus,
              a -> stats.surge_rating );
 
     fprintf( file,

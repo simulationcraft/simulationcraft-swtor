@@ -113,7 +113,7 @@ namespace std {using namespace tr1; }
 #include "data_definitions.hh"
 
 #define SC_MAJOR_VERSION "113"
-#define SC_MINOR_VERSION "1"
+#define SC_MINOR_VERSION "2"
 #define SC_USE_PTR ( 0 )
 #define SC_BETA ( 0 )
 #define SC_EPSILON ( 0.000001 )
@@ -318,10 +318,10 @@ enum school_type
   SCHOOL_FIRESTORM,   SCHOOL_FROSTSTRIKE, SCHOOL_HOLYFROST,   SCHOOL_FROSTSTORM,  SCHOOL_SHADOWSTRIKE,
   SCHOOL_SHADOWLIGHT, SCHOOL_SHADOWFLAME, SCHOOL_SHADOWSTORM, SCHOOL_SHADOWFROST, SCHOOL_SPELLSTRIKE,
   SCHOOL_DIVINE,      SCHOOL_SPELLFIRE,   SCHOOL_SPELLSTORM,  SCHOOL_SPELLFROST,  SCHOOL_SPELLSHADOW,
-  SCHOOL_ELEMENTAL,   SCHOOL_CHROMATIC,   SCHOOL_MAGIC,       SCHOOL_CHAOS,       SCHOOL_BLEED,
+  SCHOOL_CHROMATIC,   SCHOOL_MAGIC,       SCHOOL_CHAOS,       SCHOOL_BLEED,
   SCHOOL_DRAIN,
 
-  SCHOOL_INTERNAL, SCHOOL_KINETIC,
+  SCHOOL_INTERNAL, SCHOOL_KINETIC, SCHOOL_ELEMENTAL, SCHOOL_ENERGY,
   SCHOOL_MAX
 };
 
@@ -348,7 +348,8 @@ const int64_t SCHOOL_SPELL_MASK  ( ( int64_t( 1 ) << SCHOOL_ARCANE )         | (
                                    ( int64_t( 1 ) << SCHOOL_ELEMENTAL )      | ( int64_t( 1 ) << SCHOOL_CHROMATIC )    |
                                    ( int64_t( 1 ) << SCHOOL_MAGIC )          | ( int64_t( 1 ) << SCHOOL_CHAOS )        |
                                    ( int64_t( 1 ) << SCHOOL_BLEED )          | ( int64_t( 1 ) << SCHOOL_DRAIN )        |
-                                   ( int64_t( 1 ) << SCHOOL_INTERNAL )       | ( int64_t( 1 ) << SCHOOL_KINETIC )        );
+                                   ( int64_t( 1 ) << SCHOOL_INTERNAL )       | ( int64_t( 1 ) << SCHOOL_KINETIC )      |
+                                   ( int64_t( 1 ) << SCHOOL_ELEMENTAL )      | ( int64_t( 1 ) << SCHOOL_ENERGY )         );
 #define SCHOOL_ALL_MASK    ( int64_t( -1 ) )
 
 enum talent_tree_type
@@ -390,11 +391,11 @@ enum glyph_type
   GLYPH_MAX
 };
 
-enum slot_type   // these enum values match armory settings
+enum slot_type   // these enum values should match armory settings
 {
   SLOT_NONE      = -1,
   SLOT_HEAD      = 0,
-  SLOT_NECK      = 1,
+  SLOT_EAR       = 1,
   SLOT_SHOULDERS = 2,
   SLOT_SHIRT     = 3,
   SLOT_CHEST     = 4,
@@ -403,10 +404,10 @@ enum slot_type   // these enum values match armory settings
   SLOT_FEET      = 7,
   SLOT_WRISTS    = 8,
   SLOT_HANDS     = 9,
-  SLOT_FINGER_1  = 10,
-  SLOT_FINGER_2  = 11,
-  SLOT_TRINKET_1 = 12,
-  SLOT_TRINKET_2 = 13,
+  SLOT_IMPLANT_1 = 10,
+  SLOT_IMPLANT_2 = 11,
+  SLOT_RELIC_1   = 12,
+  SLOT_RELIC_2   = 13,
   SLOT_BACK      = 14,
   SLOT_MAIN_HAND = 15,
   SLOT_OFF_HAND  = 16,
@@ -3458,6 +3459,7 @@ struct rating_t : public internal::rating_t
   static double get_attribute_base( sim_t*, dbc_t& pData, int level, player_type class_type, race_type race, base_stat_type stat_type );
   static double standardhealth_damage( int level );
   static double standardhealth_healing( int level );
+  static int get_base_health( int level );
 };
 
 // Weapon ===================================================================
@@ -3656,11 +3658,10 @@ struct set_bonus_t
 {
   set_bonus_t* next;
   std::string name;
-  std::string filters;
-  std::vector<std::string> split_filters;
+  std::vector<std::string> filters;
   int count;
 
-  set_bonus_t( const std::string& name, const std::string& filters );
+  set_bonus_t( const std::string& name, const std::string& filters=std::string() );
 
   void init( const player_t& );
 
