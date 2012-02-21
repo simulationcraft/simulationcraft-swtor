@@ -34,9 +34,9 @@
 enum charge_type_t
 {
     CHARGE_NONE=0,
-    CHARGE_LIGHTNING,
-    CHARGE_SURGE,
-    CHARGE_DARK
+    LIGHTNING_CHARGE,
+    SURGING_CHARGE,
+    DARK_CHARGE
 };
 
 struct shadow_assassin_targetdata_t : public targetdata_t
@@ -71,9 +71,9 @@ struct shadow_assassin_t : public player_t
     struct actives_t
     {
         int charge;
-        action_t* lightning_charge_proc;
-        action_t* surging_charge_proc;
-        action_t* dark_charge_proc;
+        action_t* lightning_charge;
+        action_t* surging_charge;
+        action_t* dark_charge;
     } actives;
     
     // Buffs
@@ -207,10 +207,11 @@ struct shadow_assassin_t : public player_t
         primary_attribute   = ATTR_WILLPOWER;
         secondary_attribute = ATTR_STRENGTH;
         
-        actives.lightning_charge_proc = 0;
-        actives.surging_charge_proc = 0;
-        actives.dark_charge_proc = 0;
-        actives.charge = CHARGE_NONE;
+        // Active
+        actives.lightning_charge = 0;
+        actives.surging_charge   = 0;
+        actives.dark_charge      = 0;
+        actives.charge           = LIGHTNING_CHARGE;
         
         create_talents();
         create_options();
@@ -271,8 +272,20 @@ struct shadow_assassin_attack_t : public attack_t
                 if ( p -> buffs.raze -> up() )
                     p -> cooldowns.crushing_darkness -> reset();
             }
-            //       if ( p -> rngs.lightning_charge -> roll( 0.5 ) )
-            //           p -> procs.lightning_charge -> occur();
+                   if ( p -> rngs.lightning_charge -> roll( 0.5 ) )
+                       p -> procs.lightning_charge -> occur();
+
+                   //FIXME :(
+
+                       if ( p -> actives.charge = LIGHTNING_CHARGE )
+                          p -> actives.lightning_charge -> execute();
+
+            //           if ( p -> actives.charge = SURGING_CHARGE )
+            //              p -> actives.surging_charge -> execute();
+
+           //            if ( p -> actives.charge = DARK_CHARGE )
+           //                p -> actives.surging_dark -> execute();
+
         }
     }
     
@@ -288,30 +301,11 @@ struct shadow_assassin_attack_t : public attack_t
             player_dd_multiplier *= 1.10;
     }
     
-    //  virtual void execute()
-    //  {
-    //    attack_t::execute();
-    //    if ( result_is_hit () )
-    //    {
-    //        shadow_assassin_t* p = player -> cast_shadow_assassin();
-    //        switch ( p -> actives.charge )
-    //        {
-    //        case CHARGE_LIGHTNING:
-    //            p -> actives.lightning_charge_proc -> execute();
-    //            break;
-    //        case CHARGE_SURGE:
-    //            p -> actives.surging_charge_proc -> execute();
-    //            break;
-    //        case CHARGE_DARK:
-    //            p -> actives.dark_charge_proc -> execute();
-    //            break;
-    //        default:
-    //            ;
-    //        }
-    //    }
-    //  }
+   virtual void execute()
+   {
+      attack_t::execute();
+   }
 };
-
 
 struct shadow_assassin_spell_t : public spell_t
 {
@@ -716,6 +710,7 @@ struct lightning_charge_t : public shadow_assassin_spell_t
         
         proc = true;
         background = true;
+        harmful = true;
         may_crit = true;
         base_cost = 0.0;
         trigger_gcd = timespan_t::zero;
@@ -723,8 +718,13 @@ struct lightning_charge_t : public shadow_assassin_spell_t
         
         base_crit *= 1.0 + p -> talents.charge_mastery -> rank() * 0.01;
         base_multiplier *= 1.0 + p -> talents.charge_mastery -> rank() * 0.06;
-        
-        p-> actives.lightning_charge_proc -> execute();
+    }
+
+    virtual void execute()
+    {
+        shadow_assassin_t* p = player -> cast_shadow_assassin();
+        if ( p -> rngs.lightning_charge -> roll ( 0.5 ) )
+            shadow_assassin_spell_t::execute();
     }
 };
 
@@ -743,7 +743,6 @@ struct lightning_discharge_t : public shadow_assassin_spell_t
         range = 10.0;
         base_cost = 20.0;
         may_crit = false;
-        background= true;
         tick_zero = true;
         
         base_multiplier *= 1 + p -> talents.crackling_charge -> rank() * 0.08;
@@ -752,11 +751,24 @@ struct lightning_discharge_t : public shadow_assassin_spell_t
         if ( p -> talents.crackling_charge -> rank() > 0 )
             cooldown -> duration -= cooldown -> duration * p -> talents.crackling_charge -> rank() * 0.25 ;
     }
+
+    virtual void target_debuff( player_t* t, int dmg_type )
+    {
+        shadow_assassin_spell_t::target_debuff( t, dmg_type );
+
+        shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+        if ( p -> talents.deathmark -> rank() > 0 )
+            p -> benefits.discharge -> update( p -> buffs.deathmark -> check() > 0 );
+    }
+
+    virtual void execute()
+    {
+      shadow_assassin_spell_t::execute();
+    }
 };
 
-
 // Surging Charge | Shadow Technique ========================
-
 
 struct surging_charge_t : public shadow_assassin_spell_t
 {
@@ -804,14 +816,33 @@ struct surging_discharge_t : public shadow_assassin_spell_t
     }
 };
 
-// Low Slash =====================================
+// Apply Charge ======================================
 
+struct apply_charge_t : public action_t
+{
+    int charge;
+
+    apply_charge_t(shadow_assassin_t* p, const std::string& options_str ) :
+        action_t( ACTION_OTHER, "apply_charge", p ),
+        charge(0)
+    {
+        parse_options( 0, options_str );
+
+        trigger_gcd = timespan_t::zero;
+
+        if (! p -> actives.lightning_charge ) p -> actives.lightning_charge = new lightning_charge_t( p, "lightning charge", options_str );
+        if (! p -> actives.surging_charge ) p -> actives.surging_charge = new surging_charge_t( p, "surging charge", options_str );
+
+    }
+};
+
+// Low Slash =====================================
 // FIXME: AmountModiferPercent = -0.12
 
 struct low_slash_t : public shadow_assassin_attack_t
 {
     low_slash_t( shadow_assassin_t* p,const std::string& n,const std::string& options_str) :
-        shadow_assassin_attack_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
+        shadow_assassin_attack_t( n.c_str(),p,RESOURCE_FORCE, SCHOOL_PHYSICAL, TREE_NONE )
     {
         parse_options( 0, options_str );
         
@@ -823,14 +854,11 @@ struct low_slash_t : public shadow_assassin_attack_t
     }
 };
 
-
 // Voltaic Slash | Clairvoyant Strike ===============
-
 // FIXME: AmountModiferPercent = -0.465
 // FIXME: Actually strike the target twice (Double proc chance etc.)
 // TODO : Each use of this ability increases the damage dealt by your next Shock by 15%
 //        for 10 seconds. Stacks up to 2 times.
-
 
 struct voltaic_slash_t : public shadow_assassin_attack_t
 {
@@ -873,7 +901,6 @@ struct overcharge_saber_t : public shadow_assassin_spell_t
 };
 
 // Assassinate | Spinning Strike ==============================================
-
 //FIXME: AmountModifierPercent = 1.06
 
 struct assassinate_t : public shadow_assassin_attack_t
@@ -966,70 +993,7 @@ struct force_cloak_t : public shadow_assassin_spell_t
     }
 };
 
-// Discharge | Force Breach ==============================
-// FIX ME: Add check on current charge used, and apply proper spell. (Surging Charge or Lightning Charge)
-// Discharge_Lighning & Discharge_Surging are two different spells. Only lightning done so far.
-
-// Discharge Lightning Dot =========================
-
-struct discharge_t : public shadow_assassin_spell_t
-{
-    discharge_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
-        shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
-    {
-        parse_options( 0, options_str );
-        
-        td_standardhealthpercentmin = td_standardhealthpercentmax = .038;
-        tick_power_mod = 0.38;
-        
-        base_tick_time = timespan_t::from_seconds( 3.0 );
-        num_ticks = 6;
-        range = 10.0;
-        base_cost = 20.0;
-        may_crit = false;
-        tick_zero = true;
-        
-        base_multiplier *= 1 + p -> talents.crackling_charge -> rank() * 0.08;
-        cooldown -> duration = timespan_t::from_seconds( 15.0 - p -> talents.recirculation -> rank() * 1.5) ;
-        
-        if ( p -> talents.crackling_charge -> rank() > 0 )
-            cooldown -> duration -= cooldown -> duration * p -> talents.crackling_charge -> rank() * 0.25 ;
-    }
-    
-    virtual void target_debuff( player_t* t, int dmg_type )
-    {
-        shadow_assassin_spell_t::target_debuff( t, dmg_type );
-        
-        shadow_assassin_t* p = player -> cast_shadow_assassin();
-        
-        if ( p -> talents.deathmark -> rank() > 0 )
-            p -> benefits.discharge -> update( p -> buffs.deathmark -> check() > 0 );
-    }
-};
-
-
-// Discharge Surging DDD ================================================
-// FIX ME: Add check on current charge used, and apply proper spell. (Surging Charge or Lightning Charge)
-//
-// struct discharge_surging_t : public shadow_assassin_spell_t
-// {
-//      discharge_surging_t( shadow_assassin_t* p, const std::string& n ) :
-//        shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL)
-//      {
-//        dd_standardhealthpercentmin = .154;
-//        dd_standardhealthpercentmax = .194;
-//        direct_power_mod = 1.74;
-//
-//        base_cost = 0;
-//        range = 10.0;
-//      }
-//};
-// =======================================================================
-
-
-
 // Maul | Shadow Strike ===================
-
 // FIXME: AmountModifierPercent = 0.58
 
 struct maul_t : public shadow_assassin_attack_t
@@ -1088,7 +1052,6 @@ struct saber_strike_t : public shadow_assassin_attack_t
 };
 
 // Thrash | Double Strike ==================================
-
 //FIX ME: Split into two hits.
 //FIXME: AmountModifierPercent = -0.505
 
@@ -1141,7 +1104,7 @@ action_t* shadow_assassin_t::create_action( const std::string& name,
         if ( name == "lacerate"           ) return new            lacerate_t( this, "lacerate", options_str );
         if ( name == "blackout"           ) return new            blackout_t( this, "blackout", options_str );
         if ( name == "force_cloak"        ) return new         force_cloak_t( this, "force_cloak", options_str );
-        if ( name == "discharge"          ) return new           discharge_t( this, "discharge", options_str );
+//        if ( name == "discharge"          ) return new           discharge_t( this, "discharge", options_str );
         if ( name == "maul"               ) return new                maul_t( this, "maul", options_str );
         if ( name == "saber_strike"       ) return new        saber_strike_t( this, "saber_strike", options_str );
         if ( name == "thrash"             ) return new              thrash_t( this, "thrash", options_str );
@@ -1166,7 +1129,7 @@ action_t* shadow_assassin_t::create_action( const std::string& name,
         if ( name == "whirling_blow"      ) return new            lacerate_t( this, "whirling_blow", options_str );
         if ( name == "blackout"           ) return new            blackout_t( this, "blackout", options_str );
         if ( name == "force_cloak"        ) return new         force_cloak_t( this, "force_cloak", options_str );
-        if ( name == "force_breach"       ) return new           discharge_t( this, "force_breach", options_str );
+//        if ( name == "force_breach"       ) return new           discharge_t( this, "force_breach", options_str );
         if ( name == "shadow_strike"      ) return new                maul_t( this, "shadow_strike", options_str );
         if ( name == "saber_strike"       ) return new        saber_strike_t( this, "saber_strike", options_str );
         if ( name == "double_strike"      ) return new              thrash_t( this, "double_strike", options_str );
@@ -1384,17 +1347,16 @@ void shadow_assassin_t::init_actions()
                 
                 action_list_str += "/power_potion";
                 action_list_str += "/recklessness";
-                action_list_str += "/shock,if=buff.unearthed_knowledge.down";
-                action_list_str += "/assassinate";
                 action_list_str += "/death_field";
-                action_list_str += "/discharge";
-                action_list_str += "/creeping_terror,if=!ticking";
-                action_list_str += "/maul,if=buff.exploit_weakness.react";
                 action_list_str += "/crushing_darkness,if=buff.raze.react";
+                action_list_str += "/ligthning_discharge,if=!ticking";
+                action_list_str += "/shock,if=buff.unearthed_knowledge.down";
+                action_list_str += "/assassinate,if=target.health_pct<=30";
+                action_list_str += "/maul,if=buff.exploit_weakness.react";
+                action_list_str += "/creeping_terror,if=!ticking";
                 action_list_str += "/thrash";
-                action_list_str += "/force_cloak";
                 action_list_str += "/saber_strike";
-                
+
                 break;
                 
                 
