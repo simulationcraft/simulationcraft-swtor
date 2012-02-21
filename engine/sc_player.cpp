@@ -435,10 +435,7 @@ player_t::player_t( sim_t*             s,
   // Resources
   health_per_endurance( 0 ),
   // Consumables
-  elixir_guardian( ELIXIR_NONE ),
-  elixir_battle( ELIXIR_NONE ),
   stim( STIM_NONE ),
-  food( FOOD_NONE ),
   // Events
   executing( 0 ), channeling( 0 ), readying( 0 ), off_gcd( 0 ), in_combat( false ), action_queued( false ),
   cast_delay_reaction( timespan_t::zero ), cast_delay_occurred( timespan_t::zero ),
@@ -2496,11 +2493,7 @@ void player_t::reset()
   ranged_weapon.buff_value = 0;
   ranged_weapon.bonus_dmg  = 0;
 
-  elixir_battle   = ELIXIR_NONE;
-  elixir_guardian = ELIXIR_NONE;
   stim            = STIM_NONE;
-  food            = FOOD_NONE;
-
   for ( int i=0; i < RESOURCE_MAX; i++ )
   {
     action_callback_t::reset( resource_gain_callbacks[ i ] );
@@ -5765,9 +5758,6 @@ void player_t::create_options()
     // Misc
     { "skip_actions",                         OPT_STRING, &( action_list_skip                         ) },
     { "modify_action",                        OPT_STRING, &( modify_action                            ) },
-    { "elixirs",                              OPT_STRING, &( elixirs_str                              ) },
-    { "stim",                                 OPT_STRING, &( stim_str                                ) },
-    { "food",                                 OPT_STRING, &( food_str                                 ) },
     { "player_resist_holy",                   OPT_INT,    &( spell_resistance[ SCHOOL_HOLY   ]        ) },
     { "player_resist_shadow",                 OPT_INT,    &( spell_resistance[ SCHOOL_SHADOW ]        ) },
     { "player_resist_arcane",                 OPT_INT,    &( spell_resistance[ SCHOOL_ARCANE ]        ) },

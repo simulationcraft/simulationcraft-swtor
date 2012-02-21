@@ -468,24 +468,12 @@ enum stat_type
   STAT_MAX
 };
 
-enum elixir_type
-{
-  ELIXIR_NONE=0,
-  ELIXIR_MAX
-};
-
 enum stim_type
 {
   STIM_NONE=0,
   STIM_EXOTECH_RESOLVE,
   STIM_RAKATA_RESOLVE,
   STIM_MAX
-};
-
-enum food_type
-{
-  FOOD_NONE=0,
-  FOOD_MAX
 };
 
 enum position_type { POSITION_NONE=0, POSITION_FRONT, POSITION_BACK, POSITION_RANGED_FRONT, POSITION_RANGED_BACK, POSITION_MAX };
@@ -2110,9 +2098,7 @@ public:
 
   static const char* attribute_type_string     ( int type );
   static const char* dmg_type_string           ( int type );
-  static const char* elixir_type_string        ( int type );
   static const char* stim_type_string         ( int type );
-  static const char* food_type_string          ( int type );
   static const char* gem_type_string           ( int type );
   static const char* meta_gem_type_string      ( int type );
   static const char* player_type_string        ( int type );
@@ -2141,9 +2127,7 @@ public:
 
   static int parse_attribute_type              ( const std::string& name );
   static int parse_dmg_type                    ( const std::string& name );
-  static int parse_elixir_type                 ( const std::string& name );
   static int parse_stim_type                  ( const std::string& name );
-  static int parse_food_type                   ( const std::string& name );
   static int parse_gem_type                    ( const std::string& name );
   static int parse_meta_gem_type               ( const std::string& name );
   static player_type parse_player_type         ( const std::string& name );
@@ -3828,11 +3812,7 @@ struct player_t : public noncopyable
   action_callback_t* dark_intent_cb;
 
   // Consumables
-  std::string stim_str, elixirs_str, food_str;
-  int elixir_guardian;
-  int elixir_battle;
   int stim;
-  int food;
 
   // Events
   action_t* executing;

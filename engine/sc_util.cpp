@@ -850,28 +850,6 @@ int util_t::parse_stim_type( const std::string& name )
   return STIM_NONE;
 }
 
-// util_t::food_type_string =================================================
-
-const char* util_t::food_type_string( int food )
-{
-  switch ( food )
-  {
-  case FOOD_NONE:                     return "none";
-  }
-  return "unknown";
-}
-
-// util_t::parse_food_type ==================================================
-
-int util_t::parse_food_type( const std::string& name )
-{
-  for ( int i=0; i < FOOD_MAX; i++ )
-    if ( util_t::str_compare_ci( name, util_t::food_type_string( i ) ) )
-      return i;
-
-  return FOOD_NONE;
-}
-
 // util_t::set_bonus_string =================================================
 
 const char* util_t::set_bonus_string( set_type type )
