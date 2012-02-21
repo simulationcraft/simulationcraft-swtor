@@ -1,8 +1,7 @@
 sith_sorcerer=Sith_Sorcerer_Madness
 level=50
 talents=http://www.torhead.com/skill-calc#201hZbcMZfrfRs0krcz.1
-position=front
-professions=biochem=400
+position=ranged_front
 Sage_Sorcerer_Gear.simc
 save=Sith_Sorcerer_Madness.simc
 

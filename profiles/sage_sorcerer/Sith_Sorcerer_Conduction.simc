@@ -4,10 +4,9 @@ sith_sorcerer=Sith_Sorcerer_Conduction
 origin="create_Sith_Sorcerer.simc"
 level=50
 race=human
-position=front
+position=ranged_front
 role=spell
 use_pre_potion=0
-professions=biochem=400
 talents=http://www.torhead.com/skill-calc#201ZfsrodoMuzZcMcRs0z.1
 actions=stim,type=exotech_resolve
 actions+=/mark_of_power

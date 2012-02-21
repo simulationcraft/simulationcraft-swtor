@@ -1,8 +1,7 @@
 jedi_sage=Jedi_Sage_Balance
 level=50
 talents=http://www.torhead.com/skill-calc#600hZbcMZcMfRsMkrfz.1
-position=front
-professions=biochem=400
+position=ranged_front
 Sage_Sorcerer_Gear.simc
 save=Jedi_Sage_Balance.simc
 
