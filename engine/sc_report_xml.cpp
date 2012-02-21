@@ -1159,14 +1159,14 @@ void print_xml_player_action_definitions( xml_writer_t & writer, player_t * p )
           writer.print_tag( "target", a -> target -> name() );
         }
 
-        if ( a -> direct_power_mod || a -> base_dd_min || a -> base_dd_max )
+        if ( a -> dd.power_mod || a -> dd.base_min || a -> dd.base_max )
         {
           writer.begin_tag( "direct_damage" );
           writer.print_tag( "may_crit", a -> may_crit ? "true" : "false" );
-          writer.print_tag( "direct_power_mod", util_t::to_string( a -> direct_power_mod ) );
+          writer.print_tag( "power_mod", util_t::to_string( a -> dd.power_mod ) );
           writer.begin_tag( "base" );
-          writer.print_attribute( "min", util_t::to_string( a -> base_dd_min ) );
-          writer.print_attribute( "max", util_t::to_string( a -> base_dd_max ) );
+          writer.print_attribute( "min", util_t::to_string( a -> dd.base_min ) );
+          writer.print_attribute( "max", util_t::to_string( a -> dd.base_max ) );
           writer.end_tag(); // </base>
           writer.end_tag(); // </direct_damage>
         }
@@ -1176,8 +1176,11 @@ void print_xml_player_action_definitions( xml_writer_t & writer, player_t * p )
           writer.begin_tag( "damage_over_time" );
           writer.print_tag( "tick_may_crit", a -> tick_may_crit ? "true" : "false" );
           writer.print_tag( "tick_zero", a -> tick_zero ? "true" : "false" );
-          writer.print_tag( "tick_power_mod", util_t::to_string( a -> tick_power_mod ) );
-          writer.print_tag( "base", util_t::to_string( a -> base_td ) );
+          writer.print_tag( "power_mod", util_t::to_string( a -> td.power_mod ) );
+          writer.begin_tag( "base" );
+          writer.print_attribute( "min", util_t::to_string( a -> td.base_min ) );
+          writer.print_attribute( "max", util_t::to_string( a -> td.base_max ) );
+          writer.end_tag(); // </base>
           writer.print_tag( "num_ticks", util_t::to_string( a -> num_ticks ) );
           writer.print_tag( "base_tick_time", util_t::to_string( a -> base_tick_time.total_seconds() ) );
           writer.print_tag( "hasted_ticks", util_t::to_string( a -> hasted_ticks ) );

@@ -4444,15 +4444,27 @@ struct action_t
   double rp_gain;
   timespan_t min_gcd, trigger_gcd;
   double range;
-  double weapon_power_mod, direct_power_mod, tick_power_mod;
+  double weapon_power_mod;
   timespan_t base_execute_time;
   timespan_t base_tick_time;
   double base_cost;
-  double dd_standardhealthpercentmin, dd_standardhealthpercentmax, td_standardhealthpercentmin, td_standardhealthpercentmax;
-  double base_dd_min, base_dd_max, base_td, base_td_init;
-  double   base_dd_multiplier,   base_td_multiplier;
-  double player_dd_multiplier, player_td_multiplier;
-  double target_dd_multiplier, target_td_multiplier;
+
+  struct damage_factors_t {
+    double standardhealthpercentmin, standardhealthpercentmax;
+    double base_min, base_max;
+    double base_multiplier;
+    double player_multiplier;
+    double target_multiplier;
+    double power_mod;
+
+    damage_factors_t() :
+      standardhealthpercentmin( 0 ), standardhealthpercentmax( 0 ),
+      base_min( 0 ), base_max( 0 ),
+      base_multiplier( 1 ), player_multiplier( 1 ), target_multiplier( 1 ),
+      power_mod( 0 )
+    {}
+  } dd, td;
+
   double   base_multiplier,   base_hit,   base_crit,   base_penetration;
   double player_multiplier, player_hit, player_crit, player_penetration;
   double target_multiplier, target_hit, target_crit, target_penetration;
@@ -4519,8 +4531,8 @@ public:
   virtual ~action_t();
   void init_dot( const std::string& dot_name );
 
-  virtual void   parse_data();
-  virtual void   parse_effect_data( int spell_id, int effect_nr );
+  //void parse_data();
+  //void parse_effect_data( int spell_id, int effect_nr );
   virtual void   parse_options( option_t*, const std::string& options_str );
   virtual double cost() const;
   virtual double total_alacrity() const  { return alacrity();           }
@@ -4582,8 +4594,8 @@ public:
 
   // Some actions require different multipliers for the "direct" and "tick" portions.
 
-  virtual double total_dd_multiplier() const { return total_multiplier() * base_dd_multiplier * player_dd_multiplier * target_dd_multiplier; }
-  virtual double total_td_multiplier() const { return total_multiplier() * base_td_multiplier * player_td_multiplier * target_td_multiplier; }
+  virtual double total_dd_multiplier() const { return total_multiplier() * dd.base_multiplier * dd.player_multiplier * dd.target_multiplier; }
+  virtual double total_td_multiplier() const { return total_multiplier() * td.base_multiplier * td.player_multiplier * td.target_multiplier; }
 
   virtual action_expr_t* create_expression( const std::string& name );
 

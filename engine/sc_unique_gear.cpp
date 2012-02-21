@@ -142,9 +142,8 @@ struct discharge_proc_callback_t : public action_callback_t
         discharge_proc = true;
         item_proc = true;
         trigger_gcd = timespan_t::zero;
-        base_dd_min = amount;
-        base_dd_max = amount;
-        direct_power_mod = scaling;
+        dd.base_min = dd.base_max = amount;
+        dd.power_mod = scaling;
         may_crit = ( s != SCHOOL_DRAIN ) && ! no_crit;
         background  = true;
         no_buffs = nb;
@@ -161,9 +160,9 @@ struct discharge_proc_callback_t : public action_callback_t
         discharge_proc = true;
         item_proc = true;
         trigger_gcd = timespan_t::zero;
-        base_dd_min = amount;
-        base_dd_max = amount;
-        direct_power_mod = scaling;
+        dd.base_min = amount;
+        dd.base_max = amount;
+        dd.power_mod = scaling;
         may_crit = ( s != SCHOOL_DRAIN ) && ! no_crit;
         may_dodge = ( s == SCHOOL_PHYSICAL && ! no_crit );
         may_parry = ( s == SCHOOL_PHYSICAL && ! no_crit && ( p -> position == POSITION_FRONT || p -> position == POSITION_RANGED_FRONT ) );
@@ -265,9 +264,9 @@ struct chance_discharge_proc_callback_t : public action_callback_t
         discharge_proc = true;
         item_proc = true;
         trigger_gcd = timespan_t::zero;
-        base_dd_min = amount;
-        base_dd_max = amount;
-        direct_power_mod = scaling;
+        dd.base_min = amount;
+        dd.base_max = amount;
+        dd.power_mod = scaling;
         may_crit = ( s != SCHOOL_DRAIN ) && ! no_crit;
         background  = true;
         no_buffs = nb;
@@ -284,9 +283,9 @@ struct chance_discharge_proc_callback_t : public action_callback_t
         discharge_proc = true;
         item_proc = true;
         trigger_gcd = timespan_t::zero;
-        base_dd_min = amount;
-        base_dd_max = amount;
-        direct_power_mod = scaling;
+        dd.base_min = amount;
+        dd.base_max = amount;
+        dd.power_mod = scaling;
         may_crit = ( s != SCHOOL_DRAIN ) && ! no_crit;
         may_dodge = ( s == SCHOOL_PHYSICAL && ! no_crit );
         may_parry = ( s == SCHOOL_PHYSICAL && ! no_crit && ( p -> position == POSITION_FRONT || p -> position == POSITION_RANGED_FRONT ) );
@@ -345,14 +344,14 @@ struct chance_discharge_proc_callback_t : public action_callback_t
             return;
         }
       }
-      discharge_action -> base_dd_multiplier = stacks;
+      discharge_action -> dd.base_multiplier = stacks;
       discharge_action -> execute();
       stacks = 0;
       proc -> occur();
     }
     else
     {
-      discharge_action -> base_dd_multiplier = stacks;
+      discharge_action -> dd.base_multiplier = stacks;
       discharge_action -> execute();
       stacks = 0;
       proc -> occur();
@@ -388,9 +387,9 @@ struct stat_discharge_proc_callback_t : public action_callback_t
         discharge_proc = true;
         item_proc = true;
         trigger_gcd = timespan_t::zero;
-        base_dd_min = amount;
-        base_dd_max = amount;
-        direct_power_mod = scaling;
+        dd.base_min = amount;
+        dd.base_max = amount;
+        dd.power_mod = scaling;
         may_crit = ( s != SCHOOL_DRAIN ) && ! no_crit;
         background  = true;
         no_buffs = nb;
@@ -409,9 +408,9 @@ struct stat_discharge_proc_callback_t : public action_callback_t
         discharge_proc = true;
         item_proc = true;
         trigger_gcd = timespan_t::zero;
-        base_dd_min = amount;
-        base_dd_max = amount;
-        direct_power_mod = scaling;
+        dd.base_min = amount;
+        dd.base_max = amount;
+        dd.power_mod = scaling;
         may_crit = ( s != SCHOOL_DRAIN ) && ! no_crit;
         may_dodge = ( s == SCHOOL_PHYSICAL && ! no_crit );
         may_parry = ( s == SCHOOL_PHYSICAL && ! no_crit && ( p -> position == POSITION_FRONT || p -> position == POSITION_RANGED_FRONT ) );

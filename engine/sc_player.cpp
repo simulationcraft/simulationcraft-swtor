@@ -4547,8 +4547,7 @@ struct use_item_t : public action_t
           spell_t( n, p, RESOURCE_NONE, s )
         {
           trigger_gcd = timespan_t::zero;
-          base_dd_min = a;
-          base_dd_max = a;
+          dd.base_min = dd.base_max = a;
           may_crit    = true;
           background  = true;
           base_spell_power_multiplier = 0;

@@ -606,8 +606,7 @@ struct weapon_discharge_proc_callback_t : public action_callback_t
         spell_t( n, p, RESOURCE_NONE, ( s == SCHOOL_DRAIN ) ? SCHOOL_SHADOW : s )
       {
         trigger_gcd = timespan_t::zero;
-        base_dd_min = dmg;
-        base_dd_max = dmg;
+        dd.base_min = dd.base_max = dmg;
         may_crit = ( s != SCHOOL_DRAIN );
         background  = true;
         proc = true;

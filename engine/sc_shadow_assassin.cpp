@@ -238,16 +238,16 @@ struct shock_t : public shadow_assassin_spell_t
 
     if ( is_chain_shock )
     {
-      dd_standardhealthpercentmin = .073;
-      dd_standardhealthpercentmax = .113;
-      direct_power_mod = 0.925;
+      dd.standardhealthpercentmin = .073;
+      dd.standardhealthpercentmax = .113;
+      dd.power_mod = 0.925;
       background = true;
     }
     else
     {
-      dd_standardhealthpercentmin = .165;
-      dd_standardhealthpercentmax = .205;
-      direct_power_mod = 1.85;
+      dd.standardhealthpercentmin = .165;
+      dd.standardhealthpercentmax = .205;
+      dd.power_mod = 1.85;
       base_cost = 45.0;
 
       cooldown -> duration = timespan_t::from_seconds( 6.0 );
@@ -286,8 +286,8 @@ struct force_lightning_t : public shadow_assassin_spell_t
 
     parse_options( 0, options_str );
 
-    td_standardhealthpercentmin = td_standardhealthpercentmax = .079;
-    tick_power_mod = 0.79;
+    td.standardhealthpercentmin = td.standardhealthpercentmax = .079;
+    td.power_mod = 0.79;
     base_cost = 30.0;
     if ( player -> set_bonus.rakata_force_masters -> two_pc() )
       base_cost -= 2.0;
@@ -313,8 +313,8 @@ struct crushing_darkness_t : public shadow_assassin_spell_t
       static const int ranks[] = { 14, 19, 30, 41, 50 };
       range::copy( ranks, std::back_inserter( rank_level_list ) );
 
-      td_standardhealthpercentmin = td_standardhealthpercentmax = .0295;
-      tick_power_mod = 0.295;
+      td.standardhealthpercentmin = td.standardhealthpercentmax = .0295;
+      td.power_mod = 0.295;
 
       base_tick_time = timespan_t::from_seconds( 1.0 );
       num_ticks = 6;
@@ -335,9 +335,9 @@ struct crushing_darkness_t : public shadow_assassin_spell_t
 
     parse_options( 0, options_str );
 
-    dd_standardhealthpercentmin = .103;
-    dd_standardhealthpercentmax = .143;
-    direct_power_mod = 1.23;
+    dd.standardhealthpercentmin = .103;
+    dd.standardhealthpercentmax = .143;
+    dd.power_mod = 1.23;
 
     base_execute_time = timespan_t::from_seconds( 2.0 );
     base_cost = 40.0;
@@ -367,9 +367,9 @@ struct death_field_t : public shadow_assassin_spell_t
 
     parse_options( 0, options_str );
 
-    dd_standardhealthpercentmin = .167;
-    dd_standardhealthpercentmax = .207;
-    direct_power_mod = 1.87;
+    dd.standardhealthpercentmin = .167;
+    dd.standardhealthpercentmax = .207;
+    dd.power_mod = 1.87;
 
     ability_lag = timespan_t::from_seconds( 0.2 );
     base_cost = 50.0;
@@ -400,8 +400,8 @@ struct creeping_terror_t : public shadow_assassin_spell_t
 
     parse_options( 0, options_str );
 
-    td_standardhealthpercentmin = td_standardhealthpercentmax = .031;
-    tick_power_mod = 0.311;
+    td.standardhealthpercentmin = td.standardhealthpercentmax = .031;
+    td.power_mod = 0.311;
 
     base_tick_time = timespan_t::from_seconds( 3.0 );
     num_ticks = 6;
@@ -458,8 +458,8 @@ struct lightning_charge_t : public shadow_assassin_spell_t
   {
     parse_options( 0, options_str );
 
-    dd_standardhealthpercentmin = dd_standardhealthpercentmax = .017;
-    direct_power_mod = 0.165;
+    dd.standardhealthpercentmin = dd.standardhealthpercentmax = .017;
+    dd.power_mod = 0.165;
 
     proc = true;
     background = true;
@@ -483,8 +483,8 @@ struct surging_charge_t : public shadow_assassin_spell_t
   {
     parse_options( 0, options_str );
 
-    dd_standardhealthpercentmin = dd_standardhealthpercentmax = .034;
-    direct_power_mod = 0.344;
+    dd.standardhealthpercentmin = dd.standardhealthpercentmax = .034;
+    dd.power_mod = 0.344;
 
     proc = true;
     background = true;
@@ -512,8 +512,8 @@ struct low_slash_t : public shadow_assassin_attack_t
   {
     parse_options( 0, options_str );
 
-    dd_standardhealthpercentmin = dd_standardhealthpercentmax = .132;
-    direct_power_mod = 1.32;
+    dd.standardhealthpercentmin = dd.standardhealthpercentmax = .132;
+    dd.power_mod = 1.32;
 
     base_cost = 30;
     range = 4.0;
@@ -535,8 +535,8 @@ struct voltaic_slash_t : public shadow_assassin_attack_t
   {
     parse_options( 0, options_str );
 
-    dd_standardhealthpercentmin = dd_standardhealthpercentmax = 2 * .08;
-    direct_power_mod = 2 * 0.8;
+    dd.standardhealthpercentmin = dd.standardhealthpercentmax = 2 * .08;
+    dd.power_mod = 2 * 0.8;
 
     base_cost = 25.0;
     range = 4.0;
@@ -581,8 +581,8 @@ struct assassinate_t : public shadow_assassin_attack_t
   {
     parse_options( 0, options_str );
 
-    dd_standardhealthpercentmin = dd_standardhealthpercentmax = .309;
-    direct_power_mod = 3.09;
+    dd.standardhealthpercentmin = dd.standardhealthpercentmax = .309;
+    dd.power_mod = 3.09;
 
     base_cost = 25.0;
     range = 4.0;
@@ -601,8 +601,8 @@ struct lacerate_t : public shadow_assassin_attack_t
   {
     parse_options( 0, options_str );
 
-    dd_standardhealthpercentmin = dd_standardhealthpercentmax = .071;
-    direct_power_mod = 0.71;
+    dd.standardhealthpercentmin = dd.standardhealthpercentmax = .071;
+    dd.power_mod = 0.71;
 
     base_cost = 40;
     range = 4.0;
@@ -664,8 +664,8 @@ struct discharge_lightning_t : public shadow_assassin_spell_t
   discharge_lightning_t( shadow_assassin_t* p, const std::string& n ) :
     shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
   {
-    td_standardhealthpercentmin = td_standardhealthpercentmax = .038;
-    tick_power_mod = 0.38;
+    td.standardhealthpercentmin = td.standardhealthpercentmax = .038;
+    td.power_mod = 0.38;
 
     base_tick_time = timespan_t::from_seconds( 3.0 );
     num_ticks = 6;
@@ -689,16 +689,16 @@ struct discharge_lightning_t : public shadow_assassin_spell_t
 // discharge_surging
 //      DD: StandardHealthPercentMin=>0.054 => base_dd_min      = 86.94;
 //      DD: StandardHealthPercentMax=>0.094 => base_dd_max      = 151.34;
-//      DD: direct_power_mod = 0.74 ; Kinetic
+//      DD: dd.power_mod = 0.74 ; Kinetic
 
 struct discharge_surging_t : public shadow_assassin_spell_t
 {
   discharge_surging_t( shadow_assassin_t* p, const std::string& n ) :
     shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL)
   {
-    dd_standardhealthpercentmin = .154;
-    dd_standardhealthpercentmax = .194;
-    direct_power_mod = 1.74;
+    dd.standardhealthpercentmin = .154;
+    dd.standardhealthpercentmax = .194;
+    dd.power_mod = 1.74;
 
     base_cost = 0;
     range = 10.0;
@@ -744,9 +744,9 @@ struct maul_t : public shadow_assassin_attack_t
   {
     parse_options( 0, options_str );
 
-    dd_standardhealthpercentmin = .236;
-    dd_standardhealthpercentmax = .236;
-    direct_power_mod = 2.37;
+    dd.standardhealthpercentmin = .236;
+    dd.standardhealthpercentmax = .236;
+    dd.power_mod = 2.37;
 
     base_cost = 50;
     range = 4.0;
@@ -757,7 +757,7 @@ struct maul_t : public shadow_assassin_attack_t
 
 //      base_dd_min      = 379.96; // StandardHealthPercentMin=>0.236
 //      base_dd_max      = 379.96; // StandardHealthPercentMax=>0.236
-//      direct_power_mod = 2.37  ; // PHYSICAL
+//      dd.power_mod = 2.37  ; // PHYSICAL
 //      range = 4.0;
 //FIX ME: no idea how to find the dd min and max for this spell.
 //        Should be 3 distinct hits.
@@ -769,8 +769,8 @@ struct saber_strike_t : public shadow_assassin_attack_t
   {
     parse_options( 0, options_str );
 
-    dd_standardhealthpercentmin = dd_standardhealthpercentmax = .033 + .066 / 2;
-    direct_power_mod = 0;
+    dd.standardhealthpercentmin = dd.standardhealthpercentmax = .033 + .066 / 2;
+    dd.power_mod = 0;
 
     base_cost = 0;
     range = 4.0;
@@ -789,8 +789,8 @@ struct thrash_t : public shadow_assassin_spell_t
   {
     parse_options( 0, options_str );
 
-    dd_standardhealthpercentmin = dd_standardhealthpercentmax = 2 * .074;
-    direct_power_mod = 2 * 0.74;
+    dd.standardhealthpercentmin = dd.standardhealthpercentmax = 2 * .074;
+    dd.power_mod = 2 * 0.74;
 
     base_cost = 25;
     range = 4.0;

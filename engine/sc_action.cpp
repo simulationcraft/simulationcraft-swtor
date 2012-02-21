@@ -54,30 +54,14 @@ void action_t::init_action_t_()
   trigger_gcd                    = player -> base_gcd;
   range                          = -1.0;
   weapon_power_mod               = 1.0/14.0;
-  direct_power_mod               = 0.0;
-  tick_power_mod                 = 0.0;
   base_execute_time              = timespan_t::zero;
   base_tick_time                 = timespan_t::zero;
   base_cost                      = 0.0;
-  dd_standardhealthpercentmin    = 0.0;
-  dd_standardhealthpercentmax    = 0.0;
-  td_standardhealthpercentmin    = 0.0;
-  td_standardhealthpercentmax    = 0.0;
-  base_dd_min                    = 0.0;
-  base_dd_max                    = 0.0;
-  base_td                        = 0.0;
-  base_td_init                   = 0.0;
-  base_td_multiplier             = 1.0;
-  base_dd_multiplier             = 1.0;
   base_multiplier                = 1.0;
   base_hit                       = 0.0;
   base_crit                      = 0.0;
   base_penetration               = 0.0;
   player_multiplier              = 1.0;
-  player_td_multiplier           = 1.0;
-  player_dd_multiplier           = 1.0;
-  target_td_multiplier           = 1.0;
-  target_dd_multiplier           = 1.0;
   player_hit                     = 0.0;
   player_crit                    = 0.0;
   player_penetration             = 0.0;
@@ -171,6 +155,9 @@ void action_t::init_action_t_()
 
   tree = util_t::talent_tree( tree, player -> type );
 
+  rank_level = 0;
+
+#if 0
   parse_data();
 
   const spell_data_t* spell = player -> dbc.spell( id );
@@ -182,14 +169,14 @@ void action_t::init_action_t_()
 
     background = true; // prevent action from being executed
   }
-
-  rank_level = 0;
+#endif
 }
 
 void action_t::init_dot( const std::string& name )
 {
-  std::unordered_map<std::string, std::pair<player_type, size_t> >::iterator doti = sim->targetdata_items[0].find( name );
-  if ( doti != sim->targetdata_items[0].end() && doti->second.first == player->type )
+  std::unordered_map<std::string, std::pair<player_type, size_t> >::iterator doti =
+      sim -> targetdata_items[0].find( name );
+  if ( doti != sim -> targetdata_items[0].end() && doti -> second.first == player -> type )
     targetdata_dot_offset = ( int )doti->second.second;
 }
 
@@ -213,6 +200,7 @@ action_t::~action_t()
   delete interrupt_if_expr;
 }
 
+#if 0
 // action_t::parse_data =====================================================
 
 void action_t::parse_data()
@@ -342,6 +330,7 @@ void action_t::parse_effect_data( int spell_id, int effect_nr )
   default: break;
   }
 }
+#endif
 
 // action_t::parse_options ==================================================
 
@@ -461,8 +450,8 @@ timespan_t action_t::travel_time()
 void action_t::player_buff()
 {
   player_multiplier              = 1.0;
-  player_dd_multiplier           = 1.0;
-  player_td_multiplier           = 1.0;
+  dd.player_multiplier           = 1.0;
+  td.player_multiplier           = 1.0;
   player_hit                     = 0;
   player_crit                    = 0;
   player_penetration             = 0;
@@ -482,8 +471,8 @@ void action_t::player_buff()
     }
 
     player_multiplier    = p -> composite_player_multiplier   ( school, this );
-    player_dd_multiplier = p -> composite_player_dd_multiplier( school, this );
-    player_td_multiplier = p -> composite_player_td_multiplier( school, this );
+    dd.player_multiplier = p -> composite_player_dd_multiplier( school, this );
+    td.player_multiplier = p -> composite_player_td_multiplier( school, this );
 
     if ( base_attack_power_multiplier > 0 )
     {
@@ -516,8 +505,8 @@ void action_t::target_debuff( player_t* t, int /* dmg_type */ )
   target_spell_power           = 0;
   target_penetration           = 0;
   target_dd_adder              = 0;
-  target_dd_multiplier         = 1.0;
-  target_td_multiplier         = 1.0;
+  dd.target_multiplier         = 1.0;
+  td.target_multiplier         = 1.0;
 
   if ( ! no_debuffs )
   {
@@ -702,13 +691,12 @@ double action_t::calculate_weapon_damage()
 
 double action_t::calculate_tick_damage()
 {
-  double dmg = 0;
+  double base_td = ( td.base_min + td.base_max ) / 2.0;
 
-  if ( base_td == 0 ) base_td = base_td_init;
+  if ( base_td == 0 && td.power_mod == 0 ) return 0;
 
-  if ( base_td == 0 && tick_power_mod == 0 ) return 0;
-
-  dmg  = floor( base_td + 0.5 ) + total_power() * tick_power_mod;
+  double dmg = floor( base_td + 0.5 );
+  dmg += total_power() * td.power_mod;
   dmg *= total_td_multiplier();
 
   double init_tick_dmg = dmg;
@@ -729,8 +717,8 @@ double action_t::calculate_tick_damage()
   if ( sim -> debug )
   {
     log_t::output( sim, "%s dmg for %s: td=%.0f i_td=%.0f b_td=%.0f mod=%.2f power=%.0f b_mult=%.2f p_mult=%.2f t_mult=%.2f",
-                   player -> name(), name(), dmg, init_tick_dmg, base_td, tick_power_mod,
-                   total_power(), base_multiplier * base_td_multiplier, player_multiplier, target_multiplier );
+                   player -> name(), name(), dmg, init_tick_dmg, base_td, td.power_mod,
+                   total_power(), base_multiplier * td.base_multiplier, player_multiplier, target_multiplier );
   }
 
   return dmg;
@@ -740,11 +728,11 @@ double action_t::calculate_tick_damage()
 
 double action_t::calculate_direct_damage( int chain_target )
 {
-  double dmg = sim -> range( base_dd_min, base_dd_max );
+  double dmg = sim -> range( dd.base_min, dd.base_max );
 
   if ( round_base_dmg ) dmg = floor( dmg + 0.5 );
 
-  if ( dmg == 0 && weapon_multiplier == 0 && direct_power_mod == 0 ) return 0;
+  if ( dmg == 0 && weapon_multiplier == 0 && dd.power_mod == 0 ) return 0;
 
   double base_direct_dmg = dmg;
   double weapon_dmg = 0;
@@ -759,7 +747,7 @@ double action_t::calculate_direct_damage( int chain_target )
     dmg *= weapon_multiplier;
     weapon_dmg = dmg;
   }
-  dmg += direct_power_mod * total_power();
+  dmg += dd.power_mod * total_power();
   dmg *= total_dd_multiplier();
 
   double init_direct_dmg = dmg;
@@ -817,8 +805,8 @@ double action_t::calculate_direct_damage( int chain_target )
   if ( sim -> debug )
   {
     log_t::output( sim, "%s dmg for %s: dd=%.0f i_dd=%.0f w_dd=%.0f b_dd=%.0f mod=%.2f power=%.0f b_mult=%.2f p_mult=%.2f t_mult=%.2f w_mult=%.2f",
-                   player -> name(), name(), dmg, init_direct_dmg, weapon_dmg, base_direct_dmg, direct_power_mod,
-                   total_power(), base_multiplier * base_dd_multiplier, player_multiplier, target_multiplier, weapon_multiplier );
+                   player -> name(), name(), dmg, init_direct_dmg, weapon_dmg, base_direct_dmg, dd.power_mod,
+                   total_power(), base_multiplier * dd.base_multiplier, player_multiplier, target_multiplier, weapon_multiplier );
   }
 
   return dmg;
@@ -1364,17 +1352,17 @@ void action_t::init()
 
   double standard_rank_damage = rating_t::standardhealth_damage( rank_level );
 
-  if ( dd_standardhealthpercentmin > 0 )
-    base_dd_min = dd_standardhealthpercentmin * standard_rank_damage;
+  if ( dd.standardhealthpercentmin > 0 )
+    dd.base_min = dd.standardhealthpercentmin * standard_rank_damage;
 
-  if ( dd_standardhealthpercentmax > 0 )
-    base_dd_max = dd_standardhealthpercentmax * standard_rank_damage;
+  if ( dd.standardhealthpercentmax > 0 )
+    dd.base_max = dd.standardhealthpercentmax * standard_rank_damage;
 
-  if ( td_standardhealthpercentmin > 0 && td_standardhealthpercentmax >= td_standardhealthpercentmin )
-  {
-    base_td  = ( td_standardhealthpercentmin + td_standardhealthpercentmax ) / 2.0;
-    base_td *= standard_rank_damage;
-  }
+  if ( td.standardhealthpercentmin > 0 )
+    td.base_min = td.standardhealthpercentmin * standard_rank_damage;
+
+  if ( td.standardhealthpercentmax > 0 )
+    td.base_max = td.standardhealthpercentmax * standard_rank_damage;
 
   if ( ! sync_str.empty() )
   {
