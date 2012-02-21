@@ -11,10 +11,10 @@
 
 // attack_t::attack_t =======================================================
 
-void attack_t::init_attack_t_()
+attack_t::attack_t( const char* n, player_t* p, int resource, const school_type school, int tree, bool special ) :
+  action_t( ACTION_ATTACK, n, p, resource, school, tree, special ),
+  base_expertise( 0 ), player_expertise( 0 ), target_expertise( 0 )
 {
-  player_t* p = player;
-
   may_miss = may_resist = may_dodge = may_parry = may_glance = may_block = true;
 
   if ( special ) may_glance = false;
@@ -48,13 +48,6 @@ void attack_t::init_attack_t_()
   if ( range < 0 ) range = 5;
 }
 
-attack_t::attack_t( const char* n, player_t* p, int resource, const school_type school, int tree, bool special ) :
-  action_t( ACTION_ATTACK, n, p, resource, school, tree, special ),
-  base_expertise( 0 ), player_expertise( 0 ), target_expertise( 0 )
-{
-  init_attack_t_();
-}
-
 // attack_t::swing_alacrity ====================================================
 
 double attack_t::swing_alacrity() const
@@ -73,9 +66,8 @@ double attack_t::alacrity() const
 
 timespan_t attack_t::execute_time() const
 {
-  if ( base_execute_time == timespan_t::zero ) return timespan_t::zero;
-
-  if ( ! harmful && ! player -> in_combat )
+  if ( base_execute_time == timespan_t::zero ||
+       ( ! harmful && ! player -> in_combat ) )
     return timespan_t::zero;
 
   return base_execute_time * swing_alacrity();
@@ -87,11 +79,9 @@ void attack_t::player_buff()
 {
   action_t::player_buff();
 
-  player_t* p = player;
-
-  player_hit       = p -> composite_attack_hit();
-  player_expertise = p -> composite_attack_expertise();
-  player_crit      = p -> composite_attack_crit();
+  player_hit       = player -> composite_attack_hit();
+  player_expertise = player -> composite_attack_expertise();
+  player_crit      = player -> composite_attack_crit();
 
   if ( sim -> debug )
     log_t::output( sim, "attack_t::player_buff: %s hit=%.2f expertise=%.2f crit=%.2f",
@@ -327,14 +317,12 @@ int attack_t::build_table( double* chances,
 void attack_t::calculate_result()
 {
   direct_dmg = 0;
-
-  double chances[ RESULT_MAX ];
-  int    results[ RESULT_MAX ];
-
   result = RESULT_NONE;
 
   if ( ! harmful || ! may_hit ) return;
 
+  double chances[ RESULT_MAX ];
+  int    results[ RESULT_MAX ];
   int num_results = build_table( chances, results );
 
   if ( num_results == 1 )
@@ -405,11 +393,6 @@ void attack_t::execute()
 {
   action_t::execute();
 
-  if ( harmful && callbacks )
-  {
-    if ( result != RESULT_NONE )
-    {
-      action_callback_t::trigger( player -> attack_callbacks[ result ], this );
-    }
-  }
+  if ( harmful && callbacks && result != RESULT_NONE )
+    action_callback_t::trigger( player -> attack_callbacks[ result ], this );
 }

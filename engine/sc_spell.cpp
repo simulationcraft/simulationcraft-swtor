@@ -11,18 +11,13 @@
 
 // spell_t::spell_t =========================================================
 
-void spell_t::init_spell_t_()
+spell_t::spell_t( const char* n, player_t* p, int r, const school_type s, int t ) :
+  action_t( ACTION_SPELL, n, p, r, s, t, true )
 {
   may_miss = may_resist = true;
   base_spell_power_multiplier = 1.0;
   crit_bonus = 0.5;
   min_gcd = timespan_t::from_seconds( 1.0 );
-}
-
-spell_t::spell_t( const char* n, player_t* p, int r, const school_type s, int t ) :
-  action_t( ACTION_SPELL, n, p, r, s, t, true )
-{
-  init_spell_t_();
 }
 
 // spell_t::alacrity ===========================================================
@@ -37,16 +32,18 @@ double spell_t::alacrity() const
 timespan_t spell_t::gcd() const
 {
   timespan_t t = action_t::gcd();
-  if ( t == timespan_t::zero ) return timespan_t::zero;
 
-  // According to http://sithwarrior.com/forums/Thread-SWTOR-formula-list alacrity doesn't reduce the gcd
-  // cast time spells get a reduced gcd, but instant cast spells do not
-  // http://sithwarrior.com/forums/Thread-Alacrity-and-the-GCD?pid=9152#pid9152
-  // spells with base_execute_time > 0 but with time_to_execute=0 ( because of procs ) don't get a reduced gcd. Tested visually by Kor, 15/2/2012
-  if ( time_to_execute > timespan_t::zero )
-    t *= alacrity();
+  if ( t != timespan_t::zero )
+  {
+    // According to http://sithwarrior.com/forums/Thread-SWTOR-formula-list alacrity doesn't reduce the gcd
+    // cast time spells get a reduced gcd, but instant cast spells do not
+    // http://sithwarrior.com/forums/Thread-Alacrity-and-the-GCD?pid=9152#pid9152
+    // spells with base_execute_time > 0 but with time_to_execute=0 ( because of procs ) don't get a reduced gcd. Tested visually by Kor, 15/2/2012
+    if ( time_to_execute > timespan_t::zero )
+      t *= alacrity();
 
-  if ( t < min_gcd ) t = min_gcd;
+    if ( t < min_gcd ) t = min_gcd;
+  }
 
   return t;
 }
@@ -55,17 +52,13 @@ timespan_t spell_t::gcd() const
 
 timespan_t spell_t::execute_time() const
 {
-  timespan_t t = base_execute_time;
-
   if ( ! harmful && ! player -> in_combat )
     return timespan_t::zero;
 
-  if ( t <= timespan_t::zero )
+  if ( base_execute_time <= timespan_t::zero )
     return timespan_t::zero;
 
-  t *= alacrity();
-
-  return t;
+  return base_execute_time * alacrity();
 }
 
 // spell_t::player_buff =====================================================

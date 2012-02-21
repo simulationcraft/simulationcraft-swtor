@@ -4649,10 +4649,6 @@ struct attack_t : public action_t
 {
   double base_expertise, player_expertise, target_expertise;
 
-private:
-  void init_attack_t_();
-
-public:
   attack_t( const char* n=0, player_t* p=0, int r=RESOURCE_NONE, const school_type s=SCHOOL_PHYSICAL, int t=TREE_NONE, bool special=false );
 
   // Attack Overrides
@@ -4681,10 +4677,6 @@ public:
 
 struct spell_t : public action_t
 {
-private:
-  void init_spell_t_();
-
-public:
   spell_t( const char* n=0, player_t* p=0, int r=RESOURCE_NONE, const school_type s=SCHOOL_PHYSICAL, int t=TREE_NONE );
 
   // Spell Overrides

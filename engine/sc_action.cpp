@@ -1456,9 +1456,10 @@ void action_t::interrupt_action()
   if ( player -> executing  == this ) player -> executing  = 0;
   if ( player -> channeling == this )
   {
-    dot_t* dot = this->dot();
-    if ( dot -> ticking ) last_tick( dot );
     player -> channeling = 0;
+
+    dot_t* dot = this -> dot();
+    if ( dot -> ticking ) last_tick( dot );
     event_t::cancel( dot -> tick_event );
     dot -> reset();
   }
