@@ -262,7 +262,7 @@ enum base_stat_type { BASE_STAT_STRENGTH=0, BASE_STAT_AIM, BASE_STAT_CUNNING, BA
                       BASE_STAT_HEALTH, BASE_STAT_MANA,
                       BASE_STAT_MELEE_CRIT_PER_AGI, BASE_STAT_SPELL_CRIT_PER_INT,
                       BASE_STAT_DODGE_PER_AGI,
-                      BASE_STAT_MELEE_CRIT, BASE_STAT_SPELL_CRIT, BASE_STAT_MP5, BASE_STAT_SPI_REGEN, BASE_STAT_MAX
+                      BASE_STAT_MELEE_CRIT, BASE_STAT_SPELL_CRIT, BASE_STAT_SPI_REGEN, BASE_STAT_MAX
                     };
 
 enum resource_type
