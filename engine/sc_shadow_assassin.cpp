@@ -111,7 +111,6 @@ struct shadow_assassin_t : public player_t
         rng_t* chain_shock;
         rng_t* raze;
         rng_t* exploitive_strikes;
-        rng_t* exploit_weakness;
         rng_t* lightning_charge;
         rng_t* surging_charge;
         rng_t* static_charges;
@@ -251,10 +250,7 @@ struct shadow_assassin_attack_t : public attack_t
         shadow_assassin_targetdata_t* td = targetdata() -> cast_shadow_assassin();
         if ( result_is_hit( impact_result ) )
         {
-            if ( p -> talents.duplicity -> rank() > 0 && p -> rngs.exploit_weakness -> roll ( p -> talents.duplicity -> rank () * 0.1 ) )
-            {
-                p -> buffs.exploit_weakness -> trigger();
-            }
+
             if ( p -> talents.raze -> rank() > 0 && td -> dots_lightning_discharge -> ticking )
             {
                 p -> buffs.raze -> trigger();
@@ -432,6 +428,8 @@ struct shock_t : public shadow_assassin_spell_t
         parse_options( 0, options_str );
 
         range = 10.0;
+
+        crit_bonus += 1 + p -> talents.crackling_blasts -> rank() * 0.10;
 
         if ( is_chain_shock )
         {
@@ -734,6 +732,7 @@ struct discharge_t : public shadow_assassin_spell_t
           background = true;
 
           base_multiplier *= 1 + p -> talents.crackling_charge -> rank() * 0.08;
+          crit_bonus += 1 + p -> talents.crackling_blasts -> rank() * 0.10;
       }
 
       virtual void target_debuff( player_t* t, int dmg_type )
@@ -762,6 +761,7 @@ struct discharge_t : public shadow_assassin_spell_t
           background= true;
 
           base_multiplier *= 1 + p -> talents.crackling_charge -> rank() * 0.08;
+          crit_bonus += 1 + p -> talents.crackling_blasts -> rank() * 0.10;
       }
   };
 
@@ -773,6 +773,7 @@ struct discharge_t : public shadow_assassin_spell_t
           background= true;
 
           // FIME: Implement Dark Discharge
+          crit_bonus += 1 + p -> talents.crackling_blasts -> rank() * 0.10;
       }
   };
 
@@ -855,10 +856,15 @@ struct apply_charge_t : public shadow_assassin_spell_t
       // Maybe add a cleaner way to set charges, possibly on shadow_assassin_t level if it's needed in other places too
       if ( type_str == "lightning" )
         charge = LIGHTNING_CHARGE;
-      else if ( type_str =="surging" )
+      else if ( type_str =="surging" && p -> talents.surging_charge -> rank() > 0 )
         charge = SURGING_CHARGE;
       else if ( type_str == "dark")
         charge = DARK_CHARGE;
+
+      if ( charge == CHARGE_NONE )
+      {
+        sim -> errorf( "%s %s: No valid charge selected. charge_str '%s'.\n", player -> name(), name(), type_str.c_str() );
+      }
 
       base_cost = 100.0;
 
@@ -1435,6 +1441,22 @@ struct dark_charge_callback_t : public action_callback_t
   }
 };
 
+struct duplicity_callback_t : action_callback_t
+{
+  duplicity_callback_t( shadow_assassin_t* p ) :
+    action_callback_t( p -> sim, p )
+  {
+
+  }
+
+  virtual void trigger( action_t* /* a */, void* /* call_data */ )
+  {
+    shadow_assassin_t* p = listener -> cast_shadow_assassin();
+
+    p -> buffs.exploit_weakness -> trigger();
+  }
+};
+
 } // ANONYMOUS NAMESPACE ====================================================
 
 // ==========================================================================
@@ -1599,7 +1621,7 @@ void shadow_assassin_t::init_buffs()
 
     bool is_shadow = ( type == JEDI_SHADOW );
 
-    buffs.exploit_weakness = new buff_t( this, "exploit_weakness", 1, timespan_t::from_seconds( 10.0 ), timespan_t::from_seconds( 10.0 ) );
+    buffs.exploit_weakness = new buff_t( this, "exploit_weakness", 1, timespan_t::from_seconds( 10.0 ), timespan_t::from_seconds( 10.0 ), talents.duplicity -> rank () * 0.1 );
     buffs.dark_embrace = new buff_t( this, "dark_embrace", 1, timespan_t::from_seconds( 6.0 ), timespan_t::zero );
     buffs.induction = new buff_t( this, "induction", 2, timespan_t::from_seconds( 10.0 ), timespan_t::zero, talents.induction -> rank() * 0.5 );
     buffs.voltaic_slash = new buff_t( this, "voltaic_slash", 2, timespan_t::from_seconds( 10.0 ), timespan_t::zero );
@@ -1645,7 +1667,6 @@ void shadow_assassin_t::init_rng()
     rngs.chain_shock        = get_rng( "chain_shock"         );
     rngs.raze               = get_rng( "raze"                );
     rngs.exploitive_strikes = get_rng( "exploitive_strikes " );
-    rngs.exploit_weakness   = get_rng( "exploit_weakness"    );
     rngs.lightning_charge   = get_rng( "lightning_charge"    );
     rngs.surging_charge     = get_rng( "surging_charge"      );
     rngs.static_charges     = get_rng( "static_charges"      );
@@ -1756,6 +1777,9 @@ void shadow_assassin_t::init_spells()
   register_spell_callback( RESULT_HIT_MASK, lc );
   register_spell_callback( RESULT_HIT_MASK, sc );
   register_spell_callback( RESULT_HIT_MASK, dc );
+
+  register_attack_callback( RESULT_HIT_MASK, new duplicity_callback_t( this ) );
+  register_spell_callback( RESULT_HIT_MASK, new duplicity_callback_t( this ) );
 }
 
 // shadow_assassin_t::primary_resource ==================================================
