@@ -15,9 +15,7 @@ attack_t::attack_t( const char* n, player_t* p, int resource, const school_type 
   action_t( ACTION_ATTACK, n, p, resource, school, tree, special ),
   base_expertise( 0 ), player_expertise( 0 ), target_expertise( 0 )
 {
-  may_miss = may_resist = may_dodge = may_parry = may_glance = may_block = true;
-
-  if ( special ) may_glance = false;
+  may_miss = may_dodge = may_parry = may_block = true;
 
   if ( p -> position == POSITION_BACK )
   {
@@ -28,14 +26,12 @@ attack_t::attack_t( const char* n, player_t* p, int resource, const school_type 
   {
     may_block  = true;
     may_dodge  = false;
-    may_glance = false; // FIXME! If we decide to make ranged auto-shot become "special" this line goes away.
     may_parry  = false;
   }
   else if ( p -> position == POSITION_RANGED_BACK )
   {
     may_block  = false;
     may_dodge  = false;
-    may_glance = false; // FIXME! If we decide to make ranged auto-shot become "special" this line goes away.
     may_parry  = false;
   }
 
@@ -154,13 +150,6 @@ double attack_t::parry_chance( int delta_level ) const
     return 0.05 + delta_level * 0.005 - 0.25 * total_expertise();
 }
 
-// attack_t::glance_chance ==================================================
-
-double attack_t::glance_chance( int delta_level ) const
-{
-  return (  delta_level  + 1 ) * 0.06;
-}
-
 // attack_t::block_chance ===================================================
 
 double attack_t::block_chance( int /* delta_level */ ) const
@@ -216,14 +205,13 @@ double attack_t::crit_chance( int delta_level ) const
 int attack_t::build_table( double* chances,
                            int*    results )
 {
-  double miss=0, dodge=0, parry=0, glance=0, block=0,crit_block=0, crit=0;
+  double miss=0, dodge=0, parry=0, block=0,crit_block=0, crit=0;
 
   int delta_level = target -> level - player -> level;
 
   if ( may_miss   )   miss =   miss_chance( delta_level ) + target -> composite_tank_miss( school );
-  if ( may_dodge  )  dodge =  dodge_chance( delta_level ) + target -> composite_tank_dodge() - target -> diminished_dodge();
-  if ( may_parry  )  parry =  parry_chance( delta_level ) + target -> composite_tank_parry() - target -> diminished_parry();
-  if ( may_glance ) glance = glance_chance( delta_level );
+  if ( may_dodge  )  dodge =  dodge_chance( delta_level ) + target -> composite_tank_dodge();
+  if ( may_parry  )  parry =  parry_chance( delta_level ) + target -> composite_tank_parry();
 
   if ( may_block )
   {
@@ -239,8 +227,8 @@ int attack_t::build_table( double* chances,
     crit = crit_chance( delta_level ) + target -> composite_tank_crit( school );
   }
 
-  if ( sim -> debug ) log_t::output( sim, "attack_t::build_table: %s miss=%.3f dodge=%.3f parry=%.3f glance=%.3f block=%.3f crit_block=%.3f crit=%.3f",
-                                     name(), miss, dodge, parry, glance, block, crit_block, crit );
+  if ( sim -> debug ) log_t::output( sim, "attack_t::build_table: %s miss=%.3f dodge=%.3f parry=%.3f block=%.3f crit_block=%.3f crit=%.3f",
+                                     name(), miss, dodge, parry, block, crit_block, crit );
 
   double limit = 1.0;
   double total = 0;
@@ -268,14 +256,6 @@ int attack_t::build_table( double* chances,
     if ( total > limit ) total = limit;
     chances[ num_results ] = total;
     results[ num_results ] = RESULT_PARRY;
-    num_results++;
-  }
-  if ( glance > 0 && total < limit )
-  {
-    total += glance;
-    if ( total > limit ) total = limit;
-    chances[ num_results ] = total;
-    results[ num_results ] = RESULT_GLANCE;
     num_results++;
   }
   if ( block > 0 && total < limit )
@@ -369,11 +349,7 @@ void attack_t::calculate_result()
 
   if ( result_is_hit() )
   {
-    if ( binary && rng[ RESULT_RESIST ] -> roll( resistance() ) )
-    {
-      result = RESULT_RESIST;
-    }
-    else if ( special && may_crit && ( result == RESULT_HIT ) ) // Specials are 2-roll calculations
+    if ( special && may_crit && ( result == RESULT_HIT ) ) // Specials are 2-roll calculations
     {
       int delta_level = target -> level - player -> level;
 
