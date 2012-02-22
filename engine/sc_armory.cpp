@@ -590,11 +590,6 @@ void armory_t::fuzzy_stats( std::string&       encoding_str,
   stat_search( encoding_str, splits, STAT_PRESENCE,  "presence" );
 
   stat_search( encoding_str, splits, STAT_SPELL_POWER, "spell power" );
-  stat_search( encoding_str, splits, STAT_MP5,         "mana regen" );
-  stat_search( encoding_str, splits, STAT_MP5,         "mana every 5" );
-  stat_search( encoding_str, splits, STAT_MP5,         "mana per 5" );
-  stat_search( encoding_str, splits, STAT_MP5,         "mana restored per 5" );
-  stat_search( encoding_str, splits, STAT_MP5,         "mana 5" );
 
   stat_search( encoding_str, splits, STAT_ATTACK_POWER,             "attack power" );
   stat_search( encoding_str, splits, STAT_EXPERTISE_RATING,         "expertise rating" );

@@ -15,7 +15,7 @@ attack_t::attack_t( const char* n, player_t* p, int resource, const school_type 
   action_t( ACTION_ATTACK, n, p, resource, school, tree, special ),
   base_expertise( 0 ), player_expertise( 0 ), target_expertise( 0 )
 {
-  may_miss = may_resist = may_dodge = may_parry = may_glance = may_block = true;
+  may_miss = may_dodge = may_parry = may_glance = may_block = true;
 
   if ( special ) may_glance = false;
 
@@ -221,8 +221,8 @@ int attack_t::build_table( double* chances,
   int delta_level = target -> level - player -> level;
 
   if ( may_miss   )   miss =   miss_chance( delta_level ) + target -> composite_tank_miss( school );
-  if ( may_dodge  )  dodge =  dodge_chance( delta_level ) + target -> composite_tank_dodge() - target -> diminished_dodge();
-  if ( may_parry  )  parry =  parry_chance( delta_level ) + target -> composite_tank_parry() - target -> diminished_parry();
+  if ( may_dodge  )  dodge =  dodge_chance( delta_level ) + target -> composite_tank_dodge();
+  if ( may_parry  )  parry =  parry_chance( delta_level ) + target -> composite_tank_parry();
   if ( may_glance ) glance = glance_chance( delta_level );
 
   if ( may_block )
@@ -369,11 +369,7 @@ void attack_t::calculate_result()
 
   if ( result_is_hit() )
   {
-    if ( binary && rng[ RESULT_RESIST ] -> roll( resistance() ) )
-    {
-      result = RESULT_RESIST;
-    }
-    else if ( special && may_crit && ( result == RESULT_HIT ) ) // Specials are 2-roll calculations
+    if ( special && may_crit && ( result == RESULT_HIT ) ) // Specials are 2-roll calculations
     {
       int delta_level = target -> level - player -> level;
 

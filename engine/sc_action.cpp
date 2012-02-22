@@ -18,7 +18,6 @@ void action_t::init_action_t_()
   aoe                            = 0;
   dual                           = false;
   callbacks                      = true;
-  binary                         = false;
   channeled                      = false;
   background                     = false;
   sequence                       = false;
@@ -34,7 +33,6 @@ void action_t::init_action_t_()
   initialized                    = false;
   may_hit                        = true;
   may_miss                       = false;
-  may_resist                     = false;
   may_dodge                      = false;
   may_parry                      = false;
   may_glance                     = false;
@@ -60,16 +58,13 @@ void action_t::init_action_t_()
   base_multiplier                = 1.0;
   base_hit                       = 0.0;
   base_crit                      = 0.0;
-  base_penetration               = 0.0;
   player_multiplier              = 1.0;
   player_hit                     = 0.0;
   player_crit                    = 0.0;
-  player_penetration             = 0.0;
   rp_gain                        = 0.0;
   target_multiplier              = 1.0;
   target_hit                     = 0.0;
   target_crit                    = 0.0;
-  target_penetration             = 0.0;
   base_spell_power               = 0.0;
   base_attack_power              = 0.0;
   player_spell_power             = 0.0;
@@ -454,7 +449,6 @@ void action_t::player_buff()
   td.player_multiplier           = 1.0;
   player_hit                     = 0;
   player_crit                    = 0;
-  player_penetration             = 0;
   player_dd_adder                = 0;
   player_spell_power             = 0;
   player_attack_power            = 0;
@@ -464,11 +458,6 @@ void action_t::player_buff()
   if ( ! no_buffs )
   {
     player_t* p = player;
-
-    if ( school != SCHOOL_PHYSICAL )
-    {
-      player_penetration = p -> composite_spell_penetration();
-    }
 
     player_multiplier    = p -> composite_player_multiplier   ( school, this );
     dd.player_multiplier = p -> composite_player_dd_multiplier( school, this );
@@ -490,8 +479,8 @@ void action_t::player_buff()
   player_alacrity = total_alacrity();
 
   if ( sim -> debug )
-    log_t::output( sim, "action_t::player_buff: %s hit=%.2f crit=%.2f penetration=%.0f spell_power=%.2f attack_power=%.2f ",
-                   name(), player_hit, player_crit, player_penetration, player_spell_power, player_attack_power );
+    log_t::output( sim, "action_t::player_buff: %s hit=%.2f crit=%.2f spell_power=%.2f attack_power=%.2f ",
+                   name(), player_hit, player_crit, player_spell_power, player_attack_power );
 }
 
 // action_t::target_debuff ==================================================
@@ -503,7 +492,6 @@ void action_t::target_debuff( player_t* t, int /* dmg_type */ )
   target_crit                  = 0;
   target_attack_power          = 0;
   target_spell_power           = 0;
-  target_penetration           = 0;
   target_dd_adder              = 0;
   dd.target_multiplier         = 1.0;
   td.target_multiplier         = 1.0;
@@ -515,8 +503,8 @@ void action_t::target_debuff( player_t* t, int /* dmg_type */ )
   }
 
   if ( sim -> debug )
-    log_t::output( sim, "action_t::target_debuff: %s (target=%s) multiplier=%.2f hit=%.2f crit=%.2f attack_power=%.2f spell_power=%.2f penetration=%.0f",
-                   name(), t -> name(), target_multiplier, target_hit, target_crit, target_attack_power, target_spell_power, target_penetration );
+    log_t::output( sim, "action_t::target_debuff: %s (target=%s) multiplier=%.2f hit=%.2f crit=%.2f attack_power=%.2f spell_power=%.2f",
+                   name(), t -> name(), target_multiplier, target_hit, target_crit, target_attack_power, target_spell_power );
 }
 
 // action_t::snapshot
@@ -549,8 +537,7 @@ bool action_t::result_is_miss( int r ) const
 
   return( r == RESULT_MISS   ||
           r == RESULT_DODGE  ||
-          r == RESULT_PARRY  ||
-          r == RESULT_RESIST );
+          r == RESULT_PARRY  );
 }
 
 // action_t::armor ==========================================================
@@ -558,74 +545,6 @@ bool action_t::result_is_miss( int r ) const
 double action_t::armor() const
 {
   return target -> composite_armor();
-}
-
-// action_t::resistance =====================================================
-
-double action_t::resistance() const
-{
-  if ( ! may_resist )
-    return 0;
-
-  player_t* t = target;
-  double resist=0;
-
-  double penetration = base_penetration + player_penetration + target_penetration;
-
-  if ( school == SCHOOL_BLEED )
-  {
-    // Bleeds cannot be resisted
-  }
-  else
-  {
-    double resist_rating = t -> composite_spell_resistance( school );
-
-    if ( school == SCHOOL_FROSTFIRE )
-    {
-      resist_rating = std::min( t -> composite_spell_resistance( SCHOOL_FROST ),
-                                t -> composite_spell_resistance( SCHOOL_FIRE  ) );
-    }
-    else if ( school == SCHOOL_SPELLSTORM )
-    {
-      resist_rating = std::min( t -> composite_spell_resistance( SCHOOL_ARCANE ),
-                                t -> composite_spell_resistance( SCHOOL_NATURE ) );
-    }
-    else if ( school == SCHOOL_SHADOWFROST )
-    {
-      resist_rating = std::min( t -> composite_spell_resistance( SCHOOL_SHADOW ),
-                                t -> composite_spell_resistance( SCHOOL_FROST  ) );
-    }
-    else if ( school == SCHOOL_SHADOWFLAME )
-    {
-      resist_rating = std::min( t -> composite_spell_resistance( SCHOOL_SHADOW ),
-                                t -> composite_spell_resistance( SCHOOL_FIRE   ) );
-    }
-
-    resist_rating -= penetration;
-    if ( resist_rating < 0 ) resist_rating = 0;
-    if ( resist_rating > 0 )
-    {
-      resist = resist_rating / ( resist_rating + player -> half_resistance_rating );
-    }
-
-#if 0
-// TO-DO: No sign of partial resists on either Beta or PTR. ifdefing out for now in case they come back...
-    if ( ! binary )
-    {
-      int delta_level = t -> level - player -> level;
-      if ( delta_level > 0 )
-      {
-        resist += delta_level * 0.02;
-      }
-    }
-#endif
-
-    if ( resist > 1.0 ) resist = 1.0;
-  }
-
-  if ( sim -> debug ) log_t::output( sim, "%s queries resistance for %s: %.2f", player -> name(), name(), resist );
-
-  return resist;
 }
 
 // action_t::total_crit_bonus ===============================================
@@ -709,11 +628,6 @@ double action_t::calculate_tick_damage()
     dmg *= 1.0 + total_crit_bonus();
   }
 
-  if ( ! binary )
-  {
-    dmg *= 1.0 - resistance();
-  }
-
   if ( ! sim -> average_range )
     dmg = floor( dmg + sim -> real() );
 
@@ -788,11 +702,6 @@ double action_t::calculate_direct_damage( int chain_target )
   else if ( result == RESULT_CRIT )
   {
     dmg *= 1.0 + total_crit_bonus();
-  }
-
-  if ( ! binary )
-  {
-    dmg *= 1.0 - resistance();
   }
 
   // AoE with decay per target
@@ -891,9 +800,9 @@ void action_t::execute()
                    player -> resource_current[ player -> primary_resource() ] );
   }
 
-  if ( harmful )
+  if ( harmful && ! player -> in_combat )
   {
-    if ( player -> in_combat == false && sim -> debug )
+    if ( sim -> debug )
       log_t::output( sim, "%s enters combat.", player -> name() );
 
     player -> in_combat = true;

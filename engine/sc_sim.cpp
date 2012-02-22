@@ -2024,7 +2024,6 @@ void sim_t::create_options()
     { "default_enchant_endurance",                OPT_FLT,  &( enchant.attribute[ ATTR_ENDURANCE ] ) },
     { "default_enchant_presence",                 OPT_FLT,  &( enchant.attribute[ ATTR_PRESENCE  ] ) },
     { "default_enchant_spell_power",              OPT_FLT,  &( enchant.spell_power                 ) },
-    { "default_enchant_mp5",                      OPT_FLT,  &( enchant.mp5                         ) },
     { "default_enchant_power",                    OPT_FLT,  &( enchant.power                       ) },
     { "default_enchant_attack_power",             OPT_FLT,  &( enchant.attack_power                ) },
     { "default_enchant_expertise_rating",         OPT_FLT,  &( enchant.expertise_rating            ) },

@@ -14,13 +14,13 @@
 spell_t::spell_t( const char* n, player_t* p, int r, const school_type s, int t ) :
   action_t( ACTION_SPELL, n, p, r, s, t, true )
 {
-  may_miss = may_resist = true;
+  may_miss = true;
   base_spell_power_multiplier = 1.0;
   crit_bonus = 0.5;
   min_gcd = timespan_t::from_seconds( 1.0 );
 }
 
-// spell_t::alacrity ===========================================================
+// spell_t::alacrity ========================================================
 
 double spell_t::alacrity() const
 {
@@ -128,14 +128,6 @@ void spell_t::calculate_result()
     if ( rng[ RESULT_MISS ] -> roll( miss_chance( delta_level ) ) )
     {
       result = RESULT_MISS;
-    }
-  }
-
-  if ( ( result == RESULT_NONE ) && may_resist && binary )
-  {
-    if ( rng[ RESULT_RESIST ] -> roll( resistance() ) )
-    {
-      result = RESULT_RESIST;
     }
   }
 

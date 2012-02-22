@@ -354,8 +354,6 @@ void print_xml_player_stats( xml_writer_t & writer, player_t * p )
                               100 * p -> composite_spell_hit(), p -> stats.hit_rating, 100 * p -> buffed_spell_hit );
   print_xml_player_attribute( writer, "spellcrit",
                               100 * p -> composite_spell_crit(), p -> stats.crit_rating, 100 * p -> buffed_spell_crit );
-  print_xml_player_attribute( writer, "spellpenetration",
-                              100 * p -> composite_spell_penetration(), p -> stats.spell_penetration, 100 * p -> buffed_spell_penetration );
   print_xml_player_attribute( writer, "spellalacrity",
                               100 * ( 1 / p -> spell_alacrity - 1 ), p -> stats.alacrity_rating, 100 * ( 1 / p -> buffed_spell_alacrity - 1 ) );
   print_xml_player_attribute( writer, "attackpower",
@@ -373,11 +371,11 @@ void print_xml_player_stats( xml_writer_t & writer, player_t * p )
   print_xml_player_attribute( writer, "armor",
                               p -> composite_armor(), ( p -> stats.armor + p -> stats.bonus_armor ), p -> buffed_armor );
   print_xml_player_attribute( writer, "miss",
-                              100 * ( p -> composite_tank_miss( SCHOOL_PHYSICAL ) ), 0, 100 * p -> buffed_miss );
+                              100 * p -> composite_tank_miss( SCHOOL_PHYSICAL ), 0, 100 * p -> buffed_miss );
   print_xml_player_attribute( writer, "dodge",
-                              100 * ( p -> composite_tank_dodge() - p -> diminished_dodge() ), p -> stats.dodge_rating, 100 * p -> buffed_dodge );
+                              100 * p -> composite_tank_dodge(), p -> stats.dodge_rating, 100 * p -> buffed_dodge );
   print_xml_player_attribute( writer, "parry",
-                              100 * ( p -> composite_tank_parry() - p -> diminished_parry() ), p -> stats.parry_rating, 100 * p -> buffed_parry );
+                              100 * p -> composite_tank_parry(), p -> stats.parry_rating, 100 * p -> buffed_parry );
   print_xml_player_attribute( writer, "block",
                               100 * p -> composite_tank_block(), p -> stats.block_rating, 100 * p -> buffed_block );
   print_xml_player_attribute( writer, "tank_crit",
