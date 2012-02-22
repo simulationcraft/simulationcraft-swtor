@@ -457,6 +457,15 @@ struct shock_t : public shadow_assassin_spell_t
         }
     }
 
+    virtual void player_buff()
+    {
+      shadow_assassin_spell_t::player_buff();
+
+      shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+      player_multiplier += p -> buffs.voltaic_slash -> stack() * 0.15;
+    }
+
     virtual double cost() const
     {
       double c = shadow_assassin_spell_t::cost();
@@ -900,9 +909,6 @@ struct low_slash_t : public shadow_assassin_attack_t
 
 // Voltaic Slash | Clairvoyant Strike ===============
 
-// TODO : Each use of this ability increases the damage dealt by your next Shock by 15%
-//        for 10 seconds. Stacks up to 2 times.
-
 struct voltaic_slash_t : public shadow_assassin_attack_t
 {
   voltaic_slash_t* second_strike;
@@ -932,8 +938,6 @@ struct voltaic_slash_t : public shadow_assassin_attack_t
 
       base_cost = 25.0;
 
-      cooldown -> duration = timespan_t::from_seconds( 15.0 );
-
       second_strike = new voltaic_slash_t( p, n, options_str, true );
       add_child( second_strike );
     }
@@ -951,6 +955,7 @@ struct voltaic_slash_t : public shadow_assassin_attack_t
 
     if ( second_strike )
     {
+      p -> buffs.voltaic_slash -> trigger( 1 );
       second_strike -> execute();
     }
   }
@@ -1176,8 +1181,6 @@ struct saber_strike_t : public shadow_assassin_attack_t
     {
       weapon_multiplier = -.066;
       dd.power_mod = .66;
-
-      cooldown -> duration = timespan_t::from_seconds( 15.0 );
 
       second_strike = new saber_strike_t( p, n, options_str, true );
       third_strike = new saber_strike_t( p, n, options_str, true );
@@ -1718,12 +1721,10 @@ void shadow_assassin_t::init_actions()
               action_list_str += "/power_potion";
               action_list_str += "/recklessness";
               action_list_str += "/assassinate";
-              action_list_str += "/discharge";
               action_list_str += "/maul,if=buff.exploit_weakness.react";
+              action_list_str += "/discharge";
               action_list_str += "/shock,if=buff.induction.stack=2";
               action_list_str += "/voltaic_slash";
-              action_list_str += "/blackout";
-              action_list_str += "/force_cloak";
               action_list_str += "/saber_strike";
 
                 break;

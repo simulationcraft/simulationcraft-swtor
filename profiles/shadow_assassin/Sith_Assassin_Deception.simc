@@ -15,12 +15,10 @@ actions+=/apply_charge,type=surging
 actions+=/power_potion
 actions+=/recklessness
 actions+=/assassinate
-actions+=/discharge
 actions+=/maul,if=buff.exploit_weakness.react
+actions+=/discharge
 actions+=/shock,if=buff.induction.stack=2
 actions+=/voltaic_slash
-actions+=/blackout
-actions+=/force_cloak
 actions+=/saber_strike
 head=foo_stalker_headgear
 shirt=foo,stats=1303willpower_510crit_151power_1224forcepower_153surge
