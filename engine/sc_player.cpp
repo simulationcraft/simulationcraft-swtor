@@ -4744,6 +4744,8 @@ struct use_relics_t : public action_t
     relic1( new use_slot_t( player, "slot=relic1,quiet=1" ) ),
     relic2( new use_slot_t( player, "slot=relic2,quiet=1" ) )
   {
+    parse_options( 0, options_str );
+
     harmful = false;
     trigger_gcd = timespan_t::zero;
   }
