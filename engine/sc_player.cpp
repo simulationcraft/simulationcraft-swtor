@@ -4734,6 +4734,36 @@ struct use_slot_t : public base_use_item_t
   }
 };
 
+
+struct use_relics_t : public action_t
+{
+  use_slot_t *relic1, *relic2;
+
+  use_relics_t( player_t* player, const std::string& options_str ) :
+    action_t( ACTION_OTHER, "use_relics", player ),
+    relic1( new use_slot_t( player, "slot=relic1,quiet=1" ) ),
+    relic2( new use_slot_t( player, "slot=relic2,quiet=1" ) )
+  {
+    harmful = false;
+    trigger_gcd = timespan_t::zero;
+  }
+
+  virtual void execute()
+  {
+    if ( relic1 -> ready() )
+      relic1 -> execute();
+    else if ( relic2 -> ready() )
+      relic2 -> execute();
+  }
+
+  virtual bool ready()
+  {
+    if ( ! relic1 -> ready() && ! relic2 -> ready () )
+      return false;
+    return action_t::ready();
+  }
+};
+
 // Cancel Buff ==============================================================
 
 struct cancel_buff_t : public action_t
@@ -4796,6 +4826,7 @@ action_t* player_t::create_action( const std::string& name,
   if ( name == "stop_moving"      ) return new      stop_moving_t( this, options_str );
   if ( name == "use_item"         ) return new         use_item_t( this, options_str );
   if ( name == "use_slot"         ) return new         use_slot_t( this, options_str );
+  if ( name == "use_relics"       ) return new       use_relics_t( this, options_str );
   if ( name == "wait"             ) return new       wait_fixed_t( this, options_str );
   if ( name == "wait_until_ready" ) return new wait_until_ready_t( this, options_str );
   if ( name == "summon_companion" ) return new summon_companion_t( this, options_str );
