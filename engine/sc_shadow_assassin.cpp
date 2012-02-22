@@ -429,7 +429,7 @@ struct shock_t : public shadow_assassin_spell_t
 
         range = 10.0;
 
-        crit_bonus += 1 + p -> talents.crackling_blasts -> rank() * 0.10;
+        crit_bonus += p -> talents.crackling_blasts -> rank() * 0.10;
 
         if ( is_chain_shock )
         {
@@ -732,7 +732,7 @@ struct discharge_t : public shadow_assassin_spell_t
           background = true;
 
           base_multiplier *= 1 + p -> talents.crackling_charge -> rank() * 0.08;
-          crit_bonus += 1 + p -> talents.crackling_blasts -> rank() * 0.10;
+          crit_bonus += p -> talents.crackling_blasts -> rank() * 0.10;
       }
 
       virtual void target_debuff( player_t* t, int dmg_type )
@@ -761,7 +761,7 @@ struct discharge_t : public shadow_assassin_spell_t
           background= true;
 
           base_multiplier *= 1 + p -> talents.crackling_charge -> rank() * 0.08;
-          crit_bonus += 1 + p -> talents.crackling_blasts -> rank() * 0.10;
+          crit_bonus += p -> talents.crackling_blasts -> rank() * 0.10;
       }
   };
 
@@ -773,7 +773,7 @@ struct discharge_t : public shadow_assassin_spell_t
           background= true;
 
           // FIME: Implement Dark Discharge
-          crit_bonus += 1 + p -> talents.crackling_blasts -> rank() * 0.10;
+          crit_bonus += p -> talents.crackling_blasts -> rank() * 0.10;
       }
   };
 
