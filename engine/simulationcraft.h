@@ -3795,7 +3795,6 @@ struct player_t : public noncopyable
   attack_t*  off_hand_attack;
   attack_t* ranged_attack;
 
-
   // Resources
   double  resource_base   [ RESOURCE_MAX ];
   double  resource_initial[ RESOURCE_MAX ];

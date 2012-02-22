@@ -4468,9 +4468,9 @@ wait_for_cooldown_t::wait_for_cooldown_t( player_t* player, const char* cd_name 
 timespan_t wait_for_cooldown_t::execute_time() const
 { return wait_cd -> remains(); }
 
-// Use Item Action ==========================================================
+// Use Item Actions =========================================================
 
-struct use_item_t : public action_t
+struct base_use_item_t : public action_t
 {
   item_t* item;
   spell_t* discharge;
@@ -4478,43 +4478,31 @@ struct use_item_t : public action_t
   stat_buff_t* buff;
   std::string use_name;
 
-  use_item_t( player_t* player, const std::string& options_str ) :
+  base_use_item_t( player_t* player ) :
     action_t( ACTION_OTHER, "use_item", player ),
-    item( 0 ), discharge( 0 ), trigger( 0 ), buff( 0 )
+    item(), discharge(), trigger(), buff()
+  {}
+
+  virtual void init()
   {
-    std::string item_name;
-    option_t options[] =
-    {
-      { "name", OPT_STRING, &item_name },
-      { NULL, OPT_UNKNOWN, NULL }
-    };
-    parse_options( options, options_str );
-
-    if ( item_name.empty() )
-    {
-      sim -> errorf( "Player %s has 'use_item' action with no 'name=' option.\n", player -> name() );
-      return;
-    }
-
-    item = player -> find_item( item_name );
     if ( ! item )
-    {
-      sim -> errorf( "Player %s attempting 'use_item' action with item '%s' which is not currently equipped.\n", player -> name(), item_name.c_str() );
       return;
-    }
+
     if ( ! item -> use.active() )
     {
-      sim -> errorf( "Player %s attempting 'use_item' action with item '%s' which has no 'use=' encoding.\n", player -> name(), item_name.c_str() );
+      sim -> errorf( "Player %s attempting 'use_item' action with item '%s' which has no 'use=' encoding.\n", player -> name(), item->name() );
       item = 0;
       return;
     }
 
-    name_str = name_str + "_" + item_name;
-    stats = player ->  get_stats( name_str, this );
+    name_str += '_';
+    name_str += item -> name();
+
+    stats = player -> get_stats( name_str, this );
 
     item_t::special_effect_t& e = item -> use;
 
-    use_name = e.name_str.empty() ? item_name : e.name_str;
+    use_name = e.name_str.empty() ? item -> name() : e.name_str;
 
     if ( e.trigger_type )
     {
@@ -4566,9 +4554,7 @@ struct use_item_t : public action_t
     }
     else assert( false );
 
-    std::string cooldown_name = use_name;
-    cooldown_name += "_";
-    cooldown_name += item -> slot_name();
+    std::string cooldown_name = use_name + '_' + item -> slot_name();
 
     cooldown = player -> get_cooldown( cooldown_name );
     cooldown -> duration = item -> use.cooldown;
@@ -4599,6 +4585,7 @@ struct use_item_t : public action_t
     {
       discharge -> execute();
     }
+
     else if ( trigger )
     {
       if ( sim -> log ) log_t::output( sim, "%s performs %s", player -> name(), use_name.c_str() );
@@ -4609,10 +4596,10 @@ struct use_item_t : public action_t
       {
         struct trigger_expiration_t : public event_t
         {
-          item_t* item;
           action_callback_t* trigger;
 
-          trigger_expiration_t( sim_t* sim, player_t* player, item_t* i, action_callback_t* t ) : event_t( sim, player ), item( i ), trigger( t )
+          trigger_expiration_t( sim_t* sim, player_t* player, item_t* item, action_callback_t* t ) :
+            event_t( sim, player ), trigger( t )
           {
             name = item -> name();
             sim -> add_event( this, item -> use.duration );
@@ -4628,12 +4615,14 @@ struct use_item_t : public action_t
         lockout( item -> use.duration );
       }
     }
+
     else if ( buff )
     {
       if ( sim -> log ) log_t::output( sim, "%s performs %s", player -> name(), use_name.c_str() );
       buff -> trigger();
       lockout( buff -> buff_duration );
     }
+
     else assert( false );
 
     // Enable to report use_item ability
@@ -4652,6 +4641,96 @@ struct use_item_t : public action_t
   {
     if ( ! item ) return false;
     return action_t::ready();
+  }
+};
+
+struct use_item_t : public base_use_item_t
+{
+  use_item_t( player_t* player, const std::string& options_str ) :
+    base_use_item_t( player )
+  {
+    std::string item_name;
+    option_t options[] =
+    {
+      { "name", OPT_STRING, &item_name },
+      { NULL, OPT_UNKNOWN, NULL }
+    };
+    parse_options( options, options_str );
+
+    if ( item_name.empty() )
+    {
+      sim -> errorf( "Player %s has 'use_item' action with no 'name=' option.\n", player -> name() );
+      return;
+    }
+
+    item = player -> find_item( item_name );
+    if ( ! item )
+    {
+      sim -> errorf( "Player %s attempting 'use_item' action with item '%s' which is not currently equipped.\n", player -> name(), item_name.c_str() );
+      return;
+    }
+    if ( ! item -> use.active() )
+    {
+      sim -> errorf( "Player %s attempting 'use_item' action with item '%s' which has no 'use=' encoding.\n", player -> name(), item_name.c_str() );
+      item = 0;
+      return;
+    }
+  }
+};
+
+struct use_slot_t : public base_use_item_t
+{
+  use_slot_t( player_t* player, const std::string& options_str ) :
+    base_use_item_t( player )
+  {
+    std::string slot_name;
+    int quiet = 0;
+
+    option_t options[] =
+    {
+      { "quiet", OPT_BOOL,   &quiet },
+      { "slot",  OPT_STRING, &slot_name },
+      { NULL, OPT_UNKNOWN, NULL }
+    };
+    parse_options( options, options_str );
+
+    if ( slot_name.empty() )
+    {
+      sim -> errorf( "Player %s has 'use_slot' action with no 'slot=' option.\n", player -> name() );
+      return;
+    }
+
+    int slot = util_t::parse_slot_type( slot_name );
+    if ( slot == SLOT_NONE )
+    {
+      if ( ! quiet )
+        sim -> errorf( "Player %s has 'use_slot' action with invalid slot name '%s'.\n", player -> name(), slot_name.c_str() );
+      return;
+    }
+
+    for ( unsigned i = 0; i < player -> items.size(); ++i )
+    {
+      if ( player -> items[ i ].slot == slot )
+      {
+        item = &player -> items[ i ];
+        break;
+      }
+    }
+
+    if ( ! item )
+    {
+      if ( ! quiet )
+      sim -> errorf( "Player %s attempting 'use_slot' action for slot '%s' with no item equipped.\n", player -> name(), slot_name.c_str() );
+      return;
+    }
+
+    if ( ! item -> use.active() )
+    {
+      if ( !quiet )
+        sim -> errorf( "Player %s attempting 'use_slot' action with item '%s' which has no 'use=' encoding.\n", player -> name(), item -> name() );
+      item = 0;
+      return;
+    }
   }
 };
 
@@ -4716,6 +4795,7 @@ action_t* player_t::create_action( const std::string& name,
   if ( name == "start_moving"     ) return new     start_moving_t( this, options_str );
   if ( name == "stop_moving"      ) return new      stop_moving_t( this, options_str );
   if ( name == "use_item"         ) return new         use_item_t( this, options_str );
+  if ( name == "use_slot"         ) return new         use_slot_t( this, options_str );
   if ( name == "wait"             ) return new       wait_fixed_t( this, options_str );
   if ( name == "wait_until_ready" ) return new wait_until_ready_t( this, options_str );
   if ( name == "summon_companion" ) return new summon_companion_t( this, options_str );
