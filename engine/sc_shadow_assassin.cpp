@@ -934,6 +934,7 @@ struct voltaic_slash_t : public shadow_assassin_attack_t
     {
       background = true;
       dual = true;
+      base_execute_time = timespan_t::from_seconds( 0.1 ); // Add correct delta timing for second attack here.
     }
     else
     {
@@ -959,7 +960,7 @@ struct voltaic_slash_t : public shadow_assassin_attack_t
     if ( second_strike )
     {
       p -> buffs.voltaic_slash -> trigger( 1 );
-      second_strike -> execute();
+      second_strike -> schedule_execute();
     }
   }
 };
@@ -1179,6 +1180,7 @@ struct saber_strike_t : public shadow_assassin_attack_t
       dd.power_mod = .33;
       background = true;
       dual = true;
+      base_execute_time = timespan_t::from_seconds( 0.1 ); // Add correct delta timing for second attack here.
     }
     else
     {
@@ -1187,6 +1189,7 @@ struct saber_strike_t : public shadow_assassin_attack_t
 
       second_strike = new saber_strike_t( p, n, options_str, true );
       third_strike = new saber_strike_t( p, n, options_str, true );
+      third_strike -> base_execute_time += timespan_t::from_seconds( 0.1 ); // Add correct delta timing for second attack here.
 
       add_child( second_strike );
       add_child( third_strike );
@@ -1199,11 +1202,11 @@ struct saber_strike_t : public shadow_assassin_attack_t
 
     if ( second_strike )
     {
-      second_strike -> execute();
+      second_strike -> schedule_execute();
     }
     if ( third_strike )
     {
-      third_strike -> execute();
+      third_strike -> schedule_execute();
     }
   }
 };
@@ -1235,6 +1238,7 @@ struct thrash_t : public shadow_assassin_attack_t
     {
       background = true;
       dual = true;
+      base_execute_time = timespan_t::from_seconds( 0.1 ); // Add correct delta timing for second attack here.
     }
     else
     {
@@ -1256,7 +1260,7 @@ struct thrash_t : public shadow_assassin_attack_t
 
     if ( second_strike )
     {
-      second_strike -> execute();
+      second_strike -> schedule_execute();
     }
   }
 };
