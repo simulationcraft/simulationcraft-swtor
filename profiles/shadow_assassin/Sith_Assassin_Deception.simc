@@ -27,7 +27,7 @@ shirt=foo,stats=1303willpower_510crit_151power_1224forcepower_153surge
 chest=foo_stalker_vestments
 legs=foo_stalker_lower_robe
 hands=foo_stalker_gloves
-main_hand=lightsaber,weapon=sword2h_3.60speed_3053min_4580max
+main_hand=starshard,weapon=sword2h_3.60speed_367min_551max
 # Gear Summary
 # gear_willpower=1303
 # gear_crit_rating=510
@@ -35,4 +35,4 @@ main_hand=lightsaber,weapon=sword2h_3.60speed_3053min_4580max
 # gear_forcepower=1224
 # gear_surge_rating=153
 # Set Bonuses
-# main_hand=lightsaber,weapon=sword2h_3.60speed_3053min_4580max
+# main_hand=starshard,weapon=sword2h_3.60speed_367min_551max

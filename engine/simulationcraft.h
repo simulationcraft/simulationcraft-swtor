@@ -5211,7 +5211,7 @@ struct rng_t
 
   virtual int    type() const { return RNG_STANDARD; }
   virtual double real();
-  virtual int    roll( double chance );
+  virtual bool    roll( double chance );
   virtual double range( double min, double max );
   timespan_t range( timespan_t min, timespan_t max );
   virtual double gauss( double mean, double stddev );

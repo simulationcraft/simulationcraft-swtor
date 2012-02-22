@@ -860,43 +860,73 @@ struct apply_charge_t : public shadow_assassin_spell_t
 };
 
 // Low Slash =====================================
-// FIXME: AmountModiferPercent = -0.12
 
 struct low_slash_t : public shadow_assassin_attack_t
 {
-    low_slash_t( shadow_assassin_t* p,const std::string& n,const std::string& options_str) :
-        shadow_assassin_attack_t( n.c_str(),p,RESOURCE_FORCE, SCHOOL_PHYSICAL, TREE_NONE )
-    {
-        parse_options( 0, options_str );
+  low_slash_t( shadow_assassin_t* p,const std::string& n,const std::string& options_str) :
+    shadow_assassin_attack_t( n.c_str(),p,RESOURCE_FORCE, SCHOOL_PHYSICAL, TREE_NONE )
+  {
+    parse_options( 0, options_str );
 
-        dd.standardhealthpercentmin = dd.standardhealthpercentmax = .132;
-        dd.power_mod = 1.32;
+    dd.standardhealthpercentmin = dd.standardhealthpercentmax = .132;
+    dd.power_mod = 1.32;
 
-        base_cost = 30; range = 4.0; cooldown -> duration =
-                timespan_t::from_seconds( 15 );
-    }
+    weapon = &( player -> main_hand_weapon );
+    weapon_multiplier = -0.12;
+
+    base_cost = 30;
+    range = 4.0;
+    cooldown -> duration = timespan_t::from_seconds( 15 );
+  }
 };
 
 // Voltaic Slash | Clairvoyant Strike ===============
-// FIXME: AmountModiferPercent = -0.465
-// FIXME: Actually strike the target twice (Double proc chance etc.)
+
 // TODO : Each use of this ability increases the damage dealt by your next Shock by 15%
 //        for 10 seconds. Stacks up to 2 times.
 
 struct voltaic_slash_t : public shadow_assassin_attack_t
 {
-  voltaic_slash_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
-    shadow_assassin_attack_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
+  voltaic_slash_t* second_strike;
+
+  voltaic_slash_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str, bool is_second_strike = false) :
+    shadow_assassin_attack_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL ),
+    second_strike( 0 )
   {
     parse_options( 0, options_str );
 
-    dd.standardhealthpercentmin = dd.standardhealthpercentmax = 2 * .08;
-    dd.power_mod = 2 * 0.8;
+    dd.standardhealthpercentmin = dd.standardhealthpercentmax = .08;
+    dd.power_mod = .8;
 
-    base_cost = 25.0;
+    weapon = &( player -> main_hand_weapon );
+    weapon_multiplier = -0.465;
+
     range = 4.0;
 
-    cooldown -> duration = timespan_t::from_seconds( 15.0 );
+    if ( is_second_strike )
+    {
+      background = true;
+      dual = true;
+    }
+    else
+    {
+      base_cost = 25.0;
+
+      cooldown -> duration = timespan_t::from_seconds( 15.0 );
+
+      second_strike = new voltaic_slash_t( p, n, options_str, true );
+      add_child( second_strike );
+    }
+  }
+
+  virtual void execute()
+  {
+    shadow_assassin_attack_t::execute();
+
+    if ( second_strike )
+    {
+      second_strike -> execute();
+    }
   }
 };
 
@@ -904,28 +934,27 @@ struct voltaic_slash_t : public shadow_assassin_attack_t
 
 struct overcharge_saber_t : public shadow_assassin_spell_t
 {
-    overcharge_saber_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
-        shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
-    {
-        parse_options( 0, options_str );
-        cooldown -> duration = timespan_t::from_seconds( 120.0 );
-        harmful = false;
+  overcharge_saber_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
+    shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+  {
+    parse_options( 0, options_str );
+    cooldown -> duration = timespan_t::from_seconds( 120.0 );
+    harmful = false;
 
-        trigger_gcd = timespan_t::zero;
-    }
+    trigger_gcd = timespan_t::zero;
+  }
 
-    virtual void execute()
-    {
-        shadow_assassin_spell_t::execute();
+  virtual void execute()
+  {
+    shadow_assassin_spell_t::execute();
 
-        //shadow_assassin_t* p = player -> cast_shadow_assassin();
+    //shadow_assassin_t* p = player -> cast_shadow_assassin();
 
-        //p -> buffs.overcharge_saber -> trigger();
-    }
+    //p -> buffs.overcharge_saber -> trigger();
+  }
 };
 
 // Assassinate | Spinning Strike ==============================================
-//FIXME: AmountModifierPercent = 1.06
 
 struct assassinate_t : public shadow_assassin_attack_t
 {
@@ -937,6 +966,9 @@ struct assassinate_t : public shadow_assassin_attack_t
 
     dd.standardhealthpercentmin = dd.standardhealthpercentmax = .309;
     dd.power_mod = 3.09;
+
+    weapon = &( player -> main_hand_weapon );
+    weapon_multiplier = 1.06;
 
     base_cost = 25.0;
     range = 4.0;
@@ -954,8 +986,6 @@ struct assassinate_t : public shadow_assassin_attack_t
 
 // Lacerate | Whirling Blow ==================================
 
-// FIXME: AmountModifierPercent = -0.52
-
 struct lacerate_t : public shadow_assassin_attack_t
 {
 
@@ -966,6 +996,9 @@ struct lacerate_t : public shadow_assassin_attack_t
 
     dd.standardhealthpercentmin = dd.standardhealthpercentmax = .071;
     dd.power_mod = 0.71;
+
+    weapon = &( player -> main_hand_weapon );
+    weapon_multiplier = -0.52;
 
     base_cost = 40;
     range = 4.0;
@@ -1023,7 +1056,6 @@ struct force_cloak_t : public shadow_assassin_spell_t
 
 
 // Maul | Shadow Strike ===================
-// FIXME: AmountModifierPercent = 0.58
 
 struct maul_t : public shadow_assassin_attack_t
 {
@@ -1035,6 +1067,9 @@ struct maul_t : public shadow_assassin_attack_t
         dd.standardhealthpercentmin = .236;
         dd.standardhealthpercentmax = .236;
         dd.power_mod = 2.37;
+
+        weapon = &( player -> main_hand_weapon );
+        weapon_multiplier = 0.58;
 
         base_cost = 50.0;
         range = 4.0;
@@ -1080,48 +1115,103 @@ struct maul_t : public shadow_assassin_attack_t
 
 // Saber Strike ==================================
 
-//      base_dd_min      = 379.96; // StandardHealthPercentMin=>0.236
-//      base_dd_max      = 379.96; // StandardHealthPercentMax=>0.236
-//      dd.power_mod = 2.37  ; // PHYSICAL
-//      range = 4.0;
-//FIX ME: no idea how to find the dd min and max for this spell.
-//        Should be 3 distinct hits.
-
 struct saber_strike_t : public shadow_assassin_attack_t
 {
-  saber_strike_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
-    shadow_assassin_attack_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
+  saber_strike_t* second_strike;
+  saber_strike_t* third_strike;
+
+  saber_strike_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str, bool is_consequent_strike = false ) :
+    shadow_assassin_attack_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL ),
+    second_strike( 0 ), third_strike( 0 )
   {
     parse_options( 0, options_str );
 
-    dd.standardhealthpercentmin = dd.standardhealthpercentmax = .033 + .066 / 2;
-    dd.power_mod = 0;
-
     base_cost = 0;
     range = 4.0;
+
+    if ( is_consequent_strike )
+    {
+      weapon_multiplier = -.033;
+      dd.power_mod = .33;
+      background = true;
+      dual = true;
+    }
+    else
+    {
+      weapon_multiplier = -.066;
+      dd.power_mod = .66;
+
+      cooldown -> duration = timespan_t::from_seconds( 15.0 );
+
+      second_strike = new saber_strike_t( p, n, options_str, true );
+      third_strike = new saber_strike_t( p, n, options_str, true );
+
+      add_child( second_strike );
+      add_child( third_strike );
+    }
+  }
+
+  virtual void execute()
+  {
+    shadow_assassin_attack_t::execute();
+
+    if ( second_strike )
+    {
+      second_strike -> execute();
+    }
+    if ( third_strike )
+    {
+      third_strike -> execute();
+    }
   }
 };
 
 // Thrash | Double Strike ==================================
-//FIX ME: Split into two hits.
-//FIXME: AmountModifierPercent = -0.505
 
-struct thrash_t : public shadow_assassin_spell_t
+struct thrash_t : public shadow_assassin_attack_t
 {
-    thrash_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
-        shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
+  thrash_t* second_strike;
+
+  thrash_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str, bool is_second_strike = false ) :
+    shadow_assassin_attack_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL ),
+    second_strike( 0 )
+ {
+    parse_options( 0, options_str );
+
+    dd.standardhealthpercentmin = dd.standardhealthpercentmax = .074;
+    dd.power_mod = 0.74;
+
+    weapon = &( player -> main_hand_weapon );
+    weapon_multiplier = -0.505;
+
+    range = 4.0;
+
+    base_multiplier *= 1.0 + p -> talents.thrashing_blades -> rank() * 0.03;
+    crit_bonus += p -> talents.claws_of_decay -> rank() * 0.25;
+
+    if ( is_second_strike )
     {
-        parse_options( 0, options_str );
-
-        dd.standardhealthpercentmin = dd.standardhealthpercentmax = 2 * .074;
-        dd.power_mod = 2 * 0.74;
-
-        base_cost = 25 - p -> talents.torment -> rank() * 1.0;
-        range = 4.0;
-
-        base_multiplier *= 1.0 + p -> talents.thrashing_blades -> rank() * 0.03;
-        crit_bonus += p -> talents.claws_of_decay -> rank() * 0.25;
+      background = true;
+      dual = true;
     }
+    else
+    {
+      base_cost = 25 - p -> talents.torment -> rank() * 1.0;
+
+      second_strike = new thrash_t( p, n, options_str, true );
+      add_child( second_strike );
+    }
+  }
+
+  virtual void execute()
+  {
+    shadow_assassin_attack_t::execute();
+
+    if ( second_strike )
+    {
+      second_strike -> execute();
+    }
+  }
 };
 
 // Action Callbacks ( Charge procs )
@@ -1586,10 +1676,17 @@ void shadow_assassin_t::init_spells()
 {
   player_t::register_callbacks();
 
+  action_callback_t* lc = new lightning_charge_callback_t( this );
+  action_callback_t* sc = new surging_charge_callback_t( this );
+  action_callback_t* dc = new dark_charge_callback_t( this );
 
-  register_attack_callback( RESULT_HIT_MASK, new lightning_charge_callback_t( this ) );
-  register_attack_callback( RESULT_HIT_MASK, new surging_charge_callback_t( this ) );
-  register_attack_callback( RESULT_HIT_MASK, new dark_charge_callback_t( this ) );
+  register_attack_callback( RESULT_HIT_MASK, lc );
+  register_attack_callback( RESULT_HIT_MASK, sc );
+  register_attack_callback( RESULT_HIT_MASK, dc );
+
+  register_spell_callback( RESULT_HIT_MASK, lc );
+  register_spell_callback( RESULT_HIT_MASK, sc );
+  register_spell_callback( RESULT_HIT_MASK, dc );
 }
 
 // shadow_assassin_t::primary_resource ==================================================
