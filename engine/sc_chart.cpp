@@ -113,7 +113,6 @@ static const char* stat_color( int type )
   case STAT_CRIT_RATING:              return class_color( IA_OPERATIVE );
   case STAT_ALACRITY_RATING:          return class_color( SITH_SORCERER );
   case STAT_EXPERTISE_RATING:         return school_color( SCHOOL_BLEED );
-  case STAT_SPELL_PENETRATION:        return class_text_color( JEDI_SAGE );
   default:                            return 0;
   }
 }

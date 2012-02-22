@@ -240,7 +240,6 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
            "\t\t\t\t\t\t\t\t<td class=\"right small\">%.1f%%</td>\n"
            "\t\t\t\t\t\t\t\t<td class=\"right small\">%.1f%%</td>\n"
            "\t\t\t\t\t\t\t\t<td class=\"right small\">%.1f%%</td>\n"
-           "\t\t\t\t\t\t\t\t<td class=\"right small\">%.1f%%</td>\n"
            "\t\t\t\t\t\t\t\t<td class=\"right small\">%.0f</td>\n"
            "\t\t\t\t\t\t\t\t<td class=\"right small\">%.0f</td>\n"
            "\t\t\t\t\t\t\t\t<td class=\"right small\">%.0f</td>\n"
@@ -261,7 +260,6 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
            s -> direct_results[ RESULT_MISS ].pct +
            s -> direct_results[ RESULT_DODGE  ].pct +
            s -> direct_results[ RESULT_PARRY  ].pct,
-           s -> direct_results[ RESULT_GLANCE ].pct,
            s -> direct_results[ RESULT_BLOCK  ].pct,
            s -> num_ticks,
            s -> tick_results[ RESULT_HIT  ].actual_amount.mean,
@@ -527,20 +525,20 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
                 a -> base_crit,
                 a -> target ? a -> target -> name() : "",
                 a -> harmful ? "true" : "false" );
-      if ( a -> direct_power_mod || a -> base_dd_min || a -> base_dd_max )
+      if ( a -> dd.power_mod || a -> dd.base_min || a -> dd.base_max )
       {
         fprintf ( file,
                   "\t\t\t\t\t\t\t\t\t\t<h5>Direct Damage</h5>\n"
                   "\t\t\t\t\t\t\t\t\t\t<ul>\n"
                   "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">may_crit:</span>%s</li>\n"
-                  "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">direct_power_mod:</span>%.6f</li>\n"
-                  "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">base_dd_min:</span>%.2f</li>\n"
-                  "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">base_dd_max:</span>%.2f</li>\n"
+                  "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">dd.power_mod:</span>%.6f</li>\n"
+                  "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">dd.base_min:</span>%.2f</li>\n"
+                  "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">dd.base_max:</span>%.2f</li>\n"
                   "\t\t\t\t\t\t\t\t\t\t</ul>\n",
-                  a -> may_crit?"true":"false",
-                  a -> direct_power_mod,
-                  a -> base_dd_min,
-                  a -> base_dd_max );
+                  a -> may_crit ? "true" : "false",
+                  a -> dd.power_mod,
+                  a -> dd.base_min,
+                  a -> dd.base_max );
       }
       if ( a -> num_ticks )
       {
@@ -549,8 +547,9 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
                   "\t\t\t\t\t\t\t\t\t\t<ul>\n"
                   "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">tick_may_crit:</span>%s</li>\n"
                   "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">tick_zero:</span>%s</li>\n"
-                  "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">tick_power_mod:</span>%.6f</li>\n"
-                  "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">base_td:</span>%.2f</li>\n"
+                  "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">td.power_mod:</span>%.6f</li>\n"
+                  "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">td.base_min:</span>%.2f</li>\n"
+                  "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">td.base_max:</span>%.2f</li>\n"
                   "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">num_ticks:</span>%i</li>\n"
                   "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">base_tick_time:</span>%.2f</li>\n"
                   "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">hasted_ticks:</span>%s</li>\n"
@@ -558,8 +557,9 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
                   "\t\t\t\t\t\t\t\t\t\t</ul>\n",
                   a -> tick_may_crit?"true":"false",
                   a -> tick_zero?"true":"false",
-                  a -> tick_power_mod,
-                  a -> base_td,
+                  a -> td.power_mod,
+                  a -> td.base_min,
+                  a -> td.base_max,
                   a -> num_ticks,
                   a -> base_tick_time.total_seconds(),
                   a -> hasted_ticks?"true":"false",
@@ -838,17 +838,6 @@ static void print_html_stats ( FILE* file, player_t* a )
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Spell Penetration</th>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * a -> buffed_spell_penetration,
-             100 * a -> composite_spell_penetration(),
-             a -> stats.spell_penetration );
-
-    fprintf( file,
-             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
              "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Attack Power</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
@@ -943,7 +932,7 @@ static void print_html_stats ( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
              100 * a -> buffed_dodge,
-             100 * ( a -> composite_tank_dodge() - a -> diminished_dodge() ),
+             100 * a -> composite_tank_dodge(),
              a -> stats.dodge_rating );
 
     fprintf( file,
@@ -954,7 +943,7 @@ static void print_html_stats ( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
              100 * a -> buffed_parry,
-             100 * ( a -> composite_tank_parry() - a -> diminished_parry() ),
+             100 * a -> composite_tank_parry(),
              a -> stats.parry_rating );
 
     fprintf( file,
@@ -2127,7 +2116,6 @@ static void print_html_player_abilities( FILE* file, sim_t* sim, player_t* p, st
            "\t\t\t\t\t\t\t\t<th class=\"small\"><a href=\"#help-max\" class=\"help\">Max</a></th>\n"
            "\t\t\t\t\t\t\t\t<th class=\"small\"><a href=\"#help-crit-pct\" class=\"help\">Crit%%</a></th>\n"
            "\t\t\t\t\t\t\t\t<th class=\"small\"><a href=\"#help-miss-pct\" class=\"help\">Avoid%%</a></th>\n"
-           "\t\t\t\t\t\t\t\t<th class=\"small\"><a href=\"#help-glance-pct\" class=\"help\">G%%</a></th>\n"
            "\t\t\t\t\t\t\t\t<th class=\"small\"><a href=\"#help-block-pct\" class=\"help\">B%%</a></th>\n"
            "\t\t\t\t\t\t\t\t<th class=\"small\"><a href=\"#help-ticks\" class=\"help\">Ticks</a></th>\n"
            "\t\t\t\t\t\t\t\t<th class=\"small\"><a href=\"#help-ticks-hit\" class=\"help\">T-Hit</a></th>\n"

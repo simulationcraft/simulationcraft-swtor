@@ -499,11 +499,9 @@ const char* util_t::result_type_string( int type )
   {
   case RESULT_NONE:   return "none";
   case RESULT_MISS:   return "miss";
-  case RESULT_RESIST: return "resist";
   case RESULT_DODGE:  return "dodge";
   case RESULT_PARRY:  return "parry";
   case RESULT_BLOCK:  return "block";
-  case RESULT_GLANCE: return "glance";
   case RESULT_CRIT:   return "crit";
   case RESULT_CRIT_BLOCK: return "crit-block";
   case RESULT_HIT:    return "hit";
@@ -850,28 +848,6 @@ int util_t::parse_stim_type( const std::string& name )
   return STIM_NONE;
 }
 
-// util_t::food_type_string =================================================
-
-const char* util_t::food_type_string( int food )
-{
-  switch ( food )
-  {
-  case FOOD_NONE:                     return "none";
-  }
-  return "unknown";
-}
-
-// util_t::parse_food_type ==================================================
-
-int util_t::parse_food_type( const std::string& name )
-{
-  for ( int i=0; i < FOOD_MAX; i++ )
-    if ( util_t::str_compare_ci( name, util_t::food_type_string( i ) ) )
-      return i;
-
-  return FOOD_NONE;
-}
-
 // util_t::set_bonus_string =================================================
 
 const char* util_t::set_bonus_string( set_type type )
@@ -965,8 +941,6 @@ const char* util_t::stat_type_string( int stat )
   case STAT_AMMO:  return "ammo";
 
   case STAT_SPELL_POWER:       return "spell_power";
-  case STAT_SPELL_PENETRATION: return "spell_penetration";
-  case STAT_MP5:               return "mp5";
 
   case STAT_ATTACK_POWER:             return "attack_power";
   case STAT_EXPERTISE_RATING:         return "expertise_rating";
@@ -1021,8 +995,6 @@ const char* util_t::stat_type_abbrev( int stat )
   case STAT_AMMO:   return "Ammo";
 
   case STAT_SPELL_POWER:       return "SP";
-  case STAT_SPELL_PENETRATION: return "SPen";
-  case STAT_MP5:               return "MP5";
 
   case STAT_ATTACK_POWER:             return "AP";
   case STAT_EXPERTISE_RATING:         return "Exp";
@@ -1077,7 +1049,6 @@ const char* util_t::stat_type_wowhead( int stat )
   case STAT_AMMO:   return "ammo";
 
   case STAT_SPELL_POWER:       return "spellPower";
-  case STAT_SPELL_PENETRATION: return "spellPen";
 
   case STAT_ATTACK_POWER:             return "attackPower";
   case STAT_EXPERTISE_RATING:         return "expertiseRating";
@@ -1128,7 +1099,6 @@ stat_type util_t::parse_stat_type( const std::string& name )
   if ( name == "parryrtng"      ) return STAT_PARRY_RATING;
   if ( name == "resiliencertng" ) return STAT_RESILIENCE_RATING;
   if ( name == "splpwr"         ) return STAT_SPELL_POWER;
-  if ( name == "splpen"         ) return STAT_SPELL_PENETRATION;
   if ( util_t::str_compare_ci( name, "__wpds"   ) ) return STAT_WEAPON_DPS;
   if ( util_t::str_compare_ci( name, "__wspeed" ) ) return STAT_WEAPON_SPEED;
 

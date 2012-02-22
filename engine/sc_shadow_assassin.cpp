@@ -245,7 +245,6 @@ struct shadow_assassin_attack_t : public attack_t
         attack_t( n, p, r, s, t )
     {
         may_crit   = true;
-        may_glance = false;
     }
     
     virtual void impact( player_t* t, int impact_result, double travel_dmg )
@@ -279,13 +278,29 @@ struct shadow_assassin_attack_t : public attack_t
         if ( p -> buffs.exploitive_strikes -> up() )
             player_crit += p -> talents.exploitive_strikes -> rank() * 0.03;
         if ( p -> buffs.unearthed_knowledge -> up() )
-            player_dd_multiplier *= 1.10;
+            dd.player_multiplier *= 1.10;
     }
     
    virtual void execute()
    {
       attack_t::execute();
    }
+
+
+   virtual double armor() const
+   {
+     double a = attack_t::armor();
+
+     shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+     if ( p -> talents.charge_mastery -> rank() )
+     {
+       a *= 1.0 - p -> talents.charge_mastery -> rank() * 0.03;
+     }
+
+     return a;
+   }
+
 };
 
 struct shadow_assassin_spell_t : public spell_t
@@ -303,7 +318,7 @@ struct shadow_assassin_spell_t : public spell_t
         
         shadow_assassin_t* p = player -> cast_shadow_assassin();
         
-        if ( base_td > 0 && !channeled )
+        if ( td.base_min > 0 && !channeled )
             crit_bonus += p -> talents.creeping_death -> rank() * 0.1;
     }
     
@@ -313,7 +328,7 @@ struct shadow_assassin_spell_t : public spell_t
         
         shadow_assassin_t* p = player -> cast_shadow_assassin();
         
-        if ( base_dd_min > 0 )
+        if ( dd.base_min > 0 )
             p -> buffs.recklessness -> decrement();
     }
     
@@ -323,7 +338,7 @@ struct shadow_assassin_spell_t : public spell_t
         
         shadow_assassin_t* p = player -> cast_shadow_assassin();
         
-        if ( base_dd_min > 0 && p -> buffs.recklessness -> up() )
+        if ( dd.base_min > 0 && p -> buffs.recklessness -> up() )
             player_crit += 0.60;
     }
     
@@ -336,11 +351,11 @@ struct shadow_assassin_spell_t : public spell_t
         // This method is in target_debuff so that it is checked before every dot tick
         
         // Assume channeled spells don't profit
-        if ( p -> talents.deathmark -> rank() > 0 && base_td > 0 && !channeled )
+        if ( p -> talents.deathmark -> rank() > 0 && td.base_min > 0 && !channeled )
             if ( p -> buffs.deathmark -> up() )
-                target_td_multiplier *= 1.20;
+                td.target_multiplier *= 1.20;
     }
-    
+
     virtual void tick( dot_t* d )
     {
         spell_t::tick( d );
@@ -424,16 +439,16 @@ struct shock_t : public shadow_assassin_spell_t
         
         if ( is_chain_shock )
         {
-            dd_standardhealthpercentmin = .073;
-            dd_standardhealthpercentmax = .113;
-            direct_power_mod = 0.925;
-            background = true;
+          dd.standardhealthpercentmin = .073;
+          dd.standardhealthpercentmax = .113;
+          dd.power_mod = 0.925;
+          background = true;
         }
         else
         {
-            dd_standardhealthpercentmin = .165;
-            dd_standardhealthpercentmax = .205;
-            direct_power_mod = 1.85;
+            dd.standardhealthpercentmin = .165;
+            dd.standardhealthpercentmax = .205;
+            dd.power_mod = 1.85;
             base_cost = 45.0 - p -> talents.torment -> rank() * 3;
             
             cooldown -> duration = timespan_t::from_seconds( 6.0 );
@@ -448,17 +463,17 @@ struct shock_t : public shadow_assassin_spell_t
     
     virtual void execute()
     {
-        shadow_assassin_spell_t::execute();
+      shadow_assassin_spell_t::execute();
         
-        shadow_assassin_t* p = player -> cast_shadow_assassin();
+      shadow_assassin_t* p = player -> cast_shadow_assassin();
         
-        p -> buffs.unearthed_knowledge -> trigger();
+      p -> buffs.unearthed_knowledge -> trigger();
         
-        if ( chain_shock )
-        {
-            if ( p -> rngs.chain_shock -> roll( p -> talents.chain_shock -> rank() * 0.15 ) )
-                chain_shock -> execute();
-        }
+      if ( chain_shock )
+      {
+        if ( p -> rngs.chain_shock -> roll( p -> talents.chain_shock -> rank() * 0.15 ) )
+          chain_shock -> execute();
+      }
     }
 };
 
@@ -474,8 +489,8 @@ struct force_lightning_t : public shadow_assassin_spell_t
         
         parse_options( 0, options_str );
         
-        td_standardhealthpercentmin = td_standardhealthpercentmax = .079;
-        tick_power_mod = 0.79;
+        td.standardhealthpercentmin = td.standardhealthpercentmax = .079;
+        td.power_mod = 0.79;
         base_cost = 30.0;
         if ( player -> set_bonus.rakata_force_masters -> two_pc() )
             base_cost -= 2.0;
@@ -501,8 +516,8 @@ struct crushing_darkness_t : public shadow_assassin_spell_t
             static const int ranks[] = { 14, 19, 30, 41, 50 };
             range::copy( ranks, std::back_inserter( rank_level_list ) );
             
-            td_standardhealthpercentmin = td_standardhealthpercentmax = .0295;
-            tick_power_mod = 0.295;
+            td.standardhealthpercentmin = td.standardhealthpercentmax = .0295;
+            td.power_mod = 0.295;
             
             base_tick_time = timespan_t::from_seconds( 1.0 );
             num_ticks = 6;
@@ -523,15 +538,16 @@ struct crushing_darkness_t : public shadow_assassin_spell_t
         
         parse_options( 0, options_str );
         
-        dd_standardhealthpercentmin = .103;
-        dd_standardhealthpercentmax = .143;
-        direct_power_mod = 1.23;
+        dd.standardhealthpercentmin = .103;
+        dd.standardhealthpercentmax = .143;
+        dd.power_mod = 1.23;
         base_execute_time = timespan_t::from_seconds( 2.0 );
         base_cost = 40.0;
         range = 10.0;
         cooldown -> duration = timespan_t::from_seconds( 15.0 );
         
         add_child( dot_spell );
+
     }
     
     virtual void execute()
@@ -593,9 +609,9 @@ struct death_field_t : public shadow_assassin_spell_t
         
         parse_options( 0, options_str );
         
-        dd_standardhealthpercentmin = .167;
-        dd_standardhealthpercentmax = .207;
-        direct_power_mod = 1.87;
+        dd.standardhealthpercentmin = .167;
+        dd.standardhealthpercentmax = .207;
+        dd.power_mod = 1.87;
         
         crit_bonus += p -> talents.creeping_death -> rank() * 0.1 ;
         
@@ -630,8 +646,8 @@ struct creeping_terror_t : public shadow_assassin_spell_t
         
         parse_options( 0, options_str );
         
-        td_standardhealthpercentmin = td_standardhealthpercentmax = .031;
-        tick_power_mod = 0.311;
+        td.standardhealthpercentmin = td.standardhealthpercentmax = .031;
+        td.power_mod = 0.311;
         
         base_tick_time = timespan_t::from_seconds( 3.0 );
         num_ticks = 6;
@@ -688,8 +704,8 @@ struct discharge_t : public shadow_assassin_spell_t
       lightning_discharge_t(shadow_assassin_t* p, const std::string& n ) :
           shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_ENERGY)
       {
-          td_standardhealthpercentmin = td_standardhealthpercentmax = .038;
-          tick_power_mod = 0.38;
+          td.standardhealthpercentmin = td.standardhealthpercentmax = .038;
+          td.power_mod = 0.38;
 
           base_tick_time = timespan_t::from_seconds( 3.0 );
           num_ticks = 6;
@@ -717,9 +733,9 @@ struct discharge_t : public shadow_assassin_spell_t
       surging_discharge_t(shadow_assassin_t* p, const std::string& n ) :
           shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL)
       {
-          dd_standardhealthpercentmin = 0.154;
-          dd_standardhealthpercentmax = 0.194;
-          direct_power_mod = 1.74;
+          dd.standardhealthpercentmin = .154;
+          dd.standardhealthpercentmax = .194;
+          dd.power_mod = 1.74;
 
           base_tick_time = timespan_t::from_seconds( 3.0 );
 
@@ -785,6 +801,9 @@ struct discharge_t : public shadow_assassin_spell_t
     shadow_assassin_spell_t::execute();
 
     shadow_assassin_spell_t* charge_action = choose_charge();
+
+    if ( ! charge_action )
+      return;
 
     charge_action -> execute();
   }
@@ -855,8 +874,8 @@ struct low_slash_t : public shadow_assassin_attack_t
     {
         parse_options( 0, options_str );
         
-        dd_standardhealthpercentmin = dd_standardhealthpercentmax = .132;
-        direct_power_mod = 1.32;
+        dd.standardhealthpercentmin = dd.standardhealthpercentmax = .132;
+        dd.power_mod = 1.32;
         
         base_cost = 30; range = 4.0; cooldown -> duration =
                 timespan_t::from_seconds( 15 );
@@ -871,18 +890,19 @@ struct low_slash_t : public shadow_assassin_attack_t
 
 struct voltaic_slash_t : public shadow_assassin_attack_t
 {
-    voltaic_slash_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
-        shadow_assassin_attack_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
-    {
-        parse_options( 0, options_str );
-        dd_standardhealthpercentmin = dd_standardhealthpercentmax = 2 * .08;
-        direct_power_mod = 2 * 0.8;
-        base_cost = 25.0;
-        range = 4.0;
-        cooldown -> duration = timespan_t::from_seconds( 15.0 );
-        
-        base_multiplier *= 1.0 + p -> talents.thrashing_blades -> rank() * 0.03;
-    }
+  voltaic_slash_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
+    shadow_assassin_attack_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
+  {
+    parse_options( 0, options_str );
+
+    dd.standardhealthpercentmin = dd.standardhealthpercentmax = 2 * .08;
+    dd.power_mod = 2 * 0.8;
+
+    base_cost = 25.0;
+    range = 4.0;
+
+    cooldown -> duration = timespan_t::from_seconds( 15.0 );
+  }
 };
 
 // Overcharge Saber | Battle Readiness ================
@@ -914,26 +934,27 @@ struct overcharge_saber_t : public shadow_assassin_spell_t
 
 struct assassinate_t : public shadow_assassin_attack_t
 {
-    assassinate_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
-        shadow_assassin_attack_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
-    {
-        parse_options( 0, options_str );
-        
-        dd_standardhealthpercentmin = dd_standardhealthpercentmax = .309;
-        direct_power_mod = 3.09;
-        
-        base_cost = 25.0;
-        range = 4.0;
-        cooldown -> duration = timespan_t::from_seconds( 6.0 );
-    }
-    
-    virtual bool ready()
-    {
-        if ( target -> health_percentage() >= 30 )
-            return false;
-        
-        return shadow_assassin_attack_t::ready();
-    }
+
+  assassinate_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
+    shadow_assassin_attack_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
+  {
+    parse_options( 0, options_str );
+
+    dd.standardhealthpercentmin = dd.standardhealthpercentmax = .309;
+    dd.power_mod = 3.09;
+
+    base_cost = 25.0;
+    range = 4.0;
+    cooldown -> duration = timespan_t::from_seconds( 6.0 );
+  }
+
+  virtual bool ready()
+  {
+    if ( target -> health_percentage() >= 30 )
+        return false;
+
+    return shadow_assassin_attack_t::ready();
+  }
 };
 
 // Lacerate | Whirling Blow ==================================
@@ -942,18 +963,20 @@ struct assassinate_t : public shadow_assassin_attack_t
 
 struct lacerate_t : public shadow_assassin_attack_t
 {
-    lacerate_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
-        shadow_assassin_attack_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
-    {
-        parse_options( 0, options_str );
-        
-        dd_standardhealthpercentmin = dd_standardhealthpercentmax = .071;
-        direct_power_mod = 0.71;
-        base_cost = 40;
-        range = 4.0;
-        
-        base_multiplier *= 1.0 + p -> talents.thrashing_blades -> rank() * 0.03;
-    }
+
+  lacerate_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
+    shadow_assassin_attack_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
+  {
+    parse_options( 0, options_str );
+
+    dd.standardhealthpercentmin = dd.standardhealthpercentmax = .071;
+    dd.power_mod = 0.71;
+
+    base_cost = 40;
+    range = 4.0;
+
+    base_multiplier *= 1.0 + p -> talents.thrashing_blades -> rank() * 0.03;
+  }
 };
 
 // Blackout ================================
@@ -983,24 +1006,26 @@ struct blackout_t : public shadow_assassin_spell_t
 
 struct force_cloak_t : public shadow_assassin_spell_t
 {
-    force_cloak_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
-        shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
-    {
-        parse_options( 0, options_str );
-        cooldown -> duration = timespan_t::from_seconds( 180.0 );
-        harmful = false;
-        trigger_gcd = timespan_t::zero;
-    }
-    
-    virtual void execute()
-    {
-        shadow_assassin_spell_t::execute();
-        
-        shadow_assassin_t* p = player -> cast_shadow_assassin();
-        
-        p -> buffs.dark_embrace -> trigger( 1 );
-    }
+  force_cloak_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
+    shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+  {
+    parse_options( 0, options_str );
+    cooldown -> duration = timespan_t::from_seconds( 180.0 );
+    harmful = false;
+
+    trigger_gcd = timespan_t::zero;
+  }
+
+  virtual void execute()
+  {
+    shadow_assassin_spell_t::execute();
+
+    shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+    p -> buffs.dark_embrace -> trigger( 1 );
+  }
 };
+
 
 // Maul | Shadow Strike ===================
 // FIXME: AmountModifierPercent = 0.58
@@ -1012,9 +1037,9 @@ struct maul_t : public shadow_assassin_attack_t
     {
         parse_options( 0, options_str );
         
-        dd_standardhealthpercentmin = .236;
-        dd_standardhealthpercentmax = .236;
-        direct_power_mod = 2.37;
+        dd.standardhealthpercentmin = .236;
+        dd.standardhealthpercentmax = .236;
+        dd.power_mod = 2.37;
         
         base_cost = 50.0;
         range = 4.0;
@@ -1022,17 +1047,39 @@ struct maul_t : public shadow_assassin_attack_t
     
     virtual void execute()
     {
-        shadow_assassin_t* p = player -> cast_shadow_assassin();
+      shadow_assassin_attack_t::execute();
         
-        if ( p -> buffs.exploit_weakness -> up() )
-        {
-            base_cost = 25.0;
-            player_penetration += 0.5;
-        }
+      shadow_assassin_t* p = player -> cast_shadow_assassin();
         
-        shadow_assassin_attack_t::execute();
-        
-        p -> buffs.exploit_weakness -> expire();
+      p -> buffs.exploit_weakness -> expire();
+    }
+
+    virtual double cost() const
+    {
+      double c = shadow_assassin_attack_t::cost();
+
+      shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+      if ( p -> buffs.exploit_weakness -> up() )
+      {
+        c *= 0.5;
+      }
+
+      return c;
+    }
+
+    virtual double armor() const
+    {
+      double a = shadow_assassin_attack_t::armor();
+
+      shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+      if ( p -> buffs.exploit_weakness -> up() )
+      {
+        a *= 0.5;
+      }
+
+      return a;
     }
 };
 
@@ -1040,24 +1087,24 @@ struct maul_t : public shadow_assassin_attack_t
 
 //      base_dd_min      = 379.96; // StandardHealthPercentMin=>0.236
 //      base_dd_max      = 379.96; // StandardHealthPercentMax=>0.236
-//      direct_power_mod = 2.37  ; // PHYSICAL
+//      dd.power_mod = 2.37  ; // PHYSICAL
 //      range = 4.0;
 //FIX ME: no idea how to find the dd min and max for this spell.
 //        Should be 3 distinct hits.
 
 struct saber_strike_t : public shadow_assassin_attack_t
 {
-    saber_strike_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
-        shadow_assassin_attack_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
-    {
-        parse_options( 0, options_str );
-        
-        dd_standardhealthpercentmin = dd_standardhealthpercentmax = .033 + .066 / 2;
-        direct_power_mod = 0;
-        
-        base_cost = 0;
-        range = 4.0;
-    }
+  saber_strike_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
+    shadow_assassin_attack_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
+  {
+    parse_options( 0, options_str );
+
+    dd.standardhealthpercentmin = dd.standardhealthpercentmax = .033 + .066 / 2;
+    dd.power_mod = 0;
+
+    base_cost = 0;
+    range = 4.0;
+  }
 };
 
 // Thrash | Double Strike ==================================
@@ -1071,8 +1118,8 @@ struct thrash_t : public shadow_assassin_spell_t
     {
         parse_options( 0, options_str );
         
-        dd_standardhealthpercentmin = dd_standardhealthpercentmax = 2 * .074;
-        direct_power_mod = 2 * 0.74;
+        dd.standardhealthpercentmin = dd.standardhealthpercentmax = 2 * .074;
+        dd.power_mod = 2 * 0.74;
         
         base_cost = 25 - p -> talents.torment -> rank() * 1.0;
         range = 4.0;
@@ -1094,8 +1141,9 @@ struct lightning_charge_callback_t : public action_callback_t
     lightning_charge_spell_t(shadow_assassin_t* p, const std::string& n ) :
       shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
     {
-      dd_standardhealthpercentmin = dd_standardhealthpercentmax = .017;
-      direct_power_mod = 0.165;
+
+      dd.standardhealthpercentmin = dd.standardhealthpercentmax = .017;
+      dd.power_mod = 0.165;
 
       proc = true;
       background = true;
@@ -1144,14 +1192,12 @@ struct surging_charge_callback_t : public action_callback_t
       surging_charge_spell_t( shadow_assassin_t* p, const std::string& n ) :
           shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
       {
-          dd_standardhealthpercentmin = dd_standardhealthpercentmax = .034;
-          direct_power_mod = 0.344;
+          dd.standardhealthpercentmin = dd.standardhealthpercentmax = .034;
+          dd.power_mod = 0.344;
 
           proc = true;
           background = true;
           cooldown -> duration = timespan_t::from_seconds( 1.5 );
-
-          player_penetration += p -> talents.charge_mastery -> rank() * 0.03;
       }
   };
 

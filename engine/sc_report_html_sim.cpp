@@ -752,18 +752,10 @@ static void print_html_help_boxes( FILE*  file, sim_t* sim )
            "\t\t<div id=\"help-error\">\n"
            "\t\t\t<div class=\"help-box\">\n"
            "\t\t\t\t<h3>Error</h3>\n"
-           "\t\t\t\t<p>Estimator for the %.2f%% confidence intervall.</p>\n"
+           "\t\t\t\t<p>Estimator for the %.2f%% confidence interval.</p>\n"
            "\t\t\t</div>\n"
            "\t\t</div>\n",
            sim -> confidence * 100.0 );
-
-  fprintf( file,
-           "\t\t<div id=\"help-glance-pct\">\n"
-           "\t\t\t<div class=\"help-box\">\n"
-           "\t\t\t\t<h3>G%%</h3>\n"
-           "\t\t\t\t<p>Percentage of executes that resulted in glancing blows.</p>\n"
-           "\t\t\t</div>\n"
-           "\t\t</div>\n" );
 
   fprintf( file,
            "\t\t<div id=\"help-block-pct\">\n"

@@ -354,8 +354,6 @@ void print_xml_player_stats( xml_writer_t & writer, player_t * p )
                               100 * p -> composite_spell_hit(), p -> stats.hit_rating, 100 * p -> buffed_spell_hit );
   print_xml_player_attribute( writer, "spellcrit",
                               100 * p -> composite_spell_crit(), p -> stats.crit_rating, 100 * p -> buffed_spell_crit );
-  print_xml_player_attribute( writer, "spellpenetration",
-                              100 * p -> composite_spell_penetration(), p -> stats.spell_penetration, 100 * p -> buffed_spell_penetration );
   print_xml_player_attribute( writer, "spellalacrity",
                               100 * ( 1 / p -> spell_alacrity - 1 ), p -> stats.alacrity_rating, 100 * ( 1 / p -> buffed_spell_alacrity - 1 ) );
   print_xml_player_attribute( writer, "attackpower",
@@ -373,11 +371,11 @@ void print_xml_player_stats( xml_writer_t & writer, player_t * p )
   print_xml_player_attribute( writer, "armor",
                               p -> composite_armor(), ( p -> stats.armor + p -> stats.bonus_armor ), p -> buffed_armor );
   print_xml_player_attribute( writer, "miss",
-                              100 * ( p -> composite_tank_miss( SCHOOL_PHYSICAL ) ), 0, 100 * p -> buffed_miss );
+                              100 * p -> composite_tank_miss( SCHOOL_PHYSICAL ), 0, 100 * p -> buffed_miss );
   print_xml_player_attribute( writer, "dodge",
-                              100 * ( p -> composite_tank_dodge() - p -> diminished_dodge() ), p -> stats.dodge_rating, 100 * p -> buffed_dodge );
+                              100 * p -> composite_tank_dodge(), p -> stats.dodge_rating, 100 * p -> buffed_dodge );
   print_xml_player_attribute( writer, "parry",
-                              100 * ( p -> composite_tank_parry() - p -> diminished_parry() ), p -> stats.parry_rating, 100 * p -> buffed_parry );
+                              100 * p -> composite_tank_parry(), p -> stats.parry_rating, 100 * p -> buffed_parry );
   print_xml_player_attribute( writer, "block",
                               100 * p -> composite_tank_block(), p -> stats.block_rating, 100 * p -> buffed_block );
   print_xml_player_attribute( writer, "tank_crit",
@@ -1159,14 +1157,14 @@ void print_xml_player_action_definitions( xml_writer_t & writer, player_t * p )
           writer.print_tag( "target", a -> target -> name() );
         }
 
-        if ( a -> direct_power_mod || a -> base_dd_min || a -> base_dd_max )
+        if ( a -> dd.power_mod || a -> dd.base_min || a -> dd.base_max )
         {
           writer.begin_tag( "direct_damage" );
           writer.print_tag( "may_crit", a -> may_crit ? "true" : "false" );
-          writer.print_tag( "direct_power_mod", util_t::to_string( a -> direct_power_mod ) );
+          writer.print_tag( "power_mod", util_t::to_string( a -> dd.power_mod ) );
           writer.begin_tag( "base" );
-          writer.print_attribute( "min", util_t::to_string( a -> base_dd_min ) );
-          writer.print_attribute( "max", util_t::to_string( a -> base_dd_max ) );
+          writer.print_attribute( "min", util_t::to_string( a -> dd.base_min ) );
+          writer.print_attribute( "max", util_t::to_string( a -> dd.base_max ) );
           writer.end_tag(); // </base>
           writer.end_tag(); // </direct_damage>
         }
@@ -1176,8 +1174,11 @@ void print_xml_player_action_definitions( xml_writer_t & writer, player_t * p )
           writer.begin_tag( "damage_over_time" );
           writer.print_tag( "tick_may_crit", a -> tick_may_crit ? "true" : "false" );
           writer.print_tag( "tick_zero", a -> tick_zero ? "true" : "false" );
-          writer.print_tag( "tick_power_mod", util_t::to_string( a -> tick_power_mod ) );
-          writer.print_tag( "base", util_t::to_string( a -> base_td ) );
+          writer.print_tag( "power_mod", util_t::to_string( a -> td.power_mod ) );
+          writer.begin_tag( "base" );
+          writer.print_attribute( "min", util_t::to_string( a -> td.base_min ) );
+          writer.print_attribute( "max", util_t::to_string( a -> td.base_max ) );
+          writer.end_tag(); // </base>
           writer.print_tag( "num_ticks", util_t::to_string( a -> num_ticks ) );
           writer.print_tag( "base_tick_time", util_t::to_string( a -> base_tick_time.total_seconds() ) );
           writer.print_tag( "hasted_ticks", util_t::to_string( a -> hasted_ticks ) );

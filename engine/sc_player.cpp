@@ -398,9 +398,7 @@ player_t::player_t( sim_t*             s,
   spell_alacrity( 1.0 ),  buffed_spell_alacrity( 1.0 ),
   base_spell_hit( 0 ), spell_hit( 0 ), buffed_spell_hit( 0 ),
   base_spell_crit( 0 ), spell_crit( 0 ), buffed_spell_crit( 0 ),
-  base_spell_penetration( 0 ), initial_spell_penetration( 0 ), spell_penetration( 0 ), buffed_spell_penetration( 0 ),
   spell_power_multiplier( 1.0 ),  initial_spell_power_multiplier( 1.0 ),
-  mp5_per_intellect( 0 ),
   mana_regen_base( 0 ), mana_regen_while_casting( 0 ),
   base_energy_regen_per_second( 0 ), base_ammo_regen_per_second( 0 ), base_force_regen_per_second( 0 ),
   last_cast( timespan_t::zero ),
@@ -427,18 +425,13 @@ player_t::player_t( sim_t*             s,
   armor_multiplier( 1.0 ), initial_armor_multiplier( 1.0 ),
   dodge_per_agility( 0 ), initial_dodge_per_agility( 0 ),
   parry_rating_per_strength( 0 ), initial_parry_rating_per_strength( 0 ),
-  diminished_dodge_capi( 0 ), diminished_parry_capi( 0 ), diminished_kfactor( 0 ),
   armor_coeff( 0 ),
-  half_resistance_rating( 0 ),
   // Attacks
   main_hand_attack( 0 ), off_hand_attack( 0 ), ranged_attack( 0 ),
   // Resources
   health_per_endurance( 0 ),
   // Consumables
-  elixir_guardian( ELIXIR_NONE ),
-  elixir_battle( ELIXIR_NONE ),
   stim( STIM_NONE ),
-  food( FOOD_NONE ),
   // Events
   executing( 0 ), channeling( 0 ), readying( 0 ), off_gcd( 0 ), in_combat( false ), action_queued( false ),
   cast_delay_reaction( timespan_t::zero ), cast_delay_occurred( timespan_t::zero ),
@@ -492,8 +485,6 @@ player_t::player_t( sim_t*             s,
   race_str = util_t::race_type_string( race );
 
   if ( is_pet() ) skill = 1.0;
-
-  range::fill( spell_resistance, 0 );
 
   range::fill( attribute, 0 );
   range::fill( attribute_base, 0 );
@@ -990,8 +981,6 @@ void player_t::init_spell()
   if ( sim -> debug ) log_t::output( sim, "Initializing spells for player (%s)", name() );
 
   initial_stats.spell_power       = gear.spell_power       + enchant.spell_power       + ( is_pet() ? 0 : sim -> enchant.spell_power );
-  initial_stats.spell_penetration = gear.spell_penetration + enchant.spell_penetration + ( is_pet() ? 0 : sim -> enchant.spell_penetration );
-  initial_stats.mp5               = gear.mp5               + enchant.mp5               + ( is_pet() ? 0 : sim -> enchant.mp5 );
   initial_stats.power             = gear.power             + enchant.power             + ( is_pet() ? 0 : sim -> enchant.power );
   initial_stats.force_power       = gear.force_power       + enchant.force_power       + ( is_pet() ? 0 : sim -> enchant.force_power );
 
@@ -1000,23 +989,8 @@ void player_t::init_spell()
 
   initial_spell_power[ SCHOOL_MAX ] = base_spell_power + initial_stats.spell_power;
 
-  initial_spell_penetration = base_spell_penetration + initial_stats.spell_penetration;
-
   if ( type != ENEMY && type != ENEMY_ADD )
     mana_regen_base = dbc.regen_spirit( type, level );
-
-  if ( level >= 61 )
-  {
-    half_resistance_rating = 150.0 + ( level - 60 ) * ( level - 67.5 );
-  }
-  else if ( level >= 21 )
-  {
-    half_resistance_rating = 50.0 + ( level - 20 ) * 2.5;
-  }
-  else
-  {
-    half_resistance_rating = 50.0;
-  }
 }
 
 // player_t::init_attack ====================================================
@@ -1505,17 +1479,12 @@ void player_t::init_gains()
   gains.force_regen            = get_gain( "force_regen" );
   gains.energy_regen           = get_gain( "energy_regen" );
   gains.ammo_regen             = get_gain( "ammo_regen" );
-  gains.mana_potion            = get_gain( "mana_potion" );
-  gains.mp5_regen              = get_gain( "mp5_regen" );
-  gains.restore_mana           = get_gain( "restore_mana" );
-  gains.spirit_intellect_regen = get_gain( "spirit_intellect_regen" );
 }
 
 // player_t::init_procs =====================================================
 
 void player_t::init_procs()
-{
-}
+{}
 
 // player_t::init_uptimes ===================================================
 
@@ -1603,8 +1572,6 @@ void player_t::init_scaling()
     scales_with[ STAT_AMMO   ] = 0;
 
     scales_with[ STAT_SPELL_POWER       ] = 0;
-    scales_with[ STAT_SPELL_PENETRATION ] = 0;
-    scales_with[ STAT_MP5               ] = 0;
 
     scales_with[ STAT_ATTACK_POWER             ] = 0;
     scales_with[ STAT_EXPERTISE_RATING         ] = 0;
@@ -1646,7 +1613,6 @@ void player_t::init_scaling()
       case STAT_PRESENCE:  attribute_initial[ ATTR_PRESENCE  ] += v; break;
 
       case STAT_SPELL_POWER:       initial_spell_power[ SCHOOL_MAX ] += v; break;
-      case STAT_SPELL_PENETRATION: initial_spell_penetration         += v; break;
       case STAT_POWER:             initial_power                     += v; break;
       case STAT_FORCE_POWER:       initial_force_power               += v; break;
 
@@ -1875,15 +1841,6 @@ double player_t::composite_armor_multiplier() const
   return a;
 }
 
-// player_t::composite_spell_resistance =====================================
-
-double player_t::composite_spell_resistance( const school_type school ) const
-{
-  double a = spell_resistance[ school ];
-
-  return a;
-}
-
 // player_t::composite_tank_miss ============================================
 
 double player_t::composite_tank_miss( const school_type /* school */ ) const
@@ -1948,48 +1905,6 @@ double player_t::composite_tank_crit_block() const
 double player_t::composite_tank_crit( const school_type /* school */ ) const
 {
   return 0;
-}
-
-// player_t::diminished_dodge ===============================================
-
-double player_t::diminished_dodge() const
-{
-  if ( diminished_kfactor == 0 || diminished_dodge_capi == 0 ) return 0;
-
-  // Only contributions from gear are subject to diminishing returns;
-
-  double d = stats.dodge_rating / rating.dodge;
-
-  d += dodge_per_agility * stats.attribute[ ATTR_AIM ] * composite_attribute_multiplier( ATTR_AIM );
-
-  if ( d == 0 ) return 0;
-
-  double diminished_d = 0.01 / ( diminished_dodge_capi + diminished_kfactor / d );
-
-  double loss = d - diminished_d;
-
-  return loss > 0 ? loss : 0;
-}
-
-// player_t::diminished_parry ===============================================
-
-double player_t::diminished_parry() const
-{
-  if ( diminished_kfactor == 0 || diminished_parry_capi == 0 ) return 0;
-
-  // Only contributions from gear are subject to diminishing returns;
-
-  double p = stats.parry_rating / rating.parry;
-
-  p += parry_rating_per_strength * ( strength() - attribute_base[ ATTR_STRENGTH ] ) / rating.parry;
-
-  if ( p == 0 ) return 0;
-
-  double diminished_p = 0.01 / ( diminished_parry_capi + diminished_kfactor / p );
-
-  double loss = p - diminished_p;
-
-  return loss > 0 ? loss : 0;
 }
 
 // player_t::composite_spell_alacrity ==========================================
@@ -2442,8 +2357,6 @@ void player_t::reset()
     resource_reduction[ i ] = initial_resource_reduction[ i ];
   }
 
-  spell_penetration = initial_spell_penetration;
-
   attack_power       = initial_attack_power;
   attack_expertise   = initial_attack_expertise;
 
@@ -2496,11 +2409,7 @@ void player_t::reset()
   ranged_weapon.buff_value = 0;
   ranged_weapon.bonus_dmg  = 0;
 
-  elixir_battle   = ELIXIR_NONE;
-  elixir_guardian = ELIXIR_NONE;
   stim            = STIM_NONE;
-  food            = FOOD_NONE;
-
   for ( int i=0; i < RESOURCE_MAX; i++ )
   {
     action_callback_t::reset( resource_gain_callbacks[ i ] );
@@ -3132,7 +3041,6 @@ void player_t::stat_gain( int       stat,
   case STAT_MAX_AMMO:   resource_max[ RESOURCE_AMMO   ] += amount; resource_gain( RESOURCE_AMMO,   amount, gain, action ); break;
 
   case STAT_SPELL_POWER:       stats.spell_power       += amount; temporary.spell_power += temp_value * amount; spell_power[ SCHOOL_MAX ] += amount; break;
-  case STAT_SPELL_PENETRATION: stats.spell_penetration += amount; spell_penetration         += amount; break;
   case STAT_POWER:             stats.power             += amount; power                     += amount; break;
   case STAT_FORCE_POWER:       stats.force_power       += amount; force_power               += amount; break;
 
@@ -3224,7 +3132,6 @@ void player_t::stat_loss( int       stat,
   break;
 
   case STAT_SPELL_POWER:       stats.spell_power       -= amount; temporary.spell_power -= temp_value * amount; spell_power[ SCHOOL_MAX ] -= amount; break;
-  case STAT_SPELL_PENETRATION: stats.spell_penetration -= amount; spell_penetration         -= amount; break;
   case STAT_POWER:             stats.power             -= amount; power                     -= amount; break;
   case STAT_FORCE_POWER:       stats.force_power       -= amount; force_power               -= amount; break;
 
@@ -4273,6 +4180,7 @@ struct restart_sequence_t : public action_t
   }
 };
 
+#if 0
 // Restore Mana Action ======================================================
 
 struct restore_mana_t : public action_t
@@ -4305,6 +4213,7 @@ struct restore_mana_t : public action_t
     }
   }
 };
+#endif
 
 // Snapshot Stats ===========================================================
 
@@ -4342,7 +4251,6 @@ struct snapshot_stats_t : public action_t
     p -> buffed_spell_power       = floor( p -> composite_spell_power( SCHOOL_MAX ) * p -> composite_spell_power_multiplier() );
     p -> buffed_spell_hit         = p -> composite_spell_hit();
     p -> buffed_spell_crit        = p -> composite_spell_crit();
-    p -> buffed_spell_penetration = p -> composite_spell_penetration();
     p -> buffed_power             = p -> composite_power();
     p -> buffed_force_power       = p -> composite_force_power();
     p -> buffed_surge             = p -> surge_bonus;
@@ -4354,8 +4262,8 @@ struct snapshot_stats_t : public action_t
 
     p -> buffed_armor       = p -> composite_armor();
     p -> buffed_miss        = p -> composite_tank_miss( SCHOOL_PHYSICAL );
-    p -> buffed_dodge       = p -> composite_tank_dodge() - p -> diminished_dodge();
-    p -> buffed_parry       = p -> composite_tank_parry() - p -> diminished_parry();
+    p -> buffed_dodge       = p -> composite_tank_dodge();
+    p -> buffed_parry       = p -> composite_tank_parry();
     p -> buffed_block       = p -> composite_tank_block();
     p -> buffed_crit        = p -> composite_tank_crit( SCHOOL_PHYSICAL );
 
@@ -4475,9 +4383,9 @@ wait_for_cooldown_t::wait_for_cooldown_t( player_t* player, const char* cd_name 
 timespan_t wait_for_cooldown_t::execute_time() const
 { return wait_cd -> remains(); }
 
-// Use Item Action ==========================================================
+// Use Item Actions =========================================================
 
-struct use_item_t : public action_t
+struct base_use_item_t : public action_t
 {
   item_t* item;
   spell_t* discharge;
@@ -4485,43 +4393,31 @@ struct use_item_t : public action_t
   stat_buff_t* buff;
   std::string use_name;
 
-  use_item_t( player_t* player, const std::string& options_str ) :
+  base_use_item_t( player_t* player ) :
     action_t( ACTION_OTHER, "use_item", player ),
-    item( 0 ), discharge( 0 ), trigger( 0 ), buff( 0 )
+    item(), discharge(), trigger(), buff()
+  {}
+
+  virtual void init()
   {
-    std::string item_name;
-    option_t options[] =
-    {
-      { "name", OPT_STRING, &item_name },
-      { NULL, OPT_UNKNOWN, NULL }
-    };
-    parse_options( options, options_str );
-
-    if ( item_name.empty() )
-    {
-      sim -> errorf( "Player %s has 'use_item' action with no 'name=' option.\n", player -> name() );
-      return;
-    }
-
-    item = player -> find_item( item_name );
     if ( ! item )
-    {
-      sim -> errorf( "Player %s attempting 'use_item' action with item '%s' which is not currently equipped.\n", player -> name(), item_name.c_str() );
       return;
-    }
+
     if ( ! item -> use.active() )
     {
-      sim -> errorf( "Player %s attempting 'use_item' action with item '%s' which has no 'use=' encoding.\n", player -> name(), item_name.c_str() );
+      sim -> errorf( "Player %s attempting 'use_item' action with item '%s' which has no 'use=' encoding.\n", player -> name(), item->name() );
       item = 0;
       return;
     }
 
-    name_str = name_str + "_" + item_name;
-    stats = player ->  get_stats( name_str, this );
+    name_str += '_';
+    name_str += item -> name();
+
+    stats = player -> get_stats( name_str, this );
 
     item_t::special_effect_t& e = item -> use;
 
-    use_name = e.name_str.empty() ? item_name : e.name_str;
+    use_name = e.name_str.empty() ? item -> name() : e.name_str;
 
     if ( e.trigger_type )
     {
@@ -4554,8 +4450,7 @@ struct use_item_t : public action_t
           spell_t( n, p, RESOURCE_NONE, s )
         {
           trigger_gcd = timespan_t::zero;
-          base_dd_min = a;
-          base_dd_max = a;
+          dd.base_min = dd.base_max = a;
           may_crit    = true;
           background  = true;
           base_spell_power_multiplier = 0;
@@ -4574,9 +4469,7 @@ struct use_item_t : public action_t
     }
     else assert( false );
 
-    std::string cooldown_name = use_name;
-    cooldown_name += "_";
-    cooldown_name += item -> slot_name();
+    std::string cooldown_name = use_name + '_' + item -> slot_name();
 
     cooldown = player -> get_cooldown( cooldown_name );
     cooldown -> duration = item -> use.cooldown;
@@ -4607,6 +4500,7 @@ struct use_item_t : public action_t
     {
       discharge -> execute();
     }
+
     else if ( trigger )
     {
       if ( sim -> log ) log_t::output( sim, "%s performs %s", player -> name(), use_name.c_str() );
@@ -4617,10 +4511,10 @@ struct use_item_t : public action_t
       {
         struct trigger_expiration_t : public event_t
         {
-          item_t* item;
           action_callback_t* trigger;
 
-          trigger_expiration_t( sim_t* sim, player_t* player, item_t* i, action_callback_t* t ) : event_t( sim, player ), item( i ), trigger( t )
+          trigger_expiration_t( sim_t* sim, player_t* player, item_t* item, action_callback_t* t ) :
+            event_t( sim, player ), trigger( t )
           {
             name = item -> name();
             sim -> add_event( this, item -> use.duration );
@@ -4636,12 +4530,14 @@ struct use_item_t : public action_t
         lockout( item -> use.duration );
       }
     }
+
     else if ( buff )
     {
       if ( sim -> log ) log_t::output( sim, "%s performs %s", player -> name(), use_name.c_str() );
       buff -> trigger();
       lockout( buff -> buff_duration );
     }
+
     else assert( false );
 
     // Enable to report use_item ability
@@ -4659,6 +4555,128 @@ struct use_item_t : public action_t
   virtual bool ready()
   {
     if ( ! item ) return false;
+    return action_t::ready();
+  }
+};
+
+struct use_item_t : public base_use_item_t
+{
+  use_item_t( player_t* player, const std::string& options_str ) :
+    base_use_item_t( player )
+  {
+    std::string item_name;
+    option_t options[] =
+    {
+      { "name", OPT_STRING, &item_name },
+      { NULL, OPT_UNKNOWN, NULL }
+    };
+    parse_options( options, options_str );
+
+    if ( item_name.empty() )
+    {
+      sim -> errorf( "Player %s has 'use_item' action with no 'name=' option.\n", player -> name() );
+      return;
+    }
+
+    item = player -> find_item( item_name );
+    if ( ! item )
+    {
+      sim -> errorf( "Player %s attempting 'use_item' action with item '%s' which is not currently equipped.\n", player -> name(), item_name.c_str() );
+      return;
+    }
+    if ( ! item -> use.active() )
+    {
+      sim -> errorf( "Player %s attempting 'use_item' action with item '%s' which has no 'use=' encoding.\n", player -> name(), item_name.c_str() );
+      item = 0;
+      return;
+    }
+  }
+};
+
+struct use_slot_t : public base_use_item_t
+{
+  use_slot_t( player_t* player, const std::string& options_str ) :
+    base_use_item_t( player )
+  {
+    std::string slot_name;
+    int quiet = 0;
+
+    option_t options[] =
+    {
+      { "quiet", OPT_BOOL,   &quiet },
+      { "slot",  OPT_STRING, &slot_name },
+      { NULL, OPT_UNKNOWN, NULL }
+    };
+    parse_options( options, options_str );
+
+    if ( slot_name.empty() )
+    {
+      sim -> errorf( "Player %s has 'use_slot' action with no 'slot=' option.\n", player -> name() );
+      return;
+    }
+
+    int slot = util_t::parse_slot_type( slot_name );
+    if ( slot == SLOT_NONE )
+    {
+      if ( ! quiet )
+        sim -> errorf( "Player %s has 'use_slot' action with invalid slot name '%s'.\n", player -> name(), slot_name.c_str() );
+      return;
+    }
+
+    for ( unsigned i = 0; i < player -> items.size(); ++i )
+    {
+      if ( player -> items[ i ].slot == slot )
+      {
+        item = &player -> items[ i ];
+        break;
+      }
+    }
+
+    if ( ! item )
+    {
+      if ( ! quiet )
+      sim -> errorf( "Player %s attempting 'use_slot' action for slot '%s' with no item equipped.\n", player -> name(), slot_name.c_str() );
+      return;
+    }
+
+    if ( ! item -> use.active() )
+    {
+      if ( !quiet )
+        sim -> errorf( "Player %s attempting 'use_slot' action with item '%s' which has no 'use=' encoding.\n", player -> name(), item -> name() );
+      item = 0;
+      return;
+    }
+  }
+};
+
+
+struct use_relics_t : public action_t
+{
+  use_slot_t *relic1, *relic2;
+
+  use_relics_t( player_t* player, const std::string& options_str ) :
+    action_t( ACTION_OTHER, "use_relics", player ),
+    relic1( new use_slot_t( player, "slot=relic1,quiet=1" ) ),
+    relic2( new use_slot_t( player, "slot=relic2,quiet=1" ) )
+  {
+    parse_options( 0, options_str );
+
+    harmful = false;
+    trigger_gcd = timespan_t::zero;
+  }
+
+  virtual void execute()
+  {
+    if ( relic1 -> ready() )
+      relic1 -> execute();
+    else if ( relic2 -> ready() )
+      relic2 -> execute();
+  }
+
+  virtual bool ready()
+  {
+    if ( ! relic1 -> ready() && ! relic2 -> ready () )
+      return false;
     return action_t::ready();
   }
 };
@@ -4718,12 +4736,14 @@ action_t* player_t::create_action( const std::string& name,
   if ( name == "cancel_buff"      ) return new      cancel_buff_t( this, options_str );
   if ( name == "cycle"            ) return new            cycle_t( this, options_str );
   if ( name == "restart_sequence" ) return new restart_sequence_t( this, options_str );
-  if ( name == "restore_mana"     ) return new     restore_mana_t( this, options_str );
+  //if ( name == "restore_mana"     ) return new     restore_mana_t( this, options_str );
   if ( name == "sequence"         ) return new         sequence_t( this, options_str );
   if ( name == "snapshot_stats"   ) return new   snapshot_stats_t( this, options_str );
   if ( name == "start_moving"     ) return new     start_moving_t( this, options_str );
   if ( name == "stop_moving"      ) return new      stop_moving_t( this, options_str );
   if ( name == "use_item"         ) return new         use_item_t( this, options_str );
+  if ( name == "use_slot"         ) return new         use_slot_t( this, options_str );
+  if ( name == "use_relics"       ) return new       use_relics_t( this, options_str );
   if ( name == "wait"             ) return new       wait_fixed_t( this, options_str );
   if ( name == "wait_until_ready" ) return new wait_until_ready_t( this, options_str );
   if ( name == "summon_companion" ) return new summon_companion_t( this, options_str );
@@ -5579,7 +5599,6 @@ bool player_t::create_profile( std::string& profile_str, int save_type, bool sav
     if ( enchant.attribute[ ATTR_ENDURANCE ] != 0 )  profile_str += "enchant_endurance="        + util_t::to_string( enchant.attribute[ ATTR_ENDURANCE ] ) + term;
     if ( enchant.attribute[ ATTR_PRESENCE  ] != 0 )  profile_str += "enchant_presence="         + util_t::to_string( enchant.attribute[ ATTR_PRESENCE  ] ) + term;
     if ( enchant.spell_power                 != 0 )  profile_str += "enchant_spell_power="      + util_t::to_string( enchant.spell_power ) + term;
-    if ( enchant.mp5                         != 0 )  profile_str += "enchant_mp5="              + util_t::to_string( enchant.mp5 ) + term;
     if ( enchant.power                       != 0 )  profile_str += "enchant_power="            + util_t::to_string( enchant.power ) + term;
     if ( enchant.force_power                 != 0 )  profile_str += "enchant_force_power="      + util_t::to_string( enchant.force_power ) + term;
     if ( enchant.attack_power                != 0 )  profile_str += "enchant_attack_power="     + util_t::to_string( enchant.attack_power ) + term;
@@ -5720,7 +5739,6 @@ void player_t::create_options()
     { "gear_endurance",                       OPT_FLT,  &( gear.attribute[ ATTR_ENDURANCE ]           ) },
     { "gear_presence",                        OPT_FLT,  &( gear.attribute[ ATTR_PRESENCE  ]           ) },
     { "gear_spell_power",                     OPT_FLT,  &( gear.spell_power                           ) },
-    { "gear_mp5",                             OPT_FLT,  &( gear.mp5                                   ) },
     { "gear_power",                           OPT_FLT,  &( gear.power                                 ) },
     { "gear_force_power",                     OPT_FLT,  &( gear.force_power                           ) },
     { "gear_attack_power",                    OPT_FLT,  &( gear.attack_power                          ) },
@@ -5742,7 +5760,6 @@ void player_t::create_options()
     { "enchant_endurance",                    OPT_FLT,  &( enchant.attribute[ ATTR_ENDURANCE ]        ) },
     { "enchant_presence",                     OPT_FLT,  &( enchant.attribute[ ATTR_PRESENCE  ]        ) },
     { "enchant_spell_power",                  OPT_FLT,  &( enchant.spell_power                        ) },
-    { "enchant_mp5",                          OPT_FLT,  &( enchant.mp5                                ) },
     { "enchant_power",                        OPT_FLT,  &( enchant.power                              ) },
     { "enchant_force_power",                  OPT_FLT,  &( enchant.force_power                        ) },
     { "enchant_attack_power",                 OPT_FLT,  &( enchant.attack_power                       ) },
@@ -5765,15 +5782,6 @@ void player_t::create_options()
     // Misc
     { "skip_actions",                         OPT_STRING, &( action_list_skip                         ) },
     { "modify_action",                        OPT_STRING, &( modify_action                            ) },
-    { "elixirs",                              OPT_STRING, &( elixirs_str                              ) },
-    { "stim",                                 OPT_STRING, &( stim_str                                ) },
-    { "food",                                 OPT_STRING, &( food_str                                 ) },
-    { "player_resist_holy",                   OPT_INT,    &( spell_resistance[ SCHOOL_HOLY   ]        ) },
-    { "player_resist_shadow",                 OPT_INT,    &( spell_resistance[ SCHOOL_SHADOW ]        ) },
-    { "player_resist_arcane",                 OPT_INT,    &( spell_resistance[ SCHOOL_ARCANE ]        ) },
-    { "player_resist_frost",                  OPT_INT,    &( spell_resistance[ SCHOOL_FROST  ]        ) },
-    { "player_resist_fire",                   OPT_INT,    &( spell_resistance[ SCHOOL_FIRE   ]        ) },
-    { "player_resist_nature",                 OPT_INT,    &( spell_resistance[ SCHOOL_NATURE ]        ) },
     { "reaction_time_mean",                   OPT_TIMESPAN, &( reaction_mean                          ) },
     { "reaction_time_stddev",                 OPT_TIMESPAN, &( reaction_stddev                        ) },
     { "reaction_time_nu",                     OPT_TIMESPAN, &( reaction_nu                            ) },

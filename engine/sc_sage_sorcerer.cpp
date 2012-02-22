@@ -229,7 +229,6 @@ struct jedi_sage_attack_t : public attack_t
     attack_t( n, p, r, s, t )
   {
     may_crit   = true;
-    may_glance = false;
   }
 };
 
@@ -251,7 +250,7 @@ struct jedi_sage_spell_t : public spell_t
 
     sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
-    if ( base_td > 0 && !channeled )
+    if ( td.base_min > 0 && !channeled )
       crit_bonus += p -> talents.mental_scarring -> rank() * 0.1;
   }
 
@@ -276,7 +275,7 @@ struct jedi_sage_spell_t : public spell_t
     if ( base_execute_time > timespan_t::zero )
       p -> buffs.presence_of_mind -> expire();
 
-    if ( base_dd_min > 0 )
+    if ( dd.base_min > 0 )
       p -> buffs.force_potency -> decrement();
   }
 
@@ -287,9 +286,9 @@ struct jedi_sage_spell_t : public spell_t
     sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     if ( base_execute_time > timespan_t::zero && p -> buffs.presence_of_mind -> up() )
-      player_dd_multiplier *= 1.20;
+      dd.player_multiplier *= 1.20;
 
-    if ( base_dd_min > 0 && p -> buffs.force_potency -> up() )
+    if ( dd.base_min > 0 && p -> buffs.force_potency -> up() )
       player_crit += 0.60;
   }
 
@@ -302,9 +301,9 @@ struct jedi_sage_spell_t : public spell_t
     // This method is in target_debuff so that it is checked before every dot tick
 
     // Assume channeled spells don't profit
-    if ( p -> talents.force_suppression -> rank() > 0 && base_td > 0 && !channeled )
+    if ( p -> talents.force_suppression -> rank() > 0 && td.base_min > 0 && !channeled )
       if ( p -> buffs.force_suppression -> up() )
-        target_td_multiplier *= 1.20;
+        td.target_multiplier *= 1.20;
   }
 
   virtual void assess_damage( player_t* t, double dmg_amount, int dmg_type, int dmg_result )
@@ -358,12 +357,14 @@ struct jedi_sage_spell_t : public spell_t
     sage_sorcerer_t* p = player -> cast_sage_sorcerer();
 
     if ( tick_dmg > 0 && !channeled )
+    {
       p -> buffs.force_suppression -> decrement();
 
-    if ( tick_dmg > 0 && p -> talents.focused_insight -> rank() > 0 )
-    {
-      double hp = p -> resource_max[ RESOURCE_HEALTH ] * p -> talents.focused_insight -> rank() * 0.005;
-      p -> resource_gain( RESOURCE_HEALTH, hp , p -> gains.focused_insight );
+      if ( p -> talents.focused_insight -> rank() && result == RESULT_CRIT )
+      {
+        double hp = p -> resource_max[ RESOURCE_HEALTH ] * p -> talents.focused_insight -> rank() * 0.005;
+        p -> resource_gain( RESOURCE_HEALTH, hp, p -> gains.focused_insight );
+      }
     }
   }
 };
@@ -418,16 +419,16 @@ struct project_t : public jedi_sage_spell_t
 
     if ( is_upheaval )
     {
-      dd_standardhealthpercentmin = 0.058;
-      dd_standardhealthpercentmax = 0.098;
-      direct_power_mod = 0.78;
+      dd.standardhealthpercentmin = 0.058;
+      dd.standardhealthpercentmax = 0.098;
+      dd.power_mod = 0.78;
       background = true;
     }
     else
     {
-      dd_standardhealthpercentmin = 0.136;
-      dd_standardhealthpercentmax = 0.176;
-      direct_power_mod = 1.56;
+      dd.standardhealthpercentmin = 0.136;
+      dd.standardhealthpercentmax = 0.176;
+      dd.power_mod = 1.56;
 
       base_cost = 45.0;
 
@@ -470,8 +471,8 @@ struct telekinetic_throw_t : public jedi_sage_spell_t
 
     id = p -> type == SITH_SORCERER ? 188186 : 189258;
 
-    td_standardhealthpercentmin = td_standardhealthpercentmax = .079;
-    tick_power_mod = 0.79;
+    td.standardhealthpercentmin = td.standardhealthpercentmax = .079;
+    td.power_mod = 0.79;
 
     base_cost = 30.0;
     if ( player -> set_bonus.rakata_force_masters -> two_pc() )
@@ -565,9 +566,9 @@ struct disturbance_t : public jedi_sage_spell_t
 
     parse_options( 0, options_str );
 
-    dd_standardhealthpercentmin = .112;
-    dd_standardhealthpercentmax = .152;
-    direct_power_mod = 1.32;
+    dd.standardhealthpercentmin = .112;
+    dd.standardhealthpercentmax = .152;
+    dd.power_mod = 1.32;
 
     base_execute_time = timespan_t::from_seconds( 1.5 );
 
@@ -582,9 +583,9 @@ struct disturbance_t : public jedi_sage_spell_t
 
     if ( is_tm )
     {
-      dd_standardhealthpercentmin = .03;
-      dd_standardhealthpercentmax = .05;
-      direct_power_mod = 0.4;
+      dd.standardhealthpercentmin = .03;
+      dd.standardhealthpercentmax = .05;
+      dd.power_mod = 0.4;
       base_cost = 0.0;
       background = true;
     }
@@ -637,8 +638,8 @@ struct mind_crush_t : public jedi_sage_spell_t
       static const int ranks[] = { 14, 19, 30, 41, 50 };
       range::copy( ranks, std::back_inserter( rank_level_list ) );
 
-      td_standardhealthpercentmin = td_standardhealthpercentmax = .0295;
-      tick_power_mod = 0.295;
+      td.standardhealthpercentmin = td.standardhealthpercentmax = .0295;
+      td.power_mod = 0.295;
 
       base_tick_time = timespan_t::from_seconds( 1.0 );
       num_ticks = 6 + p -> talents.assertion -> rank() * 1;
@@ -672,9 +673,9 @@ struct mind_crush_t : public jedi_sage_spell_t
 
     parse_options( 0, options_str );
 
-    dd_standardhealthpercentmin = .103;
-    dd_standardhealthpercentmax = .143;
-    direct_power_mod = 1.23;
+    dd.standardhealthpercentmin = .103;
+    dd.standardhealthpercentmax = .143;
+    dd.power_mod = 1.23;
 
     base_execute_time = timespan_t::from_seconds( 2.0 );
     base_cost = 40.0;
@@ -706,8 +707,8 @@ struct weaken_mind_t : public jedi_sage_spell_t
 
     parse_options( 0, options_str );
 
-    td_standardhealthpercentmin = td_standardhealthpercentmax = .031;
-    tick_power_mod = 0.31;
+    td.standardhealthpercentmin = td.standardhealthpercentmax = .031;
+    td.power_mod = 0.31;
 
     base_tick_time = timespan_t::from_seconds( 3.0 );
     num_ticks = 5 + p -> talents.disturb_mind -> rank();
@@ -755,9 +756,9 @@ struct turbulence_t : public jedi_sage_spell_t
 
     parse_options( 0, options_str );
 
-    dd_standardhealthpercentmin = .138;
-    dd_standardhealthpercentmax = .178;
-    direct_power_mod = 1.58;
+    dd.standardhealthpercentmin = .138;
+    dd.standardhealthpercentmax = .178;
+    dd.power_mod = 1.58;
 
     base_execute_time = timespan_t::from_seconds( 2.0 );
     base_cost = 45.0;
@@ -809,9 +810,9 @@ struct force_in_balance_t : public jedi_sage_spell_t
 
     parse_options( 0, options_str );
 
-    dd_standardhealthpercentmin = .167;
-    dd_standardhealthpercentmax = .207;
-    direct_power_mod = 1.87;
+    dd.standardhealthpercentmin = .167;
+    dd.standardhealthpercentmax = .207;
+    dd.power_mod = 1.87;
 
     ability_lag = timespan_t::from_seconds( 0.2 );
     base_cost = 50.0;
@@ -845,8 +846,8 @@ struct sever_force_t : public jedi_sage_spell_t
 
     parse_options( 0, options_str );
 
-    td_standardhealthpercentmin = td_standardhealthpercentmax = .031;
-    tick_power_mod = 0.311;
+    td.standardhealthpercentmin = td.standardhealthpercentmax = .031;
+    td.power_mod = 0.311;
 
     base_tick_time = timespan_t::from_seconds( 3.0 );
     num_ticks = 6;
@@ -907,18 +908,18 @@ struct telekinetic_wave_t : public jedi_sage_spell_t
 
     if ( is_tm )
     {
-      dd_standardhealthpercentmin = .041;
-      dd_standardhealthpercentmax = .081;
-      direct_power_mod = .61;
+      dd.standardhealthpercentmin = .041;
+      dd.standardhealthpercentmax = .081;
+      dd.power_mod = .61;
 
       base_cost = 0.0;
       background = true;
     }
     else
     {
-      dd_standardhealthpercentmin = .182;
-      dd_standardhealthpercentmax = .222;
-      direct_power_mod = 2.02;
+      dd.standardhealthpercentmin = .182;
+      dd.standardhealthpercentmax = .222;
+      dd.power_mod = 2.02;
 
       base_cost = 50.0;
       cooldown -> duration = timespan_t::from_seconds( 6.0 );
@@ -1217,6 +1218,7 @@ void sage_sorcerer_t::init_actions()
 
       action_list_str += "/power_potion";
       action_list_str += "/force_potency";
+      action_list_str += "/use_relics";
       action_list_str += "/weaken_mind,if=!ticking";
 
       if ( talents.force_in_balance -> rank() > 0 )
@@ -1243,6 +1245,7 @@ void sage_sorcerer_t::init_actions()
       case TREE_TELEKINETICS:
 
       action_list_str += "/power_potion";
+      action_list_str += "/use_relics";
       action_list_str += "/weaken_mind,if=!ticking";
 
       if ( talents.turbulence -> rank() > 0 )
@@ -1284,6 +1287,7 @@ void sage_sorcerer_t::init_actions()
 
       action_list_str += "/power_potion";
       action_list_str += "/recklessness";
+      action_list_str += "/use_relics";
       action_list_str += "/affliction,if=!ticking";
 
       if ( talents.force_in_balance -> rank() > 0 )
@@ -1310,6 +1314,7 @@ void sage_sorcerer_t::init_actions()
       case TREE_LIGHTNING:
 
       action_list_str += "/power_potion";
+      action_list_str += "/use_relics";
       action_list_str += "/affliction,if=!ticking";
 
       if ( talents.turbulence -> rank() > 0 )

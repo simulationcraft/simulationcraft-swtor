@@ -363,7 +363,7 @@ struct damage_event_t : public raid_event_t
     {
       player_t* p = affected_players[ i ];
       if ( p -> sleeping ) continue;
-      raid_damage -> base_dd_min = raid_damage -> base_dd_max = rng -> range( amount - amount_range, amount + amount_range );
+      raid_damage -> dd.base_min = raid_damage -> dd.base_max = rng -> range( amount - amount_range, amount + amount_range );
       raid_damage -> target = p;
       raid_damage -> execute();
     }

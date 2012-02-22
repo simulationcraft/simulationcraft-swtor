@@ -142,9 +142,8 @@ struct discharge_proc_callback_t : public action_callback_t
         discharge_proc = true;
         item_proc = true;
         trigger_gcd = timespan_t::zero;
-        base_dd_min = amount;
-        base_dd_max = amount;
-        direct_power_mod = scaling;
+        dd.base_min = dd.base_max = amount;
+        dd.power_mod = scaling;
         may_crit = ( s != SCHOOL_DRAIN ) && ! no_crit;
         background  = true;
         no_buffs = nb;
@@ -161,13 +160,12 @@ struct discharge_proc_callback_t : public action_callback_t
         discharge_proc = true;
         item_proc = true;
         trigger_gcd = timespan_t::zero;
-        base_dd_min = amount;
-        base_dd_max = amount;
-        direct_power_mod = scaling;
+        dd.base_min = amount;
+        dd.base_max = amount;
+        dd.power_mod = scaling;
         may_crit = ( s != SCHOOL_DRAIN ) && ! no_crit;
         may_dodge = ( s == SCHOOL_PHYSICAL && ! no_crit );
         may_parry = ( s == SCHOOL_PHYSICAL && ! no_crit && ( p -> position == POSITION_FRONT || p -> position == POSITION_RANGED_FRONT ) );
-        may_glance = false;
         background  = true;
         no_buffs = nb;
         no_debuffs = nd;
@@ -175,17 +173,18 @@ struct discharge_proc_callback_t : public action_callback_t
       }
     };
 
-    cooldown = p -> get_cooldown( name_str );
-    cooldown -> duration = cd;
-
     if ( amount > 0 )
     {
+      cooldown = p -> get_cooldown( "damage_discharge_" + util_t::to_string( cd.total_seconds() ) + "cd" );
       discharge_action = new discharge_spell_t( name_str.c_str(), p, amount, scaling, school, no_crit, no_buffs, no_debuffs );
     }
     else
     {
+      cooldown = p -> get_cooldown( name_str );
       discharge_action = new discharge_attack_t( name_str.c_str(), p, -amount, scaling, school, no_crit, no_buffs, no_debuffs );
     }
+
+    cooldown -> duration = cd;
 
     proc = p -> get_proc( name_str.c_str() );
     rng  = p -> get_rng ( name_str.c_str(), rng_type );  // default is CYCLIC since discharge should not have duration
@@ -264,9 +263,9 @@ struct chance_discharge_proc_callback_t : public action_callback_t
         discharge_proc = true;
         item_proc = true;
         trigger_gcd = timespan_t::zero;
-        base_dd_min = amount;
-        base_dd_max = amount;
-        direct_power_mod = scaling;
+        dd.base_min = amount;
+        dd.base_max = amount;
+        dd.power_mod = scaling;
         may_crit = ( s != SCHOOL_DRAIN ) && ! no_crit;
         background  = true;
         no_buffs = nb;
@@ -283,13 +282,12 @@ struct chance_discharge_proc_callback_t : public action_callback_t
         discharge_proc = true;
         item_proc = true;
         trigger_gcd = timespan_t::zero;
-        base_dd_min = amount;
-        base_dd_max = amount;
-        direct_power_mod = scaling;
+        dd.base_min = amount;
+        dd.base_max = amount;
+        dd.power_mod = scaling;
         may_crit = ( s != SCHOOL_DRAIN ) && ! no_crit;
         may_dodge = ( s == SCHOOL_PHYSICAL && ! no_crit );
         may_parry = ( s == SCHOOL_PHYSICAL && ! no_crit && ( p -> position == POSITION_FRONT || p -> position == POSITION_RANGED_FRONT ) );
-        may_glance = false;
         background  = true;
         no_buffs = nb;
         no_debuffs = nd;
@@ -297,17 +295,18 @@ struct chance_discharge_proc_callback_t : public action_callback_t
       }
     };
 
-    cooldown = p -> get_cooldown( name_str );
-    cooldown -> duration = cd;
-
     if ( amount > 0 )
     {
+      cooldown = p -> get_cooldown( "damage_discharge_" + util_t::to_string( cd.total_seconds() ) + "cd" );
       discharge_action = new discharge_spell_t( name_str.c_str(), p, amount, scaling, school, no_crit, no_buffs, no_debuffs );
     }
     else
     {
+      cooldown = p -> get_cooldown( name_str );
       discharge_action = new discharge_attack_t( name_str.c_str(), p, -amount, scaling, school, no_crit, no_buffs, no_debuffs );
     }
+
+    cooldown -> duration = cd;
 
     proc = p -> get_proc( name_str.c_str() );
     rng  = p -> get_rng ( name_str.c_str(), rng_type );  // default is CYCLIC since discharge should not have duration
@@ -343,14 +342,14 @@ struct chance_discharge_proc_callback_t : public action_callback_t
             return;
         }
       }
-      discharge_action -> base_dd_multiplier = stacks;
+      discharge_action -> dd.base_multiplier = stacks;
       discharge_action -> execute();
       stacks = 0;
       proc -> occur();
     }
     else
     {
-      discharge_action -> base_dd_multiplier = stacks;
+      discharge_action -> dd.base_multiplier = stacks;
       discharge_action -> execute();
       stacks = 0;
       proc -> occur();
@@ -386,9 +385,9 @@ struct stat_discharge_proc_callback_t : public action_callback_t
         discharge_proc = true;
         item_proc = true;
         trigger_gcd = timespan_t::zero;
-        base_dd_min = amount;
-        base_dd_max = amount;
-        direct_power_mod = scaling;
+        dd.base_min = amount;
+        dd.base_max = amount;
+        dd.power_mod = scaling;
         may_crit = ( s != SCHOOL_DRAIN ) && ! no_crit;
         background  = true;
         no_buffs = nb;
@@ -407,13 +406,12 @@ struct stat_discharge_proc_callback_t : public action_callback_t
         discharge_proc = true;
         item_proc = true;
         trigger_gcd = timespan_t::zero;
-        base_dd_min = amount;
-        base_dd_max = amount;
-        direct_power_mod = scaling;
+        dd.base_min = amount;
+        dd.base_max = amount;
+        dd.power_mod = scaling;
         may_crit = ( s != SCHOOL_DRAIN ) && ! no_crit;
         may_dodge = ( s == SCHOOL_PHYSICAL && ! no_crit );
         may_parry = ( s == SCHOOL_PHYSICAL && ! no_crit && ( p -> position == POSITION_FRONT || p -> position == POSITION_RANGED_FRONT ) );
-        may_glance = false;
         background  = true;
         no_buffs = nb;
         no_debuffs = nd;
@@ -937,15 +935,15 @@ bool unique_gear_t::get_use_encoding( std::string&       encoding,
   std::string e;
 
   // SWTOR Use Relics
-       if ( name == "rakata_relic_of_primeval_fatesealer" ) e = "380Alacrity_120cd_20dur";
-  else if ( name == "rakata_relic_of_forbidden_secrets"   ) e = "235Crit_235Surge_120cd_20dur";
-  else if ( name == "rakata_relic_of_boundless_ages"      ) e = "380Power_120cd_20dur";
-  else if ( name == "columi_relic_of_primeval_fatesealer" ) e = "355Alacrity_120cd_20dur";
-  else if ( name == "columi_relic_of_forbidden_secrets"   ) e = "220Crit_220Surge_120cd_20dur";
-  else if ( name == "columi_relic_of_boundless_ages"      ) e = "355Power_120cd_20dur";
-  else if ( name == "relic_of_primeval_fatesealer"        ) e = "300Alacrity_120cd_20dur";
-  else if ( name == "relic_of_forbidden_secrets"          ) e = "185Crit_185Surge_120cd_20dur";
-  else if ( name == "relic_of_boundless_ages"             ) e = "300Power_120cd_20dur";
+       if ( name == "rakata_relic_of_the_primeval_fatesealer" ) e = "380Alacrity_120cd_20dur";
+  else if ( name == "rakata_relic_of_forbidden_secrets"       ) e = "235Crit_235Surge_120cd_20dur";
+  else if ( name == "rakata_relic_of_boundless_ages"          ) e = "380Power_120cd_20dur";
+  else if ( name == "columi_relic_of_primeval_fatesealer"     ) e = "355Alacrity_120cd_20dur";
+  else if ( name == "columi_relic_of_forbidden_secrets"       ) e = "220Crit_220Surge_120cd_20dur";
+  else if ( name == "columi_relic_of_boundless_ages"          ) e = "355Power_120cd_20dur";
+  else if ( name == "relic_of_primeval_fatesealer"            ) e = "300Alacrity_120cd_20dur";
+  else if ( name == "relic_of_forbidden_secrets"              ) e = "185Crit_185Surge_120cd_20dur";
+  else if ( name == "relic_of_boundless_ages"                 ) e = "300Power_120cd_20dur";
 
   if ( e.empty() ) return false;
 

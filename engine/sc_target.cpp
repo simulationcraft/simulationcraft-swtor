@@ -122,7 +122,7 @@ struct melee_t : public attack_t
     repeating   = true;
     trigger_gcd = timespan_t::zero;
     base_cost   = 0;
-    base_dd_min = 260000;
+    dd.base_min = 260000;
     base_execute_time = timespan_t::from_seconds( 2.4 );
     aoe = -1;
   }
@@ -160,7 +160,7 @@ struct auto_attack_t : public attack_t
     int aoe_tanks = 0;
     option_t options[] =
     {
-      { "damage",       OPT_FLT,      &p -> main_hand_attack -> base_dd_min       },
+      { "damage",       OPT_FLT,      &p -> main_hand_attack -> dd.base_min       },
       { "attack_speed", OPT_TIMESPAN, &p -> main_hand_attack -> base_execute_time },
       { "aoe_tanks",    OPT_BOOL,     &aoe_tanks },
       { NULL, OPT_UNKNOWN, NULL }
@@ -172,7 +172,7 @@ struct auto_attack_t : public attack_t
     if ( aoe_tanks == 1 )
       p -> main_hand_attack -> aoe = -1;
 
-    p -> main_hand_attack -> base_dd_max = p -> main_hand_attack -> base_dd_min;
+    p -> main_hand_attack -> dd.base_max = p -> main_hand_attack -> dd.base_min;
     if ( p -> main_hand_attack -> base_execute_time < timespan_t::from_seconds( 0.01 ) )
       p -> main_hand_attack -> base_execute_time = timespan_t::from_seconds( 2.4 );
 
@@ -211,14 +211,14 @@ struct spell_nuke_t : public spell_t
     spell_t( "spell_nuke", p, RESOURCE_MANA, SCHOOL_FIRE )
   {
     base_execute_time = timespan_t::from_seconds( 3.0 );
-    base_dd_min = 50000;
+    dd.base_min = 50000;
 
     cooldown = player -> get_cooldown( name_str + "_" + target -> name() );
 
     int aoe_tanks = 0;
     option_t options[] =
     {
-      { "damage",       OPT_FLT, &base_dd_min          },
+      { "damage",       OPT_FLT,      &dd.base_min          },
       { "attack_speed", OPT_TIMESPAN, &base_execute_time    },
       { "cooldown",     OPT_TIMESPAN, &cooldown -> duration },
       { "aoe_tanks",    OPT_BOOL,     &aoe_tanks },
@@ -226,7 +226,7 @@ struct spell_nuke_t : public spell_t
     };
     parse_options( options, options_str );
 
-    base_dd_max = base_dd_min;
+    dd.base_max = dd.base_min;
     if ( base_execute_time < timespan_t::zero )
       base_execute_time = timespan_t::from_seconds( 3.0 );
 
@@ -267,20 +267,20 @@ struct spell_aoe_t : public spell_t
     spell_t( "spell_aoe", p, RESOURCE_MANA, SCHOOL_FIRE )
   {
     base_execute_time = timespan_t::from_seconds( 3.0 );
-    base_dd_min = 50000;
+    dd.base_min = 50000;
 
     cooldown = player -> get_cooldown( name_str + "_" + target -> name() );
 
     option_t options[] =
     {
-      { "damage",       OPT_FLT, &base_dd_min          },
+      { "damage",    OPT_FLT,      &dd.base_min          },
       { "cast_time", OPT_TIMESPAN, &base_execute_time    },
-      { "cooldown",     OPT_TIMESPAN, &cooldown -> duration },
+      { "cooldown",  OPT_TIMESPAN, &cooldown -> duration },
       { NULL, OPT_UNKNOWN, NULL }
     };
     parse_options( options, options_str );
 
-    base_dd_max = base_dd_min;
+    dd.base_max = dd.base_min;
     if ( base_execute_time < timespan_t::from_seconds( 0.01 ) )
       base_execute_time = timespan_t::from_seconds( 3.0 );
 
@@ -327,9 +327,9 @@ struct summon_add_t : public spell_t
   {
     option_t options[] =
     {
-      { "name",     OPT_STRING, &add_name             },
-      { "duration", OPT_TIMESPAN,    &summoning_duration   },
-      { "cooldown", OPT_TIMESPAN,    &cooldown -> duration },
+      { "name",     OPT_STRING,   &add_name             },
+      { "duration", OPT_TIMESPAN, &summoning_duration   },
+      { "cooldown", OPT_TIMESPAN, &cooldown -> duration },
       { NULL, OPT_UNKNOWN, NULL }
     };
     parse_options( options, options_str );
