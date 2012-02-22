@@ -12,6 +12,7 @@ actions=stim,type=exotech_resolve
 actions+=/mark_of_power
 actions+=/snapshot_stats
 actions+=/power_potion
+actions+=/use_relics
 actions+=/affliction,if=!ticking
 actions+=/thundering_blast,if=dot.affliction.remains>cast_time
 actions+=/recklessness,if=buff.lightning_barrage.react|buff.lightning_storm.react

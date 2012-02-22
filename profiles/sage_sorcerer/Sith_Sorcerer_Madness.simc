@@ -13,6 +13,7 @@ actions+=/mark_of_power
 actions+=/snapshot_stats
 actions+=/power_potion
 actions+=/recklessness
+actions+=/use_relics
 actions+=/affliction,if=!ticking
 actions+=/death_field,if=force>100
 actions+=/crushing_darkness,if=buff.wrath.react

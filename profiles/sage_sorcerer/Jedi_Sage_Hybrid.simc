@@ -14,6 +14,7 @@ actions+=/snapshot_stats
 actions+=/telekinetic_throw,if=buff.psychic_projection_dd.up
 actions+=/power_potion
 actions+=/force_potency
+actions+=/use_relics
 actions+=/weaken_mind,if=!ticking
 actions+=/force_in_balance,if=force>100
 actions+=/mind_crush,if=buff.presence_of_mind.react

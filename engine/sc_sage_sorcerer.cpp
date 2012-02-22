@@ -1202,8 +1202,6 @@ void sage_sorcerer_t::init_actions()
 
   if ( action_list_str.empty() )
   {
-    const std::string use_item_actions = init_use_item_actions();
-
     if ( type == JEDI_SAGE )
     {
       action_list_str += "stim,type=exotech_resolve";
@@ -1219,7 +1217,7 @@ void sage_sorcerer_t::init_actions()
 
       action_list_str += "/power_potion";
       action_list_str += "/force_potency";
-      action_list_str += use_item_actions;
+      action_list_str += "/use_relics";
       action_list_str += "/weaken_mind,if=!ticking";
 
       if ( talents.force_in_balance -> rank() > 0 )
@@ -1246,7 +1244,7 @@ void sage_sorcerer_t::init_actions()
       case TREE_TELEKINETICS:
 
       action_list_str += "/power_potion";
-      action_list_str += use_item_actions;
+      action_list_str += "/use_relics";
       action_list_str += "/weaken_mind,if=!ticking";
 
       if ( talents.turbulence -> rank() > 0 )
@@ -1288,7 +1286,7 @@ void sage_sorcerer_t::init_actions()
 
       action_list_str += "/power_potion";
       action_list_str += "/recklessness";
-      action_list_str += use_item_actions;
+      action_list_str += "/use_relics";
       action_list_str += "/affliction,if=!ticking";
 
       if ( talents.force_in_balance -> rank() > 0 )
@@ -1315,7 +1313,7 @@ void sage_sorcerer_t::init_actions()
       case TREE_LIGHTNING:
 
       action_list_str += "/power_potion";
-      action_list_str += use_item_actions;
+      action_list_str += "/use_relics";
       action_list_str += "/affliction,if=!ticking";
 
       if ( talents.turbulence -> rank() > 0 )

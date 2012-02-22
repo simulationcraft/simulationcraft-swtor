@@ -12,6 +12,7 @@ actions=stim,type=exotech_resolve
 actions+=/force_valor
 actions+=/snapshot_stats
 actions+=/power_potion
+actions+=/use_relics
 actions+=/weaken_mind,if=!ticking
 actions+=/turbulence,if=dot.weaken_mind.remains>cast_time
 actions+=/force_potency,if=buff.psychic_projection.react|buff.tidal_force.react
