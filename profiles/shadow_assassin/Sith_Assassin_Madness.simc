@@ -11,23 +11,23 @@ talents=http://www.torhead.com/skill-calc#200McZhMZcMfRrMkrfz.1
 actions=stim,type=exotech_resolve
 actions+=/mark_of_power
 actions+=/snapshot_stats
+actions+=/apply_charge,type=lightning
 actions+=/power_potion
 actions+=/recklessness
-actions+=/shock,if=buff.unearthed_knowledge.down
-actions+=/assassinate
 actions+=/death_field
-actions+=/discharge
-actions+=/creeping_terror,if=!ticking
-actions+=/maul,if=buff.exploit_weakness.react
 actions+=/crushing_darkness,if=buff.raze.react
+actions+=/shock,if=buff.unearthed_knowledge.down
+actions+=/assassinate,if=target.health_pct<=30
+actions+=/maul,if=buff.exploit_weakness.react
+actions+=/creeping_terror,if=!ticking
 actions+=/thrash
-actions+=/force_cloak
 actions+=/saber_strike
 head=foo_stalker_headgear
 shirt=foo,stats=1303willpower_510crit_151power_1224forcepower_153surge
 chest=foo_stalker_vestments
 legs=foo_stalker_lower_robe
 hands=foo_stalker_gloves
+main_hand=lightsaber,weapon=sword2h_3.60speed_3053min_4580max
 # Gear Summary
 # gear_willpower=1303
 # gear_crit_rating=510
@@ -35,3 +35,4 @@ hands=foo_stalker_gloves
 # gear_forcepower=1224
 # gear_surge_rating=153
 # Set Bonuses
+# main_hand=lightsaber,weapon=sword2h_3.60speed_3053min_4580max

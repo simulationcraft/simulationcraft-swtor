@@ -8,6 +8,7 @@ chest=foo_stalker_vestments
 hands=foo_stalker_gloves
 legs=foo_stalker_lower_robe
 head=foo_stalker_headgear
+main_hand=lightsaber,weapon=sword2h_3.60speed_3053min_4580max
 save=Sith_Assassin_Madness.simc
 
 copy=Sith_Assassin_Deception,Sith_Assassin_Madness
