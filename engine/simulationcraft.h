@@ -4419,7 +4419,7 @@ struct action_t
   int resource, tree, result, aoe;
   bool dual, callbacks, special, channeled, background, sequence, use_off_gcd;
   bool direct_tick, repeating, harmful, proc, item_proc, proc_ignores_slot, discharge_proc, auto_cast, initialized;
-  bool may_hit, may_miss, may_dodge, may_parry, may_block, may_crush, may_crit;
+  bool may_hit, may_miss, may_dodge, may_parry, may_block, may_crit;
   bool tick_may_crit, tick_zero, hasted_ticks;
   bool no_buffs, no_debuffs;
   int dot_behavior;

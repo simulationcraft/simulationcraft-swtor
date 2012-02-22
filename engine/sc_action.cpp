@@ -36,7 +36,6 @@ void action_t::init_action_t_()
   may_dodge                      = false;
   may_parry                      = false;
   may_block                      = false;
-  may_crush                      = false;
   may_crit                       = false;
   tick_may_crit                  = false;
   tick_zero                      = false;
