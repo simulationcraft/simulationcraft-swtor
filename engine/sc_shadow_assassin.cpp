@@ -85,6 +85,7 @@ struct shadow_assassin_t : public player_t
         buff_t* unearthed_knowledge;
         buff_t* recklessness;
         buff_t* deathmark;
+        buff_t* overcharge_saber;
     } buffs;
 
     // Gains
@@ -273,12 +274,6 @@ struct shadow_assassin_attack_t : public attack_t
             dd.player_multiplier *= 1.10;
     }
 
-   virtual void execute()
-   {
-      attack_t::execute();
-   }
-
-
    virtual double armor() const
    {
      double a = attack_t::armor();
@@ -362,18 +357,18 @@ struct shadow_assassin_spell_t : public spell_t
 
         if ( result == RESULT_CRIT  && p -> talents.parasitism -> rank() > 0 )
         {
-            double hp = p -> resource_max[ RESOURCE_HEALTH ] * p -> talents.parasitism -> rank() * 0.005 * (1 + p -> talents.devour -> rank() * 0.5);
+            double hp = p -> resource_max[ RESOURCE_HEALTH ] * p -> talents.parasitism -> rank() * 0.005 * ( 1 + p -> talents.devour -> rank() * 0.5);
             p -> resource_gain( RESOURCE_HEALTH, hp , p -> gains.parasitism );
         }
     }
 
-    virtual void assess_damage( player_t* t, double dmg_amount, int dmg_type, int dmg_result )
+    virtual void impact( player_t* t, int impact_result, double travel_dmg )
     {
-        spell_t::assess_damage( t, dmg_amount, dmg_type, dmg_result );
+        spell_t::impact( t, impact_result, travel_dmg );
 
         shadow_assassin_t* p = player -> cast_shadow_assassin();
 
-        if ( dmg_result == RESULT_CRIT && p -> talents.exploitive_strikes -> rank() > 0 )
+        if ( impact_result == RESULT_CRIT && p -> talents.exploitive_strikes -> rank() > 0 )
         {
             p -> buffs.exploitive_strikes -> trigger();
         }
@@ -474,6 +469,8 @@ struct shock_t : public shadow_assassin_spell_t
       shadow_assassin_t* p = player -> cast_shadow_assassin();
 
       c *= 1.0 - p -> buffs.induction -> stack() * 0.25;
+
+      c = ceil( c );
 
       return c;
     }
@@ -985,9 +982,9 @@ struct overcharge_saber_t : public shadow_assassin_spell_t
   {
     shadow_assassin_spell_t::execute();
 
-    //shadow_assassin_t* p = player -> cast_shadow_assassin();
+    shadow_assassin_t* p = player -> cast_shadow_assassin();
 
-    //p -> buffs.overcharge_saber -> trigger();
+    p -> buffs.overcharge_saber -> trigger();
   }
 };
 
@@ -1288,6 +1285,14 @@ struct lightning_charge_callback_t : public action_callback_t
       base_multiplier *= 1.0 + p -> talents.charge_mastery -> rank() * 0.06;
     }
 
+    virtual void player_buff()
+    {
+      shadow_assassin_spell_t::player_buff();
+
+      shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+      player_multiplier += p -> buffs.overcharge_saber -> up() * 1.0;
+    }
   };
 
   rng_t* rng_lightning_charge;
@@ -1345,6 +1350,8 @@ struct surging_charge_callback_t : public action_callback_t
         shadow_assassin_t* p = player -> cast_shadow_assassin();
 
         player_multiplier += p -> buffs.static_charges -> stack() * 0.06;
+
+        player_multiplier += p -> buffs.overcharge_saber -> up() * 1.0;
       }
 
       virtual void execute()
@@ -1387,7 +1394,7 @@ struct surging_charge_callback_t : public action_callback_t
   }
 };
 
-// Lightning Charge | Force Technique ===========
+// Dark Charge |  ===========
 
 struct dark_charge_callback_t : public action_callback_t
 {
@@ -1398,8 +1405,7 @@ struct dark_charge_callback_t : public action_callback_t
       shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
     {
       // FIXME: ADD correct values and implement heal and other effects
-      //dd_standardhealthpercentmin = dd_standardhealthpercentmax = .017;
-      //direct_power_mod = 0.165;
+      // Add Overcharge Saber
 
       proc = true;
       background = true;
@@ -1631,6 +1637,7 @@ void shadow_assassin_t::init_buffs()
     buffs.unearthed_knowledge = new buff_t( this, "unearthed_knowledge", 1, timespan_t::from_seconds( 20.0 ), timespan_t::zero, talents.unearthed_knowledge -> rank() * 0.5 );
     buffs.recklessness = new buff_t( this, is_shadow ? "force_potency" : "recklessness", 2, timespan_t::from_seconds( 20.0 ) );
     buffs.deathmark = new buff_t( this, "deathmark", 10, timespan_t::from_seconds( 30.0 ), timespan_t::zero );
+    buffs.overcharge_saber = new buff_t( this, "overcharge_saber", 1, timespan_t::from_seconds( 15.0 ) );
 
 }
 
@@ -1724,6 +1731,7 @@ void shadow_assassin_t::init_actions()
               action_list_str += "/apply_charge,type=lightning";
               action_list_str += "/power_potion";
               action_list_str += "/recklessness";
+              action_list_str += "/overcharge_saber";
               action_list_str += "/death_field";
               action_list_str += "/crushing_darkness,if=buff.raze.react";
               action_list_str += "/discharge,if=!dot.lightning_discharge.ticking";
@@ -1741,6 +1749,7 @@ void shadow_assassin_t::init_actions()
               action_list_str += "/apply_charge,type=surging";
               action_list_str += "/power_potion";
               action_list_str += "/recklessness";
+              action_list_str += "/overcharge_saber";
               action_list_str += "/assassinate";
               action_list_str += "/maul,if=buff.exploit_weakness.react";
               action_list_str += "/discharge";

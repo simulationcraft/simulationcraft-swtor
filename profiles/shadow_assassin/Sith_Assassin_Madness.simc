@@ -14,6 +14,7 @@ actions+=/snapshot_stats
 actions+=/apply_charge,type=lightning
 actions+=/power_potion
 actions+=/recklessness
+actions+=/overcharge_saber
 actions+=/death_field
 actions+=/crushing_darkness,if=buff.raze.react
 actions+=/discharge,if=!dot.lightning_discharge.ticking
