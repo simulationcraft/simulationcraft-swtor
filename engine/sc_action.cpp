@@ -691,11 +691,14 @@ double action_t::calculate_weapon_damage()
 
 double action_t::calculate_tick_damage()
 {
-  double base_td = ( td.base_min + td.base_max ) / 2.0;
+  if ( td.base_max == 0 && td.power_mod == 0 ) return 0;
 
-  if ( base_td == 0 && td.power_mod == 0 ) return 0;
+  double dmg = sim -> range( td.base_min, td.base_max );
 
-  double dmg = floor( base_td + 0.5 );
+  if ( round_base_dmg ) dmg = floor( dmg + 0.5 );
+
+  double base_tick_dmg = dmg;
+
   dmg += total_power() * td.power_mod;
   dmg *= total_td_multiplier();
 
@@ -717,7 +720,7 @@ double action_t::calculate_tick_damage()
   if ( sim -> debug )
   {
     log_t::output( sim, "%s dmg for %s: td=%.0f i_td=%.0f b_td=%.0f mod=%.2f power=%.0f b_mult=%.2f p_mult=%.2f t_mult=%.2f",
-                   player -> name(), name(), dmg, init_tick_dmg, base_td, td.power_mod,
+                   player -> name(), name(), dmg, init_tick_dmg, base_tick_dmg, td.power_mod,
                    total_power(), base_multiplier * td.base_multiplier, player_multiplier, target_multiplier );
   }
 
@@ -728,11 +731,11 @@ double action_t::calculate_tick_damage()
 
 double action_t::calculate_direct_damage( int chain_target )
 {
+  if ( dd.base_max == 0 && weapon_multiplier == 0 && dd.power_mod == 0 ) return 0;
+
   double dmg = sim -> range( dd.base_min, dd.base_max );
 
   if ( round_base_dmg ) dmg = floor( dmg + 0.5 );
-
-  if ( dmg == 0 && weapon_multiplier == 0 && dd.power_mod == 0 ) return 0;
 
   double base_direct_dmg = dmg;
   double weapon_dmg = 0;
