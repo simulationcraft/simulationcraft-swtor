@@ -80,21 +80,10 @@ static const char* school_color( int type )
   switch ( type )
   {
   case SCHOOL_INTERNAL:     return class_color( T_COMMANDO );
-  case SCHOOL_BLEED:      	return "C55D54"; // Half way between DK "red" and JEDI_KNIGHT "brown"
-  case SCHOOL_CHAOS:      	return class_color( SITH_MARAUDER );
-  case SCHOOL_FIRE:       	return class_color( SITH_MARAUDER );
-  case SCHOOL_FROST:      	return class_color( SITH_ASSASSIN );
   case SCHOOL_ELEMENTAL:  	return class_color( SITH_SORCERER );
-  case SCHOOL_HOLY:       	return class_color( JEDI_SAGE );
-  case SCHOOL_NATURE:     	return class_color( BH_MERCENARY );
-  case SCHOOL_PHYSICAL:   	return class_color( JEDI_SENTINEL );
   case SCHOOL_KINETIC:     	return class_color( SITH_SORCERER );
-  case SCHOOL_FROSTSTORM:   return "2C6080";
-  case SCHOOL_SPELLSTORM: 	return "8AD0B1"; // Half way between BOUNTY_HUNTER "green" and Mage "blue" (spellstorm = arcane/nature damage)
   case SCHOOL_ENERGY: 	    return "000066";
-  case SCHOOL_SHADOWFLAME:	return "435133";
-  case SCHOOL_SHADOWSTRIKE: return "0099CC";
-  case SCHOOL_NONE:         return "FFFFFF";
+  case SCHOOL_NONE:         return color::white;
   default: return "";
   }
   return 0;
@@ -112,7 +101,7 @@ static const char* stat_color( int type )
   case STAT_HIT_RATING:               return class_color( SITH_JUGGERNAUT );
   case STAT_CRIT_RATING:              return class_color( IA_OPERATIVE );
   case STAT_ALACRITY_RATING:          return class_color( SITH_SORCERER );
-  case STAT_EXPERTISE_RATING:         return school_color( SCHOOL_BLEED );
+  case STAT_EXPERTISE_RATING:         return color::red;
   default:                            return 0;
   }
 }

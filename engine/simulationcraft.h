@@ -309,48 +309,31 @@ enum proc_type
 
 enum action_type { ACTION_USE=0, ACTION_SPELL, ACTION_ATTACK, ACTION_HEAL, ACTION_ABSORB, ACTION_SEQUENCE, ACTION_OTHER, ACTION_MAX };
 
+enum attack_type
+{
+  ATTACK_NONE = 0,
+
+  ATTACK_MELEE, ATTACK_RANGE,
+  ATTACK_FORCE, ATTACK_TECH,
+
+  ATTACK_MAX
+};
+
+#define ATTACK_PHYSICAL_MASK ( ( 1 << ATTACK_MELEE ) | ( 1 << ATTACK_RANGE ) )
+#define ATTACK_SPELL_MASK ( ( 1 << ATTACK_FORCE ) | ( 1 << ATTACK_TECH ) )
+
 enum school_type
 {
   SCHOOL_NONE=0,
-  SCHOOL_ARCANE,      SCHOOL_FIRE,        SCHOOL_FROST,       SCHOOL_HOLY,        SCHOOL_NATURE,
-  SCHOOL_SHADOW,      SCHOOL_PHYSICAL,    SCHOOL_MAX_PRIMARY, SCHOOL_FROSTFIRE,
-  SCHOOL_HOLYSTRIKE,  SCHOOL_FLAMESTRIKE, SCHOOL_HOLYFIRE,    SCHOOL_STORMSTRIKE, SCHOOL_HOLYSTORM,
-  SCHOOL_FIRESTORM,   SCHOOL_FROSTSTRIKE, SCHOOL_HOLYFROST,   SCHOOL_FROSTSTORM,  SCHOOL_SHADOWSTRIKE,
-  SCHOOL_SHADOWLIGHT, SCHOOL_SHADOWFLAME, SCHOOL_SHADOWSTORM, SCHOOL_SHADOWFROST, SCHOOL_SPELLSTRIKE,
-  SCHOOL_DIVINE,      SCHOOL_SPELLFIRE,   SCHOOL_SPELLSTORM,  SCHOOL_SPELLFROST,  SCHOOL_SPELLSHADOW,
-  SCHOOL_CHROMATIC,   SCHOOL_MAGIC,       SCHOOL_CHAOS,       SCHOOL_BLEED,
-  SCHOOL_DRAIN,
 
-  SCHOOL_INTERNAL, SCHOOL_KINETIC, SCHOOL_ELEMENTAL, SCHOOL_ENERGY,
+  SCHOOL_KINETIC,  SCHOOL_ENERGY,
+  SCHOOL_INTERNAL, SCHOOL_ELEMENTAL,
+
   SCHOOL_MAX
 };
 
-const int64_t SCHOOL_ATTACK_MASK = ( ( int64_t( 1 ) << SCHOOL_BLEED )        | ( int64_t( 1 ) << SCHOOL_PHYSICAL )     |
-                                     ( int64_t( 1 ) << SCHOOL_HOLYSTRIKE )   | ( int64_t( 1 ) << SCHOOL_FLAMESTRIKE )  |
-                                     ( int64_t( 1 ) << SCHOOL_STORMSTRIKE )  | ( int64_t( 1 ) << SCHOOL_FROSTSTRIKE )  |
-                                     ( int64_t( 1 ) << SCHOOL_SHADOWSTRIKE ) | ( int64_t( 1 ) << SCHOOL_SPELLSTRIKE )  );
-                                      // SCHOOL_CHAOS should probably be added here too.
-
-const int64_t SCHOOL_SPELL_MASK  ( ( int64_t( 1 ) << SCHOOL_ARCANE )         | ( int64_t( 1 ) << SCHOOL_CHAOS )        |
-                                   ( int64_t( 1 ) << SCHOOL_FIRE )           | ( int64_t( 1 ) << SCHOOL_FROST )        |
-                                   ( int64_t( 1 ) << SCHOOL_FROSTFIRE )      | ( int64_t( 1 ) << SCHOOL_HOLY )         |
-                                   ( int64_t( 1 ) << SCHOOL_NATURE )         | ( int64_t( 1 ) << SCHOOL_SHADOW )       |
-                                   ( int64_t( 1 ) << SCHOOL_HOLYSTRIKE )     | ( int64_t( 1 ) << SCHOOL_FLAMESTRIKE )  |
-                                   ( int64_t( 1 ) << SCHOOL_HOLYFIRE )       | ( int64_t( 1 ) << SCHOOL_STORMSTRIKE )  |
-                                   ( int64_t( 1 ) << SCHOOL_HOLYSTORM )      | ( int64_t( 1 ) << SCHOOL_FIRESTORM )    |
-                                   ( int64_t( 1 ) << SCHOOL_FROSTSTRIKE )    | ( int64_t( 1 ) << SCHOOL_HOLYFROST )    |
-                                   ( int64_t( 1 ) << SCHOOL_FROSTSTORM )     | ( int64_t( 1 ) << SCHOOL_SHADOWSTRIKE ) |
-                                   ( int64_t( 1 ) << SCHOOL_SHADOWLIGHT )    | ( int64_t( 1 ) << SCHOOL_SHADOWFLAME )  |
-                                   ( int64_t( 1 ) << SCHOOL_SHADOWSTORM )    | ( int64_t( 1 ) << SCHOOL_SHADOWFROST )  |
-                                   ( int64_t( 1 ) << SCHOOL_SPELLSTRIKE )    | ( int64_t( 1 ) << SCHOOL_DIVINE )       |
-                                   ( int64_t( 1 ) << SCHOOL_SPELLFIRE )      | ( int64_t( 1 ) << SCHOOL_SPELLSTORM )   |
-                                   ( int64_t( 1 ) << SCHOOL_SPELLFROST )     | ( int64_t( 1 ) << SCHOOL_SPELLSHADOW )  |
-                                   ( int64_t( 1 ) << SCHOOL_ELEMENTAL )      | ( int64_t( 1 ) << SCHOOL_CHROMATIC )    |
-                                   ( int64_t( 1 ) << SCHOOL_MAGIC )          | ( int64_t( 1 ) << SCHOOL_CHAOS )        |
-                                   ( int64_t( 1 ) << SCHOOL_BLEED )          | ( int64_t( 1 ) << SCHOOL_DRAIN )        |
-                                   ( int64_t( 1 ) << SCHOOL_INTERNAL )       | ( int64_t( 1 ) << SCHOOL_KINETIC )      |
-                                   ( int64_t( 1 ) << SCHOOL_ELEMENTAL )      | ( int64_t( 1 ) << SCHOOL_ENERGY )         );
-#define SCHOOL_ALL_MASK    ( int64_t( -1 ) )
+#define SCHOOL_ALL_MASK ( ( 1 << SCHOOL_KINETIC ) | ( 1 << SCHOOL_ENERGY ) | \
+                          ( 1 << SCHOOL_INTERNAL ) | ( 1 << SCHOOL_ELEMENTAL ) )
 
 enum talent_tree_type
 {
@@ -3462,7 +3445,7 @@ struct weapon_t
   timespan_t normalized_weapon_speed() const;
   double proc_chance_on_swing( double PPM, timespan_t adjusted_swing_time=timespan_t::zero ) const;
 
-  weapon_t( int t=WEAPON_NONE, double d=0, timespan_t st=timespan_t::from_seconds( 2.0 ), school_type s=SCHOOL_PHYSICAL ) :
+  weapon_t( int t=WEAPON_NONE, double d=0, timespan_t st=timespan_t::from_seconds( 2.0 ), school_type s=SCHOOL_KINETIC ) :
     type( t ), school( s ), damage( d ), min_dmg( d ), max_dmg( d ), swing_time( st ), slot( SLOT_NONE ), buff_type( 0 ), buff_value( 0 ), bonus_dmg( 0 ) { }
 };
 
@@ -4621,7 +4604,7 @@ struct attack_t : public action_t
 {
   double base_expertise, player_expertise, target_expertise;
 
-  attack_t( const char* n=0, player_t* p=0, int r=RESOURCE_NONE, const school_type s=SCHOOL_PHYSICAL, int t=TREE_NONE, bool special=false );
+  attack_t( const char* n=0, player_t* p=0, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC, int t=TREE_NONE, bool special=false );
 
   // Attack Overrides
   virtual double alacrity() const;
@@ -4648,7 +4631,7 @@ struct attack_t : public action_t
 
 struct spell_t : public action_t
 {
-  spell_t( const char* n=0, player_t* p=0, int r=RESOURCE_NONE, const school_type s=SCHOOL_PHYSICAL, int t=TREE_NONE );
+  spell_t( const char* n=0, player_t* p=0, int r=RESOURCE_NONE, const school_type s=SCHOOL_ENERGY, int t=TREE_NONE );
 
   // Spell Overrides
   virtual double alacrity() const;
@@ -4677,7 +4660,7 @@ private:
   void init_heal_t_();
 
 public:
-  heal_t( const char* n=0, player_t* p=0, int r=RESOURCE_NONE, const school_type s=SCHOOL_HOLY, int t=TREE_NONE );
+  heal_t( const char* n=0, player_t* p=0, int r=RESOURCE_NONE, school_type s=SCHOOL_NONE, int t=TREE_NONE );
 
   virtual void player_buff();
   virtual double alacrity() const;
@@ -4705,7 +4688,7 @@ private:
   void init_absorb_t_();
 
 public:
-  absorb_t( const char* n=0, player_t* p=0, int r=RESOURCE_NONE, const school_type s=SCHOOL_HOLY, int t=TREE_NONE );
+  absorb_t( const char* n=0, player_t* p=0, int r=RESOURCE_NONE, const school_type s=SCHOOL_NONE, int t=TREE_NONE );
 
   virtual void player_buff();
   virtual double alacrity() const;

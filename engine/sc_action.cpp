@@ -852,7 +852,7 @@ void action_t::last_tick( dot_t* d )
 
   d -> ticking = 0;
 
-  if ( school == SCHOOL_BLEED ) target -> debuffs.bleeding -> decrement();
+  //if ( school == SCHOOL_BLEED ) target -> debuffs.bleeding -> decrement();
 }
 
 // action_t::impact =========================================================
@@ -893,7 +893,7 @@ void action_t::impact( player_t* t, int impact_result, double travel_dmg=0 )
       }
       else
       {
-        if ( school == SCHOOL_BLEED ) target -> debuffs.bleeding -> increment();
+        //if ( school == SCHOOL_BLEED ) target -> debuffs.bleeding -> increment();
 
         dot -> schedule_tick();
       }
