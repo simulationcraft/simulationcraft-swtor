@@ -43,7 +43,7 @@ struct shadow_assassin_targetdata_t : public targetdata_t
 {
     dot_t* dots_crushing_darkness;
     dot_t* dots_creeping_terror;
-    dot_t* dots_discharge;
+    dot_t* dots_lightning_discharge;
     
     shadow_assassin_targetdata_t( player_t* source, player_t* target )
         : targetdata_t( source, target )
@@ -57,7 +57,7 @@ void register_shadow_assassin_targetdata( sim_t* sim )
     
     REGISTER_DOT( crushing_darkness, crushing_darkness );
     REGISTER_DOT( creeping_terror, creeping_terror );
-    REGISTER_DOT( discharge, discharge );
+    REGISTER_DOT( lightning_discharge, lightning_discharge );
 }
 
 
@@ -260,7 +260,7 @@ struct shadow_assassin_attack_t : public attack_t
             {
                 p -> buffs.exploit_weakness -> trigger();
             }
-            if ( p -> talents.raze -> rank() > 0 && td -> dots_discharge -> ticking )
+            if ( p -> talents.raze -> rank() > 0 && td -> dots_lightning_discharge -> ticking )
             {
                 p -> buffs.raze -> trigger();
                 if ( p -> buffs.raze -> up() )
@@ -696,7 +696,6 @@ struct discharge_t : public shadow_assassin_spell_t
           may_crit = false;
           tick_zero = true;
           background = true;
-          dual = true;
 
           base_multiplier *= 1 + p -> talents.crackling_charge -> rank() * 0.08;
       }
@@ -725,7 +724,6 @@ struct discharge_t : public shadow_assassin_spell_t
           base_tick_time = timespan_t::from_seconds( 3.0 );
 
           background= true;
-          dual = true;
 
           base_multiplier *= 1 + p -> talents.crackling_charge -> rank() * 0.08;
       }
@@ -737,7 +735,6 @@ struct discharge_t : public shadow_assassin_spell_t
           shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL)
       {
           background= true;
-          dual = true;
 
           // FIME: Implement Dark Discharge
       }
@@ -1506,7 +1503,7 @@ void shadow_assassin_t::init_actions()
               action_list_str += "/recklessness";
               action_list_str += "/death_field";
               action_list_str += "/crushing_darkness,if=buff.raze.react";
-              action_list_str += "/discharge,if=!ticking";
+              action_list_str += "/discharge,if=!dot.lightning_discharge.ticking";
               action_list_str += "/shock,if=buff.unearthed_knowledge.down";
               action_list_str += "/assassinate,if=target.health_pct<=30";
               action_list_str += "/maul,if=buff.exploit_weakness.react";
