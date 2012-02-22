@@ -4483,7 +4483,7 @@ struct action_t
   double min_health_percentage, max_health_percentage;
   int moving, vulnerable, invulnerable, wait_on_ready, interrupt, not_flying, flying;
   bool round_base_dmg;
-  bool class_flag1;
+
   std::string if_expr_str;
   action_expr_t* if_expr;
   std::string interrupt_if_expr_str;

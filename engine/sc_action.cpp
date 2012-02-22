@@ -110,7 +110,6 @@ void action_t::init_action_t_()
   wait_on_ready                  = -1;
   interrupt                      = 0;
   round_base_dmg                 = true;
-  class_flag1                    = false;
   if_expr_str.clear();
   if_expr                        = NULL;
   interrupt_if_expr_str.clear();
