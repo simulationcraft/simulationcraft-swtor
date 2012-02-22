@@ -297,7 +297,7 @@ struct shadow_assassin_attack_t : public attack_t
 
 struct shadow_assassin_spell_t : public spell_t
 {
-    shadow_assassin_spell_t( const char* n, shadow_assassin_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_HOLY, int t=TREE_NONE ) :
+    shadow_assassin_spell_t( const char* n, shadow_assassin_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC, int t=TREE_NONE ) :
         spell_t( n, p, r, s, t )
     {
         may_crit   = true;
@@ -720,7 +720,7 @@ struct discharge_t : public shadow_assassin_spell_t
   struct lightning_discharge_t : public shadow_assassin_spell_t
   {
       lightning_discharge_t(shadow_assassin_t* p, const std::string& n ) :
-          shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_ENERGY)
+          shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_ENERGY )
       {
           td.standardhealthpercentmin = td.standardhealthpercentmax = .038;
           td.power_mod = 0.38;
@@ -897,7 +897,7 @@ struct apply_charge_t : public shadow_assassin_spell_t
 struct low_slash_t : public shadow_assassin_attack_t
 {
   low_slash_t( shadow_assassin_t* p,const std::string& n,const std::string& options_str) :
-    shadow_assassin_attack_t( n.c_str(),p,RESOURCE_FORCE, SCHOOL_PHYSICAL, TREE_NONE )
+    shadow_assassin_attack_t( n.c_str(),p,RESOURCE_FORCE, SCHOOL_KINETIC, TREE_NONE )
   {
     parse_options( 0, options_str );
 
@@ -920,7 +920,7 @@ struct voltaic_slash_t : public shadow_assassin_attack_t
   voltaic_slash_t* second_strike;
 
   voltaic_slash_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str, bool is_second_strike = false) :
-    shadow_assassin_attack_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL ),
+    shadow_assassin_attack_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
     second_strike( 0 )
   {
     parse_options( 0, options_str );
@@ -997,7 +997,7 @@ struct assassinate_t : public shadow_assassin_attack_t
 {
 
   assassinate_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
-    shadow_assassin_attack_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
+    shadow_assassin_attack_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
   {
     parse_options( 0, options_str );
 
@@ -1037,7 +1037,7 @@ struct lacerate_t : public shadow_assassin_attack_t
 {
 
   lacerate_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
-    shadow_assassin_attack_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
+    shadow_assassin_attack_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
   {
     parse_options( 0, options_str );
 
@@ -1107,7 +1107,7 @@ struct force_cloak_t : public shadow_assassin_spell_t
 struct maul_t : public shadow_assassin_attack_t
 {
     maul_t( shadow_assassin_t* p,const std::string& n,const std::string& options_str) :
-        shadow_assassin_attack_t(n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL )
+        shadow_assassin_attack_t(n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
     {
         parse_options( 0, options_str );
 
@@ -1168,7 +1168,7 @@ struct saber_strike_t : public shadow_assassin_attack_t
   saber_strike_t* third_strike;
 
   saber_strike_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str, bool is_consequent_strike = false ) :
-    shadow_assassin_attack_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL ),
+    shadow_assassin_attack_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
     second_strike( 0 ), third_strike( 0 )
   {
     parse_options( 0, options_str );
@@ -1218,7 +1218,7 @@ struct thrash_t : public shadow_assassin_attack_t
   thrash_t* second_strike;
 
   thrash_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str, bool is_second_strike = false ) :
-    shadow_assassin_attack_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_PHYSICAL ),
+    shadow_assassin_attack_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
     second_strike( 0 )
  {
     parse_options( 0, options_str );
