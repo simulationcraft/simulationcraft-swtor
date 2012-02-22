@@ -4424,7 +4424,6 @@ struct action_t
   bool no_buffs, no_debuffs;
   int dot_behavior;
   timespan_t ability_lag, ability_lag_stddev;
-  double rp_gain;
   timespan_t min_gcd, trigger_gcd;
   double range;
   double weapon_power_mod;

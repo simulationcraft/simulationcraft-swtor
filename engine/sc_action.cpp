@@ -45,7 +45,6 @@ void action_t::init_action_t_()
   dot_behavior                   = DOT_CLIP;
   ability_lag                    = timespan_t::zero;
   ability_lag_stddev             = timespan_t::zero;
-  rp_gain                        = 0.0;
   min_gcd                        = timespan_t::zero;
   trigger_gcd                    = player -> base_gcd;
   range                          = -1.0;
@@ -59,7 +58,6 @@ void action_t::init_action_t_()
   player_multiplier              = 1.0;
   player_hit                     = 0.0;
   player_crit                    = 0.0;
-  rp_gain                        = 0.0;
   target_multiplier              = 1.0;
   target_hit                     = 0.0;
   target_crit                    = 0.0;
