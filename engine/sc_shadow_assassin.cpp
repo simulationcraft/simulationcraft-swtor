@@ -457,6 +457,20 @@ struct shock_t : public shadow_assassin_spell_t
         }
     }
 
+    virtual double cost() const
+    {
+      double c = shadow_assassin_spell_t::cost();
+
+      if ( c <= 0 )
+        return 0;
+
+      shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+      c *= 1.0 - p -> buffs.induction -> stack() * 0.25;
+
+      return c;
+    }
+
     virtual void execute()
     {
       shadow_assassin_spell_t::execute();
@@ -765,14 +779,11 @@ struct discharge_t : public shadow_assassin_spell_t
     range = 10.0;
     base_cost = 20.0;
 
-    cooldown -> duration = timespan_t::from_seconds( 15.0 - p -> talents.recirculation -> rank() * 1.5) ;
 
-    if ( p -> talents.crackling_charge -> rank() > 0 )
-        cooldown -> duration -= cooldown -> duration * p -> talents.crackling_charge -> rank() * 0.25 ;
 
     lightning_discharge = new lightning_discharge_t( p, "lightning_discharge" );
-    surging_discharge   = new lightning_discharge_t( p, "surging_discharge" );
-    dark_discharge      = new lightning_discharge_t( p, "dark_discharge" );
+    surging_discharge   = new surging_discharge_t( p, "surging_discharge" );
+    dark_discharge      = new dark_discharge_t( p, "dark_discharge" );
 
     add_child( lightning_discharge );
     add_child( surging_discharge );
@@ -795,6 +806,13 @@ struct discharge_t : public shadow_assassin_spell_t
 
   virtual void execute()
   {
+    shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+    cooldown -> duration = timespan_t::from_seconds( 15.0 - p -> talents.recirculation -> rank() * 1.5 );
+
+    if ( p -> actives.charge == LIGHTNING_CHARGE && p -> talents.crackling_charge -> rank() > 0 )
+        cooldown -> duration -= cooldown -> duration * p -> talents.crackling_charge -> rank() * 0.25 ;
+
     shadow_assassin_spell_t::execute();
 
     shadow_assassin_spell_t* charge_action = choose_charge();
@@ -910,6 +928,8 @@ struct voltaic_slash_t : public shadow_assassin_attack_t
     }
     else
     {
+      check_talent( p -> talents.voltaic_slash -> rank() );
+
       base_cost = 25.0;
 
       cooldown -> duration = timespan_t::from_seconds( 15.0 );
@@ -922,6 +942,12 @@ struct voltaic_slash_t : public shadow_assassin_attack_t
   virtual void execute()
   {
     shadow_assassin_attack_t::execute();
+
+    shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+    // FIXME: Do both hits give a stack of Induction, or only one?
+    if ( p -> actives.charge == SURGING_CHARGE )
+      p -> buffs.induction -> trigger();
 
     if ( second_strike )
     {
@@ -973,6 +999,16 @@ struct assassinate_t : public shadow_assassin_attack_t
     base_cost = 25.0;
     range = 4.0;
     cooldown -> duration = timespan_t::from_seconds( 6.0 );
+  }
+
+  virtual void execute()
+  {
+    shadow_assassin_attack_t::execute();
+
+    shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+    if ( p -> actives.charge == SURGING_CHARGE )
+      p -> buffs.induction -> trigger();
   }
 
   virtual bool ready()
@@ -1207,6 +1243,11 @@ struct thrash_t : public shadow_assassin_attack_t
   {
     shadow_assassin_attack_t::execute();
 
+    shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+    if ( p -> actives.charge == SURGING_CHARGE )
+      p -> buffs.induction -> trigger();
+
     if ( second_strike )
     {
       second_strike -> execute();
@@ -1263,6 +1304,9 @@ struct lightning_charge_callback_t : public action_callback_t
     if ( p -> actives.charge != LIGHTNING_CHARGE )
       return;
 
+    if ( lightning_charge_damage_proc -> cooldown -> remains() > timespan_t::zero )
+      return;
+
     lightning_charge_damage_proc -> execute();
   }
 };
@@ -1283,6 +1327,24 @@ struct surging_charge_callback_t : public action_callback_t
           proc = true;
           background = true;
           cooldown -> duration = timespan_t::from_seconds( 1.5 );
+      }
+
+      virtual void player_buff()
+      {
+        shadow_assassin_spell_t::player_buff();
+
+        shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+        player_multiplier += p -> buffs.static_charges -> stack() * 0.06;
+      }
+
+      virtual void execute()
+      {
+        shadow_assassin_spell_t::execute();
+
+        shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+        p -> buffs.static_charges -> trigger( 1 );
       }
   };
 
@@ -1307,6 +1369,9 @@ struct surging_charge_callback_t : public action_callback_t
     shadow_assassin_t* p = listener -> cast_shadow_assassin();
 
     if ( p -> actives.charge != SURGING_CHARGE )
+      return;
+
+    if ( surging_charge_damage_proc -> cooldown -> remains() > timespan_t::zero )
       return;
 
     surging_charge_damage_proc -> execute();
@@ -1358,6 +1423,9 @@ struct dark_charge_callback_t : public action_callback_t
     shadow_assassin_t* p = listener -> cast_shadow_assassin();
 
     if ( p -> actives.charge != DARK_CHARGE )
+      return;
+
+    if ( dark_charge_damage_proc -> cooldown -> remains() > timespan_t::zero )
       return;
 
     dark_charge_damage_proc -> execute();
@@ -1530,7 +1598,7 @@ void shadow_assassin_t::init_buffs()
 
     buffs.exploit_weakness = new buff_t( this, "exploit_weakness", 1, timespan_t::from_seconds( 10.0 ), timespan_t::from_seconds( 10.0 ) );
     buffs.dark_embrace = new buff_t( this, "dark_embrace", 1, timespan_t::from_seconds( 6.0 ), timespan_t::zero );
-    buffs.induction = new buff_t( this, "induction", 2, timespan_t::from_seconds( 10.0 ), timespan_t::zero );
+    buffs.induction = new buff_t( this, "induction", 2, timespan_t::from_seconds( 10.0 ), timespan_t::zero, talents.induction -> rank() * 0.5 );
     buffs.voltaic_slash = new buff_t( this, "voltaic_slash", 2, timespan_t::from_seconds( 10.0 ), timespan_t::zero );
     buffs.static_charges = new buff_t( this, "static_charges", 5, timespan_t::from_seconds( 30.0 ), timespan_t::zero );
     buffs.exploitive_strikes = new buff_t( this, "exploitive_strikes", 1, timespan_t::from_seconds( 10.0 ), timespan_t::zero );
@@ -1646,7 +1714,7 @@ void shadow_assassin_t::init_actions()
 
 
             case TREE_DECEPTION:
-              action_list_str += "/apply_charge,type=lightning";
+              action_list_str += "/apply_charge,type=surging";
               action_list_str += "/power_potion";
               action_list_str += "/recklessness";
               action_list_str += "/assassinate";

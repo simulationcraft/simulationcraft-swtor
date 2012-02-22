@@ -11,7 +11,7 @@ talents=http://www.torhead.com/skill-calc#200McZhGMRkhMrtzZcM.1
 actions=stim,type=exotech_resolve
 actions+=/mark_of_power
 actions+=/snapshot_stats
-actions+=/apply_charge,type=lightning
+actions+=/apply_charge,type=surging
 actions+=/power_potion
 actions+=/recklessness
 actions+=/assassinate
