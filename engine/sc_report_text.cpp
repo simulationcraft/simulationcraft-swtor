@@ -55,13 +55,6 @@ static void print_text_action( FILE* file, stats_t* s, int max_name_length=0 )
                      s -> direct_results[ RESULT_CRIT ].actual_amount.max,
                      s -> direct_results[ RESULT_CRIT ].pct );
   }
-  if ( s -> direct_results[ RESULT_GLANCE ].actual_amount.mean > 0 )
-  {
-    util_t::fprintf( file,
-                     "  Glance=%4.0f|%.1f%%",
-                     s -> direct_results[ RESULT_GLANCE ].actual_amount.mean,
-                     s -> direct_results[ RESULT_GLANCE ].pct );
-  }
   if ( s -> direct_results[ RESULT_DODGE ].count.mean > 0 )
   {
     util_t::fprintf( file,

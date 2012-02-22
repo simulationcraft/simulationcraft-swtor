@@ -229,7 +229,6 @@ struct jedi_sage_attack_t : public attack_t
     attack_t( n, p, r, s, t )
   {
     may_crit   = true;
-    may_glance = false;
   }
 };
 

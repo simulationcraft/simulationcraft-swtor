@@ -278,11 +278,11 @@ enum result_type
   RESULT_UNKNOWN=-1,
   RESULT_NONE=0,
   RESULT_MISS,  RESULT_DODGE, RESULT_PARRY,
-  RESULT_BLOCK, RESULT_CRIT_BLOCK, RESULT_GLANCE, RESULT_CRIT, RESULT_HIT,
+  RESULT_BLOCK, RESULT_CRIT_BLOCK, RESULT_CRIT, RESULT_HIT,
   RESULT_MAX
 };
 
-#define RESULT_HIT_MASK  ( (1<<RESULT_GLANCE) | (1<<RESULT_BLOCK) | (1<<RESULT_CRIT_BLOCK) | (1<<RESULT_CRIT) | (1<<RESULT_HIT) )
+#define RESULT_HIT_MASK  ( (1<<RESULT_BLOCK) | (1<<RESULT_CRIT_BLOCK) | (1<<RESULT_CRIT) | (1<<RESULT_HIT) )
 #define RESULT_CRIT_MASK ( (1<<RESULT_CRIT) )
 #define RESULT_MISS_MASK ( (1<<RESULT_MISS) )
 #define RESULT_NONE_MASK ( (1<<RESULT_NONE) )
@@ -4419,7 +4419,7 @@ struct action_t
   int resource, tree, result, aoe;
   bool dual, callbacks, special, channeled, background, sequence, use_off_gcd;
   bool direct_tick, repeating, harmful, proc, item_proc, proc_ignores_slot, discharge_proc, auto_cast, initialized;
-  bool may_hit, may_miss, may_dodge, may_parry, may_glance, may_block, may_crush, may_crit;
+  bool may_hit, may_miss, may_dodge, may_parry, may_block, may_crush, may_crit;
   bool tick_may_crit, tick_zero, hasted_ticks;
   bool no_buffs, no_debuffs;
   int dot_behavior;
@@ -4561,7 +4561,6 @@ public:
   virtual double   miss_chance( int /* delta_level */ ) const { return 0; }
   virtual double  dodge_chance( int /* delta_level */ ) const { return 0; }
   virtual double  parry_chance( int /* delta_level */ ) const { return 0; }
-  virtual double glance_chance( int /* delta_level */ ) const { return 0; }
   virtual double  block_chance( int /* delta_level */ ) const { return 0; }
   virtual double   crit_chance( int /* delta_level */ ) const { return 0; }
 
@@ -4641,7 +4640,6 @@ struct attack_t : public action_t
   virtual double   miss_chance( int delta_level ) const;
   virtual double  dodge_chance( int delta_level ) const;
   virtual double  parry_chance( int delta_level ) const;
-  virtual double glance_chance( int delta_level ) const;
   virtual double  block_chance( int delta_level ) const;
   virtual double  crit_block_chance( int delta_level ) const;
   virtual double   crit_chance( int delta_level ) const;
@@ -5701,13 +5699,6 @@ struct ability_t : public action_t
   {
     if ( weapon )
       return calculate_attack_parry_chance( target );
-    else
-      return 0;
-  }
-  virtual double calculate_glance_chance( actor_t* target )
-  {
-    if ( weapon && auto_attack )
-      return calculate_attack_glance_chance( target );
     else
       return 0;
   }

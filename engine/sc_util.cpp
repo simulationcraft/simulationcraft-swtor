@@ -502,7 +502,6 @@ const char* util_t::result_type_string( int type )
   case RESULT_DODGE:  return "dodge";
   case RESULT_PARRY:  return "parry";
   case RESULT_BLOCK:  return "block";
-  case RESULT_GLANCE: return "glance";
   case RESULT_CRIT:   return "crit";
   case RESULT_CRIT_BLOCK: return "crit-block";
   case RESULT_HIT:    return "hit";

@@ -240,7 +240,6 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
            "\t\t\t\t\t\t\t\t<td class=\"right small\">%.1f%%</td>\n"
            "\t\t\t\t\t\t\t\t<td class=\"right small\">%.1f%%</td>\n"
            "\t\t\t\t\t\t\t\t<td class=\"right small\">%.1f%%</td>\n"
-           "\t\t\t\t\t\t\t\t<td class=\"right small\">%.1f%%</td>\n"
            "\t\t\t\t\t\t\t\t<td class=\"right small\">%.0f</td>\n"
            "\t\t\t\t\t\t\t\t<td class=\"right small\">%.0f</td>\n"
            "\t\t\t\t\t\t\t\t<td class=\"right small\">%.0f</td>\n"
@@ -261,7 +260,6 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
            s -> direct_results[ RESULT_MISS ].pct +
            s -> direct_results[ RESULT_DODGE  ].pct +
            s -> direct_results[ RESULT_PARRY  ].pct,
-           s -> direct_results[ RESULT_GLANCE ].pct,
            s -> direct_results[ RESULT_BLOCK  ].pct,
            s -> num_ticks,
            s -> tick_results[ RESULT_HIT  ].actual_amount.mean,
@@ -2118,7 +2116,6 @@ static void print_html_player_abilities( FILE* file, sim_t* sim, player_t* p, st
            "\t\t\t\t\t\t\t\t<th class=\"small\"><a href=\"#help-max\" class=\"help\">Max</a></th>\n"
            "\t\t\t\t\t\t\t\t<th class=\"small\"><a href=\"#help-crit-pct\" class=\"help\">Crit%%</a></th>\n"
            "\t\t\t\t\t\t\t\t<th class=\"small\"><a href=\"#help-miss-pct\" class=\"help\">Avoid%%</a></th>\n"
-           "\t\t\t\t\t\t\t\t<th class=\"small\"><a href=\"#help-glance-pct\" class=\"help\">G%%</a></th>\n"
            "\t\t\t\t\t\t\t\t<th class=\"small\"><a href=\"#help-block-pct\" class=\"help\">B%%</a></th>\n"
            "\t\t\t\t\t\t\t\t<th class=\"small\"><a href=\"#help-ticks\" class=\"help\">Ticks</a></th>\n"
            "\t\t\t\t\t\t\t\t<th class=\"small\"><a href=\"#help-ticks-hit\" class=\"help\">T-Hit</a></th>\n"

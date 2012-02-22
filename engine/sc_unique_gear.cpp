@@ -166,7 +166,6 @@ struct discharge_proc_callback_t : public action_callback_t
         may_crit = ( s != SCHOOL_DRAIN ) && ! no_crit;
         may_dodge = ( s == SCHOOL_PHYSICAL && ! no_crit );
         may_parry = ( s == SCHOOL_PHYSICAL && ! no_crit && ( p -> position == POSITION_FRONT || p -> position == POSITION_RANGED_FRONT ) );
-        may_glance = false;
         background  = true;
         no_buffs = nb;
         no_debuffs = nd;
@@ -289,7 +288,6 @@ struct chance_discharge_proc_callback_t : public action_callback_t
         may_crit = ( s != SCHOOL_DRAIN ) && ! no_crit;
         may_dodge = ( s == SCHOOL_PHYSICAL && ! no_crit );
         may_parry = ( s == SCHOOL_PHYSICAL && ! no_crit && ( p -> position == POSITION_FRONT || p -> position == POSITION_RANGED_FRONT ) );
-        may_glance = false;
         background  = true;
         no_buffs = nb;
         no_debuffs = nd;
@@ -414,7 +412,6 @@ struct stat_discharge_proc_callback_t : public action_callback_t
         may_crit = ( s != SCHOOL_DRAIN ) && ! no_crit;
         may_dodge = ( s == SCHOOL_PHYSICAL && ! no_crit );
         may_parry = ( s == SCHOOL_PHYSICAL && ! no_crit && ( p -> position == POSITION_FRONT || p -> position == POSITION_RANGED_FRONT ) );
-        may_glance = false;
         background  = true;
         no_buffs = nb;
         no_debuffs = nd;

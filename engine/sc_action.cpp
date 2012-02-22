@@ -35,7 +35,6 @@ void action_t::init_action_t_()
   may_miss                       = false;
   may_dodge                      = false;
   may_parry                      = false;
-  may_glance                     = false;
   may_block                      = false;
   may_crush                      = false;
   may_crit                       = false;
@@ -80,12 +79,12 @@ void action_t::init_action_t_()
   base_dd_adder                  = 0.0;
   player_dd_adder                = 0.0;
   target_dd_adder                = 0.0;
-  player_alacrity                   = 1.0;
+  player_alacrity                = 1.0;
   resource_consumed              = 0.0;
   direct_dmg                     = 0.0;
   tick_dmg                       = 0.0;
   snapshot_crit                  = 0.0;
-  snapshot_alacrity                 = 1.0;
+  snapshot_alacrity              = 1.0;
   num_ticks                      = 0;
   weapon                         = NULL;
   weapon_multiplier              = 1.0;
@@ -100,8 +99,8 @@ void action_t::init_action_t_()
   time_to_travel                 = timespan_t::zero;
   travel_speed                   = 0.0;
   bloodlust_active               = 0;
-  max_alacrity                      = 0.0;
-  alacrity_gain_percentage          = 0.0;
+  max_alacrity                   = 0.0;
+  alacrity_gain_percentage       = 0.0;
   min_current_time               = timespan_t::zero;
   max_current_time               = timespan_t::zero;
   min_health_percentage          = 0.0;
@@ -336,7 +335,7 @@ void action_t::parse_options( option_t*          options,
   {
     { "bloodlust",              OPT_BOOL,   &bloodlust_active      },
     { "alacrity<",              OPT_FLT,    &max_alacrity             },
-    { "alacrity_gain_percentage>", OPT_FLT,    &alacrity_gain_percentage },
+    { "alacrity_gain_percentage>", OPT_FLT, &alacrity_gain_percentage },
     { "health_percentage<",     OPT_FLT,    &max_health_percentage },
     { "health_percentage>",     OPT_FLT,    &min_health_percentage },
     { "if",                     OPT_STRING, &if_expr_str           },
@@ -511,8 +510,8 @@ void action_t::target_debuff( player_t* t, int /* dmg_type */ )
 
 void action_t::snapshot()
 {
-  snapshot_crit    = total_crit();
-  snapshot_alacrity   = alacrity();
+  snapshot_crit     = total_crit();
+  snapshot_alacrity = alacrity();
 }
 
 // action_t::result_is_hit ==================================================
@@ -523,7 +522,6 @@ bool action_t::result_is_hit( int r ) const
 
   return( r == RESULT_HIT        ||
           r == RESULT_CRIT       ||
-          r == RESULT_GLANCE     ||
           r == RESULT_BLOCK      ||
           r == RESULT_CRIT_BLOCK ||
           r == RESULT_NONE       );
@@ -669,37 +667,7 @@ double action_t::calculate_direct_damage( int chain_target )
 
   double init_direct_dmg = dmg;
 
-  if ( result == RESULT_GLANCE )
-  {
-    double delta_skill = ( target -> level - player -> level ) * 5.0;
-
-    if ( delta_skill < 0.0 )
-      delta_skill = 0.0;
-
-    double max_glance = 1.3 - 0.03 * delta_skill;
-
-    if ( max_glance > 0.99 )
-      max_glance = 0.99;
-    else if ( max_glance < 0.2 )
-      max_glance = 0.20;
-
-    double min_glance = 1.4 - 0.05 * delta_skill;
-
-    if ( min_glance > 0.91 )
-      min_glance = 0.91;
-    else if ( min_glance < 0.01 )
-      min_glance = 0.01;
-
-    if ( min_glance > max_glance )
-    {
-      double temp = min_glance;
-      min_glance = max_glance;
-      max_glance = temp;
-    }
-
-    dmg *= sim -> range( min_glance, max_glance ); // 0.75 against +3 targets.
-  }
-  else if ( result == RESULT_CRIT )
+  if ( result == RESULT_CRIT )
   {
     dmg *= 1.0 + total_crit_bonus();
   }
