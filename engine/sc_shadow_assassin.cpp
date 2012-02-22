@@ -758,6 +758,7 @@ struct discharge_t : public shadow_assassin_spell_t
           background= true;
 
           base_multiplier *= 1 + p -> talents.crackling_charge -> rank() * 0.08;
+          player_multiplier += p -> buffs.static_charges -> stack() * 0.06;
           crit_bonus += p -> talents.crackling_blasts -> rank() * 0.10;
       }
   };
@@ -819,7 +820,10 @@ struct discharge_t : public shadow_assassin_spell_t
 
     if ( p -> actives.charge == LIGHTNING_CHARGE && p -> talents.crackling_charge -> rank() > 0 )
         cooldown -> duration -= cooldown -> duration * p -> talents.crackling_charge -> rank() * 0.25 ;
-
+    
+    if ( p -> actives.charge == SURGING_CHARGE)
+          p -> buffs.static_charges -> expire();
+          
     shadow_assassin_spell_t::execute();
 
     shadow_assassin_spell_t* charge_action = choose_charge();
@@ -1352,8 +1356,6 @@ struct surging_charge_callback_t : public action_callback_t
         shadow_assassin_spell_t::player_buff();
 
         shadow_assassin_t* p = player -> cast_shadow_assassin();
-
-        player_multiplier += p -> buffs.static_charges -> stack() * 0.06;
 
         player_multiplier += p -> buffs.overcharge_saber -> up() * 1.0;
       }
