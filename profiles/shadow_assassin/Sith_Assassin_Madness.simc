@@ -16,6 +16,7 @@ actions+=/power_potion
 actions+=/recklessness
 actions+=/death_field
 actions+=/crushing_darkness,if=buff.raze.react
+actions+=/discharge,if=!ticking
 actions+=/shock,if=buff.unearthed_knowledge.down
 actions+=/assassinate,if=target.health_pct<=30
 actions+=/maul,if=buff.exploit_weakness.react
