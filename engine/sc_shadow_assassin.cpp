@@ -94,6 +94,7 @@ struct shadow_assassin_t : public player_t
         gain_t* parasitism;
         gain_t* dark_embrace;
         gain_t* calculating_mind;
+        gain_t* rakata_stalker_2pc;
     } gains;
 
     // Procs
@@ -414,7 +415,7 @@ struct shock_t : public shadow_assassin_spell_t
     shock_t* chain_shock;
 
     shock_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str, bool is_chain_shock = false ) :
-        shadow_assassin_spell_t( ( n + std::string( is_chain_shock ? "_chain_shock" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
+        shadow_assassin_spell_t( ( n + std::string( is_chain_shock ? "_chain_shock" : "" ) ).c_str(), p, RESOURCE_FORCE, SCHOOL_ENERGY),
         chain_shock( 0 )
     {
         static const int ranks[] = { 1, 4, 7, 11, 14, 17, 23, 34, 47, 50 };
@@ -482,6 +483,8 @@ struct shock_t : public shadow_assassin_spell_t
       shadow_assassin_t* p = player -> cast_shadow_assassin();
 
       p -> buffs.unearthed_knowledge -> trigger();
+      p -> buffs.voltaic_slash -> expire();
+      p -> buffs.induction -> expire();
 
       if ( chain_shock )
       {
@@ -496,7 +499,7 @@ struct shock_t : public shadow_assassin_spell_t
 struct force_lightning_t : public shadow_assassin_spell_t
 {
     force_lightning_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
-        shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
+        shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_ENERGY )
     {
         static const int ranks[] = { 2, 5, 8, 11, 14, 19, 27, 39, 50 };
         range::copy( ranks, std::back_inserter( rank_level_list ) );
@@ -820,7 +823,7 @@ struct discharge_t : public shadow_assassin_spell_t
 
     if ( p -> actives.charge == LIGHTNING_CHARGE && p -> talents.crackling_charge -> rank() > 0 )
         cooldown -> duration -= cooldown -> duration * p -> talents.crackling_charge -> rank() * 0.25 ;
-    
+        
     if ( p -> actives.charge == SURGING_CHARGE)
           p -> buffs.static_charges -> expire();
           
@@ -938,7 +941,7 @@ struct voltaic_slash_t : public shadow_assassin_attack_t
     {
       background = true;
       dual = true;
-      base_execute_time = timespan_t::from_seconds( 0.1 ); // Add correct delta timing for second attack here.
+      base_execute_time = timespan_t::from_seconds( 0.3 );
     }
     else
     {
@@ -957,7 +960,6 @@ struct voltaic_slash_t : public shadow_assassin_attack_t
 
     shadow_assassin_t* p = player -> cast_shadow_assassin();
 
-    // FIXME: Do both hits give a stack of Induction, or only one?
     if ( p -> actives.charge == SURGING_CHARGE )
       p -> buffs.induction -> trigger();
 
@@ -966,6 +968,16 @@ struct voltaic_slash_t : public shadow_assassin_attack_t
       p -> buffs.voltaic_slash -> trigger( 1 );
       second_strike -> schedule_execute();
     }
+  }
+  
+  virtual void player_buff()
+  {
+    shadow_assassin_attack_t::player_buff();
+
+    shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+    if ( p -> set_bonus.rakata_stalkers ->four_pc() )
+        player_crit += 0.15 ;
   }
 };
 
@@ -1203,6 +1215,10 @@ struct saber_strike_t : public shadow_assassin_attack_t
   virtual void execute()
   {
     shadow_assassin_attack_t::execute();
+    
+    shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+    p -> resource_gain( RESOURCE_FORCE, 1 , p -> gains.rakata_stalker_2pc );
 
     if ( second_strike )
     {
@@ -1242,7 +1258,7 @@ struct thrash_t : public shadow_assassin_attack_t
     {
       background = true;
       dual = true;
-      base_execute_time = timespan_t::from_seconds( 0.1 ); // Add correct delta timing for second attack here.
+      base_execute_time = timespan_t::from_seconds( 0.5 ); // Add correct delta timing for second attack here.
     }
     else
     {
@@ -1266,6 +1282,16 @@ struct thrash_t : public shadow_assassin_attack_t
     {
       second_strike -> schedule_execute();
     }
+  }
+  
+  virtual void player_buff()
+  {
+    shadow_assassin_attack_t::player_buff();
+
+    shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+    if ( p -> set_bonus.rakata_stalkers -> four_pc() )
+        player_crit += 0.15 ;
   }
 };
 
@@ -1656,6 +1682,7 @@ void shadow_assassin_t::init_gains()
     gains.dark_embrace     = get_gain( "dark_embrace"     );
     gains.parasitism       = get_gain( "parasitism"       );
     gains.calculating_mind = get_gain( "calculating_mind" );
+    gains.rakata_stalker_2pc = get_gain( "rakata_stalker_2pc" );
 }
 
 // shadow_assassin_t::init_procs =======================================================
@@ -1829,6 +1856,12 @@ int shadow_assassin_t::primary_role() const
 void shadow_assassin_t::regen( timespan_t periodicity )
 {
     player_t::regen( periodicity );
+    
+    if ( buffs.dark_embrace -> up() )
+    {
+       double force_regen = periodicity.total_seconds() * force_regen_per_second() * buffs.dark_embrace -> check() * talents.dark_embrace -> rank() * 0.25;
+       resource_gain( RESOURCE_FORCE, force_regen, gains.dark_embrace );
+    }
 }
 
 // shadow_assassin_t::composite_spell_power ==================================================
