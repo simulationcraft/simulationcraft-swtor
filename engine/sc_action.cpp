@@ -10,47 +10,75 @@
 // Action
 // ==========================================================================
 
-namespace {
 
 // Attack policies ==========================================================
+
+class action_t::attack_policy_t
+{
+public:
+  virtual double acccuracy( const player_t& source ) const = 0;
+  virtual double avoidance( const player_t& target ) const = 0;
+  virtual double crit_chance( const player_t& source ) const = 0;
+  virtual double power_bonus( const player_t& source ) const = 0;
+  virtual bool   can_shield() const = 0;
+};
+
+namespace {
 
 class physical_policy_t : public action_t::attack_policy_t
 {
 public:
-  bool can_shield( const actor_pair_t& ) const { return true; }
+  bool can_shield() const { return true; }
 };
 
 class melee_policy_t : public physical_policy_t
-{};
+{
+public:
+  double power_bonus( const player_t& player ) const
+  { return player.composite_melee_damage_bonus(); }
+};
 
 class range_policy_t : public physical_policy_t
-{};
+{
+public:
+  double power_bonus( const player_t& player ) const
+  { return player.composite_range_damage_bonus(); }
+};
 
 class spell_policy_t : public action_t::attack_policy_t
 {
 public:
-  bool can_shield( const actor_pair_t& ) const { return false; }
+  bool can_shield() const { return false; }
 };
 
 class force_policy_t : public spell_policy_t
 {
 public:
-  double power_bonus( const actor_pair_t& actors ) const
-  { return actors.source -> composite_force_damage_bonus(); }
+  double power_bonus( const player_t& player ) const
+  { return player.composite_force_damage_bonus(); }
 };
 
 class force_heal_policy_t : public spell_policy_t
 {
 public:
-  double avoidance( const actor_pair_t & ) const { return 0; }
+  double avoidance( const player_t& ) const { return 0; }
+  double power_bonus( const player_t& player ) const
+  { return player.composite_force_healing_bonus(); }
 };
 
-class tech_policy_t : public spell_policy_t {};
+class tech_policy_t : public spell_policy_t
+{
+public:
+  double power_bonus( const player_t& player ) const
+  { return player.composite_tech_damage_bonus(); }
+};
 
 class tech_heal_policy_t : public spell_policy_t
 {
 public:
-  double avoidance( const actor_pair_t & ) const { return 0; }
+  double avoidance( const player_t & ) const { return 0; }
+  double power_bonus( const player_t& player ) const
+  { return player.composite_tech_healing_bonus(); }
 };
 
 const melee_policy_t the_melee_policy;

@@ -4009,6 +4009,7 @@ struct player_t : public noncopyable
 
   virtual double composite_power() const;
   virtual double composite_force_power() const;
+  virtual double composite_tech_power() const;
 
   virtual double energy_regen_per_second() const;
   virtual double ammo_regen_per_second() const;
@@ -4042,31 +4043,38 @@ struct player_t : public noncopyable
 
   virtual double matching_gear_multiplier( const attribute_type /* attr */ ) const { return 0; }
 
-  virtual double composite_player_multiplier   ( const school_type school, action_t* a = NULL ) const;
+  virtual double composite_player_multiplier( const school_type school, action_t* a = NULL ) const;
   virtual double composite_player_dd_multiplier( const school_type /* school */, action_t* /* a */ = NULL ) const { return 1; }
   virtual double composite_player_td_multiplier( const school_type school, action_t* a = NULL ) const;
 
-  virtual double composite_player_heal_multiplier   ( const school_type school ) const;
+  virtual double composite_player_heal_multiplier( const school_type school ) const;
   virtual double composite_player_dh_multiplier( const school_type /* school */ ) const { return 1; }
   virtual double composite_player_th_multiplier( const school_type school ) const;
 
-  virtual double composite_player_absorb_multiplier   ( const school_type school ) const;
+  virtual double composite_player_absorb_multiplier( const school_type school ) const;
 
   virtual double composite_movement_speed() const;
 
-  virtual double composite_force_damage_bonus() const;
-
 private:
+  double composite_damage_bonus( attribute_type main_attr, double extra_power=0 ) const;
+  double composite_healing_bonus( attribute_type main_attr, double extra_power=0 ) const;
   double get_stat_helper( attribute_type a ) const
   { return attribute[ a ] * composite_attribute_multiplier( a ); }
 
 public:
-  virtual double strength() const;
-  virtual double aim() const;
-  virtual double cunning() const;
-  virtual double willpower() const;
-  virtual double endurance() const;
-  virtual double presence() const;
+  virtual double composite_melee_damage_bonus() const;
+  virtual double composite_range_damage_bonus() const;
+  virtual double composite_force_damage_bonus() const;
+  virtual double composite_tech_damage_bonus() const;
+  virtual double composite_force_healing_bonus() const;
+  virtual double composite_tech_healing_bonus() const;
+
+  double strength() const { return get_stat_helper( ATTR_STRENGTH ); }
+  double aim() const { return get_stat_helper( ATTR_AIM ); }
+  double cunning() const { return get_stat_helper( ATTR_CUNNING ); }
+  double willpower() const { return get_stat_helper( ATTR_WILLPOWER ); }
+  double endurance() const { return get_stat_helper( ATTR_ENDURANCE ); }
+  double presence() const { return get_stat_helper( ATTR_PRESENCE ); }
 
   virtual void      interrupt();
   virtual void      halt();
@@ -4379,20 +4387,14 @@ struct stats_t
 
 struct action_t
 {
-  class attack_policy_t
-  {
-  public:
-    virtual double acccuracy( const actor_pair_t& actors ) const = 0;
-    virtual double avoidance( const actor_pair_t& actors ) const = 0;
-    virtual double crit_chance( const actor_pair_t& actors ) const = 0;
-    virtual double power_bonus( const actor_pair_t& actors ) const = 0;
-    virtual bool   can_shield( const actor_pair_t& actors ) const = 0;
-  };
+  class attack_policy_t;
 
   static const attack_policy_t* melee_policy;
   static const attack_policy_t* range_policy;
   static const attack_policy_t* force_policy;
   static const attack_policy_t* tech_policy;
+  static const attack_policy_t* force_heal_policy;
+  static const attack_policy_t* tech_heal_policy;
 
   sim_t* const sim;
   const int type;
