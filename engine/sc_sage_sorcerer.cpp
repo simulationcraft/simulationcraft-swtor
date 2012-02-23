@@ -408,7 +408,7 @@ struct project_t : public jedi_sage_spell_t
     upheaval( 0 )
   {
     static const int ranks[] = { 1, 4, 7, 11, 14, 17, 23, 34, 47, 50 };
-    range::copy( ranks, std::back_inserter( rank_level_list ) );
+    rank_level_list = util_t::array_to_vector( ranks );
 
     parse_options( 0, options_str );
 
@@ -465,7 +465,8 @@ struct telekinetic_throw_t : public jedi_sage_spell_t
     is_buffed_by_psychic_projection( false )
   {
     static const int ranks[] = { 2, 5, 8, 11, 14, 19, 27, 39, 50 };
-    range::copy( ranks, std::back_inserter( rank_level_list ) );
+    rank_level_list = util_t::array_to_vector( ranks );
+
 
     parse_options( 0, options_str );
 
@@ -562,7 +563,7 @@ struct disturbance_t : public jedi_sage_spell_t
     tm( 0 )
   {
     static const int ranks[] = { 10, 13, 16, 25, 36, 45, 50 };
-    range::copy( ranks, std::back_inserter( rank_level_list ) );
+    rank_level_list = util_t::array_to_vector( ranks );
 
     parse_options( 0, options_str );
 
@@ -636,7 +637,7 @@ struct mind_crush_t : public jedi_sage_spell_t
       jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
     {
       static const int ranks[] = { 14, 19, 30, 41, 50 };
-      range::copy( ranks, std::back_inserter( rank_level_list ) );
+      rank_level_list = util_t::array_to_vector( ranks );
 
       td.standardhealthpercentmin = td.standardhealthpercentmax = .0295;
       td.power_mod = 0.295;
@@ -703,7 +704,7 @@ struct weaken_mind_t : public jedi_sage_spell_t
     jedi_sage_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
   {
     static const int ranks[] = { 16, 22, 33, 44, 50 };
-    range::copy( ranks, std::back_inserter( rank_level_list ) );
+    rank_level_list = util_t::array_to_vector( ranks );
 
     parse_options( 0, options_str );
 
