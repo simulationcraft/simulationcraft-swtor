@@ -1816,7 +1816,7 @@ void shadow_assassin_t::init_actions()
               action_list_str += "/overcharge_saber";
               action_list_str += "/assassinate";
               action_list_str += "/maul,if=buff.exploit_weakness.react";
-              action_list_str += "/discharge,if=buff.static_charges>0";
+              action_list_str += "/discharge,if=buff.static_charges.stack>0";
               action_list_str += "/shock,if=buff.induction.stack=2";
               action_list_str += "/voltaic_slash";
               action_list_str += "/saber_strike";
