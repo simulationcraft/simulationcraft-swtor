@@ -1785,6 +1785,9 @@ void shadow_assassin_t::init_actions()
             action_list_str += "/mark_of_power";
             action_list_str += "/snapshot_stats";
 
+            if ( talents.dark_embrace -> rank() )
+              action_list_str += "/stealth";
+
             switch ( primary_tree() )
             {
             case TREE_MADNESS:
@@ -1804,11 +1807,18 @@ void shadow_assassin_t::init_actions()
 
               break;
 
-
             case TREE_DECEPTION:
               action_list_str += "/apply_charge,type=surging";
               action_list_str += "/power_potion";
               action_list_str += "/recklessness";
+
+              if ( talents.dark_embrace -> rank() )
+              {
+                if ( talents.darkswell -> rank() )
+                  action_list_str += "/blackout,if=buff.dark_embrace.down";
+                action_list_str += "/force_cloak,if=buff.dark_embrace.down";
+              }
+
               action_list_str += "/overcharge_saber";
               action_list_str += "/assassinate";
               action_list_str += "/maul,if=buff.exploit_weakness.react";
