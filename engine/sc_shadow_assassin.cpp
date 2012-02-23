@@ -1300,12 +1300,12 @@ struct thrash_t : public shadow_assassin_attack_t
 
     shadow_assassin_t* p = player -> cast_shadow_assassin();
 
-    if ( p -> actives.charge == SURGING_CHARGE )
-      p -> buffs.induction -> trigger();
-
     if ( second_strike )
     {
       second_strike -> schedule_execute();
+      
+      if ( p -> actives.charge == SURGING_CHARGE )
+        p -> buffs.induction -> trigger();
     }
   }
   
@@ -1784,8 +1784,8 @@ void shadow_assassin_t::init_actions()
               if ( talents.dark_embrace -> rank() )
               {
                 if ( talents.darkswell -> rank() )
-                  action_list_str += "/blackout,if=buff.dark_embrace.down";
-                action_list_str += "/force_cloak,if=buff.dark_embrace.down";
+                  action_list_str += "/blackout,if=buff.dark_embrace.down&force<60";
+                action_list_str += "/force_cloak,if=buff.dark_embrace.down&force<60";
               }
 
               action_list_str += "/overcharge_saber";
@@ -1793,7 +1793,7 @@ void shadow_assassin_t::init_actions()
               action_list_str += "/crushing_darkness,if=buff.raze.react";
               action_list_str += "/discharge,if=!dot.lightning_discharge.ticking";
               action_list_str += "/shock,if=buff.unearthed_knowledge.down";
-              action_list_str += "/assassinate,if=target.health_pct<=30";
+              action_list_str += "/assassinate";
               action_list_str += "/maul,if=buff.exploit_weakness.react";
               action_list_str += "/creeping_terror,if=!ticking";
               action_list_str += "/thrash";
@@ -1809,14 +1809,14 @@ void shadow_assassin_t::init_actions()
               if ( talents.dark_embrace -> rank() )
               {
                 if ( talents.darkswell -> rank() )
-                  action_list_str += "/blackout,if=buff.dark_embrace.down";
-                action_list_str += "/force_cloak,if=buff.dark_embrace.down";
+                  action_list_str += "/blackout,if=buff.dark_embrace.down&force<60";
+                action_list_str += "/force_cloak,if=buff.dark_embrace.down&force<60";
               }
 
               action_list_str += "/overcharge_saber";
               action_list_str += "/assassinate";
               action_list_str += "/maul,if=buff.exploit_weakness.react";
-              action_list_str += "/discharge";
+              action_list_str += "/discharge,if=buff.static_charges>0";
               action_list_str += "/shock,if=buff.induction.stack=2";
               action_list_str += "/voltaic_slash";
               action_list_str += "/saber_strike";
