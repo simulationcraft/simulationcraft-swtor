@@ -3,30 +3,6 @@
 // Send questions to natehieter@gmail.com
 // ==========================================================================
 
-// ==========================================================================
-// Tyrus ToDo List
-// ==========================================================================
-// ----------
-// Abilities |
-// ----------
-//
-// Discharge : Add Dark Discharge
-//
-// ----------
-// Procs     |
-// ----------
-//
-// Add Dark Charge Ability
-//
-// ----------
-// Talents   |
-// ----------
-//
-// MADNESS Tree mostly done - Double check needed on some talents and proc type (melee vs spells procs)
-// DECEPTION: NYI (only Exploit Weakness implemented so far
-// DARKNESS : Thrashing Blades and Charge mastery only
-// ==========================================================================
-
 #include "simulationcraft.h"
 
 enum charge_type_t
@@ -94,6 +70,7 @@ struct shadow_assassin_t : public player_t
         gain_t* dark_embrace;
         gain_t* darkswell;
         gain_t* calculating_mind;
+        gain_t* saber_conduit;
         gain_t* rakata_stalker_2pc;
     } gains;
 
@@ -116,6 +93,7 @@ struct shadow_assassin_t : public player_t
         rng_t* lightning_charge;
         rng_t* surging_charge;
         rng_t* static_charges;
+        rng_t* saber_conduit;
     } rngs;
 
     // Benefits
@@ -995,7 +973,7 @@ struct overcharge_saber_t : public shadow_assassin_spell_t
     shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
   {
     parse_options( 0, options_str );
-    cooldown -> duration = timespan_t::from_seconds( 120.0 );
+    cooldown -> duration = timespan_t::from_seconds( 120.0 - p -> talents.resourcefulness -> rank() * 15 );
     harmful = false;
 
     trigger_gcd = timespan_t::zero;
@@ -1067,7 +1045,7 @@ struct lacerate_t : public shadow_assassin_attack_t
     weapon = &( player -> main_hand_weapon );
     weapon_multiplier = -0.52;
 
-    base_cost = 40;
+    base_cost = 40 - p -> talents.resourcefulness -> rank() * 5;
     range = 4.0;
 
     base_multiplier *= 1.0 + p -> talents.thrashing_blades -> rank() * 0.03;
@@ -1454,6 +1432,10 @@ struct surging_charge_callback_t : public action_callback_t
       return;
 
     surging_charge_damage_proc -> execute();
+
+    if ( p -> rngs.saber_conduit -> roll( p -> talents.saber_conduit -> rank() * 1/3 ) )
+      p -> resource_gain( RESOURCE_FORCE, 10 , p -> gains.saber_conduit ); //FIX ME: Should proc once every 10s
+
   }
 };
 
@@ -1682,7 +1664,7 @@ void shadow_assassin_t::init_buffs()
     buffs.dark_embrace = new buff_t( this, "dark_embrace", 1, timespan_t::from_seconds( 6.0 ), timespan_t::zero );
     buffs.induction = new buff_t( this, "induction", 2, timespan_t::from_seconds( 10.0 ), timespan_t::zero, talents.induction -> rank() * 0.5 );
     buffs.voltaic_slash = new buff_t( this, "voltaic_slash", 2, timespan_t::from_seconds( 10.0 ), timespan_t::zero );
-    buffs.static_charges = new buff_t( this, "static_charges", 5, timespan_t::from_seconds( 30.0 ), timespan_t::zero );
+    buffs.static_charges = new buff_t( this, "static_charges", 5, timespan_t::from_seconds( 30.0 ), timespan_t::zero, talents.static_charges -> rank() * 0.5 );
     buffs.exploitive_strikes = new buff_t( this, "exploitive_strikes", 1, timespan_t::from_seconds( 10.0 ), timespan_t::zero );
     buffs.raze = new buff_t( this, "raze", 1, timespan_t::from_seconds( 15.0 ), timespan_t::from_seconds( 7.5 ), talents.raze -> rank() * 0.6 );
     buffs.unearthed_knowledge = new buff_t( this, "unearthed_knowledge", 1, timespan_t::from_seconds( 20.0 ), timespan_t::zero, talents.unearthed_knowledge -> rank() * 0.5 );
@@ -1703,6 +1685,7 @@ void shadow_assassin_t::init_gains()
     gains.parasitism         = get_gain( "parasitism"         );
     gains.calculating_mind   = get_gain( "calculating_mind"   );
     gains.rakata_stalker_2pc = get_gain( "rakata_stalker_2pc" );
+    gains.saber_conduit      = get_gain( "saber_conduit"      );
 }
 
 // shadow_assassin_t::init_procs =======================================================
@@ -1730,6 +1713,7 @@ void shadow_assassin_t::init_rng()
     rngs.lightning_charge   = get_rng( "lightning_charge"    );
     rngs.surging_charge     = get_rng( "surging_charge"      );
     rngs.static_charges     = get_rng( "static_charges"      );
+    rngs.saber_conduit      = get_rng( "saber_conduit"       );
 }
 
 // shadow_assassin_t::init_actions =====================================================
