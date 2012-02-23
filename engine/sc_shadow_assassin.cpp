@@ -70,7 +70,6 @@ struct shadow_assassin_t : public player_t
         gain_t* dark_embrace;
         gain_t* darkswell;
         gain_t* calculating_mind;
-        gain_t* saber_conduit;
         gain_t* rakata_stalker_2pc;
     } gains;
 
@@ -93,7 +92,6 @@ struct shadow_assassin_t : public player_t
         rng_t* lightning_charge;
         rng_t* surging_charge;
         rng_t* static_charges;
-        rng_t* saber_conduit;
     } rngs;
 
     // Benefits
@@ -106,7 +104,8 @@ struct shadow_assassin_t : public player_t
 
     // Cooldowns
     struct cooldowns_t
-    { cooldown_t* crushing_darkness;
+    {
+      cooldown_t* crushing_darkness;
     } cooldowns;
 
     // Talents
@@ -519,7 +518,7 @@ struct crushing_darkness_t : public shadow_assassin_spell_t
             background = true;
             may_crit = false;
         }
-        
+
         virtual void target_debuff( player_t* t, int dmg_type )
         {
             shadow_assassin_spell_t::target_debuff( t, dmg_type );
@@ -809,10 +808,10 @@ struct discharge_t : public shadow_assassin_spell_t
 
     if ( p -> actives.charge == LIGHTNING_CHARGE && p -> talents.crackling_charge -> rank() > 0 )
         cooldown -> duration -= cooldown -> duration * p -> talents.crackling_charge -> rank() * 0.25 ;
-        
+
     if ( p -> actives.charge == SURGING_CHARGE)
           p -> buffs.static_charges -> expire();
-          
+
     shadow_assassin_spell_t::execute();
 
     shadow_assassin_spell_t* charge_action = choose_charge();
@@ -950,12 +949,12 @@ struct voltaic_slash_t : public shadow_assassin_attack_t
     {
       p -> buffs.voltaic_slash -> trigger( 1 );
       second_strike -> schedule_execute();
-      
+
       if ( p -> actives.charge == SURGING_CHARGE )
         p -> buffs.induction -> trigger( 1 );
     }
   }
-  
+
   virtual void player_buff()
   {
     shadow_assassin_attack_t::player_buff();
@@ -1226,7 +1225,7 @@ struct saber_strike_t : public shadow_assassin_attack_t
   virtual void execute()
   {
     shadow_assassin_attack_t::execute();
-    
+
     shadow_assassin_t* p = player -> cast_shadow_assassin();
 
     if ( player -> set_bonus.rakata_stalkers -> two_pc() )
@@ -1290,12 +1289,12 @@ struct thrash_t : public shadow_assassin_attack_t
     if ( second_strike )
     {
       second_strike -> schedule_execute();
-      
+
       if ( p -> actives.charge == SURGING_CHARGE )
         p -> buffs.induction -> trigger();
     }
   }
-  
+
   virtual void player_buff()
   {
     shadow_assassin_attack_t::player_buff();
@@ -1404,14 +1403,29 @@ struct surging_charge_callback_t : public action_callback_t
       }
   };
 
-  rng_t* rng_surging_charge;
+  struct {
+    rng_t* surging_charge;
+    rng_t* saber_conduit;
+  } rngs;
+
+  cooldown_t* saber_conduit_cd;
+  gain_t* saber_conduit_gain;
+
   surging_charge_spell_t* surging_charge_damage_proc;
 
   surging_charge_callback_t( shadow_assassin_t* p ) :
     action_callback_t( p -> sim, p )
   {
     const char* name = p -> type == SITH_ASSASSIN ? "surging_charge" : "shadow_technique";
-    rng_surging_charge = p -> get_rng( name );
+
+    rngs.surging_charge = p -> get_rng( name );
+    rngs.saber_conduit = p -> get_rng( "saber_conduit" );
+
+    saber_conduit_cd = p -> get_cooldown( "saber_conduit" );
+    saber_conduit_cd -> duration = timespan_t::from_seconds( 10 );
+
+    saber_conduit_gain = p -> get_gain( "saber_conduit" );
+
     surging_charge_damage_proc = new surging_charge_spell_t( p, name );
   }
 
@@ -1428,14 +1442,19 @@ struct surging_charge_callback_t : public action_callback_t
     if ( surging_charge_damage_proc -> cooldown -> remains() > timespan_t::zero )
       return;
 
-    if ( ! rng_surging_charge -> roll( 0.25 ) )
+    if ( ! rngs.surging_charge -> roll( 0.25 ) )
       return;
 
     surging_charge_damage_proc -> execute();
 
-    if ( p -> rngs.saber_conduit -> roll( p -> talents.saber_conduit -> rank() * 1/3 ) )
-      p -> resource_gain( RESOURCE_FORCE, 10 , p -> gains.saber_conduit ); //FIX ME: Should proc once every 10s
+    if ( saber_conduit_cd -> remains() > timespan_t::zero )
+      return;
 
+    if ( rngs.saber_conduit -> roll( p -> talents.saber_conduit -> rank() * (1.0/3) ) )
+    {
+      saber_conduit_cd -> start();
+      p -> resource_gain( RESOURCE_FORCE, 10, saber_conduit_gain );
+    }
   }
 };
 
@@ -1685,7 +1704,6 @@ void shadow_assassin_t::init_gains()
     gains.parasitism         = get_gain( "parasitism"         );
     gains.calculating_mind   = get_gain( "calculating_mind"   );
     gains.rakata_stalker_2pc = get_gain( "rakata_stalker_2pc" );
-    gains.saber_conduit      = get_gain( "saber_conduit"      );
 }
 
 // shadow_assassin_t::init_procs =======================================================
@@ -1713,7 +1731,6 @@ void shadow_assassin_t::init_rng()
     rngs.lightning_charge   = get_rng( "lightning_charge"    );
     rngs.surging_charge     = get_rng( "surging_charge"      );
     rngs.static_charges     = get_rng( "static_charges"      );
-    rngs.saber_conduit      = get_rng( "saber_conduit"       );
 }
 
 // shadow_assassin_t::init_actions =====================================================
@@ -1878,7 +1895,7 @@ int shadow_assassin_t::primary_role() const
 void shadow_assassin_t::regen( timespan_t periodicity )
 {
     player_t::regen( periodicity );
-    
+
     if ( buffs.dark_embrace -> up() )
     {
        double force_regen = periodicity.total_seconds() * force_regen_per_second() * buffs.dark_embrace -> check() * talents.dark_embrace -> rank() * 0.25;
