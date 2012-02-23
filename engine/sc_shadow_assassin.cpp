@@ -958,13 +958,13 @@ struct voltaic_slash_t : public shadow_assassin_attack_t
 
     shadow_assassin_t* p = player -> cast_shadow_assassin();
 
-    if ( p -> actives.charge == SURGING_CHARGE )
-      p -> buffs.induction -> trigger();
-
     if ( second_strike )
     {
       p -> buffs.voltaic_slash -> trigger( 1 );
       second_strike -> schedule_execute();
+      
+      if ( p -> actives.charge == SURGING_CHARGE )
+        p -> buffs.induction -> trigger( 1 );
     }
   }
   
