@@ -91,6 +91,8 @@ const action_t::attack_policy_t* action_t::melee_policy = &the_melee_policy;
 const action_t::attack_policy_t* action_t::range_policy = &the_range_policy;
 const action_t::attack_policy_t* action_t::force_policy = &the_force_policy;
 const action_t::attack_policy_t* action_t::tech_policy = &the_tech_policy;
+const action_t::attack_policy_t* action_t::force_heal_policy = &the_force_heal_policy;
+const action_t::attack_policy_t* action_t::tech_heal_policy = &the_tech_heal_policy;
 
 // action_t::action_t =======================================================
 
