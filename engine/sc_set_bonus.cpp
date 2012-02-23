@@ -7,8 +7,8 @@
 
 // set_bonus_t::set_bonus_t =================================================
 
-set_bonus_t::set_bonus_t( const std::string& n, const std::string& f ) :
- next( 0 ), name( n ), count( 0 )
+set_bonus_t::set_bonus_t( const std::string& n, const std::string& f, int64_t s_mask ) :
+ next( 0 ), name( n ), count( 0 ), slot_mask( s_mask )
 {
   if ( f.empty() )
     filters.push_back( name );
@@ -20,14 +20,17 @@ set_bonus_t::set_bonus_t( const std::string& n, const std::string& f ) :
 
 bool set_bonus_t::decode( const item_t& item ) const
 {
-  if ( item.name() )
+  if ( ( item.slot > 0 && slot_mask < 0 ) || ( slot_mask & ( int64_t( 1 ) << item.slot ) ) )
   {
-    std::string s = item.name();
-
-    for ( unsigned int i = 0; i < filters.size(); i++ )
+    if ( item.name() )
     {
-      if ( s.find( filters[ i ] ) != s.npos )
-        return true;
+      std::string s = item.name();
+
+      for ( unsigned int i = 0; i < filters.size(); i++ )
+      {
+        if ( s.find( filters[ i ] ) != s.npos )
+          return true;
+      }
     }
   }
 

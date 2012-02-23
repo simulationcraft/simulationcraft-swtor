@@ -416,6 +416,10 @@ enum slot_type   // these enum values should match armory settings
   SLOT_MAX       = 19
 };
 
+const int64_t DEFAULT_SET_BONUS_SLOT_MASK = ( ( int64_t( 1 ) << SLOT_HEAD )   | ( int64_t( 1 ) << SLOT_CHEST ) |
+                                            ( int64_t( 1 ) << SLOT_HANDS  )   | ( int64_t( 1 ) << SLOT_LEGS )  |
+                                            ( int64_t( 1 ) << SLOT_FEET   )  );
+
 // Tiers 11..14 + PVP
 #define N_TIER 5
 
@@ -3646,8 +3650,9 @@ struct set_bonus_t
   std::string name;
   std::vector<std::string> filters;
   int count;
+  int64_t slot_mask;
 
-  set_bonus_t( const std::string& name, const std::string& filters=std::string() );
+  set_bonus_t( const std::string& name, const std::string& filters=std::string(), int64_t s_mask=DEFAULT_SET_BONUS_SLOT_MASK );
 
   void init( const player_t& );
 
@@ -4261,7 +4266,7 @@ public:
   benefit_t*  get_benefit ( const std::string& name );
   uptime_t*   get_uptime  ( const std::string& name );
   rng_t*      get_rng     ( const std::string& name, int type=RNG_DEFAULT );
-  set_bonus_t* get_set_bonus( const std::string& name, std::string filter );
+  set_bonus_t* get_set_bonus( const std::string& name, std::string filter, int64_t slot_filter=DEFAULT_SET_BONUS_SLOT_MASK );
   double      get_player_distance( const player_t* p ) const;
   double      get_position_distance( double m=0, double v=0 ) const;
   action_priority_list_t* get_action_priority_list( const std::string& name );
