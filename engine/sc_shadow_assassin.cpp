@@ -1781,6 +1781,14 @@ void shadow_assassin_t::init_actions()
               action_list_str += "/apply_charge,type=lightning";
               action_list_str += "/power_potion";
               action_list_str += "/recklessness";
+
+              if ( talents.dark_embrace -> rank() )
+              {
+                if ( talents.darkswell -> rank() )
+                  action_list_str += "/blackout,if=buff.dark_embrace.down";
+                action_list_str += "/force_cloak,if=buff.dark_embrace.down";
+              }
+
               action_list_str += "/overcharge_saber";
               action_list_str += "/death_field";
               action_list_str += "/crushing_darkness,if=buff.raze.react";

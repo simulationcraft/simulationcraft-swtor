@@ -15,6 +15,7 @@ actions+=/stealth
 actions+=/apply_charge,type=lightning
 actions+=/power_potion
 actions+=/recklessness
+actions+=/force_cloak,if=buff.dark_embrace.down
 actions+=/overcharge_saber
 actions+=/death_field
 actions+=/crushing_darkness,if=buff.raze.react
