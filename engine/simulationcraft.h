@@ -3982,6 +3982,7 @@ struct player_t : public noncopyable
   {
     set_bonus_t* rakata_force_masters;
     set_bonus_t* battlemaster_force_masters;
+    set_bonus_t* rakata_stalkers;
     void reset() { *this = set_bonuses_t(); }
   };
   set_bonuses_t set_bonus;
