@@ -11,7 +11,6 @@
 // ----------
 //
 // Discharge : Add Dark Discharge
-// Stealth : NYI
 //
 // ----------
 // Procs     |
@@ -93,6 +92,7 @@ struct shadow_assassin_t : public player_t
     {
         gain_t* parasitism;
         gain_t* dark_embrace;
+        gain_t* darkswell;
         gain_t* calculating_mind;
         gain_t* rakata_stalker_2pc;
     } gains;
@@ -900,8 +900,8 @@ struct apply_charge_t : public shadow_assassin_spell_t
 
 struct low_slash_t : public shadow_assassin_attack_t
 {
-  low_slash_t( shadow_assassin_t* p,const std::string& n,const std::string& options_str) :
-    shadow_assassin_attack_t( n.c_str(),p,RESOURCE_FORCE, SCHOOL_KINETIC, TREE_NONE )
+  low_slash_t( shadow_assassin_t* p, const std::string& options_str ) :
+    shadow_assassin_attack_t( "low_slash", p, RESOURCE_FORCE, SCHOOL_KINETIC, TREE_NONE )
   {
     parse_options( 0, options_str );
 
@@ -1070,13 +1070,11 @@ struct lacerate_t : public shadow_assassin_attack_t
 
 // Blackout ================================
 
-struct blackout_t : public shadow_assassin_spell_t
+struct stealth_base_t : public shadow_assassin_spell_t
 {
-    blackout_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
+    stealth_base_t( shadow_assassin_t* p, const std::string& n ) :
         shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
     {
-        parse_options( 0, options_str );
-        cooldown -> duration = timespan_t::from_seconds( 60.0 );
         harmful = false;
         trigger_gcd = timespan_t::zero;
     }
@@ -1087,34 +1085,65 @@ struct blackout_t : public shadow_assassin_spell_t
 
         shadow_assassin_t* p = player -> cast_shadow_assassin();
 
-        p -> buffs.dark_embrace -> trigger( 1 );
+        p -> buffs.dark_embrace -> trigger();
+    }
+};
+
+
+struct blackout_t : public stealth_base_t
+{
+    blackout_t( shadow_assassin_t* p, const std::string& options_str ) :
+      stealth_base_t( p, "blackout" )
+    {
+        check_talent( p -> talents.darkswell -> rank() );
+        parse_options( 0, options_str );
+        cooldown -> duration = timespan_t::from_seconds( 60.0 - 7.5 * p -> talents.fade -> rank() );
+    }
+
+    virtual void execute()
+    {
+        stealth_base_t::execute();
+
+        shadow_assassin_t* p = player -> cast_shadow_assassin();
+        p -> resource_gain( RESOURCE_FORCE, 10 * p -> talents.darkswell -> rank(), p -> gains.darkswell );
     }
 };
 
 // Force Cloak ==========================================
 
-struct force_cloak_t : public shadow_assassin_spell_t
+struct force_cloak_t : public stealth_base_t
 {
-  force_cloak_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
-    shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+  force_cloak_t( shadow_assassin_t* p, const std::string& options_str ) :
+    stealth_base_t( p, "force_cloak" )
   {
     parse_options( 0, options_str );
-    cooldown -> duration = timespan_t::from_seconds( 180.0 );
-    harmful = false;
-
-    trigger_gcd = timespan_t::zero;
-  }
-
-  virtual void execute()
-  {
-    shadow_assassin_spell_t::execute();
-
-    shadow_assassin_t* p = player -> cast_shadow_assassin();
-
-    p -> buffs.dark_embrace -> trigger( 1 );
+    cooldown -> duration = timespan_t::from_seconds( 180.0 - 30 * p -> talents.fade -> rank() );
   }
 };
 
+// Stealth
+
+struct stealth_t : public stealth_base_t
+{
+  stealth_t( shadow_assassin_t* p, const std::string& options_str ) :
+    stealth_base_t( p, "stealth" )
+  {
+    parse_options( 0, options_str );
+  }
+
+  virtual bool ready()
+  {
+    shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+    if ( p -> in_combat )
+      return false;
+
+    if ( p -> buffs.dark_embrace -> check() )
+      return false;
+
+    return stealth_base_t::ready();
+  }
+};
 
 // Maul | Shadow Strike ===================
 
@@ -1181,8 +1210,8 @@ struct saber_strike_t : public shadow_assassin_attack_t
   saber_strike_t* second_strike;
   saber_strike_t* third_strike;
 
-  saber_strike_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str, bool is_consequent_strike = false ) :
-    shadow_assassin_attack_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC ),
+  saber_strike_t( shadow_assassin_t* p, const std::string& options_str, bool is_consequent_strike = false ) :
+    shadow_assassin_attack_t( "saber_strike", p, RESOURCE_FORCE, SCHOOL_KINETIC ),
     second_strike( 0 ), third_strike( 0 )
   {
     parse_options( 0, options_str );
@@ -1196,16 +1225,16 @@ struct saber_strike_t : public shadow_assassin_attack_t
       dd.power_mod = .33;
       background = true;
       dual = true;
-      base_execute_time = timespan_t::from_seconds( 0.1 ); // Add correct delta timing for second attack here.
     }
     else
     {
       weapon_multiplier = -.066;
       dd.power_mod = .66;
 
-      second_strike = new saber_strike_t( p, n, options_str, true );
-      third_strike = new saber_strike_t( p, n, options_str, true );
-      third_strike -> base_execute_time += timespan_t::from_seconds( 0.1 ); // Add correct delta timing for second attack here.
+      second_strike = new saber_strike_t( p, options_str, true );
+      second_strike -> base_execute_time = timespan_t::from_seconds( 0.5 );
+      third_strike = new saber_strike_t( p, options_str, true );
+      third_strike -> base_execute_time = timespan_t::from_seconds( 1.0 );
 
       add_child( second_strike );
       add_child( third_strike );
@@ -1508,48 +1537,45 @@ action_t* shadow_assassin_t::create_action( const std::string& name,
 {
     if ( type == SITH_ASSASSIN )
     {
-        if ( name == "mark_of_power"      ) return new       mark_of_power_t( this, "mark_of_power", options_str );
-        if ( name == "shock"              ) return new               shock_t( this, "shock", options_str );
-        if ( name == "force_lightning"    ) return new     force_lightning_t( this, "force_lightning", options_str );
+        if ( name == "assassinate"        ) return new         assassinate_t( this, "assassinate", options_str );
+        if ( name == "creeping_terror"    ) return new     creeping_terror_t( this, "creeping_terror", options_str );
         if ( name == "crushing_darkness"  ) return new   crushing_darkness_t( this, "crushing_darkness", options_str );
         if ( name == "death_field"        ) return new         death_field_t( this, "death_field", options_str );
-        if ( name == "creeping_terror"    ) return new     creeping_terror_t( this, "creeping_terror", options_str );
-        if ( name == "recklessness"       ) return new        recklessness_t( this, "recklessness", options_str );
-        if ( name == "low_slash"          ) return new           low_slash_t( this, "low_slash", options_str );
-        if ( name == "voltaic_slash"      ) return new       voltaic_slash_t( this, "voltaic_slash", options_str );
-        if ( name == "overcharge_saber"   ) return new    overcharge_saber_t( this, "overcharge_saber", options_str );
-        if ( name == "assassinate"        ) return new         assassinate_t( this, "assassinate", options_str );
-        if ( name == "lacerate"           ) return new            lacerate_t( this, "lacerate", options_str );
-        if ( name == "blackout"           ) return new            blackout_t( this, "blackout", options_str );
-        if ( name == "force_cloak"        ) return new         force_cloak_t( this, "force_cloak", options_str );
         if ( name == "discharge"          ) return new           discharge_t( this, "discharge", options_str );
+        if ( name == "force_lightning"    ) return new     force_lightning_t( this, "force_lightning", options_str );
+        if ( name == "lacerate"           ) return new            lacerate_t( this, "lacerate", options_str );
+        if ( name == "mark_of_power"      ) return new       mark_of_power_t( this, "mark_of_power", options_str );
         if ( name == "maul"               ) return new                maul_t( this, "maul", options_str );
-        if ( name == "saber_strike"       ) return new        saber_strike_t( this, "saber_strike", options_str );
+        if ( name == "overcharge_saber"   ) return new    overcharge_saber_t( this, "overcharge_saber", options_str );
+        if ( name == "recklessness"       ) return new        recklessness_t( this, "recklessness", options_str );
+        if ( name == "shock"              ) return new               shock_t( this, "shock", options_str );
         if ( name == "thrash"             ) return new              thrash_t( this, "thrash", options_str );
+        if ( name == "voltaic_slash"      ) return new       voltaic_slash_t( this, "voltaic_slash", options_str );
     }
     else if ( type == JEDI_SHADOW )
     {
-        if ( name == "force_valor"        ) return new       mark_of_power_t( this, "force_valor", options_str );
-        if ( name == "project"            ) return new               shock_t( this, "project", options_str );
-        if ( name == "telekinetic_throw"  ) return new     force_lightning_t( this, "telekinetic_throw", options_str );
+        if ( name == "spinning_strike"    ) return new         assassinate_t( this, "spinning_strike", options_str );
+        if ( name == "sever_force"        ) return new     creeping_terror_t( this, "sever_force", options_str );
         if ( name == "mind_crush"         ) return new   crushing_darkness_t( this, "mind_crush", options_str );
         if ( name == "force_in_balance"   ) return new         death_field_t( this, "force_in_balance", options_str );
-        if ( name == "sever_force"        ) return new     creeping_terror_t( this, "sever_force", options_str );
-        if ( name == "force_potency"      ) return new        recklessness_t( this, "force_potency", options_str );
-        if ( name == "low_slash"          ) return new           low_slash_t( this, "low_slash", options_str );
-        if ( name == "clairvoyant_strike" ) return new       voltaic_slash_t( this, "clairvoyant_strike", options_str );
-        if ( name == "battle_readiness"   ) return new    overcharge_saber_t( this, "battle_readiness", options_str );
-        if ( name == "spinning_strike"    ) return new         assassinate_t( this, "spinning_strike", options_str );
-        if ( name == "whirling_blow"      ) return new            lacerate_t( this, "whirling_blow", options_str );
-        if ( name == "blackout"           ) return new            blackout_t( this, "blackout", options_str );
-        if ( name == "force_cloak"        ) return new         force_cloak_t( this, "force_cloak", options_str );
         if ( name == "force_breach"       ) return new           discharge_t( this, "force_breach", options_str );
+        if ( name == "telekinetic_throw"  ) return new     force_lightning_t( this, "telekinetic_throw", options_str );
+        if ( name == "whirling_blow"      ) return new            lacerate_t( this, "whirling_blow", options_str );
+        if ( name == "force_valor"        ) return new       mark_of_power_t( this, "force_valor", options_str );
         if ( name == "shadow_strike"      ) return new                maul_t( this, "shadow_strike", options_str );
-        if ( name == "saber_strike"       ) return new        saber_strike_t( this, "saber_strike", options_str );
+        if ( name == "battle_readiness"   ) return new    overcharge_saber_t( this, "battle_readiness", options_str );
+        if ( name == "force_potency"      ) return new        recklessness_t( this, "force_potency", options_str );
+        if ( name == "project"            ) return new               shock_t( this, "project", options_str );
         if ( name == "double_strike"      ) return new              thrash_t( this, "double_strike", options_str );
+        if ( name == "clairvoyant_strike" ) return new       voltaic_slash_t( this, "clairvoyant_strike", options_str );
     }
 
-    if ( name == "apply_charge"      ) return new              apply_charge_t( this, options_str );
+    if ( name == "apply_charge"           ) return new        apply_charge_t( this, options_str );
+    if ( name == "blackout"               ) return new            blackout_t( this, options_str );
+    if ( name == "force_cloak"            ) return new         force_cloak_t( this, options_str );
+    if ( name == "low_slash"              ) return new           low_slash_t( this, options_str );
+    if ( name == "saber_strike"           ) return new        saber_strike_t( this, options_str );
+    if ( name == "stealth"                ) return new             stealth_t( this, options_str );
 
     return player_t::create_action( name, options_str );
 }
@@ -1679,9 +1705,10 @@ void shadow_assassin_t::init_gains()
 {
     player_t::init_gains();
 
-    gains.dark_embrace     = get_gain( "dark_embrace"     );
-    gains.parasitism       = get_gain( "parasitism"       );
-    gains.calculating_mind = get_gain( "calculating_mind" );
+    gains.dark_embrace       = get_gain( "dark_embrace"       );
+    gains.darkswell          = get_gain( "darkswell"          );
+    gains.parasitism         = get_gain( "parasitism"         );
+    gains.calculating_mind   = get_gain( "calculating_mind"   );
     gains.rakata_stalker_2pc = get_gain( "rakata_stalker_2pc" );
 }
 
@@ -1775,7 +1802,7 @@ void shadow_assassin_t::init_actions()
               action_list_str += "/thrash";
               action_list_str += "/saber_strike";
 
-                break;
+              break;
 
 
             case TREE_DECEPTION:
@@ -1790,7 +1817,7 @@ void shadow_assassin_t::init_actions()
               action_list_str += "/voltaic_slash";
               action_list_str += "/saber_strike";
 
-                break;
+              break;
 
             default: break;
             }
@@ -1991,5 +2018,3 @@ void player_t::shadow_assassin_combat_begin( sim_t* /* sim */ )
     }
 #endif
 }
-
-
