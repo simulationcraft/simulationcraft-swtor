@@ -5,9 +5,64 @@
 
 #include "simulationcraft.h"
 
+
 // ==========================================================================
 // Action
 // ==========================================================================
+
+namespace {
+
+// Attack policies ==========================================================
+
+class physical_policy_t : public action_t::attack_policy_t
+{
+public:
+  bool can_shield( const actor_pair_t& ) const { return true; }
+};
+
+class melee_policy_t : public physical_policy_t
+{};
+
+class range_policy_t : public physical_policy_t
+{};
+
+class spell_policy_t : public action_t::attack_policy_t
+{
+public:
+  bool can_shield( const actor_pair_t& ) const { return false; }
+};
+
+class force_policy_t : public spell_policy_t
+{
+public:
+  double power_bonus( const actor_pair_t& actors ) const
+  { return actors.source -> composite_force_damage_bonus(); }
+};
+
+class force_heal_policy_t : public spell_policy_t
+{
+public:
+  double avoidance( const actor_pair_t & ) const { return 0; }
+};
+
+class tech_policy_t : public spell_policy_t {};
+
+class tech_heal_policy_t : public spell_policy_t
+{
+public:
+  double avoidance( const actor_pair_t & ) const { return 0; }
+};
+
+const melee_policy_t the_melee_policy;
+const range_policy_t the_range_policy;
+const force_policy_t the_force_policy;
+const tech_policy_t the_tech_policy;
+}
+
+const action_t::attack_policy_t* action_t::melee_policy = &the_melee_policy;
+const action_t::attack_policy_t* action_t::range_policy = &the_range_policy;
+const action_t::attack_policy_t* action_t::force_policy = &the_force_policy;
+const action_t::attack_policy_t* action_t::tech_policy = &the_tech_policy;
 
 // action_t::action_t =======================================================
 
@@ -173,13 +228,14 @@ void action_t::init_dot( const std::string& name )
 action_t::action_t( int               ty,
                     const char*       n,
                     player_t*         p,
+                    attack_policy_t*  policy,
                     int               r,
                     const school_type s,
                     int               tr,
                     bool              sp ) :
   sim( p -> sim ), type( ty ), name_str( n ),
-  player( p ), target( p -> target ), school( s ), resource( r ),
-  tree( tr ), special( sp )
+  player( p ), target( p -> target ), attack_policy( policy ),
+  school( s ), resource( r ), tree( tr ), special( sp )
 {
   init_action_t_();
 }

@@ -309,19 +309,6 @@ enum proc_type
 
 enum action_type { ACTION_USE=0, ACTION_SPELL, ACTION_ATTACK, ACTION_HEAL, ACTION_ABSORB, ACTION_SEQUENCE, ACTION_OTHER, ACTION_MAX };
 
-enum attack_type
-{
-  ATTACK_NONE = 0,
-
-  ATTACK_MELEE, ATTACK_RANGE,
-  ATTACK_FORCE, ATTACK_TECH,
-
-  ATTACK_MAX
-};
-
-#define ATTACK_PHYSICAL_MASK ( ( 1 << ATTACK_MELEE ) | ( 1 << ATTACK_RANGE ) )
-#define ATTACK_SPELL_MASK ( ( 1 << ATTACK_FORCE ) | ( 1 << ATTACK_TECH ) )
-
 enum school_type
 {
   SCHOOL_NONE=0,
@@ -4392,12 +4379,28 @@ struct stats_t
 
 struct action_t
 {
-  sim_t* sim;
+  class attack_policy_t
+  {
+  public:
+    virtual double acccuracy( const actor_pair_t& actors ) const = 0;
+    virtual double avoidance( const actor_pair_t& actors ) const = 0;
+    virtual double crit_chance( const actor_pair_t& actors ) const = 0;
+    virtual double power_bonus( const actor_pair_t& actors ) const = 0;
+    virtual bool   can_shield( const actor_pair_t& actors ) const = 0;
+  };
+
+  static const attack_policy_t* melee_policy;
+  static const attack_policy_t* range_policy;
+  static const attack_policy_t* force_policy;
+  static const attack_policy_t* tech_policy;
+
+  sim_t* const sim;
   const int type;
   std::string name_str;
-  player_t* player;
+  player_t* const player;
   player_t* target;
   uint32_t id;
+  attack_policy_t* attack_policy;
   school_type school;
   int resource, tree, result, aoe;
   bool dual, callbacks, special, channeled, background, sequence, use_off_gcd;
@@ -4492,7 +4495,7 @@ private:
   void init_action_t_();
 
 public:
-  action_t( int type, const char* name, player_t* p=0, int r=RESOURCE_NONE, const school_type s=SCHOOL_NONE, int t=TREE_NONE, bool special=false );
+  action_t( int type, const char* name, player_t* p=0, attack_policy_t* policy=0, int r=RESOURCE_NONE, const school_type s=SCHOOL_NONE, int t=TREE_NONE, bool special=false );
   virtual ~action_t();
   void init_dot( const std::string& dot_name );
 
