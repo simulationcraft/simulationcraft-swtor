@@ -189,19 +189,18 @@ struct shadow_assassin_t : public player_t
             tree_type[ SITH_ASSASSIN_DARKNESS ]   = TREE_DARKNESS;
             tree_type[ SITH_ASSASSIN_DECEPTION ]  = TREE_DECEPTION;
             tree_type[ SITH_ASSASSIN_MADNESS ]    = TREE_MADNESS;
-            cooldowns.crushing_darkness = get_cooldown( "crushing_darkness");
+            cooldowns.crushing_darkness = get_cooldown( "crushing_darkness" );
         }
         else
         {
             tree_type[ JEDI_SHADOW_KINETIC_COMBAT ] = TREE_KINETIC_COMBAT;
             tree_type[ JEDI_SHADOW_INFILTRATION ]   = TREE_INFILTRATION;
             tree_type[ JEDI_SHADOW_BALANCE ]        = TREE_BALANCE;
-            cooldowns.crushing_darkness = get_cooldown( "mind_crush");
+            cooldowns.crushing_darkness = get_cooldown( "mind_crush" );
         }
 
         primary_attribute   = ATTR_WILLPOWER;
         secondary_attribute = ATTR_STRENGTH;
-
 
         create_talents();
         create_options();
@@ -222,8 +221,6 @@ struct shadow_assassin_t : public player_t
     virtual int       primary_resource() const;
     virtual int       primary_role() const;
     virtual void      regen( timespan_t periodicity );
-    virtual double    composite_force_damage_bonus() const;
-    virtual double    composite_spell_alacrity() const;
     virtual void      reset();
     virtual void      create_talents();
 
@@ -1330,13 +1327,11 @@ struct thrash_t : public shadow_assassin_attack_t
 
 struct lightning_charge_callback_t : public action_callback_t
 {
-
   struct lightning_charge_spell_t : public shadow_assassin_spell_t
   {
-    lightning_charge_spell_t(shadow_assassin_t* p, const std::string& n ) :
-      shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
+    lightning_charge_spell_t( shadow_assassin_t* p, const std::string& n ) :
+      shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_ENERGY )
     {
-
       dd.standardhealthpercentmin = dd.standardhealthpercentmax = .017;
       dd.power_mod = 0.165;
 
@@ -1359,13 +1354,14 @@ struct lightning_charge_callback_t : public action_callback_t
   };
 
   rng_t* rng_lightning_charge;
-  shadow_assassin_spell_t* lightning_charge_damage_proc;
+  lightning_charge_spell_t* lightning_charge_damage_proc;
 
   lightning_charge_callback_t( shadow_assassin_t* p ) :
-    action_callback_t( p -> sim, p ), lightning_charge_damage_proc( 0 )
+    action_callback_t( p -> sim, p )
   {
-    rng_lightning_charge = p -> get_rng( "lightning_charge" );
-    lightning_charge_damage_proc = new lightning_charge_spell_t( p, p -> type == SITH_ASSASSIN ? "lightning_charge" : "force_technique" );
+    const char* name = p -> type == SITH_ASSASSIN ? "lightning_charge" : "force_technique";
+    rng_lightning_charge = p -> get_rng( name );
+    lightning_charge_damage_proc = new lightning_charge_spell_t( p, name );
   }
 
   virtual void trigger( action_t* /* a */, void* /* call_data */ )
@@ -1373,15 +1369,15 @@ struct lightning_charge_callback_t : public action_callback_t
     //weapon_t* w = a -> weapon;
     //if ( ! w ) return;
 
-    if ( ! rng_lightning_charge -> roll( 0.5 ) )
-      return;
-
     shadow_assassin_t* p = listener -> cast_shadow_assassin();
 
     if ( p -> actives.charge != LIGHTNING_CHARGE )
       return;
 
     if ( lightning_charge_damage_proc -> cooldown -> remains() > timespan_t::zero )
+      return;
+
+    if ( ! rng_lightning_charge -> roll( 0.5 ) )
       return;
 
     lightning_charge_damage_proc -> execute();
@@ -1392,7 +1388,6 @@ struct lightning_charge_callback_t : public action_callback_t
 
 struct surging_charge_callback_t : public action_callback_t
 {
-
   struct surging_charge_spell_t : public shadow_assassin_spell_t
   {
       surging_charge_spell_t( shadow_assassin_t* p, const std::string& n ) :
@@ -1426,13 +1421,14 @@ struct surging_charge_callback_t : public action_callback_t
   };
 
   rng_t* rng_surging_charge;
-  shadow_assassin_spell_t* surging_charge_damage_proc;
+  surging_charge_spell_t* surging_charge_damage_proc;
 
   surging_charge_callback_t( shadow_assassin_t* p ) :
-    action_callback_t( p -> sim, p ), surging_charge_damage_proc( 0 )
+    action_callback_t( p -> sim, p )
   {
-    rng_surging_charge = p -> get_rng( "surging_charge" );
-    surging_charge_damage_proc = new surging_charge_spell_t( p, p -> type == SITH_ASSASSIN ? "surging_charge" : "shadow_technique" );
+    const char* name = p -> type == SITH_ASSASSIN ? "surging_charge" : "shadow_technique";
+    rng_surging_charge = p -> get_rng( name );
+    surging_charge_damage_proc = new surging_charge_spell_t( p, name );
   }
 
   virtual void trigger( action_t* /* a */, void* /* call_data */ )
@@ -1440,15 +1436,15 @@ struct surging_charge_callback_t : public action_callback_t
     //weapon_t* w = a -> weapon;
     //if ( ! w ) return;
 
-    if ( ! rng_surging_charge -> roll( 0.25 ) )
-      return;
-
     shadow_assassin_t* p = listener -> cast_shadow_assassin();
 
     if ( p -> actives.charge != SURGING_CHARGE )
       return;
 
     if ( surging_charge_damage_proc -> cooldown -> remains() > timespan_t::zero )
+      return;
+
+    if ( ! rng_surging_charge -> roll( 0.25 ) )
       return;
 
     surging_charge_damage_proc -> execute();
@@ -1459,11 +1455,10 @@ struct surging_charge_callback_t : public action_callback_t
 
 struct dark_charge_callback_t : public action_callback_t
 {
-
   struct dark_charge_spell_t : public shadow_assassin_spell_t
   {
-    dark_charge_spell_t(shadow_assassin_t* p, const std::string& n ) :
-      shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_KINETIC )
+    dark_charge_spell_t( shadow_assassin_t* p, const std::string& n ) :
+      shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
     {
       // FIXME: ADD correct values and implement heal and other effects
       // Add Overcharge Saber
@@ -1479,13 +1474,14 @@ struct dark_charge_callback_t : public action_callback_t
   };
 
   rng_t* rng_dark_charge;
-  shadow_assassin_spell_t* dark_charge_damage_proc;
+  dark_charge_spell_t* dark_charge_damage_proc;
 
   dark_charge_callback_t( shadow_assassin_t* p ) :
-    action_callback_t( p -> sim, p ), dark_charge_damage_proc( 0 )
+    action_callback_t( p -> sim, p )
   {
-    rng_dark_charge = p -> get_rng( "dark_charge" );
-    dark_charge_damage_proc = new dark_charge_spell_t( p, p -> type == SITH_ASSASSIN ? "dark_charge" : "force_technique" );
+    const char* name = p -> type == SITH_ASSASSIN ? "dark_charge" : "force_technique";
+    rng_dark_charge = p -> get_rng( name );
+    dark_charge_damage_proc = new dark_charge_spell_t( p, name );
   }
 
   virtual void trigger( action_t* /* a */, void* /* call_data */ )
@@ -1493,15 +1489,15 @@ struct dark_charge_callback_t : public action_callback_t
     //weapon_t* w = a -> weapon;
     //if ( ! w ) return;
 
-    if ( ! rng_dark_charge -> roll( 0.5 ) )
-      return;
-
     shadow_assassin_t* p = listener -> cast_shadow_assassin();
 
     if ( p -> actives.charge != DARK_CHARGE )
       return;
 
     if ( dark_charge_damage_proc -> cooldown -> remains() > timespan_t::zero )
+      return;
+
+    if ( ! rng_dark_charge -> roll( 0.5 ) )
       return;
 
     dark_charge_damage_proc -> execute();
@@ -1512,9 +1508,7 @@ struct duplicity_callback_t : action_callback_t
 {
   duplicity_callback_t( shadow_assassin_t* p ) :
     action_callback_t( p -> sim, p )
-  {
-
-  }
+  {}
 
   virtual void trigger( action_t* /* a */, void* /* call_data */ )
   {
@@ -1639,18 +1633,11 @@ void shadow_assassin_t::init_base()
 {
     player_t::init_base();
 
-    attribute_base[ ATTR_WILLPOWER ] = 250;
-
     default_distance = 3;
     distance = default_distance;
 
     base_force_regen_per_second = 8.0;
     resource_base[  RESOURCE_FORCE  ] += 100 + talents.deceptive_power -> rank() * 10;
-
-    // FIXME: Add defensive constants
-    //diminished_kfactor    = 0;
-    //diminished_dodge_capi = 0;
-    //diminished_parry_capi = 0;
 }
 
 // shadow_assassin_t::init_benefits =======================================================
@@ -1901,25 +1888,6 @@ void shadow_assassin_t::regen( timespan_t periodicity )
     }
 }
 
-// shadow_assassin_t::composite_spell_power ==================================================
-
-double shadow_assassin_t::composite_force_damage_bonus() const
-{
-    double sp = player_t::composite_force_damage_bonus();
-
-
-    return sp;
-}
-
-// shadow_assassin_t::composite_spell_alacrity ==================================================
-
-double shadow_assassin_t::composite_spell_alacrity() const
-{
-    double sh = player_t::composite_spell_alacrity();
-
-    return sh;
-}
-
 // shadow_assassin_t::create_talents ==================================================
 
 void shadow_assassin_t::reset()
@@ -1987,44 +1955,30 @@ void shadow_assassin_t::create_talents()
 // PLAYER_T EXTENSIONS
 // ==========================================================================
 
-// player_t::create_jedi_shadow  ===================================================
+// player_t::create_jedi_shadow  ============================================
 
 player_t* player_t::create_jedi_shadow( sim_t* sim, const std::string& name, race_type r )
 {
     return new shadow_assassin_t( sim, JEDI_SHADOW, name, r );
 }
 
-// player_t::create_sith_assassin  ===================================================
+// player_t::create_sith_assassin  ==========================================
 
 player_t* player_t::create_sith_assassin( sim_t* sim, const std::string& name, race_type r )
 {
     return new shadow_assassin_t( sim, SITH_ASSASSIN, name, r );
 }
 
-// player_t::shadow_assassin_init ======================================================
+// player_t::shadow_assassin_init ===========================================
 
 void player_t::shadow_assassin_init( sim_t* /* sim */ )
 {
-#if 0
-    for ( unsigned int i = 0; i < sim -> actor_list.size(); i++ )
-    {
-        //player_t* p = sim -> actor_list[i];
-        // Force Valor || Mark of Power constructed in sage_sorcerer_init !!!
-    }
-#endif
+  // Force Valor || Mark of Power is constructed in sage_sorcerer_init().
 }
 
-// player_t::shadow_assassin_combat_begin ==============================================
+// player_t::shadow_assassin_combat_begin ===================================
 
 void player_t::shadow_assassin_combat_begin( sim_t* /* sim */ )
 {
-#if 0
-    for ( player_t* p = sim -> player_list; p; p = p -> next )
-    {
-        if ( p -> ooc_buffs() )
-        {
-            // Force Valor || Mark of Power is taken care of in sage_sorcerer_combat_begin !!!
-        }
-    }
-#endif
+  // Force Valor || Mark of Power is taken care of in sage_sorcerer_combat_begin().
 }
