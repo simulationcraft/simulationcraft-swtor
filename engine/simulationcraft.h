@@ -3044,7 +3044,7 @@ public:
 
 // Simulation Engine ========================================================
 
-#define REGISTER_DOT(n) sim->register_targetdata_item(DATA_DOT, #n, t, nonpod_offsetof(type, dots_##n))
+#define REGISTER_DOT(n, q) sim->register_targetdata_item(DATA_DOT, #q, t, nonpod_offsetof(type, dots_##n))
 #define REGISTER_BUFF(n) sim->register_targetdata_item(DATA_AURA, #n, t, nonpod_offsetof(type, buffs_##n))
 #define REGISTER_DEBUFF(n) sim->register_targetdata_item(DATA_AURA, #n, t, nonpod_offsetof(type, debuffs_##n))
 
@@ -3986,6 +3986,7 @@ struct player_t : public noncopyable
   {
     set_bonus_t* rakata_force_masters;
     set_bonus_t* battlemaster_force_masters;
+    set_bonus_t* rakata_stalkers;
     void reset() { *this = set_bonuses_t(); }
   };
   set_bonuses_t set_bonus;
@@ -4286,6 +4287,7 @@ struct targetdata_t : public noncopyable
 
   jedi_sage_targetdata_t* cast_jedi_sage() { assert( source->type == JEDI_SAGE  ); return ( jedi_sage_targetdata_t* ) this; }
   sith_sorcerer_targetdata_t* cast_sith_sorcerer() { assert( source->type == SITH_SORCERER ); return ( sith_sorcerer_targetdata_t* ) this; }
+  shadow_assassin_targetdata_t* cast_shadow_assassin() { assert( source->type == JEDI_SAGE || source -> type == SITH_ASSASSIN ); return ( shadow_assassin_targetdata_t* ) this; }
 
 protected:
   dot_t* add_dot( dot_t* d );
@@ -5214,7 +5216,7 @@ struct rng_t
 
   virtual int    type() const { return RNG_STANDARD; }
   virtual double real();
-  virtual int    roll( double chance );
+  virtual bool    roll( double chance );
   virtual double range( double min, double max );
   timespan_t range( timespan_t min, timespan_t max );
   virtual double gauss( double mean, double stddev );

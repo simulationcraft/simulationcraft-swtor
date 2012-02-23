@@ -22,15 +22,15 @@ void register_jedi_sage_targetdata( sim_t*  sim  )
   player_type t = JEDI_SAGE;
   typedef jedi_sage_targetdata_t type;
 
-  REGISTER_DOT( telekinetic_throw );
-  REGISTER_DOT( mind_crush );
-  REGISTER_DOT( weaken_mind );
-  REGISTER_DOT( sever_force );
+  REGISTER_DOT( telekinetic_throw, telekinetic_throw );
+  REGISTER_DOT( mind_crush, mind_crush );
+  REGISTER_DOT( weaken_mind, weaken_mind );
+  REGISTER_DOT( sever_force, sever_force );
 }
 
 struct sith_sorcerer_targetdata_t : public targetdata_t
 {
-  dot_t* dots_telekinetic_throw;
+  dot_t* dots_force_lightning;
   dot_t* dots_crushing_darkness;
   dot_t* dots_affliction;
   dot_t* dots_creeping_terror;
@@ -45,10 +45,10 @@ void register_sith_sorcerer_targetdata( sim_t*  sim  )
   player_type t = SITH_SORCERER;
   typedef sith_sorcerer_targetdata_t type;
 
-  REGISTER_DOT( telekinetic_throw );
-  REGISTER_DOT( crushing_darkness );
-  REGISTER_DOT( affliction );
-  REGISTER_DOT( creeping_terror );
+  REGISTER_DOT( force_lightning, force_lightning );
+  REGISTER_DOT( crushing_darkness, crushing_darkness );
+  REGISTER_DOT( affliction, affliction );
+  REGISTER_DOT( creeping_terror, creeping_terror );
 }
 
 // ==========================================================================
@@ -826,11 +826,13 @@ struct force_in_balance_t : public jedi_sage_spell_t
     base_multiplier *= 1.0 + p -> talents.psychic_suffusion -> rank() * 0.05;
   }
 
-  virtual void calculate_result()
+  virtual void execute()
   {
-    jedi_sage_spell_t::calculate_result();
+    jedi_sage_spell_t::execute();
 
     sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+
+    // ToDo: Move buff to targetdata and buff trigger to impact
 
     p -> buffs.force_suppression -> trigger( 10 );
   }

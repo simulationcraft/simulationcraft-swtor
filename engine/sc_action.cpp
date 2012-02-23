@@ -650,12 +650,12 @@ double action_t::calculate_direct_damage( int chain_target )
 
   dmg += base_dd_adder + player_dd_adder + target_dd_adder;
 
-  if ( weapon_multiplier > 0 )
+  if ( weapon_multiplier > - 1.00 )
   {
     // x% weapon damage + Y
     // e.g. Obliterate, Shred, Backstab
     dmg += calculate_weapon_damage();
-    dmg *= weapon_multiplier;
+    dmg *= ( 1 + weapon_multiplier );
     weapon_dmg = dmg;
   }
   dmg += dd.power_mod * total_power();
