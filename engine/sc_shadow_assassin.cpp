@@ -278,10 +278,8 @@ struct shadow_assassin_attack_t : public attack_t
 
      shadow_assassin_t* p = player -> cast_shadow_assassin();
 
-     if ( p -> talents.charge_mastery -> rank() )
-     {
+     if ( p -> actives.charge == SURGING_CHARGE )
        a *= 1.0 - p -> talents.charge_mastery -> rank() * 0.03;
-     }
 
      return a;
    }
@@ -1216,18 +1214,16 @@ struct saber_strike_t : public shadow_assassin_attack_t
     base_cost = 0;
     range = 4.0;
 
+    weapon_multiplier = -.066;
+    dd.power_mod = .33;
+
     if ( is_consequent_strike )
     {
-      weapon_multiplier = -.033;
-      dd.power_mod = .33;
       background = true;
       dual = true;
     }
     else
     {
-      weapon_multiplier = -.066;
-      dd.power_mod = .66;
-
       second_strike = new saber_strike_t( p, options_str, true );
       second_strike -> base_execute_time = timespan_t::from_seconds( 0.5 );
       third_strike = new saber_strike_t( p, options_str, true );
