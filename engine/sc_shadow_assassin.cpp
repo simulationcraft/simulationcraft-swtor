@@ -269,7 +269,11 @@ struct shadow_assassin_attack_t : public attack_t
         if ( p -> buffs.exploitive_strikes -> up() )
             player_crit += p -> talents.exploitive_strikes -> rank() * 0.03;
         if ( p -> buffs.unearthed_knowledge -> up() )
+        {
+            // FIXME: Unearthed Knowledge should be increasing melee bonus damage by 10%,
+            //        not increasing melee damage by 10%.
             dd.player_multiplier *= 1.10;
+        }
     }
 
    virtual double armor() const
@@ -283,7 +287,6 @@ struct shadow_assassin_attack_t : public attack_t
 
      return a;
    }
-
 };
 
 struct shadow_assassin_spell_t : public spell_t
