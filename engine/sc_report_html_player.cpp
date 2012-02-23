@@ -1135,6 +1135,7 @@ static void print_html_player_scale_factors( FILE* file, sim_t* sim, player_t* p
                "\t\t\t\t\t\t\t</tr>\n",
                colspan,
                p -> gear_weights_wowreforge_link.c_str() );
+#endif
       fprintf( file,
                "\t\t\t\t\t\t\t<tr class=\"left\">\n"
                "\t\t\t\t\t\t\t\t<th>Stat Ranking</th>\n"
@@ -1161,7 +1162,7 @@ static void print_html_player_scale_factors( FILE* file, sim_t* sim, player_t* p
                "\t\t\t\t\t\t\t\t\t</ul>\n"
                "\t\t\t\t\t\t\t\t</td>\n"
                "\t\t\t\t\t\t\t</tr>\n" );
-#endif
+
       fprintf( file,
                "\t\t\t\t\t\t</table>\n" );
       if ( sim -> iterations < 10000 )

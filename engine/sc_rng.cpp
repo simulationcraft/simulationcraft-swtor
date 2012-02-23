@@ -30,12 +30,12 @@ double rng_t::real()
 
 // rng_t::roll ==============================================================
 
-int rng_t::roll( double chance )
+bool rng_t::roll( double chance )
 {
   if ( chance <= 0 ) return 0;
   if ( chance >= 1 ) return 1;
   num_roll++;
-  int result = ( real() < chance ) ? 1 : 0;
+  bool result = ( real() < chance );
   expected_roll += chance;
   if ( result ) actual_roll++;
   return result;
@@ -583,7 +583,7 @@ struct rng_normalized_t : public rng_t
   virtual double range( double min, double max ) { return ( min + max ) / 2.0; }
   virtual double gauss( double mean, double /* stddev */ ) { return mean; }
   virtual timespan_t gauss( timespan_t mean, timespan_t /* stddev */ ) { return mean; }
-  virtual int    roll( double chance ) = 0; // must be overridden
+  virtual bool    roll( double chance ) = 0; // must be overridden
 };
 
 // ==========================================================================
@@ -646,7 +646,7 @@ struct rng_phase_shift_t : public rng_normalized_t
   {
     return TIMESPAN_FROM_NATIVE_VALUE( gauss( TIMESPAN_TO_NATIVE_VALUE( mean ), TIMESPAN_TO_NATIVE_VALUE( stddev ) ) );
   }
-  virtual int roll( double chance )
+  virtual bool roll( double chance )
   {
     if ( chance <= 0 ) return 0;
     if ( chance >= 1 ) return 1;
@@ -655,9 +655,9 @@ struct rng_phase_shift_t : public rng_normalized_t
     if ( actual_roll < expected_roll )
     {
       actual_roll++;
-      return 1;
+      return true;
     }
-    return 0;
+    return false;
   }
 };
 
@@ -697,7 +697,7 @@ struct rng_pre_fill_t : public rng_normalized_t
   }
   virtual int type() const { return RNG_PRE_FILL; }
 
-  virtual int roll( double chance )
+  virtual bool roll( double chance )
   {
     if ( chance <= 0 ) return 0;
     if ( chance >= 1 ) return 1;
@@ -731,9 +731,9 @@ struct rng_pre_fill_t : public rng_normalized_t
     if ( roll_distribution[ roll_index ] )
     {
       actual_roll++;
-      return 1;
+      return true;
     }
-    return 0;
+    return false;
   }
 
   virtual double range( double min, double max )
@@ -962,7 +962,7 @@ struct rng_distance_simple_t : public rng_normalized_t
   }
   virtual int type() const { return RNG_DISTANCE_SIMPLE; }
 
-  virtual int roll( double chance )
+  virtual bool roll( double chance )
   {
     if ( chance <= 0 ) return 0;
     if ( chance >= 1 ) return 1;
@@ -971,9 +971,9 @@ struct rng_distance_simple_t : public rng_normalized_t
     if ( roll_d.reach( chance ) )
     {
       actual_roll++;
-      return 1;
+      return true;
     }
-    return 0;
+    return false;
   }
 
   virtual double range( double min, double max )
@@ -1017,7 +1017,7 @@ struct rng_distance_bands_t : public rng_distance_simple_t
   }
   virtual int type() const { return RNG_DISTANCE_BANDS; }
 
-  virtual int roll( double chance )
+  virtual bool roll( double chance )
   {
     if ( chance <= 0 ) return 0;
     if ( chance >= 1 ) return 1;
@@ -1027,9 +1027,9 @@ struct rng_distance_bands_t : public rng_distance_simple_t
     if ( roll_bands[ band ].reach( chance ) )
     {
       actual_roll++;
-      return 1;
+      return true;
     }
-    return 0;
+    return false;
   }
 };
 

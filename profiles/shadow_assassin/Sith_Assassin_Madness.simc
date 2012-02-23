@@ -11,27 +11,45 @@ talents=http://www.torhead.com/skill-calc#200McZhMZcMfRrMkrfz.1
 actions=stim,type=exotech_resolve
 actions+=/mark_of_power
 actions+=/snapshot_stats
+actions+=/stealth
+actions+=/apply_charge,type=lightning
 actions+=/power_potion
 actions+=/recklessness
+actions+=/force_cloak,if=buff.dark_embrace.down&force<60
+actions+=/overcharge_saber
+actions+=/death_field
+actions+=/crushing_darkness,if=buff.raze.react
+actions+=/discharge,if=!dot.lightning_discharge.ticking
 actions+=/shock,if=buff.unearthed_knowledge.down
 actions+=/assassinate
-actions+=/death_field
-actions+=/discharge,if=!ticking
-actions+=/creeping_terror,if=!ticking
 actions+=/maul,if=buff.exploit_weakness.react
-actions+=/crushing_darkness,if=buff.raze.react
+actions+=/creeping_terror,if=!ticking
 actions+=/thrash
-actions+=/force_cloak
 actions+=/saber_strike
-head=foo_stalker_headgear
-shirt=foo,stats=1303willpower_510crit_151power_1224forcepower_153surge
-chest=foo_stalker_vestments
-legs=foo_stalker_lower_robe
-hands=foo_stalker_gloves
+head=rakata_stalkers_headgear,stats=55end_51willpower_29end_48willpower_37power_40end_20power_51hit
+ear=rakata_stalkers_chip,stats=99end_85willpower_51crit_51hit
+shirt=datacron,stats=40willpower
+chest=rakata_stalkers_robe,stats=44end_61willpower_37end_61willpower_11crit_24end_37crit_51hit
+waist=rakata_stalkers_waistwrap,stats=71end_103willpower_11crit
+legs=rakata_stalkers_legwraps,stats=55end_51willpower_29end_48willpower_37crit_24end_37crit_51hit
+feet=rakata_stalkers_boots,stats=44end_61willpower_37end_61willpower_11crit_24end_37crit_51hit
+wrists=rakata_stalkers_bracers,stats=74end_85willpower_37power
+hands=rakata_stalkers_handwraps,stats=55end_51willpower_29end_48willpower_37power_40end_20power_51hit
+implant1=rakata_stalkers_implant,stats=85end_103willpower_44crit_51surge
+implant2=rakata_stalkers_implant,stats=85end_103willpower_44crit_51surge
+relic1=matrix_cube_m7r3,stats=50end_58willpower_24crit
+relic2=plasma_burst_device,stats=77end,equip=ondamage_168elemental_30%_4.5cd
+main_hand=blood_of_korriban,stats=612forcepower_41crit_44end_61willpower_37end_61willpower_11crit_24end_37crit_51hit,weapon=sword2h_3.60speed_367min_551max
+off_hand=rakata_stalkers_power_generator,stats=85end_103willpower_612forcepower_77crit_51surge
 # Gear Summary
+# gear_willpower=1343
+# gear_endurance=1297
+# gear_hit_rating=357
 # gear_crit_rating=510
 # gear_power=151
 # gear_forcepower=1224
-# gear_willpower=1303
 # gear_surge_rating=153
 # Set Bonuses
+# set_bonus=rakata_stalkers_2pc
+# set_bonus=rakata_stalkers_4pc
+# main_hand=blood_of_korriban,weapon=sword2h_3.60speed_367min_551max

@@ -2,15 +2,10 @@ sith_assassin=Sith_Assassin_Madness
 level=50
 talents=http://www.torhead.com/skill-calc#200McZhMZcMfRrMkrfz.1
 position=back
-shirt=foo,stats=1303willpower_510crit_151power_1224forcepower_153surge
-#shirt=foo,stats=1303willpower_510crit_357accuracy_151power_1224forcepower_153surge
-chest=foo_stalker_vestments
-hands=foo_stalker_gloves
-legs=foo_stalker_lower_robe
-head=foo_stalker_headgear
+Shadow_Assassin_Gear.simc
 save=Sith_Assassin_Madness.simc
 
 copy=Sith_Assassin_Deception,Sith_Assassin_Madness
-talents=http://www.torhead.com/skill-calc#200McZhGMRkhMrtzZcM.1
+talents=http://www.torhead.com/skill-calc#2000MZhGMRkhMrtzZcMc.1
 save=Sith_Assassin_Deception.simc
 
