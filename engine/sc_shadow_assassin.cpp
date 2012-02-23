@@ -94,7 +94,6 @@ struct shadow_assassin_t : public player_t
         gain_t* parasitism;
         gain_t* dark_embrace;
         gain_t* calculating_mind;
-        gain_t* saber_conduit;
     } gains;
 
     // Procs
@@ -974,7 +973,7 @@ struct overcharge_saber_t : public shadow_assassin_spell_t
     shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
   {
     parse_options( 0, options_str );
-    cooldown -> duration = timespan_t::from_seconds( 120.0 - p -> talents.resourcefulness -> rank() * 15.0 );
+    cooldown -> duration = timespan_t::from_seconds( 120.0 );
     harmful = false;
 
     trigger_gcd = timespan_t::zero;
@@ -1046,7 +1045,7 @@ struct lacerate_t : public shadow_assassin_attack_t
     weapon = &( player -> main_hand_weapon );
     weapon_multiplier = -0.52;
 
-    base_cost = 40 - p -> talents.resourcefulness -> rank() * 5.0;
+    base_cost = 40;
     range = 4.0;
 
     base_multiplier *= 1.0 + p -> talents.thrashing_blades -> rank() * 0.03;
@@ -1119,8 +1118,6 @@ struct maul_t : public shadow_assassin_attack_t
 
         base_cost = 50.0;
         range = 4.0;
-
-        crit_bonus += p -> talents.induction -> rank() * 0.15;
     }
 
     virtual void execute()
@@ -1339,12 +1336,8 @@ struct surging_charge_callback_t : public action_callback_t
 
   struct surging_charge_spell_t : public shadow_assassin_spell_t
   {
-      rng_t* rng_saber_conduit;
-      cooldown_t* cooldown_saber_conduit;
-
       surging_charge_spell_t( shadow_assassin_t* p, const std::string& n ) :
-          shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL ),
-          rng_saber_conduit( 0 ), cooldown_saber_conduit( 0 )
+          shadow_assassin_spell_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
       {
           dd.standardhealthpercentmin = dd.standardhealthpercentmax = .034;
           dd.power_mod = 0.344;
@@ -1352,13 +1345,6 @@ struct surging_charge_callback_t : public action_callback_t
           proc = true;
           background = true;
           cooldown -> duration = timespan_t::from_seconds( 1.5 );
-
-          if ( p -> talents.saber_conduit -> rank() > 0 )
-          {
-            rng_saber_conduit = p -> get_rng( "saber_conduit" );
-            cooldown_saber_conduit = p -> get_cooldown( "saber_conduit" );
-            cooldown_saber_conduit -> duration = timespan_t::from_seconds( 10.0 );
-          }
       }
 
       virtual void player_buff()
@@ -1379,16 +1365,6 @@ struct surging_charge_callback_t : public action_callback_t
         shadow_assassin_t* p = player -> cast_shadow_assassin();
 
         p -> buffs.static_charges -> trigger( 1 );
-
-        if ( p -> talents.saber_conduit -> rank() > 0 )
-        {
-          if ( cooldown_saber_conduit -> remains() <= timespan_t::zero )
-            if ( rng_saber_conduit -> roll( p -> talents.saber_conduit -> rank() * 1.0 / 3.0 ) )
-            {
-              p -> resource_gain( RESOURCE_FORCE, 10.0, p -> gains.saber_conduit );
-              cooldown_saber_conduit -> start();
-            }
-        }
       }
   };
 
@@ -1678,7 +1654,6 @@ void shadow_assassin_t::init_gains()
     gains.dark_embrace     = get_gain( "dark_embrace"     );
     gains.parasitism       = get_gain( "parasitism"       );
     gains.calculating_mind = get_gain( "calculating_mind" );
-    gains.saber_conduit    = get_gain( "saber_conduit"    );
 }
 
 // shadow_assassin_t::init_procs =======================================================
