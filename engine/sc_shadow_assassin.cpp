@@ -972,9 +972,7 @@ struct voltaic_slash_t : public shadow_assassin_attack_t
   {
     shadow_assassin_attack_t::player_buff();
 
-    shadow_assassin_t* p = player -> cast_shadow_assassin();
-
-    if ( p -> set_bonus.rakata_stalkers ->four_pc() )
+    if ( player -> set_bonus.rakata_stalkers -> four_pc() )
         player_crit += 0.15 ;
   }
 };
@@ -1243,7 +1241,8 @@ struct saber_strike_t : public shadow_assassin_attack_t
     
     shadow_assassin_t* p = player -> cast_shadow_assassin();
 
-    p -> resource_gain( RESOURCE_FORCE, 1 , p -> gains.rakata_stalker_2pc );
+    if ( player -> set_bonus.rakata_stalkers -> two_pc() )
+      p -> resource_gain( RESOURCE_FORCE, 1 , p -> gains.rakata_stalker_2pc );
 
     if ( second_strike )
     {
@@ -1313,9 +1312,7 @@ struct thrash_t : public shadow_assassin_attack_t
   {
     shadow_assassin_attack_t::player_buff();
 
-    shadow_assassin_t* p = player -> cast_shadow_assassin();
-
-    if ( p -> set_bonus.rakata_stalkers -> four_pc() )
+    if ( player -> set_bonus.rakata_stalkers -> four_pc() )
         player_crit += 0.15 ;
   }
 };
