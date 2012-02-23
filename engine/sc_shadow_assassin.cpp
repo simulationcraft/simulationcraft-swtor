@@ -541,6 +541,16 @@ struct crushing_darkness_t : public shadow_assassin_spell_t
             background = true;
             may_crit = false;
         }
+        
+        virtual void target_debuff( player_t* t, int dmg_type )
+        {
+            shadow_assassin_spell_t::target_debuff( t, dmg_type );
+
+              shadow_assassin_t* p = player -> cast_shadow_assassin();
+
+              if ( p -> talents.deathmark -> rank() > 0 )
+                p -> benefits.crushing_darkness -> update( p -> buffs.deathmark -> check() > 0 );
+        }
     };
 
     crushing_darkness_dot_t* dot_spell;
