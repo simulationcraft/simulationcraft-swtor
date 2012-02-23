@@ -1146,6 +1146,8 @@ struct maul_t : public shadow_assassin_attack_t
 
         base_cost = 50.0;
         range = 4.0;
+
+        crit_bonus += p -> talents.induction -> rank() * 0.15;
     }
 
     virtual void execute()
