@@ -11,9 +11,12 @@ talents=http://www.torhead.com/skill-calc#200McZhGMRkhMrtzZcM.1
 actions=stim,type=exotech_resolve
 actions+=/mark_of_power
 actions+=/snapshot_stats
+actions+=/stealth
 actions+=/apply_charge,type=surging
 actions+=/power_potion
 actions+=/recklessness
+actions+=/blackout,if=buff.dark_embrace.down
+actions+=/force_cloak,if=buff.dark_embrace.down
 actions+=/overcharge_saber
 actions+=/assassinate
 actions+=/maul,if=buff.exploit_weakness.react
