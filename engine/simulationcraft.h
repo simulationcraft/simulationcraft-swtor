@@ -2222,6 +2222,10 @@ public:
   static int32_t CeilToInt  ( double d ) SC_FINLINE_EXT;
   static int32_t RoundToInt ( double d ) SC_FINLINE_EXT;
   static int32_t CRoundToInt( double d ) SC_FINLINE_EXT;
+
+  template <typename T, std::size_t N>
+  static std::vector<T> array_to_vector( const T (&array)[N] )
+  { return std::vector<T>( array, array + N ); }
 };
 
 finline int32_t util_t::DoubleToInt( double d )
