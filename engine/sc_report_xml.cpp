@@ -348,16 +348,12 @@ void print_xml_player_stats( xml_writer_t & writer, player_t * p )
                               p -> willpower(), p -> stats.attribute[ ATTR_WILLPOWER ], p -> attribute_buffed[ ATTR_WILLPOWER ] );
   print_xml_player_attribute( writer, "presence",
                               p -> presence(),  p -> stats.attribute[ ATTR_PRESENCE  ], p -> attribute_buffed[ ATTR_PRESENCE  ] );
-  print_xml_player_attribute( writer, "spellpower",
-                              p -> composite_spell_power( SCHOOL_MAX ) * p -> composite_spell_power_multiplier(), p -> stats.spell_power, p -> buffed_spell_power );
   print_xml_player_attribute( writer, "spellhit",
                               100 * p -> composite_spell_hit(), p -> stats.hit_rating, 100 * p -> buffed_spell_hit );
   print_xml_player_attribute( writer, "spellcrit",
                               100 * p -> composite_spell_crit(), p -> stats.crit_rating, 100 * p -> buffed_spell_crit );
   print_xml_player_attribute( writer, "spellalacrity",
                               100 * ( 1 / p -> spell_alacrity - 1 ), p -> stats.alacrity_rating, 100 * ( 1 / p -> buffed_spell_alacrity - 1 ) );
-  print_xml_player_attribute( writer, "attackpower",
-                              p -> composite_attack_power() * p -> composite_attack_power_multiplier(), p -> stats.attack_power, p -> buffed_attack_power );
   print_xml_player_attribute( writer, "attackhit",
                               100 * p -> composite_attack_hit(), p -> stats.hit_rating, 100 * p -> buffed_attack_hit );
   print_xml_player_attribute( writer, "attackcrit",
@@ -370,16 +366,12 @@ void print_xml_player_stats( xml_writer_t & writer, player_t * p )
                               100 * ( 1 / p -> composite_attack_speed() - 1 ), p -> stats.alacrity_rating, 100 * ( 1 / p -> buffed_attack_speed - 1 ) );
   print_xml_player_attribute( writer, "armor",
                               p -> composite_armor(), ( p -> stats.armor + p -> stats.bonus_armor ), p -> buffed_armor );
-  print_xml_player_attribute( writer, "miss",
-                              100 * p -> composite_tank_miss( SCHOOL_PHYSICAL ), 0, 100 * p -> buffed_miss );
   print_xml_player_attribute( writer, "dodge",
                               100 * p -> composite_tank_dodge(), p -> stats.dodge_rating, 100 * p -> buffed_dodge );
   print_xml_player_attribute( writer, "parry",
                               100 * p -> composite_tank_parry(), p -> stats.parry_rating, 100 * p -> buffed_parry );
   print_xml_player_attribute( writer, "block",
                               100 * p -> composite_tank_block(), p -> stats.block_rating, 100 * p -> buffed_block );
-  print_xml_player_attribute( writer, "tank_crit",
-                              100 * p -> composite_tank_crit( SCHOOL_PHYSICAL ), 0, 100 * p -> buffed_crit );
 
   writer.begin_tag( "resource" );
   writer.print_attribute( "name", "health" );

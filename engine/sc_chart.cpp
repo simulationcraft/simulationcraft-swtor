@@ -1752,8 +1752,6 @@ const char* chart_t::gear_weights_lootrank( std::string& s,
     case STAT_WILLPOWER:                name = "Wil";  break;
     case STAT_ENDURANCE:                name = "End";  break;
     case STAT_PRESENCE:                 name = "Pre";  break;
-    case STAT_SPELL_POWER:              name = "spd";  break;
-    case STAT_ATTACK_POWER:             name = "map";  break;
     case STAT_EXPERTISE_RATING:         name = "Exp";  break;
     case STAT_HIT_RATING:               name = "mhit"; break;
     case STAT_CRIT_RATING:              name = "mcr";  break;
@@ -1812,8 +1810,6 @@ const char* chart_t::gear_weights_wowhead( std::string& s,
     switch ( i )
     {
     case STAT_STRENGTH:                 id = 20;  break;
-    case STAT_SPELL_POWER:              id = 123; break;
-    case STAT_ATTACK_POWER:             id = 77;  break;
     case STAT_EXPERTISE_RATING:         id = 117; break;
     case STAT_HIT_RATING:               id = 119; break;
     case STAT_CRIT_RATING:              id = 96;  break;
@@ -1936,8 +1932,6 @@ const char* chart_t::gear_weights_pawn( std::string& s,
     switch ( stat )
     {
     case STAT_STRENGTH:                 name = "Strength";         if ( value*20 > maxR ) maxR = value*20; break;
-    case STAT_SPELL_POWER:              name = "SpellDamage";      if ( value*20 > maxR ) maxR = value*20; break;
-    case STAT_ATTACK_POWER:             name = "Ap";               if ( value*20 > maxR ) maxR = value*20; break;
     case STAT_EXPERTISE_RATING:         name = "ExpertiseRating";  if ( value*20 > maxR ) maxR = value*20; break;
     case STAT_HIT_RATING:               name = "HitRating";        if ( value*20 > maxY ) maxY = value*20; break;
     case STAT_CRIT_RATING:              name = "CritRating";       if ( value*20 > maxY ) maxY = value*20; break;

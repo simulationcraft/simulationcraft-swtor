@@ -15,7 +15,6 @@ spell_t::spell_t( const char* n, player_t* p, int r, const school_type s, int t 
   action_t( ACTION_SPELL, n, p, r, s, t, true )
 {
   may_miss = true;
-  base_spell_power_multiplier = 1.0;
   crit_bonus = 0.5;
   min_gcd = timespan_t::from_seconds( 1.0 );
 }

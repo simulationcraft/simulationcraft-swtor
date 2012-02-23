@@ -37,9 +37,6 @@ void gear_stats_t::add_stat( int    stat,
   case STAT_MAX_ENERGY:
   case STAT_MAX_AMMO:  break;
 
-  case STAT_SPELL_POWER:       spell_power       += value; break;
-
-  case STAT_ATTACK_POWER:             attack_power             += value; break;
   case STAT_EXPERTISE_RATING:         expertise_rating         += value; break;
   case STAT_EXPERTISE_RATING2:        expertise_rating2        += value; break;
 
@@ -102,9 +99,6 @@ void gear_stats_t::set_stat( int    stat,
   case STAT_MAX_ENERGY:
   case STAT_MAX_AMMO:  break;
 
-  case STAT_SPELL_POWER:       spell_power       = value; break;
-
-  case STAT_ATTACK_POWER:             attack_power             = value; break;
   case STAT_EXPERTISE_RATING:         expertise_rating         = value; break;
   case STAT_EXPERTISE_RATING2:        expertise_rating2        = value; break;
 
@@ -166,9 +160,6 @@ double gear_stats_t::get_stat( int stat ) const
   case STAT_MAX_ENERGY:
   case STAT_MAX_AMMO:  return 0;
 
-  case STAT_SPELL_POWER:       return spell_power;
-
-  case STAT_ATTACK_POWER:             return attack_power;
   case STAT_EXPERTISE_RATING:         return expertise_rating;
   case STAT_EXPERTISE_RATING2:        return expertise_rating2;
 
@@ -223,8 +214,6 @@ double gear_stats_t::stat_mod( int stat )
 {
   switch ( stat )
   {
-  case STAT_ATTACK_POWER:      return 0.50;
-  case STAT_SPELL_POWER:       return 0.86;
   }
   return 1.0;
 }

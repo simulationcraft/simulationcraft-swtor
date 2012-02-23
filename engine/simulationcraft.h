@@ -439,8 +439,7 @@ enum stat_type
   STAT_STRENGTH, STAT_AIM, STAT_CUNNING, STAT_WILLPOWER, STAT_ENDURANCE, STAT_PRESENCE,
   STAT_HEALTH, STAT_MANA, STAT_RAGE, STAT_ENERGY, STAT_AMMO,
   STAT_MAX_HEALTH, STAT_MAX_MANA, STAT_MAX_RAGE, STAT_MAX_ENERGY, STAT_MAX_AMMO,
-  STAT_SPELL_POWER,
-  STAT_ATTACK_POWER, STAT_EXPERTISE_RATING, STAT_EXPERTISE_RATING2,
+  STAT_EXPERTISE_RATING, STAT_EXPERTISE_RATING2,
   STAT_HIT_RATING, STAT_HIT_RATING2, STAT_CRIT_RATING, STAT_ALACRITY_RATING,
   STAT_WEAPON_DPS, STAT_WEAPON_SPEED,
   STAT_WEAPON_OFFHAND_DPS, STAT_WEAPON_OFFHAND_SPEED,
@@ -2516,8 +2515,6 @@ struct gear_stats_t
 {
   double attribute[ ATTRIBUTE_MAX ];
   double resource[ RESOURCE_MAX ];
-  double spell_power;
-  double attack_power;
   double expertise_rating;
   double expertise_rating2;
   double hit_rating;
@@ -3721,11 +3718,9 @@ struct player_t : public noncopyable
   // Spell Mechanics
   double base_power, initial_power, power, buffed_power;
   double base_force_power, initial_force_power, force_power, buffed_force_power;
-  double base_spell_power,       initial_spell_power[ SCHOOL_MAX+1 ], spell_power[ SCHOOL_MAX+1 ], buffed_spell_power;
   double spell_alacrity, buffed_spell_alacrity;
   double base_spell_hit,         spell_hit,                   buffed_spell_hit;
   double base_spell_crit,        spell_crit,                  buffed_spell_crit;
-  double spell_power_multiplier, initial_spell_power_multiplier;
   double mana_regen_base;
   double mana_regen_while_casting;
   double base_energy_regen_per_second;
@@ -3736,13 +3731,9 @@ struct player_t : public noncopyable
 
   // Attack Mechanics
   double attack_alacrity, buffed_attack_alacrity, buffed_attack_speed;
-  double base_attack_power,       initial_attack_power,        attack_power,       buffed_attack_power;
   double base_attack_hit,         attack_hit,         buffed_attack_hit;
   double base_attack_expertise,   initial_attack_expertise,    attack_expertise,   buffed_attack_expertise;
   double base_attack_crit,        attack_crit,        buffed_attack_crit;
-  double attack_power_multiplier,   initial_attack_power_multiplier;
-  double attack_power_per_strength, initial_attack_power_per_strength;
-  double attack_power_per_agility,  initial_attack_power_per_agility;
   double attack_crit_per_agility,   initial_attack_crit_per_agility;
   int    position;
   std::string position_str;
@@ -4028,13 +4019,11 @@ struct player_t : public noncopyable
   virtual double force_regen_per_second() const;
   virtual double composite_attack_alacrity() const;
   virtual double composite_attack_speed() const;
-  virtual double composite_attack_power() const;
   virtual double composite_attack_crit() const;
   virtual double composite_attack_expertise() const { return attack_expertise; }
   virtual double composite_attack_hit() const;
 
   virtual double composite_spell_alacrity() const;
-  virtual double composite_spell_power( const school_type school ) const;
   virtual double composite_spell_crit() const;
   virtual double composite_spell_hit() const;
 
@@ -4049,8 +4038,6 @@ struct player_t : public noncopyable
   virtual double composite_tank_crit_block()            const;
   virtual double composite_tank_crit( const school_type school ) const;
 
-  virtual double composite_attack_power_multiplier() const;
-  virtual double composite_spell_power_multiplier() const;
   virtual double composite_attribute_multiplier( int attr ) const;
 
   virtual double matching_gear_multiplier( const attribute_type /* attr */ ) const { return 0; }
@@ -4067,7 +4054,15 @@ struct player_t : public noncopyable
 
   virtual double composite_movement_speed() const;
 
-  virtual double composite_force_damage_bonus() const;
+  virtual double base_damage_bonus() const;
+  virtual double melee_damage_bonus() const;
+  virtual double ranged_damage_bonus() const;
+  virtual double tech_damage_bonus() const;
+  virtual double force_damage_bonus() const;
+
+  virtual double base_healing_bonus() const;
+  virtual double tech_healing_bonus() const;
+  virtual double force_healing_bonus() const;
 
 private:
   double get_stat_helper( attribute_type a ) const
@@ -4433,11 +4428,6 @@ struct action_t
   double   base_multiplier,   base_hit,   base_crit;
   double player_multiplier, player_hit, player_crit;
   double target_multiplier, target_hit, target_crit;
-  double   base_spell_power,   base_attack_power;
-  double player_spell_power, player_attack_power;
-  double target_spell_power, target_attack_power;
-  double   base_spell_power_multiplier,   base_attack_power_multiplier;
-  double player_spell_power_multiplier, player_attack_power_multiplier;
   double crit_multiplier, crit_bonus_multiplier, crit_bonus;
   double base_dd_adder, player_dd_adder, target_dd_adder;
   double player_alacrity;
@@ -4551,8 +4541,6 @@ public:
   virtual double total_crit() const       { return   base_crit       + player_crit       + target_crit;       }
   virtual double total_crit_bonus() const;
 
-  virtual double total_spell_power() const  { return floor( ( base_spell_power  + player_spell_power  + target_spell_power  ) * base_spell_power_multiplier  * player_spell_power_multiplier  ); }
-  virtual double total_attack_power() const { return floor( ( base_attack_power + player_attack_power + target_attack_power ) * base_attack_power_multiplier * player_attack_power_multiplier ); }
   virtual double total_power() const;
 
   // Some actions require different multipliers for the "direct" and "tick" portions.

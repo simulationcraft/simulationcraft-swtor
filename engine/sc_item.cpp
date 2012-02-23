@@ -920,42 +920,6 @@ bool item_t::decode_special( special_effect_t& effect,
       effect.trigger_type = PROC_DIRECT_DAMAGE;
       effect.trigger_mask = SCHOOL_ALL_MASK;
     }
-    else if ( t.full == "onspelldamage" )
-    {
-      effect.trigger_str  = t.full;
-      effect.trigger_type = PROC_DAMAGE;
-      effect.trigger_mask = SCHOOL_SPELL_MASK;
-    }
-    else if ( t.full == "onspelltickdamage" )
-    {
-      effect.trigger_str  = t.full;
-      effect.trigger_type = PROC_TICK_DAMAGE;
-      effect.trigger_mask = SCHOOL_SPELL_MASK;
-    }
-    else if ( t.full == "onspelldirectdamage" )
-    {
-      effect.trigger_str  = t.full;
-      effect.trigger_type = PROC_DIRECT_DAMAGE;
-      effect.trigger_mask = SCHOOL_SPELL_MASK;
-    }
-    else if ( t.full == "onattackdamage" )
-    {
-      effect.trigger_str  = t.full;
-      effect.trigger_type = PROC_DAMAGE;
-      effect.trigger_mask = SCHOOL_ATTACK_MASK;
-    }
-    else if ( t.full == "onattacktickdamage" )
-    {
-      effect.trigger_str  = t.full;
-      effect.trigger_type = PROC_TICK_DAMAGE;
-      effect.trigger_mask = SCHOOL_ATTACK_MASK;
-    }
-    else if ( t.full == "onattackdirectdamage" )
-    {
-      effect.trigger_str  = t.full;
-      effect.trigger_type = PROC_DIRECT_DAMAGE;
-      effect.trigger_mask = SCHOOL_ATTACK_MASK;
-    }
     else if ( t.full == "onkineticdamage" )
     {
       effect.trigger_str  = t.full;
@@ -1105,12 +1069,6 @@ bool item_t::decode_special( special_effect_t& effect,
       effect.trigger_str  = t.full;
       effect.trigger_type = PROC_ATTACK;
       effect.trigger_mask = RESULT_MISS_MASK;
-    }
-    else if ( t.full == "onspelldamageheal" )
-    {
-      effect.trigger_str  = t.full;
-      effect.trigger_type = PROC_DAMAGE_HEAL;
-      effect.trigger_mask = SCHOOL_SPELL_MASK;
     }
     else
     {

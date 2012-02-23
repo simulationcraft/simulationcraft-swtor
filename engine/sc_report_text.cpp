@@ -317,8 +317,7 @@ static void print_text_core_stats( FILE* file, player_t* p )
 static void print_text_spell_stats( FILE* file, player_t* p )
 {
   util_t::fprintf( file,
-                   "  Spell Stats:  power=%.0f|%.0f(%.0f)  hit=%.2f%%|%.2f%%(%.0f)  crit=%.2f%%|%.2f%%(%.0f)  alacrity=%.2f%%|%.2f%%(%.0f)\n",
-                   p -> buffed_spell_power, p -> composite_spell_power( SCHOOL_MAX ) * p -> composite_spell_power_multiplier(), p -> stats.spell_power,
+                   "  Spell Stats:  hit=%.2f%%|%.2f%%(%.0f)  crit=%.2f%%|%.2f%%(%.0f)  alacrity=%.2f%%|%.2f%%(%.0f)\n",
                    100 * p -> buffed_spell_hit,          100 * p -> composite_spell_hit(),          p -> stats.hit_rating,
                    100 * p -> buffed_spell_crit,         100 * p -> composite_spell_crit(),         p -> stats.crit_rating,
                    100 * ( 1 / p -> buffed_spell_alacrity - 1 ), 100 * ( 1 / p -> spell_alacrity - 1 ), p -> stats.alacrity_rating);
@@ -329,8 +328,7 @@ static void print_text_spell_stats( FILE* file, player_t* p )
 static void print_text_attack_stats( FILE* file, player_t* p )
 {
   util_t::fprintf( file,
-                   "  Attack Stats  power=%.0f|%.0f(%.0f)  hit=%.2f%%|%.2f%%(%.0f)  crit=%.2f%%|%.2f%%(%.0f)  expertise=%.2f|%.2f(%.0f)  alacrity=%.2f%%|%.2f%%(%.0f)  speed=%.2f%%|%.2f%%(%.0f)\n",
-                   p -> buffed_attack_power, p -> composite_attack_power() * p -> composite_attack_power_multiplier(), p -> stats.attack_power,
+                   "  Attack Stats hit=%.2f%%|%.2f%%(%.0f)  crit=%.2f%%|%.2f%%(%.0f)  expertise=%.2f|%.2f(%.0f)  alacrity=%.2f%%|%.2f%%(%.0f)  speed=%.2f%%|%.2f%%(%.0f)\n",
                    100 * p -> buffed_attack_hit,         100 * p -> composite_attack_hit(),         p -> stats.hit_rating,
                    100 * p -> buffed_attack_crit,        100 * p -> composite_attack_crit(),        p -> stats.crit_rating,
                    100 * p -> buffed_attack_expertise,   100 * p -> composite_attack_expertise(),   p -> stats.expertise_rating,
@@ -345,11 +343,11 @@ static void print_text_defense_stats( FILE* file, player_t* p )
   util_t::fprintf( file,
                    "  Defense Stats:  armor=%.0f|%.0f(%.0f) miss=%.2f%%|%.2f%%  dodge=%.2f%%|%.2f%%(%.0f)  parry=%.2f%%|%.2f%%(%.0f)  block=%.2f%%|%.2f%%(%.0f) crit=%.2f%%|%.2f%%\n",
                    p -> buffed_armor,       p -> composite_armor(), ( p -> stats.armor + p -> stats.bonus_armor ),
-                   100 * p -> buffed_miss,  100 * ( p -> composite_tank_miss( SCHOOL_PHYSICAL ) ),
+                   100 * p -> buffed_miss,  100 * ( p -> composite_tank_miss( SCHOOL_KINETIC ) ),
                    100 * p -> buffed_dodge, 100 * p -> composite_tank_dodge(), p -> stats.dodge_rating,
                    100 * p -> buffed_parry, 100 * p -> composite_tank_parry(), p -> stats.parry_rating,
                    100 * p -> buffed_block, 100 * p -> composite_tank_block(), p -> stats.block_rating,
-                   100 * p -> buffed_crit,  100 * p -> composite_tank_crit( SCHOOL_PHYSICAL ) );
+                   100 * p -> buffed_crit,  100 * p -> composite_tank_crit( SCHOOL_KINETIC ) );
 }
 
 // print_text_gains =========================================================

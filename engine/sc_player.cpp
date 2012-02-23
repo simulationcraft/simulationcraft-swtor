@@ -394,23 +394,17 @@ player_t::player_t( sim_t*             s,
   // Spell Mechanics
   base_power( 0.0 ), initial_power( 0.0 ), power( 0.0 ), buffed_power( 0.0 ),
   base_force_power( 0.0 ), initial_force_power( 0.0 ), force_power( 0.0 ), buffed_force_power( 0.0 ),
-  base_spell_power( 0 ), buffed_spell_power( 0 ),
   spell_alacrity( 1.0 ),  buffed_spell_alacrity( 1.0 ),
   base_spell_hit( 0 ), spell_hit( 0 ), buffed_spell_hit( 0 ),
   base_spell_crit( 0 ), spell_crit( 0 ), buffed_spell_crit( 0 ),
-  spell_power_multiplier( 1.0 ),  initial_spell_power_multiplier( 1.0 ),
   mana_regen_base( 0 ), mana_regen_while_casting( 0 ),
   base_energy_regen_per_second( 0 ), base_ammo_regen_per_second( 0 ), base_force_regen_per_second( 0 ),
   last_cast( timespan_t::zero ),
   // Attack Mechanics
   attack_alacrity( 1.0 ), buffed_attack_alacrity( 1.0 ), buffed_attack_speed( 1.0 ),
-  base_attack_power( 0 ),       initial_attack_power( 0 ),        attack_power( 0 ),       buffed_attack_power( 0 ),
   base_attack_hit( 0 ), attack_hit( 0 ),         buffed_attack_hit( 0 ),
   base_attack_expertise( 0 ),   initial_attack_expertise( 0 ),    attack_expertise( 0 ),   buffed_attack_expertise( 0 ),
   base_attack_crit( 0 ), attack_crit( 0 ),        buffed_attack_crit( 0 ),
-  attack_power_multiplier( 1.0 ), initial_attack_power_multiplier( 1.0 ),
-  attack_power_per_strength( 0 ), initial_attack_power_per_strength( 0 ),
-  attack_power_per_agility( 0 ),  initial_attack_power_per_agility( 0 ),
   attack_crit_per_agility( 0 ),   initial_attack_crit_per_agility( 0 ),
   position( POSITION_BACK ), position_str ( "" ),
   // Defense Mechanics
@@ -497,8 +491,6 @@ player_t::player_t( sim_t*             s,
   range::fill( infinite_resource, false );
   infinite_resource[ RESOURCE_HEALTH ] = true;
 
-  range::fill( initial_spell_power, 0 );
-  range::fill( spell_power, 0 );
   range::fill( resource_reduction, 0 );
   range::fill( initial_resource_reduction, 0 );
 
@@ -980,14 +972,11 @@ void player_t::init_spell()
 {
   if ( sim -> debug ) log_t::output( sim, "Initializing spells for player (%s)", name() );
 
-  initial_stats.spell_power       = gear.spell_power       + enchant.spell_power       + ( is_pet() ? 0 : sim -> enchant.spell_power );
   initial_stats.power             = gear.power             + enchant.power             + ( is_pet() ? 0 : sim -> enchant.power );
   initial_stats.force_power       = gear.force_power       + enchant.force_power       + ( is_pet() ? 0 : sim -> enchant.force_power );
 
   initial_power = base_power + initial_stats.power;
   initial_force_power = base_force_power + initial_stats.force_power;
-
-  initial_spell_power[ SCHOOL_MAX ] = base_spell_power + initial_stats.spell_power;
 
   if ( type != ENEMY && type != ENEMY_ADD )
     mana_regen_base = dbc.regen_spirit( type, level );
@@ -999,10 +988,8 @@ void player_t::init_attack()
 {
   if ( sim -> debug ) log_t::output( sim, "Initializing attack for player (%s)", name() );
 
-  initial_stats.attack_power     = gear.attack_power     + enchant.attack_power     + ( is_pet() ? 0 : sim -> enchant.attack_power );
   initial_stats.expertise_rating = gear.expertise_rating + enchant.expertise_rating + ( is_pet() ? 0 : sim -> enchant.expertise_rating );
 
-  initial_attack_power     = base_attack_power     + initial_stats.attack_power;
   initial_attack_expertise = base_attack_expertise + initial_stats.expertise_rating / rating.expertise;
 
   double a,b;
@@ -1571,9 +1558,6 @@ void player_t::init_scaling()
     scales_with[ STAT_ENERGY ] = 0;
     scales_with[ STAT_AMMO   ] = 0;
 
-    scales_with[ STAT_SPELL_POWER       ] = 0;
-
-    scales_with[ STAT_ATTACK_POWER             ] = 0;
     scales_with[ STAT_EXPERTISE_RATING         ] = 0;
     scales_with[ STAT_EXPERTISE_RATING2        ] = 0;
 
@@ -1612,13 +1596,10 @@ void player_t::init_scaling()
       case STAT_ENDURANCE: attribute_initial[ ATTR_ENDURANCE ] += v; break;
       case STAT_PRESENCE:  attribute_initial[ ATTR_PRESENCE  ] += v; break;
 
-      case STAT_SPELL_POWER:       initial_spell_power[ SCHOOL_MAX ] += v; break;
       case STAT_POWER:             initial_power                     += v; break;
       case STAT_FORCE_POWER:       initial_force_power               += v; break;
 
       case STAT_SURGE_RATING:      initial_surge_rating              += v; break;
-
-      case STAT_ATTACK_POWER:      initial_attack_power              += v; break;
 
       case STAT_EXPERTISE_RATING:
       case STAT_EXPERTISE_RATING2:
@@ -1784,21 +1765,6 @@ double player_t::composite_attack_speed() const
   return h;
 }
 
-// player_t::composite_attack_power =========================================
-
-double player_t::composite_attack_power() const
-{
-  double ap = attack_power;
-
-  ap += attack_power_per_strength * ( strength() - 10 );
-  //ap += attack_power_per_agility  * ( agility() - 10 );
-
-  if ( vengeance_enabled )
-    ap += vengeance_value;
-
-  return ap;
-}
-
 // player_t::composite_attack_crit ==========================================
 
 double player_t::composite_attack_crit() const
@@ -1916,46 +1882,6 @@ double player_t::composite_spell_alacrity() const
   return h;
 }
 
-// player_t::composite_spell_power ==========================================
-
-double player_t::composite_spell_power( const school_type school ) const
-{
-  double sp = spell_power[ school ];
-
-  if ( school == SCHOOL_FROSTFIRE )
-  {
-    sp = std::max( spell_power[ SCHOOL_FROST ],
-                   spell_power[ SCHOOL_FIRE  ] );
-  }
-  else if ( school == SCHOOL_SPELLSTORM )
-  {
-    sp = std::max( spell_power[ SCHOOL_NATURE ],
-                   spell_power[ SCHOOL_ARCANE ] );
-  }
-  else if ( school == SCHOOL_SHADOWFROST )
-  {
-    sp = std::max( spell_power[ SCHOOL_SHADOW ],
-                   spell_power[ SCHOOL_FROST ] );
-  }
-  else if ( school == SCHOOL_SHADOWFLAME )
-  {
-    sp = std::max( spell_power[ SCHOOL_SHADOW ],
-                   spell_power[ SCHOOL_FIRE ] );
-  }
-  if ( school != SCHOOL_MAX ) sp += spell_power[ SCHOOL_MAX ];
-
-  return sp;
-}
-
-// player_t::composite_spell_power_multiplier ===============================
-
-double player_t::composite_spell_power_multiplier() const
-{
-  double m = spell_power_multiplier;
-
-  return m;
-}
-
 // player_t::composite_spell_crit ===========================================
 
 double player_t::composite_spell_crit() const
@@ -1975,15 +1901,6 @@ double player_t::composite_spell_hit() const
   double sh = spell_hit;
 
   return sh;
-}
-
-// player_t::composite_attack_power_multiplier ==============================
-
-double player_t::composite_attack_power_multiplier() const
-{
-  double m = attack_power_multiplier;
-
-  return m;
 }
 
 // player_t::composite_attribute_multiplier =================================
@@ -2064,16 +1981,94 @@ double player_t::composite_movement_speed() const
   return speed;
 }
 
-// player_t::composite_force_damage_bonus() =======================================
+// player_t::base_damage_bonus() =======================================
 
-double player_t::composite_force_damage_bonus() const
+double player_t::base_damage_bonus() const
 {
-  double dmg_bonus = willpower() * 0.2 + composite_power() * 0.23 + composite_force_power() * 0.23;
+  double dmg_bonus = get_stat_helper( primary_attribute ) * 0.2 + composite_power() * 0.23;
+
+  return dmg_bonus;
+}
+
+// player_t::melee_damage_bonus() =======================================
+
+double player_t::melee_damage_bonus() const
+{
+  double dmg_bonus = base_damage_bonus();
 
   if ( buffs.unnatural_might -> up() )
     dmg_bonus *= 1.05;
 
   return dmg_bonus;
+}
+
+// player_t::ranged_damage_bonus() =======================================
+
+double player_t::ranged_damage_bonus() const
+{
+  double dmg_bonus = base_damage_bonus();
+
+  if ( buffs.unnatural_might -> up() )
+    dmg_bonus *= 1.05;
+
+  return dmg_bonus;
+}
+
+// player_t::tech_damage_bonus() =======================================
+
+double player_t::tech_damage_bonus() const
+{
+  double dmg_bonus = base_damage_bonus(); // Add 23% tech power
+
+  if ( buffs.unnatural_might -> up() )
+    dmg_bonus *= 1.05;
+
+  return dmg_bonus;
+}
+
+// player_t::force_damage_bonus() =======================================
+
+double player_t::force_damage_bonus() const
+{
+  double dmg_bonus = base_damage_bonus() + composite_force_power() * 0.23;
+
+  if ( buffs.unnatural_might -> up() )
+    dmg_bonus *= 1.05;
+
+  return dmg_bonus;
+}
+
+// player_t::base_healing_bonus() =======================================
+
+double player_t::base_healing_bonus() const
+{
+  double healing_bonus = get_stat_helper( primary_attribute ) * 0.14 + composite_power() * 0.17;
+
+  return healing_bonus;
+}
+
+// player_t::tech_healing_bonus() =======================================
+
+double player_t::tech_healing_bonus() const
+{
+  double healing_bonus = base_healing_bonus(); // Add 17% tech power
+
+  if ( buffs.unnatural_might -> up() )
+    healing_bonus *= 1.05;
+
+  return healing_bonus;
+}
+
+// player_t::force_healing_bonus() =======================================
+
+double player_t::force_healing_bonus() const
+{
+  double healing_bonus = base_healing_bonus() + composite_force_power() * 0.17;
+
+  if ( buffs.unnatural_might -> up() )
+    healing_bonus *= 1.05;
+
+  return healing_bonus;
 }
 
 // player_t::strength() =====================================================
@@ -2348,16 +2343,11 @@ void player_t::reset()
   }
   recalculate_crit();
 
-  for ( int i=0; i <= SCHOOL_MAX; i++ )
-  {
-    spell_power[ i ] = initial_spell_power[ i ];
-  }
   for ( int i=0; i < SCHOOL_MAX; i++ )
   {
     resource_reduction[ i ] = initial_resource_reduction[ i ];
   }
 
-  attack_power       = initial_attack_power;
   attack_expertise   = initial_attack_expertise;
 
   armor              = initial_armor;
@@ -2370,11 +2360,6 @@ void player_t::reset()
   power              = initial_power;
   force_power        = initial_force_power;
 
-  spell_power_multiplier    = initial_spell_power_multiplier;
-
-  attack_power_multiplier   = initial_attack_power_multiplier;
-  attack_power_per_strength = initial_attack_power_per_strength;
-  attack_power_per_agility  = initial_attack_power_per_agility;
   attack_crit_per_agility   = initial_attack_crit_per_agility;
 
   armor_multiplier          = initial_armor_multiplier;
@@ -3040,11 +3025,9 @@ void player_t::stat_gain( int       stat,
   case STAT_MAX_ENERGY: resource_max[ RESOURCE_ENERGY ] += amount; resource_gain( RESOURCE_ENERGY, amount, gain, action ); break;
   case STAT_MAX_AMMO:   resource_max[ RESOURCE_AMMO   ] += amount; resource_gain( RESOURCE_AMMO,   amount, gain, action ); break;
 
-  case STAT_SPELL_POWER:       stats.spell_power       += amount; temporary.spell_power += temp_value * amount; spell_power[ SCHOOL_MAX ] += amount; break;
   case STAT_POWER:             stats.power             += amount; power                     += amount; break;
   case STAT_FORCE_POWER:       stats.force_power       += amount; force_power               += amount; break;
 
-  case STAT_ATTACK_POWER:             stats.attack_power             += amount; temporary.attack_power += temp_value * amount; attack_power       += amount;                            break;
   case STAT_EXPERTISE_RATING:         stats.expertise_rating         += amount; temporary.expertise_rating += temp_value * amount; attack_expertise   += amount / rating.expertise;         break;
 
   case STAT_HIT_RATING:
@@ -3131,11 +3114,9 @@ void player_t::stat_loss( int       stat,
   }
   break;
 
-  case STAT_SPELL_POWER:       stats.spell_power       -= amount; temporary.spell_power -= temp_value * amount; spell_power[ SCHOOL_MAX ] -= amount; break;
   case STAT_POWER:             stats.power             -= amount; power                     -= amount; break;
   case STAT_FORCE_POWER:       stats.force_power       -= amount; force_power               -= amount; break;
 
-  case STAT_ATTACK_POWER:             stats.attack_power             -= amount; temporary.attack_power -= temp_value * amount; attack_power       -= amount;                            break;
   case STAT_EXPERTISE_RATING:         stats.expertise_rating         -= amount; temporary.expertise_rating -= temp_value * amount; attack_expertise   -= amount / rating.expertise;         break;
 
   case STAT_HIT_RATING:
@@ -3188,20 +3169,7 @@ void player_t::cost_reduction_gain( int       school,
 
   if ( sim -> log ) log_t::output( sim, "%s gains a cost reduction of %.0f on abilities of school %s", name(), amount, util_t::school_type_string( school ) );
 
-  if ( school > SCHOOL_MAX_PRIMARY )
-  {
-    for ( int i = 1; i < SCHOOL_MAX_PRIMARY; i++ )
-    {
-      if ( util_t::school_type_component( school, i ) )
-      {
-        resource_reduction[ i ] += amount;
-      }
-    }
-  }
-  else
-  {
-    resource_reduction[ school ] += amount;
-  }
+  resource_reduction[ school ] += amount;
 }
 
 // player_t::cost_reduction_loss ============================================
@@ -3214,20 +3182,7 @@ void player_t::cost_reduction_loss( int       school,
 
   if ( sim -> log ) log_t::output( sim, "%s loses a cost reduction %.0f on abilities of school %s", name(), amount, util_t::school_type_string( school ) );
 
-  if ( school > SCHOOL_MAX_PRIMARY )
-  {
-    for ( int i = 1; i < SCHOOL_MAX_PRIMARY; i++ )
-    {
-      if ( util_t::school_type_component( school, i ) )
-      {
-        resource_reduction[ i ] -= amount;
-      }
-    }
-  }
-  else
-  {
-    resource_reduction[ school ] -= amount;
-  }
+  resource_reduction[ school ] -= amount;
 }
 
 // player_t::assess_damage ==================================================
@@ -3321,7 +3276,7 @@ double player_t::target_mitigation( double            amount,
     if ( mitigated_amount < 0 ) return 0;
   }
 
-  if ( school == SCHOOL_PHYSICAL || school == SCHOOL_KINETIC || school == SCHOOL_ENERGY )
+  if ( school == SCHOOL_KINETIC || school == SCHOOL_ENERGY )
   {
 
     // Armor
@@ -4248,24 +4203,22 @@ struct snapshot_stats_t : public action_t
 
     for ( int i=0; i < RESOURCE_MAX; i++ ) p -> resource_buffed[ i ] = p -> resource_max[ i ];
 
-    p -> buffed_spell_power       = floor( p -> composite_spell_power( SCHOOL_MAX ) * p -> composite_spell_power_multiplier() );
     p -> buffed_spell_hit         = p -> composite_spell_hit();
     p -> buffed_spell_crit        = p -> composite_spell_crit();
     p -> buffed_power             = p -> composite_power();
     p -> buffed_force_power       = p -> composite_force_power();
     p -> buffed_surge             = p -> surge_bonus;
 
-    p -> buffed_attack_power       = p -> composite_attack_power() * p -> composite_attack_power_multiplier();
     p -> buffed_attack_hit         = p -> composite_attack_hit();
     p -> buffed_attack_expertise   = p -> composite_attack_expertise();
     p -> buffed_attack_crit        = p -> composite_attack_crit();
 
     p -> buffed_armor       = p -> composite_armor();
-    p -> buffed_miss        = p -> composite_tank_miss( SCHOOL_PHYSICAL );
+    p -> buffed_miss        = p -> composite_tank_miss( SCHOOL_KINETIC );
     p -> buffed_dodge       = p -> composite_tank_dodge();
     p -> buffed_parry       = p -> composite_tank_parry();
     p -> buffed_block       = p -> composite_tank_block();
-    p -> buffed_crit        = p -> composite_tank_crit( SCHOOL_PHYSICAL );
+    p -> buffed_crit        = p -> composite_tank_crit( SCHOOL_KINETIC );
 
     int role = p -> primary_role();
     int delta_level = sim -> target -> level - p -> level;
@@ -4453,7 +4406,6 @@ struct base_use_item_t : public action_t
           dd.base_min = dd.base_max = a;
           may_crit    = true;
           background  = true;
-          base_spell_power_multiplier = 0;
           init();
         }
       };
@@ -5245,8 +5197,6 @@ action_expr_t* player_t::create_expression( action_t* a,
         case STAT_WILLPOWER:        p_stat = &( a -> player -> temporary.attribute[ ATTR_WILLPOWER ] ); attr = ATTR_WILLPOWER; break;
         case STAT_ENDURANCE:        p_stat = &( a -> player -> temporary.attribute[ ATTR_ENDURANCE ] ); attr = ATTR_ENDURANCE; break;
         case STAT_PRESENCE:         p_stat = &( a -> player -> temporary.attribute[ ATTR_PRESENCE  ] ); attr = ATTR_PRESENCE;  break;
-        case STAT_SPELL_POWER:      p_stat = &( a -> player -> temporary.spell_power                 ); break;
-        case STAT_ATTACK_POWER:     p_stat = &( a -> player -> temporary.attack_power                ); break;
         case STAT_EXPERTISE_RATING: p_stat = &( a -> player -> temporary.expertise_rating            ); break;
         case STAT_HIT_RATING:       p_stat = &( a -> player -> temporary.hit_rating                  ); break;
         case STAT_CRIT_RATING:      p_stat = &( a -> player -> temporary.crit_rating                 ); break;
@@ -5277,19 +5227,6 @@ action_expr_t* player_t::create_expression( action_t* a,
             result_num = stat;
             if ( attr != -1 )
               result_num *= action -> player -> composite_attribute_multiplier( attr );
-            else if ( stat_type == STAT_SPELL_POWER )
-            {
-              result_num *= action -> player -> composite_spell_power_multiplier();
-              //log_t::output( action -> sim, "temporary_bonus.spell_power=%f", result_num );
-            }
-            else if ( stat_type == STAT_ATTACK_POWER )
-            {
-              result_num += action -> player -> temporary.attribute[ ATTR_STRENGTH ] *
-                            action -> player -> composite_attribute_multiplier( ATTR_STRENGTH ) *
-                            action -> player -> attack_power_per_strength;
-
-              result_num *= action -> player -> composite_attack_power_multiplier();
-            }
 
             return TOK_NUM;
           }
@@ -5598,10 +5535,8 @@ bool player_t::create_profile( std::string& profile_str, int save_type, bool sav
     if ( enchant.attribute[ ATTR_WILLPOWER ] != 0 )  profile_str += "enchant_willpower="        + util_t::to_string( enchant.attribute[ ATTR_WILLPOWER ] ) + term;
     if ( enchant.attribute[ ATTR_ENDURANCE ] != 0 )  profile_str += "enchant_endurance="        + util_t::to_string( enchant.attribute[ ATTR_ENDURANCE ] ) + term;
     if ( enchant.attribute[ ATTR_PRESENCE  ] != 0 )  profile_str += "enchant_presence="         + util_t::to_string( enchant.attribute[ ATTR_PRESENCE  ] ) + term;
-    if ( enchant.spell_power                 != 0 )  profile_str += "enchant_spell_power="      + util_t::to_string( enchant.spell_power ) + term;
     if ( enchant.power                       != 0 )  profile_str += "enchant_power="            + util_t::to_string( enchant.power ) + term;
     if ( enchant.force_power                 != 0 )  profile_str += "enchant_force_power="      + util_t::to_string( enchant.force_power ) + term;
-    if ( enchant.attack_power                != 0 )  profile_str += "enchant_attack_power="     + util_t::to_string( enchant.attack_power ) + term;
     if ( enchant.expertise_rating            != 0 )  profile_str += "enchant_expertise_rating=" + util_t::to_string( enchant.expertise_rating ) + term;
     if ( enchant.armor                       != 0 )  profile_str += "enchant_armor="            + util_t::to_string( enchant.armor ) + term;
     if ( enchant.alacrity_rating             != 0 )  profile_str += "enchant_alacrity_rating="  + util_t::to_string( enchant.alacrity_rating ) + term;
@@ -5738,10 +5673,8 @@ void player_t::create_options()
     { "gear_willpower",                       OPT_FLT,  &( gear.attribute[ ATTR_WILLPOWER ]           ) },
     { "gear_endurance",                       OPT_FLT,  &( gear.attribute[ ATTR_ENDURANCE ]           ) },
     { "gear_presence",                        OPT_FLT,  &( gear.attribute[ ATTR_PRESENCE  ]           ) },
-    { "gear_spell_power",                     OPT_FLT,  &( gear.spell_power                           ) },
     { "gear_power",                           OPT_FLT,  &( gear.power                                 ) },
     { "gear_force_power",                     OPT_FLT,  &( gear.force_power                           ) },
-    { "gear_attack_power",                    OPT_FLT,  &( gear.attack_power                          ) },
     { "gear_expertise_rating",                OPT_FLT,  &( gear.expertise_rating                      ) },
     { "gear_alacrity_rating",                 OPT_FLT,  &( gear.alacrity_rating                       ) },
     { "gear_hit_rating",                      OPT_FLT,  &( gear.hit_rating                            ) },
@@ -5759,10 +5692,8 @@ void player_t::create_options()
     { "enchant_willpower",                    OPT_FLT,  &( enchant.attribute[ ATTR_WILLPOWER ]        ) },
     { "enchant_endurance",                    OPT_FLT,  &( enchant.attribute[ ATTR_ENDURANCE ]        ) },
     { "enchant_presence",                     OPT_FLT,  &( enchant.attribute[ ATTR_PRESENCE  ]        ) },
-    { "enchant_spell_power",                  OPT_FLT,  &( enchant.spell_power                        ) },
     { "enchant_power",                        OPT_FLT,  &( enchant.power                              ) },
     { "enchant_force_power",                  OPT_FLT,  &( enchant.force_power                        ) },
-    { "enchant_attack_power",                 OPT_FLT,  &( enchant.attack_power                       ) },
     { "enchant_expertise_rating",             OPT_FLT,  &( enchant.expertise_rating                   ) },
     { "enchant_armor",                        OPT_FLT,  &( enchant.armor                              ) },
     { "enchant_alacrity_rating",              OPT_FLT,  &( enchant.alacrity_rating                    ) },

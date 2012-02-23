@@ -564,39 +564,6 @@ const char* util_t::school_type_string( int school )
 {
   switch ( school )
   {
-  case SCHOOL_ARCANE:           return "arcane";
-  case SCHOOL_BLEED:            return "bleed";
-  case SCHOOL_CHAOS:            return "chaos";
-  case SCHOOL_FIRE:             return "fire";
-  case SCHOOL_FROST:            return "frost";
-  case SCHOOL_FROSTFIRE:        return "frostfire";
-  case SCHOOL_HOLY:             return "holy";
-  case SCHOOL_NATURE:           return "nature";
-  case SCHOOL_PHYSICAL:         return "physical";
-  case SCHOOL_SHADOW:           return "shadow";
-  case SCHOOL_HOLYSTRIKE:       return "holystrike";
-  case SCHOOL_FLAMESTRIKE:      return "flamestrike";
-  case SCHOOL_HOLYFIRE:         return "holyfire";
-  case SCHOOL_STORMSTRIKE:      return "stormstrike";
-  case SCHOOL_HOLYSTORM:        return "holystorm";
-  case SCHOOL_FIRESTORM:        return "firestorm";
-  case SCHOOL_FROSTSTRIKE:      return "froststrike";
-  case SCHOOL_HOLYFROST:        return "holyfrost";
-  case SCHOOL_FROSTSTORM:       return "froststorm";
-  case SCHOOL_SHADOWSTRIKE:     return "shadowstrike";
-  case SCHOOL_SHADOWLIGHT:      return "shadowlight";
-  case SCHOOL_SHADOWFLAME:      return "shadowflame";
-  case SCHOOL_SHADOWSTORM:      return "shadowstorm";
-  case SCHOOL_SHADOWFROST:      return "shadowfrost";
-  case SCHOOL_SPELLSTRIKE:      return "spellstrike";
-  case SCHOOL_DIVINE:           return "divine";
-  case SCHOOL_SPELLFIRE:        return "spellfire";
-  case SCHOOL_SPELLSTORM:       return "spellstorm";
-  case SCHOOL_SPELLFROST:       return "spellfrost";
-  case SCHOOL_SPELLSHADOW:      return "spellshadow";
-  case SCHOOL_CHROMATIC:        return "chromatic";
-  case SCHOOL_MAGIC:            return "magic";
-  case SCHOOL_DRAIN:            return "drain";
   case SCHOOL_KINETIC:          return "kinetic";
   case SCHOOL_INTERNAL:         return "internal";
   case SCHOOL_ELEMENTAL:        return "elemental";
@@ -940,9 +907,6 @@ const char* util_t::stat_type_string( int stat )
   case STAT_ENERGY: return "energy";
   case STAT_AMMO:  return "ammo";
 
-  case STAT_SPELL_POWER:       return "spell_power";
-
-  case STAT_ATTACK_POWER:             return "attack_power";
   case STAT_EXPERTISE_RATING:         return "expertise_rating";
   case STAT_EXPERTISE_RATING2:        return "inverse_expertise_rating";
 
@@ -994,9 +958,6 @@ const char* util_t::stat_type_abbrev( int stat )
   case STAT_ENERGY: return "Energy";
   case STAT_AMMO:   return "Ammo";
 
-  case STAT_SPELL_POWER:       return "SP";
-
-  case STAT_ATTACK_POWER:             return "AP";
   case STAT_EXPERTISE_RATING:         return "Exp";
   case STAT_EXPERTISE_RATING2:        return "InvExp";
 
@@ -1048,9 +1009,6 @@ const char* util_t::stat_type_wowhead( int stat )
   case STAT_ENERGY: return "energy";
   case STAT_AMMO:   return "ammo";
 
-  case STAT_SPELL_POWER:       return "spellPower";
-
-  case STAT_ATTACK_POWER:             return "attackPower";
   case STAT_EXPERTISE_RATING:         return "expertiseRating";
 
   case STAT_HIT_RATING:   return "hitRating";
@@ -1090,7 +1048,6 @@ stat_type util_t::parse_stat_type( const std::string& name )
   if ( name == "rgdcritstrkrtng" ) return STAT_CRIT_RATING;
 
   // in-case wowhead changes their mind again
-  if ( name == "atkpwr"         ) return STAT_ATTACK_POWER;
   if ( name == "critstrkrtng"   ) return STAT_CRIT_RATING;
   if ( name == "dodgertng"      ) return STAT_DODGE_RATING;
   if ( name == "exprtng"        ) return STAT_EXPERTISE_RATING;
@@ -1098,7 +1055,6 @@ stat_type util_t::parse_stat_type( const std::string& name )
   if ( name == "hitrtng"        ) return STAT_HIT_RATING;
   if ( name == "parryrtng"      ) return STAT_PARRY_RATING;
   if ( name == "resiliencertng" ) return STAT_RESILIENCE_RATING;
-  if ( name == "splpwr"         ) return STAT_SPELL_POWER;
   if ( util_t::str_compare_ci( name, "__wpds"   ) ) return STAT_WEAPON_DPS;
   if ( util_t::str_compare_ci( name, "__wspeed" ) ) return STAT_WEAPON_SPEED;
 
@@ -1273,9 +1229,6 @@ stat_type util_t::translate_item_mod( int item_mod )
   case ITEM_MOD_CRIT_RATING:         return STAT_CRIT_RATING;
   case ITEM_MOD_HASTE_RATING:        return STAT_ALACRITY_RATING;
   case ITEM_MOD_EXPERTISE_RATING:    return STAT_EXPERTISE_RATING;
-  case ITEM_MOD_ATTACK_POWER:        return STAT_ATTACK_POWER;
-  case ITEM_MOD_RANGED_ATTACK_POWER: return STAT_ATTACK_POWER;
-  case ITEM_MOD_SPELL_POWER:         return STAT_SPELL_POWER;
   case ITEM_MOD_EXTRA_ARMOR:         return STAT_BONUS_ARMOR;
   case ITEM_MOD_RESILIENCE_RATING:   return STAT_RESILIENCE_RATING;
   }

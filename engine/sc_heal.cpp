@@ -22,7 +22,6 @@ void heal_t::init_heal_t_()
   if ( target -> is_enemy() || target -> is_add() )
     target = player;
 
-  base_spell_power_multiplier = 1.0;
   min_gcd = timespan_t::from_seconds( 1.0 );
 
   group_only = false;
@@ -305,7 +304,6 @@ void absorb_t::init_absorb_t_()
   if ( target -> is_enemy() || target -> is_add() )
     target = player;
 
-  base_spell_power_multiplier = 1.0;
   min_gcd = timespan_t::from_seconds( 1.0 );
 
   total_heal = total_actual = 0;

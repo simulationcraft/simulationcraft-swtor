@@ -115,7 +115,7 @@ namespace { // ANONYMOUS NAMESPACE ==========================================
 struct melee_t : public attack_t
 {
   melee_t( const char* name, player_t* player ) :
-    attack_t( name, player, RESOURCE_MANA, SCHOOL_PHYSICAL )
+    attack_t( name, player, RESOURCE_MANA, SCHOOL_KINETIC )
   {
     may_crit    = true;
     background  = true;
@@ -151,7 +151,7 @@ struct melee_t : public attack_t
 struct auto_attack_t : public attack_t
 {
   auto_attack_t( player_t* p, const std::string& options_str ) :
-    attack_t( "auto_attack", p, RESOURCE_MANA, SCHOOL_PHYSICAL )
+    attack_t( "auto_attack", p, RESOURCE_MANA, SCHOOL_KINETIC )
   {
     p -> main_hand_attack = new melee_t( "melee_main_hand", player );
     p -> main_hand_attack -> weapon = &( p -> main_hand_weapon );
@@ -208,7 +208,7 @@ struct auto_attack_t : public attack_t
 struct spell_nuke_t : public spell_t
 {
   spell_nuke_t( player_t* p, const std::string& options_str ) :
-    spell_t( "spell_nuke", p, RESOURCE_MANA, SCHOOL_FIRE )
+    spell_t( "spell_nuke", p, RESOURCE_MANA, SCHOOL_INTERNAL )
   {
     base_execute_time = timespan_t::from_seconds( 3.0 );
     dd.base_min = 50000;
@@ -264,7 +264,7 @@ struct spell_nuke_t : public spell_t
 struct spell_aoe_t : public spell_t
 {
   spell_aoe_t( player_t* p, const std::string& options_str ) :
-    spell_t( "spell_aoe", p, RESOURCE_MANA, SCHOOL_FIRE )
+    spell_t( "spell_aoe", p, RESOURCE_MANA, SCHOOL_KINETIC )
   {
     base_execute_time = timespan_t::from_seconds( 3.0 );
     dd.base_min = 50000;
@@ -322,7 +322,7 @@ struct summon_add_t : public spell_t
   pet_t* pet;
 
   summon_add_t( player_t* player, const std::string& options_str ) :
-    spell_t( "summon_add", player, RESOURCE_MANA, SCHOOL_PHYSICAL ),
+    spell_t( "summon_add", player, RESOURCE_MANA, SCHOOL_KINETIC ),
     add_name( "" ), summoning_duration( timespan_t::zero ), pet( 0 )
   {
     option_t options[] =

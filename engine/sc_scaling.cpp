@@ -156,14 +156,11 @@ void scaling_t::init_deltas()
     if ( stats.attribute[ i ] == 0 ) stats.attribute[ i ] = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
   }
 
-  if ( stats.spell_power == 0 ) stats.spell_power = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
-
   if ( stats.power == 0 ) stats.power = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
   if ( stats.force_power == 0 ) stats.force_power = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
 
   if ( stats.surge_rating == 0 ) stats.surge_rating = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
 
-  if ( stats.attack_power == 0 ) stats.attack_power = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
 
   if ( stats.expertise_rating == 0 )
   {
@@ -530,8 +527,6 @@ void scaling_t::create_options()
     { "scale_willpower",                OPT_FLT,    &( stats.attribute[ ATTR_WILLPOWER ]    ) },
     { "scale_endurance",                OPT_FLT,    &( stats.attribute[ ATTR_ENDURANCE ]    ) },
     { "scale_presence",                 OPT_FLT,    &( stats.attribute[ ATTR_PRESENCE  ]    ) },
-    { "scale_spell_power",              OPT_FLT,    &( stats.spell_power                    ) },
-    { "scale_attack_power",             OPT_FLT,    &( stats.attack_power                   ) },
     { "scale_expertise_rating",         OPT_FLT,    &( stats.expertise_rating               ) },
     { "scale_hit_rating",               OPT_FLT,    &( stats.hit_rating                     ) },
     { "scale_crit_rating",              OPT_FLT,    &( stats.crit_rating                    ) },

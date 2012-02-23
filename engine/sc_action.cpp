@@ -48,7 +48,7 @@ void action_t::init_action_t_()
   min_gcd                        = timespan_t::zero;
   trigger_gcd                    = player -> base_gcd;
   range                          = -1.0;
-  weapon_power_mod               = 1.0/14.0;
+  weapon_power_mod               = 0.0;
   base_execute_time              = timespan_t::zero;
   base_tick_time                 = timespan_t::zero;
   base_cost                      = 0.0;
@@ -61,16 +61,6 @@ void action_t::init_action_t_()
   target_multiplier              = 1.0;
   target_hit                     = 0.0;
   target_crit                    = 0.0;
-  base_spell_power               = 0.0;
-  base_attack_power              = 0.0;
-  player_spell_power             = 0.0;
-  player_attack_power            = 0.0;
-  target_spell_power             = 0.0;
-  target_attack_power            = 0.0;
-  base_spell_power_multiplier    = 0.0;
-  base_attack_power_multiplier   = 0.0;
-  player_spell_power_multiplier  = 1.0;
-  player_attack_power_multiplier = 1.0;
   crit_multiplier                = 1.0;
   crit_bonus_multiplier          = 1.0;
   base_dd_adder                  = 0.0;
@@ -445,10 +435,6 @@ void action_t::player_buff()
   player_hit                     = 0;
   player_crit                    = 0;
   player_dd_adder                = 0;
-  player_spell_power             = 0;
-  player_attack_power            = 0;
-  player_spell_power_multiplier  = 1.0;
-  player_attack_power_multiplier = 1.0;
 
   if ( ! no_buffs )
   {
@@ -457,25 +443,13 @@ void action_t::player_buff()
     player_multiplier    = p -> composite_player_multiplier   ( school, this );
     dd.player_multiplier = p -> composite_player_dd_multiplier( school, this );
     td.player_multiplier = p -> composite_player_td_multiplier( school, this );
-
-    if ( base_attack_power_multiplier > 0 )
-    {
-      player_attack_power            = p -> composite_attack_power();
-      player_attack_power_multiplier = p -> composite_attack_power_multiplier();
-    }
-
-    if ( base_spell_power_multiplier > 0 )
-    {
-      player_spell_power            = p -> composite_spell_power( school );
-      player_spell_power_multiplier = p -> composite_spell_power_multiplier();
-    }
   }
 
   player_alacrity = total_alacrity();
 
   if ( sim -> debug )
-    log_t::output( sim, "action_t::player_buff: %s hit=%.2f crit=%.2f spell_power=%.2f attack_power=%.2f ",
-                   name(), player_hit, player_crit, player_spell_power, player_attack_power );
+    log_t::output( sim, "action_t::player_buff: %s hit=%.2f crit=%.2f",
+                   name(), player_hit, player_crit );
 }
 
 // action_t::target_debuff ==================================================
@@ -485,8 +459,6 @@ void action_t::target_debuff( player_t* t, int /* dmg_type */ )
   target_multiplier            = 1.0;
   target_hit                   = 0;
   target_crit                  = 0;
-  target_attack_power          = 0;
-  target_spell_power           = 0;
   target_dd_adder              = 0;
   dd.target_multiplier         = 1.0;
   td.target_multiplier         = 1.0;
@@ -498,8 +470,8 @@ void action_t::target_debuff( player_t* t, int /* dmg_type */ )
   }
 
   if ( sim -> debug )
-    log_t::output( sim, "action_t::target_debuff: %s (target=%s) multiplier=%.2f hit=%.2f crit=%.2f attack_power=%.2f spell_power=%.2f",
-                   name(), t -> name(), target_multiplier, target_hit, target_crit, target_attack_power, target_spell_power );
+    log_t::output( sim, "action_t::target_debuff: %s (target=%s) multiplier=%.2f hit=%.2f crit=%.2f",
+                   name(), t -> name(), target_multiplier, target_hit, target_crit );
 }
 
 // action_t::snapshot
@@ -562,7 +534,7 @@ double action_t::total_power() const
 {
   double power=0;
 
-  power += player -> composite_force_damage_bonus();
+  power += player -> force_damage_bonus();
 
   if ( sim -> debug )
   {
@@ -581,23 +553,17 @@ double action_t::calculate_weapon_damage()
 
   double dmg = sim -> range( weapon -> min_dmg, weapon -> max_dmg ) + weapon -> bonus_dmg;
 
-  timespan_t weapon_speed  = normalize_weapon_speed  ? weapon -> normalized_weapon_speed() : weapon -> swing_time;
-
-  double power_damage = weapon_speed.total_seconds() * weapon_power_mod * total_attack_power();
-
-  double total_dmg = dmg + power_damage;
-
   // OH penalty
   if ( weapon -> slot == SLOT_OFF_HAND )
-    total_dmg *= 0.3;
+    dmg *= 0.3;
 
   if ( sim -> debug )
   {
-    log_t::output( sim, "%s weapon damage for %s: td=%.3f wd=%.3f bd=%.3f ws=%.3f pd=%.3f ap=%.3f",
-                   player -> name(), name(), total_dmg, dmg, weapon -> bonus_dmg, weapon_speed.total_seconds(), power_damage, total_attack_power() );
+    log_t::output( sim, "%s weapon damage for %s: dmg=%.3f bd=%.3f",
+                   player -> name(), name(), dmg, weapon -> bonus_dmg );
   }
 
-  return total_dmg;
+  return dmg;
 }
 
 // action_t::calculate_tick_damage ==========================================

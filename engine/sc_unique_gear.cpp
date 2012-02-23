@@ -137,14 +137,13 @@ struct discharge_proc_callback_t : public action_callback_t
     struct discharge_spell_t : public spell_t
     {
       discharge_spell_t( const char* n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
-        spell_t( n, p, RESOURCE_NONE, ( s == SCHOOL_DRAIN ) ? SCHOOL_SHADOW : s )
+        spell_t( n, p, RESOURCE_NONE, s )
       {
         discharge_proc = true;
         item_proc = true;
         trigger_gcd = timespan_t::zero;
         dd.base_min = dd.base_max = amount;
         dd.power_mod = scaling;
-        may_crit = ( s != SCHOOL_DRAIN ) && ! no_crit;
         background  = true;
         no_buffs = nb;
         no_debuffs = nd;
@@ -155,7 +154,7 @@ struct discharge_proc_callback_t : public action_callback_t
     struct discharge_attack_t : public attack_t
     {
       discharge_attack_t( const char* n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
-        attack_t( n, p, RESOURCE_NONE, ( s == SCHOOL_DRAIN ) ? SCHOOL_SHADOW : s )
+        attack_t( n, p, RESOURCE_NONE, s )
       {
         discharge_proc = true;
         item_proc = true;
@@ -163,9 +162,6 @@ struct discharge_proc_callback_t : public action_callback_t
         dd.base_min = amount;
         dd.base_max = amount;
         dd.power_mod = scaling;
-        may_crit = ( s != SCHOOL_DRAIN ) && ! no_crit;
-        may_dodge = ( s == SCHOOL_PHYSICAL && ! no_crit );
-        may_parry = ( s == SCHOOL_PHYSICAL && ! no_crit && ( p -> position == POSITION_FRONT || p -> position == POSITION_RANGED_FRONT ) );
         background  = true;
         no_buffs = nb;
         no_debuffs = nd;
@@ -258,7 +254,7 @@ struct chance_discharge_proc_callback_t : public action_callback_t
     struct discharge_spell_t : public spell_t
     {
       discharge_spell_t( const char* n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
-        spell_t( n, p, RESOURCE_NONE, ( s == SCHOOL_DRAIN ) ? SCHOOL_SHADOW : s )
+        spell_t( n, p, RESOURCE_NONE, s )
       {
         discharge_proc = true;
         item_proc = true;
@@ -266,7 +262,6 @@ struct chance_discharge_proc_callback_t : public action_callback_t
         dd.base_min = amount;
         dd.base_max = amount;
         dd.power_mod = scaling;
-        may_crit = ( s != SCHOOL_DRAIN ) && ! no_crit;
         background  = true;
         no_buffs = nb;
         no_debuffs = nd;
@@ -277,7 +272,7 @@ struct chance_discharge_proc_callback_t : public action_callback_t
     struct discharge_attack_t : public attack_t
     {
       discharge_attack_t( const char* n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
-        attack_t( n, p, RESOURCE_NONE, ( s == SCHOOL_DRAIN ) ? SCHOOL_SHADOW : s )
+        attack_t( n, p, RESOURCE_NONE, s )
       {
         discharge_proc = true;
         item_proc = true;
@@ -285,9 +280,6 @@ struct chance_discharge_proc_callback_t : public action_callback_t
         dd.base_min = amount;
         dd.base_max = amount;
         dd.power_mod = scaling;
-        may_crit = ( s != SCHOOL_DRAIN ) && ! no_crit;
-        may_dodge = ( s == SCHOOL_PHYSICAL && ! no_crit );
-        may_parry = ( s == SCHOOL_PHYSICAL && ! no_crit && ( p -> position == POSITION_FRONT || p -> position == POSITION_RANGED_FRONT ) );
         background  = true;
         no_buffs = nb;
         no_debuffs = nd;
@@ -380,7 +372,7 @@ struct stat_discharge_proc_callback_t : public action_callback_t
     struct discharge_spell_t : public spell_t
     {
       discharge_spell_t( const char* n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
-        spell_t( n, p, RESOURCE_NONE, ( s == SCHOOL_DRAIN ) ? SCHOOL_SHADOW : s )
+        spell_t( n, p, RESOURCE_NONE, s )
       {
         discharge_proc = true;
         item_proc = true;
@@ -388,7 +380,6 @@ struct stat_discharge_proc_callback_t : public action_callback_t
         dd.base_min = amount;
         dd.base_max = amount;
         dd.power_mod = scaling;
-        may_crit = ( s != SCHOOL_DRAIN ) && ! no_crit;
         background  = true;
         no_buffs = nb;
         no_debuffs = nd;
@@ -401,7 +392,7 @@ struct stat_discharge_proc_callback_t : public action_callback_t
       bool no_buffs;
 
       discharge_attack_t( const char* n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
-        attack_t( n, p, RESOURCE_NONE, ( s == SCHOOL_DRAIN ) ? SCHOOL_SHADOW : s )
+        attack_t( n, p, RESOURCE_NONE, s )
       {
         discharge_proc = true;
         item_proc = true;
@@ -409,9 +400,6 @@ struct stat_discharge_proc_callback_t : public action_callback_t
         dd.base_min = amount;
         dd.base_max = amount;
         dd.power_mod = scaling;
-        may_crit = ( s != SCHOOL_DRAIN ) && ! no_crit;
-        may_dodge = ( s == SCHOOL_PHYSICAL && ! no_crit );
-        may_parry = ( s == SCHOOL_PHYSICAL && ! no_crit && ( p -> position == POSITION_FRONT || p -> position == POSITION_RANGED_FRONT ) );
         background  = true;
         no_buffs = nb;
         no_debuffs = nd;

@@ -35,7 +35,6 @@ attack_t::attack_t( const char* n, player_t* p, int resource, const school_type 
     may_parry  = false;
   }
 
-  base_attack_power_multiplier = 1.0;
   crit_bonus = 1.0;
 
   min_gcd = timespan_t::from_seconds( 1.0 );

@@ -610,7 +610,6 @@ struct weapon_discharge_proc_callback_t : public action_callback_t
         may_crit = true;
         background  = true;
         proc = true;
-        base_spell_power_multiplier = 0;
         init();
       }
     };

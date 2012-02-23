@@ -202,7 +202,7 @@ struct sage_sorcerer_t : public player_t
   virtual int       primary_resource() const;
   virtual int       primary_role() const;
   virtual void      regen( timespan_t periodicity );
-  virtual double    composite_force_damage_bonus() const;
+  virtual double    force_damage_bonus() const;
   virtual double    composite_spell_alacrity() const;
   virtual void      create_talents();
   virtual void      create_options();
@@ -225,7 +225,7 @@ namespace { // ANONYMOUS NAMESPACE ==========================================
 
 struct jedi_sage_attack_t : public attack_t
 {
-  jedi_sage_attack_t( const char* n, sage_sorcerer_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_HOLY, int t=TREE_NONE ) :
+  jedi_sage_attack_t( const char* n, sage_sorcerer_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC, int t=TREE_NONE ) :
     attack_t( n, p, r, s, t )
   {
     may_crit   = true;
@@ -236,7 +236,7 @@ struct jedi_sage_spell_t : public spell_t
 {
   bool influenced_by_inner_strength;
 
-  jedi_sage_spell_t( const char* n, sage_sorcerer_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_HOLY, int t=TREE_NONE ) :
+  jedi_sage_spell_t( const char* n, sage_sorcerer_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC, int t=TREE_NONE ) :
     spell_t( n, p, r, s, t ),
     influenced_by_inner_strength( true )
   {
@@ -1383,9 +1383,9 @@ void sage_sorcerer_t::regen( timespan_t periodicity )
 
 // sage_sorcerer_t::composite_spell_power ==================================================
 
-double sage_sorcerer_t::composite_force_damage_bonus() const
+double sage_sorcerer_t::force_damage_bonus() const
 {
-  double sp = player_t::composite_force_damage_bonus();
+  double sp = player_t::force_damage_bonus();
 
   sp *= 1.0 + buffs.tremors -> stack() * 0.01;
 
