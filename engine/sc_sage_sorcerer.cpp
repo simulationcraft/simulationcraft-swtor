@@ -202,7 +202,7 @@ struct sage_sorcerer_t : public player_t
   virtual int       primary_resource() const;
   virtual int       primary_role() const;
   virtual void      regen( timespan_t periodicity );
-  virtual double    force_damage_bonus() const;
+  virtual double    composite_force_damage_bonus() const;
   virtual double    composite_spell_alacrity() const;
   virtual void      create_talents();
   virtual void      create_options();
@@ -1386,9 +1386,9 @@ void sage_sorcerer_t::regen( timespan_t periodicity )
 
 // sage_sorcerer_t::composite_spell_power ==================================================
 
-double sage_sorcerer_t::force_damage_bonus() const
+double sage_sorcerer_t::composite_force_damage_bonus() const
 {
-  double sp = player_t::force_damage_bonus();
+  double sp = player_t::composite_force_damage_bonus();
 
   sp *= 1.0 + buffs.tremors -> stack() * 0.01;
 

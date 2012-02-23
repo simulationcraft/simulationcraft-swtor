@@ -5,9 +5,94 @@
 
 #include "simulationcraft.h"
 
+
 // ==========================================================================
 // Action
 // ==========================================================================
+
+
+// Attack policies ==========================================================
+
+class action_t::attack_policy_t
+{
+public:
+  virtual double acccuracy( const player_t& source ) const = 0;
+  virtual double avoidance( const player_t& target ) const = 0;
+  virtual double crit_chance( const player_t& source ) const = 0;
+  virtual double power_bonus( const player_t& source ) const = 0;
+  virtual bool   can_shield() const = 0;
+};
+
+namespace {
+
+class physical_policy_t : public action_t::attack_policy_t
+{
+public:
+  bool can_shield() const { return true; }
+};
+
+class melee_policy_t : public physical_policy_t
+{
+public:
+  double power_bonus( const player_t& player ) const
+  { return player.composite_melee_damage_bonus(); }
+};
+
+class range_policy_t : public physical_policy_t
+{
+public:
+  double power_bonus( const player_t& player ) const
+  { return player.composite_range_damage_bonus(); }
+};
+
+class spell_policy_t : public action_t::attack_policy_t
+{
+public:
+  bool can_shield() const { return false; }
+};
+
+class force_policy_t : public spell_policy_t
+{
+public:
+  double power_bonus( const player_t& player ) const
+  { return player.composite_force_damage_bonus(); }
+};
+
+class force_heal_policy_t : public spell_policy_t
+{
+public:
+  double avoidance( const player_t& ) const { return 0; }
+  double power_bonus( const player_t& player ) const
+  { return player.composite_force_healing_bonus(); }
+};
+
+class tech_policy_t : public spell_policy_t
+{
+public:
+  double power_bonus( const player_t& player ) const
+  { return player.composite_tech_damage_bonus(); }
+};
+
+class tech_heal_policy_t : public spell_policy_t
+{
+public:
+  double avoidance( const player_t & ) const { return 0; }
+  double power_bonus( const player_t& player ) const
+  { return player.composite_tech_healing_bonus(); }
+};
+
+const melee_policy_t the_melee_policy;
+const range_policy_t the_range_policy;
+const force_policy_t the_force_policy;
+const tech_policy_t the_tech_policy;
+}
+
+const action_t::attack_policy_t* action_t::melee_policy = &the_melee_policy;
+const action_t::attack_policy_t* action_t::range_policy = &the_range_policy;
+const action_t::attack_policy_t* action_t::force_policy = &the_force_policy;
+const action_t::attack_policy_t* action_t::tech_policy = &the_tech_policy;
+const action_t::attack_policy_t* action_t::force_heal_policy = &the_force_heal_policy;
+const action_t::attack_policy_t* action_t::tech_heal_policy = &the_tech_heal_policy;
 
 // action_t::action_t =======================================================
 
@@ -163,13 +248,14 @@ void action_t::init_dot( const std::string& name )
 action_t::action_t( int               ty,
                     const char*       n,
                     player_t*         p,
+                    attack_policy_t*  policy,
                     int               r,
                     const school_type s,
                     int               tr,
                     bool              sp ) :
   sim( p -> sim ), type( ty ), name_str( n ),
-  player( p ), target( p -> target ), school( s ), resource( r ),
-  tree( tr ), special( sp )
+  player( p ), target( p -> target ), attack_policy( policy ),
+  school( s ), resource( r ), tree( tr ), special( sp )
 {
   init_action_t_();
 }
@@ -534,7 +620,7 @@ double action_t::total_power() const
 {
   double power=0;
 
-  power += player -> force_damage_bonus();
+  power += player -> composite_force_damage_bonus();
 
   if ( sim -> debug )
   {

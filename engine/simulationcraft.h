@@ -309,19 +309,6 @@ enum proc_type
 
 enum action_type { ACTION_USE=0, ACTION_SPELL, ACTION_ATTACK, ACTION_HEAL, ACTION_ABSORB, ACTION_SEQUENCE, ACTION_OTHER, ACTION_MAX };
 
-enum attack_type
-{
-  ATTACK_NONE = 0,
-
-  ATTACK_MELEE, ATTACK_RANGE,
-  ATTACK_FORCE, ATTACK_TECH,
-
-  ATTACK_MAX
-};
-
-#define ATTACK_PHYSICAL_MASK ( ( 1 << ATTACK_MELEE ) | ( 1 << ATTACK_RANGE ) )
-#define ATTACK_SPELL_MASK ( ( 1 << ATTACK_FORCE ) | ( 1 << ATTACK_TECH ) )
-
 enum school_type
 {
   SCHOOL_NONE=0,
@@ -4018,6 +4005,7 @@ struct player_t : public noncopyable
 
   virtual double composite_power() const;
   virtual double composite_force_power() const;
+  virtual double composite_tech_power() const;
 
   virtual double energy_regen_per_second() const;
   virtual double ammo_regen_per_second() const;
@@ -4047,39 +4035,38 @@ struct player_t : public noncopyable
 
   virtual double matching_gear_multiplier( const attribute_type /* attr */ ) const { return 0; }
 
-  virtual double composite_player_multiplier   ( const school_type school, action_t* a = NULL ) const;
+  virtual double composite_player_multiplier( const school_type school, action_t* a = NULL ) const;
   virtual double composite_player_dd_multiplier( const school_type /* school */, action_t* /* a */ = NULL ) const { return 1; }
   virtual double composite_player_td_multiplier( const school_type school, action_t* a = NULL ) const;
 
-  virtual double composite_player_heal_multiplier   ( const school_type school ) const;
+  virtual double composite_player_heal_multiplier( const school_type school ) const;
   virtual double composite_player_dh_multiplier( const school_type /* school */ ) const { return 1; }
   virtual double composite_player_th_multiplier( const school_type school ) const;
 
-  virtual double composite_player_absorb_multiplier   ( const school_type school ) const;
+  virtual double composite_player_absorb_multiplier( const school_type school ) const;
 
   virtual double composite_movement_speed() const;
 
-  virtual double base_damage_bonus() const;
-  virtual double melee_damage_bonus() const;
-  virtual double ranged_damage_bonus() const;
-  virtual double tech_damage_bonus() const;
-  virtual double force_damage_bonus() const;
-
-  virtual double base_healing_bonus() const;
-  virtual double tech_healing_bonus() const;
-  virtual double force_healing_bonus() const;
-
 private:
+  double composite_damage_bonus( attribute_type main_attr, double extra_power=0 ) const;
+  double composite_healing_bonus( attribute_type main_attr, double extra_power=0 ) const;
   double get_stat_helper( attribute_type a ) const
   { return attribute[ a ] * composite_attribute_multiplier( a ); }
 
 public:
-  virtual double strength() const;
-  virtual double aim() const;
-  virtual double cunning() const;
-  virtual double willpower() const;
-  virtual double endurance() const;
-  virtual double presence() const;
+  virtual double composite_melee_damage_bonus() const;
+  virtual double composite_range_damage_bonus() const;
+  virtual double composite_force_damage_bonus() const;
+  virtual double composite_tech_damage_bonus() const;
+  virtual double composite_force_healing_bonus() const;
+  virtual double composite_tech_healing_bonus() const;
+
+  double strength() const { return get_stat_helper( ATTR_STRENGTH ); }
+  double aim() const { return get_stat_helper( ATTR_AIM ); }
+  double cunning() const { return get_stat_helper( ATTR_CUNNING ); }
+  double willpower() const { return get_stat_helper( ATTR_WILLPOWER ); }
+  double endurance() const { return get_stat_helper( ATTR_ENDURANCE ); }
+  double presence() const { return get_stat_helper( ATTR_PRESENCE ); }
 
   virtual void      interrupt();
   virtual void      halt();
@@ -4393,12 +4380,22 @@ struct stats_t
 
 struct action_t
 {
-  sim_t* sim;
+  class attack_policy_t;
+
+  static const attack_policy_t* melee_policy;
+  static const attack_policy_t* range_policy;
+  static const attack_policy_t* force_policy;
+  static const attack_policy_t* tech_policy;
+  static const attack_policy_t* force_heal_policy;
+  static const attack_policy_t* tech_heal_policy;
+
+  sim_t* const sim;
   const int type;
   std::string name_str;
-  player_t* player;
+  player_t* const player;
   player_t* target;
   uint32_t id;
+  attack_policy_t* attack_policy;
   school_type school;
   int resource, tree, result, aoe;
   bool dual, callbacks, special, channeled, background, sequence, use_off_gcd;
@@ -4488,7 +4485,7 @@ private:
   void init_action_t_();
 
 public:
-  action_t( int type, const char* name, player_t* p=0, int r=RESOURCE_NONE, const school_type s=SCHOOL_NONE, int t=TREE_NONE, bool special=false );
+  action_t( int type, const char* name, player_t* p=0, attack_policy_t* policy=0, int r=RESOURCE_NONE, const school_type s=SCHOOL_NONE, int t=TREE_NONE, bool special=false );
   virtual ~action_t();
   void init_dot( const std::string& dot_name );
 

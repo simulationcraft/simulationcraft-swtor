@@ -1982,125 +1982,87 @@ double player_t::composite_movement_speed() const
   return speed;
 }
 
-// player_t::base_damage_bonus() =======================================
+// player_t::composite_damage_bonus =========================================
 
-double player_t::base_damage_bonus() const
+double player_t::composite_damage_bonus( attribute_type attr, double extra_power ) const
 {
-  double dmg_bonus = get_stat_helper( primary_attribute ) * 0.2 + composite_power() * 0.23;
+  double stat = get_stat_helper( attr );
 
-  return dmg_bonus;
+  if ( primary_attribute != attr )
+    stat += get_stat_helper( primary_attribute );
+
+  return 0.2 * stat + 0.23 * ( composite_power() + extra_power );
 }
 
-// player_t::melee_damage_bonus() =======================================
+// player_t::composite_melee_damage_bonus() =================================
 
-double player_t::melee_damage_bonus() const
+double player_t::composite_melee_damage_bonus() const
+{ return composite_damage_bonus( ATTR_STRENGTH ); }
+
+// player_t::composite_range_damage_bonus() =================================
+
+double player_t::composite_range_damage_bonus() const
+{ return composite_damage_bonus( ATTR_AIM ); }
+
+// player_t::composite_force_damage_bonus() =================================
+
+double player_t::composite_force_damage_bonus() const
 {
-  double dmg_bonus = base_damage_bonus();
+  double bonus = composite_damage_bonus( ATTR_WILLPOWER, composite_force_power() );
 
   if ( buffs.unnatural_might -> up() )
-    dmg_bonus *= 1.05;
+    bonus *= 1.05;
 
-  return dmg_bonus;
+  return bonus;
 }
 
-// player_t::ranged_damage_bonus() =======================================
+// player_t::composite_tech_damage_bonus() ==================================
 
-double player_t::ranged_damage_bonus() const
+double player_t::composite_tech_damage_bonus() const
 {
-  double dmg_bonus = base_damage_bonus();
+  double bonus = composite_damage_bonus( ATTR_CUNNING, composite_tech_power() );
 
   if ( buffs.unnatural_might -> up() )
-    dmg_bonus *= 1.05;
+    bonus *= 1.05;
 
-  return dmg_bonus;
+  return bonus;
 }
 
-// player_t::tech_damage_bonus() =======================================
+// player_t::composite_healing_bonus ========================================
 
-double player_t::tech_damage_bonus() const
+double player_t::composite_healing_bonus( attribute_type attr, double extra_power ) const
 {
-  double dmg_bonus = base_damage_bonus(); // Add 23% tech power
+  double stat = get_stat_helper( attr );
+
+  if ( primary_attribute != attr )
+    stat += get_stat_helper( primary_attribute );
+
+  return 0.14 * stat + 0.17 * ( composite_power() + extra_power );
+}
+
+// player_t::composite_force_healing_bonus() =================================
+
+double player_t::composite_force_healing_bonus() const
+{
+  double bonus = composite_healing_bonus( ATTR_WILLPOWER, composite_force_power() );
 
   if ( buffs.unnatural_might -> up() )
-    dmg_bonus *= 1.05;
+    bonus *= 1.05;
 
-  return dmg_bonus;
+  return bonus;
 }
 
-// player_t::force_damage_bonus() =======================================
+// player_t::composite_tech_healing_bonus() ==================================
 
-double player_t::force_damage_bonus() const
+double player_t::composite_tech_healing_bonus() const
 {
-  double dmg_bonus = base_damage_bonus() + composite_force_power() * 0.23;
+  double bonus = composite_healing_bonus( ATTR_CUNNING, composite_tech_power() );
 
   if ( buffs.unnatural_might -> up() )
-    dmg_bonus *= 1.05;
+    bonus *= 1.05;
 
-  return dmg_bonus;
+  return bonus;
 }
-
-// player_t::base_healing_bonus() =======================================
-
-double player_t::base_healing_bonus() const
-{
-  double healing_bonus = get_stat_helper( primary_attribute ) * 0.14 + composite_power() * 0.17;
-
-  return healing_bonus;
-}
-
-// player_t::tech_healing_bonus() =======================================
-
-double player_t::tech_healing_bonus() const
-{
-  double healing_bonus = base_healing_bonus(); // Add 17% tech power
-
-  if ( buffs.unnatural_might -> up() )
-    healing_bonus *= 1.05;
-
-  return healing_bonus;
-}
-
-// player_t::force_healing_bonus() =======================================
-
-double player_t::force_healing_bonus() const
-{
-  double healing_bonus = base_healing_bonus() + composite_force_power() * 0.17;
-
-  if ( buffs.unnatural_might -> up() )
-    healing_bonus *= 1.05;
-
-  return healing_bonus;
-}
-
-// player_t::strength() =====================================================
-
-double player_t::strength() const
-{ return get_stat_helper( ATTR_STRENGTH ); }
-
-// player_t::aim() ==========================================================
-
-double player_t::aim() const
-{ return get_stat_helper( ATTR_AIM ); }
-
-// player_t::cunning() ======================================================
-
-double player_t::cunning() const
-{ return get_stat_helper( ATTR_CUNNING ); }
-
-// player_t::willpower =======================================
-
-double player_t::willpower() const
-{ return get_stat_helper( ATTR_WILLPOWER ); }
-
-// player_t::endurance() ====================================================
-
-double player_t::endurance() const
-{ return get_stat_helper( ATTR_ENDURANCE ); }
-
-// player_t::presence() =====================================================
-
-double player_t::presence() const
-{ return get_stat_helper( ATTR_PRESENCE ); }
 
 // player_t::combat_begin ===================================================
 
