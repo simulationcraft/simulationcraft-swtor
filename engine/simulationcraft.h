@@ -3747,6 +3747,7 @@ struct player_t : public noncopyable
   double base_attack_expertise,   initial_attack_expertise,    attack_expertise,   buffed_attack_expertise;
   double base_attack_crit,        attack_crit,        buffed_attack_crit;
   double attack_crit_per_agility,   initial_attack_crit_per_agility;
+
   int    position;
   std::string position_str;
 
@@ -4024,18 +4025,18 @@ struct player_t : public noncopyable
   virtual void combat_end();
   virtual void merge( player_t& other );
 
+  virtual double energy_regen_per_second() const;
+  virtual double ammo_regen_per_second() const;
+  virtual double force_regen_per_second() const;
+
   virtual double composite_power() const;
   virtual double composite_force_power() const;
   virtual double composite_tech_power() const;
 
-  virtual double energy_regen_per_second() const;
-  virtual double ammo_regen_per_second() const;
-  virtual double force_regen_per_second() const;
   virtual double composite_attack_alacrity() const;
   virtual double composite_attack_speed() const;
   virtual double composite_attack_crit() const;
   virtual double composite_attack_expertise() const { return attack_expertise; }
-  virtual double composite_attack_hit() const;
 
   virtual double composite_spell_alacrity() const;
   virtual double composite_spell_crit() const;
@@ -4053,8 +4054,6 @@ struct player_t : public noncopyable
   virtual double composite_tank_crit( const school_type school ) const;
 
   virtual double composite_attribute_multiplier( int attr ) const;
-
-  virtual double matching_gear_multiplier( const attribute_type /* attr */ ) const { return 0; }
 
   virtual double composite_player_multiplier( const school_type school, action_t* a = NULL ) const;
   virtual double composite_player_dd_multiplier( const school_type /* school */, action_t* /* a */ = NULL ) const { return 1; }
@@ -4078,7 +4077,8 @@ public:
   virtual double melee_bonus_stats() const;
   virtual double melee_bonus_multiplier() const;
   virtual double melee_crit_from_stats() const;
-  double composite_melee_damage_bonus() const;
+          double composite_melee_damage_bonus() const;
+  virtual double composite_melee_hit_chance() const;
 
   virtual double range_bonus_stats() const;
   virtual double range_bonus_multiplier() const;
@@ -4324,10 +4324,11 @@ public:
   // Pets gain their owners' hit rating, but it rounds down to a
   // percentage.  Also, heroic presence does not contribute to pet
   // expertise, so we use raw attack_hit.
+#if 0
   virtual double composite_attack_expertise() const { return floor( floor( 100.0 * owner -> attack_hit ) * ( 26.0 / 8.0 ) ) / 100.0; }
   virtual double composite_attack_hit()       const { return floor( 100.0 * owner -> composite_attack_hit() ) / 100.0; }
   virtual double composite_spell_hit()        const { return floor( 100.0 * owner -> composite_spell_hit() ) / 100.0;  }
-
+#endif
   virtual double endurance() const;
 
   virtual void init_base();

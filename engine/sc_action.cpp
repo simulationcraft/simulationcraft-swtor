@@ -34,6 +34,8 @@ public:
 class melee_policy_t : public physical_policy_t
 {
 public:
+  double accuracy( const player_t& source ) const
+  { return player.composite_melee_hit_chance(); }
   double power_bonus( const player_t& player ) const
   { return player.composite_melee_damage_bonus(); }
 };
@@ -58,14 +60,6 @@ public:
   { return player.composite_force_damage_bonus(); }
 };
 
-class force_heal_policy_t : public spell_policy_t
-{
-public:
-  double avoidance( const player_t& ) const { return 0; }
-  double power_bonus( const player_t& player ) const
-  { return player.composite_force_healing_bonus(); }
-};
-
 class tech_policy_t : public spell_policy_t
 {
 public:
@@ -73,10 +67,21 @@ public:
   { return player.composite_tech_damage_bonus(); }
 };
 
-class tech_heal_policy_t : public spell_policy_t
+class heal_policy_t : public spell_policy_t
 {
 public:
-  double avoidance( const player_t & ) const { return 0; }
+  double avoidance( const player_t& ) const { return 0; }
+};
+
+class force_heal_policy_t : public heal_policy_t
+{
+public:
+  double power_bonus( const player_t& player ) const
+  { return player.composite_force_healing_bonus(); }
+};
+class tech_heal_policy_t : public heal_policy_t
+{
+public:
   double power_bonus( const player_t& player ) const
   { return player.composite_tech_healing_bonus(); }
 };
@@ -85,6 +90,8 @@ const melee_policy_t the_melee_policy;
 const range_policy_t the_range_policy;
 const force_policy_t the_force_policy;
 const tech_policy_t the_tech_policy;
+const force_heal_policy_t the_force_heal_policy;
+const tech_heal_policy_t the_tech_heal_policy;
 }
 
 const action_t::attack_policy_t* action_t::melee_policy = &the_melee_policy;

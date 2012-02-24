@@ -2352,9 +2352,6 @@ void player_t::reset()
   {
     attribute           [ i ] = attribute_initial           [ i ];
     attribute_multiplier[ i ] = attribute_multiplier_initial[ i ];
-    // Matched gear. i.e. Mysticism etc.
-    if ( ( level >= 50 ) && matching_gear )
-      attribute_multiplier[ i ] *= 1.0 + matching_gear_multiplier( ( const attribute_type ) i );
   }
   recalculate_crit();
 
