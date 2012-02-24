@@ -1115,6 +1115,7 @@ action_t* sage_sorcerer_t::create_action( const std::string& name,
     if ( name == "polarity_shift"     ) return new   mental_alacrity_t( this, "polarity_shift", options_str );
     if ( name == "chain_lightning"    ) return new  telekinetic_wave_t( this, "chain_lightning", options_str );
     if ( name == "recklessness"       ) return new     force_potency_t( this, "recklessness", options_str );
+    if ( name == "dark_infusion"        ) return new     deliverance_t( this, "dark_infusion", options_str );
   }
 
   return player_t::create_action( name, options_str );
@@ -1408,6 +1409,12 @@ void sage_sorcerer_t::init_actions()
       action_list_str += "/crushing_darkness";
       action_list_str += "/lightning_strike";
       action_list_str += "/shock,moving=1";
+
+      break;
+
+      case TREE_CORRUPTION:
+
+      action_list_str += "/dark_infusion";
 
       break;
 
