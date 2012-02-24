@@ -1990,7 +1990,7 @@ double player_t::melee_bonus_multiplier() const
 { return 1.0; }
 
 double player_t::melee_crit_from_stats() const
-{ return rating_t::crit_from_stat( strength() ); }
+{ return rating_t::crit_from_stat( strength(), level ); }
 
 double player_t::composite_melee_damage_bonus() const
 { return composite_damage_bonus( melee_bonus_stats(),
@@ -3503,7 +3503,8 @@ void player_t::register_direct_heal_callback( int64_t mask,
 
 void player_t::recalculate_alacrity()
 {
-  attack_alacrity = spell_alacrity = 1.0 - rating_t::activation_speed_from_rating( alacrity_rating, level );
+  attack_alacrity = spell_alacrity =
+      1.0 - rating_t::alacrity_from_rating( alacrity_rating, level );
 }
 
 // player_t::recalculate_crit ==============================================

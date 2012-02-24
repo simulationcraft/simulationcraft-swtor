@@ -204,6 +204,12 @@ struct shadow_assassin_t : public player_t
     virtual double    melee_bonus_stats() const
     { return player_t::melee_bonus_stats() + willpower(); }
 
+    virtual double    melee_crit_from_stats() const
+    {
+      return player_t::melee_crit_from_stats() +
+          rating_t::crit_from_stat( willpower(), level );
+    }
+
     virtual double    melee_bonus_multiplier() const
     {
       double m = player_t::melee_bonus_multiplier();
