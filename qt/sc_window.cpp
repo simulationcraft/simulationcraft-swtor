@@ -725,14 +725,23 @@ void SimulationCraftWindow::createBestInSlotTab()
   bisTree->setHeaderLabels( headerLabels );
   importTab->addTab( bisTree, "BiS" );
 
-  QTreeWidgetItem* top[ PLAYER_MAX ];
-  range::fill( top, 0 );
+  QStringList profile_folder_list = QStringList() << "profiles" << "profiles_heal" << "profiles_tank";
+  QStringList profile_folder_names = QStringList() << "Damage" << "Heal" << "Tank";
 
-  // Scan all subfolders in /profiles/ and create a list
+  QTreeWidgetItem* rootItems[ profile_folder_list.count() ][ PLAYER_MAX ];
+
+  for ( int k=0; k < profile_folder_list.count(); k++ )
+  {
+    QTreeWidgetItem* top = new QTreeWidgetItem( QStringList( profile_folder_names[ k ] ) );
+
+    bisTree -> addTopLevelItem( top );
+    range::fill( rootItems[ k ], 0 );
+
+    // Scan all subfolders and create a list
 #ifndef Q_WS_MAC
-  QDir tdir = QString( "profiles" );
+  QDir tdir = QString( profile_folder_list[ k ] );
 #else
-  CFURLRef fileRef    = CFBundleCopyResourceURL( CFBundleGetMainBundle(), CFSTR( "profiles" ), 0, 0 );
+  CFURLRef fileRef    = CFBundleCopyResourceURL( CFBundleGetMainBundle(), CFSTR( profile_folder_list[ k ] ), 0, 0 );
   QDir tdir;
   if ( fileRef )
   {
@@ -751,9 +760,9 @@ void SimulationCraftWindow::createBestInSlotTab()
   for ( int i=0; i < tnumProfiles; i++ )
   {
 #ifndef Q_WS_MAC
-    QDir dir = QString( "profiles/" + tprofileList[ i ] );
+    QDir dir = QString( profile_folder_list[ k ] + "/" + tprofileList[ i ] );
 #else
-    CFURLRef fileRef    = CFBundleCopyResourceURL( CFBundleGetMainBundle(), CFSTR( "profiles" + tprofileList[ i ] ), 0, 0 );
+    CFURLRef fileRef    = CFBundleCopyResourceURL( CFBundleGetMainBundle(), CFSTR( profile_folder_list[ k ] + tprofileList[ i ] ), 0, 0 );
     QDir dir;
     if ( fileRef )
     {
@@ -784,18 +793,19 @@ void SimulationCraftWindow::createBestInSlotTab()
       {
         if ( profile.contains( util_t::player_type_string( pt ), Qt::CaseInsensitive ) )
         {
-          if ( ! top[ pt ] )
+          if ( !rootItems[ k ][ pt ] )
           {
-            top[ pt ] = new QTreeWidgetItem( QStringList( util_t::player_type_string( pt ) ) );
-            bisTree -> addTopLevelItem( top[ pt ] );
+            top-> addChild( rootItems[ k ][ pt ] = new QTreeWidgetItem( QStringList( util_t::player_type_string( pt ) ) ) );
           }
+
           QTreeWidgetItem* item = new QTreeWidgetItem( QStringList() << profileList[ i ] << profile );
-          top[ pt ] -> addChild( item );
+          rootItems[ k ][ pt ] -> addChild( item );
           break;
         }
       }
    }
  }
+  }
 
   bisTree->setColumnWidth( 0, 300 );
 
