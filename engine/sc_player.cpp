@@ -214,11 +214,6 @@ static bool parse_brain_lag_stddev( sim_t* sim,
   return true;
 }
 
-inline double swtor_diminishing_return( double cap, double divisor, int level, double rating )
-{
-  return cap * ( 1.0 - std::pow( ( 1.0 - ( 0.01 / cap ) ), std::max( rating, 0.0 ) / std::max( 20, level ) / divisor ) );
-}
-
 // The wowhead encoding that represents pairs of integers in [0..5] with a
 // single character. The character at index i in this array encodes the pair
 // ( floor( i / 6 ), i % 6 ).
@@ -1994,6 +1989,9 @@ double player_t::melee_bonus_stats() const
 double player_t::melee_bonus_multiplier() const
 { return 1.0; }
 
+double player_t::melee_crit_from_stats() const
+{ return rating_t::crit_from_stat( strength() ); }
+
 double player_t::composite_melee_damage_bonus() const
 { return composite_damage_bonus( melee_bonus_stats(),
                                  melee_bonus_multiplier() ); }
@@ -3505,15 +3503,15 @@ void player_t::register_direct_heal_callback( int64_t mask,
 
 void player_t::recalculate_alacrity()
 {
-  attack_alacrity = spell_alacrity = 1.0 - swtor_diminishing_return( 0.3, 0.55, level, alacrity_rating );
+  attack_alacrity = spell_alacrity = 1.0 - rating_t::activation_speed_from_rating( alacrity_rating, level );
 }
 
 // player_t::recalculate_crit ==============================================
 
 void player_t::recalculate_crit()
 {
-  double crit_from_rating = swtor_diminishing_return( 0.3, 0.45, level, crit_rating );
-  double crit_from_primary = swtor_diminishing_return( 0.3, 2.5, level, get_stat_helper( primary_attribute) );
+  double crit_from_rating = rating_t::crit_from_rating( crit_rating, level );
+  double crit_from_primary = rating_t::crit_from_stat( get_stat_helper( primary_attribute ), level );
 
   spell_crit  = base_spell_crit + crit_from_rating + crit_from_primary;
   attack_crit = base_attack_crit + crit_from_rating + crit_from_primary;
@@ -3523,7 +3521,7 @@ void player_t::recalculate_crit()
 
 void player_t::recalculate_accuracy()
 {
-  double acc = swtor_diminishing_return( 0.3, 0.55, level, accuracy_rating );
+  double acc = rating_t::accuracy_from_rating( accuracy_rating, level );
 
   spell_hit  = base_spell_hit + acc;
   attack_hit = base_attack_hit + acc;
@@ -3532,9 +3530,7 @@ void player_t::recalculate_accuracy()
 // player_t::recalculate_surge ==============================================
 
 void player_t::recalculate_surge()
-{
-  surge_bonus = swtor_diminishing_return( 0.3, 0.11, level, surge_rating );
-}
+{ surge_bonus = rating_t::surge_from_rating( surge_rating, level ); }
 
 // player_t::recent_cast ====================================================
 

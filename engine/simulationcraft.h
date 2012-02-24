@@ -3413,6 +3413,27 @@ struct rating_t : public internal::rating_t
   static double standardhealth_damage( int level );
   static double standardhealth_healing( int level );
   static int get_base_health( int level );
+
+  static double swtor_diminishing_return( double cap, double divisor, int level, double rating )
+  {
+    return cap * ( 1.0 - std::pow( ( 1.0 - ( 0.01 / cap ) ),
+                                   std::max( rating, 0.0 ) / std::max( 20, level ) / divisor ) );
+  }
+
+  static double crit_from_stat( double amount, int level )
+  { return swtor_diminishing_return( 0.3, 2.5, level, amount ); }
+
+  static double crit_from_rating( double amount, int level )
+  { return swtor_diminishing_return( 0.3, 0.45, level, amount ); }
+
+  static double alacrity_from_rating( double amount, int level )
+  { return swtor_diminishing_return( 0.3, 0.55, level, amount ); }
+
+  static double accuracy_from_rating( double amount, int level )
+  { return swtor_diminishing_return( 0.3, 0.55, level, amount ); }
+
+  static double surge_from_rating( double amount, int level )
+  { return swtor_diminishing_return( 0.3, 0.11, level, amount ); }
 };
 
 // Weapon ===================================================================
@@ -4056,6 +4077,7 @@ private:
 public:
   virtual double melee_bonus_stats() const;
   virtual double melee_bonus_multiplier() const;
+  virtual double melee_crit_from_stats() const;
   double composite_melee_damage_bonus() const;
 
   virtual double range_bonus_stats() const;
