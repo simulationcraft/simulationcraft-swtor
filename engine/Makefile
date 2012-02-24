@@ -93,6 +93,7 @@ SRC = \
     sc_knotor.cpp \
 	sc_log.cpp \
 	sc_main.cpp \
+	sc_marauder_sentinel.cpp \
 	sc_mmo_champion.cpp \
 	sc_option.cpp \
 	sc_pet.cpp \
