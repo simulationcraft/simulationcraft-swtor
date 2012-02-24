@@ -1989,7 +1989,7 @@ double player_t::composite_damage_bonus( double stats, double multiplier, double
 // player_t::composite_melee_damage_bonus() =================================
 
 double player_t::melee_bonus_stats() const
-{ return get_stat_helper( ATTR_STRENGTH ); }
+{ return strength(); }
 
 double player_t::melee_bonus_multiplier() const
 { return 1.0; }
@@ -2001,7 +2001,7 @@ double player_t::composite_melee_damage_bonus() const
 // player_t::composite_range_damage_bonus() =================================
 
 double player_t::range_bonus_stats() const
-{ return get_stat_helper( ATTR_AIM ); }
+{ return aim(); }
 
 double player_t::range_bonus_multiplier() const
 { return 1.0; }
@@ -2013,7 +2013,7 @@ double player_t::composite_range_damage_bonus() const
 // player_t::composite_force_damage_bonus() =================================
 
 double player_t::force_bonus_stats() const
-{ return get_stat_helper( ATTR_WILLPOWER ); }
+{ return willpower(); }
 
 double player_t::force_bonus_multiplier() const
 {
@@ -2035,7 +2035,7 @@ double player_t::composite_force_damage_bonus() const
 // player_t::composite_tech_damage_bonus() ==================================
 
 double player_t::tech_bonus_stats() const
-{ return get_stat_helper( ATTR_CUNNING ); }
+{ return cunning(); }
 
 double player_t::tech_bonus_multiplier() const
 {
@@ -2062,7 +2062,7 @@ double player_t::composite_healing_bonus( double stats, double multiplier, doubl
 // player_t::composite_force_healing_bonus() ================================
 
 double player_t::force_healing_bonus_stats() const
-{ return get_stat_helper( ATTR_WILLPOWER ); }
+{ return willpower(); }
 
 double player_t::force_healing_bonus_multiplier() const
 {
@@ -2084,7 +2084,7 @@ double player_t::composite_force_healing_bonus() const
 // player_t::composite_tech_healing_bonus() =================================
 
 double player_t::tech_healing_bonus_stats() const
-{ return get_stat_helper( ATTR_CUNNING ); }
+{ return cunning(); }
 
 double player_t::tech_healing_bonus_multiplier() const
 {

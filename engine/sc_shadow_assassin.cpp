@@ -201,16 +201,18 @@ struct shadow_assassin_t : public player_t
     virtual void      reset();
     virtual void      create_talents();
 
-    virtual double    composite_melee_damage_bonus() const
+    virtual double    melee_bonus_stats() const
+    { return player_t::melee_bonus_stats() + willpower(); }
+
+    virtual double    melee_bonus_multiplier() const
     {
-      double bonus = player_t::composite_melee_damage_bonus();
+      double m = player_t::melee_bonus_multiplier();
 
       if ( actives.charge == DARK_CHARGE )
-        bonus *= .95;
+        m -= 0.05;
 
-      return bonus;
+      return m;
     }
-
 };
 
 namespace { // ANONYMOUS NAMESPACE ==========================================
