@@ -1220,6 +1220,8 @@ struct saber_strike_t : public shadow_assassin_attack_t
     weapon_multiplier = -.066;
     dd.power_mod = .33;
 
+    is_basic = true;
+
     if ( is_consequent_strike )
     {
       background = true;

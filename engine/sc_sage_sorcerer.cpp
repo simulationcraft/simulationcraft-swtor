@@ -189,8 +189,9 @@ struct sage_sorcerer_t : public player_t
   }
 
   // Character Definition
-  virtual targetdata_t* new_targetdata( player_t* source, player_t* target ) {return new jedi_sage_targetdata_t( source, target );}
-  virtual action_t* create_action( const std::string& name, const std::string& options );
+  virtual targetdata_t* new_targetdata( player_t* source, player_t* target )
+  { return new jedi_sage_targetdata_t( source, target ); }
+
   virtual void      init_talents();
   virtual void      init_base();
   virtual void      init_benefits();
@@ -199,11 +200,17 @@ struct sage_sorcerer_t : public player_t
   virtual void      init_procs();
   virtual void      init_rng();
   virtual void      init_actions();
+
   virtual int       primary_resource() const;
   virtual int       primary_role() const;
+
   virtual void      regen( timespan_t periodicity );
-  virtual double    composite_force_damage_bonus() const;
+
+  virtual double    force_bonus_multiplier() const;
+  // virtual double    force_healing_bonus_multiplier() const;
   virtual double    composite_spell_alacrity() const;
+
+  virtual action_t* create_action( const std::string& name, const std::string& options );
   virtual void      create_talents();
   virtual void      create_options();
 
@@ -1386,16 +1393,21 @@ void sage_sorcerer_t::regen( timespan_t periodicity )
 
 // sage_sorcerer_t::composite_spell_power ==================================================
 
-double sage_sorcerer_t::composite_force_damage_bonus() const
+double sage_sorcerer_t::force_bonus_multiplier() const
 {
-  double sp = player_t::composite_force_damage_bonus();
-
-  sp *= 1.0 + buffs.tremors -> stack() * 0.01;
-
-  return sp;
+  return player_t::force_bonus_multiplier() +
+      buffs.tremors -> stack() * 0.01;
 }
 
-// sage_sorcerer_t::composite_spell_alacrity ==================================================
+#if 0
+double sage_sorcerer_t::force_healing_bonus_multiplier() const
+{
+  return player_t::force_healing_bonus_multiplier() +
+      talents.clairvoyance -> rank() * 0.02;
+}
+#endif
+
+// sage_sorcerer_t::composite_spell_alacrity ========================================
 
 double sage_sorcerer_t::composite_spell_alacrity() const
 {

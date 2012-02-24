@@ -116,6 +116,7 @@ void action_t::init_action_t_()
   discharge_proc                 = false;
   auto_cast                      = false;
   initialized                    = false;
+  is_basic                       = false; // FIXME: implement this.
   may_hit                        = true;
   may_miss                       = false;
   may_dodge                      = false;

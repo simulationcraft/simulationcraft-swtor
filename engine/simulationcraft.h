@@ -4048,18 +4048,35 @@ struct player_t : public noncopyable
   virtual double composite_movement_speed() const;
 
 private:
-  double composite_damage_bonus( attribute_type main_attr, double extra_power=0 ) const;
-  double composite_healing_bonus( attribute_type main_attr, double extra_power=0 ) const;
+  double composite_damage_bonus( double stats, double multiplier, double extra_power=0 ) const;
+  double composite_healing_bonus( double stats, double multiplier, double extra_power=0 ) const;
   double get_stat_helper( attribute_type a ) const
   { return attribute[ a ] * composite_attribute_multiplier( a ); }
 
 public:
-  virtual double composite_melee_damage_bonus() const;
-  virtual double composite_range_damage_bonus() const;
-  virtual double composite_force_damage_bonus() const;
-  virtual double composite_tech_damage_bonus() const;
-  virtual double composite_force_healing_bonus() const;
-  virtual double composite_tech_healing_bonus() const;
+  virtual double melee_bonus_stats() const;
+  virtual double melee_bonus_multiplier() const;
+  double composite_melee_damage_bonus() const;
+
+  virtual double range_bonus_stats() const;
+  virtual double range_bonus_multiplier() const;
+  double composite_range_damage_bonus() const;
+
+  virtual double force_bonus_stats() const;
+  virtual double force_bonus_multiplier() const;
+  double composite_force_damage_bonus() const;
+
+  virtual double tech_bonus_stats() const;
+  virtual double tech_bonus_multiplier() const;
+  double composite_tech_damage_bonus() const;
+
+  virtual double force_healing_bonus_stats() const;
+  virtual double force_healing_bonus_multiplier() const;
+  double composite_force_healing_bonus() const;
+
+  virtual double tech_healing_bonus_stats() const;
+  virtual double tech_healing_bonus_multiplier() const;
+  double composite_tech_healing_bonus() const;
 
   double strength() const { return get_stat_helper( ATTR_STRENGTH ); }
   double aim() const { return get_stat_helper( ATTR_AIM ); }
@@ -4400,7 +4417,7 @@ struct action_t
   int resource, tree, result, aoe;
   bool dual, callbacks, special, channeled, background, sequence, use_off_gcd;
   bool direct_tick, repeating, harmful, proc, item_proc, proc_ignores_slot, discharge_proc, auto_cast, initialized;
-  bool may_hit, may_miss, may_dodge, may_parry, may_block, may_crit;
+  bool is_basic, may_hit, may_miss, may_dodge, may_parry, may_block, may_crit;
   bool tick_may_crit, tick_zero, hasted_ticks;
   bool no_buffs, no_debuffs;
   int dot_behavior;
