@@ -762,57 +762,6 @@ const char* util_t::weapon_class_string( int class_ )
   return 0;
 }
 
-// util_t::set_item_type_string =============================================
-
-const char* util_t::set_item_type_string( int item_set )
-{
-  switch ( item_set )
-  {
-    // Melee sets
-  case 925:   // Death Knight T11
-  case 927:   // Druid T11
-  case 932:   // Paladin T11
-  case 939:   // Shaman T11
-  case 942:   // Warrior T11
-  case 1000:  // Death Knight T12
-  case 1002:  // Druid T12
-  case 1011:  // Paladin T12
-  case 1015:  // Shaman T12
-  case 1017:  // Warrior T12
-    return "Melee";
-
-    // Tank sets
-  case 926:   // Death Knight T11
-  case 934:   // Paladin T11
-  case 943:   // Warrior T11
-  case 1001:  // Death Knight T12
-  case 1013:  // Paladin T12
-  case 1018:  // Warrior T12
-    return "Tank";
-
-    // Healer sets
-  case 928:   // Druid T11
-  case 933:   // Paladin T11
-  case 935:   // Priest T11
-  case 938:   // Shaman T11
-  case 1003:  // Druid T12
-  case 1010:  // Priest T12
-  case 1012:  // Paladin T12
-  case 1014:  // Shaman T12
-    return "Healer";
-
-    // DPS Caster sets
-  case 929:   // Druid T11
-  case 936:   // Priest T11
-  case 940:   // Shaman T11
-  case 1004:  // Druid T12
-  case 1009:  // Priest T12
-  case 1016:  // Shaman T12
-    return "Caster";
-  }
-  return 0;
-}
-
 // util_t::parse_weapon_type ================================================
 
 int util_t::parse_weapon_type( const std::string& name )
@@ -846,31 +795,6 @@ int util_t::parse_stim_type( const std::string& name )
       return i;
 
   return STIM_NONE;
-}
-
-// util_t::set_bonus_string =================================================
-
-const char* util_t::set_bonus_string( set_type type )
-{
-  switch ( type )
-  {
-  case SET_RAKATA_COMBAT_TECH_GEAR: return "rakata_combat_tech_gear";
-  case SET_INDOMITABLE: return "indomitable";
-  default:
-    break;
-  }
-  return "unknown";
-}
-
-// util_t::parse_set_bonus ==================================================
-
-set_type util_t::parse_set_bonus( const std::string& name )
-{
-  for ( int i=0; i < SET_MAX; i++ )
-    if ( util_t::str_compare_ci( name, util_t::set_bonus_string( ( set_type ) i ) ) )
-      return ( set_type ) i;
-
-  return SET_NONE;
 }
 
 // util_t::slot_type_string =================================================

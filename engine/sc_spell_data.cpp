@@ -373,19 +373,7 @@ struct spell_list_expr_t : public spell_data_expr_t
     }
     case DATA_SET_BONUS_SPELL:
     {
-      for ( unsigned cls = 0; cls < 12; cls++ )
-      {
-        for ( unsigned tier = 0; tier < N_TIER; tier++ )
-        {
-          for ( unsigned n = 0; n < sim -> dbc.set_bonus_spell_size(); n++ )
-          {
-            if ( ! ( spell_id = sim -> dbc.set_bonus_spell( cls, tier, n ) ) )
-              continue;
 
-            result_spell_list.push_back( spell_id );
-          }
-        }
-      }
       break;
     }
     default:
