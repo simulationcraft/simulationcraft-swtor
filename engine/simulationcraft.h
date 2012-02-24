@@ -4082,22 +4082,27 @@ public:
 
   virtual double range_bonus_stats() const;
   virtual double range_bonus_multiplier() const;
+  virtual double range_crit_from_stats() const;
   double composite_range_damage_bonus() const;
 
   virtual double force_bonus_stats() const;
   virtual double force_bonus_multiplier() const;
+  virtual double force_crit_from_stats() const;
   double composite_force_damage_bonus() const;
 
   virtual double tech_bonus_stats() const;
   virtual double tech_bonus_multiplier() const;
+  virtual double tech_crit_from_stats() const;
   double composite_tech_damage_bonus() const;
 
   virtual double force_healing_bonus_stats() const;
   virtual double force_healing_bonus_multiplier() const;
+  virtual double force_healing_crit_from_stats() const;
   double composite_force_healing_bonus() const;
 
   virtual double tech_healing_bonus_stats() const;
   virtual double tech_healing_bonus_multiplier() const;
+  virtual double tech_healing_crit_from_stats() const;
   double composite_tech_healing_bonus() const;
 
   double strength() const { return get_stat_helper( ATTR_STRENGTH ); }

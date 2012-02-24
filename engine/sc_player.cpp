@@ -2004,6 +2004,9 @@ double player_t::range_bonus_stats() const
 double player_t::range_bonus_multiplier() const
 { return 1.0; }
 
+double player_t::range_crit_from_stats() const
+{ return rating_t::crit_from_stat( aim(), level ); }
+
 double player_t::composite_range_damage_bonus() const
 { return composite_damage_bonus( range_bonus_stats(),
                                  range_bonus_multiplier() ); }
@@ -2022,6 +2025,9 @@ double player_t::force_bonus_multiplier() const
 
   return m;
 }
+
+double player_t::force_crit_from_stats() const
+{ return rating_t::crit_from_stat( willpower(), level ); }
 
 double player_t::composite_force_damage_bonus() const
 {
@@ -2045,6 +2051,9 @@ double player_t::tech_bonus_multiplier() const
   return m;
 }
 
+double player_t::tech_crit_from_stats() const
+{ return rating_t::crit_from_stat( cunning(), level ); }
+
 double player_t::composite_tech_damage_bonus() const
 {
   return composite_damage_bonus( tech_bonus_stats(),
@@ -2061,6 +2070,9 @@ double player_t::composite_healing_bonus( double stats, double multiplier, doubl
 
 double player_t::force_healing_bonus_stats() const
 { return willpower(); }
+
+double player_t::force_healing_crit_from_stats() const
+{ return rating_t::crit_from_stat( willpower(), level ); }
 
 double player_t::force_healing_bonus_multiplier() const
 {
@@ -2083,6 +2095,9 @@ double player_t::composite_force_healing_bonus() const
 
 double player_t::tech_healing_bonus_stats() const
 { return cunning(); }
+
+double player_t::tech_healing_crit_from_stats() const
+{ return rating_t::crit_from_stat( cunning(), level ); }
 
 double player_t::tech_healing_bonus_multiplier() const
 {
