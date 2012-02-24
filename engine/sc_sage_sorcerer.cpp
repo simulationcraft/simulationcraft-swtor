@@ -1000,6 +1000,80 @@ struct force_potency_t : public jedi_sage_spell_t
   }
 };
 
+
+struct jedi_sage_heal_t : public heal_t
+{
+  bool influenced_by_inner_strength;
+
+  jedi_sage_heal_t( const char* n, sage_sorcerer_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_HOLY, int t=TREE_NONE ) :
+    heal_t( n, p, r, s, t ),
+    influenced_by_inner_strength( true )
+  {
+    may_crit   = true;
+    tick_may_crit = true;
+  }
+
+  virtual void init()
+  {
+    heal_t::init();
+
+    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+
+    if ( td.base_min > 0 && !channeled )
+      crit_bonus += p -> talents.mental_scarring -> rank() * 0.1;
+  }
+
+  virtual double cost() const
+  {
+    double c = heal_t::cost();
+
+    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+
+    if ( p -> talents.inner_strength -> rank() > 0 && influenced_by_inner_strength )
+    {
+      c *= 1.0 - p -> talents.inner_strength -> rank() * 0.03;
+      c = ceil( c ); // 17/01/2012 According to http://sithwarrior.com/forums/Thread-Sorcerer-Sage-Mechanics-and-Quirks
+    }
+
+    if ( p -> buffs.telekinetic_effusion -> check() > 0 )
+    {
+      c *= 0.5;
+      c = floor( c ); // FIXME: floor or ceil?
+    }
+
+    return c;
+  }
+
+  virtual void consume_resource()
+  {
+    heal_t::consume_resource();
+
+    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+
+    p -> buffs.telekinetic_effusion -> up();
+  }
+};
+
+struct deliverance_t : public jedi_sage_heal_t
+{
+  deliverance_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
+    jedi_sage_heal_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+  {
+    parse_options( 0, options_str );
+
+    dd.standardhealthpercentmin = .16;
+    dd.standardhealthpercentmax = .18;
+    dd.power_mod = 3.41;
+
+    base_cost = 55.0;
+    base_execute_time = timespan_t::from_seconds( 3.0 );
+
+    range = 30.0;
+
+  }
+
+};
+
 } // ANONYMOUS NAMESPACE ====================================================
 
 // ==========================================================================
@@ -1025,6 +1099,7 @@ action_t* sage_sorcerer_t::create_action( const std::string& name,
     if ( name == "mental_alacrity"    ) return new   mental_alacrity_t( this, "mental_alacrity", options_str );
     if ( name == "telekinetic_wave"   ) return new  telekinetic_wave_t( this, "telekinetic_wave", options_str );
     if ( name == "force_potency"      ) return new     force_potency_t( this, "force_potency", options_str );
+    if ( name == "deliverance"        ) return new       deliverance_t( this, "deliverance", options_str );
   }
   else if ( type == SITH_SORCERER )
   {
