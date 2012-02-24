@@ -733,8 +733,9 @@ void SimulationCraftWindow::createBestInSlotTab()
   for ( int k=0; k < profile_folder_list.count(); k++ )
   {
     QTreeWidgetItem* top = new QTreeWidgetItem( QStringList( profile_folder_names[ k ] ) );
-
     bisTree -> addTopLevelItem( top );
+    if ( k == 0 ) top -> setExpanded( true );
+
     range::fill( rootItems[ k ], 0 );
 
     // Scan all subfolders and create a list
