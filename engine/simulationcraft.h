@@ -4212,6 +4212,8 @@ public:
   static player_t* create_sith_sorcerer( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
   static player_t* create_jedi_shadow( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
   static player_t* create_sith_assassin( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+  static player_t* create_sith_juggernaut( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+  static player_t* create_jedi_guardian( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
   static player_t* create_enemy       ( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
 
   // Raid-wide aura/buff/debuff maintenance
@@ -4229,6 +4231,11 @@ public:
   static void shadow_assassin_combat_begin( sim_t* sim );
   static void shadow_assassin_combat_end  ( sim_t* /* sim */ ) {}
 
+  // Raid-wide Juggernaut|Guardian buff maintenance
+  static void juggernaut_guardian_init        ( sim_t* sim );
+  static void juggernaut_guardian_combat_begin( sim_t* sim );
+  static void juggernaut_guardian_combat_end  ( sim_t* /* sim */ ) {}
+
   // Raid-wide Enemy buff maintenance
   static void enemy_init        ( sim_t* sim );
   static void enemy_combat_begin( sim_t* sim );
@@ -4239,6 +4246,7 @@ public:
   bool is_add() const { return type == ENEMY_ADD; }
   bool is_sage_sorcerer() const { return ( type == JEDI_SAGE || type == SITH_SORCERER ); }
   bool is_shadow_assassin() const { return ( type == JEDI_SHADOW || type == SITH_ASSASSIN ); }
+  bool is_juggernaut_guardian() const { return ( type == JEDI_GUARDIAN || type == SITH_JUGGERNAUT ); }
 
   pet_t* cast_pet() { assert( is_pet() ); return ( pet_t* )this; }
   enemy_t* cast_enemy() { assert( type == ENEMY ); return ( enemy_t*)this; }
