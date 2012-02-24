@@ -217,6 +217,10 @@ struct shadow_assassin_t : public player_t
       if ( actives.charge == DARK_CHARGE )
         m -= 0.05;
 
+      // FIXME: Account for benefit.
+      if ( buffs.unearthed_knowledge -> check() )
+        m += 0.10;
+
       return m;
     }
 };
@@ -263,12 +267,6 @@ struct shadow_assassin_attack_t : public attack_t
 
         if ( p -> buffs.exploitive_strikes -> up() )
             player_crit += p -> talents.exploitive_strikes -> rank() * 0.03;
-        if ( p -> buffs.unearthed_knowledge -> up() )
-        {
-            // FIXME: Unearthed Knowledge should be increasing melee bonus damage by 10%,
-            //        not increasing melee damage by 10%.
-            dd.player_multiplier *= 1.10;
-        }
     }
 
    virtual double armor() const
