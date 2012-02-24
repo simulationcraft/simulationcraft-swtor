@@ -5824,6 +5824,14 @@ player_t* player_t::create( sim_t*             sim,
   {
     return player_t::create_jedi_guardian( sim, name, r );
   }
+  else if ( type == "sith_marauder" )
+  {
+    return player_t::create_sith_marauder( sim, name, r );
+  }
+  else if ( type == "jedi_sentinel" )
+  {
+    return player_t::create_jedi_sentinel( sim, name, r );
+  }
 
   else if ( type == "enemy" )
   {

@@ -1996,6 +1996,8 @@ void sim_t::create_options()
     { "sith_assassin",                    OPT_FUNC,   ( void* ) ::parse_player                      },
     { "sith_juggernaut",                  OPT_FUNC,   ( void* ) ::parse_player                      },
     { "jedi_guardian",                    OPT_FUNC,   ( void* ) ::parse_player                      },
+    { "sith_marauder",                    OPT_FUNC,   ( void* ) ::parse_player                      },
+    { "jedi_sentinel",                    OPT_FUNC,   ( void* ) ::parse_player                      },
     { "enemy",                            OPT_FUNC,   ( void* ) ::parse_player                      },
     { "pet",                              OPT_FUNC,   ( void* ) ::parse_player                      },
     { "player",                           OPT_FUNC,   ( void* ) ::parse_player                      },
