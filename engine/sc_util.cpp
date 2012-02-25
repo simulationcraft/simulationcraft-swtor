@@ -926,6 +926,7 @@ const char* util_t::stat_type_string( int stat )
   case STAT_RESILIENCE_RATING: return "resilience_rating";
   case STAT_DODGE_RATING:      return "dodge_rating";
   case STAT_PARRY_RATING:      return "parry_rating";
+  case STAT_DEFENSE_RATING:    return "defense_rating";
 
   case STAT_BLOCK_RATING: return "block_rating";
 
@@ -986,6 +987,7 @@ const char* util_t::stat_type_abbrev( int stat )
   case STAT_TECH_POWER: return "Tech_Power";
 
   case STAT_SURGE_RATING: return "Surge";
+  case STAT_DEFENSE_RATING: return "Defense";
 
   case STAT_MAX: return "All";
   }

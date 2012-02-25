@@ -103,6 +103,7 @@ static const char* stat_color( int type )
   case STAT_CRIT_RATING:              return class_color( IA_OPERATIVE );
   case STAT_ALACRITY_RATING:          return class_color( SITH_SORCERER );
   case STAT_EXPERTISE_RATING:         return color::red;
+  case STAT_DEFENSE_RATING:           return color::white;
   default:                            return 0;
   }
 }

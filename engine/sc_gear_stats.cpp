@@ -52,7 +52,6 @@ void gear_stats_t::add_stat( int    stat,
   case STAT_WEAPON_OFFHAND_SPEED:  weapon_offhand_speed  += value; break;
 
   case STAT_ARMOR:             armor          += value; break;
-  case STAT_RESILIENCE_RATING:                          break;
   case STAT_BONUS_ARMOR:       bonus_armor    += value; break;
   case STAT_DODGE_RATING:      dodge_rating   += value; break;
   case STAT_PARRY_RATING:      parry_rating   += value; break;
@@ -64,6 +63,7 @@ void gear_stats_t::add_stat( int    stat,
   case STAT_TECH_POWER:  tech_power  += value; break;
 
   case STAT_SURGE_RATING: surge_rating += value; break;
+  case STAT_DEFENSE_RATING: defense_rating += value; break;
 
   case STAT_MAX: for ( int i=0; i < ATTRIBUTE_MAX; i++ ) { attribute[ i ] += value; }
     break;
@@ -127,6 +127,7 @@ void gear_stats_t::set_stat( int    stat,
   case STAT_TECH_POWER:  tech_power  = value; break;
 
   case STAT_SURGE_RATING: surge_rating = value; break;
+  case STAT_DEFENSE_RATING: defense_rating = value; break;
 
   case STAT_MAX: for ( int i=0; i < ATTRIBUTE_MAX; i++ ) { attribute[ i ] = value; }
     break;
@@ -189,6 +190,7 @@ double gear_stats_t::get_stat( int stat ) const
   case STAT_TECH_POWER: return tech_power;
 
   case STAT_SURGE_RATING: return surge_rating;
+  case STAT_DEFENSE_RATING: return defense_rating;
 
   default: assert( 0 );
   }

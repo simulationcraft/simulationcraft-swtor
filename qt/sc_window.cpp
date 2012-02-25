@@ -88,6 +88,7 @@ static OptionEntry* getScalingOptions()
     { "Analyze Off-hand Weapon DPS",      "wohdps",       "Calculate scale factor for Off-hand Weapon DPS"    },
     { "Analyze Off-hand Weapon Speed",    "wohspeed",     "Calculate scale factor for Off-hand Weapon Speed"  },
     { "Analyze Armor",                    "armor",        "Calculate scale factor for Armor"                  },
+    { "Analyze Defense Rating",           "defense",      "Calculate scale factor for Defense Rating"         },
     { NULL, NULL, NULL }  };
   return options;
 }
@@ -104,6 +105,7 @@ static OptionEntry* getPlotOptions()
     { "Plot DPS per Surge Rating",        "surge",      "Generate DPS curve for Surge Rating" },
     { "Plot DPS per Power",               "power",      "Generate DPS curve for Power"        },
     { "Plot DPS per Force Power",         "forcepower", "Generate DPS curve for Force Power"  },
+    { "Plot DPS per Tech Power",          "techpower",  "Generate DPS curve for Tech Power"  },
     { "Plot DPS per Weapon DPS",          "wdps",       "Generate DPS curve for Weapon DPS"   },
     { NULL, NULL, NULL }
   };

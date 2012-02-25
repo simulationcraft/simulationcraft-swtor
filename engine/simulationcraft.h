@@ -431,7 +431,7 @@ enum stat_type
   STAT_ARMOR, STAT_BONUS_ARMOR, STAT_RESILIENCE_RATING, STAT_DODGE_RATING, STAT_PARRY_RATING,
   STAT_BLOCK_RATING,
   STAT_POWER, STAT_FORCE_POWER, STAT_TECH_POWER,
-  STAT_SURGE_RATING,
+  STAT_SURGE_RATING, STAT_DEFENSE_RATING,
   STAT_MAX
 };
 
@@ -2523,6 +2523,7 @@ struct gear_stats_t
   double force_power;
   double tech_power;
   double surge_rating;
+  double defense_rating;
 };
 }
 
@@ -3417,16 +3418,19 @@ struct rating_t : public internal::rating_t
                                    std::max( rating, 0.0 ) / std::max( 20, level ) / divisor ) );
   }
 
+  static double accuracy_from_rating( double amount, int level )
+  { return swtor_diminishing_return( 0.3, 0.55, level, amount ); }
+
+  static double alacrity_from_rating( double amount, int level )
+  { return swtor_diminishing_return( 0.3, 0.55, level, amount ); }
+
   static double crit_from_stat( double amount, int level )
   { return swtor_diminishing_return( 0.3, 2.5, level, amount ); }
 
   static double crit_from_rating( double amount, int level )
   { return swtor_diminishing_return( 0.3, 0.45, level, amount ); }
 
-  static double alacrity_from_rating( double amount, int level )
-  { return swtor_diminishing_return( 0.3, 0.55, level, amount ); }
-
-  static double accuracy_from_rating( double amount, int level )
+  static double defense_from_rating( double amount, int level )
   { return swtor_diminishing_return( 0.3, 0.55, level, amount ); }
 
   static double surge_from_rating( double amount, int level )
@@ -3730,6 +3734,7 @@ struct player_t : public noncopyable
   double initial_crit_rating, crit_rating;
   double initial_accuracy_rating, accuracy_rating;
   double initial_surge_rating, surge_rating;
+  double initial_defense_rating, defense_rating;
 
   double surge_bonus, buffed_surge;
 

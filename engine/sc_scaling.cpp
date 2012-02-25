@@ -189,6 +189,7 @@ void scaling_t::init_deltas()
   if ( stats.alacrity_rating == 0 ) stats.alacrity_rating = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
 
   // Defensive
+  if ( stats.defense_rating == 0 ) stats.defense_rating = scale_delta_multiplier * ( smooth_scale_factors ? 60 : 120 );
   if ( stats.armor == 0 ) stats.armor = smooth_scale_factors ? 1500 : 3000;
   if ( stats.dodge_rating  == 0 ) stats.dodge_rating  = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
   if ( stats.parry_rating  == 0 ) stats.parry_rating  = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
@@ -534,6 +535,7 @@ void scaling_t::create_options()
     { "scale_alacrity_rating",          OPT_FLT,    &( stats.alacrity_rating                ) },
     { "scale_power",                    OPT_FLT,    &( stats.power                          ) },
     { "scale_surge_rating",             OPT_FLT,    &( stats.surge_rating                   ) },
+    { "scale_defense_rating",           OPT_FLT,    &( stats.defense_rating                 ) },
     { "scale_weapon_dps",               OPT_FLT,    &( stats.weapon_dps                     ) },
     { "scale_weapon_speed",             OPT_FLT,    &( stats.weapon_speed                   ) },
     { "scale_offhand_weapon_dps",       OPT_FLT,    &( stats.weapon_offhand_dps             ) },

@@ -389,6 +389,7 @@ player_t::player_t( sim_t*             s,
   initial_crit_rating( 0 ), crit_rating( 0 ),
   initial_accuracy_rating( 0 ), accuracy_rating( 0 ),
   initial_surge_rating( 0 ), surge_rating( 0 ),
+  initial_defense_rating( 0 ), defense_rating( 0 ),
   surge_bonus( 0 ), buffed_surge( 0 ),
   primary_attribute( ATTRIBUTE_NONE ), secondary_attribute( ATTRIBUTE_NONE ),
   // Spell Mechanics
@@ -1514,6 +1515,7 @@ void player_t::init_scaling()
     scales_with[ STAT_BONUS_ARMOR    ] = 0;
     scales_with[ STAT_DODGE_RATING   ] = 0;
     scales_with[ STAT_PARRY_RATING   ] = 0;
+    scales_with[ STAT_DEFENSE_RATING ] = tank;
 
     scales_with[ STAT_BLOCK_RATING ] = 0;
 
@@ -1541,6 +1543,8 @@ void player_t::init_scaling()
       case STAT_TECH_POWER:      initial_tech_power      += v; break;
 
       case STAT_SURGE_RATING:    initial_surge_rating    += v; break;
+
+      case STAT_DEFENSE_RATING:  initial_defense_rating  += v; break;
 
       case STAT_HIT_RATING:      initial_accuracy_rating += v; break;
       case STAT_CRIT_RATING:     initial_crit_rating     += v; break;
@@ -2259,6 +2263,7 @@ void player_t::reset()
   accuracy_rating = initial_accuracy_rating;
   surge_rating = initial_surge_rating;
   recalculate_surge();
+  defense_rating = initial_defense_rating;
 
   range::copy( attribute_initial, attribute );
   range::copy( attribute_multiplier_initial, attribute_multiplier );
@@ -2956,6 +2961,12 @@ void player_t::stat_gain( int       stat,
     recalculate_surge();
     break;
 
+  case STAT_DEFENSE_RATING:
+    stats.defense_rating += amount;
+    temporary.defense_rating += temp_value * amount;
+    defense_rating += amount;
+    break;
+
   case STAT_ARMOR:          stats.armor          += amount; temporary.armor += temp_value * amount; armor       += amount;                  break;
   case STAT_BONUS_ARMOR:    stats.bonus_armor    += amount; bonus_armor += amount;                  break;
   case STAT_DODGE_RATING:   stats.dodge_rating   += amount; temporary.dodge_rating += temp_value * amount; dodge       += amount / rating.dodge;   break;
@@ -3039,6 +3050,12 @@ void player_t::stat_loss( int       stat,
     temporary.surge_rating -= temp_value * amount;
     surge_rating       -= amount;
     recalculate_surge();
+    break;
+
+  case STAT_DEFENSE_RATING:
+    stats.defense_rating -= amount;
+    temporary.defense_rating -= temp_value * amount;
+    defense_rating       -= amount;
     break;
 
   case STAT_ARMOR:          stats.armor          -= amount; temporary.armor -= temp_value * amount; armor       -= amount;                  break;
@@ -5027,7 +5044,7 @@ action_expr_t* player_t::create_expression( action_t* a,
         case STAT_EXPERTISE_RATING: p_stat = &( a -> player -> temporary.expertise_rating            ); break;
         case STAT_HIT_RATING:       p_stat = &( a -> player -> temporary.hit_rating                  ); break;
         case STAT_CRIT_RATING:      p_stat = &( a -> player -> temporary.crit_rating                 ); break;
-        case STAT_ALACRITY_RATING:     p_stat = &( a -> player -> temporary.alacrity_rating             ); break;
+        case STAT_ALACRITY_RATING:  p_stat = &( a -> player -> temporary.alacrity_rating             ); break;
         case STAT_ARMOR:            p_stat = &( a -> player -> temporary.armor                       ); break;
         case STAT_DODGE_RATING:     p_stat = &( a -> player -> temporary.dodge_rating                ); break;
         case STAT_PARRY_RATING:     p_stat = &( a -> player -> temporary.parry_rating                ); break;
@@ -5036,6 +5053,7 @@ action_expr_t* player_t::create_expression( action_t* a,
         case STAT_FORCE_POWER:      p_stat = &( a -> player -> temporary.force_power                 ); break;
         case STAT_TECH_POWER:       p_stat = &( a -> player -> temporary.tech_power                  ); break;
         case STAT_SURGE_RATING:     p_stat = &( a -> player -> temporary.surge_rating                ); break;
+        case STAT_DEFENSE_RATING:   p_stat = &( a -> player -> temporary.defense_rating              ); break;
 
         default: assert( 0 ); break;
       }
