@@ -71,8 +71,6 @@ SRC = \
 	utf8.h \
 	sc_action.cpp \
 	sc_armory.cpp \
-	sc_battle_net.cpp \
-	sc_bcp_api.cpp \
 	sc_buff.cpp \
 	sc_chart.cpp \
 	sc_const_data.cpp \
@@ -91,7 +89,6 @@ SRC = \
     sc_knotor.cpp \
 	sc_log.cpp \
 	sc_main.cpp \
-	sc_mmo_champion.cpp \
 	sc_option.cpp \
 	sc_pet.cpp \
 	sc_player.cpp \
@@ -121,7 +118,6 @@ SRC = \
 	sc_unique_gear.cpp \
 	sc_util.cpp \
 	sc_weapon.cpp \
-	sc_wowhead.cpp \
 	sc_xml.cpp
 
 SRC_H   := $(filter %.h, $(SRC)) $(filter %.hh, $(SRC))

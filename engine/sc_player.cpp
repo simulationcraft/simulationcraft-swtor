@@ -5,6 +5,11 @@
 
 #include "simulationcraft.h"
 
+// TODO
+// * Implement defense_rating, melee_avoidance(), range_avoidance(),
+//   force_avoidance(), tech_avoidance().
+// * Move all of the buffed_XXX stats into player_t::buffed.
+
 namespace { // ANONYMOUS NAMESPACE ==========================================
 
 // compare_talents ==========================================================
@@ -433,8 +438,6 @@ player_t::player_t( sim_t*             s,
   heal( s -> statistics_level < 2 ), compound_heal( s -> statistics_level < 2 ),
   hps( s -> statistics_level < 1 ), hpse( s -> statistics_level < 2 ),
   htps( s -> statistics_level < 2 ), heal_taken( s -> statistics_level < 2 ),
-  // Gear
-  meta_gem( META_GEM_NONE ), matching_gear( false ),
   // Scaling
   scaling_lag( 0 ), scaling_lag_error( 0 ),
   // Movement & Position
@@ -700,7 +703,6 @@ void player_t::init()
   init_target();
   init_talents();
   init_spells();
-  //init_glyphs();
   init_race();
   init_base();
   init_racials();
@@ -837,8 +839,6 @@ void player_t::init_items()
   if ( num_ilvl_items > 1 )
     avg_ilvl /= num_ilvl_items;
 
-  init_meta_gem( item_stats );
-
   for ( int i=0; i < STAT_MAX; i++ )
   {
     if ( gear.get_stat( i ) == 0 )
@@ -857,15 +857,6 @@ void player_t::init_items()
   {
     sb -> init( *this );
   }
-}
-
-// player_t::init_meta_gem ==================================================
-
-void player_t::init_meta_gem( gear_stats_t& /* item_stats */ )
-{
-  if ( ! meta_gem_str.empty() ) meta_gem = util_t::parse_meta_gem_type( meta_gem_str );
-
-  if ( sim -> debug ) log_t::output( sim, "Initializing meta-gem for player (%s)", name() );
 }
 
 // player_t::init_core ======================================================
@@ -1380,23 +1371,6 @@ void player_t::init_talents()
 
   specialization = primary_tab();
 }
-
-#if 0
-// player_t::init_glyphs ====================================================
-
-void player_t::init_glyphs()
-{
-  std::vector<std::string> glyph_names;
-  int num_glyphs = util_t::string_split( glyph_names, glyphs_str, ",/" );
-
-  for ( int i=0; i < num_glyphs; i++ )
-  {
-    glyph_t* g = find_glyph( glyph_names[ i ] );
-
-    if ( g ) g -> enable();
-  }
-}
-#endif
 
 // player_t::init_spells ====================================================
 
@@ -5273,11 +5247,6 @@ bool player_t::create_profile( std::string& profile_str, int save_type, bool sav
     talents_str = torhead_encode_talents( *this );
     if ( ! talents_str.empty() )
       profile_str += "talents=" + talents_str + term;
-
-    if ( ! glyphs_str.empty() )
-    {
-      profile_str += "glyphs=" + glyphs_str + term;
-    }
   }
 
   if ( save_type == SAVE_ALL || save_type == SAVE_ACTIONS )
@@ -5333,12 +5302,6 @@ bool player_t::create_profile( std::string& profile_str, int save_type, bool sav
       if ( sb -> two_pc() )  profile_str += "# set_bonus=" + sb -> name + "_2pc" + term ;
       if ( sb -> four_pc() ) profile_str += "# set_bonus=" + sb -> name + "_4pc" + term ;
     }
-    if ( meta_gem != META_GEM_NONE )
-    {
-      profile_str += "# meta_gem=";
-      profile_str += util_t::meta_gem_type_string( meta_gem );
-      profile_str += term;
-    }
 
     for ( int i=0; i < SLOT_MAX; i++ )
     {
@@ -5390,10 +5353,13 @@ void player_t::copy_from( player_t* source )
   level = source -> level;
   race_str = source -> race_str;
   role = source -> role;
+  professions_str = source -> professions_str;
+
   position = source -> position;
   position_str = source -> position_str;
+
   use_pre_potion = source -> use_pre_potion;
-  professions_str = source -> professions_str;
+
   talents_str = "http://www.torhead.com/skill-calc#";
   talents_str += util_t::player_type_string( type );
   talents_str += "-";
@@ -5410,13 +5376,14 @@ void player_t::copy_from( player_t* source )
       talents_str += ss.str();
     }
   }
-  glyphs_str = source -> glyphs_str;
+
   action_list_str = source -> action_list_str;
   action_priority_list.clear();
   for ( unsigned int i = 0; i < source -> action_priority_list.size(); i++ )
   {
     action_priority_list.push_back( source -> action_priority_list[ i ] );
   }
+
   int num_items = ( int ) items.size();
   for ( int i=0; i < num_items; i++ )
   {
@@ -5440,7 +5407,7 @@ void player_t::create_options()
     { "server",                               OPT_STRING,   &( server_str                             ) },
     { "id",                                   OPT_STRING,   &( id_str                                 ) },
     { "talents",                              OPT_FUNC,     ( void* ) ::parse_talent_url                },
-    { "glyphs",                               OPT_STRING,   &( glyphs_str                             ) },
+    //{ "glyphs",                               OPT_STRING,   &( glyphs_str                             ) },
     { "race",                                 OPT_STRING,   &( race_str                               ) },
     { "level",                                OPT_INT,      &( level                                  ) },
     { "use_pre_potion",                       OPT_INT,      &( use_pre_potion                         ) },
@@ -5468,7 +5435,6 @@ void player_t::create_options()
     { "brain_lag_stddev",                     OPT_FUNC,     ( void* ) ::parse_brain_lag_stddev          },
     { "scale_player",                         OPT_BOOL,     &( scale_player                           ) },
     // Items
-    { "meta_gem",                             OPT_STRING,   &( meta_gem_str                           ) },
     { "items",                                OPT_STRING,   &( items_str                              ) },
     { "items+",                               OPT_APPEND,   &( items_str                              ) },
     { "head",                                 OPT_STRING,   &( items[ SLOT_HEAD      ].options_str    ) },

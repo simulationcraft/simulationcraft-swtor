@@ -150,9 +150,9 @@ static bool parse_player( sim_t*             sim,
                           const std::string& name,
                           const std::string& value )
 {
+#if 0
   if ( name == "player" )
   {
-
     std::string::size_type cut_pt = value.find( ',' );
     std::string player_name( value, 0, cut_pt );
 
@@ -182,21 +182,7 @@ static bool parse_player( sim_t*             sim,
     cache::behavior_t caching = use_cache ? cache::ANY : cache::players();
 
     if ( wowhead.empty() )
-    {
-      if ( true )
-        sim -> active_player = bcp_api::download_player( sim, region, server, player_name, "active", caching );
-      else
-      {
-        if ( region == "cn" )
-        {
-          sim -> active_player = armory_t::download_player( sim, region, server, player_name, "active", caching );
-        }
-        else
-        {
-          sim -> active_player = battle_net_t::download_player( sim, region, server, player_name, "active", caching );
-        }
-      }
-    }
+      sim -> active_player = bcp_api::download_player( sim, region, server, player_name, "active", caching );
     else
     {
       sim -> active_player = wowhead_t::download_player( sim, wowhead, ( talents == "active" ), caching );
@@ -206,8 +192,10 @@ static bool parse_player( sim_t*             sim,
                        player_name.c_str(), sim -> active_player -> name(), wowhead.c_str() );
     }
   }
+  else
+#endif // 0
 
-  else if ( name == "pet" )
+  if ( name == "pet" )
   {
     std::string::size_type cut_pt = value.find( ',' );
     std::string pet_type( value, 0, cut_pt );
@@ -309,6 +297,7 @@ static bool parse_cache( sim_t*             /* sim */,
   return true;
 }
 
+#if 0
 // parse_armory =============================================================
 
 static bool parse_armory( sim_t*             sim,
@@ -348,18 +337,7 @@ static bool parse_armory( sim_t*             sim,
       if ( ! sim -> input_is_utf8 )
         sim -> input_is_utf8 = utf8::is_valid( player_name.begin(), player_name.end() ) && utf8::is_valid( server.begin(), server.end() );
 
-      if ( true )
-      {
-        sim -> active_player = bcp_api::download_player( sim, region, server, player_name, description );
-      }
-      else if ( region == "cn" )
-      {
-        sim -> active_player = armory_t::download_player( sim, region, server, player_name, description );
-      }
-      else
-      {
-        sim -> active_player = battle_net_t::download_player( sim, region, server, player_name, description );
-      }
+      sim -> active_player = bcp_api::download_player( sim, region, server, player_name, description );
       if ( ! sim -> active_player ) return false;
     }
     return true;
@@ -416,17 +394,7 @@ static bool parse_armory( sim_t*             sim,
 
     cache::behavior_t caching = use_cache ? cache::ANY : cache::players();
 
-    if ( true )
-      return bcp_api::download_guild( sim, region, server, guild_name, ranks_list, player_type, max_rank, caching );
-
-    if ( region == "cn" )
-    {
-      return armory_t::download_guild( sim, region, server, guild_name, ranks_list, player_type, max_rank, caching );
-    }
-    else
-    {
-      return battle_net_t::download_guild( sim, region, server, guild_name, ranks_list, player_type, max_rank, caching );
-    }
+    return bcp_api::download_guild( sim, region, server, guild_name, ranks_list, player_type, max_rank, caching );
   }
 
   return false;
@@ -495,6 +463,7 @@ static bool parse_wowreforge( sim_t*             sim,
 
   return sim -> active_player != 0;
 }
+#endif // 0
 
 // parse_fight_style ========================================================
 
@@ -1998,10 +1967,12 @@ void sim_t::create_options()
     { "pet",                              OPT_FUNC,   ( void* ) ::parse_player                      },
     { "player",                           OPT_FUNC,   ( void* ) ::parse_player                      },
     { "copy",                             OPT_FUNC,   ( void* ) ::parse_player                      },
+#if 0
     { "armory",                           OPT_DEPRECATED,   ( void* ) ::parse_armory                      },
     { "guild",                            OPT_DEPRECATED,   ( void* ) ::parse_armory                      },
     { "wowhead",                          OPT_DEPRECATED,   ( void* ) ::parse_wowhead                     },
     { "wowreforge",                       OPT_DEPRECATED,   ( void* ) ::parse_wowreforge                  },
+#endif
     { "http_clear_cache",                 OPT_FUNC,   ( void* ) ::http_t::clear_cache               },
     { "cache_items",                      OPT_FUNC,   ( void* ) ::parse_cache                       },
     { "cache_players",                    OPT_FUNC,   ( void* ) ::parse_cache                       },

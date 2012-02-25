@@ -105,7 +105,7 @@ static void print_text_action( FILE* file, stats_t* s, int max_name_length=0 )
 
 static void print_text_actions( FILE* file, player_t* p )
 {
-  if ( ! p -> glyphs_str.empty() ) util_t::fprintf( file, "  Glyphs: %s\n", p -> glyphs_str.c_str() );
+  // if ( ! p -> glyphs_str.empty() ) util_t::fprintf( file, "  Glyphs: %s\n", p -> glyphs_str.c_str() );
 
   util_t::fprintf( file, "  Priorities:\n" );
 

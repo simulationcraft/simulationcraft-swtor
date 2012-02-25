@@ -3574,7 +3574,6 @@ struct item_t
   bool parse_options();
   void encode_options();
   bool decode_stats();
-  bool decode_gems();
   bool decode_enchant();
   bool decode_addon();
   bool decode_special( special_effect_t&, const std::string& encoding );
@@ -3595,9 +3594,13 @@ struct item_t
                              const std::string& rsuffix_id,
                              const std::string gem_ids[ 3 ] );
   static bool download_item( item_t&, const std::string& item_id );
+
+#if 0
+  bool decode_gems();
   static bool download_glyph( player_t* player, std::string& glyph_name, const std::string& glyph_id );
   static int  parse_gem( item_t&            item,
                          const std::string& gem_id );
+#endif
 };
 
 // Item database ============================================================
@@ -3611,8 +3614,6 @@ struct item_database_t
                                       const std::string& rsuffix_id,
                                       const std::string gem_ids[ 3 ] );
   static bool     download_item(      item_t& item, const std::string& item_id );
-  static bool     download_glyph(     player_t* player, std::string& glyph_name, const std::string& glyph_id );
-  static int      parse_gem(          item_t& item, const std::string& gem_id );
   static bool     initialize_item_sources( const item_t& item, std::vector<std::string>& source_list );
 
   static int      random_suffix_type( const item_t& item );
@@ -3625,10 +3626,16 @@ struct item_database_t
   static uint32_t weapon_dmg_max(     const item_data_t*, const dbc_t& );
 
   static bool     load_item_from_data( item_t& item, const item_data_t* item_data );
+
+  static bool     parse_enchant(      item_t& item, const std::string& enchant_id );
+
+#if 0
+  static bool     download_glyph(     player_t* player, std::string& glyph_name, const std::string& glyph_id );
+  static int      parse_gem(          item_t& item, const std::string& gem_id );
   static bool     parse_gems(         item_t&            item,
                                       const item_data_t* item_data,
                                       const std::string  gem_ids[ 3 ] );
-  static bool     parse_enchant(      item_t& item, const std::string& enchant_id );
+#endif
 };
 
 // Set Bonus ================================================================
@@ -3658,7 +3665,7 @@ private:
 struct player_t : public noncopyable
 {
   sim_t*      sim;
-  std::string name_str, talents_str, glyphs_str, id_str, target_str;
+  std::string name_str, talents_str, id_str, target_str;
   std::string region_str, server_str, origin_str;
   player_t*   next;
   int         index;
@@ -3893,11 +3900,9 @@ struct player_t : public noncopyable
   std::string thumbnail_url;
 
   // Gear
-  std::string items_str, meta_gem_str;
+  std::string items_str;
   std::vector<item_t> items;
   gear_stats_t stats, initial_stats, gear, enchant, temporary;
-  int meta_gem;
-  bool matching_gear;
 
   // Scale Factors
   gear_stats_t scaling;
@@ -3982,10 +3987,8 @@ struct player_t : public noncopyable
 
   virtual targetdata_t* new_targetdata( player_t* source, player_t* target );
   virtual void init();
-  //virtual void init_glyphs();
   virtual void init_base() = 0;
   virtual void init_items();
-  virtual void init_meta_gem( gear_stats_t& );
   virtual void init_core();
   virtual void init_position();
   virtual void init_race();
@@ -4430,14 +4433,15 @@ struct stats_t
 struct action_t
 {
   class attack_policy_t;
+  typedef const attack_policy_t* policy_t;
 
-  static const attack_policy_t* default_policy;
-  static const attack_policy_t* melee_policy;
-  static const attack_policy_t* range_policy;
-  static const attack_policy_t* force_policy;
-  static const attack_policy_t* tech_policy;
-  static const attack_policy_t* force_heal_policy;
-  static const attack_policy_t* tech_heal_policy;
+  static policy_t default_policy;
+  static policy_t melee_policy;
+  static policy_t range_policy;
+  static policy_t force_policy;
+  static policy_t tech_policy;
+  static policy_t force_heal_policy;
+  static policy_t tech_heal_policy;
 
   sim_t* const sim;
   const int type;
@@ -4445,7 +4449,7 @@ struct action_t
   player_t* const player;
   player_t* target;
   uint32_t id;
-  const attack_policy_t* attack_policy;
+  policy_t attack_policy;
   school_type school;
   int resource, tree, result, aoe;
   bool dual, callbacks, channeled, background, sequence, use_off_gcd;
@@ -4534,7 +4538,7 @@ private:
   void init_action_t_();
 
 public:
-  action_t( int type, const char* name, player_t* p=0, const attack_policy_t* policy=default_policy,
+  action_t( int type, const char* name, player_t* p=0, policy_t policy=default_policy,
             int r=RESOURCE_NONE, const school_type s=SCHOOL_NONE, int t=TREE_NONE );
   virtual ~action_t();
   void init_dot( const std::string& dot_name );
@@ -4643,7 +4647,7 @@ struct heal_t : public action_t
 {
   bool group_only;
 
-  heal_t( const char* n=0, player_t* p=0, const attack_policy_t* policy=default_policy,
+  heal_t( const char* n=0, player_t* p=0, policy_t policy=default_policy,
           int r=RESOURCE_NONE, school_type s=SCHOOL_NONE, int t=TREE_NONE );
 
   virtual void player_buff();
@@ -4661,7 +4665,7 @@ struct heal_t : public action_t
 
 struct absorb_t : public action_t
 {
-  absorb_t( const char* n=0, player_t* p=0, const attack_policy_t* policy=default_policy,
+  absorb_t( const char* n=0, player_t* p=0, policy_t policy=default_policy,
             int r=RESOURCE_NONE, const school_type s=SCHOOL_NONE, int t=TREE_NONE );
 
   virtual void player_buff();
@@ -5192,6 +5196,7 @@ bool str_to_float( const std::string& src, double& dest );
 
 struct armory_t
 {
+#if 0
   static bool download_guild( sim_t* sim,
                               const std::string& region,
                               const std::string& server,
@@ -5208,11 +5213,13 @@ struct armory_t
                                     cache::behavior_t  b=cache::players() );
   static bool download_slot( item_t&, const std::string& item_id, cache::behavior_t b=cache::items() );
   static bool download_item( item_t&, const std::string& item_id, cache::behavior_t b=cache::items() );
-  static void fuzzy_stats( std::string& encoding, const std::string& description );
   static int  parse_meta_gem( const std::string& description );
+#endif // 0
+  static void fuzzy_stats( std::string& encoding, const std::string& description );
   static std::string& format( std::string& name, int format_type = FORMAT_DEFAULT );
 };
 
+#if 0
 // Battle Net ===============================================================
 
 struct battle_net_t
@@ -5322,6 +5329,7 @@ namespace wowreforge
 {
 player_t* download_player( sim_t* sim, const std::string& id, cache::behavior_t b=cache::players() );
 };
+#endif // 0
 
 // Knotor ===================================================================
 

@@ -9,10 +9,9 @@ namespace { // ANONYMOUS NAMESPACE ==========================================
 
 // is_number ================================================================
 
-static bool is_number( const std::string s )
+bool is_number( const std::string s )
 {
-  int size = ( int ) s.size();
-  for ( int i=0; i < size; i++ )
+  for ( std::string::size_type i=0, e=s.size(); i < e; ++i )
     if ( ! isdigit( s[ i ] ) )
       return false;
   return true;
@@ -20,14 +19,14 @@ static bool is_number( const std::string s )
 
 // stat_search ==============================================================
 
-static void stat_search( std::string&              encoding_str,
-                         std::vector<std::string>& description_tokens,
-                         int                       stat_type,
-                         const std::string&        stat_str )
+void stat_search( std::string&              encoding_str,
+                  std::vector<std::string>& description_tokens,
+                  int                       stat_type,
+                  const std::string&        stat_str )
 {
   std::vector<std::string> stat_tokens;
   int num_stats = util_t::string_split( stat_tokens, stat_str, " " );
-  int num_descriptions = ( int ) description_tokens.size();
+  int num_descriptions = description_tokens.size();
 
   for ( int i=0; i < num_descriptions; i++ )
   {
@@ -84,7 +83,7 @@ static void stat_search( std::string&              encoding_str,
 
 // is_proc_description ======================================================
 
-static bool is_proc_description( const std::string& description_str )
+bool is_proc_description( const std::string& description_str )
 {
   if ( description_str.find( "chance" ) != std::string::npos ) return true;
   if ( description_str.find( "stack"  ) != std::string::npos ) return true;
@@ -98,6 +97,7 @@ static bool is_proc_description( const std::string& description_str )
   return false;
 }
 
+#if 0
 // download_character_sheet =================================================
 
 static xml_node_t* download_character_sheet( sim_t* sim,
@@ -560,6 +560,7 @@ static bool parse_item_weapon( item_t& item,
 
   return true;
 }
+#endif // 0
 
 } // ANONYMOUS NAMESPACE ===================================================
 
@@ -604,6 +605,7 @@ void armory_t::fuzzy_stats( std::string&       encoding_str,
   stat_search( encoding_str, splits, STAT_BLOCK_RATING,   "block_rating" );
 }
 
+#if 0
 // armory_t::parse_meta_gem =================================================
 
 int armory_t::parse_meta_gem( const std::string& /* description */ )
@@ -848,26 +850,6 @@ player_t* armory_t::download_player( sim_t* sim,
       p -> talents_str = "http://www.torhead.com/skill-calc#";
       p -> talents_str += util_t::player_type_string( p -> type );
       p -> talents_str += "-" + talents_encoding;
-
-      p -> glyphs_str = "";
-      std::vector<xml_node_t*> glyph_nodes;
-      int num_glyphs = xml_t::get_nodes( glyph_nodes, active_talents, "glyph" );
-      for ( int i=0; i < num_glyphs; i++ )
-      {
-        std::string glyph_name;
-        if ( ! xml_t::get_value( glyph_name, glyph_nodes[ i ], "name" ) )
-        {
-          sim -> errorf( "Player %s unable to determine glyph name from armory xml.\n", p -> name() );
-          return 0;
-        }
-        if ( !glyph_name.compare( 0, 9, "Glyph of " ) )
-          glyph_name.erase( 0, 9 ); // remove "Glyph of "
-        else if ( !glyph_name.compare( 0, 8, "Glyph - " ) )
-          glyph_name.erase( 0, 8 ); // remove "Glyph - "
-        armory_t::format( glyph_name );
-        if ( i ) p -> glyphs_str += "/";
-        p -> glyphs_str += glyph_name;
-      }
     }
   }
 
@@ -1047,6 +1029,7 @@ bool armory_t::download_item( item_t& item,
 
   return true;
 }
+#endif // 0
 
 // armory_t::format =========================================================
 
@@ -1114,4 +1097,3 @@ std::string& armory_t::format( std::string& name, int format_type )
 
   return name;
 }
-

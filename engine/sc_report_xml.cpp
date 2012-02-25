@@ -394,6 +394,7 @@ void print_xml_player_attribute( xml_writer_t & writer, const std::string & attr
 
 void print_xml_player_actions( xml_writer_t & writer, player_t* p )
 {
+#if 0
   writer.begin_tag( "glyphs" );
   std::vector<std::string> glyph_names;
   int num_glyphs = util_t::string_split( glyph_names, p -> glyphs_str.c_str(), "/" );
@@ -404,6 +405,7 @@ void print_xml_player_actions( xml_writer_t & writer, player_t* p )
     writer.end_tag(); // </glyph>
   }
   writer.end_tag(); // </glyphs>
+#endif
 
   writer.begin_tag( "priorities" );
   std::vector<std::string> action_list;

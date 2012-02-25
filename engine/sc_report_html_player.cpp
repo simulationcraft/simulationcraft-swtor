@@ -1994,6 +1994,8 @@ static void print_html_player_results_spec_gear( FILE* file, sim_t* sim, player_
                enc_url.c_str(),
                enc_url.c_str() );
     }
+
+#if 0
     std::vector<std::string> glyph_names;
     int num_glyphs = util_t::string_split( glyph_names, p -> glyphs_str, ",/" );
     if ( num_glyphs )
@@ -2014,6 +2016,7 @@ static void print_html_player_results_spec_gear( FILE* file, sim_t* sim, player_
                "\t\t\t\t\t\t\t\t</td>\n"
                "\t\t\t\t\t\t\t</tr>\n" );
     }
+#endif
 
     fprintf( file,
              "\t\t\t\t\t\t</table>\n" );

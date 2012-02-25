@@ -5,6 +5,8 @@
 
 #include "simulationcraft.h"
 
+// TODO
+// * Split up action_t.
 
 // ==========================================================================
 // Action
