@@ -3418,6 +3418,9 @@ struct rating_t : public internal::rating_t
                                    std::max( rating, 0.0 ) / std::max( 20, level ) / divisor ) );
   }
 
+  static double absorb_from_rating( double amount, int level )
+  { return swtor_diminishing_return( 0.5, 0.18, level, amount ); }
+
   static double accuracy_from_rating( double amount, int level )
   { return swtor_diminishing_return( 0.3, 0.55, level, amount ); }
 
@@ -3432,6 +3435,9 @@ struct rating_t : public internal::rating_t
 
   static double defense_from_rating( double amount, int level )
   { return swtor_diminishing_return( 0.3, 0.55, level, amount ); }
+
+  static double shield_from_rating( double amount, int level )
+  { return swtor_diminishing_return( 0.5, 0.32, level, amount ); }
 
   static double surge_from_rating( double amount, int level )
   { return swtor_diminishing_return( 0.3, 0.11, level, amount ); }
