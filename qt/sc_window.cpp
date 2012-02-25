@@ -82,6 +82,7 @@ static OptionEntry* getScalingOptions()
     { "Analyze Surge Rating",             "surge",        "Calculate scale factor for Surge Rating"           },
     { "Analyze Power",                    "power",        "Calculate scale factor for Power"                  },
     { "Analyze Force Power",              "force_power",  "Calculate scale factor for Force Power"            },
+    { "Analyze Tech Power",               "tech_power",   "Calculate scale factor for Tech Power"             },
     { "Analyze Weapon DPS",               "wdps",         "Calculate scale factor for Weapon DPS"             },
     { "Analyze Weapon Speed",             "wspeed",       "Calculate scale factor for Weapon Speed"           },
     { "Analyze Off-hand Weapon DPS",      "wohdps",       "Calculate scale factor for Off-hand Weapon DPS"    },

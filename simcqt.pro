@@ -43,7 +43,6 @@ HEADERS += qt/simulationcraftqt.h
 
 SOURCES += engine/sc_action.cpp
 SOURCES += engine/sc_armory.cpp
-SOURCES += engine/sc_attack.cpp
 SOURCES += engine/sc_battle_net.cpp
 SOURCES += engine/sc_bcp_api.cpp
 SOURCES += engine/sc_buff.cpp
@@ -84,7 +83,7 @@ SOURCES += engine/sc_sequence.cpp
 SOURCES += engine/sc_set_bonus.cpp
 SOURCES += engine/sc_shadow_assassin.cpp
 SOURCES += engine/sc_sim.cpp
-SOURCES += engine/sc_spell.cpp
+SOURCES +=
 SOURCES += engine/sc_spell_data.cpp
 SOURCES += engine/sc_stats.cpp
 SOURCES += engine/sc_talent.cpp
