@@ -176,6 +176,27 @@ void rating_t::init( sim_t* sim, dbc_t& dbc, int level, int type )
   }
 }
 
+// rating_t::standardhealth_damage ==========================================
+
+double rating_t::standardhealth_damage( int level )
+{ return get_standard_health( level ).damage; }
+
+// rating_t::standardhealth_healing =========================================
+
+double rating_t::standardhealth_healing( int level )
+{ return get_standard_health( level ).healing; }
+
+// rating_t::get_base_health ================================================
+
+int rating_t::get_base_health( int level )
+{
+  unsigned index = level;
+  if ( index >= sizeof( base_health_table ) / sizeof( base_health_table[ 0 ] ) )
+    index = 0;
+  return base_health_table[ index ];
+}
+
+#if 0
 // rating_t::interpolate ====================================================
 
 double rating_t::interpolate( int    level,
@@ -253,23 +274,4 @@ double rating_t::get_attribute_base( sim_t* /* sim */, dbc_t& dbc, int level, pl
 
   return res;
 }
-
-// rating_t::standardhealth_damage ==========================================
-
-double rating_t::standardhealth_damage( int level )
-{ return get_standard_health( level ).damage; }
-
-// rating_t::standardhealth_healing =========================================
-
-double rating_t::standardhealth_healing( int level )
-{ return get_standard_health( level ).healing; }
-
-// rating_t::get_base_health ================================================
-
-int rating_t::get_base_health( int level )
-{
-  unsigned index = level;
-  if ( index >= sizeof( base_health_table ) / sizeof( base_health_table[ 0 ] ) )
-    index = 0;
-  return base_health_table[ index ];
-}
+#endif // 0

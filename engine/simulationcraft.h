@@ -3407,8 +3407,6 @@ struct rating_t : public internal::rating_t
 
   void init( sim_t*, dbc_t& pData, int level, int type );
 
-  static double interpolate( int level, double val_60, double val_70, double val_80, double val_85 = -1 );
-  static double get_attribute_base( sim_t*, dbc_t& pData, int level, player_type class_type, race_type race, base_stat_type stat_type );
   static double standardhealth_damage( int level );
   static double standardhealth_healing( int level );
   static int get_base_health( int level );
@@ -3439,6 +3437,11 @@ struct rating_t : public internal::rating_t
     ( void )attacker_level; ( void )defender_level;
     return 1.0;
   }
+
+#if 0
+  static double interpolate( int level, double val_60, double val_70, double val_80, double val_85 = -1 );
+  static double get_attribute_base( sim_t*, dbc_t& pData, int level, player_type class_type, race_type race, base_stat_type stat_type );
+#endif
 };
 
 // Weapon ===================================================================
