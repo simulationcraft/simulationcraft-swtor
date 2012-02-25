@@ -158,6 +158,7 @@ void scaling_t::init_deltas()
 
   if ( stats.power == 0 ) stats.power = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
   if ( stats.force_power == 0 ) stats.force_power = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
+  if ( stats.tech_power == 0 )  stats.tech_power  = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
 
   if ( stats.surge_rating == 0 ) stats.surge_rating = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
 

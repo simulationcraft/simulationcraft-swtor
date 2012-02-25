@@ -711,7 +711,7 @@ static void print_html_stats ( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> attribute_buffed[ ATTR_STRENGTH  ],
+             a -> buffed.attribute[ ATTR_STRENGTH  ],
              a -> strength(),
              a -> stats.attribute[ ATTR_STRENGTH  ] );
 
@@ -722,7 +722,7 @@ static void print_html_stats ( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> attribute_buffed[ ATTR_AIM ],
+             a -> buffed.attribute[ ATTR_AIM ],
              a -> aim(),
              a -> stats.attribute[ ATTR_AIM ] );
 
@@ -733,7 +733,7 @@ static void print_html_stats ( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> attribute_buffed[ ATTR_CUNNING ],
+             a -> buffed.attribute[ ATTR_CUNNING ],
              a -> cunning(),
              a -> stats.attribute[ ATTR_CUNNING ] );
 
@@ -744,7 +744,7 @@ static void print_html_stats ( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> attribute_buffed[ ATTR_WILLPOWER  ],
+             a -> buffed.attribute[ ATTR_WILLPOWER  ],
              a -> willpower(),
              a -> stats.attribute[ ATTR_WILLPOWER  ] );
 
@@ -755,7 +755,7 @@ static void print_html_stats ( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> attribute_buffed[ ATTR_ENDURANCE ],
+             a -> buffed.attribute[ ATTR_ENDURANCE ],
              a -> endurance(),
              a -> stats.attribute[ ATTR_ENDURANCE ] );
 
@@ -766,7 +766,7 @@ static void print_html_stats ( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> attribute_buffed[ ATTR_PRESENCE ],
+             a -> buffed.attribute[ ATTR_PRESENCE ],
              a -> presence(),
              a -> stats.attribute[ ATTR_PRESENCE ] );
 
@@ -777,52 +777,63 @@ static void print_html_stats ( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> resource_buffed[ RESOURCE_HEALTH ],
+             a -> buffed.resource[ RESOURCE_HEALTH ],
              a -> resource_max[ RESOURCE_HEALTH ],
              0.0 );
 
     fprintf( file,
-             "\t\t\t\t\t\t\t\t\t<tr>\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Mana</th>\n"
+             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Power</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> resource_buffed[ RESOURCE_MANA   ],
-             a -> resource_max[ RESOURCE_MANA   ],
-             0.0 );
-
-    fprintf( file,
-             "\t\t\t\t\t\t\t\t\t<tr>\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Spell Hit</th>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * a -> buffed_spell_hit,
-             100 * a -> composite_spell_hit(),
-             a -> stats.hit_rating  );
+             a -> buffed.power,
+             a -> composite_power(),
+             a -> stats.power );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Spell Crit</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Force Power</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t</tr>\n",
+             a -> buffed.force_power,
+             a -> composite_force_power(),
+             a -> stats.force_power );
+
+    fprintf( file,
+             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Tech Power</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t</tr>\n",
+             a -> buffed.tech_power,
+             a -> composite_tech_power(),
+             a -> stats.tech_power );
+
+    fprintf( file,
+             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Surge</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * a -> buffed_spell_crit,
-             100 * a -> composite_spell_crit(),
-             a -> stats.crit_rating );
+             100 * a -> buffed_surge,
+             100 * a -> surge_bonus,
+             a -> stats.surge_rating );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr>\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Spell Alacrity</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Alacrity</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * ( 1 - a -> buffed_spell_alacrity ),
-             100 * ( 1 - a -> composite_spell_alacrity() ),
+             100 * ( 1 - a -> buffed.alacrity ),
+             100 * ( 1 - a -> alacrity() ),
              a -> stats.alacrity_rating );
 
     fprintf( file,
@@ -832,8 +843,8 @@ static void print_html_stats ( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * a -> buffed_attack_hit,
-             100 * a -> composite_attack_hit(),
+             100 * a -> buffed.melee_hit,
+             100 * a -> melee_hit_chance(),
              a -> stats.hit_rating );
 
     fprintf( file,
@@ -843,42 +854,35 @@ static void print_html_stats ( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * a -> buffed_attack_crit,
-             100 * a -> composite_attack_crit(),
+             100 * a -> buffed.melee_crit,
+             100 * a -> melee_crit_chance(),
              a -> stats.crit_rating );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr>\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Melee Alacrity</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Range Hit</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * ( 1.0 - a -> buffed_attack_alacrity ),
-             100 * ( 1.0 - a -> composite_attack_alacrity() ),
-             a -> stats.alacrity_rating );
-
-    fprintf( file,
-             "\t\t\t\t\t\t\t\t\t<tr>\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Swing Speed</th>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * ( 1.0 - a -> buffed_attack_speed ),
-             100 * ( 1.0 - a -> composite_attack_speed() ),
-             a -> stats.alacrity_rating );
+             100 * a -> buffed.range_hit,
+             100 * a -> range_hit_chance(),
+             a -> stats.hit_rating  );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Expertise</th>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Range Crit</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * a -> buffed_attack_expertise,
-             100 * a -> composite_attack_expertise(),
-             a -> stats.expertise_rating );
+             100 * a -> buffed.range_crit,
+             100 * a -> range_crit_chance(),
+             a -> stats.crit_rating );
+
+    // Force
+
+    // Tech
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr>\n"
@@ -923,39 +927,6 @@ static void print_html_stats ( FILE* file, player_t* a )
              100 * a -> buffed_block,
              100 * a -> composite_tank_block(),
              a -> stats.block_rating );
-
-    fprintf( file,
-             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Power</th>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> buffed_power,
-             a -> composite_power(),
-             a -> stats.power );
-
-    fprintf( file,
-             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Force Power</th>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> buffed_force_power,
-             a -> composite_force_power(),
-             a -> stats.force_power );
-
-    fprintf( file,
-             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Surge</th>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * a -> buffed_surge,
-             100 * a -> surge_bonus,
-             a -> stats.surge_rating );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t</table>\n"

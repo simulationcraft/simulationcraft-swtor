@@ -61,6 +61,7 @@ void gear_stats_t::add_stat( int    stat,
 
   case STAT_POWER: power += value; break;
   case STAT_FORCE_POWER: force_power += value; break;
+  case STAT_TECH_POWER:  tech_power  += value; break;
 
   case STAT_SURGE_RATING: surge_rating += value; break;
 
@@ -123,6 +124,7 @@ void gear_stats_t::set_stat( int    stat,
 
   case STAT_POWER: power = value; break;
   case STAT_FORCE_POWER: force_power = value; break;
+  case STAT_TECH_POWER:  tech_power  = value; break;
 
   case STAT_SURGE_RATING: surge_rating = value; break;
 
@@ -184,6 +186,7 @@ double gear_stats_t::get_stat( int stat ) const
 
   case STAT_POWER: return power;
   case STAT_FORCE_POWER: return force_power;
+  case STAT_TECH_POWER: return tech_power;
 
   case STAT_SURGE_RATING: return surge_rating;
 

@@ -72,18 +72,11 @@ struct casting_event_t : public raid_event_t
   virtual void start()
   {
     raid_event_t::start();
-    sim -> target -> debuffs.casting -> increment();
     for ( player_t* p = sim -> player_list; p; p = p -> next )
     {
       if ( p -> sleeping ) continue;
       p -> interrupt();
     }
-  }
-
-  virtual void finish()
-  {
-    sim -> target -> debuffs.casting -> decrement();
-    raid_event_t::finish();
   }
 };
 
@@ -318,14 +311,25 @@ struct interrupt_event_t : public raid_event_t
 
 struct damage_event_t : public raid_event_t
 {
+  struct raid_damage_t : public action_t
+  {
+    raid_damage_t( const char* n, player_t* player, const school_type s ) :
+      action_t( ACTION_ATTACK, n, player, force_policy, RESOURCE_NONE, s )
+    {
+      may_crit = false;
+      background = true;
+      trigger_gcd = timespan_t::zero;
+    }
+  };
+
   double amount;
   double amount_range;
-  spell_t* raid_damage;
+  raid_damage_t* raid_damage;
 
   damage_event_t( sim_t* s, const std::string& options_str ) :
     raid_event_t( s, "damage" ), amount( 1 ), amount_range( 0 ), raid_damage( 0 )
   {
-    std::string type_str = "holy";
+    std::string type_str = "energy";
     option_t options[] =
     {
       { "amount",        OPT_FLT, &amount        },
@@ -338,17 +342,6 @@ struct damage_event_t : public raid_event_t
     assert( duration == timespan_t::zero );
 
     name_str = "raid_damage_" + type_str;
-
-    struct raid_damage_t : public spell_t
-    {
-      raid_damage_t( const char* n, player_t* player, const school_type s ) :
-        spell_t( n, player, RESOURCE_NONE, s )
-      {
-        may_crit = false;
-        background = true;
-        trigger_gcd = timespan_t::zero;
-      }
-    };
 
     raid_damage = new raid_damage_t( name_str.c_str(), sim -> target, util_t::parse_school_type( type_str ) );
     raid_damage -> init();
@@ -504,7 +497,7 @@ timespan_t raid_event_t::cooldown_time() const
     {
       time = first;
     }
-    else 
+    else
     {
       time = timespan_t::from_millis( 10 );
     }

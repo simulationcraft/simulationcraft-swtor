@@ -134,10 +134,10 @@ struct discharge_proc_callback_t : public action_callback_t
   {
     if ( rng_type == RNG_DEFAULT ) rng_type = RNG_DISTRIBUTED;
 
-    struct discharge_spell_t : public spell_t
+    struct discharge_spell_t : public action_t
     {
       discharge_spell_t( const char* n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
-        spell_t( n, p, RESOURCE_NONE, s )
+        action_t( ACTION_ATTACK, n, p, force_policy, RESOURCE_NONE, s )
       {
         discharge_proc = true;
         item_proc = true;
@@ -151,10 +151,10 @@ struct discharge_proc_callback_t : public action_callback_t
       }
     };
 
-    struct discharge_attack_t : public attack_t
+    struct discharge_attack_t : public action_t
     {
       discharge_attack_t( const char* n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
-        attack_t( n, p, RESOURCE_NONE, s )
+        action_t( ACTION_ATTACK, n, p, melee_policy, RESOURCE_NONE, s )
       {
         discharge_proc = true;
         item_proc = true;
@@ -251,10 +251,10 @@ struct chance_discharge_proc_callback_t : public action_callback_t
   {
     if ( rng_type == RNG_DEFAULT ) rng_type = RNG_DISTRIBUTED;
 
-    struct discharge_spell_t : public spell_t
+    struct discharge_spell_t : public action_t
     {
       discharge_spell_t( const char* n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
-        spell_t( n, p, RESOURCE_NONE, s )
+        action_t( ACTION_ATTACK, n, p, force_policy, RESOURCE_NONE, s )
       {
         discharge_proc = true;
         item_proc = true;
@@ -269,10 +269,10 @@ struct chance_discharge_proc_callback_t : public action_callback_t
       }
     };
 
-    struct discharge_attack_t : public attack_t
+    struct discharge_attack_t : public action_t
     {
       discharge_attack_t( const char* n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
-        attack_t( n, p, RESOURCE_NONE, s )
+        action_t( ACTION_ATTACK, n, p, melee_policy, RESOURCE_NONE, s )
       {
         discharge_proc = true;
         item_proc = true;
@@ -369,10 +369,10 @@ struct stat_discharge_proc_callback_t : public action_callback_t
     buff = new stat_buff_t( p, n, stat, stat_amount, max_stacks, duration, cooldown, proc_chance );
     buff -> activated = activated;
 
-    struct discharge_spell_t : public spell_t
+    struct discharge_spell_t : public action_t
     {
       discharge_spell_t( const char* n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
-        spell_t( n, p, RESOURCE_NONE, s )
+        action_t( ACTION_ATTACK, n, p, force_policy, RESOURCE_NONE, s )
       {
         discharge_proc = true;
         item_proc = true;
@@ -387,12 +387,12 @@ struct stat_discharge_proc_callback_t : public action_callback_t
       }
     };
 
-    struct discharge_attack_t : public attack_t
+    struct discharge_attack_t : public action_t
     {
       bool no_buffs;
 
       discharge_attack_t( const char* n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
-        attack_t( n, p, RESOURCE_NONE, s )
+        action_t( ACTION_ATTACK, n, p, melee_policy, RESOURCE_NONE, s )
       {
         discharge_proc = true;
         item_proc = true;

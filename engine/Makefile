@@ -71,7 +71,6 @@ SRC = \
 	utf8.h \
 	sc_action.cpp \
 	sc_armory.cpp \
-	sc_attack.cpp \
 	sc_battle_net.cpp \
 	sc_bcp_api.cpp \
 	sc_buff.cpp \
@@ -113,7 +112,6 @@ SRC = \
 	sc_set_bonus.cpp \
 	sc_shadow_assassin.cpp \
 	sc_sim.cpp \
-	sc_spell.cpp \
 	sc_spell_data.cpp \
 	sc_stats.cpp \
 	sc_talent.cpp \

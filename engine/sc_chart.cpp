@@ -97,7 +97,8 @@ static const char* stat_color( int type )
   case STAT_SURGE_RATING:             return class_color( BH_MERCENARY );
   case STAT_WILLPOWER:                return class_color( T_COMMANDO );
   case STAT_POWER:                    return class_color( JEDI_SAGE );
-  case STAT_FORCE_POWER:              return class_text_color( T_VANGUARD);
+  case STAT_FORCE_POWER:              return class_text_color( T_VANGUARD );
+  case STAT_TECH_POWER:               return class_text_color( T_VANGUARD );
   case STAT_HIT_RATING:               return class_color( SITH_JUGGERNAUT );
   case STAT_CRIT_RATING:              return class_color( IA_OPERATIVE );
   case STAT_ALACRITY_RATING:          return class_color( SITH_SORCERER );

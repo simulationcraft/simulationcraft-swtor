@@ -590,7 +590,7 @@ struct weapon_discharge_proc_callback_t : public action_callback_t
   int stacks, max_stacks;
   double fixed_chance, PPM;
   cooldown_t* cooldown;
-  spell_t* spell;
+  action_t* spell;
   proc_t* proc;
   rng_t* rng;
 
@@ -600,10 +600,10 @@ struct weapon_discharge_proc_callback_t : public action_callback_t
   {
     if ( rng_type == RNG_DEFAULT ) rng_type = RNG_CYCLIC; // default is CYCLIC since discharge should not have duration
 
-    struct discharge_spell_t : public spell_t
+    struct discharge_spell_t : public action_t
     {
       discharge_spell_t( const char* n, player_t* p, double dmg, const school_type s ) :
-        spell_t( n, p, RESOURCE_NONE, s )
+        action_t( ACTION_ATTACK, n, p, force_policy, RESOURCE_NONE, s )
       {
         trigger_gcd = timespan_t::zero;
         dd.base_min = dd.base_max = dmg;

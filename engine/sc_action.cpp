@@ -16,55 +16,90 @@
 class action_t::attack_policy_t
 {
 public:
-  virtual double acccuracy( const player_t& source ) const = 0;
+  virtual double hit_chance( const player_t& source ) const = 0;
   virtual double avoidance( const player_t& target ) const = 0;
   virtual double crit_chance( const player_t& source ) const = 0;
-  virtual double power_bonus( const player_t& source ) const = 0;
-  virtual bool   can_shield() const = 0;
+  virtual double damage_bonus( const player_t& source ) const = 0;
+  virtual bool   is_shieldable() const = 0;
 };
 
 namespace {
 
+class default_policy_t : public action_t::attack_policy_t
+{
+  double hit_chance( const player_t& ) const
+  { return -1; }
+  double avoidance( const player_t& ) const
+  { return 0; }
+  double crit_chance( const player_t&) const
+  { return -1; }
+  double damage_bonus( const player_t& ) const
+  { return 0; }
+  bool is_shieldable() const { return false; }
+};
+
 class physical_policy_t : public action_t::attack_policy_t
 {
 public:
-  bool can_shield() const { return true; }
+  bool is_shieldable() const { return true; }
 };
 
 class melee_policy_t : public physical_policy_t
 {
 public:
-  double accuracy( const player_t& source ) const
-  { return player.composite_melee_hit_chance(); }
-  double power_bonus( const player_t& player ) const
-  { return player.composite_melee_damage_bonus(); }
+  double hit_chance( const player_t& player ) const
+  { return player.melee_hit_chance(); }
+  double avoidance( const player_t& player ) const
+  { return player.melee_avoidance(); }
+  double crit_chance( const player_t& player ) const
+  { return player.melee_crit_chance(); }
+  double damage_bonus( const player_t& player ) const
+  { return player.melee_damage_bonus(); }
 };
 
 class range_policy_t : public physical_policy_t
 {
 public:
-  double power_bonus( const player_t& player ) const
-  { return player.composite_range_damage_bonus(); }
+  double hit_chance( const player_t& player ) const
+  { return player.range_hit_chance(); }
+  double avoidance( const player_t& player ) const
+  { return player.range_avoidance(); }
+  double crit_chance( const player_t& player ) const
+  { return player.range_crit_chance(); }
+  double damage_bonus( const player_t& player ) const
+  { return player.range_damage_bonus(); }
 };
 
 class spell_policy_t : public action_t::attack_policy_t
 {
 public:
-  bool can_shield() const { return false; }
+  bool is_shieldable() const { return false; }
 };
 
 class force_policy_t : public spell_policy_t
 {
 public:
-  double power_bonus( const player_t& player ) const
-  { return player.composite_force_damage_bonus(); }
+  double hit_chance( const player_t& player ) const
+  { return player.force_hit_chance(); }
+  double avoidance( const player_t& player ) const
+  { return player.force_avoidance(); }
+  double crit_chance( const player_t& player ) const
+  { return player.force_crit_chance(); }
+  double damage_bonus( const player_t& player ) const
+  { return player.force_damage_bonus(); }
 };
 
 class tech_policy_t : public spell_policy_t
 {
 public:
-  double power_bonus( const player_t& player ) const
-  { return player.composite_tech_damage_bonus(); }
+  double hit_chance( const player_t& player ) const
+  { return player.tech_hit_chance(); }
+  double avoidance( const player_t& player ) const
+  { return player.tech_avoidance(); }
+  double crit_chance( const player_t& player ) const
+  { return player.tech_crit_chance(); }
+  double damage_bonus( const player_t& player ) const
+  { return player.tech_damage_bonus(); }
 };
 
 class heal_policy_t : public spell_policy_t
@@ -76,16 +111,26 @@ public:
 class force_heal_policy_t : public heal_policy_t
 {
 public:
-  double power_bonus( const player_t& player ) const
-  { return player.composite_force_healing_bonus(); }
+  double hit_chance( const player_t& ) const
+  { return 1.0; }
+  double crit_chance( const player_t& player ) const
+  { return player.force_crit_chance(); }
+  double damage_bonus( const player_t& player ) const
+  { return player.force_healing_bonus(); }
 };
+
 class tech_heal_policy_t : public heal_policy_t
 {
 public:
-  double power_bonus( const player_t& player ) const
-  { return player.composite_tech_healing_bonus(); }
+  double hit_chance( const player_t& ) const
+  { return 1.0; }
+  double crit_chance( const player_t& player ) const
+  { return player.tech_crit_chance(); }
+  double damage_bonus( const player_t& player ) const
+  { return player.tech_healing_bonus(); }
 };
 
+const default_policy_t the_default_policy;
 const melee_policy_t the_melee_policy;
 const range_policy_t the_range_policy;
 const force_policy_t the_force_policy;
@@ -94,6 +139,7 @@ const force_heal_policy_t the_force_heal_policy;
 const tech_heal_policy_t the_tech_heal_policy;
 }
 
+const action_t::attack_policy_t* action_t::default_policy = &the_default_policy;
 const action_t::attack_policy_t* action_t::melee_policy = &the_melee_policy;
 const action_t::attack_policy_t* action_t::range_policy = &the_range_policy;
 const action_t::attack_policy_t* action_t::force_policy = &the_force_policy;
@@ -123,12 +169,6 @@ void action_t::init_action_t_()
   discharge_proc                 = false;
   auto_cast                      = false;
   initialized                    = false;
-  is_basic                       = false; // FIXME: implement this.
-  may_hit                        = true;
-  may_miss                       = false;
-  may_dodge                      = false;
-  may_parry                      = false;
-  may_block                      = false;
   may_crit                       = false;
   tick_may_crit                  = false;
   tick_zero                      = false;
@@ -138,10 +178,14 @@ void action_t::init_action_t_()
   dot_behavior                   = DOT_CLIP;
   ability_lag                    = timespan_t::zero;
   ability_lag_stddev             = timespan_t::zero;
-  min_gcd                        = timespan_t::zero;
+  min_gcd                        = timespan_t::from_seconds( 1.0 );
   trigger_gcd                    = player -> base_gcd;
+
   range                          = -1.0;
-  weapon_power_mod               = 0.0;
+  // Prevent melee from being scheduled when player is moving
+  // FIXME: What is this doing?
+  if ( range < 0 ) range = 5;
+
   base_execute_time              = timespan_t::zero;
   base_tick_time                 = timespan_t::zero;
   base_cost                      = 0.0;
@@ -155,6 +199,7 @@ void action_t::init_action_t_()
   target_hit                     = 0.0;
   target_crit                    = 0.0;
   crit_multiplier                = 1.0;
+  crit_bonus                     = 0.5;
   crit_bonus_multiplier          = 1.0;
   base_dd_adder                  = 0.0;
   player_dd_adder                = 0.0;
@@ -163,14 +208,13 @@ void action_t::init_action_t_()
   resource_consumed              = 0.0;
   direct_dmg                     = 0.0;
   tick_dmg                       = 0.0;
-  snapshot_crit                  = 0.0;
-  snapshot_alacrity              = 1.0;
   num_ticks                      = 0;
   weapon                         = NULL;
   weapon_multiplier              = 1.0;
+  weapon_power_mod               = 0.0;
+  normalize_weapon_speed         = false;
   base_add_multiplier            = 1.0;
   base_aoe_multiplier            = 1.0;
-  normalize_weapon_speed         = false;
   rng_travel                     = NULL;
   stats                          = NULL;
   execute_event                  = NULL;
@@ -256,15 +300,15 @@ void action_t::init_dot( const std::string& name )
 action_t::action_t( int               ty,
                     const char*       n,
                     player_t*         p,
-                    attack_policy_t*  policy,
+                    const attack_policy_t*  policy,
                     int               r,
                     const school_type s,
-                    int               tr,
-                    bool              sp ) :
+                    int               tr ) :
   sim( p -> sim ), type( ty ), name_str( n ),
   player( p ), target( p -> target ), attack_policy( policy ),
-  school( s ), resource( r ), tree( tr ), special( sp )
+  school( s ), resource( r ), tree( tr )
 {
+  assert( policy );
   init_action_t_();
 }
 
@@ -440,7 +484,7 @@ void action_t::parse_options( option_t*          options,
   std::vector<option_t> merged_options;
   option_t::merge( merged_options, options, base_options );
 
-  std::string::size_type cut_pt = options_str.find_first_of( ":" );
+  std::string::size_type cut_pt = options_str.find( ':' );
 
   std::string options_buffer;
   if ( cut_pt != options_str.npos )
@@ -450,7 +494,6 @@ void action_t::parse_options( option_t*          options,
   else options_buffer = options_str;
 
   if ( options_buffer.empty()     ) return;
-  if ( options_buffer.size() == 0 ) return;
 
   if ( ! option_t::parse( sim, name(), merged_options, options_buffer ) )
   {
@@ -496,7 +539,22 @@ timespan_t action_t::gcd() const
   if ( ! harmful && ! player -> in_combat )
     return timespan_t::zero;
 
-  return trigger_gcd;
+  timespan_t t = trigger_gcd;
+
+  if ( t != timespan_t::zero )
+  {
+    // According to http://sithwarrior.com/forums/Thread-SWTOR-formula-list alacrity doesn't reduce the gcd
+    // cast time abilities get a reduced gcd, but instant cast abilities do not
+    // http://sithwarrior.com/forums/Thread-Alacrity-and-the-GCD?pid=9152#pid9152
+    // abilities with base_execute_time > 0 but with time_to_execute=0 ( e.g., because of procs ) don't get
+    // a reduced gcd. Tested visually by Kor, 15/2/2012
+    if ( time_to_execute > timespan_t::zero )
+      t *= alacrity();
+
+    if ( t < min_gcd ) t = min_gcd;
+  }
+
+  return t;
 }
 
 // action_t::travel_time ====================================================
@@ -526,8 +584,8 @@ void action_t::player_buff()
   player_multiplier              = 1.0;
   dd.player_multiplier           = 1.0;
   td.player_multiplier           = 1.0;
-  player_hit                     = 0;
-  player_crit                    = 0;
+  player_hit                     = attack_policy -> hit_chance( *player );
+  player_crit                    = attack_policy -> crit_chance( *player );
   player_dd_adder                = 0;
 
   if ( ! no_buffs )
@@ -539,7 +597,7 @@ void action_t::player_buff()
     td.player_multiplier = p -> composite_player_td_multiplier( school, this );
   }
 
-  player_alacrity = total_alacrity();
+  player_alacrity = alacrity();
 
   if ( sim -> debug )
     log_t::output( sim, "action_t::player_buff: %s hit=%.2f crit=%.2f",
@@ -550,12 +608,22 @@ void action_t::player_buff()
 
 void action_t::target_debuff( player_t* t, int /* dmg_type */ )
 {
-  target_multiplier            = 1.0;
-  target_hit                   = 0;
-  target_crit                  = 0;
-  target_dd_adder              = 0;
-  dd.target_multiplier         = 1.0;
-  td.target_multiplier         = 1.0;
+  target_avoidance     = attack_policy -> avoidance( *t );
+  target_multiplier    = 1.0;
+  target_dd_adder      = 0;
+  dd.target_multiplier = 1.0;
+  td.target_multiplier = 1.0;
+
+  if ( attack_policy -> is_shieldable() )
+  {
+    target_shield      = t -> shield_chance();
+    target_absorb      = t -> shield_absorb();
+  }
+  else
+  {
+    target_shield      = 0;
+    target_absorb      = 0;
+  }
 
   if ( ! no_debuffs )
   {
@@ -564,16 +632,8 @@ void action_t::target_debuff( player_t* t, int /* dmg_type */ )
   }
 
   if ( sim -> debug )
-    log_t::output( sim, "action_t::target_debuff: %s (target=%s) multiplier=%.2f hit=%.2f crit=%.2f",
-                   name(), t -> name(), target_multiplier, target_hit, target_crit );
-}
-
-// action_t::snapshot
-
-void action_t::snapshot()
-{
-  snapshot_crit     = total_crit();
-  snapshot_alacrity = alacrity();
+    log_t::output( sim, "action_t::target_debuff: %s (target=%s) multiplier=%.2f avoid=%.2f shield=%.2f",
+                   name(), t -> name(), target_multiplier, target_avoidance, target_shield );
 }
 
 // action_t::result_is_hit ==================================================
@@ -604,6 +664,7 @@ bool action_t::result_is_miss( int r ) const
 
 double action_t::armor() const
 {
+  // FIXME
   return target -> composite_armor();
 }
 
@@ -626,9 +687,7 @@ double action_t::total_crit_bonus() const
 
 double action_t::total_power() const
 {
-  double power=0;
-
-  power += player -> composite_force_damage_bonus();
+  double power = attack_policy -> damage_bonus( *player );
 
   if ( sim -> debug )
   {
@@ -643,13 +702,13 @@ double action_t::total_power() const
 
 double action_t::calculate_weapon_damage()
 {
-  if ( ! weapon || weapon_multiplier <= 0 ) return 0;
+  if ( ! weapon ) return 0;
 
   double dmg = sim -> range( weapon -> min_dmg, weapon -> max_dmg ) + weapon -> bonus_dmg;
 
   // OH penalty
   if ( weapon -> slot == SLOT_OFF_HAND )
-    dmg *= 0.3;
+    dmg *= 0.3; // FIXME: check this multiplier for SWTOR, Marauder talent will increase it.
 
   if ( sim -> debug )
   {
@@ -699,26 +758,26 @@ double action_t::calculate_tick_damage()
 
 double action_t::calculate_direct_damage( int chain_target )
 {
-  if ( dd.base_max == 0 && weapon_multiplier == 0 && dd.power_mod == 0 ) return 0;
+  if ( dd.base_max == 0 && weapon == 0 && dd.power_mod == 0 ) return 0;
 
   double dmg = sim -> range( dd.base_min, dd.base_max );
 
   if ( round_base_dmg ) dmg = floor( dmg + 0.5 );
 
   double base_direct_dmg = dmg;
-  double weapon_dmg = 0;
 
   dmg += base_dd_adder + player_dd_adder + target_dd_adder;
+  dmg += dd.power_mod * total_power();
 
-  if ( weapon_multiplier > - 1.00 )
+  double weapon_dmg = 0;
+  if ( weapon )
   {
     // x% weapon damage + Y
     // e.g. Obliterate, Shred, Backstab
-    dmg += calculate_weapon_damage();
-    dmg *= ( 1 + weapon_multiplier );
-    weapon_dmg = dmg;
+    weapon_dmg = calculate_weapon_damage() * ( 1 + weapon_multiplier );
+    dmg += weapon_dmg;
   }
-  dmg += dd.power_mod * total_power();
+
   dmg *= total_dd_multiplier();
 
   double init_direct_dmg = dmg;
@@ -768,44 +827,44 @@ void action_t::consume_resource()
 
 // action_t::available_targets ==============================================
 
-size_t action_t::available_targets( std::vector< player_t* >& tl ) const
+std::vector<player_t*> action_t::available_targets() const
 {
   // TODO: This does not work for heals at all, as it presumes enemies in the
   // actor list.
 
-  tl.push_back( target );
+  std::vector<player_t*> tl;
+
+  if ( target )
+    tl.push_back( target );
+
+  bool harmful = ( type != ACTION_HEAL ) && ( type != ACTION_ABSORB );
 
   for ( size_t i = 0; i < sim -> actor_list.size(); i++ )
   {
-    if ( ! sim -> actor_list[ i ] -> sleeping &&
-         ( ( type == ACTION_HEAL && !sim -> actor_list[ i ] -> is_enemy() ) || ( type != ACTION_HEAL && sim -> actor_list[ i ] -> is_enemy() ) ) &&
-         sim -> actor_list[ i ] != target )
-      tl.push_back( sim -> actor_list[ i ] );
+    player_t& t = *sim -> actor_list[ i ];
+    if ( ! t.sleeping && ( harmful == t.is_enemy() ) && &t != target )
+      tl.push_back( &t );
   }
 
-  return tl.size();
+  return tl;
 }
 
 // action_t::target_list ====================================================
 
-std::vector< player_t* > action_t::target_list() const
+std::vector<player_t*> action_t::target_list() const
 {
   // A very simple target list for aoe spells, pick any and all targets, up to
   // aoe amount, or if aoe == -1, pick all (enemy) targets
 
-  std::vector< player_t* > t;
+  std::vector<player_t*> t = available_targets();
 
-  size_t total_targets = available_targets( t );
-
-  if ( aoe == -1 || total_targets <= static_cast< size_t >( aoe + 1 ) )
-    return t;
-  // Drop out targets from the end
-  else
+  if ( aoe != -1 && t.size() > static_cast< size_t >( aoe + 1 ) )
   {
+    // Drop out targets from the end
     t.resize( aoe + 1 );
-
-    return t;
   }
+
+  return t;
 }
 
 // action_t::execute ========================================================
@@ -824,7 +883,7 @@ void action_t::execute()
                    player -> resource_current[ player -> primary_resource() ] );
   }
 
-  if ( harmful && ! player -> in_combat )
+  if ( unlikely( harmful && ! player -> in_combat ) )
   {
     if ( sim -> debug )
       log_t::output( sim, "%s enters combat.", player -> name() );
@@ -834,7 +893,7 @@ void action_t::execute()
 
   player_buff();
 
-  if ( aoe == -1 || aoe > 0 )
+  if ( aoe )
   {
     std::vector< player_t* > tl = target_list();
 
@@ -869,6 +928,54 @@ void action_t::execute()
   if ( ! dual ) stats -> add_execute( time_to_execute );
 
   if ( repeating && ! proc ) schedule_execute();
+
+  if ( harmful && callbacks )
+  {
+    if ( result != RESULT_NONE )
+      action_callback_t::trigger( player -> attack_callbacks[ result ], this );
+
+    if ( ! background ) // OnSpellCast
+      action_callback_t::trigger( player -> attack_callbacks[ RESULT_NONE ], this );
+  }
+}
+
+// action_t::calculate_result ===============================================
+
+void action_t::calculate_result()
+{
+  direct_dmg = 0;
+  result = RESULT_NONE;
+
+  if ( ! harmful ) return;
+
+  // First roll: Accuracy vs. Defense determines if attack lands
+  double random = sim -> real();
+  double accuracy = 1.0 + total_hit();
+
+  if ( random < accuracy - target_avoidance )
+    result = RESULT_HIT;
+  else if ( random < accuracy )
+  {
+    // Treat all avoidance as dodge for now
+    result = RESULT_DODGE;
+  }
+  else
+    result = RESULT_MISS;
+
+  assert( result != RESULT_NONE );
+
+  if ( result_is_hit() )
+  {
+    // Second roll: Crit vs. Shield chance
+    random = sim -> real();
+
+    if ( random < total_crit() )
+      result = RESULT_CRIT;
+    else if ( random > 1.0 - target_shield )
+      result = RESULT_BLOCK;
+  }
+
+  if ( sim -> debug ) log_t::output( sim, "%s result for %s is %s", player -> name(), name(), util_t::result_type_string( result ) );
 }
 
 // action_t::tick ===========================================================
@@ -881,18 +988,12 @@ void action_t::tick( dot_t* d )
 
   player_buff(); // 23/01/2012 According to http://sithwarrior.com/forums/Thread-Madness-Balance-Sorcerer-DPS-Compendium--573?pid=11311#pid11311
 
-  player_tick();
-
   target_debuff( target, type == ACTION_HEAL ? HEAL_OVER_TIME : DMG_OVER_TIME );
 
   if ( tick_may_crit )
   {
-    int delta_level = target -> level - player -> level;
-
-    if ( rng[ RESULT_CRIT ] -> roll( crit_chance( delta_level ) ) )
-    {
+    if ( sim -> roll( total_crit() ) )
       result = RESULT_CRIT;
-    }
   }
 
   tick_dmg = calculate_tick_damage();
@@ -921,7 +1022,7 @@ void action_t::impact( player_t* t, int impact_result, double travel_dmg=0 )
 {
   assess_damage( t, travel_dmg, type == ACTION_HEAL ? HEAL_DIRECT : DMG_DIRECT, impact_result );
 
-  // Set target so aoe dots work
+  // HACK: Set target so aoe dots work
   player_t* orig_target = target;
   target = t;
 
@@ -1035,6 +1136,22 @@ void action_t::additional_damage( player_t* t,
   stats -> add_result( actual_amount, dmg_amount, dmg_type, dmg_result );
 }
 
+// action_t::alacrity =======================================================
+
+double action_t::alacrity() const
+{ return player -> alacrity(); }
+
+// action_t::execute_time ===================================================
+
+timespan_t action_t::execute_time() const
+{
+  if ( unlikely( ! harmful && ! player -> in_combat ) ||
+       base_execute_time == timespan_t::zero )
+    return timespan_t::zero;
+  else
+    return base_execute_time * alacrity();
+}
+
 // action_t::schedule_execute ===============================================
 
 void action_t::schedule_execute()
@@ -1056,29 +1173,6 @@ void action_t::schedule_execute()
     {
       player -> gcd_ready -= sim -> queue_gcd_reduction;
     }
-
-    if ( special && time_to_execute > timespan_t::zero && ! proc )
-    {
-      // While an ability is casting, the auto_attack is paused
-      // So we simply reschedule the auto_attack by the ability's casttime
-      timespan_t time_to_next_hit;
-      // Mainhand
-      if ( player -> main_hand_attack && player -> main_hand_attack -> execute_event )
-      {
-        time_to_next_hit  = player -> main_hand_attack -> execute_event -> occurs();
-        time_to_next_hit -= sim -> current_time;
-        time_to_next_hit += time_to_execute;
-        player -> main_hand_attack -> execute_event -> reschedule( time_to_next_hit );
-      }
-      // Offhand
-      if ( player -> off_hand_attack && player -> off_hand_attack -> execute_event )
-      {
-        time_to_next_hit  = player -> off_hand_attack -> execute_event -> occurs();
-        time_to_next_hit -= sim -> current_time;
-        time_to_next_hit += time_to_execute;
-        player -> off_hand_attack -> execute_event -> reschedule( time_to_next_hit );
-      }
-    }
   }
 }
 
@@ -1088,8 +1182,6 @@ void action_t::schedule_travel( player_t* t )
 {
   time_to_travel = travel_time();
 
-  snapshot();
-
   if ( time_to_travel == timespan_t::zero )
   {
     impact( t, result, direct_dmg );
@@ -1098,7 +1190,8 @@ void action_t::schedule_travel( player_t* t )
   {
     if ( sim -> log )
     {
-      log_t::output( sim, "%s schedules travel (%.2f) for %s", player -> name(), time_to_travel.total_seconds(), name() );
+      log_t::output( sim, "%s schedules travel (%.2f) for %s",
+                     player -> name(), time_to_travel.total_seconds(), name() );
     }
 
     travel_event = new ( sim ) action_travel_event_t( sim, t, this, time_to_travel );
@@ -1212,7 +1305,7 @@ bool action_t::ready()
       return false;
 
   if ( max_alacrity > 0 )
-    if ( ( ( 1.0 / alacrity() ) - 1.0 ) > max_alacrity )
+    if ( ( ( 1.0 / alacrity() ) - 1.0 ) > max_alacrity ) // FIXME: SWTOR
       return false;
 
   if ( sync_action && ! sync_action -> ready() )
@@ -1360,8 +1453,6 @@ void action_t::cancel()
   if ( player -> channeling == this ) player -> channeling = 0;
 
   event_t::cancel( execute_event );
-
-  player -> debuffs.casting -> expire();
 }
 
 // action_t::interrupt ======================================================
@@ -1389,8 +1480,6 @@ void action_t::interrupt_action()
   }
 
   event_t::cancel( execute_event );
-
-  player -> debuffs.casting -> expire();
 }
 
 // action_t::check_talent ===================================================
