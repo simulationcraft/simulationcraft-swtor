@@ -414,6 +414,9 @@ void enemy_t::init_base()
   {
     initial_health_percentage = 100.0;
   }
+
+  // Current best guess
+  base_melee_avoidance = base_range_avoidance = .08;
 }
 
 // enemy_t::init_resources ==================================================

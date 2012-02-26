@@ -139,6 +139,7 @@ struct discharge_proc_callback_t : public action_callback_t
       discharge_spell_t( const char* n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
         action_t( ACTION_ATTACK, n, p, force_policy, RESOURCE_NONE, s )
       {
+        may_crit = ! no_crit;
         discharge_proc = true;
         item_proc = true;
         trigger_gcd = timespan_t::zero;
@@ -156,6 +157,7 @@ struct discharge_proc_callback_t : public action_callback_t
       discharge_attack_t( const char* n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
         action_t( ACTION_ATTACK, n, p, melee_policy, RESOURCE_NONE, s )
       {
+        may_crit = ! no_crit;
         discharge_proc = true;
         item_proc = true;
         trigger_gcd = timespan_t::zero;
@@ -256,6 +258,7 @@ struct chance_discharge_proc_callback_t : public action_callback_t
       discharge_spell_t( const char* n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
         action_t( ACTION_ATTACK, n, p, force_policy, RESOURCE_NONE, s )
       {
+        may_crit = ! no_crit;
         discharge_proc = true;
         item_proc = true;
         trigger_gcd = timespan_t::zero;
@@ -274,6 +277,7 @@ struct chance_discharge_proc_callback_t : public action_callback_t
       discharge_attack_t( const char* n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
         action_t( ACTION_ATTACK, n, p, melee_policy, RESOURCE_NONE, s )
       {
+        may_crit = ! no_crit;
         discharge_proc = true;
         item_proc = true;
         trigger_gcd = timespan_t::zero;
@@ -374,6 +378,7 @@ struct stat_discharge_proc_callback_t : public action_callback_t
       discharge_spell_t( const char* n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
         action_t( ACTION_ATTACK, n, p, force_policy, RESOURCE_NONE, s )
       {
+        may_crit = ! no_crit;
         discharge_proc = true;
         item_proc = true;
         trigger_gcd = timespan_t::zero;
@@ -394,6 +399,7 @@ struct stat_discharge_proc_callback_t : public action_callback_t
       discharge_attack_t( const char* n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
         action_t( ACTION_ATTACK, n, p, melee_policy, RESOURCE_NONE, s )
       {
+        may_crit = ! no_crit;
         discharge_proc = true;
         item_proc = true;
         trigger_gcd = timespan_t::zero;

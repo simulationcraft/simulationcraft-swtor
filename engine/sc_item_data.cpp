@@ -588,7 +588,7 @@ bool item_database_t::download_slot( item_t&            item,
                                      const std::string& addon_id,
                                      const std::string& reforge_id,
                                      const std::string& rsuffix_id,
-                                     const std::string  gem_ids[ 3 ] )
+                                     const std::string  /* gem_ids */ [ 3 ] )
 {
   const item_data_t* item_data = download_common( item, item_id );
   if ( ! item_data )
