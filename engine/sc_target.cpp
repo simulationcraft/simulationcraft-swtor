@@ -32,6 +32,14 @@ struct enemy_t : public player_t
     create_options();
   }
 
+  virtual void init_defense()
+  {
+    player_t::init_defense();
+
+    // Current best guess
+    base_melee_avoidance = base_range_avoidance = .08;
+  }
+
 // target_t::combat_begin ===================================================
 
   virtual void combat_begin()
@@ -413,9 +421,6 @@ void enemy_t::init_base()
   {
     initial_health_percentage = 100.0;
   }
-
-  // Current best guess
-  base_melee_avoidance = base_range_avoidance = .08;
 }
 
 // enemy_t::init_resources ==================================================
