@@ -4055,8 +4055,8 @@ struct player_t : public noncopyable
   virtual double composite_armor() const;
   virtual double composite_armor_multiplier() const;
 
-  virtual double shield_chance() const { return 0; }
-  virtual double shield_absorb() const { return 0; }
+  virtual double shield_chance() const;
+  virtual double shield_absorb() const;
 
   virtual double composite_attribute_multiplier( int attr ) const;
 

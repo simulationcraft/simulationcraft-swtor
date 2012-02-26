@@ -1989,6 +1989,12 @@ double player_t::tech_healing_bonus() const
                         composite_tech_power() );
 }
 
+double player_t::shield_chance() const
+{ return base_shield_chance + rating_t::shield_from_rating( shield_rating, level ); }
+
+double player_t::shield_absorb() const
+{ return base_shield_absorb + rating_t::absorb_from_rating( absorb_rating, level ); }
+
 // player_t::combat_begin ===================================================
 
 void player_t::combat_begin( sim_t* sim )
