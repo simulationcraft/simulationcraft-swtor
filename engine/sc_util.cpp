@@ -966,8 +966,8 @@ const char* util_t::stat_type_abbrev( int stat )
   case STAT_ARMOR:          return "Armor";
   case STAT_BONUS_ARMOR:    return "BArmor";
   case STAT_DEFENSE_RATING: return "Defense";
-  case STAT_SHIELD_RATING:  return "Defense";
-  case STAT_ABSORB_RATING:  return "Defense";
+  case STAT_SHIELD_RATING:  return "Shield";
+  case STAT_ABSORB_RATING:  return "Absorb";
 
   case STAT_POWER: return "Power";
   case STAT_FORCE_POWER: return "Force_Power";
@@ -1035,7 +1035,6 @@ stat_type util_t::parse_stat_type( const std::string& name )
   if ( name == "critstrkrtng"   ) return STAT_CRIT_RATING;
   if ( name == "exprtng"        ) return STAT_EXPERTISE_RATING;
   if ( name == "alacrityrtng"   ) return STAT_ALACRITY_RATING;
-  if ( name == "hitrtng"        ) return STAT_HIT_RATING;
 
   return STAT_NONE;
 }

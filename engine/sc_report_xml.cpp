@@ -671,7 +671,7 @@ void print_xml_player_scale_factors( xml_writer_t & writer, player_t * p )
 
   for ( int i=0; i < STAT_MAX; i++ )
   {
-    if ( p -> scales_with[ i ] != 0 )
+    if ( p -> scales_with[ i ] )
     {
       writer.begin_tag( "stat" );
       writer.print_attribute( "name", util_t::stat_type_abbrev( i ) );

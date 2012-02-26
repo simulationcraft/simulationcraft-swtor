@@ -74,9 +74,9 @@ static OptionEntry* getScalingOptions()
       "Use Positive Deltas Only",         "",         "Normally Hit/Expertise use negative scale factors to show DPS lost by reducing that stat.\n"
       "This option forces a positive scale delta, which is useful for classes with soft caps."
     },
-    { "Analyze Strength",                 "str",          "Calculate scale factor for Strength"               },
+    { "Analyze Strength",                 "strength",     "Calculate scale factor for Strength"               },
     { "Analyze Willpower",                "willpower",    "Calculate scale factor for Willpower"              },
-    { "Analyze Accuracy Rating",          "hit",          "Calculate scale factor for Accuracy Rating"        },
+    { "Analyze Accuracy Rating",          "accuracy",     "Calculate scale factor for Accuracy Rating"        },
     { "Analyze Crit Rating",              "crit",         "Calculate scale factor for Crit Rating"            },
     { "Analyze Alacrity Rating",          "alacrity",     "Calculate scale factor for Alacrity Rating"        },
     { "Analyze Surge Rating",             "surge",        "Calculate scale factor for Surge Rating"           },

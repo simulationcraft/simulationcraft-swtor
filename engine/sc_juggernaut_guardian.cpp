@@ -103,6 +103,10 @@ struct juggernaut_guardian_t : public player_t
     virtual int       primary_role() const;
     virtual void      create_talents();
 
+    virtual void      init_scaling()
+    {
+      scales_with[ STAT_FORCE_POWER ] = true;
+    }
 };
 
 namespace { // ANONYMOUS NAMESPACE ==========================================

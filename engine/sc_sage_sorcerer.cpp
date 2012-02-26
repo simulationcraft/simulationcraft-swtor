@@ -201,6 +201,12 @@ struct sage_sorcerer_t : public player_t
   virtual void      init_rng();
   virtual void      init_actions();
 
+  virtual void      init_scaling()
+  {
+    player_t::init_scaling();
+    scales_with[ STAT_FORCE_POWER ] = true;
+  }
+
   virtual int       primary_resource() const;
   virtual int       primary_role() const;
 
