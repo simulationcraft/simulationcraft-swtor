@@ -490,7 +490,7 @@ player_t::player_t( sim_t*             s,
 
   range::fill( profession, 0 );
 
-  range::fill( scales_with, 0 );
+  range::fill( scales_with, false );
   range::fill( over_cap, 0 );
 
   items.resize( SLOT_MAX );
@@ -1484,47 +1484,27 @@ void player_t::init_scaling()
 
     int role = primary_role();
 
-    int attack = ( ( role == ROLE_ATTACK ) || ( role == ROLE_HYBRID ) || role == ROLE_TANK ) ? 1 : 0;
-    int spell  = ( ( role == ROLE_SPELL  ) || ( role == ROLE_HYBRID ) || ( role == ROLE_HEAL ) ) ? 1 : 0;
-    int tank   = role == ROLE_TANK ? 1 : 0;
+    bool attack = ( role == ROLE_ATTACK || role == ROLE_HYBRID || role == ROLE_TANK );
+    bool spell  = ( role == ROLE_SPELL  || role == ROLE_HYBRID || role == ROLE_HEAL );
+    bool tank   = ( role == ROLE_TANK );
 
-    scales_with[ STAT_STRENGTH  ] = attack;
-    scales_with[ STAT_AIM       ] = 0;
-    scales_with[ STAT_CUNNING   ] = 0;
-    scales_with[ STAT_WILLPOWER ] = spell;
-    scales_with[ STAT_ENDURANCE ] = 0;
-    scales_with[ STAT_PRESENCE  ] = 0;
+    scales_with[ primary_attribute    ] = true;
+    scales_with[ secondary_attribute  ] = true;
 
-    scales_with[ STAT_HEALTH ] = 0;
-    scales_with[ STAT_MANA   ] = 0;
-    scales_with[ STAT_RAGE   ] = 0;
-    scales_with[ STAT_ENERGY ] = 0;
-    scales_with[ STAT_AMMO   ] = 0;
+    scales_with[ STAT_HIT_RATING      ] = attack;
 
-    scales_with[ STAT_EXPERTISE_RATING         ] = 0;
-    scales_with[ STAT_EXPERTISE_RATING2        ] = 0;
+    scales_with[ STAT_CRIT_RATING     ] = true;
+    scales_with[ STAT_ALACRITY_RATING ] = true;
+    scales_with[ STAT_SURGE_RATING    ] = true;
 
-    scales_with[ STAT_HIT_RATING                ] = spell || attack;
-    scales_with[ STAT_CRIT_RATING               ] = spell || attack;
-    scales_with[ STAT_ALACRITY_RATING           ] = spell || attack;
+    scales_with[ STAT_WEAPON_DPS      ] = attack;
 
-    scales_with[ STAT_WEAPON_DPS   ] = attack;
-    scales_with[ STAT_WEAPON_SPEED ] = sim -> weapon_speed_scale_factors ? attack : 0;
+    scales_with[ STAT_ARMOR           ] = tank;
+    scales_with[ STAT_DEFENSE_RATING  ] = tank;
+    scales_with[ STAT_SHIELD_RATING   ] = tank;
+    scales_with[ STAT_ABSORB_RATING   ] = tank;
 
-    scales_with[ STAT_WEAPON_OFFHAND_DPS   ] = 0;
-    scales_with[ STAT_WEAPON_OFFHAND_SPEED ] = 0;
-
-    scales_with[ STAT_ARMOR          ] = tank;
-    scales_with[ STAT_BONUS_ARMOR    ] = 0;
-    scales_with[ STAT_DEFENSE_RATING ] = tank;
-    scales_with[ STAT_SHIELD_RATING ] = tank;
-    scales_with[ STAT_ABSORB_RATING ] = tank;
-
-    scales_with[ STAT_POWER ] = spell || attack;
-    scales_with[ STAT_FORCE_POWER ] = spell || attack;
-    scales_with[ STAT_TECH_POWER ] = spell || attack;
-
-    scales_with[ STAT_SURGE_RATING ] = spell || attack;
+    scales_with[ STAT_POWER           ] = true;
 
     if ( sim -> scaling -> scale_stat != STAT_NONE && scale_player )
     {

@@ -102,6 +102,13 @@ struct marauder_sentinel_t : public player_t
     virtual int       primary_role() const;
     virtual void      create_talents();
 
+    virtual void init_scaling()
+    {
+      player_t::init_scaling();
+      scales_with[ STAT_WEAPON_DPS         ] = true;
+      scales_with[ STAT_WEAPON_OFFHAND_DPS ] = true;
+      scales_with[ STAT_FORCE_POWER        ] = true;
+    }
 };
 
 namespace { // ANONYMOUS NAMESPACE ==========================================
