@@ -978,9 +978,14 @@ void player_t::init_defense()
 
   initial_stats.armor          = gear.armor          + enchant.armor          + ( is_pet() ? 0 : sim -> enchant.armor );
   initial_stats.bonus_armor    = gear.bonus_armor    + enchant.bonus_armor    + ( is_pet() ? 0 : sim -> enchant.bonus_armor );
+  initial_stats.defense_rating = gear.defense_rating + enchant.defense_rating + ( is_pet() ? 0 : sim -> enchant.defense_rating );
+  initial_stats.shield_rating  = gear.shield_rating  + enchant.shield_rating  + ( is_pet() ? 0 : sim -> enchant.shield_rating );
+  initial_stats.absorb_rating  = gear.absorb_rating  + enchant.absorb_rating  + ( is_pet() ? 0 : sim -> enchant.absorb_rating );
 
   initial_armor             = base_armor       + initial_stats.armor;
   initial_bonus_armor       = base_bonus_armor + initial_stats.bonus_armor;
+  initial_shield_rating     = initial_stats.shield_rating;
+  initial_absorb_rating     = initial_stats.absorb_rating;
 
   initial_shield_chance     = base_shield_chance + rating_t::shield_from_rating( initial_shield_rating, level );
   initial_shield_absorb     = base_shield_absorb + rating_t::absorb_from_rating( initial_absorb_rating, level );
