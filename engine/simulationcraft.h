@@ -4596,8 +4596,12 @@ public:
   virtual void   player_buff();
   virtual void   target_debuff( player_t* t, int dmg_type );
   virtual void   calculate_result();
-  virtual bool   result_is_hit ( int r=RESULT_UNKNOWN ) const;
-  virtual bool   result_is_miss( int r=RESULT_UNKNOWN ) const;
+
+  static  bool   result_is_hit ( int r );
+          bool   result_is_hit () const { return action_t::result_is_hit( result ); }
+  static  bool   result_is_miss( int r );
+          bool   result_is_miss() const { return action_t::result_is_miss( result ); }
+
   virtual double calculate_direct_damage( int = 0 );
   virtual double calculate_tick_damage();
   virtual double calculate_weapon_damage();

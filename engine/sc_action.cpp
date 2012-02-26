@@ -634,16 +634,14 @@ void action_t::target_debuff( player_t* t, int /* dmg_type */ )
   }
 
   if ( sim -> debug )
-    log_t::output( sim, "action_t::target_debuff: %s (target=%s) multiplier=%.2f avoid=%.2f shield=%.2f",
-                   name(), t -> name(), target_multiplier, target_avoidance, target_shield );
+    log_t::output( sim, "action_t::target_debuff: %s (target=%s) multiplier=%.2f avoid=%.2f shield=%.2f absorb=%.2f",
+                   name(), t -> name(), target_multiplier, target_avoidance, target_shield, target_absorb );
 }
 
 // action_t::result_is_hit ==================================================
 
-bool action_t::result_is_hit( int r ) const
+bool action_t::result_is_hit( int r )
 {
-  if ( r == RESULT_UNKNOWN ) r = result;
-
   return( r == RESULT_HIT        ||
           r == RESULT_CRIT       ||
           r == RESULT_BLOCK      ||
@@ -652,12 +650,8 @@ bool action_t::result_is_hit( int r ) const
 
 // action_t::result_is_miss =================================================
 
-bool action_t::result_is_miss( int r ) const
-{
-  if ( r == RESULT_UNKNOWN ) r = result;
-
-  return ( r == RESULT_MISS || r == RESULT_AVOID );
-}
+bool action_t::result_is_miss( int r )
+{ return ( r == RESULT_MISS || r == RESULT_AVOID ); }
 
 // action_t::armor ==========================================================
 
