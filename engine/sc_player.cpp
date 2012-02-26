@@ -2102,10 +2102,11 @@ void player_t::combat_begin()
 
   init_resources( true );
 
-  if ( primary_resource() == RESOURCE_MANA )
+  if ( primary_resource() == RESOURCE_FORCE )
   {
-    get_gain( "initial_mana" ) -> add( resource_max[ RESOURCE_MANA ] );
-    get_gain( "initial_mana" ) -> type = RESOURCE_MANA;
+    gain_t* initial_force = get_gain( "initial_force" );
+    initial_force -> type = RESOURCE_FORCE;
+    initial_force -> add( resource_max[ RESOURCE_FORCE ] );
   }
 
   action_sequence = "";
