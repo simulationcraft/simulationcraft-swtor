@@ -3412,12 +3412,14 @@ struct rating_t : public internal::rating_t
   static double standardhealth_healing( int level );
   static int get_base_health( int level );
 
+private:
   static double swtor_diminishing_return( double cap, double divisor, int level, double rating )
   {
     return cap * ( 1.0 - std::pow( ( 1.0 - ( 0.01 / cap ) ),
                                    std::max( rating, 0.0 ) / std::max( 20, level ) / divisor ) );
   }
 
+public:
   static double absorb_from_rating( double amount, int level )
   { return swtor_diminishing_return( 0.5, 0.18, level, amount ); }
 
@@ -3769,13 +3771,19 @@ struct player_t : public noncopyable
   event_t* target_auto_attack;
   double base_armor,       initial_armor,       armor,       buffed_armor;
   double base_bonus_armor, initial_bonus_armor, bonus_armor;
+  double armor_multiplier,  initial_armor_multiplier;
+  double armor_coeff;
+
+  double base_melee_avoidance, initial_melee_avoidance;
+  double base_range_avoidance, initial_range_avoidance;
+  double base_force_avoidance, initial_force_avoidance;
+  double base_tech_avoidance,  initial_tech_avoidance;
+
   double base_miss,        initial_miss,        miss,        buffed_miss;
   double base_dodge,       initial_dodge,       dodge,       buffed_dodge;
   double base_parry,       initial_parry,       parry,       buffed_parry;
   double base_block,       initial_block,       block,       buffed_block;
   double base_block_reduction, initial_block_reduction, block_reduction;
-  double armor_multiplier,  initial_armor_multiplier;
-  double armor_coeff;
 
   // Weapons
   weapon_t main_hand_weapon;
@@ -3783,11 +3791,11 @@ struct player_t : public noncopyable
   weapon_t ranged_weapon;
 
   // Resources
-  double  resource_base   [ RESOURCE_MAX ];
-  double  resource_initial[ RESOURCE_MAX ];
-  double  resource_max    [ RESOURCE_MAX ];
-  double  resource_current[ RESOURCE_MAX ];
-  double  health_per_endurance;
+  double resource_base   [ RESOURCE_MAX ];
+  double resource_initial[ RESOURCE_MAX ];
+  double resource_max    [ RESOURCE_MAX ];
+  double resource_current[ RESOURCE_MAX ];
+  double health_per_endurance;
   uptime_t* primary_resource_cap;
 
   // Replenishment
@@ -3862,6 +3870,8 @@ struct player_t : public noncopyable
 
     double melee_hit,  range_hit,  force_hit,  tech_hit;
     double melee_crit, range_crit, force_crit, tech_crit;
+
+    double melee_avoidance, range_avoidance, force_avoidance, tech_avoidance;
   } buffed;
 
   buff_t*   buff_list;
@@ -4118,16 +4128,20 @@ public:
   virtual double range_avoidance() const;
 
   double force_damage_bonus() const;
-  double force_healing_bonus() const;
   virtual double force_hit_chance() const;
   virtual double force_crit_chance() const;
   virtual double force_avoidance() const;
 
+  double force_healing_bonus() const;
+  virtual double force_healing_crit_chance() const;
+
   double tech_damage_bonus() const;
-  double tech_healing_bonus() const;
   virtual double tech_hit_chance() const;
   virtual double tech_crit_chance() const;
   virtual double tech_avoidance() const;
+
+  double tech_healing_bonus() const;
+  virtual double tech_healing_crit_chance() const;
 
   double get_attribute( attribute_type a ) const;
   double strength() const { return get_attribute( ATTR_STRENGTH ); }

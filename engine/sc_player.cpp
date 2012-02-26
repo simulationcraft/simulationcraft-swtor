@@ -398,17 +398,23 @@ player_t::player_t( sim_t*             s,
   base_tech_power( 0 ),  initial_tech_power( 0 ),  tech_power( 0 ),
   base_energy_regen_per_second( 0 ), base_ammo_regen_per_second( 0 ), base_force_regen_per_second( 0 ),
   position( POSITION_BACK ),
+
   // Defense Mechanics
   target_auto_attack( 0 ),
   base_armor( 0 ),       initial_armor( 0 ),       armor( 0 ),       buffed_armor( 0 ),
   base_bonus_armor( 0 ), initial_bonus_armor( 0 ), bonus_armor( 0 ),
+  armor_multiplier( 1.0 ), initial_armor_multiplier( 1.0 ),
+  armor_coeff( 0 ),
+
+  base_melee_avoidance( .05 ), base_range_avoidance( .05 ),
+  base_force_avoidance( 0 ),   base_tech_avoidance( 0 ),
+
   base_miss( 0 ),        initial_miss( 0 ),        miss( 0 ),        buffed_miss( 0 ),
   base_dodge( 0 ),       initial_dodge( 0 ),       dodge( 0 ),       buffed_dodge( 0 ),
   base_parry( 0 ),       initial_parry( 0 ),       parry( 0 ),       buffed_parry( 0 ),
   base_block( 0 ),       initial_block( 0 ),       block( 0 ),       buffed_block( 0 ),
   base_block_reduction( 0.3 ), initial_block_reduction( 0 ), block_reduction( 0 ),
-  armor_multiplier( 1.0 ), initial_armor_multiplier( 1.0 ),
-  armor_coeff( 0 ),
+
   // Resources
   health_per_endurance( 10 ),
   // Consumables
@@ -970,6 +976,9 @@ void player_t::init_defense()
 {
   if ( sim -> debug ) log_t::output( sim, "Initializing defense for player (%s)", name() );
 
+  base_melee_avoidance = base_range_avoidance = .05;
+  base_force_avoidance = base_tech_avoidance = 0;
+
   if ( type != ENEMY && type != ENEMY_ADD )
     base_dodge = dbc.dodge_base( type );
 
@@ -986,6 +995,11 @@ void player_t::init_defense()
   initial_parry             = base_parry       + initial_stats.parry_rating / rating.parry;
   initial_block             = base_block       + initial_stats.block_rating / rating.block;
   initial_block_reduction   = base_block_reduction;
+
+  initial_melee_avoidance   = base_melee_avoidance + rating_t::defense_from_rating( defense_rating, level );
+  initial_range_avoidance   = base_range_avoidance + rating_t::defense_from_rating( defense_rating, level );
+  initial_force_avoidance   = base_force_avoidance;
+  initial_tech_avoidance    = base_tech_avoidance;
 
   if ( primary_role() == ROLE_TANK ) position = POSITION_FRONT;
 }
@@ -1895,6 +1909,9 @@ double player_t::melee_hit_chance() const
 double player_t::melee_crit_chance() const
 { return default_crit_chance() + melee_crit_from_stats(); }
 
+double player_t::melee_avoidance() const
+{ return base_melee_avoidance + rating_t::defense_from_rating( defense_rating, level ); }
+
 // player_t::range_damage_bonus() ===========================================
 
 double player_t::range_bonus_stats() const
@@ -1917,6 +1934,9 @@ double player_t::range_hit_chance() const
 
 double player_t::range_crit_chance() const
 { return default_crit_chance() + range_crit_from_stats(); }
+
+double player_t::range_avoidance() const
+{ return base_range_avoidance + rating_t::defense_from_rating( defense_rating, level ); }
 
 // player_t::force_damage_bonus() ===========================================
 
@@ -1949,6 +1969,9 @@ double player_t::force_hit_chance() const
 double player_t::force_crit_chance() const
 { return default_crit_chance() + force_crit_from_stats(); }
 
+double player_t::force_avoidance() const
+{ return base_force_avoidance; }
+
 // player_t::tech_damage_bonus() ============================================
 
 double player_t::tech_bonus_stats() const
@@ -1980,6 +2003,9 @@ double player_t::tech_hit_chance() const
 double player_t::tech_crit_chance() const
 { return default_crit_chance() + tech_crit_from_stats(); }
 
+double player_t::tech_avoidance() const
+{ return base_tech_avoidance; }
+
 // player_t::healing_bonus() ================================================
 
 double player_t::healing_bonus( double stats, double multiplier, double extra_power ) const
@@ -1992,6 +2018,9 @@ double player_t::force_healing_bonus_stats() const
 
 double player_t::force_healing_crit_from_stats() const
 { return rating_t::crit_from_stat( willpower(), level ); }
+
+double player_t::force_healing_crit_chance() const
+{ return default_crit_chance() + force_healing_crit_from_stats(); }
 
 double player_t::force_healing_bonus_multiplier() const
 {
@@ -2017,6 +2046,9 @@ double player_t::tech_healing_bonus_stats() const
 
 double player_t::tech_healing_crit_from_stats() const
 { return rating_t::crit_from_stat( cunning(), level ); }
+
+double player_t::tech_healing_crit_chance() const
+{ return default_crit_chance() + tech_healing_crit_from_stats(); }
 
 double player_t::tech_healing_bonus_multiplier() const
 {
@@ -2348,7 +2380,7 @@ void player_t::reset()
 
   potion_used = 0;
 
-  memset( &temporary, 0x00, sizeof( temporary ) );
+  temporary = gear_stats_t();
 }
 
 // player_t::schedule_ready =================================================
@@ -4082,15 +4114,19 @@ struct snapshot_stats_t : public action_t
 
     p -> buffed.melee_hit         = p -> melee_hit_chance();
     p -> buffed.melee_crit        = p -> melee_crit_chance();
+    p -> buffed.melee_avoidance   = p -> melee_avoidance();
 
     p -> buffed.range_hit         = p -> range_hit_chance();
     p -> buffed.range_crit        = p -> range_crit_chance();
+    p -> buffed.range_avoidance   = p -> range_avoidance();
 
     p -> buffed.force_hit         = p -> force_hit_chance();
     p -> buffed.force_crit        = p -> force_crit_chance();
+    p -> buffed.force_avoidance   = p -> force_avoidance();
 
     p -> buffed.tech_hit          = p -> tech_hit_chance();
     p -> buffed.tech_crit         = p -> tech_crit_chance();
+    p -> buffed.tech_avoidance    = p -> tech_avoidance();
 
     p -> buffed_armor       = p -> composite_armor();
     p -> buffed_miss        = p -> composite_tank_miss( SCHOOL_KINETIC );

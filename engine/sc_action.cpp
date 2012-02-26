@@ -116,7 +116,7 @@ public:
   double hit_chance( const player_t& ) const
   { return 1.0; }
   double crit_chance( const player_t& player ) const
-  { return player.force_crit_chance(); }
+  { return player.force_healing_crit_chance(); }
   double damage_bonus( const player_t& player ) const
   { return player.force_healing_bonus(); }
 };
@@ -127,7 +127,7 @@ public:
   double hit_chance( const player_t& ) const
   { return 1.0; }
   double crit_chance( const player_t& player ) const
-  { return player.tech_crit_chance(); }
+  { return player.tech_healing_crit_chance(); }
   double damage_bonus( const player_t& player ) const
   { return player.tech_healing_bonus(); }
 };
