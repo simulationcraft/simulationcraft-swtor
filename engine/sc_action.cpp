@@ -629,7 +629,7 @@ void action_t::target_debuff( player_t* t, int /* dmg_type */ )
 
   if ( ! no_debuffs )
   {
-    if ( t -> debuffs.vulnerable -> up() && ( type == ACTION_SPELL || type == ACTION_ATTACK ) )
+    if ( t -> debuffs.vulnerable -> up() && type == ACTION_ATTACK )
       target_multiplier *= t -> debuffs.vulnerable -> value();
   }
 
