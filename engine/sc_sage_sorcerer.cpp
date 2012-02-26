@@ -237,8 +237,8 @@ struct jedi_sage_spell_t : public action_t
 {
   bool influenced_by_inner_strength;
 
-  jedi_sage_spell_t( const char* n, sage_sorcerer_t* p, const attack_policy_t* policy=force_policy ) :
-    action_t( ACTION_ATTACK, n, p, policy, RESOURCE_FORCE, SCHOOL_KINETIC, TREE_NONE ),
+  jedi_sage_spell_t( const char* n, sage_sorcerer_t* p, school_type s=SCHOOL_KINETIC ) :
+    action_t( ACTION_ATTACK, n, p, force_policy, RESOURCE_FORCE, s, TREE_NONE ),
     influenced_by_inner_strength( true )
   {
     may_crit   = true;
@@ -702,14 +702,12 @@ struct mind_crush_t : public jedi_sage_spell_t
 struct weaken_mind_t : public jedi_sage_spell_t
 {
   weaken_mind_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
-    jedi_sage_spell_t( n.c_str(), p )
+    jedi_sage_spell_t( n.c_str(), p, SCHOOL_INTERNAL )
   {
     static const int ranks[] = { 16, 22, 33, 44, 50 };
     rank_level_list = util_t::array_to_vector( ranks );
 
     parse_options( 0, options_str );
-
-    school = SCHOOL_INTERNAL;
 
     td.standardhealthpercentmin = td.standardhealthpercentmax = .031;
     td.power_mod = 0.31;
@@ -754,13 +752,11 @@ struct turbulence_t : public jedi_sage_spell_t
   jedi_sage_spell_t* tm;
 
   turbulence_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
-    jedi_sage_spell_t( n.c_str(), p )
+    jedi_sage_spell_t( n.c_str(), p, SCHOOL_INTERNAL )
   {
     check_talent( p -> talents.turbulence -> rank() );
 
     parse_options( 0, options_str );
-
-    school = SCHOOL_INTERNAL;
 
     dd.standardhealthpercentmin = .138;
     dd.standardhealthpercentmax = .178;
@@ -810,13 +806,11 @@ struct turbulence_t : public jedi_sage_spell_t
 struct force_in_balance_t : public jedi_sage_spell_t
 {
   force_in_balance_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
-    jedi_sage_spell_t( n.c_str(), p )
+    jedi_sage_spell_t( n.c_str(), p, SCHOOL_INTERNAL )
   {
     check_talent( p -> talents.force_in_balance -> rank() );
 
     parse_options( 0, options_str );
-
-    school = SCHOOL_INTERNAL;
 
     dd.standardhealthpercentmin = .167;
     dd.standardhealthpercentmax = .207;
@@ -848,13 +842,11 @@ struct force_in_balance_t : public jedi_sage_spell_t
 struct sever_force_t : public jedi_sage_spell_t
 {
   sever_force_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
-    jedi_sage_spell_t( n.c_str(), p )
+    jedi_sage_spell_t( n.c_str(), p, SCHOOL_INTERNAL )
   {
     check_talent( p -> talents.sever_force -> rank() );
 
     parse_options( 0, options_str );
-
-    school = SCHOOL_INTERNAL;
 
     td.standardhealthpercentmin = td.standardhealthpercentmax = .031;
     td.power_mod = 0.311;
