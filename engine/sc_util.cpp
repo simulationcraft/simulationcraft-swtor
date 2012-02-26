@@ -499,8 +499,7 @@ const char* util_t::result_type_string( int type )
   {
   case RESULT_NONE:   return "none";
   case RESULT_MISS:   return "miss";
-  case RESULT_DODGE:  return "dodge";
-  case RESULT_PARRY:  return "parry";
+  case RESULT_AVOID:  return "avoid";
   case RESULT_BLOCK:  return "block";
   case RESULT_CRIT:   return "crit";
   case RESULT_HIT:    return "hit";

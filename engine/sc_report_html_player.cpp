@@ -258,16 +258,14 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
            s -> direct_results[ RESULT_CRIT ].actual_amount.max ? s -> direct_results[ RESULT_CRIT ].actual_amount.max : s -> direct_results[ RESULT_HIT ].actual_amount.max,
            s -> direct_results[ RESULT_CRIT ].pct,
            s -> direct_results[ RESULT_MISS ].pct +
-           s -> direct_results[ RESULT_DODGE  ].pct +
-           s -> direct_results[ RESULT_PARRY  ].pct,
+           s -> direct_results[ RESULT_AVOID  ].pct,
            s -> direct_results[ RESULT_BLOCK  ].pct,
            s -> num_ticks,
            s -> tick_results[ RESULT_HIT  ].actual_amount.mean,
            s -> tick_results[ RESULT_CRIT ].actual_amount.mean,
            s -> tick_results[ RESULT_CRIT ].pct,
            s -> tick_results[ RESULT_MISS ].pct +
-           s -> tick_results[ RESULT_DODGE ].pct +
-           s -> tick_results[ RESULT_PARRY ].pct,
+           s -> tick_results[ RESULT_AVOID ].pct,
            100 * s -> total_tick_time.total_seconds() / s -> player -> fight_length.mean );
 
   if ( p -> sim -> report_details )

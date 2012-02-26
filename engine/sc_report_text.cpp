@@ -55,17 +55,11 @@ static void print_text_action( FILE* file, stats_t* s, int max_name_length=0 )
                      s -> direct_results[ RESULT_CRIT ].actual_amount.max,
                      s -> direct_results[ RESULT_CRIT ].pct );
   }
-  if ( s -> direct_results[ RESULT_DODGE ].count.mean > 0 )
+  if ( s -> direct_results[ RESULT_AVOID ].count.mean > 0 )
   {
     util_t::fprintf( file,
-                     "  Dodge=%.1f%%",
-                     s -> direct_results[ RESULT_DODGE ].pct );
-  }
-  if ( s -> direct_results[ RESULT_PARRY ].count.mean > 0 )
-  {
-    util_t::fprintf( file,
-                     "  Parry=%.1f%%",
-                     s -> direct_results[ RESULT_PARRY ].pct );
+                     "  Avoid=%.1f%%",
+                     s -> direct_results[ RESULT_AVOID ].pct );
   }
 
   if ( s -> num_ticks > 0 ) util_t::fprintf( file, "  TickCount=%.0f", s -> num_ticks );

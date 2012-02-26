@@ -656,9 +656,7 @@ bool action_t::result_is_miss( int r ) const
 {
   if ( r == RESULT_UNKNOWN ) r = result;
 
-  return( r == RESULT_MISS   ||
-          r == RESULT_DODGE  ||
-          r == RESULT_PARRY  );
+  return ( r == RESULT_MISS || r == RESULT_AVOID );
 }
 
 // action_t::armor ==========================================================
@@ -956,14 +954,9 @@ void action_t::calculate_result()
   if ( random < accuracy - target_avoidance )
     result = RESULT_HIT;
   else if ( random < accuracy )
-  {
-    // Treat all avoidance as dodge for now
-    result = RESULT_DODGE;
-  }
+    result = RESULT_AVOID;
   else
     result = RESULT_MISS;
-
-  assert( result != RESULT_NONE );
 
   if ( result_is_hit() )
   {

@@ -277,7 +277,7 @@ enum result_type
 {
   RESULT_UNKNOWN=-1,
   RESULT_NONE=0,
-  RESULT_MISS,  RESULT_DODGE, RESULT_PARRY,
+  RESULT_MISS,  RESULT_AVOID,
   RESULT_BLOCK, RESULT_CRIT, RESULT_HIT,
   RESULT_MAX
 };
@@ -286,7 +286,7 @@ enum result_type
 #define RESULT_CRIT_MASK ( (1<<RESULT_CRIT) )
 #define RESULT_MISS_MASK ( (1<<RESULT_MISS) )
 #define RESULT_NONE_MASK ( (1<<RESULT_NONE) )
-#define RESULT_ALL_MASK  -1
+#define RESULT_ALL_MASK  ( -1 )
 
 enum proc_type
 {
