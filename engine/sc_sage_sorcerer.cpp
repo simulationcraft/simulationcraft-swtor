@@ -771,35 +771,34 @@ struct turbulence_t : public jedi_sage_spell_t
     cooldown -> duration = timespan_t::from_seconds( 9.0 );
   }
 
-  virtual void calculate_result()
+  virtual void target_debuff( player_t *t, int dmg_type )
   {
-    jedi_sage_spell_t::calculate_result();
+    jedi_sage_spell_t::target_debuff( t, dmg_type );
 
-    bool t = false;
+    assert( t == target );
+
+    bool increase_crit_chance = false;
     if ( player -> type == JEDI_SAGE )
     {
       jedi_sage_targetdata_t* td = targetdata() -> cast_jedi_sage();
 
       if ( td -> dots_weaken_mind -> ticking )
-      {
-        t = true;
-        result = RESULT_CRIT;
-      }
+        increase_crit_chance = true;
     }
     else if ( player -> type == SITH_SORCERER )
     {
       sith_sorcerer_targetdata_t* td = targetdata() -> cast_sith_sorcerer();
 
       if ( td -> dots_affliction -> ticking )
-      {
-        t = true;
-        result = RESULT_CRIT;
-      }
+        increase_crit_chance = true;
     }
     else
       assert( 0 );
 
-    player -> cast_sage_sorcerer() -> benefits.turbulence -> update( t );
+    player -> cast_sage_sorcerer() -> benefits.turbulence -> update( increase_crit_chance );
+
+    if ( increase_crit_chance )
+      target_crit += 1.0;
   }
 };
 

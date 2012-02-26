@@ -615,6 +615,7 @@ void action_t::target_debuff( player_t* t, int /* dmg_type */ )
   target_dd_adder      = 0;
   dd.target_multiplier = 1.0;
   td.target_multiplier = 1.0;
+  target_crit          = 0;
 
   if ( attack_policy -> is_shieldable() )
   {

@@ -4576,12 +4576,12 @@ private:
   mutable targetdata_t* cached_targetdata;
 
   void init_action_t_();
+  void init_dot( const std::string& dot_name );
 
 public:
   action_t( int type, const char* name, player_t* p=0, policy_t policy=default_policy,
             int r=RESOURCE_NONE, const school_type s=SCHOOL_NONE, int t=TREE_NONE );
   virtual ~action_t();
-  void init_dot( const std::string& dot_name );
 
   //void parse_data();
   //void parse_effect_data( int spell_id, int effect_nr );
@@ -4630,7 +4630,7 @@ public:
 
   double total_multiplier() const { return base_multiplier * player_multiplier * target_multiplier; }
   double total_hit() const        { return base_hit        + player_hit;                            }
-  double total_crit() const       { return base_crit       + player_crit;                           }
+  double total_crit() const       { return base_crit       + player_crit       + target_crit;       }
   double total_crit_bonus() const;
 
   virtual double total_power() const;
