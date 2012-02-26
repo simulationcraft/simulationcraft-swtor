@@ -923,7 +923,6 @@ const char* util_t::stat_type_string( int stat )
 
   case STAT_ARMOR:             return "armor";
   case STAT_BONUS_ARMOR:       return "bonus_armor";
-  case STAT_RESILIENCE_RATING: return "resilience_rating";
   case STAT_DODGE_RATING:      return "dodge_rating";
   case STAT_PARRY_RATING:      return "parry_rating";
   case STAT_DEFENSE_RATING:    return "defense_rating";
@@ -976,7 +975,6 @@ const char* util_t::stat_type_abbrev( int stat )
 
   case STAT_ARMOR:             return "Armor";
   case STAT_BONUS_ARMOR:       return "BArmor";
-  case STAT_RESILIENCE_RATING: return "Resil";
   case STAT_DODGE_RATING:      return "Dodge";
   case STAT_PARRY_RATING:      return "Parry";
 
@@ -1024,7 +1022,6 @@ const char* util_t::stat_type_wowhead( int stat )
 
   case STAT_ARMOR:             return "armor";
   case STAT_BONUS_ARMOR:       return "__armor"; // FIXME! Does wowhead distinguish "bonus" armor?
-  case STAT_RESILIENCE_RATING: return "resilRating";
   case STAT_DODGE_RATING:      return "dodgeRating";
   case STAT_PARRY_RATING:      return "parryRating";
 
@@ -1058,7 +1055,6 @@ stat_type util_t::parse_stat_type( const std::string& name )
   if ( name == "alacrityrtng"   ) return STAT_ALACRITY_RATING;
   if ( name == "hitrtng"        ) return STAT_HIT_RATING;
   if ( name == "parryrtng"      ) return STAT_PARRY_RATING;
-  if ( name == "resiliencertng" ) return STAT_RESILIENCE_RATING;
   if ( util_t::str_compare_ci( name, "__wpds"   ) ) return STAT_WEAPON_DPS;
   if ( util_t::str_compare_ci( name, "__wspeed" ) ) return STAT_WEAPON_SPEED;
 
@@ -1234,7 +1230,6 @@ stat_type util_t::translate_item_mod( int item_mod )
   case ITEM_MOD_HASTE_RATING:        return STAT_ALACRITY_RATING;
   case ITEM_MOD_EXPERTISE_RATING:    return STAT_EXPERTISE_RATING;
   case ITEM_MOD_EXTRA_ARMOR:         return STAT_BONUS_ARMOR;
-  case ITEM_MOD_RESILIENCE_RATING:   return STAT_RESILIENCE_RATING;
   }
 
   return STAT_NONE;
