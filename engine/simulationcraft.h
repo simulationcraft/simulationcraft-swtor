@@ -148,12 +148,14 @@ struct event_t;
 struct gain_t;
 struct item_t;
 struct sage_sorcerer_t;
+struct juggernaut_guardian_t;
 struct js_node_t;
 struct option_t;
 struct pet_t;
 struct player_t;
 struct plot_t;
 struct proc_t;
+struct marauder_sentinel_t;
 struct raid_event_t;
 struct rating_t;
 struct reforge_plot_t;
@@ -383,6 +385,10 @@ enum slot_type   // these enum values should match armory settings
   SLOT_TABARD    = 18,
   SLOT_MAX       = 19
 };
+
+const int64_t DEFAULT_SET_BONUS_SLOT_MASK = ( ( int64_t( 1 ) << SLOT_HEAD )   | ( int64_t( 1 ) << SLOT_CHEST ) |
+                                            ( int64_t( 1 ) << SLOT_HANDS  )   | ( int64_t( 1 ) << SLOT_LEGS )  |
+                                            ( int64_t( 1 ) << SLOT_FEET   )  );
 
 // Tiers 11..14 + PVP
 #define N_TIER 5
@@ -3656,8 +3662,9 @@ struct set_bonus_t
   std::string name;
   std::vector<std::string> filters;
   int count;
+  int64_t slot_mask;
 
-  set_bonus_t( const std::string& name, const std::string& filters=std::string() );
+  set_bonus_t( const std::string& name, const std::string& filters=std::string(), int64_t s_mask=DEFAULT_SET_BONUS_SLOT_MASK );
 
   void init( const player_t& );
 
@@ -4239,6 +4246,10 @@ public:
   static player_t* create_sith_sorcerer( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
   static player_t* create_jedi_shadow( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
   static player_t* create_sith_assassin( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+  static player_t* create_sith_juggernaut( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+  static player_t* create_jedi_guardian( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+  static player_t* create_sith_marauder( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+  static player_t* create_jedi_sentinel( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
   static player_t* create_enemy       ( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
 
   // Raid-wide aura/buff/debuff maintenance
@@ -4256,6 +4267,16 @@ public:
   static void shadow_assassin_combat_begin( sim_t* sim );
   static void shadow_assassin_combat_end  ( sim_t* /* sim */ ) {}
 
+  // Raid-wide Juggernaut|Guardian buff maintenance
+  static void juggernaut_guardian_init        ( sim_t* sim );
+  static void juggernaut_guardian_combat_begin( sim_t* sim );
+  static void juggernaut_guardian_combat_end  ( sim_t* /* sim */ ) {}
+
+  // Raid-wide Warrior|Sentinel buff maintenance
+  static void marauder_sentinel_init        ( sim_t* sim );
+  static void marauder_sentinel_combat_begin( sim_t* sim );
+  static void marauder_sentinel_combat_end  ( sim_t* /* sim */ ) {}
+
   // Raid-wide Enemy buff maintenance
   static void enemy_init        ( sim_t* sim );
   static void enemy_combat_begin( sim_t* sim );
@@ -4266,11 +4287,15 @@ public:
   bool is_add() const { return type == ENEMY_ADD; }
   bool is_sage_sorcerer() const { return ( type == JEDI_SAGE || type == SITH_SORCERER ); }
   bool is_shadow_assassin() const { return ( type == JEDI_SHADOW || type == SITH_ASSASSIN ); }
+  bool is_juggernaut_guardian() const { return ( type == JEDI_GUARDIAN || type == SITH_JUGGERNAUT ); }
+  bool is_marauder_sentinel() const { return ( type == JEDI_SENTINEL || type == SITH_MARAUDER ); }
 
   pet_t* cast_pet() { assert( is_pet() ); return ( pet_t* )this; }
   enemy_t* cast_enemy() { assert( type == ENEMY ); return ( enemy_t*)this; }
   sage_sorcerer_t* cast_sage_sorcerer() { assert( is_sage_sorcerer() ); return ( sage_sorcerer_t*)this; }
   shadow_assassin_t* cast_shadow_assassin() { assert( is_shadow_assassin() ); return ( shadow_assassin_t* )this; }
+  juggernaut_guardian_t* cast_juggernaut_guardian() { assert( is_juggernaut_guardian() ); return ( juggernaut_guardian_t* )this; }
+  marauder_sentinel_t* cast_marauder_sentinel() { assert( is_marauder_sentinel() ); return ( marauder_sentinel_t* )this; }
 
   bool      in_gcd() const { return gcd_ready > sim -> current_time; }
   item_t*   find_item( const std::string& );
@@ -4292,7 +4317,7 @@ public:
   benefit_t*  get_benefit ( const std::string& name );
   uptime_t*   get_uptime  ( const std::string& name );
   rng_t*      get_rng     ( const std::string& name, int type=RNG_DEFAULT );
-  set_bonus_t* get_set_bonus( const std::string& name, std::string filter );
+  set_bonus_t* get_set_bonus( const std::string& name, std::string filter, int64_t slot_filter=DEFAULT_SET_BONUS_SLOT_MASK );
   double      get_player_distance( const player_t* p ) const;
   double      get_position_distance( double m=0, double v=0 ) const;
   action_priority_list_t* get_action_priority_list( const std::string& name );

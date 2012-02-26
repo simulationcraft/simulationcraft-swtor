@@ -1380,19 +1380,19 @@ void action_t::init()
     }
   }
 
-  double standard_rank_damage = rating_t::standardhealth_damage( rank_level );
+  double standard_rank_amount = ( type == ACTION_HEAL || type == ACTION_ABSORB ) ? rating_t::standardhealth_healing( rank_level ) : rating_t::standardhealth_damage( rank_level );
 
   if ( dd.standardhealthpercentmin > 0 )
-    dd.base_min = dd.standardhealthpercentmin * standard_rank_damage;
+    dd.base_min = dd.standardhealthpercentmin * standard_rank_amount;
 
   if ( dd.standardhealthpercentmax > 0 )
-    dd.base_max = dd.standardhealthpercentmax * standard_rank_damage;
+    dd.base_max = dd.standardhealthpercentmax * standard_rank_amount;
 
   if ( td.standardhealthpercentmin > 0 )
-    td.base_min = td.standardhealthpercentmin * standard_rank_damage;
+    td.base_min = td.standardhealthpercentmin * standard_rank_amount;
 
   if ( td.standardhealthpercentmax > 0 )
-    td.base_max = td.standardhealthpercentmax * standard_rank_damage;
+    td.base_max = td.standardhealthpercentmax * standard_rank_amount;
 
   if ( ! sync_str.empty() )
   {

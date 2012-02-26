@@ -86,9 +86,11 @@ SRC = \
 	sc_item.cpp \
 	sc_item_data.cpp \
 	sc_js.cpp \
+	sc_juggernaut_guardian.cpp \
     sc_knotor.cpp \
 	sc_log.cpp \
 	sc_main.cpp \
+	sc_marauder_sentinel.cpp \
 	sc_option.cpp \
 	sc_pet.cpp \
 	sc_player.cpp \

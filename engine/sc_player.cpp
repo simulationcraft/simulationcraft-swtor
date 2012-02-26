@@ -512,6 +512,7 @@ player_t::player_t( sim_t*             s,
 
   if ( reaction_stddev == timespan_t::zero ) reaction_stddev = reaction_mean * 0.25;
 
+
   set_bonus.rakata_force_masters = get_set_bonus( "rakata_force_masters", "tionese_force_masters_/columi_force_masters_/rakata_force_masters_" );
   set_bonus.battlemaster_force_masters = get_set_bonus( "battlemaster_force_masters", "centurion_force_masters_/champion_force_masters_/battlemaster_force_masters_" );
   set_bonus.rakata_stalkers = get_set_bonus( "rakata_stalkers", "tionese_stalkers_/columi_stalkers_/rakata_stalkers_" );
@@ -3696,7 +3697,7 @@ rng_t* player_t::get_rng( const std::string& n, int type )
 
 // player_t::get_set_bonus =======================================================
 
-set_bonus_t* player_t::get_set_bonus( const std::string& name, std::string filter )
+set_bonus_t* player_t::get_set_bonus( const std::string& name, std::string filter, int64_t slot_filter )
 {
   set_bonus_t* sb=0;
 
@@ -3706,7 +3707,7 @@ set_bonus_t* player_t::get_set_bonus( const std::string& name, std::string filte
       return sb;
   }
 
-  sb = new set_bonus_t( name, filter );
+  sb = new set_bonus_t( name, filter, slot_filter );
 
   set_bonus_t** tail = &set_bonus_list;
 
@@ -5525,6 +5526,22 @@ player_t* player_t::create( sim_t*             sim,
   else if ( type == "sith_assassin" )
   {
     return player_t::create_sith_assassin( sim, name, r );
+  }
+  else if ( type == "sith_juggernaut" )
+  {
+    return player_t::create_sith_juggernaut( sim, name, r );
+  }
+  else if ( type == "jedi_guardian" )
+  {
+    return player_t::create_jedi_guardian( sim, name, r );
+  }
+  else if ( type == "sith_marauder" )
+  {
+    return player_t::create_sith_marauder( sim, name, r );
+  }
+  else if ( type == "jedi_sentinel" )
+  {
+    return player_t::create_jedi_sentinel( sim, name, r );
   }
 
   else if ( type == "enemy" )

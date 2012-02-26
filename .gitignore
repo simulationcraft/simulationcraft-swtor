@@ -34,6 +34,7 @@ bin
 int
 .project
 .externalToolBuilders
+.settings
 engine/simc_x64
 .cproject
 Makefile

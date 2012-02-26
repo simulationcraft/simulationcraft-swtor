@@ -12,7 +12,7 @@ actions=stim,type=exotech_resolve
 actions+=/mark_of_power
 actions+=/snapshot_stats
 actions+=/stealth
-actions+=/apply_charge,type=surging
+actions+=/surging_charge
 actions+=/power_potion
 actions+=/recklessness
 actions+=/blackout,if=buff.dark_embrace.down&force<60
