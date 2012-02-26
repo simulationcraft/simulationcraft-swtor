@@ -276,11 +276,11 @@ enum result_type
   RESULT_UNKNOWN=-1,
   RESULT_NONE=0,
   RESULT_MISS,  RESULT_DODGE, RESULT_PARRY,
-  RESULT_BLOCK, RESULT_CRIT_BLOCK, RESULT_CRIT, RESULT_HIT,
+  RESULT_BLOCK, RESULT_CRIT, RESULT_HIT,
   RESULT_MAX
 };
 
-#define RESULT_HIT_MASK  ( (1<<RESULT_BLOCK) | (1<<RESULT_CRIT_BLOCK) | (1<<RESULT_CRIT) | (1<<RESULT_HIT) )
+#define RESULT_HIT_MASK  ( (1<<RESULT_BLOCK) | (1<<RESULT_CRIT) | (1<<RESULT_HIT) )
 #define RESULT_CRIT_MASK ( (1<<RESULT_CRIT) )
 #define RESULT_MISS_MASK ( (1<<RESULT_MISS) )
 #define RESULT_NONE_MASK ( (1<<RESULT_NONE) )
@@ -428,10 +428,10 @@ enum stat_type
   STAT_HIT_RATING, STAT_HIT_RATING2, STAT_CRIT_RATING, STAT_ALACRITY_RATING,
   STAT_WEAPON_DPS, STAT_WEAPON_SPEED,
   STAT_WEAPON_OFFHAND_DPS, STAT_WEAPON_OFFHAND_SPEED,
-  STAT_ARMOR, STAT_BONUS_ARMOR, STAT_DODGE_RATING, STAT_PARRY_RATING,
-  STAT_BLOCK_RATING,
+  STAT_ARMOR, STAT_BONUS_ARMOR,
   STAT_POWER, STAT_FORCE_POWER, STAT_TECH_POWER,
-  STAT_SURGE_RATING, STAT_DEFENSE_RATING,
+  STAT_SURGE_RATING,
+  STAT_DEFENSE_RATING, STAT_SHIELD_RATING, STAT_ABSORB_RATING,
   STAT_MAX
 };
 
@@ -550,9 +550,6 @@ enum power_type
 
 enum rating_type
 {
-  RATING_DODGE = 0,
-  RATING_PARRY,
-  RATING_BLOCK,
   RATING_MELEE_HIT,
   RATING_RANGED_HIT,
   RATING_SPELL_HIT,
@@ -2510,20 +2507,19 @@ struct gear_stats_t
   double hit_rating2;
   double crit_rating;
   double alacrity_rating;
+  double surge_rating;
+  double power;
+  double force_power;
+  double tech_power;
   double weapon_dps;
   double weapon_speed;
   double weapon_offhand_dps;
   double weapon_offhand_speed;
   double armor;
   double bonus_armor;
-  double dodge_rating;
-  double parry_rating;
-  double block_rating;
-  double power;
-  double force_power;
-  double tech_power;
-  double surge_rating;
   double defense_rating;
+  double shield_rating;
+  double absorb_rating;
 };
 }
 
@@ -3397,7 +3393,6 @@ struct rating_t
   double attack_alacrity, attack_hit, attack_crit;
   double ranged_alacrity, ranged_hit,ranged_crit;
   double expertise;
-  double dodge, parry, block;
 };
 }
 
@@ -3743,6 +3738,8 @@ struct player_t : public noncopyable
   double initial_accuracy_rating, accuracy_rating;
   double initial_surge_rating, surge_rating;
   double initial_defense_rating, defense_rating;
+  double initial_shield_rating, shield_rating;
+  double initial_absorb_rating, absorb_rating;
 
   double surge_bonus, buffed_surge;
 
@@ -3771,19 +3768,16 @@ struct player_t : public noncopyable
   event_t* target_auto_attack;
   double base_armor,       initial_armor,       armor,       buffed_armor;
   double base_bonus_armor, initial_bonus_armor, bonus_armor;
-  double armor_multiplier,  initial_armor_multiplier;
+  double armor_multiplier, initial_armor_multiplier;
   double armor_coeff;
+
+  double base_shield_chance, initial_shield_chance;
+  double base_shield_absorb, initial_shield_absorb;
 
   double base_melee_avoidance, initial_melee_avoidance;
   double base_range_avoidance, initial_range_avoidance;
   double base_force_avoidance, initial_force_avoidance;
   double base_tech_avoidance,  initial_tech_avoidance;
-
-  double base_miss,        initial_miss,        miss,        buffed_miss;
-  double base_dodge,       initial_dodge,       dodge,       buffed_dodge;
-  double base_parry,       initial_parry,       parry,       buffed_parry;
-  double base_block,       initial_block,       block,       buffed_block;
-  double base_block_reduction, initial_block_reduction, block_reduction;
 
   // Weapons
   weapon_t main_hand_weapon;
@@ -3868,9 +3862,10 @@ struct player_t : public noncopyable
 
     double power, force_power, tech_power;
 
+    double shield_chance, shield_absorb;
+
     double melee_hit,  range_hit,  force_hit,  tech_hit;
     double melee_crit, range_crit, force_crit, tech_crit;
-
     double melee_avoidance, range_avoidance, force_avoidance, tech_avoidance;
   } buffed;
 
@@ -4062,14 +4057,6 @@ struct player_t : public noncopyable
 
   virtual double shield_chance() const { return 0; }
   virtual double shield_absorb() const { return 0; }
-
-  virtual double composite_tank_miss( const school_type school ) const;
-  virtual double composite_tank_dodge()            const;
-  virtual double composite_tank_parry()            const;
-  virtual double composite_tank_block()            const;
-  virtual double composite_tank_block_reduction()  const;
-  virtual double composite_tank_crit_block()            const;
-  virtual double composite_tank_crit( const school_type school ) const;
 
   virtual double composite_attribute_multiplier( int attr ) const;
 
@@ -5729,4 +5716,3 @@ struct ability_t : public action_t
 #endif
 
 #endif // __SIMULATIONCRAFT_H
-

@@ -154,9 +154,6 @@ void rating_t::init( sim_t* sim, dbc_t& dbc, int level, int type )
     ranged_hit        = max;
     ranged_crit       = max;
     expertise         = max;
-    dodge             = max;
-    parry             = max;
-    block             = max;
   }
   else
   {
@@ -170,9 +167,6 @@ void rating_t::init( sim_t* sim, dbc_t& dbc, int level, int type )
     ranged_hit        = dbc.combat_rating( RATING_RANGED_HIT,   level );
     ranged_crit       = dbc.combat_rating( RATING_RANGED_CRIT,  level );
     expertise         = dbc.combat_rating( RATING_EXPERTISE,    level );
-    dodge             = dbc.combat_rating( RATING_DODGE,        level );
-    parry             = dbc.combat_rating( RATING_PARRY,        level );
-    block             = dbc.combat_rating( RATING_BLOCK,        level );
   }
 }
 

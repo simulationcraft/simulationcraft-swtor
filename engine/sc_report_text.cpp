@@ -339,12 +339,15 @@ static void print_text_melee_stats( FILE* file, player_t* p )
 static void print_text_defense_stats( FILE* file, player_t* p )
 {
   util_t::fprintf( file,
-                   "  Defense Stats:  armor=%.0f|%.0f(%.0f) miss=%.2f%%|%.2f%%  dodge=%.2f%%|%.2f%%(%.0f)  parry=%.2f%%|%.2f%%(%.0f)  block=%.2f%%|%.2f%%(%.0f)\n",
+                   "  Defense Stats:  armor=%.0f|%.0f(%.0f)  rating=%.0f  melee=%.2f%%|%.2f%%  range=%.2f%%|%.2f%%  force=%.2f%%|%.2f%% tech=%.2f%%|%.2f%%  shield=%.2f%%|%.2f%%(%.0f)  absorb=%.2f%%|%.2f%%(%.0f)\n",
                    p -> buffed_armor,       p -> composite_armor(), ( p -> stats.armor + p -> stats.bonus_armor ),
-                   100 * p -> buffed_miss,  100 * ( p -> composite_tank_miss( SCHOOL_KINETIC ) ),
-                   100 * p -> buffed_dodge, 100 * p -> composite_tank_dodge(), p -> stats.dodge_rating,
-                   100 * p -> buffed_parry, 100 * p -> composite_tank_parry(), p -> stats.parry_rating,
-                   100 * p -> buffed_block, 100 * p -> composite_tank_block(), p -> stats.block_rating );
+                   p -> stats.defense_rating,
+                   100 * p -> buffed.melee_avoidance, 100 * p -> melee_avoidance(),
+                   100 * p -> buffed.range_avoidance, 100 * p -> range_avoidance(),
+                   100 * p -> buffed.force_avoidance, 100 * p -> force_avoidance(),
+                   100 * p -> buffed.tech_avoidance,  100 * p -> tech_avoidance(),
+                   100 * p -> buffed.shield_chance,   100 * p -> shield_chance(), p -> stats.shield_rating,
+                   100 * p -> buffed.shield_absorb,   100 * p -> shield_absorb(), p -> stats.absorb_rating );
 }
 
 // print_text_gains =========================================================

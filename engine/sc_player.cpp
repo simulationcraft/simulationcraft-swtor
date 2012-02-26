@@ -6,8 +6,6 @@
 #include "simulationcraft.h"
 
 // TODO
-// * Implement defense_rating, melee_avoidance(), range_avoidance(),
-//   force_avoidance(), tech_avoidance().
 // * Move all of the buffed_XXX stats into player_t::buffed.
 
 namespace { // ANONYMOUS NAMESPACE ==========================================
@@ -390,6 +388,8 @@ player_t::player_t( sim_t*             s,
   initial_accuracy_rating( 0 ), accuracy_rating( 0 ),
   initial_surge_rating( 0 ), surge_rating( 0 ),
   initial_defense_rating( 0 ), defense_rating( 0 ),
+  initial_shield_rating( 0 ), shield_rating( 0 ),
+  initial_absorb_rating( 0 ), absorb_rating( 0 ),
   surge_bonus( 0 ), buffed_surge( 0 ),
   primary_attribute( ATTRIBUTE_NONE ), secondary_attribute( ATTRIBUTE_NONE ),
   // Spell Mechanics
@@ -406,14 +406,10 @@ player_t::player_t( sim_t*             s,
   armor_multiplier( 1.0 ), initial_armor_multiplier( 1.0 ),
   armor_coeff( 0 ),
 
+  base_shield_chance( 0 ), base_shield_absorb( 0 ),
+
   base_melee_avoidance( .05 ), base_range_avoidance( .05 ),
   base_force_avoidance( 0 ),   base_tech_avoidance( 0 ),
-
-  base_miss( 0 ),        initial_miss( 0 ),        miss( 0 ),        buffed_miss( 0 ),
-  base_dodge( 0 ),       initial_dodge( 0 ),       dodge( 0 ),       buffed_dodge( 0 ),
-  base_parry( 0 ),       initial_parry( 0 ),       parry( 0 ),       buffed_parry( 0 ),
-  base_block( 0 ),       initial_block( 0 ),       block( 0 ),       buffed_block( 0 ),
-  base_block_reduction( 0.3 ), initial_block_reduction( 0 ), block_reduction( 0 ),
 
   // Resources
   health_per_endurance( 10 ),
@@ -979,22 +975,14 @@ void player_t::init_defense()
   base_melee_avoidance = base_range_avoidance = .05;
   base_force_avoidance = base_tech_avoidance = 0;
 
-  if ( type != ENEMY && type != ENEMY_ADD )
-    base_dodge = dbc.dodge_base( type );
-
   initial_stats.armor          = gear.armor          + enchant.armor          + ( is_pet() ? 0 : sim -> enchant.armor );
   initial_stats.bonus_armor    = gear.bonus_armor    + enchant.bonus_armor    + ( is_pet() ? 0 : sim -> enchant.bonus_armor );
-  initial_stats.dodge_rating   = gear.dodge_rating   + enchant.dodge_rating   + ( is_pet() ? 0 : sim -> enchant.dodge_rating );
-  initial_stats.parry_rating   = gear.parry_rating   + enchant.parry_rating   + ( is_pet() ? 0 : sim -> enchant.parry_rating );
-  initial_stats.block_rating   = gear.block_rating   + enchant.block_rating   + ( is_pet() ? 0 : sim -> enchant.block_rating );
 
   initial_armor             = base_armor       + initial_stats.armor;
   initial_bonus_armor       = base_bonus_armor + initial_stats.bonus_armor;
-  initial_miss              = base_miss;
-  initial_dodge             = base_dodge       + initial_stats.dodge_rating / rating.dodge;
-  initial_parry             = base_parry       + initial_stats.parry_rating / rating.parry;
-  initial_block             = base_block       + initial_stats.block_rating / rating.block;
-  initial_block_reduction   = base_block_reduction;
+
+  initial_shield_chance     = base_shield_chance + rating_t::shield_from_rating( initial_shield_rating, level );
+  initial_shield_absorb     = base_shield_absorb + rating_t::absorb_from_rating( initial_absorb_rating, level );
 
   initial_melee_avoidance   = base_melee_avoidance + rating_t::defense_from_rating( defense_rating, level );
   initial_range_avoidance   = base_range_avoidance + rating_t::defense_from_rating( defense_rating, level );
@@ -1527,11 +1515,9 @@ void player_t::init_scaling()
 
     scales_with[ STAT_ARMOR          ] = tank;
     scales_with[ STAT_BONUS_ARMOR    ] = 0;
-    scales_with[ STAT_DODGE_RATING   ] = 0;
-    scales_with[ STAT_PARRY_RATING   ] = 0;
     scales_with[ STAT_DEFENSE_RATING ] = tank;
-
-    scales_with[ STAT_BLOCK_RATING ] = 0;
+    scales_with[ STAT_SHIELD_RATING ] = tank;
+    scales_with[ STAT_ABSORB_RATING ] = tank;
 
     scales_with[ STAT_POWER ] = spell || attack;
     scales_with[ STAT_FORCE_POWER ] = spell || attack;
@@ -1559,6 +1545,8 @@ void player_t::init_scaling()
       case STAT_SURGE_RATING:    initial_surge_rating    += v; break;
 
       case STAT_DEFENSE_RATING:  initial_defense_rating  += v; break;
+      case STAT_SHIELD_RATING:   initial_shield_rating   += v; break;
+      case STAT_ABSORB_RATING:   initial_absorb_rating   += v; break;
 
       case STAT_HIT_RATING:      initial_accuracy_rating += v; break;
       case STAT_CRIT_RATING:     initial_crit_rating     += v; break;
@@ -1630,10 +1618,6 @@ void player_t::init_scaling()
 
       case STAT_ARMOR:          initial_armor       += v; break;
       case STAT_BONUS_ARMOR:    initial_bonus_armor += v; break;
-      case STAT_DODGE_RATING:   initial_dodge       += v / rating.dodge; break;
-      case STAT_PARRY_RATING:   initial_parry       += v / rating.parry; break;
-
-      case STAT_BLOCK_RATING:   initial_block       += v / rating.block; break;
 
       case STAT_MAX: break;
 
@@ -1726,68 +1710,6 @@ double player_t::composite_armor_multiplier() const
     a *= 0.8;
 
   return a;
-}
-
-// player_t::composite_tank_miss ============================================
-
-double player_t::composite_tank_miss( const school_type /* school */ ) const
-{
-  double m = 0;
-
-  if      ( m > 1.0 ) m = 1.0;
-  else if ( m < 0.0 ) m = 0.0;
-
-  return m;
-}
-
-// player_t::composite_tank_dodge ===========================================
-
-double player_t::composite_tank_dodge() const
-{
-  double d = dodge;
-
-  return d;
-}
-
-// player_t::composite_tank_parry ===========================================
-
-double player_t::composite_tank_parry() const
-{
-  double p = parry;
-
-  return p;
-}
-
-// player_t::composite_tank_block ===========================================
-
-double player_t::composite_tank_block() const
-{
-  double b = block;
-
-  return b;
-}
-
-// player_t::composite_tank_block_reduction =================================
-
-double player_t::composite_tank_block_reduction() const
-{
-  double b = block_reduction;
-
-  return b;
-}
-
-// player_t::composite_tank_crit_block ======================================
-
-double player_t::composite_tank_crit_block() const
-{
-  return 0;
-}
-
-// player_t::composite_tank_crit ============================================
-
-double player_t::composite_tank_crit( const school_type /* school */ ) const
-{
-  return 0;
 }
 
 // player_t::composite_attribute_multiplier =================================
@@ -2297,6 +2219,8 @@ void player_t::reset()
   surge_rating = initial_surge_rating;
   recalculate_surge();
   defense_rating = initial_defense_rating;
+  shield_rating = initial_shield_rating;
+  absorb_rating = initial_absorb_rating;
 
   range::copy( attribute_initial, attribute );
   range::copy( attribute_multiplier_initial, attribute_multiplier );
@@ -2304,10 +2228,6 @@ void player_t::reset()
 
   armor           = initial_armor;
   bonus_armor     = initial_bonus_armor;
-  dodge           = initial_dodge;
-  parry           = initial_parry;
-  block           = initial_block;
-  block_reduction = initial_block_reduction;
 
   power           = initial_power;
   force_power     = initial_force_power;
@@ -3000,12 +2920,20 @@ void player_t::stat_gain( int       stat,
     defense_rating += amount;
     break;
 
+  case STAT_SHIELD_RATING:
+    stats.shield_rating += amount;
+    temporary.shield_rating += temp_value * amount;
+    shield_rating += amount;
+    break;
+
+  case STAT_ABSORB_RATING:
+    stats.absorb_rating += amount;
+    temporary.absorb_rating += temp_value * amount;
+    absorb_rating += amount;
+    break;
+
   case STAT_ARMOR:          stats.armor          += amount; temporary.armor += temp_value * amount; armor       += amount;                  break;
   case STAT_BONUS_ARMOR:    stats.bonus_armor    += amount; bonus_armor += amount;                  break;
-  case STAT_DODGE_RATING:   stats.dodge_rating   += amount; temporary.dodge_rating += temp_value * amount; dodge       += amount / rating.dodge;   break;
-  case STAT_PARRY_RATING:   stats.parry_rating   += amount; temporary.parry_rating += temp_value * amount; parry       += amount / rating.parry;   break;
-
-  case STAT_BLOCK_RATING: stats.block_rating += amount; temporary.block_rating += temp_value * amount; block       += amount / rating.block; break;
 
   default: assert( 0 );
   }
@@ -3091,12 +3019,20 @@ void player_t::stat_loss( int       stat,
     defense_rating       -= amount;
     break;
 
+  case STAT_SHIELD_RATING:
+    stats.shield_rating -= amount;
+    temporary.shield_rating -= temp_value * amount;
+    shield_rating       -= amount;
+    break;
+
+  case STAT_ABSORB_RATING:
+    stats.absorb_rating -= amount;
+    temporary.absorb_rating -= temp_value * amount;
+    absorb_rating       -= amount;
+    break;
+
   case STAT_ARMOR:          stats.armor          -= amount; temporary.armor -= temp_value * amount; armor       -= amount;                  break;
   case STAT_BONUS_ARMOR:    stats.bonus_armor    -= amount; bonus_armor -= amount;                  break;
-  case STAT_DODGE_RATING:   stats.dodge_rating   -= amount; temporary.dodge_rating -= temp_value * amount; dodge       -= amount / rating.dodge;   break;
-  case STAT_PARRY_RATING:   stats.parry_rating   -= amount; temporary.parry_rating -= temp_value * amount; parry       -= amount / rating.parry;   break;
-
-  case STAT_BLOCK_RATING: stats.block_rating -= amount; temporary.block_rating -= temp_value * amount; block       -= amount / rating.block; break;
 
   default: assert( 0 );
   }
@@ -3206,32 +3142,23 @@ double player_t::target_mitigation( double            amount,
 
   double mitigated_amount = amount;
 
-  // TODO: Add Force Valor damage reduction for internal and elemental schools. if ( buffs.force_valor -> up() )
-
   if ( result == RESULT_BLOCK )
   {
-    mitigated_amount *= ( 1 - composite_tank_block_reduction() );
-    if ( mitigated_amount < 0 ) return 0;
+    mitigated_amount *= ( 1 - shield_absorb() );
+    if ( mitigated_amount <= 0 ) return 0;
   }
 
-  if ( result == RESULT_CRIT_BLOCK )
-  {
-    mitigated_amount *= ( 1 - 2 * composite_tank_block_reduction() );
-    if ( mitigated_amount < 0 ) return 0;
-  }
-
+  // TODO: Add Force Valor damage reduction for internal and elemental schools. if ( buffs.force_valor -> up() )
   if ( school == SCHOOL_KINETIC || school == SCHOOL_ENERGY )
   {
 
     // Armor
     if ( action )
     {
+      // FIXME: Armor DR should depend on ATTACKER level, not DEFENDER level.
       double resist = action -> armor() / ( action -> armor() + armor_coeff );
+      resist = std::min( 0.75, std::max( 0.0, resist ) );
 
-      if ( resist < 0.0 )
-        resist = 0.0;
-      else if ( resist > 0.75 )
-        resist = 0.75;
       mitigated_amount *= 1.0 - resist;
 
 
@@ -4130,10 +4057,8 @@ struct snapshot_stats_t : public action_t
     p -> buffed.tech_avoidance    = p -> tech_avoidance();
 
     p -> buffed_armor       = p -> composite_armor();
-    p -> buffed_miss        = p -> composite_tank_miss( SCHOOL_KINETIC );
-    p -> buffed_dodge       = p -> composite_tank_dodge();
-    p -> buffed_parry       = p -> composite_tank_parry();
-    p -> buffed_block       = p -> composite_tank_block();
+    p -> buffed.shield_chance = p -> shield_chance();
+    p -> buffed.shield_absorb = p -> shield_absorb();
 
     double spell_hit_extra=0, attack_hit_extra=0;
 
@@ -5083,14 +5008,13 @@ action_expr_t* player_t::create_expression( action_t* a,
         case STAT_CRIT_RATING:      p_stat = &( a -> player -> temporary.crit_rating                 ); break;
         case STAT_ALACRITY_RATING:  p_stat = &( a -> player -> temporary.alacrity_rating             ); break;
         case STAT_ARMOR:            p_stat = &( a -> player -> temporary.armor                       ); break;
-        case STAT_DODGE_RATING:     p_stat = &( a -> player -> temporary.dodge_rating                ); break;
-        case STAT_PARRY_RATING:     p_stat = &( a -> player -> temporary.parry_rating                ); break;
-        case STAT_BLOCK_RATING:     p_stat = &( a -> player -> temporary.block_rating                ); break;
         case STAT_POWER:            p_stat = &( a -> player -> temporary.power                       ); break;
         case STAT_FORCE_POWER:      p_stat = &( a -> player -> temporary.force_power                 ); break;
         case STAT_TECH_POWER:       p_stat = &( a -> player -> temporary.tech_power                  ); break;
         case STAT_SURGE_RATING:     p_stat = &( a -> player -> temporary.surge_rating                ); break;
         case STAT_DEFENSE_RATING:   p_stat = &( a -> player -> temporary.defense_rating              ); break;
+        case STAT_SHIELD_RATING:    p_stat = &( a -> player -> temporary.shield_rating              ); break;
+        case STAT_ABSORB_RATING:    p_stat = &( a -> player -> temporary.absorb_rating              ); break;
 
         default: assert( 0 ); break;
       }

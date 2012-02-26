@@ -503,7 +503,6 @@ const char* util_t::result_type_string( int type )
   case RESULT_PARRY:  return "parry";
   case RESULT_BLOCK:  return "block";
   case RESULT_CRIT:   return "crit";
-  case RESULT_CRIT_BLOCK: return "crit-block";
   case RESULT_HIT:    return "hit";
   }
   return "unknown";
@@ -914,6 +913,7 @@ const char* util_t::stat_type_string( int stat )
   case STAT_HIT_RATING2:  return "inverse_hit_rating";
   case STAT_CRIT_RATING:  return "crit_rating";
   case STAT_ALACRITY_RATING: return "alacrity_rating";
+  case STAT_SURGE_RATING: return "surge_rating";
 
   case STAT_WEAPON_DPS:   return "weapon_dps";
   case STAT_WEAPON_SPEED: return "weapon_speed";
@@ -923,17 +923,13 @@ const char* util_t::stat_type_string( int stat )
 
   case STAT_ARMOR:             return "armor";
   case STAT_BONUS_ARMOR:       return "bonus_armor";
-  case STAT_DODGE_RATING:      return "dodge_rating";
-  case STAT_PARRY_RATING:      return "parry_rating";
   case STAT_DEFENSE_RATING:    return "defense_rating";
-
-  case STAT_BLOCK_RATING: return "block_rating";
+  case STAT_SHIELD_RATING:     return "shield_rating";
+  case STAT_ABSORB_RATING:     return "absorb_rating";
 
   case STAT_POWER: return "power";
   case STAT_FORCE_POWER: return "forcepower";
   case STAT_TECH_POWER: return "techpower";
-
-  case STAT_SURGE_RATING: return "surge_rating";
 
   case STAT_MAX: return "all";
   }
@@ -959,33 +955,30 @@ const char* util_t::stat_type_abbrev( int stat )
   case STAT_ENERGY: return "Energy";
   case STAT_AMMO:   return "Ammo";
 
-  case STAT_EXPERTISE_RATING:         return "Exp";
-  case STAT_EXPERTISE_RATING2:        return "InvExp";
+  case STAT_EXPERTISE_RATING:  return "Exp";
+  case STAT_EXPERTISE_RATING2: return "InvExp";
 
-  case STAT_HIT_RATING:   return "Hit";
-  case STAT_HIT_RATING2:  return "InvHit";
-  case STAT_CRIT_RATING:  return "Crit";
+  case STAT_HIT_RATING:      return "Hit";
+  case STAT_HIT_RATING2:     return "InvHit";
+  case STAT_CRIT_RATING:     return "Crit";
   case STAT_ALACRITY_RATING: return "Alacrity";
+  case STAT_SURGE_RATING:    return "Surge";
 
   case STAT_WEAPON_DPS:   return "Wdps";
   case STAT_WEAPON_SPEED: return "Wspeed";
 
-  case STAT_WEAPON_OFFHAND_DPS:    return "WOHdps";
-  case STAT_WEAPON_OFFHAND_SPEED:  return "WOHspeed";
+  case STAT_WEAPON_OFFHAND_DPS:   return "WOHdps";
+  case STAT_WEAPON_OFFHAND_SPEED: return "WOHspeed";
 
-  case STAT_ARMOR:             return "Armor";
-  case STAT_BONUS_ARMOR:       return "BArmor";
-  case STAT_DODGE_RATING:      return "Dodge";
-  case STAT_PARRY_RATING:      return "Parry";
-
-  case STAT_BLOCK_RATING: return "BlockR";
+  case STAT_ARMOR:          return "Armor";
+  case STAT_BONUS_ARMOR:    return "BArmor";
+  case STAT_DEFENSE_RATING: return "Defense";
+  case STAT_SHIELD_RATING:  return "Defense";
+  case STAT_ABSORB_RATING:  return "Defense";
 
   case STAT_POWER: return "Power";
   case STAT_FORCE_POWER: return "Force_Power";
   case STAT_TECH_POWER: return "Tech_Power";
-
-  case STAT_SURGE_RATING: return "Surge";
-  case STAT_DEFENSE_RATING: return "Defense";
 
   case STAT_MAX: return "All";
   }
@@ -1011,10 +1004,10 @@ const char* util_t::stat_type_wowhead( int stat )
   case STAT_ENERGY: return "energy";
   case STAT_AMMO:   return "ammo";
 
-  case STAT_EXPERTISE_RATING:         return "expertiseRating";
+  case STAT_EXPERTISE_RATING: return "expertiseRating";
 
-  case STAT_HIT_RATING:   return "hitRating";
-  case STAT_CRIT_RATING:  return "critRating";
+  case STAT_HIT_RATING:      return "hitRating";
+  case STAT_CRIT_RATING:     return "critRating";
   case STAT_ALACRITY_RATING: return "alacrityRating";
 
   case STAT_WEAPON_DPS:   return "__dps";
@@ -1022,8 +1015,6 @@ const char* util_t::stat_type_wowhead( int stat )
 
   case STAT_ARMOR:             return "armor";
   case STAT_BONUS_ARMOR:       return "__armor"; // FIXME! Does wowhead distinguish "bonus" armor?
-  case STAT_DODGE_RATING:      return "dodgeRating";
-  case STAT_PARRY_RATING:      return "parryRating";
 
   case STAT_MAX: return "__all";
   }
@@ -1050,11 +1041,9 @@ stat_type util_t::parse_stat_type( const std::string& name )
 
   // in-case wowhead changes their mind again
   if ( name == "critstrkrtng"   ) return STAT_CRIT_RATING;
-  if ( name == "dodgertng"      ) return STAT_DODGE_RATING;
   if ( name == "exprtng"        ) return STAT_EXPERTISE_RATING;
   if ( name == "alacrityrtng"   ) return STAT_ALACRITY_RATING;
   if ( name == "hitrtng"        ) return STAT_HIT_RATING;
-  if ( name == "parryrtng"      ) return STAT_PARRY_RATING;
   if ( util_t::str_compare_ci( name, "__wpds"   ) ) return STAT_WEAPON_DPS;
   if ( util_t::str_compare_ci( name, "__wspeed" ) ) return STAT_WEAPON_SPEED;
 
@@ -1073,8 +1062,6 @@ stat_type util_t::parse_reforge_type( const std::string& name )
   case STAT_HIT_RATING:
   case STAT_CRIT_RATING:
   case STAT_ALACRITY_RATING:
-  case STAT_DODGE_RATING:
-  case STAT_PARRY_RATING:
     return s;
   default:
     return STAT_NONE;
@@ -1222,9 +1209,6 @@ stat_type util_t::translate_item_mod( int item_mod )
   switch ( item_mod )
   {
   case ITEM_MOD_STRENGTH:            return STAT_STRENGTH;
-  case ITEM_MOD_DODGE_RATING:        return STAT_DODGE_RATING;
-  case ITEM_MOD_PARRY_RATING:        return STAT_PARRY_RATING;
-  case ITEM_MOD_BLOCK_RATING:        return STAT_BLOCK_RATING;
   case ITEM_MOD_HIT_RATING:          return STAT_HIT_RATING;
   case ITEM_MOD_CRIT_RATING:         return STAT_CRIT_RATING;
   case ITEM_MOD_HASTE_RATING:        return STAT_ALACRITY_RATING;

@@ -362,12 +362,6 @@ void print_xml_player_stats( xml_writer_t & writer, player_t * p )
   // FIXME: Tech
   print_xml_player_attribute( writer, "armor",
                               p -> composite_armor(), ( p -> stats.armor + p -> stats.bonus_armor ), p -> buffed_armor );
-  print_xml_player_attribute( writer, "dodge",
-                              100 * p -> composite_tank_dodge(), p -> stats.dodge_rating, 100 * p -> buffed_dodge );
-  print_xml_player_attribute( writer, "parry",
-                              100 * p -> composite_tank_parry(), p -> stats.parry_rating, 100 * p -> buffed_parry );
-  print_xml_player_attribute( writer, "block",
-                              100 * p -> composite_tank_block(), p -> stats.block_rating, 100 * p -> buffed_block );
 
   writer.begin_tag( "resource" );
   writer.print_attribute( "name", "health" );
@@ -376,9 +370,9 @@ void print_xml_player_stats( xml_writer_t & writer, player_t * p )
   writer.end_tag(); // </resource>
 
   writer.begin_tag( "resource" );
-  writer.print_attribute( "name", "mana" );
-  writer.print_attribute( "base", util_t::to_string( p -> resource_max[ RESOURCE_MANA ], 0 ) );
-  writer.print_attribute( "buffed", util_t::to_string( p -> buffed.resource[ RESOURCE_MANA ], 0 ) );
+  writer.print_attribute( "name", "force" );
+  writer.print_attribute( "base", util_t::to_string( p -> resource_max[ RESOURCE_FORCE ], 0 ) );
+  writer.print_attribute( "buffed", util_t::to_string( p -> buffed.resource[ RESOURCE_FORCE ], 0 ) );
   writer.end_tag(); // </resource>
 }
 

@@ -190,10 +190,9 @@ void scaling_t::init_deltas()
 
   // Defensive
   if ( stats.defense_rating == 0 ) stats.defense_rating = scale_delta_multiplier * ( smooth_scale_factors ? 60 : 120 );
+  if ( stats.shield_rating == 0 ) stats.shield_rating = scale_delta_multiplier * ( smooth_scale_factors ? 60 : 120 );
+  if ( stats.absorb_rating == 0 ) stats.absorb_rating = scale_delta_multiplier * ( smooth_scale_factors ? 60 : 120 );
   if ( stats.armor == 0 ) stats.armor = smooth_scale_factors ? 1500 : 3000;
-  if ( stats.dodge_rating  == 0 ) stats.dodge_rating  = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
-  if ( stats.parry_rating  == 0 ) stats.parry_rating  = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
-  if ( stats.block_rating  == 0 ) stats.block_rating  = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
 
 
   if ( stats.weapon_dps            == 0 ) stats.weapon_dps            = scale_delta_multiplier * ( smooth_scale_factors ? 50 : 100 );
@@ -536,6 +535,8 @@ void scaling_t::create_options()
     { "scale_power",                    OPT_FLT,    &( stats.power                          ) },
     { "scale_surge_rating",             OPT_FLT,    &( stats.surge_rating                   ) },
     { "scale_defense_rating",           OPT_FLT,    &( stats.defense_rating                 ) },
+    { "scale_shield_rating",            OPT_FLT,    &( stats.shield_rating                  ) },
+    { "scale_absorb_rating",            OPT_FLT,    &( stats.absorb_rating                  ) },
     { "scale_weapon_dps",               OPT_FLT,    &( stats.weapon_dps                     ) },
     { "scale_weapon_speed",             OPT_FLT,    &( stats.weapon_speed                   ) },
     { "scale_offhand_weapon_dps",       OPT_FLT,    &( stats.weapon_offhand_dps             ) },

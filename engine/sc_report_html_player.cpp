@@ -897,36 +897,25 @@ static void print_html_stats ( FILE* file, player_t* a )
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Tank-Dodge</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Shield</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * a -> buffed_dodge,
-             100 * a -> composite_tank_dodge(),
-             a -> stats.dodge_rating );
+             100 * a -> buffed.shield_chance,
+             100 * a -> shield_chance(),
+             a -> stats.shield_rating );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr>\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Tank-Parry</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Absorb</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * a -> buffed_parry,
-             100 * a -> composite_tank_parry(),
-             a -> stats.parry_rating );
-
-    fprintf( file,
-             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Tank-Block</th>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * a -> buffed_block,
-             100 * a -> composite_tank_block(),
-             a -> stats.block_rating );
+             100 * a -> buffed.shield_absorb,
+             100 * a -> shield_absorb(),
+             a -> stats.absorb_rating );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t</table>\n"

@@ -647,7 +647,6 @@ bool action_t::result_is_hit( int r ) const
   return( r == RESULT_HIT        ||
           r == RESULT_CRIT       ||
           r == RESULT_BLOCK      ||
-          r == RESULT_CRIT_BLOCK ||
           r == RESULT_NONE       );
 }
 
