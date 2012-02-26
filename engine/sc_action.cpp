@@ -22,7 +22,8 @@ public:
   virtual double avoidance( const player_t& target ) const = 0;
   virtual double crit_chance( const player_t& source ) const = 0;
   virtual double damage_bonus( const player_t& source ) const = 0;
-  virtual bool   is_shieldable() const = 0;
+  virtual double shield_chance( const player_t& target ) const = 0;
+  virtual double shield_absorb( const player_t& target ) const = 0;
 };
 
 namespace {
@@ -37,13 +38,19 @@ class default_policy_t : public action_t::attack_policy_t
   { return -1; }
   double damage_bonus( const player_t& ) const
   { return 0; }
-  bool is_shieldable() const { return false; }
+  double shield_chance( const player_t& ) const
+  { return 0; }
+  double shield_absorb( const player_t& ) const
+  { return 0; }
 };
 
 class physical_policy_t : public action_t::attack_policy_t
 {
 public:
-  bool is_shieldable() const { return true; }
+  double shield_chance( const player_t& t ) const
+  { return t.shield_chance(); }
+  double shield_absorb( const player_t& t ) const
+  { return t.shield_absorb(); }
 };
 
 class melee_policy_t : public physical_policy_t
@@ -75,7 +82,10 @@ public:
 class spell_policy_t : public action_t::attack_policy_t
 {
 public:
-  bool is_shieldable() const { return false; }
+  double shield_chance( const player_t& ) const
+  { return 0; }
+  double shield_absorb( const player_t& ) const
+  { return 0; }
 };
 
 class force_policy_t : public spell_policy_t
@@ -611,22 +621,13 @@ void action_t::player_buff()
 void action_t::target_debuff( player_t* t, int /* dmg_type */ )
 {
   target_avoidance     = attack_policy -> avoidance( *t );
+  target_shield        = attack_policy -> shield_chance( *t );
+  target_absorb        = attack_policy -> shield_absorb( *t );
   target_multiplier    = 1.0;
   target_dd_adder      = 0;
   dd.target_multiplier = 1.0;
   td.target_multiplier = 1.0;
   target_crit          = 0;
-
-  if ( attack_policy -> is_shieldable() )
-  {
-    target_shield      = t -> shield_chance();
-    target_absorb      = t -> shield_absorb();
-  }
-  else
-  {
-    target_shield      = 0;
-    target_absorb      = 0;
-  }
 
   if ( ! no_debuffs )
   {
