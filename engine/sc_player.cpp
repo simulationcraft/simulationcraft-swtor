@@ -1504,7 +1504,7 @@ void player_t::init_scaling()
     scales_with[ STAT_EXPERTISE_RATING         ] = 0;
     scales_with[ STAT_EXPERTISE_RATING2        ] = 0;
 
-    scales_with[ STAT_HIT_RATING                ] = 0;
+    scales_with[ STAT_HIT_RATING                ] = spell || attack;
     scales_with[ STAT_CRIT_RATING               ] = spell || attack;
     scales_with[ STAT_ALACRITY_RATING           ] = spell || attack;
 
