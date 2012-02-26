@@ -1490,7 +1490,7 @@ void player_t::init_scaling()
     int role = primary_role();
 
     bool attack = ( role == ROLE_ATTACK || role == ROLE_HYBRID || role == ROLE_TANK );
-    bool spell  = ( role == ROLE_SPELL  || role == ROLE_HYBRID || role == ROLE_HEAL );
+    // bool spell  = ( role == ROLE_SPELL  || role == ROLE_HYBRID || role == ROLE_HEAL );
     bool tank   = ( role == ROLE_TANK );
 
     scales_with[ primary_attribute    ] = true;
