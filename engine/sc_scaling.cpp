@@ -195,19 +195,9 @@ void scaling_t::init_deltas()
   if ( stats.armor == 0 ) stats.armor = smooth_scale_factors ? 1500 : 3000;
 
 
-  if ( stats.weapon_dps            == 0 ) stats.weapon_dps            = scale_delta_multiplier * ( smooth_scale_factors ? 50 : 100 );
-  if ( stats.weapon_offhand_dps    == 0 ) stats.weapon_offhand_dps    = scale_delta_multiplier * ( smooth_scale_factors ? 50 : 100 );
+  if ( stats.weapon_dmg            == 0 ) stats.weapon_dmg            = scale_delta_multiplier * ( smooth_scale_factors ? 50 : 100 );
+  if ( stats.weapon_offhand_dmg    == 0 ) stats.weapon_offhand_dmg    = scale_delta_multiplier * ( smooth_scale_factors ? 50 : 100 );
 
-  if ( sim -> weapon_speed_scale_factors )
-  {
-    if ( stats.weapon_speed          == 0 ) stats.weapon_speed = 0.2;
-    if ( stats.weapon_offhand_speed  == 0 ) stats.weapon_offhand_speed  = 0.2;
-  }
-  else
-  {
-    stats.weapon_speed         = 0;
-    stats.weapon_offhand_speed = 0;
-  }
 }
 
 // scaling_t::analyze_stats =================================================
@@ -537,10 +527,8 @@ void scaling_t::create_options()
     { "scale_defense_rating",           OPT_FLT,    &( stats.defense_rating                 ) },
     { "scale_shield_rating",            OPT_FLT,    &( stats.shield_rating                  ) },
     { "scale_absorb_rating",            OPT_FLT,    &( stats.absorb_rating                  ) },
-    { "scale_weapon_dps",               OPT_FLT,    &( stats.weapon_dps                     ) },
-    { "scale_weapon_speed",             OPT_FLT,    &( stats.weapon_speed                   ) },
-    { "scale_offhand_weapon_dps",       OPT_FLT,    &( stats.weapon_offhand_dps             ) },
-    { "scale_offhand_weapon_speed",     OPT_FLT,    &( stats.weapon_offhand_speed           ) },
+    { "scale_weapon_dmg",               OPT_FLT,    &( stats.weapon_dmg                     ) },
+    { "scale_offhand_weapon_dmg",       OPT_FLT,    &( stats.weapon_offhand_dmg             ) },
     { "scale_only",                     OPT_STRING, &( scale_only_str                       ) },
     { "scale_alacrity_iterations",      OPT_FLT,    &( scale_alacrity_iterations            ) },
     { "scale_expertise_iterations",     OPT_FLT,    &( scale_expertise_iterations           ) },

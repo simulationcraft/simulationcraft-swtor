@@ -914,11 +914,8 @@ const char* util_t::stat_type_string( int stat )
   case STAT_ALACRITY_RATING: return "alacrity_rating";
   case STAT_SURGE_RATING: return "surge_rating";
 
-  case STAT_WEAPON_DPS:   return "weapon_dps";
-  case STAT_WEAPON_SPEED: return "weapon_speed";
-
-  case STAT_WEAPON_OFFHAND_DPS:    return "weapon_offhand_dps";
-  case STAT_WEAPON_OFFHAND_SPEED:  return "weapon_offhand_speed";
+  case STAT_WEAPON_DMG:   return "weapon_dmg";
+  case STAT_WEAPON_OFFHAND_DMG:    return "weapon_offhand_dmg";
 
   case STAT_ARMOR:             return "armor";
   case STAT_BONUS_ARMOR:       return "bonus_armor";
@@ -963,11 +960,8 @@ const char* util_t::stat_type_abbrev( int stat )
   case STAT_ALACRITY_RATING: return "Alacrity";
   case STAT_SURGE_RATING:    return "Surge";
 
-  case STAT_WEAPON_DPS:   return "Wdps";
-  case STAT_WEAPON_SPEED: return "Wspeed";
-
-  case STAT_WEAPON_OFFHAND_DPS:   return "WOHdps";
-  case STAT_WEAPON_OFFHAND_SPEED: return "WOHspeed";
+  case STAT_WEAPON_DMG:   return "Wdmg";
+  case STAT_WEAPON_OFFHAND_DMG:   return "WOHdmg";
 
   case STAT_ARMOR:          return "Armor";
   case STAT_BONUS_ARMOR:    return "BArmor";
@@ -1009,8 +1003,7 @@ const char* util_t::stat_type_wowhead( int stat )
   case STAT_CRIT_RATING:     return "critRating";
   case STAT_ALACRITY_RATING: return "alacrityRating";
 
-  case STAT_WEAPON_DPS:   return "__dps";
-  case STAT_WEAPON_SPEED: return "__speed";
+  case STAT_WEAPON_DMG:   return "__dmg";
 
   case STAT_ARMOR:             return "armor";
   case STAT_BONUS_ARMOR:       return "__armor"; // FIXME! Does wowhead distinguish "bonus" armor?
@@ -1043,8 +1036,6 @@ stat_type util_t::parse_stat_type( const std::string& name )
   if ( name == "exprtng"        ) return STAT_EXPERTISE_RATING;
   if ( name == "alacrityrtng"   ) return STAT_ALACRITY_RATING;
   if ( name == "hitrtng"        ) return STAT_HIT_RATING;
-  if ( util_t::str_compare_ci( name, "__wpds"   ) ) return STAT_WEAPON_DPS;
-  if ( util_t::str_compare_ci( name, "__wspeed" ) ) return STAT_WEAPON_SPEED;
 
   return STAT_NONE;
 }

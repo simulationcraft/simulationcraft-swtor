@@ -1110,24 +1110,12 @@ bool item_t::decode_weapon()
     {
       w -> school = school;
     }
-    else if ( t.name == "dps" )
-    {
-      if ( ! dmg_set )
-      {
-        w -> dps = t.value;
-        dps_set = true;
-      }
-    }
     else if ( t.name == "damage" || t.name == "dmg" )
     {
       w -> damage  = t.value;
       w -> min_dmg = t.value;
       w -> max_dmg = t.value;
       dmg_set = true;
-    }
-    else if ( t.name == "speed" || t.name == "spd" )
-    {
-      w -> swing_time = timespan_t::from_seconds( t.value );
     }
     else if ( t.name == "min" )
     {
@@ -1167,9 +1155,6 @@ bool item_t::decode_weapon()
       return false;
     }
   }
-
-  if ( dps_set ) w -> damage = w -> dps    * w -> swing_time.total_seconds();
-  if ( dmg_set ) w -> dps    = w -> damage / w -> swing_time.total_seconds();
 
   if ( ! max_set || ! min_set )
   {

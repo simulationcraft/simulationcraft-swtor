@@ -1761,10 +1761,8 @@ const char* chart_t::gear_weights_lootrank( std::string& s,
     case STAT_CRIT_RATING:              name = "mcr";  break;
     case STAT_ALACRITY_RATING:          name = "Ala";  break;
     case STAT_ARMOR:                    name = "Arm";  break;
-    case STAT_WEAPON_DPS:               name = "dps";  break;
-    case STAT_WEAPON_OFFHAND_DPS:       name = "odps"; break;
-    case STAT_WEAPON_SPEED:             name = "msp"; break;
-    case STAT_WEAPON_OFFHAND_SPEED:     name = "osp"; break;
+    case STAT_WEAPON_DMG:               name = "mh_dmg";  break;
+    case STAT_WEAPON_OFFHAND_DMG:       name = "oh_dmg"; break;
     }
 
     if ( name )
@@ -1819,7 +1817,6 @@ const char* chart_t::gear_weights_wowhead( std::string& s,
     case STAT_CRIT_RATING:              id = 96;  break;
     case STAT_ALACRITY_RATING:          id = 103; break;
     case STAT_ARMOR:                    id = 41;  break;
-    case STAT_WEAPON_DPS:               id = 32;  break;
     }
 
     if ( id )
@@ -1941,7 +1938,6 @@ const char* chart_t::gear_weights_pawn( std::string& s,
     case STAT_CRIT_RATING:              name = "CritRating";       if ( value*20 > maxY ) maxY = value*20; break;
     case STAT_ALACRITY_RATING:          name = "AlacrityRating";   if ( value*20 > maxY ) maxY = value*20; break;
     case STAT_ARMOR:                    name = "Armor";            break;
-    case STAT_WEAPON_DPS:               name = "MeleeDps";  break;
     }
 
     if ( name )

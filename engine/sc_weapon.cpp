@@ -44,31 +44,3 @@ int weapon_t::group() const
   }
   return WEAPON_NONE;
 }
-
-// weapon_t::normalized_weapon_speed ========================================
-
-timespan_t weapon_t::normalized_weapon_speed() const
-{
-  int g = group();
-
-  if ( g == WEAPON_SMALL  ) return timespan_t::from_seconds( 1.7 );
-  if ( g == WEAPON_1H     ) return timespan_t::from_seconds( 2.4 );
-  if ( g == WEAPON_2H     ) return timespan_t::from_seconds( 3.3 );
-  if ( g == WEAPON_RANGED ) return timespan_t::from_seconds( 2.8 );
-
-  assert( 0 );
-  return timespan_t::zero;
-}
-
-// weapon_t::proc_chance_on_swing ===========================================
-
-double weapon_t::proc_chance_on_swing( double PPM,
-                                       timespan_t adjusted_swing_time ) const
-{
-  if ( adjusted_swing_time == timespan_t::zero ) adjusted_swing_time = swing_time;
-
-  timespan_t time_to_proc = timespan_t::from_seconds( 60.0 ) / PPM;
-  double proc_chance = adjusted_swing_time / time_to_proc;
-
-  return proc_chance;
-}

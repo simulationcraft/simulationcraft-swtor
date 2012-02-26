@@ -432,8 +432,8 @@ enum stat_type
   STAT_MAX_HEALTH, STAT_MAX_MANA, STAT_MAX_RAGE, STAT_MAX_ENERGY, STAT_MAX_AMMO,
   STAT_EXPERTISE_RATING, STAT_EXPERTISE_RATING2,
   STAT_HIT_RATING, STAT_HIT_RATING2, STAT_CRIT_RATING, STAT_ALACRITY_RATING,
-  STAT_WEAPON_DPS, STAT_WEAPON_SPEED,
-  STAT_WEAPON_OFFHAND_DPS, STAT_WEAPON_OFFHAND_SPEED,
+  STAT_WEAPON_DMG,
+  STAT_WEAPON_OFFHAND_DMG,
   STAT_ARMOR, STAT_BONUS_ARMOR,
   STAT_POWER, STAT_FORCE_POWER, STAT_TECH_POWER,
   STAT_SURGE_RATING,
@@ -2517,10 +2517,8 @@ struct gear_stats_t
   double power;
   double force_power;
   double tech_power;
-  double weapon_dps;
-  double weapon_speed;
-  double weapon_offhand_dps;
-  double weapon_offhand_speed;
+  double weapon_dmg;
+  double weapon_offhand_dmg;
   double armor;
   double bonus_armor;
   double defense_rating;
@@ -3050,7 +3048,7 @@ struct sim_t : private thread_t
   int64_t     events_remaining, max_events_remaining;
   int64_t     events_processed, total_events_processed;
   int         seed, id, iterations, current_iteration, current_slot;
-  int         armor_update_interval, weapon_speed_scale_factors;
+  int         armor_update_interval;
   int         optimal_raid, log, debug;
   int         save_profiles, default_actions;
   int         normalized_stat;
@@ -3463,20 +3461,18 @@ struct weapon_t
 {
   int    type;
   school_type school;
-  double damage, dps;
+  double damage;
   double min_dmg, max_dmg;
-  timespan_t swing_time;
+
   int    slot;
   int    buff_type;
   double buff_value;
   double bonus_dmg;
 
   int    group() const;
-  timespan_t normalized_weapon_speed() const;
-  double proc_chance_on_swing( double PPM, timespan_t adjusted_swing_time=timespan_t::zero ) const;
 
-  weapon_t( int t=WEAPON_NONE, double d=0, timespan_t st=timespan_t::from_seconds( 2.0 ), school_type s=SCHOOL_KINETIC ) :
-    type( t ), school( s ), damage( d ), min_dmg( d ), max_dmg( d ), swing_time( st ), slot( SLOT_NONE ), buff_type( 0 ), buff_value( 0 ), bonus_dmg( 0 ) { }
+  weapon_t( int t=WEAPON_NONE, double d=0, school_type s=SCHOOL_KINETIC ) :
+    type( t ), school( s ), damage( d ), min_dmg( d ), max_dmg( d ), slot( SLOT_NONE ), buff_type( 0 ), buff_value( 0 ), bonus_dmg( 0 ) { }
 };
 
 // Item =====================================================================

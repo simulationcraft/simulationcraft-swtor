@@ -1750,18 +1750,11 @@ action_expr_t* action_t::create_expression( const std::string& name_str )
 
 double action_t::ppm_proc_chance( double PPM ) const
 {
-  if ( weapon )
-  {
-    return weapon -> proc_chance_on_swing( PPM );
-  }
-  else
-  {
-    timespan_t time = channeled ? dot() -> time_to_tick : time_to_execute;
+  timespan_t time = channeled ? dot() -> time_to_tick : time_to_execute;
 
-    if ( time == timespan_t::zero ) time = player -> base_gcd;
+  if ( time == timespan_t::zero ) time = player -> base_gcd;
 
-    return ( PPM * time.total_minutes() );
-  }
+  return ( PPM * time.total_minutes() );
 }
 
 // action_t::tick_time ======================================================

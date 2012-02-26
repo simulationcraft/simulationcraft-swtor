@@ -83,10 +83,8 @@ static OptionEntry* getScalingOptions()
     { "Analyze Power",                    "power",        "Calculate scale factor for Power"                  },
     { "Analyze Force Power",              "force_power",  "Calculate scale factor for Force Power"            },
     { "Analyze Tech Power",               "tech_power",   "Calculate scale factor for Tech Power"             },
-    { "Analyze Weapon DPS",               "wdps",         "Calculate scale factor for Weapon DPS"             },
-    { "Analyze Weapon Speed",             "wspeed",       "Calculate scale factor for Weapon Speed"           },
-    { "Analyze Off-hand Weapon DPS",      "wohdps",       "Calculate scale factor for Off-hand Weapon DPS"    },
-    { "Analyze Off-hand Weapon Speed",    "wohspeed",     "Calculate scale factor for Off-hand Weapon Speed"  },
+    { "Analyze Weapon Damage",            "wdmg",         "Calculate scale factor for Weapon Damage"          },
+    { "Analyze Off-hand Weapon Damage",   "wohdmg",       "Calculate scale factor for Off-hand Weapon Damage" },
     { "Analyze Armor",                    "armor",        "Calculate scale factor for Armor"                  },
     { "Analyze Defense Rating",           "defense",      "Calculate scale factor for Defense Rating"         },
     { NULL, NULL, NULL }  };
@@ -106,7 +104,8 @@ static OptionEntry* getPlotOptions()
     { "Plot DPS per Power",               "power",      "Generate DPS curve for Power"        },
     { "Plot DPS per Force Power",         "forcepower", "Generate DPS curve for Force Power"  },
     { "Plot DPS per Tech Power",          "techpower",  "Generate DPS curve for Tech Power"  },
-    { "Plot DPS per Weapon DPS",          "wdps",       "Generate DPS curve for Weapon DPS"   },
+    { "Plot DPS per Weapon Damage",       "wdmg",       "Generate DPS curve for Weapon Damage"   },
+    { "Plot DPS per Off-hand Weapon Damage",       "wohdmg",       "Generate DPS curve for Off-hand Weapon Damage"   },
     { NULL, NULL, NULL }
   };
   return options;

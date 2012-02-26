@@ -567,14 +567,9 @@ struct weapon_stat_proc_callback_t : public action_callback_t
     if ( ! all_damage && a -> proc ) return;
     if ( weapon && a -> weapon != weapon ) return;
 
-    if ( PPM > 0 )
-    {
-      buff -> trigger( 1, 0, weapon -> proc_chance_on_swing( PPM ) ); // scales with haste
-    }
-    else
-    {
-      buff -> trigger();
-    }
+
+    buff -> trigger();
+
     buff -> up();  // track uptime info
   }
 };
@@ -634,8 +629,6 @@ struct weapon_discharge_proc_callback_t : public action_callback_t
       return;
 
     double chance = fixed_chance;
-    if ( weapon && PPM > 0 )
-      chance = weapon -> proc_chance_on_swing( PPM ); // scales with haste
 
     if ( chance > 0 )
       if ( ! rng -> roll( chance ) )

@@ -47,11 +47,8 @@ void gear_stats_t::add_stat( int    stat,
   case STAT_ALACRITY_RATING: alacrity_rating += value; break;
   case STAT_SURGE_RATING:    surge_rating    += value; break;
 
-  case STAT_WEAPON_DPS:   weapon_dps   += value; break;
-  case STAT_WEAPON_SPEED: weapon_speed += value; break;
-
-  case STAT_WEAPON_OFFHAND_DPS:   weapon_offhand_dps   += value; break;
-  case STAT_WEAPON_OFFHAND_SPEED: weapon_offhand_speed += value; break;
+  case STAT_WEAPON_DMG:           weapon_dmg           += value; break;
+  case STAT_WEAPON_OFFHAND_DMG:   weapon_offhand_dmg   += value; break;
 
   case STAT_ARMOR:       armor       += value; break;
   case STAT_BONUS_ARMOR: bonus_armor += value; break;
@@ -109,11 +106,8 @@ void gear_stats_t::set_stat( int    stat,
   case STAT_ALACRITY_RATING: alacrity_rating = value; break;
   case STAT_SURGE_RATING:    surge_rating    = value; break;
 
-  case STAT_WEAPON_DPS:   weapon_dps   = value; break;
-  case STAT_WEAPON_SPEED: weapon_speed = value; break;
-
-  case STAT_WEAPON_OFFHAND_DPS:   weapon_offhand_dps   = value; break;
-  case STAT_WEAPON_OFFHAND_SPEED: weapon_offhand_speed = value; break;
+  case STAT_WEAPON_DMG:         weapon_dmg          = value; break;
+  case STAT_WEAPON_OFFHAND_DMG: weapon_offhand_dmg  = value; break;
 
   case STAT_ARMOR:       armor       = value; break;
   case STAT_BONUS_ARMOR: bonus_armor = value; break;
@@ -170,11 +164,8 @@ double gear_stats_t::get_stat( int stat ) const
   case STAT_ALACRITY_RATING: return alacrity_rating;
   case STAT_SURGE_RATING:    return surge_rating;
 
-  case STAT_WEAPON_DPS:   return weapon_dps;
-  case STAT_WEAPON_SPEED: return weapon_speed;
-
-  case STAT_WEAPON_OFFHAND_DPS:   return weapon_offhand_dps;
-  case STAT_WEAPON_OFFHAND_SPEED: return weapon_offhand_speed;
+  case STAT_WEAPON_DMG:         return weapon_dmg;
+  case STAT_WEAPON_OFFHAND_DMG: return weapon_offhand_dmg;
 
   case STAT_ARMOR:       return armor;
   case STAT_BONUS_ARMOR: return bonus_armor;

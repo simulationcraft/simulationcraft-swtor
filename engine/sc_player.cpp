@@ -1508,11 +1508,8 @@ void player_t::init_scaling()
     scales_with[ STAT_CRIT_RATING               ] = spell || attack;
     scales_with[ STAT_ALACRITY_RATING           ] = spell || attack;
 
-    scales_with[ STAT_WEAPON_DPS   ] = attack;
-    scales_with[ STAT_WEAPON_SPEED ] = sim -> weapon_speed_scale_factors ? attack : 0;
-
-    scales_with[ STAT_WEAPON_OFFHAND_DPS   ] = 0;
-    scales_with[ STAT_WEAPON_OFFHAND_SPEED ] = 0;
+    scales_with[ STAT_WEAPON_DMG   ] = attack;
+    scales_with[ STAT_WEAPON_OFFHAND_DMG   ] = 0;
 
     scales_with[ STAT_ARMOR          ] = tank;
     scales_with[ STAT_BONUS_ARMOR    ] = 0;
@@ -1553,67 +1550,27 @@ void player_t::init_scaling()
       case STAT_CRIT_RATING:     initial_crit_rating     += v; break;
       case STAT_ALACRITY_RATING: initial_alacrity_rating += v; break;
 
-      case STAT_WEAPON_DPS:
+      case STAT_WEAPON_DMG:
         if ( main_hand_weapon.damage > 0 )
         {
-          main_hand_weapon.damage  += main_hand_weapon.swing_time.total_seconds() * v;
-          main_hand_weapon.min_dmg += main_hand_weapon.swing_time.total_seconds() * v;
-          main_hand_weapon.max_dmg += main_hand_weapon.swing_time.total_seconds() * v;
+          main_hand_weapon.damage  += v;
+          main_hand_weapon.min_dmg += v;
+          main_hand_weapon.max_dmg += v;
         }
         if ( ranged_weapon.damage > 0 )
         {
-          ranged_weapon.damage     += ranged_weapon.swing_time.total_seconds() * v;
-          ranged_weapon.min_dmg    += ranged_weapon.swing_time.total_seconds() * v;
-          ranged_weapon.max_dmg    += ranged_weapon.swing_time.total_seconds() * v;
+          ranged_weapon.damage     += v;
+          ranged_weapon.min_dmg    += v;
+          ranged_weapon.max_dmg    += v;
         }
         break;
 
-      case STAT_WEAPON_SPEED:
-        if ( main_hand_weapon.swing_time > timespan_t::zero )
-        {
-          timespan_t new_speed = ( main_hand_weapon.swing_time + timespan_t::from_seconds( v ) );
-          double mult = new_speed / main_hand_weapon.swing_time;
-
-          main_hand_weapon.min_dmg *= mult;
-          main_hand_weapon.max_dmg *= mult;
-          main_hand_weapon.damage  *= mult;
-
-          main_hand_weapon.swing_time = new_speed;
-        }
-        if ( ranged_weapon.swing_time > timespan_t::zero )
-        {
-          timespan_t new_speed = ( ranged_weapon.swing_time + timespan_t::from_seconds( v ) );
-
-          double mult = new_speed / ranged_weapon.swing_time;
-
-          ranged_weapon.min_dmg *= mult;
-          ranged_weapon.max_dmg *= mult;
-          ranged_weapon.damage  *= mult;
-
-          ranged_weapon.swing_time = new_speed;
-        }
-        break;
-
-      case STAT_WEAPON_OFFHAND_DPS:
+      case STAT_WEAPON_OFFHAND_DMG:
         if ( off_hand_weapon.damage > 0 )
         {
-          off_hand_weapon.damage   += off_hand_weapon.swing_time.total_seconds() * v;
-          off_hand_weapon.min_dmg  += off_hand_weapon.swing_time.total_seconds() * v;
-          off_hand_weapon.max_dmg  += off_hand_weapon.swing_time.total_seconds() * v;
-        }
-        break;
-
-      case STAT_WEAPON_OFFHAND_SPEED:
-        if ( off_hand_weapon.swing_time > timespan_t::zero )
-        {
-          timespan_t new_speed = ( off_hand_weapon.swing_time + timespan_t::from_seconds( v ) );
-          double mult = new_speed / off_hand_weapon.swing_time;
-
-          off_hand_weapon.min_dmg *= mult;
-          off_hand_weapon.max_dmg *= mult;
-          off_hand_weapon.damage  *= mult;
-
-          off_hand_weapon.swing_time = new_speed;
+          off_hand_weapon.damage   += v;
+          off_hand_weapon.min_dmg  += v;
+          off_hand_weapon.max_dmg  += v;
         }
         break;
 
