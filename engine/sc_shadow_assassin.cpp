@@ -201,23 +201,23 @@ struct shadow_assassin_t : public player_t
     virtual void      reset();
     virtual void      create_talents();
 
-    virtual void      init_scaling()
+    virtual void init_scaling()
     {
       player_t::init_scaling();
-      scales_with[ STAT_WEAPON_DMG         ] = true;
+      scales_with[ STAT_WEAPON_DMG  ] = true;
       scales_with[ STAT_FORCE_POWER ] = true;
     }
 
-    virtual double    melee_bonus_stats() const
+    virtual double melee_bonus_stats() const
     { return player_t::melee_bonus_stats() + willpower(); }
 
-    virtual double    melee_crit_from_stats() const
+    virtual double melee_crit_from_stats() const
     {
       return player_t::melee_crit_from_stats() +
           rating_t::crit_from_stat( willpower(), level );
     }
 
-    virtual double    melee_bonus_multiplier() const
+    virtual double melee_bonus_multiplier() const
     {
       double m = player_t::melee_bonus_multiplier();
 
@@ -230,6 +230,9 @@ struct shadow_assassin_t : public player_t
 
       return m;
     }
+
+    virtual double force_healing_bonus_stats() const
+    { return 0; }
 };
 
 namespace { // ANONYMOUS NAMESPACE ==========================================
