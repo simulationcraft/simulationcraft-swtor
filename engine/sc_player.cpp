@@ -1739,6 +1739,16 @@ double player_t::composite_movement_speed() const
 double player_t::damage_bonus( double stats, double multiplier, double extra_power ) const
 { return multiplier * ( 0.2 * stats + 0.23 * ( composite_power() + extra_power ) ); }
 
+double player_t::default_bonus_multiplier() const
+{
+  double m = 1.0;
+
+  if ( buffs.unnatural_might -> up() )
+    m += .05;
+
+  return m;
+}
+
 double player_t::default_hit_chance() const
 { return rating_t::accuracy_from_rating( accuracy_rating, level ); }
 
@@ -1758,7 +1768,7 @@ double player_t::melee_bonus_stats() const
 { return strength(); }
 
 double player_t::melee_bonus_multiplier() const
-{ return 1.0; }
+{ return default_bonus_multiplier(); }
 
 double player_t::melee_crit_from_stats() const
 { return rating_t::crit_from_stat( strength(), level ); }
@@ -1784,7 +1794,7 @@ double player_t::range_bonus_stats() const
 { return aim(); }
 
 double player_t::range_bonus_multiplier() const
-{ return 1.0; }
+{ return default_bonus_multiplier(); }
 
 double player_t::range_crit_from_stats() const
 { return rating_t::crit_from_stat( aim(), level ); }
@@ -1810,14 +1820,7 @@ double player_t::force_bonus_stats() const
 { return willpower(); }
 
 double player_t::force_bonus_multiplier() const
-{
-  double m = 1.0;
-
-  if ( buffs.unnatural_might -> up() )
-    m += .05;
-
-  return m;
-}
+{ return default_bonus_multiplier(); }
 
 double player_t::force_crit_from_stats() const
 { return rating_t::crit_from_stat( willpower(), level ); }
@@ -1844,14 +1847,7 @@ double player_t::tech_bonus_stats() const
 { return cunning(); }
 
 double player_t::tech_bonus_multiplier() const
-{
-  double m = 1.0;
-
-  if ( buffs.unnatural_might -> up() )
-    m += .05;
-
-  return m;
-}
+{ return default_bonus_multiplier(); }
 
 double player_t::tech_crit_from_stats() const
 { return rating_t::crit_from_stat( cunning(), level ); }
@@ -1889,14 +1885,7 @@ double player_t::force_healing_crit_chance() const
 { return default_crit_chance() + force_healing_crit_from_stats(); }
 
 double player_t::force_healing_bonus_multiplier() const
-{
-  double m = 1.0;
-
-  if ( buffs.unnatural_might -> up() )
-    m += .05;
-
-  return m;
-}
+{ return default_bonus_multiplier(); }
 
 double player_t::force_healing_bonus() const
 {
@@ -1917,14 +1906,7 @@ double player_t::tech_healing_crit_chance() const
 { return default_crit_chance() + tech_healing_crit_from_stats(); }
 
 double player_t::tech_healing_bonus_multiplier() const
-{
-  double m = 1.0;
-
-  if ( buffs.unnatural_might -> up() )
-    m += .05;
-
-  return m;
-}
+{ return default_bonus_multiplier(); }
 
 double player_t::tech_healing_bonus() const
 {

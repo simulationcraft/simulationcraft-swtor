@@ -4079,6 +4079,7 @@ struct player_t : public noncopyable
 private:
   double damage_bonus( double stats, double multiplier, double extra_power=0 ) const;
   double healing_bonus( double stats, double multiplier, double extra_power=0 ) const;
+  double default_bonus_multiplier() const;
   double default_hit_chance() const;
   double default_crit_chance() const;
 
