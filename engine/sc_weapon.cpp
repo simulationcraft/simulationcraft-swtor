@@ -23,8 +23,8 @@ int weapon_t::group() const
     return WEAPON_1H;
 
   case WEAPON_DOUBLE_BLADED_LIGHTSABER:
-  case WEAPON_ELECTROSTAVE:
-  case WEAPON_TECHSTAVE:
+  case WEAPON_ELECTROSTAFF:
+  case WEAPON_TECHSTAFF:
     return WEAPON_2H;
 
   case WEAPON_ASSAULT_CANON:

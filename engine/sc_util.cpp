@@ -668,8 +668,8 @@ const char* util_t::weapon_type_string( int weapon )
   case WEAPON_TECHBLADE:                  return "techblade";
   case WEAPON_VIBROSWORD:                 return "vibrosword";
   case WEAPON_DOUBLE_BLADED_LIGHTSABER:   return "doublebladedlightsaber";
-  case WEAPON_ELECTROSTAVE:               return "electrostave";
-  case WEAPON_TECHSTAVE:                  return "techstave";
+  case WEAPON_ELECTROSTAFF:               return "electrostaf";
+  case WEAPON_TECHSTAFF:                  return "techstaff";
   case WEAPON_ASSAULT_CANON:              return "assault_canon";
   case WEAPON_BLASTER_PISTOL:             return "blaster_pistol";
   case WEAPON_BLASTER_RIFLE:              return "blaster_rifle";
