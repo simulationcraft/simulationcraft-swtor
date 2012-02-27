@@ -663,23 +663,18 @@ const char* util_t::weapon_type_string( int weapon )
 {
   switch ( weapon )
   {
-  case WEAPON_NONE:     return "none";
-  case WEAPON_DAGGER:   return "dagger";
-  case WEAPON_FIST:     return "fist";
-  case WEAPON_BEAST:    return "beast";
-  case WEAPON_SWORD:    return "sword";
-  case WEAPON_MACE:     return "mace";
-  case WEAPON_AXE:      return "axe";
-  case WEAPON_BEAST_2H: return "beast2h";
-  case WEAPON_SWORD_2H: return "sword2h";
-  case WEAPON_MACE_2H:  return "mace2h";
-  case WEAPON_AXE_2H:   return "axe2h";
-  case WEAPON_STAFF:    return "staff";
-  case WEAPON_POLEARM:  return "polearm";
-  case WEAPON_BOW:      return "bow";
-  case WEAPON_CROSSBOW: return "crossbow";
-  case WEAPON_GUN:      return "gun";
-  case WEAPON_THROWN:   return "thrown";
+  case WEAPON_LIGHTSABER:                 return "lightsaber";
+  case WEAPON_VIBROKNIFE:                 return "vibroknife";
+  case WEAPON_TECHBLADE:                  return "techblade";
+  case WEAPON_VIBROSWORD:                 return "vibrosword";
+  case WEAPON_DOUBLE_BLADED_LIGHTSABER:   return "doublebladedlightsaber";
+  case WEAPON_ELECTROSTAVE:               return "electrostave";
+  case WEAPON_TECHSTAVE:                  return "techstave";
+  case WEAPON_ASSAULT_CANON:              return "assault_canon";
+  case WEAPON_BLASTER_PISTOL:             return "blaster_pistol";
+  case WEAPON_BLASTER_RIFLE:              return "blaster_rifle";
+  case WEAPON_SCATTERGUN:                 return "scattergun";
+  case WEAPON_SNIPER_RIFLE:               return "sniperrifle";
   }
   return "unknown";
 }
@@ -1210,27 +1205,8 @@ stat_type util_t::translate_item_mod( int item_mod )
 
 // util_t::translate_weapon_subclass ========================================
 
-weapon_type util_t::translate_weapon_subclass( item_subclass_weapon id )
+weapon_type util_t::translate_weapon_subclass( item_subclass_weapon /* id */ )
 {
-  switch ( id )
-  {
-  case ITEM_SUBCLASS_WEAPON_AXE:          return WEAPON_AXE;
-  case ITEM_SUBCLASS_WEAPON_AXE2:         return WEAPON_AXE_2H;
-  case ITEM_SUBCLASS_WEAPON_BOW:          return WEAPON_BOW;
-  case ITEM_SUBCLASS_WEAPON_GUN:          return WEAPON_GUN;
-  case ITEM_SUBCLASS_WEAPON_MACE:         return WEAPON_MACE;
-  case ITEM_SUBCLASS_WEAPON_MACE2:        return WEAPON_MACE_2H;
-  case ITEM_SUBCLASS_WEAPON_POLEARM:      return WEAPON_POLEARM;
-  case ITEM_SUBCLASS_WEAPON_SWORD:        return WEAPON_SWORD;
-  case ITEM_SUBCLASS_WEAPON_SWORD2:       return WEAPON_SWORD_2H;
-  case ITEM_SUBCLASS_WEAPON_STAFF:        return WEAPON_STAFF;
-  case ITEM_SUBCLASS_WEAPON_FIST:         return WEAPON_FIST;
-  case ITEM_SUBCLASS_WEAPON_DAGGER:       return WEAPON_DAGGER;
-  case ITEM_SUBCLASS_WEAPON_THROWN:       return WEAPON_THROWN;
-  case ITEM_SUBCLASS_WEAPON_CROSSBOW:     return WEAPON_CROSSBOW;
-  case ITEM_SUBCLASS_WEAPON_WAND:         return WEAPON_WAND;
-  default: return WEAPON_NONE;
-  }
 
   return WEAPON_NONE;
 }
