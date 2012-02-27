@@ -12,24 +12,15 @@
 // Action
 // ==========================================================================
 
-
 // Attack policies ==========================================================
 
-class action_t::attack_policy_t
-{
-public:
-  virtual double hit_chance( const player_t& source ) const = 0;
-  virtual double avoidance( const player_t& target ) const = 0;
-  virtual double crit_chance( const player_t& source ) const = 0;
-  virtual double damage_bonus( const player_t& source ) const = 0;
-  virtual double shield_chance( const player_t& target ) const = 0;
-  virtual double shield_absorb( const player_t& target ) const = 0;
-};
-
-namespace {
+namespace { // ANONYMOUS ====================================================
 
 class default_policy_t : public action_t::attack_policy_t
 {
+public:
+  default_policy_t() { name_ = "none"; }
+
   double hit_chance( const player_t& ) const
   { return -1; }
   double avoidance( const player_t& ) const
@@ -56,6 +47,8 @@ public:
 class melee_policy_t : public physical_policy_t
 {
 public:
+  melee_policy_t() { name_ = "melee"; }
+
   double hit_chance( const player_t& player ) const
   { return player.melee_hit_chance(); }
   double avoidance( const player_t& player ) const
@@ -69,6 +62,8 @@ public:
 class range_policy_t : public physical_policy_t
 {
 public:
+  range_policy_t() { name_ = "range"; }
+
   double hit_chance( const player_t& player ) const
   { return player.range_hit_chance(); }
   double avoidance( const player_t& player ) const
@@ -91,6 +86,8 @@ public:
 class force_policy_t : public spell_policy_t
 {
 public:
+  force_policy_t() { name_ = "force"; }
+
   double hit_chance( const player_t& player ) const
   { return player.force_hit_chance(); }
   double avoidance( const player_t& player ) const
@@ -104,6 +101,8 @@ public:
 class tech_policy_t : public spell_policy_t
 {
 public:
+  tech_policy_t() { name_ = "tech"; }
+
   double hit_chance( const player_t& player ) const
   { return player.tech_hit_chance(); }
   double avoidance( const player_t& player ) const
@@ -123,6 +122,8 @@ public:
 class force_heal_policy_t : public heal_policy_t
 {
 public:
+  force_heal_policy_t() { name_ = "force_heal"; }
+
   double hit_chance( const player_t& ) const
   { return 1.0; }
   double crit_chance( const player_t& player ) const
@@ -134,6 +135,8 @@ public:
 class tech_heal_policy_t : public heal_policy_t
 {
 public:
+  tech_heal_policy_t() { name_ = "tech_heal"; }
+
   double hit_chance( const player_t& ) const
   { return 1.0; }
   double crit_chance( const player_t& player ) const
@@ -151,13 +154,13 @@ const force_heal_policy_t the_force_heal_policy;
 const tech_heal_policy_t the_tech_heal_policy;
 }
 
-const action_t::attack_policy_t* action_t::default_policy = &the_default_policy;
-const action_t::attack_policy_t* action_t::melee_policy = &the_melee_policy;
-const action_t::attack_policy_t* action_t::range_policy = &the_range_policy;
-const action_t::attack_policy_t* action_t::force_policy = &the_force_policy;
-const action_t::attack_policy_t* action_t::tech_policy = &the_tech_policy;
-const action_t::attack_policy_t* action_t::force_heal_policy = &the_force_heal_policy;
-const action_t::attack_policy_t* action_t::tech_heal_policy = &the_tech_heal_policy;
+const action_t::policy_t action_t::default_policy = &the_default_policy;
+const action_t::policy_t action_t::melee_policy = &the_melee_policy;
+const action_t::policy_t action_t::range_policy = &the_range_policy;
+const action_t::policy_t action_t::force_policy = &the_force_policy;
+const action_t::policy_t action_t::tech_policy = &the_tech_policy;
+const action_t::policy_t action_t::force_heal_policy = &the_force_heal_policy;
+const action_t::policy_t action_t::tech_heal_policy = &the_tech_heal_policy;
 
 // action_t::action_t =======================================================
 
@@ -312,7 +315,7 @@ void action_t::init_dot( const std::string& name )
 action_t::action_t( int               ty,
                     const char*       n,
                     player_t*         p,
-                    const attack_policy_t*  policy,
+                    const policy_t    policy,
                     int               r,
                     const school_type s,
                     int               tr ) :

@@ -1294,25 +1294,6 @@ const char* util_t::item_quality_string( int quality )
   default:  return "poor";
   }
 }
-#if 0
-// util_t::attack_policy_string =============================================
-
-const std::string attack_policy_string ( const action_t::attack_policy_t& ap )
-{
-  switch ( ap )
-  {
-  case action_t::force_policy: return "force";
-  case action_t::tech_policy: return "tech";
-  case action_t::melee_policy: return "melee";
-  case action_t::range_policy: return "range";
-
-  case action_t::force_heal_policy: return "force_heal";
-  case action_t::tech_heal_policy: return "tech_heal";
-
-  default: return "no"; break;
-  }
-}
-#endif
 
 // util_t::parse_item_quality ===============================================
 

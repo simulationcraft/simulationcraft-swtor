@@ -2097,7 +2097,6 @@ public:
   static const char* weapon_subclass_string    ( int subclass );
   static const char* set_item_type_string      ( int item_set );
   static const char* item_quality_string       ( int item_quality );
-  //static const std::string attack_policy_string ( const action_t::attack_policy_t& );
 
   static int parse_attribute_type              ( const std::string& name );
   static int parse_dmg_type                    ( const std::string& name );
@@ -4473,16 +4472,30 @@ struct stats_t
 
 struct action_t
 {
-  class attack_policy_t;
+  class attack_policy_t
+  {
+  protected:
+    std::string name_;
+  public:
+    const std::string& name() const { return name_; }
+
+    virtual double hit_chance( const player_t& source ) const = 0;
+    virtual double crit_chance( const player_t& source ) const = 0;
+    virtual double damage_bonus( const player_t& source ) const = 0;
+    virtual double avoidance( const player_t& target ) const = 0;
+    virtual double shield_chance( const player_t& target ) const = 0;
+    virtual double shield_absorb( const player_t& target ) const = 0;
+  };
+
   typedef const attack_policy_t* policy_t;
 
-  static policy_t default_policy;
-  static policy_t melee_policy;
-  static policy_t range_policy;
-  static policy_t force_policy;
-  static policy_t tech_policy;
-  static policy_t force_heal_policy;
-  static policy_t tech_heal_policy;
+  static const policy_t default_policy;
+  static const policy_t melee_policy;
+  static const policy_t range_policy;
+  static const policy_t force_policy;
+  static const policy_t tech_policy;
+  static const policy_t force_heal_policy;
+  static const policy_t tech_heal_policy;
 
   sim_t* const sim;
   const int type;

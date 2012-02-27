@@ -511,7 +511,7 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
                 "\t\t\t\t\t\t\t\t\t</div>\n"
                 "\t\t\t\t\t\t\t\t\t<div class=\"float\">\n",
                 a -> id,
-                "", // FIXME: replace by util_t::attack_policy_string
+                a -> attack_policy -> name().c_str(),
                 util_t::school_type_string( a-> school ),
                 util_t::resource_type_string( a -> resource ),
                 util_t::talent_tree_string( a -> tree ),
