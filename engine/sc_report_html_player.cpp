@@ -493,6 +493,7 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
                 "\t\t\t\t\t\t\t\t\t\t<h5>Static Values</h5>\n"
                 "\t\t\t\t\t\t\t\t\t\t<ul>\n"
                 "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">id:</span>%i</li>\n"
+                "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">attack-policy:</span>%s</li>\n"
                 "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">school:</span>%s</li>\n"
                 "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">resource:</span>%s</li>\n"
                 "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">tree:</span>%s</li>\n"
@@ -510,6 +511,7 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
                 "\t\t\t\t\t\t\t\t\t</div>\n"
                 "\t\t\t\t\t\t\t\t\t<div class=\"float\">\n",
                 a -> id,
+                "", // FIXME: replace by util_t::attack_policy_string
                 util_t::school_type_string( a-> school ),
                 util_t::resource_type_string( a -> resource ),
                 util_t::talent_tree_string( a -> tree ),

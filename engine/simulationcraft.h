@@ -2094,6 +2094,7 @@ public:
   static const char* weapon_subclass_string    ( int subclass );
   static const char* set_item_type_string      ( int item_set );
   static const char* item_quality_string       ( int item_quality );
+  //static const std::string attack_policy_string ( const action_t::attack_policy_t& );
 
   static int parse_attribute_type              ( const std::string& name );
   static int parse_dmg_type                    ( const std::string& name );
