@@ -395,22 +395,6 @@ const int64_t DEFAULT_SET_BONUS_SLOT_MASK = ( ( int64_t( 1 ) << SLOT_HEAD )   | 
                                             ( int64_t( 1 ) << SLOT_HANDS  )   | ( int64_t( 1 ) << SLOT_LEGS )  |
                                             ( int64_t( 1 ) << SLOT_FEET   )  );
 
-// Tiers 11..14 + PVP
-#define N_TIER 5
-
-// Caster 2/4, Melee 2/4, Tank 2/4, Heal 2/4
-#define N_TIER_BONUS 8
-
-typedef uint32_t set_bonus_description_t[N_TIER][N_TIER_BONUS];
-
-enum set_type
-{
-  SET_NONE = 0,
-  SET_RAKATA_COMBAT_TECH_GEAR, SET_RAKATA_COMBAT_TECH_GEAR_2PC, SET_RAKATA_COMBAT_TECH_GEAR_4PC,
-  SET_INDOMITABLE, SET_INDOMITABLE_2PC, SET_INDOMITABLE_4PC,
-  SET_MAX
-};
-// static_assert( SET_MAX == N_TIER * 3 * N_TIER_BONUS / 2 );
 
 enum gem_type
 {
@@ -2087,7 +2071,6 @@ public:
   static int         school_type_component     ( int s_type, int c_type );
   static const char* school_type_string        ( int type );
   static const char* armor_type_string         ( player_type ptype, int slot_type );
-  static const char* set_bonus_string          ( set_type type );
   static const char* slot_type_string          ( int type );
   static const char* stat_type_string          ( int type );
   static const char* stat_type_abbrev          ( int type );
@@ -2097,7 +2080,6 @@ public:
   static const char* weapon_type_string        ( int type );
   static const char* weapon_class_string       ( int class_ );
   static const char* weapon_subclass_string    ( int subclass );
-  static const char* set_item_type_string      ( int item_set );
   static const char* item_quality_string       ( int item_quality );
 
   static int parse_attribute_type              ( const std::string& name );
@@ -2114,7 +2096,6 @@ public:
   static int parse_resource_type               ( const std::string& name );
   static int parse_result_type                 ( const std::string& name );
   static school_type parse_school_type         ( const std::string& name );
-  static set_type parse_set_bonus              ( const std::string& name );
   static int parse_slot_type                   ( const std::string& name );
   static stat_type parse_stat_type             ( const std::string& name );
   static stat_type parse_reforge_type          ( const std::string& name );
