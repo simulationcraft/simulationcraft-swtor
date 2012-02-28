@@ -800,19 +800,6 @@ void player_t::init_items()
 
   gear_stats_t item_stats;
 
-  bool slots[ SLOT_MAX ];
-  for ( int i = 0; i < SLOT_MAX; i++ )
-  {
-    if ( util_t::armor_type_string( type, i ) )
-    {
-      slots[ i ] = false;
-    }
-    else
-    {
-      slots[ i ] = true;
-    }
-  }
-
   int num_items = ( int ) items.size();
   for ( int i=0; i < num_items; i++ )
   {
@@ -837,8 +824,6 @@ void player_t::init_items()
       avg_ilvl += item.ilevel;
       num_ilvl_items++;
     }
-
-    slots[ item.slot ] = item.matching_type();
 
     for ( int j=0; j < STAT_MAX; j++ )
     {

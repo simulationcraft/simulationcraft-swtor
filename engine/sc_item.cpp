@@ -1094,7 +1094,7 @@ bool item_t::decode_weapon()
   std::vector<token_t> tokens;
   int num_tokens = parse_tokens( tokens, encoded_weapon_str );
 
-  bool dps_set=false, dmg_set=false, min_set=false, max_set=false;
+  bool min_set=false, max_set=false;
 
   for ( int i=0; i < num_tokens; i++ )
   {
@@ -1115,7 +1115,6 @@ bool item_t::decode_weapon()
       w -> damage  = t.value;
       w -> min_dmg = t.value;
       w -> max_dmg = t.value;
-      dmg_set = true;
     }
     else if ( t.name == "min" )
     {
@@ -1124,8 +1123,6 @@ bool item_t::decode_weapon()
 
       if ( max_set )
       {
-        dmg_set = true;
-        dps_set = false;
         w -> damage = ( w -> min_dmg + w -> max_dmg ) / 2;
       }
       else
@@ -1140,8 +1137,6 @@ bool item_t::decode_weapon()
 
       if ( min_set )
       {
-        dmg_set = true;
-        dps_set = false;
         w -> damage = ( w -> min_dmg + w -> max_dmg ) / 2;
       }
       else
