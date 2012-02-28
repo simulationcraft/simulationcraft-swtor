@@ -16,7 +16,7 @@
 
 namespace { // ANONYMOUS ====================================================
 
-class default_policy_t : public action_t::attack_policy_t
+class default_policy_t : public attack_policy_interface_t
 {
 public:
   default_policy_t() { name_ = "none"; }
@@ -35,7 +35,7 @@ public:
   { return 0; }
 };
 
-class physical_policy_t : public action_t::attack_policy_t
+class physical_policy_t : public attack_policy_interface_t
 {
 public:
   double shield_chance( const player_t& t ) const
@@ -74,7 +74,7 @@ public:
   { return player.range_damage_bonus(); }
 };
 
-class spell_policy_t : public action_t::attack_policy_t
+class spell_policy_t : public attack_policy_interface_t
 {
 public:
   double shield_chance( const player_t& ) const

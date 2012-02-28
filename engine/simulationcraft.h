@@ -133,6 +133,8 @@ struct action_callback_t;
 struct action_expr_t;
 struct action_priority_list_t;
 struct alias_t;
+class attack_policy_interface_t;
+typedef const attack_policy_interface_t* attack_policy_t;
 struct benefit_t;
 struct buff_t;
 struct buff_uptime_t;
@@ -4485,25 +4487,25 @@ struct stats_t
 
 // Action ===================================================================
 
+class attack_policy_interface_t
+{
+protected:
+  std::string name_;
+public:
+  const std::string& name() const { return name_; }
+
+  virtual double hit_chance( const player_t& source ) const = 0;
+  virtual double crit_chance( const player_t& source ) const = 0;
+  virtual double damage_bonus( const player_t& source ) const = 0;
+
+  virtual double avoidance( const player_t& target ) const = 0;
+  virtual double shield_chance( const player_t& target ) const = 0;
+  virtual double shield_absorb( const player_t& target ) const = 0;
+};
+
 struct action_t
 {
-  class attack_policy_t
-  {
-  protected:
-    std::string name_;
-  public:
-    const std::string& name() const { return name_; }
-
-    virtual double hit_chance( const player_t& source ) const = 0;
-    virtual double crit_chance( const player_t& source ) const = 0;
-    virtual double damage_bonus( const player_t& source ) const = 0;
-    virtual double avoidance( const player_t& target ) const = 0;
-    virtual double shield_chance( const player_t& target ) const = 0;
-    virtual double shield_absorb( const player_t& target ) const = 0;
-  };
-
-  typedef const attack_policy_t* policy_t;
-
+  typedef attack_policy_t policy_t;
   static const policy_t default_policy;
   static const policy_t melee_policy;
   static const policy_t range_policy;

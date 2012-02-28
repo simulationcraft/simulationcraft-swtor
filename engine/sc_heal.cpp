@@ -17,7 +17,7 @@
 
 // heal_t::heal_t ===========================================================
 
-heal_t::heal_t( const char* n, player_t* p, const action_t::attack_policy_t* policy,
+heal_t::heal_t( const char* n, player_t* p, policy_t policy,
                 int r, const school_type s, int t ) :
     action_t( ACTION_HEAL, n, p, policy, r, s, t )
 {
@@ -183,7 +183,7 @@ std::vector<player_t*> heal_t::available_targets() const
 
 // absorb_t::absorb_t =======================
 
-absorb_t::absorb_t( const char* n, player_t* p, const attack_policy_t* policy,
+absorb_t::absorb_t( const char* n, player_t* p, policy_t policy,
                     int r, const school_type s, int t ) :
   action_t( ACTION_ABSORB, n, p, policy, r, s, t )
 {
