@@ -40,6 +40,12 @@ stats_t::stats_t( const std::string& n, player_t* p ) :
 
 void stats_t::add_child( stats_t* child )
 {
+  if ( child == this )
+  {
+    sim -> errorf( "stats_t %s trying to add_child( this )", name_str.c_str() );
+    assert( child != this );
+  }
+
   if ( child -> parent )
   {
     if ( child -> parent != this )
@@ -50,6 +56,7 @@ void stats_t::add_child( stats_t* child )
     }
     return;
   }
+
   child -> parent = this;
   children.push_back( child );
 }
