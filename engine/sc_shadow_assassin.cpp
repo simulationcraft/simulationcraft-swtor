@@ -277,19 +277,10 @@ struct shadow_assassin_attack_t : public action_t
 
         if ( p -> buffs.exploitive_strikes -> up() )
             player_crit += p -> talents.exploitive_strikes -> rank() * 0.03;
+
+        if ( p -> actives.charge == SURGING_CHARGE )
+          player_armor_penetration += p -> talents.charge_mastery -> rank() * 0.03;
     }
-
-   virtual double armor() const
-   {
-     double a = action_t::armor();
-
-     shadow_assassin_t* p = player -> cast_shadow_assassin();
-
-     if ( p -> actives.charge == SURGING_CHARGE )
-       a *= 1.0 - p -> talents.charge_mastery -> rank() * 0.03;
-
-     return a;
-   }
 };
 
 struct shadow_assassin_spell_t : public action_t
@@ -1200,18 +1191,14 @@ struct maul_t : public shadow_assassin_attack_t
       return c;
     }
 
-    virtual double armor() const
+    virtual void player_buff()
     {
-      double a = shadow_assassin_attack_t::armor();
+      shadow_assassin_attack_t::player_buff();
 
       shadow_assassin_t* p = player -> cast_shadow_assassin();
 
       if ( p -> buffs.exploit_weakness -> up() )
-      {
-        a *= 0.5;
-      }
-
-      return a;
+        player_armor_penetration += 0.5;
     }
 };
 

@@ -207,12 +207,15 @@ void action_t::init_action_t_()
   base_multiplier                = 1.0;
   base_hit                       = 0.0;
   base_crit                      = 0.0;
+  base_armor_penetration         = 0.0;
   player_multiplier              = 1.0;
   player_hit                     = 0.0;
   player_crit                    = 0.0;
+  player_armor_penetration       = 0.0;
   target_multiplier              = 1.0;
   target_hit                     = 0.0;
   target_crit                    = 0.0;
+  target_armor_penetration       = 0.0;
   crit_multiplier                = 1.0;
   crit_bonus                     = 0.5;
   crit_bonus_multiplier          = 1.0;
@@ -601,6 +604,7 @@ void action_t::player_buff()
   td.player_multiplier           = 1.0;
   player_hit                     = attack_policy -> hit_chance( *player );
   player_crit                    = attack_policy -> crit_chance( *player );
+  player_armor_penetration       = player -> armor_penetration();
   player_dd_adder                = 0;
 
   if ( ! no_buffs )
@@ -631,6 +635,7 @@ void action_t::target_debuff( player_t* t, int /* dmg_type */ )
   dd.target_multiplier = 1.0;
   td.target_multiplier = 1.0;
   target_crit          = 0;
+  target_armor_penetration = t -> armor_penetration_debuff();
 
   if ( ! no_debuffs )
   {
@@ -662,8 +667,9 @@ bool action_t::result_is_miss( int r )
 
 double action_t::armor() const
 {
-  // FIXME
-  return target -> composite_armor();
+  double a = target -> composite_armor();
+  a *= 1 - total_armor_penetration();
+  return a;
 }
 
 // action_t::total_crit_bonus ===============================================

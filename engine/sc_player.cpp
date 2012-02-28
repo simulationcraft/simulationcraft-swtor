@@ -390,26 +390,32 @@ player_t::player_t( sim_t*             s,
   initial_defense_rating( 0 ), defense_rating( 0 ),
   initial_shield_rating( 0 ), shield_rating( 0 ),
   initial_absorb_rating( 0 ), absorb_rating( 0 ),
-  surge_bonus( 0 ), buffed_surge( 0 ),
   primary_attribute( ATTRIBUTE_NONE ), secondary_attribute( ATTRIBUTE_NONE ),
-  // Spell Mechanics
+
+  // Attack Mechanics
   base_power( 0 ),       initial_power( 0 ),       power( 0 ),
   base_force_power( 0 ), initial_force_power( 0 ), force_power( 0 ),
   base_tech_power( 0 ),  initial_tech_power( 0 ),  tech_power( 0 ),
+  surge_bonus( 0 ), buffed_surge( 0 ),
+  base_armor_penetration( 0 ),
+
+  // Resource Regen
   base_energy_regen_per_second( 0 ), base_ammo_regen_per_second( 0 ), base_force_regen_per_second( 0 ),
+
   position( POSITION_BACK ),
 
   // Defense Mechanics
   target_auto_attack( 0 ),
-  base_armor( 0 ),       initial_armor( 0 ),       armor( 0 ),       buffed_armor( 0 ),
-  base_bonus_armor( 0 ), initial_bonus_armor( 0 ), bonus_armor( 0 ),
+  base_armor( 0 ),         initial_armor( 0 ),       armor( 0 ),       buffed_armor( 0 ),
+  base_bonus_armor( 0 ),   initial_bonus_armor( 0 ), bonus_armor( 0 ),
   armor_multiplier( 1.0 ), initial_armor_multiplier( 1.0 ),
-  armor_coeff( 0 ),
 
   base_shield_chance( 0 ), base_shield_absorb( 0 ),
 
   base_melee_avoidance( .05 ), base_range_avoidance( .05 ),
   base_force_avoidance( 0 ),   base_tech_avoidance( 0 ),
+
+  base_DR( 0 ),
 
   // Resources
   health_per_endurance( 10 ),
@@ -959,12 +965,6 @@ void player_t::init_attack()
   if ( sim -> debug ) log_t::output( sim, "Initializing attack for player (%s)", name() );
 
   initial_stats.expertise_rating = gear.expertise_rating + enchant.expertise_rating + ( is_pet() ? 0 : sim -> enchant.expertise_rating );
-
-  double a,b;
-  a = 200.0;
-  b = 800.0;
-
-  armor_coeff = a * level + b;
 }
 
 // player_t::init_defense ===================================================
@@ -1634,26 +1634,51 @@ double player_t::composite_tech_power() const
 // player_t::composite_armor ================================================
 
 double player_t::composite_armor() const
-{
-  double a = armor;
-
-  a *= composite_armor_multiplier();
-
-  a += bonus_armor;
-
-  return a;
-}
+{ return armor * composite_armor_multiplier() + bonus_armor; }
 
 // player_t::composite_armor_multiplier =====================================
 
 double player_t::composite_armor_multiplier() const
+{ return armor_multiplier; }
+
+// player_t::armor_penetration ==============================================
+
+double player_t::armor_penetration() const
+{ return base_armor_penetration; }
+
+// player_t::armor_penetration_debuff =======================================
+
+double player_t::armor_penetration_debuff() const
+{ return debuffs.shatter_shot -> up() ? 0.2 : 0; }
+
+// player_t::kinetic_damage_reduction =======================================
+
+double player_t::kinetic_damage_reduction() const
+{ return base_DR; }
+
+// player_t::energy_damage_reduction ========================================
+
+double player_t::energy_damage_reduction() const
+{ return base_DR; }
+
+// player_t::internal_damage_reduction ======================================
+
+double player_t::internal_damage_reduction() const
 {
-  double a = armor_multiplier;
+  double dr = base_DR;
+  if ( buffs.force_valor -> up() )
+    dr += .10;
+  return dr;
+}
 
-  if ( debuffs.shatter_shot -> up() )
-    a *= 0.8;
+// player_t::elemental_damage_reduction =====================================
 
-  return a;
+double player_t::elemental_damage_reduction() const
+{
+  double dr = base_DR;
+  if ( buffs.force_valor -> up() )
+    dr += .10;
+  return dr;
 }
 
 // player_t::composite_attribute_multiplier =================================
@@ -1683,56 +1708,32 @@ double player_t::composite_attribute_multiplier( int attr ) const
 // player_t::composite_player_multiplier ====================================
 
 double player_t::composite_player_multiplier( const school_type /* school */, action_t* /* a */ ) const
-{
-  double m = 1.0;
-
-  return m;
-}
+{ return 1.0; }
 
 // player_t::composite_player_td_multiplier =================================
 
 double player_t::composite_player_td_multiplier( const school_type /* school */, action_t* /* a */ ) const
-{
-  double m = 1.0;
-
-  return m;
-}
+{ return 1.0; }
 
 // player_t::composite_player_heal_multiplier ===============================
 
 double player_t::composite_player_heal_multiplier( const school_type /* school */ ) const
-{
-  double m = 1.0;
-
-  return m;
-}
+{ return 1.0; }
 
 // player_t::composite_player_th_multiplier =================================
 
 double player_t::composite_player_th_multiplier( const school_type /* school */ ) const
-{
-  double m = 1.0;
-
-  return m;
-}
+{ return 1.0; }
 
 // player_t::composite_player_absorb_multiplier =============================
 
 double player_t::composite_player_absorb_multiplier( const school_type /* school */ ) const
-{
-  double m = 1.0;
-
-  return m;
-}
+{ return 1.0; }
 
 // player_t::composite_movement_speed =======================================
 
 double player_t::composite_movement_speed() const
-{
-  double speed = base_movement_speed;
-
-  return speed;
-}
+{ return base_movement_speed; }
 
 // player_t::damage_bonus ===================================================
 
@@ -3061,6 +3062,23 @@ double player_t::assess_damage( double            amount,
   return mitigated_amount;
 }
 
+double player_t::school_damage_reduction( school_type school ) const
+{
+  switch( school )
+  {
+  case SCHOOL_KINETIC:
+    return kinetic_damage_reduction();
+  case SCHOOL_ENERGY:
+    return energy_damage_reduction();
+  case SCHOOL_INTERNAL:
+    return internal_damage_reduction();
+  case SCHOOL_ELEMENTAL:
+    return elemental_damage_reduction();
+  default:
+    return 0;
+  }
+}
+
 // player_t::target_mitigation ==============================================
 
 double player_t::target_mitigation( double            amount,
@@ -3069,38 +3087,45 @@ double player_t::target_mitigation( double            amount,
                                     int               result,
                                     action_t*         action )
 {
-  if ( amount == 0 )
+  if ( amount <= 0 )
     return 0;
 
   double mitigated_amount = amount;
 
   if ( result == RESULT_BLOCK )
   {
-    mitigated_amount *= ( 1 - shield_absorb() );
+    double absorb = shield_absorb();
+    mitigated_amount *= ( 1 - absorb );
+
+    if ( sim -> debug )
+      log_t::output( sim, "%s shield absorbs %.1f%%", name(), absorb * 100.0 );
+
     if ( mitigated_amount <= 0 ) return 0;
   }
 
-  // TODO: Add Force Valor damage reduction for internal and elemental schools. if ( buffs.force_valor -> up() )
+  double resist = school_damage_reduction( school );
+  double armor_resist = 0;
+
   if ( school == SCHOOL_KINETIC || school == SCHOOL_ENERGY )
   {
+    assert( action );
+    double action_armor = action -> armor();
 
-    // Armor
-    if ( action )
-    {
-      // FIXME: Armor DR should depend on ATTACKER level, not DEFENDER level.
-      double resist = action -> armor() / ( action -> armor() + armor_coeff );
-      resist = std::min( 0.75, std::max( 0.0, resist ) );
+    armor_resist = action_armor / ( action_armor + rating_t::armor_divisor( action -> player -> level ) );
+    armor_resist = std::min( 0.75, std::max( 0.0, armor_resist ) );
 
-      mitigated_amount *= 1.0 - resist;
+    if ( sim -> debug )
+      log_t::output( sim, "%s %.0f armor mitigates %.1f%%", name(), action_armor, armor_resist * 100.0 );
 
-
-      if ( sim -> debug )
-        log_t::output( sim, "%s %.0f armor mitigates %.1f%%", name(), action -> armor(), resist * 100.0 );
-    }
-
+    resist += armor_resist;
   }
 
-  return mitigated_amount;
+  if ( sim -> debug && resist > armor_resist )
+    log_t::output( sim, "%s total damage reduction %.1f%%", name(), resist * 100.0 );
+
+  mitigated_amount *= 1.0 - resist;
+
+  return std::max( 0.0, mitigated_amount );
 }
 
 // player_t::assess_heal ====================================================

@@ -3446,6 +3446,9 @@ public:
   static double surge_from_rating( double amount, int level )
   { return swtor_diminishing_return( 0.3, 0.11, level, amount ); }
 
+  static int armor_divisor( int attacker_level )
+  { return 200 * attacker_level + 800; }
+
   static double base_hit_chance( int attacker_level, int defender_level )
   {
     ( void )attacker_level; ( void )defender_level;
@@ -3747,8 +3750,6 @@ struct player_t : public noncopyable
   double initial_shield_rating, shield_rating;
   double initial_absorb_rating, absorb_rating;
 
-  double surge_bonus, buffed_surge;
-
   // Attributes
   attribute_type primary_attribute, secondary_attribute;
   double attribute                   [ ATTRIBUTE_MAX ];
@@ -3757,11 +3758,15 @@ struct player_t : public noncopyable
   double attribute_multiplier        [ ATTRIBUTE_MAX ];
   double attribute_multiplier_initial[ ATTRIBUTE_MAX ];
 
-  // Spell Mechanics
+  // Attack Mechanics
   double base_power,       initial_power,       power;
   double base_force_power, initial_force_power, force_power;
   double base_tech_power,  initial_tech_power,  tech_power;
 
+  double surge_bonus, buffed_surge;
+  double base_armor_penetration;
+
+  // Resource Regen
   double base_energy_regen_per_second;
   double base_ammo_regen_per_second;
   double base_force_regen_per_second;
@@ -3775,7 +3780,6 @@ struct player_t : public noncopyable
   double base_armor,       initial_armor,       armor,       buffed_armor;
   double base_bonus_armor, initial_bonus_armor, bonus_armor;
   double armor_multiplier, initial_armor_multiplier;
-  double armor_coeff;
 
   double base_shield_chance, initial_shield_chance;
   double base_shield_absorb, initial_shield_absorb;
@@ -3784,6 +3788,8 @@ struct player_t : public noncopyable
   double base_range_avoidance, initial_range_avoidance;
   double base_force_avoidance, initial_force_avoidance;
   double base_tech_avoidance,  initial_tech_avoidance;
+
+  double base_DR;
 
   // Weapons
   weapon_t main_hand_weapon;
@@ -3907,7 +3913,6 @@ struct player_t : public noncopyable
   sample_data_t hpse;
   sample_data_t htps;
   sample_data_t heal_taken;
-
 
   std::string action_sequence;
   std::string action_dpet_chart, action_dmg_chart, time_spent_chart, gains_chart;
@@ -4058,12 +4063,6 @@ struct player_t : public noncopyable
   virtual double composite_force_power() const;
   virtual double composite_tech_power() const;
 
-  virtual double composite_armor() const;
-  virtual double composite_armor_multiplier() const;
-
-  virtual double shield_chance() const;
-  virtual double shield_absorb() const;
-
   virtual double composite_attribute_multiplier( int attr ) const;
 
   virtual double composite_player_multiplier( const school_type school, action_t* a = NULL ) const;
@@ -4114,17 +4113,14 @@ public:
   double melee_damage_bonus() const;
   virtual double melee_hit_chance() const;
   virtual double melee_crit_chance() const;
-  virtual double melee_avoidance() const;
 
   double range_damage_bonus() const;
   virtual double range_hit_chance() const;
   virtual double range_crit_chance() const;
-  virtual double range_avoidance() const;
 
   double force_damage_bonus() const;
   virtual double force_hit_chance() const;
   virtual double force_crit_chance() const;
-  virtual double force_avoidance() const;
 
   double force_healing_bonus() const;
   virtual double force_healing_crit_chance() const;
@@ -4132,10 +4128,11 @@ public:
   double tech_damage_bonus() const;
   virtual double tech_hit_chance() const;
   virtual double tech_crit_chance() const;
-  virtual double tech_avoidance() const;
 
   double tech_healing_bonus() const;
   virtual double tech_healing_crit_chance() const;
+
+  virtual double armor_penetration() const;
 
   double get_attribute( attribute_type a ) const;
   double strength() const { return get_attribute( ATTR_STRENGTH ); }
@@ -4146,6 +4143,24 @@ public:
   double presence() const { return get_attribute( ATTR_PRESENCE ); }
 
   virtual double alacrity() const;
+
+  virtual double composite_armor() const;
+  virtual double composite_armor_multiplier() const;
+  virtual double armor_penetration_debuff() const;
+
+  virtual double shield_chance() const;
+  virtual double shield_absorb() const;
+
+  virtual double melee_avoidance() const;
+  virtual double range_avoidance() const;
+  virtual double force_avoidance() const;
+  virtual double tech_avoidance() const;
+
+  virtual double kinetic_damage_reduction() const;
+  virtual double energy_damage_reduction() const;
+  virtual double internal_damage_reduction() const;
+  virtual double elemental_damage_reduction() const;
+  virtual double school_damage_reduction( school_type ) const;
 
   virtual void      interrupt();
   virtual void      halt();
@@ -4182,11 +4197,11 @@ public:
   virtual void cost_reduction_gain( int school, double amount, gain_t* g=0, action_t* a=0 );
   virtual void cost_reduction_loss( int school, double amount, action_t* a=0 );
 
-  virtual double assess_damage( double amount, const school_type school, int type, int result, action_t* a=0 );
-  virtual double target_mitigation( double amount, const school_type school, int type, int result, action_t* a=0 );
+  virtual double assess_damage( double amount, const school_type school, int type, int result, action_t* a );
+  virtual double target_mitigation( double amount, const school_type school, int type, int result, action_t* a );
 
   struct heal_info_t { double actual, amount; };
-  virtual heal_info_t assess_heal( double amount, const school_type school, int type, int result, action_t* a=0 );
+  virtual heal_info_t assess_heal( double amount, const school_type school, int type, int result, action_t* a );
 
   virtual void  summon_pet( const char* name, timespan_t duration=timespan_t::zero );
   virtual void dismiss_pet( const char* name );
@@ -4535,9 +4550,9 @@ struct action_t
     {}
   } dd, td;
 
-  double   base_multiplier,   base_hit,   base_crit;
-  double player_multiplier, player_hit, player_crit;
-  double target_multiplier, target_hit, target_crit;
+  double   base_multiplier,   base_hit,   base_crit, base_armor_penetration;
+  double player_multiplier, player_hit, player_crit, player_armor_penetration;
+  double target_multiplier, target_hit, target_crit, target_armor_penetration;
   double target_avoidance, target_shield, target_absorb;
   double crit_multiplier, crit_bonus_multiplier, crit_bonus;
   double base_dd_adder, player_dd_adder, target_dd_adder;
@@ -4646,6 +4661,8 @@ public:
   double total_hit() const        { return base_hit        + player_hit;                            }
   double total_crit() const       { return base_crit       + player_crit       + target_crit;       }
   double total_crit_bonus() const;
+  double total_armor_penetration() const
+  { return base_armor_penetration + player_armor_penetration + target_armor_penetration; }
 
   virtual double total_power() const;
 
