@@ -233,6 +233,12 @@ struct shadow_assassin_t : public player_t
 
     virtual double force_healing_bonus_stats() const
     { return 0; }
+
+    virtual bool report_attack_type( action_t::policy_t policy )
+    {
+      return policy == action_t::melee_policy ||
+             policy == action_t::force_policy;
+    }
 };
 
 namespace { // ANONYMOUS NAMESPACE ==========================================

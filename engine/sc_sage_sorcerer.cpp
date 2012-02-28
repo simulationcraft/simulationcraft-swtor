@@ -230,6 +230,13 @@ struct sage_sorcerer_t : public player_t
       cooldowns.telekinetic_wave -> reset();
     }
   }
+
+  virtual bool report_attack_type( action_t::policy_t policy )
+  {
+    return policy == action_t::melee_policy ||
+           policy == action_t::force_policy ||
+           ( primary_role() == ROLE_HEAL && policy == action_t::force_heal_policy );
+  }
 };
 
 namespace { // ANONYMOUS NAMESPACE ==========================================

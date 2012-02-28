@@ -4002,6 +4002,13 @@ struct snapshot_stats_t : public action_t
     p -> buffed.shield_chance = p -> shield_chance();
     p -> buffed.shield_absorb = p -> shield_absorb();
 
+    p -> buffed.melee_damage_bonus  = p -> melee_damage_bonus();
+    p -> buffed.range_damage_bonus  = p -> range_damage_bonus();
+    p -> buffed.force_damage_bonus  = p -> force_damage_bonus();
+    p -> buffed.tech_damage_bonus   = p -> tech_damage_bonus();
+    p -> buffed.force_healing_bonus = p -> force_healing_bonus();
+    p -> buffed.tech_healing_bonus  = p -> tech_healing_bonus();
+
     double spell_hit_extra=0, attack_hit_extra=0;
 
 #if 0

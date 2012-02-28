@@ -3862,6 +3862,7 @@ struct player_t : public noncopyable
     double melee_hit,  range_hit,  force_hit,  tech_hit;
     double melee_crit, range_crit, force_crit, tech_crit;
     double melee_avoidance, range_avoidance, force_avoidance, tech_avoidance;
+    double melee_damage_bonus, range_damage_bonus, force_damage_bonus, tech_damage_bonus, force_healing_bonus, tech_healing_bonus;
   } buffed;
 
   buff_t*   buff_list;
@@ -4169,6 +4170,7 @@ public:
   int            primary_tab() const;
   const char*    primary_tree_name() const;
   virtual int    normalize_by() const;
+  virtual bool   report_attack_type( attack_policy_t ) { return false; }
 
   virtual double health_percentage() const;
   virtual timespan_t time_to_die() const;
