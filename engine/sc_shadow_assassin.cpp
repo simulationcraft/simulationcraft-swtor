@@ -954,7 +954,6 @@ struct voltaic_slash_t : public shadow_assassin_attack_t
       base_cost = 25.0;
 
       second_strike = new voltaic_slash_t( p, n, options_str, true );
-      add_child( second_strike );
     }
   }
 
@@ -1236,9 +1235,6 @@ struct saber_strike_t : public shadow_assassin_attack_t
       second_strike -> base_execute_time = timespan_t::from_seconds( 0.5 );
       third_strike = new saber_strike_t( p, options_str, true );
       third_strike -> base_execute_time = timespan_t::from_seconds( 1.0 );
-
-      add_child( second_strike );
-      add_child( third_strike );
     }
   }
 
@@ -1297,7 +1293,6 @@ struct thrash_t : public shadow_assassin_attack_t
       base_cost = 25 - p -> talents.torment -> rank() * 1.0;
 
       second_strike = new thrash_t( p, n, options_str, true );
-      add_child( second_strike );
     }
   }
 
