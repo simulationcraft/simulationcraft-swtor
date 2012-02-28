@@ -10,13 +10,13 @@ use_pre_potion=0
 talents=http://www.torhead.com/skill-calc#2000MZhGMRkhMrtzZcMc.1
 actions=stim,type=exotech_resolve
 actions+=/mark_of_power
+actions+=/surging_charge
 actions+=/snapshot_stats
 actions+=/stealth
-actions+=/surging_charge
 actions+=/power_potion
 actions+=/recklessness
-actions+=/blackout,if=buff.dark_embrace.down&force<60
-actions+=/force_cloak,if=buff.dark_embrace.down&force<60
+actions+=/blackout,if=buff.dark_embrace.down&force<90
+actions+=/force_cloak,if=buff.dark_embrace.down
 actions+=/overcharge_saber
 actions+=/assassinate
 actions+=/maul,if=buff.exploit_weakness.react
