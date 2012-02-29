@@ -39,7 +39,7 @@ static bool is_scaling_stat( sim_t* sim,
 
 static bool stat_may_cap( int stat )
 {
-  if ( stat == STAT_HIT_RATING ) return true;
+  if ( stat == STAT_ACCURACY_RATING ) return true;
   return false;
 }
 
@@ -108,7 +108,7 @@ scaling_t::scaling_t( sim_t* s ) :
   scale_alacrity_iterations( 1.0 ),
   scale_expertise_iterations( 1.0 ),
   scale_crit_iterations( 1.0 ),
-  scale_hit_iterations( 1.0 ),
+  scale_accuracy_iterations( 1.0 ),
   scale_over( "" ), scale_over_player( "" )
 {
   create_options();
@@ -156,14 +156,12 @@ void scaling_t::init_deltas()
     if ( stats.attribute[ i ] == 0 ) stats.attribute[ i ] = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
   }
 
-  if ( stats.spell_power == 0 ) stats.spell_power = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
-
   if ( stats.power == 0 ) stats.power = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
   if ( stats.force_power == 0 ) stats.force_power = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
+  if ( stats.tech_power == 0 )  stats.tech_power  = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
 
   if ( stats.surge_rating == 0 ) stats.surge_rating = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
 
-  if ( stats.attack_power == 0 ) stats.attack_power = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
 
   if ( stats.expertise_rating == 0 )
   {
@@ -176,40 +174,30 @@ void scaling_t::init_deltas()
     if ( positive_scale_delta ) stats.expertise_rating2 *= -1;
   }
 
-  if ( stats.hit_rating == 0 )
+  if ( stats.accuracy_rating == 0 )
   {
-    stats.hit_rating = scale_delta_multiplier * ( smooth_scale_factors ? -150 : -300 );
-    if ( positive_scale_delta ) stats.hit_rating *= -1;
+    stats.accuracy_rating = scale_delta_multiplier * ( smooth_scale_factors ? -150 : -300 );
+    if ( positive_scale_delta ) stats.accuracy_rating *= -1;
   }
-  if ( stats.hit_rating2 == 0 )
+  if ( stats.accuracy_rating2 == 0 )
   {
-    stats.hit_rating2 = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
-    if ( positive_scale_delta ) stats.hit_rating2 *= -1;
+    stats.accuracy_rating2 = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
+    if ( positive_scale_delta ) stats.accuracy_rating2 *= -1;
   }
 
   if ( stats.crit_rating  == 0    ) stats.crit_rating     = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
   if ( stats.alacrity_rating == 0 ) stats.alacrity_rating = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
 
   // Defensive
+  if ( stats.defense_rating == 0 ) stats.defense_rating = scale_delta_multiplier * ( smooth_scale_factors ? 60 : 120 );
+  if ( stats.shield_rating == 0 ) stats.shield_rating = scale_delta_multiplier * ( smooth_scale_factors ? 60 : 120 );
+  if ( stats.absorb_rating == 0 ) stats.absorb_rating = scale_delta_multiplier * ( smooth_scale_factors ? 60 : 120 );
   if ( stats.armor == 0 ) stats.armor = smooth_scale_factors ? 1500 : 3000;
-  if ( stats.dodge_rating  == 0 ) stats.dodge_rating  = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
-  if ( stats.parry_rating  == 0 ) stats.parry_rating  = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
-  if ( stats.block_rating  == 0 ) stats.block_rating  = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
 
 
-  if ( stats.weapon_dps            == 0 ) stats.weapon_dps            = scale_delta_multiplier * ( smooth_scale_factors ? 50 : 100 );
-  if ( stats.weapon_offhand_dps    == 0 ) stats.weapon_offhand_dps    = scale_delta_multiplier * ( smooth_scale_factors ? 50 : 100 );
+  if ( stats.weapon_dmg            == 0 ) stats.weapon_dmg            = scale_delta_multiplier * ( smooth_scale_factors ? 50 : 100 );
+  if ( stats.weapon_offhand_dmg    == 0 ) stats.weapon_offhand_dmg    = scale_delta_multiplier * ( smooth_scale_factors ? 50 : 100 );
 
-  if ( sim -> weapon_speed_scale_factors )
-  {
-    if ( stats.weapon_speed          == 0 ) stats.weapon_speed = 0.2;
-    if ( stats.weapon_offhand_speed  == 0 ) stats.weapon_offhand_speed  = 0.2;
-  }
-  else
-  {
-    stats.weapon_speed         = 0;
-    stats.weapon_offhand_speed = 0;
-  }
 }
 
 // scaling_t::analyze_stats =================================================
@@ -270,7 +258,7 @@ void scaling_t::analyze_stats()
     if ( i == STAT_ALACRITY_RATING && ( scale_alacrity_iterations != 0 ) ) delta_sim -> iterations = ( int ) ( delta_sim -> iterations * scale_alacrity_iterations );
     if ( i == STAT_EXPERTISE_RATING && ( scale_expertise_iterations != 0 ) ) delta_sim -> iterations = ( int ) ( delta_sim -> iterations * scale_expertise_iterations );
     if ( i == STAT_CRIT_RATING && ( scale_crit_iterations != 0 ) ) delta_sim -> iterations = ( int ) ( delta_sim -> iterations * scale_crit_iterations );
-    if ( i == STAT_HIT_RATING && ( scale_hit_iterations != 0 ) ) delta_sim -> iterations = ( int ) ( delta_sim -> iterations * scale_hit_iterations );
+    if ( i == STAT_ACCURACY_RATING && ( scale_accuracy_iterations != 0 ) ) delta_sim -> iterations = ( int ) ( delta_sim -> iterations * scale_accuracy_iterations );
     delta_sim -> execute();
 
     if ( center )
@@ -280,7 +268,7 @@ void scaling_t::analyze_stats()
       if ( i == STAT_ALACRITY_RATING && ( scale_alacrity_iterations != 0 ) ) ref_sim -> iterations = ( int ) ( ref_sim -> iterations * scale_alacrity_iterations );
       if ( i == STAT_EXPERTISE_RATING && ( scale_expertise_iterations != 0 ) ) ref_sim -> iterations = ( int ) ( ref_sim -> iterations * scale_expertise_iterations );
       if ( i == STAT_CRIT_RATING && ( scale_crit_iterations != 0 ) ) ref_sim -> iterations = ( int ) ( ref_sim -> iterations * scale_crit_iterations );
-      if ( i == STAT_HIT_RATING && ( scale_hit_iterations != 0 ) ) ref_sim -> iterations = ( int ) ( ref_sim -> iterations * scale_hit_iterations );
+      if ( i == STAT_ACCURACY_RATING && ( scale_accuracy_iterations != 0 ) ) ref_sim -> iterations = ( int ) ( ref_sim -> iterations * scale_accuracy_iterations );
       ref_sim -> execute();
     }
 
@@ -288,7 +276,7 @@ void scaling_t::analyze_stats()
     {
       player_t* p = sim -> players_by_name[ j ];
 
-      if ( p -> scales_with[ i ] <= 0 ) continue;
+      if ( ! p -> scales_with[ i ] ) continue;
 
       player_t*   ref_p =   ref_sim -> find_player( p -> name() );
       player_t* delta_p = delta_sim -> find_player( p -> name() );
@@ -439,7 +427,6 @@ void scaling_t::analyze_gear_weights()
 
     if ( p -> is_pet() ) continue;
 
-    chart_t::gear_weights_lootrank  ( p -> gear_weights_lootrank_link,   p );
     chart_t::gear_weights_wowhead   ( p -> gear_weights_wowhead_link,    p );
     chart_t::gear_weights_wowreforge( p -> gear_weights_wowreforge_link, p );
     chart_t::gear_weights_pawn      ( p -> gear_weights_pawn_std_string, p, true  );
@@ -463,7 +450,7 @@ void scaling_t::normalize()
 
     for ( int i=0; i < STAT_MAX; i++ )
     {
-      if ( p -> scales_with[ i ] == 0 ) continue;
+      if ( ! p -> scales_with[ i ] ) continue;
 
       p -> scaling_normalized.set_stat( i, p -> scaling.get_stat( i ) / divisor );
 
@@ -530,23 +517,22 @@ void scaling_t::create_options()
     { "scale_willpower",                OPT_FLT,    &( stats.attribute[ ATTR_WILLPOWER ]    ) },
     { "scale_endurance",                OPT_FLT,    &( stats.attribute[ ATTR_ENDURANCE ]    ) },
     { "scale_presence",                 OPT_FLT,    &( stats.attribute[ ATTR_PRESENCE  ]    ) },
-    { "scale_spell_power",              OPT_FLT,    &( stats.spell_power                    ) },
-    { "scale_attack_power",             OPT_FLT,    &( stats.attack_power                   ) },
     { "scale_expertise_rating",         OPT_FLT,    &( stats.expertise_rating               ) },
-    { "scale_hit_rating",               OPT_FLT,    &( stats.hit_rating                     ) },
+    { "scale_accuracy_rating",          OPT_FLT,    &( stats.accuracy_rating                ) },
     { "scale_crit_rating",              OPT_FLT,    &( stats.crit_rating                    ) },
     { "scale_alacrity_rating",          OPT_FLT,    &( stats.alacrity_rating                ) },
     { "scale_power",                    OPT_FLT,    &( stats.power                          ) },
     { "scale_surge_rating",             OPT_FLT,    &( stats.surge_rating                   ) },
-    { "scale_weapon_dps",               OPT_FLT,    &( stats.weapon_dps                     ) },
-    { "scale_weapon_speed",             OPT_FLT,    &( stats.weapon_speed                   ) },
-    { "scale_offhand_weapon_dps",       OPT_FLT,    &( stats.weapon_offhand_dps             ) },
-    { "scale_offhand_weapon_speed",     OPT_FLT,    &( stats.weapon_offhand_speed           ) },
+    { "scale_defense_rating",           OPT_FLT,    &( stats.defense_rating                 ) },
+    { "scale_shield_rating",            OPT_FLT,    &( stats.shield_rating                  ) },
+    { "scale_absorb_rating",            OPT_FLT,    &( stats.absorb_rating                  ) },
+    { "scale_weapon_dmg",               OPT_FLT,    &( stats.weapon_dmg                     ) },
+    { "scale_offhand_weapon_dmg",       OPT_FLT,    &( stats.weapon_offhand_dmg             ) },
     { "scale_only",                     OPT_STRING, &( scale_only_str                       ) },
     { "scale_alacrity_iterations",      OPT_FLT,    &( scale_alacrity_iterations            ) },
     { "scale_expertise_iterations",     OPT_FLT,    &( scale_expertise_iterations           ) },
     { "scale_crit_iterations",          OPT_FLT,    &( scale_crit_iterations                ) },
-    { "scale_hit_iterations",           OPT_FLT,    &( scale_hit_iterations                 ) },
+    { "scale_accuracy_iterations",      OPT_FLT,    &( scale_accuracy_iterations            ) },
     { "scale_over",                     OPT_STRING, &( scale_over                           ) },
     { "scale_over_player",              OPT_STRING, &( scale_over_player                    ) },
     { NULL, OPT_UNKNOWN, NULL }

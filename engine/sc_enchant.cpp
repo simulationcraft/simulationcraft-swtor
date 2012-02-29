@@ -543,9 +543,7 @@ static enchant_data_t* addon_db = enchant_db;
 
 static const stat_type reforge_stats[] =
 {
-  STAT_DODGE_RATING,
-  STAT_PARRY_RATING,
-  STAT_HIT_RATING,
+  STAT_ACCURACY_RATING,
   STAT_CRIT_RATING,
   STAT_ALACRITY_RATING,
   STAT_EXPERTISE_RATING,
@@ -569,14 +567,9 @@ struct weapon_stat_proc_callback_t : public action_callback_t
     if ( ! all_damage && a -> proc ) return;
     if ( weapon && a -> weapon != weapon ) return;
 
-    if ( PPM > 0 )
-    {
-      buff -> trigger( 1, 0, weapon -> proc_chance_on_swing( PPM ) ); // scales with haste
-    }
-    else
-    {
-      buff -> trigger();
-    }
+
+    buff -> trigger();
+
     buff -> up();  // track uptime info
   }
 };
@@ -590,7 +583,7 @@ struct weapon_discharge_proc_callback_t : public action_callback_t
   int stacks, max_stacks;
   double fixed_chance, PPM;
   cooldown_t* cooldown;
-  spell_t* spell;
+  action_t* spell;
   proc_t* proc;
   rng_t* rng;
 
@@ -600,17 +593,16 @@ struct weapon_discharge_proc_callback_t : public action_callback_t
   {
     if ( rng_type == RNG_DEFAULT ) rng_type = RNG_CYCLIC; // default is CYCLIC since discharge should not have duration
 
-    struct discharge_spell_t : public spell_t
+    struct discharge_spell_t : public action_t
     {
       discharge_spell_t( const char* n, player_t* p, double dmg, const school_type s ) :
-        spell_t( n, p, RESOURCE_NONE, ( s == SCHOOL_DRAIN ) ? SCHOOL_SHADOW : s )
+        action_t( ACTION_ATTACK, n, p, force_policy, RESOURCE_NONE, s )
       {
         trigger_gcd = timespan_t::zero;
         dd.base_min = dd.base_max = dmg;
-        may_crit = ( s != SCHOOL_DRAIN );
+        may_crit = true;
         background  = true;
         proc = true;
-        base_spell_power_multiplier = 0;
         init();
       }
     };
@@ -637,8 +629,6 @@ struct weapon_discharge_proc_callback_t : public action_callback_t
       return;
 
     double chance = fixed_chance;
-    if ( weapon && PPM > 0 )
-      chance = weapon -> proc_chance_on_swing( PPM ); // scales with haste
 
     if ( chance > 0 )
       if ( ! rng -> roll( chance ) )

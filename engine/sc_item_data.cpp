@@ -198,7 +198,7 @@ bool parse_weapon_type( item_t&            item,
     return true;
 
   weapon_type w = util_t::translate_weapon_subclass( ( item_subclass_weapon ) item_data -> item_subclass );
-  if ( w == WEAPON_NONE || w == WEAPON_WAND )
+  if ( w == WEAPON_NONE )
     return true;
 
   snprintf( stat_buf, sizeof( stat_buf ), "%s_%4.2fspeed_%umin_%umax",
@@ -349,30 +349,9 @@ int item_database_t::random_suffix_type( const item_data_t* item )
 
 int item_database_t::random_suffix_type( const item_t& item )
 {
-  if ( weapon_t* w = item.weapon() )
+  if ( item.weapon() )
   {
-    switch ( w -> type )
-    {
-    // Two-hand weapons use the first point allocation budget
-    case WEAPON_AXE_2H:
-    case WEAPON_MACE_2H:
-    case WEAPON_POLEARM:
-    case WEAPON_SWORD_2H:
-    case WEAPON_STAFF:
-      return 0;
-
-    // Various ranged types use the fifth point allocation budget
-    case WEAPON_BOW:
-    case WEAPON_CROSSBOW:
-    case WEAPON_GUN:
-    case WEAPON_THROWN:
-    case WEAPON_WAND:
-      return 4;
-
-    // One-hand/Off-hand/Main-hand weapons use the fourth point allocation budget
-    default:
-      return 3;
-    }
+    return 3;
   }
 
   // Armor handling goes by slot
@@ -486,6 +465,7 @@ uint32_t item_database_t::weapon_dmg_max( const item_t& item, unsigned item_id )
                              ( 1 + item.player -> dbc.item( item_id ) -> dmg_range / 2 ) + 0.5 );
 }
 
+#if 0
 bool item_database_t::parse_gems( item_t&            item,
                                   const item_data_t* item_data,
                                   const std::string  gem_ids[ 3 ] )
@@ -535,6 +515,7 @@ bool item_database_t::parse_gems( item_t&            item,
 
   return true;
 }
+#endif // 0
 
 bool item_database_t::parse_enchant( item_t&            item,
                                      const std::string& enchant_id )
@@ -586,13 +567,13 @@ bool item_database_t::download_slot( item_t&            item,
                                      const std::string& addon_id,
                                      const std::string& reforge_id,
                                      const std::string& rsuffix_id,
-                                     const std::string  gem_ids[ 3 ] )
+                                     const std::string  /* gem_ids */ [ 3 ] )
 {
   const item_data_t* item_data = download_common( item, item_id );
   if ( ! item_data )
     return false;
 
-  parse_gems( item, item_data, gem_ids );
+  // parse_gems( item, item_data, gem_ids );
 
   if ( ! parse_enchant( item, enchant_id ) )
   {
@@ -651,6 +632,7 @@ bool item_database_t::download_item( item_t& item, const std::string& item_id )
   return true;
 }
 
+#if 0
 // item_database_t::download_glyph ==========================================
 
 bool item_database_t::download_glyph( player_t* player, std::string& glyph_name, const std::string& glyph_id )
@@ -715,3 +697,4 @@ int item_database_t::parse_gem( item_t& item, const std::string& gem_id )
 
   return gem_prop.color;
 }
+#endif // 0

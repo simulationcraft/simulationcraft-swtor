@@ -55,17 +55,11 @@ static void print_text_action( FILE* file, stats_t* s, int max_name_length=0 )
                      s -> direct_results[ RESULT_CRIT ].actual_amount.max,
                      s -> direct_results[ RESULT_CRIT ].pct );
   }
-  if ( s -> direct_results[ RESULT_DODGE ].count.mean > 0 )
+  if ( s -> direct_results[ RESULT_AVOID ].count.mean > 0 )
   {
     util_t::fprintf( file,
-                     "  Dodge=%.1f%%",
-                     s -> direct_results[ RESULT_DODGE ].pct );
-  }
-  if ( s -> direct_results[ RESULT_PARRY ].count.mean > 0 )
-  {
-    util_t::fprintf( file,
-                     "  Parry=%.1f%%",
-                     s -> direct_results[ RESULT_PARRY ].pct );
+                     "  Avoid=%.1f%%",
+                     s -> direct_results[ RESULT_AVOID ].pct );
   }
 
   if ( s -> num_ticks > 0 ) util_t::fprintf( file, "  TickCount=%.0f", s -> num_ticks );
@@ -105,7 +99,7 @@ static void print_text_action( FILE* file, stats_t* s, int max_name_length=0 )
 
 static void print_text_actions( FILE* file, player_t* p )
 {
-  if ( ! p -> glyphs_str.empty() ) util_t::fprintf( file, "  Glyphs: %s\n", p -> glyphs_str.c_str() );
+  // if ( ! p -> glyphs_str.empty() ) util_t::fprintf( file, "  Glyphs: %s\n", p -> glyphs_str.c_str() );
 
   util_t::fprintf( file, "  Priorities:\n" );
 
@@ -302,40 +296,76 @@ static void print_text_core_stats( FILE* file, player_t* p )
 {
   util_t::fprintf( file,
                    "  Core Stats:  strength=%.0f|%.0f(%.0f)  aim=%.0f|%.0f(%.0f)  cunning=%.0f|%.0f(%.0f) willpower=%.0f|%.0f(%.0f)  endurance=%.0f|%.0f(%.0f)  presence=%.0f|%.0f(%.0f)  health=%.0f|%.0f  mana=%.0f|%.0f\n",
-                   p -> attribute_buffed[ ATTR_STRENGTH  ], p -> strength(),  p -> stats.attribute[ ATTR_STRENGTH  ],
-                   p -> attribute_buffed[ ATTR_AIM       ], p -> aim(),       p -> stats.attribute[ ATTR_AIM       ],
-                   p -> attribute_buffed[ ATTR_CUNNING   ], p -> cunning(),   p -> stats.attribute[ ATTR_CUNNING   ],
-                   p -> attribute_buffed[ ATTR_WILLPOWER ], p -> willpower(), p -> stats.attribute[ ATTR_WILLPOWER ],
-                   p -> attribute_buffed[ ATTR_ENDURANCE ], p -> endurance(), p -> stats.attribute[ ATTR_ENDURANCE ],
-                   p -> attribute_buffed[ ATTR_PRESENCE  ], p -> presence(),  p -> stats.attribute[ ATTR_PRESENCE  ],
-                   p -> resource_buffed[ RESOURCE_HEALTH ], p -> resource_max[ RESOURCE_HEALTH ],
-                   p -> resource_buffed[ RESOURCE_MANA   ], p -> resource_max[ RESOURCE_MANA   ] );
+                   p -> buffed.attribute[ ATTR_STRENGTH  ], p -> strength(),  p -> stats.attribute[ ATTR_STRENGTH  ],
+                   p -> buffed.attribute[ ATTR_AIM       ], p -> aim(),       p -> stats.attribute[ ATTR_AIM       ],
+                   p -> buffed.attribute[ ATTR_CUNNING   ], p -> cunning(),   p -> stats.attribute[ ATTR_CUNNING   ],
+                   p -> buffed.attribute[ ATTR_WILLPOWER ], p -> willpower(), p -> stats.attribute[ ATTR_WILLPOWER ],
+                   p -> buffed.attribute[ ATTR_ENDURANCE ], p -> endurance(), p -> stats.attribute[ ATTR_ENDURANCE ],
+                   p -> buffed.attribute[ ATTR_PRESENCE  ], p -> presence(),  p -> stats.attribute[ ATTR_PRESENCE  ],
+                   p -> buffed.resource[ RESOURCE_HEALTH ], p -> resource_max[ RESOURCE_HEALTH ],
+                   p -> buffed.resource[ RESOURCE_MANA   ], p -> resource_max[ RESOURCE_MANA   ] );
 }
 
-// print_text_spell_stats ===================================================
+// print_text_melee_stats ==================================================
 
-static void print_text_spell_stats( FILE* file, player_t* p )
+static void print_text_melee_stats( FILE* file, player_t* p )
 {
   util_t::fprintf( file,
-                   "  Spell Stats:  power=%.0f|%.0f(%.0f)  hit=%.2f%%|%.2f%%(%.0f)  crit=%.2f%%|%.2f%%(%.0f)  alacrity=%.2f%%|%.2f%%(%.0f)\n",
-                   p -> buffed_spell_power, p -> composite_spell_power( SCHOOL_MAX ) * p -> composite_spell_power_multiplier(), p -> stats.spell_power,
-                   100 * p -> buffed_spell_hit,          100 * p -> composite_spell_hit(),          p -> stats.hit_rating,
-                   100 * p -> buffed_spell_crit,         100 * p -> composite_spell_crit(),         p -> stats.crit_rating,
-                   100 * ( 1 / p -> buffed_spell_alacrity - 1 ), 100 * ( 1 / p -> spell_alacrity - 1 ), p -> stats.alacrity_rating);
+                   "  Melee Stats bonus=%.0f|%.0f  accuracy=%.2f%%|%.2f%%(%.0f)  crit=%.2f%%|%.2f%%(%.0f)\n",
+                         p -> buffed.melee_damage_bonus,        p -> melee_damage_bonus(),
+                   100 * p -> buffed.melee_accuracy,      100 * p -> melee_accuracy_chance(),  p -> stats.accuracy_rating,
+                   100 * p -> buffed.melee_crit,          100 * p -> melee_crit_chance(),      p -> stats.crit_rating );
 }
 
-// print_text_attack_stats ==================================================
+// print_text_range_stats ===================================================
 
-static void print_text_attack_stats( FILE* file, player_t* p )
+static void print_text_range_stats( FILE* file, player_t* p )
 {
   util_t::fprintf( file,
-                   "  Attack Stats  power=%.0f|%.0f(%.0f)  hit=%.2f%%|%.2f%%(%.0f)  crit=%.2f%%|%.2f%%(%.0f)  expertise=%.2f|%.2f(%.0f)  alacrity=%.2f%%|%.2f%%(%.0f)  speed=%.2f%%|%.2f%%(%.0f)\n",
-                   p -> buffed_attack_power, p -> composite_attack_power() * p -> composite_attack_power_multiplier(), p -> stats.attack_power,
-                   100 * p -> buffed_attack_hit,         100 * p -> composite_attack_hit(),         p -> stats.hit_rating,
-                   100 * p -> buffed_attack_crit,        100 * p -> composite_attack_crit(),        p -> stats.crit_rating,
-                   100 * p -> buffed_attack_expertise,   100 * p -> composite_attack_expertise(),   p -> stats.expertise_rating,
-                   100 * ( 1 / p -> buffed_attack_alacrity - 1 ), 100 * ( 1 / p -> composite_attack_alacrity() - 1 ), p -> stats.alacrity_rating,
-                   100 * ( 1 / p -> buffed_attack_speed - 1 ), 100 * ( 1 / p -> composite_attack_speed() - 1 ), p -> stats.alacrity_rating );
+                   "  Range Stats:  bonus=%.0f|%.0f  accuracy=%.2f%%|%.2f%%(%.0f)  crit=%.2f%%|%.2f%%(%.0f)\n",
+                         p -> buffed.range_damage_bonus,        p -> range_damage_bonus(),
+                   100 * p -> buffed.range_accuracy,      100 * p -> range_accuracy_chance(),  p -> stats.accuracy_rating,
+                   100 * p -> buffed.range_crit,          100 * p -> range_crit_chance(),      p -> stats.crit_rating );
+}
+
+// print_text_force_stats ===================================================
+
+static void print_text_force_stats( FILE* file, player_t* p )
+{
+  util_t::fprintf( file,
+                   "  Force Stats:  bonus=%.0f|%.0f  accuracy=%.2f%%|%.2f%%(%.0f)  crit=%.2f%%|%.2f%%(%.0f)\n",
+                         p -> buffed.force_damage_bonus,        p -> force_damage_bonus(),
+                   100 * p -> buffed.force_accuracy,      100 * p -> force_accuracy_chance(),  p -> stats.accuracy_rating,
+                   100 * p -> buffed.force_crit,          100 * p -> force_crit_chance(),      p -> stats.crit_rating );
+}
+
+// print_text_tech_stats ===================================================
+
+static void print_text_tech_stats( FILE* file, player_t* p )
+{
+  util_t::fprintf( file,
+                   "  Tech Stats:  bonus=%.0f|%.0f  accuracy=%.2f%%|%.2f%%(%.0f)  crit=%.2f%%|%.2f%%(%.0f)\n",
+                         p -> buffed.tech_damage_bonus,       p -> tech_damage_bonus(),
+                   100 * p -> buffed.tech_accuracy,     100 * p -> tech_accuracy_chance(),  p -> stats.accuracy_rating,
+                   100 * p -> buffed.tech_crit,         100 * p -> tech_crit_chance(),      p -> stats.crit_rating );
+}
+
+// print_text_force_heal_stats ===================================================
+
+static void print_text_force_heal_stats( FILE* file, player_t* p )
+{
+  util_t::fprintf( file,
+                   "  Force Heal Stats:  bonus=%.0f|%.0f\n",
+                   p -> buffed.force_healing_bonus, p -> force_healing_bonus() );
+}
+
+// print_text_tech_heal_stats ===================================================
+
+static void print_text_tech_heal_stats( FILE* file, player_t* p )
+{
+  util_t::fprintf( file,
+                   "  Tech Heal Stats:  bonus=%.0f|%.0f\n",
+                   p -> buffed.tech_healing_bonus, p -> tech_healing_bonus() );
 }
 
 // print_text_defense_stats =================================================
@@ -343,15 +373,43 @@ static void print_text_attack_stats( FILE* file, player_t* p )
 static void print_text_defense_stats( FILE* file, player_t* p )
 {
   util_t::fprintf( file,
-                   "  Defense Stats:  armor=%.0f|%.0f(%.0f) miss=%.2f%%|%.2f%%  dodge=%.2f%%|%.2f%%(%.0f)  parry=%.2f%%|%.2f%%(%.0f)  block=%.2f%%|%.2f%%(%.0f) crit=%.2f%%|%.2f%%\n",
+                   "  Defense Stats:  armor=%.0f|%.0f(%.0f)  rating=%.0f  melee=%.2f%%|%.2f%%  range=%.2f%%|%.2f%%  force=%.2f%%|%.2f%% tech=%.2f%%|%.2f%%  shield=%.2f%%|%.2f%%(%.0f)  absorb=%.2f%%|%.2f%%(%.0f)\n",
                    p -> buffed_armor,       p -> composite_armor(), ( p -> stats.armor + p -> stats.bonus_armor ),
-                   100 * p -> buffed_miss,  100 * ( p -> composite_tank_miss( SCHOOL_PHYSICAL ) ),
-                   100 * p -> buffed_dodge, 100 * p -> composite_tank_dodge(), p -> stats.dodge_rating,
-                   100 * p -> buffed_parry, 100 * p -> composite_tank_parry(), p -> stats.parry_rating,
-                   100 * p -> buffed_block, 100 * p -> composite_tank_block(), p -> stats.block_rating,
-                   100 * p -> buffed_crit,  100 * p -> composite_tank_crit( SCHOOL_PHYSICAL ) );
+                   p -> stats.defense_rating,
+                   100 * p -> buffed.melee_avoidance, 100 * p -> melee_avoidance(),
+                   100 * p -> buffed.range_avoidance, 100 * p -> range_avoidance(),
+                   100 * p -> buffed.force_avoidance, 100 * p -> force_avoidance(),
+                   100 * p -> buffed.tech_avoidance,  100 * p -> tech_avoidance(),
+                   100 * p -> buffed.shield_chance,   100 * p -> shield_chance(), p -> stats.shield_rating,
+                   100 * p -> buffed.shield_absorb,   100 * p -> shield_absorb(), p -> stats.absorb_rating );
 }
 
+// print_text_player_stats =========================================================
+
+static void print_text_player_stats( FILE* file, player_t* p )
+{
+  print_text_core_stats   ( file, p );
+
+  if ( p -> report_attack_type( action_t::melee_policy ) )
+    print_text_melee_stats  ( file, p );
+
+  if ( p -> report_attack_type( action_t::range_policy ) )
+    print_text_range_stats( file, p );
+
+  if ( p -> report_attack_type( action_t::force_policy ) )
+    print_text_force_stats  ( file, p );
+
+  if ( p -> report_attack_type( action_t::tech_policy ) )
+    print_text_tech_stats ( file, p );
+
+  if ( p -> report_attack_type( action_t::force_heal_policy ) )
+    print_text_force_heal_stats ( file, p );
+
+  if ( p -> report_attack_type( action_t::tech_heal_policy ) )
+    print_text_tech_heal_stats ( file, p );
+
+  print_text_defense_stats( file, p );
+}
 // print_text_gains =========================================================
 
 static void print_text_gains( FILE* file, player_t* p )
@@ -536,7 +594,7 @@ static void print_text_scale_factors( FILE* file, sim_t* sim )
 
     for ( int j=0; j < STAT_MAX; j++ )
     {
-      if ( p -> scales_with[ j ] != 0 )
+      if ( p -> scales_with[ j ] )
       {
         util_t::fprintf( file, "  %s=%.*f(%.*f)", util_t::stat_type_abbrev( j ),
                          sim -> report_precision, sf.get_stat( j ),
@@ -571,7 +629,7 @@ static void print_text_scale_factors( FILE* file, player_t* p )
   util_t::fprintf( file, "    Weights :" );
   for ( int i=0; i < STAT_MAX; i++ )
   {
-    if ( p -> scales_with[ i ] != 0 )
+    if ( p -> scales_with[ i ] )
     {
       util_t::fprintf( file, "  %s=%.*f(%.*f)", util_t::stat_type_abbrev( i ),
                        p -> sim -> report_precision, sf.get_stat( i ),
@@ -672,7 +730,7 @@ static void print_text_reference_dps( FILE* file, sim_t* sim )
   {
     for ( int j=0; j < STAT_MAX; j++ )
     {
-      if ( ref_p -> scales_with[ j ] != 0 )
+      if ( ref_p -> scales_with[ j ] )
       {
         util_t::fprintf( file, "  %s=%.*f", util_t::stat_type_abbrev( j ), sim -> report_precision, ref_p -> scaling.get_stat( j ) );
       }
@@ -699,7 +757,7 @@ static void print_text_reference_dps( FILE* file, sim_t* sim )
       {
         for ( int j=0; j < STAT_MAX; j++ )
         {
-          if ( ref_p -> scales_with[ j ] != 0 )
+          if ( ref_p -> scales_with[ j ] )
           {
             double ref_sf = ref_p -> scaling.get_stat( j );
             double     sf =     p -> scaling.get_stat( j );
@@ -747,10 +805,7 @@ static void print_text_player( FILE* file, player_t* p )
   util_t::fprintf( file, "\n" );
   if ( p -> origin_str.compare( "unknown" ) ) util_t::fprintf( file, "  Origin: %s\n", p -> origin_str.c_str() );
   if ( ! p -> talents_str.empty() )util_t::fprintf( file, "  Talents: %s\n",p -> talents_str.c_str() );
-  print_text_core_stats   ( file, p );
-  print_text_spell_stats  ( file, p );
-  print_text_attack_stats ( file, p );
-  print_text_defense_stats( file, p );
+  print_text_player_stats ( file, p );
   print_text_actions      ( file, p );
 
   print_text_buffs        ( file, p );

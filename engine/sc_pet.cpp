@@ -23,10 +23,6 @@ void pet_t::init_pet_t_()
   *last = this;
   next_pet = 0;
 
-  // Pets have inherent 5% critical strike chance if not overridden.
-  base_spell_crit  = 0.05;
-  base_attack_crit = 0.05;
-
   endurance_per_owner = 0.75;
 
   party = owner -> party;

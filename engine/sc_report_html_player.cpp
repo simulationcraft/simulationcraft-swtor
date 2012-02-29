@@ -258,16 +258,14 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
            s -> direct_results[ RESULT_CRIT ].actual_amount.max ? s -> direct_results[ RESULT_CRIT ].actual_amount.max : s -> direct_results[ RESULT_HIT ].actual_amount.max,
            s -> direct_results[ RESULT_CRIT ].pct,
            s -> direct_results[ RESULT_MISS ].pct +
-           s -> direct_results[ RESULT_DODGE  ].pct +
-           s -> direct_results[ RESULT_PARRY  ].pct,
+           s -> direct_results[ RESULT_AVOID  ].pct,
            s -> direct_results[ RESULT_BLOCK  ].pct,
            s -> num_ticks,
            s -> tick_results[ RESULT_HIT  ].actual_amount.mean,
            s -> tick_results[ RESULT_CRIT ].actual_amount.mean,
            s -> tick_results[ RESULT_CRIT ].pct,
            s -> tick_results[ RESULT_MISS ].pct +
-           s -> tick_results[ RESULT_DODGE ].pct +
-           s -> tick_results[ RESULT_PARRY ].pct,
+           s -> tick_results[ RESULT_AVOID ].pct,
            100 * s -> total_tick_time.total_seconds() / s -> player -> fight_length.mean );
 
   if ( p -> sim -> report_details )
@@ -495,6 +493,7 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
                 "\t\t\t\t\t\t\t\t\t\t<h5>Static Values</h5>\n"
                 "\t\t\t\t\t\t\t\t\t\t<ul>\n"
                 "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">id:</span>%i</li>\n"
+                "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">attack-policy:</span>%s</li>\n"
                 "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">school:</span>%s</li>\n"
                 "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">resource:</span>%s</li>\n"
                 "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">tree:</span>%s</li>\n"
@@ -506,12 +505,14 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
                 "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">cooldown:</span>%.2f</li>\n"
                 "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">base_execute_time:</span>%.2f</li>\n"
                 "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">base_crit:</span>%.2f</li>\n"
+                "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">base_accuracy:</span>%.2f</li>\n"
                 "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">target:</span>%s</li>\n"
                 "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">harmful:</span>%s</li>\n"
                 "\t\t\t\t\t\t\t\t\t\t</ul>\n"
                 "\t\t\t\t\t\t\t\t\t</div>\n"
                 "\t\t\t\t\t\t\t\t\t<div class=\"float\">\n",
                 a -> id,
+                a -> attack_policy -> name().c_str(),
                 util_t::school_type_string( a-> school ),
                 util_t::resource_type_string( a -> resource ),
                 util_t::talent_tree_string( a -> tree ),
@@ -523,6 +524,7 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
                 a -> cooldown -> duration.total_seconds(),
                 a -> base_execute_time.total_seconds(),
                 a -> base_crit,
+                a -> base_accuracy,
                 a -> target ? a -> target -> name() : "",
                 a -> harmful ? "true" : "false" );
       if ( a -> dd.power_mod || a -> dd.base_min || a -> dd.base_max )
@@ -711,7 +713,7 @@ static void print_html_stats ( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> attribute_buffed[ ATTR_STRENGTH  ],
+             a -> buffed.attribute[ ATTR_STRENGTH  ],
              a -> strength(),
              a -> stats.attribute[ ATTR_STRENGTH  ] );
 
@@ -722,7 +724,7 @@ static void print_html_stats ( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> attribute_buffed[ ATTR_AIM ],
+             a -> buffed.attribute[ ATTR_AIM ],
              a -> aim(),
              a -> stats.attribute[ ATTR_AIM ] );
 
@@ -733,7 +735,7 @@ static void print_html_stats ( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> attribute_buffed[ ATTR_CUNNING ],
+             a -> buffed.attribute[ ATTR_CUNNING ],
              a -> cunning(),
              a -> stats.attribute[ ATTR_CUNNING ] );
 
@@ -744,7 +746,7 @@ static void print_html_stats ( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> attribute_buffed[ ATTR_WILLPOWER  ],
+             a -> buffed.attribute[ ATTR_WILLPOWER  ],
              a -> willpower(),
              a -> stats.attribute[ ATTR_WILLPOWER  ] );
 
@@ -755,7 +757,7 @@ static void print_html_stats ( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> attribute_buffed[ ATTR_ENDURANCE ],
+             a -> buffed.attribute[ ATTR_ENDURANCE ],
              a -> endurance(),
              a -> stats.attribute[ ATTR_ENDURANCE ] );
 
@@ -766,7 +768,7 @@ static void print_html_stats ( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> attribute_buffed[ ATTR_PRESENCE ],
+             a -> buffed.attribute[ ATTR_PRESENCE ],
              a -> presence(),
              a -> stats.attribute[ ATTR_PRESENCE ] );
 
@@ -777,86 +779,93 @@ static void print_html_stats ( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> resource_buffed[ RESOURCE_HEALTH ],
+             a -> buffed.resource[ RESOURCE_HEALTH ],
              a -> resource_max[ RESOURCE_HEALTH ],
              0.0 );
 
     fprintf( file,
-             "\t\t\t\t\t\t\t\t\t<tr>\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Mana</th>\n"
+             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Power</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> resource_buffed[ RESOURCE_MANA   ],
-             a -> resource_max[ RESOURCE_MANA   ],
-             0.0 );
+             a -> buffed.power,
+             a -> composite_power(),
+             a -> stats.power );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Spell Power</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Force Power</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> buffed_spell_power,
-             a -> composite_spell_power( SCHOOL_MAX ) * a -> composite_spell_power_multiplier(),
-             a -> stats.spell_power );
-
-    fprintf( file,
-             "\t\t\t\t\t\t\t\t\t<tr>\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Spell Hit</th>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * a -> buffed_spell_hit,
-             100 * a -> composite_spell_hit(),
-             a -> stats.hit_rating  );
+             a -> buffed.force_power,
+             a -> composite_force_power(),
+             a -> stats.force_power );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Spell Crit</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Tech Power</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t</tr>\n",
+             a -> buffed.tech_power,
+             a -> composite_tech_power(),
+             a -> stats.tech_power );
+
+    fprintf( file,
+             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Surge</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * a -> buffed_spell_crit,
-             100 * a -> composite_spell_crit(),
-             a -> stats.crit_rating );
+             100 * a -> buffed_surge,
+             100 * a -> surge_bonus,
+             a -> stats.surge_rating );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr>\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Spell Alacrity</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Alacrity</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * ( 1 - a -> buffed_spell_alacrity ),
-             100 * ( 1 - a -> composite_spell_alacrity() ),
+             100 * ( 1 - a -> buffed.alacrity ),
+             100 * ( 1 - a -> alacrity() ),
              a -> stats.alacrity_rating );
 
+    // Melee
+    if ( a -> report_attack_type( action_t::melee_policy ) )
+      {
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Attack Power</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\"></th>\n"
+             "\t\t\t\t\t\t\t\t\t</tr>\n" );
+
+    fprintf( file,
+             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Melee Damage Bonus</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\"></td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> buffed_attack_power,
-             a -> composite_attack_power() * a -> composite_attack_power_multiplier(),
-             a -> stats.attack_power );
+             a -> buffed.melee_damage_bonus,
+             a -> melee_damage_bonus() );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr>\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Melee Hit</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Melee Accuracy</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * a -> buffed_attack_hit,
-             100 * a -> composite_attack_hit(),
-             a -> stats.hit_rating );
+             100 * a -> buffed.melee_accuracy,
+             100 * a -> melee_accuracy_chance(),
+             a -> stats.accuracy_rating );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
@@ -865,42 +874,174 @@ static void print_html_stats ( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * a -> buffed_attack_crit,
-             100 * a -> composite_attack_crit(),
+             100 * a -> buffed.melee_crit,
+             100 * a -> melee_crit_chance(),
              a -> stats.crit_rating );
-
+      }
+    // Range
+    if ( a -> report_attack_type( action_t::range_policy ) )
+      {
     fprintf( file,
-             "\t\t\t\t\t\t\t\t\t<tr>\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Melee Alacrity</th>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * ( 1.0 - a -> buffed_attack_alacrity ),
-             100 * ( 1.0 - a -> composite_attack_alacrity() ),
-             a -> stats.alacrity_rating );
-
-    fprintf( file,
-             "\t\t\t\t\t\t\t\t\t<tr>\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Swing Speed</th>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * ( 1.0 - a -> buffed_attack_speed ),
-             100 * ( 1.0 - a -> composite_attack_speed() ),
-             a -> stats.alacrity_rating );
+             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\"></th>\n"
+             "\t\t\t\t\t\t\t\t\t</tr>\n" );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Expertise</th>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Range Damage Bonus</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\"></td>\n"
+             "\t\t\t\t\t\t\t\t\t</tr>\n",
+             a -> buffed.force_damage_bonus,
+             a -> force_damage_bonus() );
+
+    fprintf( file,
+             "\t\t\t\t\t\t\t\t\t<tr>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Range Accuracy</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * a -> buffed_attack_expertise,
-             100 * a -> composite_attack_expertise(),
-             a -> stats.expertise_rating );
+             100 * a -> buffed.range_accuracy,
+             100 * a -> range_accuracy_chance(),
+             a -> stats.accuracy_rating  );
+
+    fprintf( file,
+             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Range Crit</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t</tr>\n",
+             100 * a -> buffed.range_crit,
+             100 * a -> range_crit_chance(),
+             a -> stats.crit_rating );
+      }
+
+    // Force
+    if ( a -> report_attack_type( action_t::force_policy ) )
+      {
+    fprintf( file,
+             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\"></th>\n"
+             "\t\t\t\t\t\t\t\t\t</tr>\n" );
+
+    fprintf( file,
+             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Force Damage Bonus</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\"></td>\n"
+             "\t\t\t\t\t\t\t\t\t</tr>\n",
+             a -> buffed.force_damage_bonus,
+             a -> force_damage_bonus() );
+
+    fprintf( file,
+             "\t\t\t\t\t\t\t\t\t<tr>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Force Accuracy</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t</tr>\n",
+             100 * a -> buffed.force_accuracy,
+             100 * a -> force_accuracy_chance(),
+             a -> stats.accuracy_rating  );
+
+    fprintf( file,
+             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Force Crit</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t</tr>\n",
+             100 * a -> buffed.force_crit,
+             100 * a -> force_crit_chance(),
+             a -> stats.crit_rating );
+      }
+    // Tech
+    if ( a -> report_attack_type( action_t::tech_policy ) )
+      {
+    fprintf( file,
+             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\"></th>\n"
+             "\t\t\t\t\t\t\t\t\t</tr>\n" );
+
+    fprintf( file,
+             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Tech Damage Bonus</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\"></td>\n"
+             "\t\t\t\t\t\t\t\t\t</tr>\n",
+             a -> buffed.tech_damage_bonus,
+             a -> tech_damage_bonus() );
+    fprintf( file,
+             "\t\t\t\t\t\t\t\t\t<tr>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Tech Accuracy</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t</tr>\n",
+             100 * a -> buffed.tech_accuracy,
+             100 * a -> tech_accuracy_chance(),
+             a -> stats.accuracy_rating  );
+
+    fprintf( file,
+             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Tech Crit</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t</tr>\n",
+             100 * a -> buffed.tech_crit,
+             100 * a -> tech_crit_chance(),
+             a -> stats.crit_rating );
+      }
+
+
+    // Force Heal
+    if ( a -> report_attack_type( action_t::force_heal_policy ) )
+      {
+    fprintf( file,
+             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\"></th>\n"
+             "\t\t\t\t\t\t\t\t\t</tr>\n" );
+
+    fprintf( file,
+             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Force Healing Bonus</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\"></td>\n"
+             "\t\t\t\t\t\t\t\t\t</tr>\n",
+             a -> buffed.force_healing_bonus,
+             a -> force_healing_bonus() );
+      }
+
+    // Tech Heal
+    if ( a -> report_attack_type( action_t::tech_heal_policy ) )
+      {
+    fprintf( file,
+             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\"></th>\n"
+             "\t\t\t\t\t\t\t\t\t</tr>\n" );
+
+    fprintf( file,
+             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Tech Healing Bonus</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\"></td>\n"
+             "\t\t\t\t\t\t\t\t\t</tr>\n",
+             a -> buffed.tech_healing_bonus,
+             a -> tech_healing_bonus() );
+      }
+
+    fprintf( file,
+             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\"></th>\n"
+             "\t\t\t\t\t\t\t\t\t</tr>\n" );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr>\n"
@@ -914,92 +1055,26 @@ static void print_html_stats ( FILE* file, player_t* a )
              ( a -> stats.armor + a -> stats.bonus_armor ) );
 
     fprintf( file,
-             "\t\t\t\t\t\t\t\t\t<tr>\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Tank-Miss</th>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * a -> buffed_miss,
-             100 * ( a -> composite_tank_miss( SCHOOL_PHYSICAL ) ),
-             0.0  );
-
-    fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Tank-Dodge</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Shield</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * a -> buffed_dodge,
-             100 * a -> composite_tank_dodge(),
-             a -> stats.dodge_rating );
+             100 * a -> buffed.shield_chance,
+             100 * a -> shield_chance(),
+             a -> stats.shield_rating );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr>\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Tank-Parry</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Absorb</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * a -> buffed_parry,
-             100 * a -> composite_tank_parry(),
-             a -> stats.parry_rating );
-
-    fprintf( file,
-             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Tank-Block</th>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * a -> buffed_block,
-             100 * a -> composite_tank_block(),
-             a -> stats.block_rating );
-
-    fprintf( file,
-             "\t\t\t\t\t\t\t\t\t<tr>\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Tank-Crit</th>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * a -> buffed_crit,
-             100 * a -> composite_tank_crit( SCHOOL_PHYSICAL ),
-             0.0 );
-
-    fprintf( file,
-             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Power</th>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> buffed_power,
-             a -> composite_power(),
-             a -> stats.power );
-
-    fprintf( file,
-             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Force Power</th>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> buffed_force_power,
-             a -> composite_force_power(),
-             a -> stats.force_power );
-
-    fprintf( file,
-             "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Surge</th>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
-             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
-             "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * a -> buffed_surge,
-             100 * a -> surge_bonus,
-             a -> stats.surge_rating );
+             100 * a -> buffed.shield_absorb,
+             100 * a -> shield_absorb(),
+             a -> stats.absorb_rating );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t</table>\n"
@@ -1129,8 +1204,7 @@ static void print_html_player_scale_factors( FILE* file, sim_t* sim, player_t* p
       for ( int i=0; i < STAT_MAX; i++ )
         if ( p -> scales_with[ i ] )
           fprintf( file,
-                   "\t\t\t\t\t\t\t\t<td>%.*f</td>\n",
-                   ( i == STAT_WEAPON_OFFHAND_SPEED || i == STAT_WEAPON_SPEED ) ? 2 : 0,
+                   "\t\t\t\t\t\t\t\t<td>%.0f</td>\n",
                    p -> sim -> scaling -> stats.get_stat( i ) );
       if ( p -> sim -> scaling -> scale_lag )
         fprintf( file,
@@ -2067,6 +2141,8 @@ static void print_html_player_results_spec_gear( FILE* file, sim_t* sim, player_
                enc_url.c_str(),
                enc_url.c_str() );
     }
+
+#if 0
     std::vector<std::string> glyph_names;
     int num_glyphs = util_t::string_split( glyph_names, p -> glyphs_str, ",/" );
     if ( num_glyphs )
@@ -2087,6 +2163,7 @@ static void print_html_player_results_spec_gear( FILE* file, sim_t* sim, player_
                "\t\t\t\t\t\t\t\t</td>\n"
                "\t\t\t\t\t\t\t</tr>\n" );
     }
+#endif
 
     fprintf( file,
              "\t\t\t\t\t\t</table>\n" );
@@ -2386,7 +2463,7 @@ static void print_html_player_gear_weights( FILE* file, player_t* p )
              "\t\t\t\t\t\t\t\t\t\t<td>%s</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n"
              "\t\t\t\t\t\t\t\t\t<tr class=\"left\">\n"
-             "\t\t\t\t\t\t\t\t\t\t<th>Zero Hit/Expertise</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th>Zero Accuracy/Expertise</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td>%s</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n"
              "\t\t\t\t\t\t\t\t</table>\n",
@@ -2406,7 +2483,7 @@ static void print_html_player_gear_weights( FILE* file, player_t* p )
              "\t\t\t\t\t\t\t\t\t\t<td>%s</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n"
              "\t\t\t\t\t\t\t\t\t<tr class=\"left\">\n"
-             "\t\t\t\t\t\t\t\t\t\t<th>Zero Hit/Expertise</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th>Zero Accuracy/Expertise</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td>%s</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n"
              "\t\t\t\t\t\t\t\t</table>\n",

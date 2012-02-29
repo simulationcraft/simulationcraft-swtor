@@ -150,9 +150,9 @@ static bool parse_player( sim_t*             sim,
                           const std::string& name,
                           const std::string& value )
 {
+#if 0
   if ( name == "player" )
   {
-
     std::string::size_type cut_pt = value.find( ',' );
     std::string player_name( value, 0, cut_pt );
 
@@ -182,21 +182,7 @@ static bool parse_player( sim_t*             sim,
     cache::behavior_t caching = use_cache ? cache::ANY : cache::players();
 
     if ( wowhead.empty() )
-    {
-      if ( true )
-        sim -> active_player = bcp_api::download_player( sim, region, server, player_name, "active", caching );
-      else
-      {
-        if ( region == "cn" )
-        {
-          sim -> active_player = armory_t::download_player( sim, region, server, player_name, "active", caching );
-        }
-        else
-        {
-          sim -> active_player = battle_net_t::download_player( sim, region, server, player_name, "active", caching );
-        }
-      }
-    }
+      sim -> active_player = bcp_api::download_player( sim, region, server, player_name, "active", caching );
     else
     {
       sim -> active_player = wowhead_t::download_player( sim, wowhead, ( talents == "active" ), caching );
@@ -206,8 +192,10 @@ static bool parse_player( sim_t*             sim,
                        player_name.c_str(), sim -> active_player -> name(), wowhead.c_str() );
     }
   }
+  else
+#endif // 0
 
-  else if ( name == "pet" )
+  if ( name == "pet" )
   {
     std::string::size_type cut_pt = value.find( ',' );
     std::string pet_type( value, 0, cut_pt );
@@ -309,6 +297,7 @@ static bool parse_cache( sim_t*             /* sim */,
   return true;
 }
 
+#if 0
 // parse_armory =============================================================
 
 static bool parse_armory( sim_t*             sim,
@@ -348,18 +337,7 @@ static bool parse_armory( sim_t*             sim,
       if ( ! sim -> input_is_utf8 )
         sim -> input_is_utf8 = utf8::is_valid( player_name.begin(), player_name.end() ) && utf8::is_valid( server.begin(), server.end() );
 
-      if ( true )
-      {
-        sim -> active_player = bcp_api::download_player( sim, region, server, player_name, description );
-      }
-      else if ( region == "cn" )
-      {
-        sim -> active_player = armory_t::download_player( sim, region, server, player_name, description );
-      }
-      else
-      {
-        sim -> active_player = battle_net_t::download_player( sim, region, server, player_name, description );
-      }
+      sim -> active_player = bcp_api::download_player( sim, region, server, player_name, description );
       if ( ! sim -> active_player ) return false;
     }
     return true;
@@ -416,17 +394,7 @@ static bool parse_armory( sim_t*             sim,
 
     cache::behavior_t caching = use_cache ? cache::ANY : cache::players();
 
-    if ( true )
-      return bcp_api::download_guild( sim, region, server, guild_name, ranks_list, player_type, max_rank, caching );
-
-    if ( region == "cn" )
-    {
-      return armory_t::download_guild( sim, region, server, guild_name, ranks_list, player_type, max_rank, caching );
-    }
-    else
-    {
-      return battle_net_t::download_guild( sim, region, server, guild_name, ranks_list, player_type, max_rank, caching );
-    }
+    return bcp_api::download_guild( sim, region, server, guild_name, ranks_list, player_type, max_rank, caching );
   }
 
   return false;
@@ -495,6 +463,7 @@ static bool parse_wowreforge( sim_t*             sim,
 
   return sim -> active_player != 0;
 }
+#endif // 0
 
 // parse_fight_style ========================================================
 
@@ -627,7 +596,7 @@ sim_t::sim_t( sim_t* p, int index ) :
   events_remaining( 0 ), max_events_remaining( 0 ),
   events_processed( 0 ), total_events_processed( 0 ),
   seed( 0 ), id( 0 ), iterations( 1000 ), current_iteration( -1 ), current_slot( -1 ),
-  armor_update_interval( 20 ), weapon_speed_scale_factors( 0 ),
+  armor_update_interval( 20 ),
   optimal_raid( 0 ), log( 0 ), debug( 0 ), save_profiles( 0 ), default_actions( 0 ),
   normalized_stat( STAT_NONE ),
   default_region_str( "us" ),
@@ -1994,7 +1963,6 @@ void sim_t::create_options()
     { "raid_events+",                     OPT_APPEND, &( raid_events_str                          ) },
     { "fight_style",                      OPT_FUNC,   ( void* ) ::parse_fight_style                 },
     { "debug_exp",                        OPT_INT,    &( debug_exp                                ) },
-    { "weapon_speed_scale_factors",       OPT_BOOL,   &( weapon_speed_scale_factors               ) },
     { "main_target",                      OPT_STRING, &( main_target_str                          ) },
     { "target_death_pct",                 OPT_FLT,    &( target_death_pct                         ) },
     { "target_level",                     OPT_INT,    &( target_level                             ) },
@@ -2012,10 +1980,12 @@ void sim_t::create_options()
     { "pet",                              OPT_FUNC,   ( void* ) ::parse_player                      },
     { "player",                           OPT_FUNC,   ( void* ) ::parse_player                      },
     { "copy",                             OPT_FUNC,   ( void* ) ::parse_player                      },
+#if 0
     { "armory",                           OPT_DEPRECATED,   ( void* ) ::parse_armory                      },
     { "guild",                            OPT_DEPRECATED,   ( void* ) ::parse_armory                      },
     { "wowhead",                          OPT_DEPRECATED,   ( void* ) ::parse_wowhead                     },
     { "wowreforge",                       OPT_DEPRECATED,   ( void* ) ::parse_wowreforge                  },
+#endif
     { "http_clear_cache",                 OPT_FUNC,   ( void* ) ::http_t::clear_cache               },
     { "cache_items",                      OPT_FUNC,   ( void* ) ::parse_cache                       },
     { "cache_players",                    OPT_FUNC,   ( void* ) ::parse_cache                       },
@@ -2037,16 +2007,11 @@ void sim_t::create_options()
     { "default_enchant_willpower",                OPT_FLT,  &( enchant.attribute[ ATTR_WILLPOWER ] ) },
     { "default_enchant_endurance",                OPT_FLT,  &( enchant.attribute[ ATTR_ENDURANCE ] ) },
     { "default_enchant_presence",                 OPT_FLT,  &( enchant.attribute[ ATTR_PRESENCE  ] ) },
-    { "default_enchant_spell_power",              OPT_FLT,  &( enchant.spell_power                 ) },
     { "default_enchant_power",                    OPT_FLT,  &( enchant.power                       ) },
-    { "default_enchant_attack_power",             OPT_FLT,  &( enchant.attack_power                ) },
     { "default_enchant_expertise_rating",         OPT_FLT,  &( enchant.expertise_rating            ) },
     { "default_enchant_armor",                    OPT_FLT,  &( enchant.bonus_armor                 ) },
-    { "default_enchant_dodge_rating",             OPT_FLT,  &( enchant.dodge_rating                ) },
-    { "default_enchant_parry_rating",             OPT_FLT,  &( enchant.parry_rating                ) },
-    { "default_enchant_block_rating",             OPT_FLT,  &( enchant.block_rating                ) },
     { "default_enchant_alacrity_rating",          OPT_FLT,  &( enchant.alacrity_rating             ) },
-    { "default_enchant_hit_rating",               OPT_FLT,  &( enchant.hit_rating                  ) },
+    { "default_enchant_accuracy_rating",          OPT_FLT,  &( enchant.accuracy_rating             ) },
     { "default_enchant_crit_rating",              OPT_FLT,  &( enchant.crit_rating                 ) },
     { "default_enchant_health",                   OPT_FLT,  &( enchant.resource[ RESOURCE_HEALTH ] ) },
     { "default_enchant_mana",                     OPT_FLT,  &( enchant.resource[ RESOURCE_MANA   ] ) },

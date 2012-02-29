@@ -293,38 +293,6 @@ uint32_t spell_id_t::get_school_mask( const school_type s )
 {
   switch ( s )
   {
-  case SCHOOL_PHYSICAL      : return 0x01;
-  case SCHOOL_HOLY          : return 0x02;
-  case SCHOOL_FIRE          : return 0x04;
-  case SCHOOL_NATURE        : return 0x08;
-  case SCHOOL_FROST         : return 0x10;
-  case SCHOOL_SHADOW        : return 0x20;
-  case SCHOOL_ARCANE        : return 0x40;
-  case SCHOOL_HOLYSTRIKE    : return 0x03;
-  case SCHOOL_FLAMESTRIKE   : return 0x05;
-  case SCHOOL_HOLYFIRE      : return 0x06;
-  case SCHOOL_STORMSTRIKE   : return 0x09;
-  case SCHOOL_HOLYSTORM     : return 0x0a;
-  case SCHOOL_FIRESTORM     : return 0x0c;
-  case SCHOOL_FROSTSTRIKE   : return 0x11;
-  case SCHOOL_HOLYFROST     : return 0x12;
-  case SCHOOL_FROSTFIRE     : return 0x14;
-  case SCHOOL_FROSTSTORM    : return 0x18;
-  case SCHOOL_SHADOWSTRIKE  : return 0x21;
-  case SCHOOL_SHADOWLIGHT   : return 0x22;
-  case SCHOOL_SHADOWFLAME   : return 0x24;
-  case SCHOOL_SHADOWSTORM   : return 0x28;
-  case SCHOOL_SHADOWFROST   : return 0x30;
-  case SCHOOL_SPELLSTRIKE   : return 0x41;
-  case SCHOOL_DIVINE        : return 0x42;
-  case SCHOOL_SPELLFIRE     : return 0x44;
-  case SCHOOL_SPELLSTORM    : return 0x48;
-  case SCHOOL_SPELLFROST    : return 0x50;
-  case SCHOOL_SPELLSHADOW   : return 0x60;
-  case SCHOOL_ELEMENTAL     : return 0x1c;
-  case SCHOOL_CHROMATIC     : return 0x7c;
-  case SCHOOL_MAGIC         : return 0x7e;
-  case SCHOOL_CHAOS         : return 0x7f;
   default:
     return SCHOOL_NONE;
   }
@@ -340,38 +308,6 @@ school_type spell_id_t::get_school_type( const uint32_t mask )
 {
   switch ( mask )
   {
-  case 0x01: return SCHOOL_PHYSICAL;
-  case 0x02: return SCHOOL_HOLY;
-  case 0x04: return SCHOOL_FIRE;
-  case 0x08: return SCHOOL_NATURE;
-  case 0x10: return SCHOOL_FROST;
-  case 0x20: return SCHOOL_SHADOW;
-  case 0x40: return SCHOOL_ARCANE;
-  case 0x03: return SCHOOL_HOLYSTRIKE;
-  case 0x05: return SCHOOL_FLAMESTRIKE;
-  case 0x06: return SCHOOL_HOLYFIRE;
-  case 0x09: return SCHOOL_STORMSTRIKE;
-  case 0x0a: return SCHOOL_HOLYSTORM;
-  case 0x0c: return SCHOOL_FIRESTORM;
-  case 0x11: return SCHOOL_FROSTSTRIKE;
-  case 0x12: return SCHOOL_HOLYFROST;
-  case 0x14: return SCHOOL_FROSTFIRE;
-  case 0x18: return SCHOOL_FROSTSTORM;
-  case 0x21: return SCHOOL_SHADOWSTRIKE;
-  case 0x22: return SCHOOL_SHADOWLIGHT;
-  case 0x24: return SCHOOL_SHADOWFLAME;
-  case 0x28: return SCHOOL_SHADOWSTORM;
-  case 0x30: return SCHOOL_SHADOWFROST;
-  case 0x41: return SCHOOL_SPELLSTRIKE;
-  case 0x42: return SCHOOL_DIVINE;
-  case 0x44: return SCHOOL_SPELLFIRE;
-  case 0x48: return SCHOOL_SPELLSTORM;
-  case 0x50: return SCHOOL_SPELLFROST;
-  case 0x60: return SCHOOL_SPELLSHADOW;
-  case 0x1c: return SCHOOL_ELEMENTAL;
-  case 0x7c: return SCHOOL_CHROMATIC;
-  case 0x7e: return SCHOOL_MAGIC;
-  case 0x7f: return SCHOOL_CHAOS;
   default:
     return SCHOOL_NONE;
   }

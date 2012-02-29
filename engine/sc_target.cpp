@@ -32,6 +32,14 @@ struct enemy_t : public player_t
     create_options();
   }
 
+  virtual void init_defense()
+  {
+    player_t::init_defense();
+
+    // Current best guess
+    base_melee_avoidance = base_range_avoidance = .08;
+  }
+
 // target_t::combat_begin ===================================================
 
   virtual void combat_begin()
@@ -66,7 +74,6 @@ struct enemy_t : public player_t
   virtual void init_resources( bool force=false );
   virtual void init_target();
   virtual void init_actions();
-  virtual double composite_tank_block() const;
   virtual void create_options();
   virtual pet_t* create_pet( const std::string& add_name, const std::string& pet_type = std::string() );
   virtual void create_pets();
@@ -112,10 +119,10 @@ namespace { // ANONYMOUS NAMESPACE ==========================================
 
 // Melee ====================================================================
 
-struct melee_t : public attack_t
+struct melee_t : public action_t
 {
   melee_t( const char* name, player_t* player ) :
-    attack_t( name, player, RESOURCE_MANA, SCHOOL_PHYSICAL )
+    action_t( ACTION_ATTACK, name, player, melee_policy, RESOURCE_NONE, SCHOOL_KINETIC )
   {
     may_crit    = true;
     background  = true;
@@ -127,11 +134,9 @@ struct melee_t : public attack_t
     aoe = -1;
   }
 
-  virtual size_t available_targets( std::vector< player_t* >& tl ) const
+  virtual std::vector<player_t*> available_targets() const
   {
-    // TODO: This does not work for heals at all, as it presumes enemies in the
-    // actor list.
-
+    std::vector<player_t*> tl;
     tl.push_back( target );
 
     for ( size_t i = 0; i < sim -> actor_list.size(); i++ )
@@ -142,16 +147,19 @@ struct melee_t : public attack_t
         tl.push_back( sim -> actor_list[ i ] );
     }
 
-    return tl.size();
+    return tl;
   }
 };
+
+#if 0
+// FIXME
 
 // Auto Attack ==============================================================
 
 struct auto_attack_t : public attack_t
 {
   auto_attack_t( player_t* p, const std::string& options_str ) :
-    attack_t( "auto_attack", p, RESOURCE_MANA, SCHOOL_PHYSICAL )
+    attack_t( "auto_attack", p, RESOURCE_MANA, SCHOOL_KINETIC )
   {
     p -> main_hand_attack = new melee_t( "melee_main_hand", player );
     p -> main_hand_attack -> weapon = &( p -> main_hand_weapon );
@@ -202,13 +210,14 @@ struct auto_attack_t : public attack_t
     return( p -> main_hand_attack -> execute_event == 0 ); // not swinging
   }
 };
+#endif
 
 // Spell Nuke ===============================================================
 
-struct spell_nuke_t : public spell_t
+struct spell_nuke_t : public action_t
 {
   spell_nuke_t( player_t* p, const std::string& options_str ) :
-    spell_t( "spell_nuke", p, RESOURCE_MANA, SCHOOL_FIRE )
+    action_t( ACTION_ATTACK, "spell_nuke", p, force_policy, RESOURCE_NONE, SCHOOL_INTERNAL )
   {
     base_execute_time = timespan_t::from_seconds( 3.0 );
     dd.base_min = 50000;
@@ -239,11 +248,9 @@ struct spell_nuke_t : public spell_t
       aoe = -1;
   }
 
-  virtual size_t available_targets( std::vector< player_t* >& tl ) const
+  virtual std::vector<player_t*> available_targets() const
   {
-    // TODO: This does not work for heals at all, as it presumes enemies in the
-    // actor list.
-
+    std::vector<player_t*> tl;
     tl.push_back( target );
 
     for ( size_t i = 0; i < sim -> actor_list.size(); i++ )
@@ -254,17 +261,16 @@ struct spell_nuke_t : public spell_t
         tl.push_back( sim -> actor_list[ i ] );
     }
 
-    return tl.size();
+    return tl;
   }
-
 };
 
 // Spell AoE ================================================================
 
-struct spell_aoe_t : public spell_t
+struct spell_aoe_t : public action_t
 {
   spell_aoe_t( player_t* p, const std::string& options_str ) :
-    spell_t( "spell_aoe", p, RESOURCE_MANA, SCHOOL_FIRE )
+    action_t( ACTION_ATTACK, "spell_aoe", p, force_policy, RESOURCE_NONE, SCHOOL_ELEMENTAL )
   {
     base_execute_time = timespan_t::from_seconds( 3.0 );
     dd.base_min = 50000;
@@ -293,11 +299,9 @@ struct spell_aoe_t : public spell_t
     aoe = -1;
   }
 
-  virtual size_t available_targets( std::vector< player_t* >& tl ) const
+  virtual std::vector<player_t*> available_targets() const
   {
-    // TODO: This does not work for heals at all, as it presumes enemies in the
-    // actor list.
-
+    std::vector<player_t*> tl;
     tl.push_back( target );
 
     for ( size_t i = 0; i < sim -> actor_list.size(); i++ )
@@ -308,22 +312,21 @@ struct spell_aoe_t : public spell_t
         tl.push_back( sim -> actor_list[ i ] );
     }
 
-    return tl.size();
+    return tl;
   }
-
 };
 
 // Summon Add ===============================================================
 
-struct summon_add_t : public spell_t
+struct summon_add_t : public action_t
 {
   std::string add_name;
   timespan_t summoning_duration;
   pet_t* pet;
 
   summon_add_t( player_t* player, const std::string& options_str ) :
-    spell_t( "summon_add", player, RESOURCE_MANA, SCHOOL_PHYSICAL ),
-    add_name( "" ), summoning_duration( timespan_t::zero ), pet( 0 )
+    action_t( ACTION_OTHER, "summon_add", player ),
+    summoning_duration( timespan_t::zero ), pet( 0 )
   {
     option_t options[] =
     {
@@ -352,7 +355,7 @@ struct summon_add_t : public spell_t
   {
     enemy_t* p = player -> cast_enemy();
 
-    spell_t::execute();
+    action_t::execute();
 
     p -> summon_pet( add_name.c_str(), summoning_duration );
   }
@@ -362,7 +365,7 @@ struct summon_add_t : public spell_t
     if ( ! pet -> sleeping )
       return false;
 
-    return spell_t::ready();
+    return action_t::ready();
   }
 };
 }
@@ -376,7 +379,6 @@ struct summon_add_t : public spell_t
 action_t* enemy_t::create_action( const std::string& name,
                                   const std::string& options_str )
 {
-  if ( name == "auto_attack" ) return new auto_attack_t( this, options_str );
   if ( name == "spell_nuke"  ) return new  spell_nuke_t( this, options_str );
   if ( name == "spell_aoe"   ) return new   spell_aoe_t( this, options_str );
   if ( name == "summon_add"  ) return new  summon_add_t( this, options_str );
@@ -405,8 +407,6 @@ void enemy_t::init_base()
     waiting_time = timespan_t::from_seconds( 1.0 );
 
   health_per_endurance = 10;
-
-  base_attack_crit = 0.05;
 
   if ( initial_armor <= 0 )
   {
@@ -476,7 +476,7 @@ void enemy_t::init_actions()
 
       if ( target != this )
       {
-        action_list_str += "/auto_attack,damage=260000,attack_speed=2.4,aoe_tanks=1";
+        //action_list_str += "/auto_attack,damage=260000,attack_speed=2.4,aoe_tanks=1";
         action_list_str += "/spell_nuke,damage=6000,cooldown=4,attack_speed=0.1,aoe_tanks=1";
       }
     }
@@ -493,17 +493,6 @@ void enemy_t::init_actions()
     waiting_time = timespan_t::from_seconds( 1.0 );
     break;
   }
-}
-
-// enemy_t::composite_tank_block ============================================
-
-double enemy_t::composite_tank_block() const
-{
-  double b = player_t::composite_tank_block();
-
-  b += 0.05;
-
-  return b;
 }
 
 // enemy_t::create_options ==================================================
@@ -637,7 +626,7 @@ void enemy_t::combat_end()
 action_t* enemy_add_t::create_action( const std::string& name,
                                       const std::string& options_str )
 {
-  if ( name == "auto_attack"             ) return new              auto_attack_t( this, options_str );
+  //if ( name == "auto_attack"             ) return new              auto_attack_t( this, options_str );
   if ( name == "spell_nuke"              ) return new               spell_nuke_t( this, options_str );
 
   return pet_t::create_action( name, options_str );

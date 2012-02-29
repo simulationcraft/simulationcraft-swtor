@@ -49,6 +49,7 @@ static int parse_tokens( std::vector<token_t>& tokens,
   return num_splits;
 }
 
+#if 0
 // is_meta_prefix ===========================================================
 
 static bool is_meta_prefix( const std::string& option_name )
@@ -96,6 +97,7 @@ static int parse_meta_gem( const std::string& prefix,
 
   return util_t::parse_meta_gem_type( name );
 }
+#endif // 0
 
 } // ANONYMOUS NAMESPACE ====================================================
 
@@ -354,7 +356,7 @@ bool item_t::init()
 
 
   if ( ! decode_stats()         ) return false;
-  if ( ! decode_gems()          ) return false;
+  // if ( ! decode_gems()          ) return false;
   if ( ! decode_enchant()       ) return false;
   if ( ! decode_addon()         ) return false;
   if ( ! decode_weapon()        ) return false;
@@ -642,6 +644,7 @@ bool item_t::decode_random_suffix()
   return true;
 }
 
+#if 0
 // item_t::decode_gems ======================================================
 
 bool item_t::decode_gems()
@@ -686,6 +689,7 @@ bool item_t::decode_gems()
 
   return true;
 }
+#endif // 0
 
 // item_t::decode_enchant ===================================================
 
@@ -920,119 +924,11 @@ bool item_t::decode_special( special_effect_t& effect,
       effect.trigger_type = PROC_DIRECT_DAMAGE;
       effect.trigger_mask = SCHOOL_ALL_MASK;
     }
-    else if ( t.full == "onspelldamage" )
-    {
-      effect.trigger_str  = t.full;
-      effect.trigger_type = PROC_DAMAGE;
-      effect.trigger_mask = SCHOOL_SPELL_MASK;
-    }
-    else if ( t.full == "onspelltickdamage" )
-    {
-      effect.trigger_str  = t.full;
-      effect.trigger_type = PROC_TICK_DAMAGE;
-      effect.trigger_mask = SCHOOL_SPELL_MASK;
-    }
-    else if ( t.full == "onspelldirectdamage" )
-    {
-      effect.trigger_str  = t.full;
-      effect.trigger_type = PROC_DIRECT_DAMAGE;
-      effect.trigger_mask = SCHOOL_SPELL_MASK;
-    }
-    else if ( t.full == "onattackdamage" )
-    {
-      effect.trigger_str  = t.full;
-      effect.trigger_type = PROC_DAMAGE;
-      effect.trigger_mask = SCHOOL_ATTACK_MASK;
-    }
-    else if ( t.full == "onattacktickdamage" )
-    {
-      effect.trigger_str  = t.full;
-      effect.trigger_type = PROC_TICK_DAMAGE;
-      effect.trigger_mask = SCHOOL_ATTACK_MASK;
-    }
-    else if ( t.full == "onattackdirectdamage" )
-    {
-      effect.trigger_str  = t.full;
-      effect.trigger_type = PROC_DIRECT_DAMAGE;
-      effect.trigger_mask = SCHOOL_ATTACK_MASK;
-    }
-    else if ( t.full == "onarcanedamage" )
-    {
-      effect.trigger_str  = t.full;
-      effect.trigger_type = PROC_DAMAGE;
-      effect.trigger_mask = ( int64_t( 1 ) << SCHOOL_ARCANE );
-    }
-    else if ( t.full == "onbleeddamage" )
-    {
-      effect.trigger_str  = t.full;
-      effect.trigger_type = PROC_DAMAGE;
-      effect.trigger_mask = ( int64_t( 1 ) << SCHOOL_BLEED );
-    }
-    else if ( t.full == "onchaosdamage" )
-    {
-      effect.trigger_str  = t.full;
-      effect.trigger_type = PROC_DAMAGE;
-      effect.trigger_mask = ( int64_t( 1 ) << SCHOOL_CHAOS );
-    }
-    else if ( t.full == "onfiredamage" )
-    {
-      effect.trigger_str  = t.full;
-      effect.trigger_type = PROC_DAMAGE;
-      effect.trigger_mask = ( int64_t( 1 ) << SCHOOL_FIRE );
-    }
-    else if ( t.full == "onfrostdamage" )
-    {
-      effect.trigger_str  = t.full;
-      effect.trigger_type = PROC_DAMAGE;
-      effect.trigger_mask = ( int64_t( 1 ) << SCHOOL_FROST );
-    }
-    else if ( t.full == "onfrostfiredamage" )
-    {
-      effect.trigger_str  = t.full;
-      effect.trigger_type = PROC_DAMAGE;
-      effect.trigger_mask = ( int64_t( 1 ) << SCHOOL_FROSTFIRE );
-    }
-    else if ( t.full == "onholydamage" )
-    {
-      effect.trigger_str  = t.full;
-      effect.trigger_type = PROC_DAMAGE;
-      effect.trigger_mask = ( int64_t( 1 ) << SCHOOL_HOLY );
-    }
-    else if ( t.full == "onnaturedamage" )
-    {
-      effect.trigger_str  = t.full;
-      effect.trigger_type = PROC_DAMAGE;
-      effect.trigger_mask = ( int64_t( 1 ) << SCHOOL_NATURE );
-    }
-    else if ( t.full == "onphysicaldamage" )
-    {
-      effect.trigger_str  = t.full;
-      effect.trigger_type = PROC_DAMAGE;
-      effect.trigger_mask = ( int64_t( 1 ) << SCHOOL_PHYSICAL );
-    }
-    else if ( t.full == "onshadowdamage" )
-    {
-      effect.trigger_str  = t.full;
-      effect.trigger_type = PROC_DAMAGE;
-      effect.trigger_mask = ( int64_t( 1 ) << SCHOOL_SHADOW );
-    }
-    else if ( t.full == "ondraindamage" )
-    {
-      effect.trigger_str  = t.full;
-      effect.trigger_type = PROC_DAMAGE;
-      effect.trigger_mask = ( int64_t( 1 ) << SCHOOL_DRAIN );
-    }
     else if ( t.full == "onkineticdamage" )
     {
       effect.trigger_str  = t.full;
       effect.trigger_type = PROC_DAMAGE;
       effect.trigger_mask = ( int64_t( 1 ) << SCHOOL_KINETIC );
-    }
-    else if ( t.full == "onelementaldamage" )
-    {
-      effect.trigger_str  = t.full;
-      effect.trigger_type = PROC_DAMAGE;
-      effect.trigger_mask = ( int64_t( 1 ) << SCHOOL_ELEMENTAL );
     }
     else if ( t.full == "onenergydamage" )
     {
@@ -1045,6 +941,12 @@ bool item_t::decode_special( special_effect_t& effect,
       effect.trigger_str  = t.full;
       effect.trigger_type = PROC_DAMAGE;
       effect.trigger_mask = ( int64_t( 1 ) << SCHOOL_INTERNAL );
+    }
+    else if ( t.full == "onelementaldamage" )
+    {
+      effect.trigger_str  = t.full;
+      effect.trigger_type = PROC_DAMAGE;
+      effect.trigger_mask = ( int64_t( 1 ) << SCHOOL_ELEMENTAL );
     }
     else if ( t.full == "ontick" )
     {
@@ -1172,12 +1074,6 @@ bool item_t::decode_special( special_effect_t& effect,
       effect.trigger_type = PROC_ATTACK;
       effect.trigger_mask = RESULT_MISS_MASK;
     }
-    else if ( t.full == "onspelldamageheal" )
-    {
-      effect.trigger_str  = t.full;
-      effect.trigger_type = PROC_DAMAGE_HEAL;
-      effect.trigger_mask = SCHOOL_SPELL_MASK;
-    }
     else
     {
       sim -> errorf( "Player %s has unknown 'use/equip=' token '%s' at slot %s\n", player -> name(), t.full.c_str(), slot_name() );
@@ -1198,7 +1094,7 @@ bool item_t::decode_weapon()
   std::vector<token_t> tokens;
   int num_tokens = parse_tokens( tokens, encoded_weapon_str );
 
-  bool dps_set=false, dmg_set=false, min_set=false, max_set=false;
+  bool min_set=false, max_set=false;
 
   for ( int i=0; i < num_tokens; i++ )
   {
@@ -1214,24 +1110,11 @@ bool item_t::decode_weapon()
     {
       w -> school = school;
     }
-    else if ( t.name == "dps" )
-    {
-      if ( ! dmg_set )
-      {
-        w -> dps = t.value;
-        dps_set = true;
-      }
-    }
     else if ( t.name == "damage" || t.name == "dmg" )
     {
       w -> damage  = t.value;
       w -> min_dmg = t.value;
       w -> max_dmg = t.value;
-      dmg_set = true;
-    }
-    else if ( t.name == "speed" || t.name == "spd" )
-    {
-      w -> swing_time = timespan_t::from_seconds( t.value );
     }
     else if ( t.name == "min" )
     {
@@ -1240,8 +1123,6 @@ bool item_t::decode_weapon()
 
       if ( max_set )
       {
-        dmg_set = true;
-        dps_set = false;
         w -> damage = ( w -> min_dmg + w -> max_dmg ) / 2;
       }
       else
@@ -1256,8 +1137,6 @@ bool item_t::decode_weapon()
 
       if ( min_set )
       {
-        dmg_set = true;
-        dps_set = false;
         w -> damage = ( w -> min_dmg + w -> max_dmg ) / 2;
       }
       else
@@ -1271,9 +1150,6 @@ bool item_t::decode_weapon()
       return false;
     }
   }
-
-  if ( dps_set ) w -> damage = w -> dps    * w -> swing_time.total_seconds();
-  if ( dmg_set ) w -> dps    = w -> damage / w -> swing_time.total_seconds();
 
   if ( ! max_set || ! min_set )
   {
@@ -1306,6 +1182,7 @@ bool item_t::download_slot( item_t& item,
       const std::string& src = item.sim -> item_db_sources[ i ];
       if ( src == "local" )
         has_local = true;
+#if 0
       else if ( src == "wowhead" )
         success = wowhead_t::download_slot( item, item_id, enchant_id, addon_id, reforge_id,
                                             rsuffix_id, gem_ids, item.player -> dbc.ptr, cache::ONLY );
@@ -1320,6 +1197,7 @@ bool item_t::download_slot( item_t& item,
       else if ( src == "bcpapi" )
         success = bcp_api::download_slot( item, item_id, enchant_id, addon_id, reforge_id,
                                           rsuffix_id, gem_ids, cache::ONLY );
+#endif
     }
 
     if ( ! success && has_local )
@@ -1327,6 +1205,7 @@ bool item_t::download_slot( item_t& item,
                                                 rsuffix_id, gem_ids );
   }
 
+#if 0
   if ( cb != cache::ONLY )
   {
     // Download in earnest from a data source
@@ -1349,6 +1228,7 @@ bool item_t::download_slot( item_t& item,
                                           rsuffix_id, gem_ids, cb );
     }
   }
+#endif
 
   return success;
 }
@@ -1375,6 +1255,7 @@ bool item_t::download_item( item_t& item, const std::string& item_id )
     {
       if ( source_list[ i ] == "local" )
         has_local = true;
+#if 0
       else if ( source_list[ i ] == "wowhead" )
         success = wowhead_t::download_item( item, item_id, false, cache::ONLY );
       else if ( source_list[ i ] == "ptrhead" )
@@ -1385,12 +1266,14 @@ bool item_t::download_item( item_t& item, const std::string& item_id )
         success = armory_t::download_item( item, item_id, cache::ONLY );
       else if ( source_list[ i ] == "bcpapi" )
         success = bcp_api::download_item( item, item_id, cache::ONLY );
+#endif
     }
 
     if ( ! success && has_local )
       success = item_database_t::download_item( item, item_id );
   }
 
+#if 0
   if ( cache::items() != cache::ONLY )
   {
     // Download in earnest from a data source
@@ -1408,10 +1291,12 @@ bool item_t::download_item( item_t& item, const std::string& item_id )
         success = bcp_api::download_item( item, item_id );
     }
   }
+#endif
 
   return success;
 }
 
+#if 0
 // item_t::download_glyph ===================================================
 
 bool item_t::download_glyph( player_t* player, std::string& glyph_name, const std::string& glyph_id )
@@ -1521,3 +1406,4 @@ int item_t::parse_gem( item_t&            item,
 
   return gem_type;
 }
+#endif // 0

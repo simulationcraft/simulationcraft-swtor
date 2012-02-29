@@ -339,58 +339,40 @@ void print_xml_player( sim_t * sim, xml_writer_t & writer, player_t * p, player_
 void print_xml_player_stats( xml_writer_t & writer, player_t * p )
 {
   print_xml_player_attribute( writer, "strength",
-                              p -> strength(),  p -> stats.attribute[ ATTR_STRENGTH  ], p -> attribute_buffed[ ATTR_STRENGTH  ] );
+                              p -> strength(),  p -> stats.attribute[ ATTR_STRENGTH  ], p -> buffed.attribute[ ATTR_STRENGTH  ] );
   print_xml_player_attribute( writer, "aim",
-                              p -> aim(),       p -> stats.attribute[ ATTR_AIM       ], p -> attribute_buffed[ ATTR_AIM       ] );
+                              p -> aim(),       p -> stats.attribute[ ATTR_AIM       ], p -> buffed.attribute[ ATTR_AIM       ] );
   print_xml_player_attribute( writer, "cunning",
-                              p -> cunning(),   p -> stats.attribute[ ATTR_CUNNING   ], p -> attribute_buffed[ ATTR_CUNNING   ] );
+                              p -> cunning(),   p -> stats.attribute[ ATTR_CUNNING   ], p -> buffed.attribute[ ATTR_CUNNING   ] );
   print_xml_player_attribute( writer, "willpower",
-                              p -> willpower(), p -> stats.attribute[ ATTR_WILLPOWER ], p -> attribute_buffed[ ATTR_WILLPOWER ] );
+                              p -> willpower(), p -> stats.attribute[ ATTR_WILLPOWER ], p -> buffed.attribute[ ATTR_WILLPOWER ] );
   print_xml_player_attribute( writer, "presence",
-                              p -> presence(),  p -> stats.attribute[ ATTR_PRESENCE  ], p -> attribute_buffed[ ATTR_PRESENCE  ] );
-  print_xml_player_attribute( writer, "spellpower",
-                              p -> composite_spell_power( SCHOOL_MAX ) * p -> composite_spell_power_multiplier(), p -> stats.spell_power, p -> buffed_spell_power );
-  print_xml_player_attribute( writer, "spellhit",
-                              100 * p -> composite_spell_hit(), p -> stats.hit_rating, 100 * p -> buffed_spell_hit );
-  print_xml_player_attribute( writer, "spellcrit",
-                              100 * p -> composite_spell_crit(), p -> stats.crit_rating, 100 * p -> buffed_spell_crit );
-  print_xml_player_attribute( writer, "spellalacrity",
-                              100 * ( 1 / p -> spell_alacrity - 1 ), p -> stats.alacrity_rating, 100 * ( 1 / p -> buffed_spell_alacrity - 1 ) );
-  print_xml_player_attribute( writer, "attackpower",
-                              p -> composite_attack_power() * p -> composite_attack_power_multiplier(), p -> stats.attack_power, p -> buffed_attack_power );
-  print_xml_player_attribute( writer, "attackhit",
-                              100 * p -> composite_attack_hit(), p -> stats.hit_rating, 100 * p -> buffed_attack_hit );
-  print_xml_player_attribute( writer, "attackcrit",
-                              100 * p -> composite_attack_crit(), p -> stats.crit_rating, 100 * p -> buffed_attack_crit );
-  print_xml_player_attribute( writer, "expertise",
-                              100 * p -> composite_attack_expertise(), p -> stats.expertise_rating, 100 * p -> buffed_attack_expertise );
-  print_xml_player_attribute( writer, "attackalacrity",
-                              100 * ( 1 / p -> composite_attack_alacrity() - 1 ), p -> stats.alacrity_rating, 100 * ( 1 / p -> buffed_attack_alacrity - 1 ) );
-  print_xml_player_attribute( writer, "attackspeed",
-                              100 * ( 1 / p -> composite_attack_speed() - 1 ), p -> stats.alacrity_rating, 100 * ( 1 / p -> buffed_attack_speed - 1 ) );
+                              p -> presence(),  p -> stats.attribute[ ATTR_PRESENCE  ], p -> buffed.attribute[ ATTR_PRESENCE  ] );
+  print_xml_player_attribute( writer, "alacrity",
+                              100 * ( 1 - p -> alacrity() ), p -> stats.alacrity_rating, 100 * ( 1 - p -> buffed.alacrity ) );
+  print_xml_player_attribute( writer, "meleeaccuracy",
+                              100 * p -> melee_accuracy_chance(), p -> stats.accuracy_rating, 100 * p -> buffed.melee_accuracy );
+  print_xml_player_attribute( writer, "meleecrit",
+                              100 * p -> melee_crit_chance(), p -> stats.crit_rating, 100 * p -> buffed.melee_crit );
+  // FIXME: Range
+  print_xml_player_attribute( writer, "forceaccuracy",
+                              100 * p -> force_accuracy_chance(), p -> stats.accuracy_rating, 100 * p -> buffed.force_accuracy );
+  print_xml_player_attribute( writer, "forcecrit",
+                              100 * p -> force_crit_chance(), p -> stats.crit_rating, 100 * p -> buffed.force_crit );
+  // FIXME: Tech
   print_xml_player_attribute( writer, "armor",
                               p -> composite_armor(), ( p -> stats.armor + p -> stats.bonus_armor ), p -> buffed_armor );
-  print_xml_player_attribute( writer, "miss",
-                              100 * p -> composite_tank_miss( SCHOOL_PHYSICAL ), 0, 100 * p -> buffed_miss );
-  print_xml_player_attribute( writer, "dodge",
-                              100 * p -> composite_tank_dodge(), p -> stats.dodge_rating, 100 * p -> buffed_dodge );
-  print_xml_player_attribute( writer, "parry",
-                              100 * p -> composite_tank_parry(), p -> stats.parry_rating, 100 * p -> buffed_parry );
-  print_xml_player_attribute( writer, "block",
-                              100 * p -> composite_tank_block(), p -> stats.block_rating, 100 * p -> buffed_block );
-  print_xml_player_attribute( writer, "tank_crit",
-                              100 * p -> composite_tank_crit( SCHOOL_PHYSICAL ), 0, 100 * p -> buffed_crit );
 
   writer.begin_tag( "resource" );
   writer.print_attribute( "name", "health" );
   writer.print_attribute( "base", util_t::to_string( p -> resource_max[ RESOURCE_HEALTH ], 0 ) );
-  writer.print_attribute( "buffed", util_t::to_string( p -> resource_buffed[ RESOURCE_HEALTH ], 0 ) );
+  writer.print_attribute( "buffed", util_t::to_string( p -> buffed.resource[ RESOURCE_HEALTH ], 0 ) );
   writer.end_tag(); // </resource>
 
   writer.begin_tag( "resource" );
-  writer.print_attribute( "name", "mana" );
-  writer.print_attribute( "base", util_t::to_string( p -> resource_max[ RESOURCE_MANA ], 0 ) );
-  writer.print_attribute( "buffed", util_t::to_string( p -> resource_buffed[ RESOURCE_MANA ], 0 ) );
+  writer.print_attribute( "name", "force" );
+  writer.print_attribute( "base", util_t::to_string( p -> resource_max[ RESOURCE_FORCE ], 0 ) );
+  writer.print_attribute( "buffed", util_t::to_string( p -> buffed.resource[ RESOURCE_FORCE ], 0 ) );
   writer.end_tag(); // </resource>
 }
 
@@ -406,6 +388,7 @@ void print_xml_player_attribute( xml_writer_t & writer, const std::string & attr
 
 void print_xml_player_actions( xml_writer_t & writer, player_t* p )
 {
+#if 0
   writer.begin_tag( "glyphs" );
   std::vector<std::string> glyph_names;
   int num_glyphs = util_t::string_split( glyph_names, p -> glyphs_str.c_str(), "/" );
@@ -416,6 +399,7 @@ void print_xml_player_actions( xml_writer_t & writer, player_t* p )
     writer.end_tag(); // </glyph>
   }
   writer.end_tag(); // </glyphs>
+#endif
 
   writer.begin_tag( "priorities" );
   std::vector<std::string> action_list;
@@ -687,7 +671,7 @@ void print_xml_player_scale_factors( xml_writer_t & writer, player_t * p )
 
   for ( int i=0; i < STAT_MAX; i++ )
   {
-    if ( p -> scales_with[ i ] != 0 )
+    if ( p -> scales_with[ i ] )
     {
       writer.begin_tag( "stat" );
       writer.print_attribute( "name", util_t::stat_type_abbrev( i ) );

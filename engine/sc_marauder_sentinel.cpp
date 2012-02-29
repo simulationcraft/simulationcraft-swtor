@@ -7,7 +7,6 @@
 
 struct marauder_sentinel_targetdata_t : public targetdata_t
 {
-
     marauder_sentinel_targetdata_t( player_t* source, player_t* target )
         : targetdata_t( source, target )
     {}
@@ -81,11 +80,11 @@ struct marauder_sentinel_t : public player_t
     {
 
 
-        primary_attribute   = ATTR_WILLPOWER;
-        secondary_attribute = ATTR_STRENGTH;
+      primary_attribute = ATTR_STRENGTH;
+      secondary_attribute   = ATTR_WILLPOWER;
 
-        create_talents();
-        create_options();
+      create_talents();
+      create_options();
     }
 
     // Character Definition
@@ -103,6 +102,12 @@ struct marauder_sentinel_t : public player_t
     virtual int       primary_role() const;
     virtual void      create_talents();
 
+    virtual void init_scaling()
+    {
+      player_t::init_scaling();
+      scales_with[ STAT_WEAPON_DMG         ] = true;
+      scales_with[ STAT_FORCE_POWER        ] = true;
+    }
 };
 
 namespace { // ANONYMOUS NAMESPACE ==========================================
@@ -112,20 +117,20 @@ namespace { // ANONYMOUS NAMESPACE ==========================================
 // Sith assassin Abilities
 // ==========================================================================
 
-struct marauder_sentinel_attack_t : public attack_t
+struct marauder_sentinel_attack_t : public action_t
 {
     marauder_sentinel_attack_t( const char* n, marauder_sentinel_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC, int t=TREE_NONE ) :
-        attack_t( n, p, r, s, t )
+        action_t( ACTION_ATTACK, n, p, melee_policy, r, s, t )
     {
         may_crit   = true;
     }
 
 };
 
-struct marauder_sentinel_spell_t : public spell_t
+struct marauder_sentinel_spell_t : public action_t
 {
     marauder_sentinel_spell_t( const char* n, marauder_sentinel_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC, int t=TREE_NONE ) :
-        spell_t( n, p, r, s, t )
+        action_t( ACTION_ATTACK, n, p, force_policy, r, s, t )
     {
         may_crit   = true;
         tick_may_crit = true;

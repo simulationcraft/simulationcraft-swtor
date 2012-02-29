@@ -81,8 +81,8 @@ struct juggernaut_guardian_t : public player_t
     {
 
 
-        primary_attribute   = ATTR_WILLPOWER;
-        secondary_attribute = ATTR_STRENGTH;
+        primary_attribute   = ATTR_STRENGTH;
+        secondary_attribute = ATTR_WILLPOWER;
 
         create_talents();
         create_options();
@@ -103,6 +103,10 @@ struct juggernaut_guardian_t : public player_t
     virtual int       primary_role() const;
     virtual void      create_talents();
 
+    virtual void      init_scaling()
+    {
+      scales_with[ STAT_FORCE_POWER ] = true;
+    }
 };
 
 namespace { // ANONYMOUS NAMESPACE ==========================================
@@ -112,20 +116,20 @@ namespace { // ANONYMOUS NAMESPACE ==========================================
 // Sith assassin Abilities
 // ==========================================================================
 
-struct juggernaut_guardian_attack_t : public attack_t
+struct juggernaut_guardian_attack_t : public action_t
 {
     juggernaut_guardian_attack_t( const char* n, juggernaut_guardian_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC, int t=TREE_NONE ) :
-        attack_t( n, p, r, s, t )
+        action_t( ACTION_ATTACK, n, p, melee_policy, r, s, t )
     {
         may_crit   = true;
     }
 
 };
 
-struct juggernaut_guardian_spell_t : public spell_t
+struct juggernaut_guardian_spell_t : public action_t
 {
     juggernaut_guardian_spell_t( const char* n, juggernaut_guardian_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC, int t=TREE_NONE ) :
-        spell_t( n, p, r, s, t )
+        action_t( ACTION_ATTACK, n, p, force_policy, r, s, t )
     {
         may_crit   = true;
         tick_may_crit = true;

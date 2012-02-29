@@ -499,11 +499,9 @@ const char* util_t::result_type_string( int type )
   {
   case RESULT_NONE:   return "none";
   case RESULT_MISS:   return "miss";
-  case RESULT_DODGE:  return "dodge";
-  case RESULT_PARRY:  return "parry";
+  case RESULT_AVOID:  return "avoid";
   case RESULT_BLOCK:  return "block";
   case RESULT_CRIT:   return "crit";
-  case RESULT_CRIT_BLOCK: return "crit-block";
   case RESULT_HIT:    return "hit";
   }
   return "unknown";
@@ -564,39 +562,6 @@ const char* util_t::school_type_string( int school )
 {
   switch ( school )
   {
-  case SCHOOL_ARCANE:           return "arcane";
-  case SCHOOL_BLEED:            return "bleed";
-  case SCHOOL_CHAOS:            return "chaos";
-  case SCHOOL_FIRE:             return "fire";
-  case SCHOOL_FROST:            return "frost";
-  case SCHOOL_FROSTFIRE:        return "frostfire";
-  case SCHOOL_HOLY:             return "holy";
-  case SCHOOL_NATURE:           return "nature";
-  case SCHOOL_PHYSICAL:         return "physical";
-  case SCHOOL_SHADOW:           return "shadow";
-  case SCHOOL_HOLYSTRIKE:       return "holystrike";
-  case SCHOOL_FLAMESTRIKE:      return "flamestrike";
-  case SCHOOL_HOLYFIRE:         return "holyfire";
-  case SCHOOL_STORMSTRIKE:      return "stormstrike";
-  case SCHOOL_HOLYSTORM:        return "holystorm";
-  case SCHOOL_FIRESTORM:        return "firestorm";
-  case SCHOOL_FROSTSTRIKE:      return "froststrike";
-  case SCHOOL_HOLYFROST:        return "holyfrost";
-  case SCHOOL_FROSTSTORM:       return "froststorm";
-  case SCHOOL_SHADOWSTRIKE:     return "shadowstrike";
-  case SCHOOL_SHADOWLIGHT:      return "shadowlight";
-  case SCHOOL_SHADOWFLAME:      return "shadowflame";
-  case SCHOOL_SHADOWSTORM:      return "shadowstorm";
-  case SCHOOL_SHADOWFROST:      return "shadowfrost";
-  case SCHOOL_SPELLSTRIKE:      return "spellstrike";
-  case SCHOOL_DIVINE:           return "divine";
-  case SCHOOL_SPELLFIRE:        return "spellfire";
-  case SCHOOL_SPELLSTORM:       return "spellstorm";
-  case SCHOOL_SPELLFROST:       return "spellfrost";
-  case SCHOOL_SPELLSHADOW:      return "spellshadow";
-  case SCHOOL_CHROMATIC:        return "chromatic";
-  case SCHOOL_MAGIC:            return "magic";
-  case SCHOOL_DRAIN:            return "drain";
   case SCHOOL_KINETIC:          return "kinetic";
   case SCHOOL_INTERNAL:         return "internal";
   case SCHOOL_ELEMENTAL:        return "elemental";
@@ -698,23 +663,18 @@ const char* util_t::weapon_type_string( int weapon )
 {
   switch ( weapon )
   {
-  case WEAPON_NONE:     return "none";
-  case WEAPON_DAGGER:   return "dagger";
-  case WEAPON_FIST:     return "fist";
-  case WEAPON_BEAST:    return "beast";
-  case WEAPON_SWORD:    return "sword";
-  case WEAPON_MACE:     return "mace";
-  case WEAPON_AXE:      return "axe";
-  case WEAPON_BEAST_2H: return "beast2h";
-  case WEAPON_SWORD_2H: return "sword2h";
-  case WEAPON_MACE_2H:  return "mace2h";
-  case WEAPON_AXE_2H:   return "axe2h";
-  case WEAPON_STAFF:    return "staff";
-  case WEAPON_POLEARM:  return "polearm";
-  case WEAPON_BOW:      return "bow";
-  case WEAPON_CROSSBOW: return "crossbow";
-  case WEAPON_GUN:      return "gun";
-  case WEAPON_THROWN:   return "thrown";
+  case WEAPON_LIGHTSABER:                 return "lightsaber";
+  case WEAPON_VIBROKNIFE:                 return "vibroknife";
+  case WEAPON_TECHBLADE:                  return "techblade";
+  case WEAPON_VIBROSWORD:                 return "vibrosword";
+  case WEAPON_DOUBLE_BLADED_LIGHTSABER:   return "doublebladedlightsaber";
+  case WEAPON_ELECTROSTAFF:               return "electrostaf";
+  case WEAPON_TECHSTAFF:                  return "techstaff";
+  case WEAPON_ASSAULT_CANON:              return "assault_canon";
+  case WEAPON_BLASTER_PISTOL:             return "blaster_pistol";
+  case WEAPON_BLASTER_RIFLE:              return "blaster_rifle";
+  case WEAPON_SCATTERGUN:                 return "scattergun";
+  case WEAPON_SNIPER_RIFLE:               return "sniperrifle";
   }
   return "unknown";
 }
@@ -762,57 +722,6 @@ const char* util_t::weapon_class_string( int class_ )
   return 0;
 }
 
-// util_t::set_item_type_string =============================================
-
-const char* util_t::set_item_type_string( int item_set )
-{
-  switch ( item_set )
-  {
-    // Melee sets
-  case 925:   // Death Knight T11
-  case 927:   // Druid T11
-  case 932:   // Paladin T11
-  case 939:   // Shaman T11
-  case 942:   // Warrior T11
-  case 1000:  // Death Knight T12
-  case 1002:  // Druid T12
-  case 1011:  // Paladin T12
-  case 1015:  // Shaman T12
-  case 1017:  // Warrior T12
-    return "Melee";
-
-    // Tank sets
-  case 926:   // Death Knight T11
-  case 934:   // Paladin T11
-  case 943:   // Warrior T11
-  case 1001:  // Death Knight T12
-  case 1013:  // Paladin T12
-  case 1018:  // Warrior T12
-    return "Tank";
-
-    // Healer sets
-  case 928:   // Druid T11
-  case 933:   // Paladin T11
-  case 935:   // Priest T11
-  case 938:   // Shaman T11
-  case 1003:  // Druid T12
-  case 1010:  // Priest T12
-  case 1012:  // Paladin T12
-  case 1014:  // Shaman T12
-    return "Healer";
-
-    // DPS Caster sets
-  case 929:   // Druid T11
-  case 936:   // Priest T11
-  case 940:   // Shaman T11
-  case 1004:  // Druid T12
-  case 1009:  // Priest T12
-  case 1016:  // Shaman T12
-    return "Caster";
-  }
-  return 0;
-}
-
 // util_t::parse_weapon_type ================================================
 
 int util_t::parse_weapon_type( const std::string& name )
@@ -846,31 +755,6 @@ int util_t::parse_stim_type( const std::string& name )
       return i;
 
   return STIM_NONE;
-}
-
-// util_t::set_bonus_string =================================================
-
-const char* util_t::set_bonus_string( set_type type )
-{
-  switch ( type )
-  {
-  case SET_RAKATA_COMBAT_TECH_GEAR: return "rakata_combat_tech_gear";
-  case SET_INDOMITABLE: return "indomitable";
-  default:
-    break;
-  }
-  return "unknown";
-}
-
-// util_t::parse_set_bonus ==================================================
-
-set_type util_t::parse_set_bonus( const std::string& name )
-{
-  for ( int i=0; i < SET_MAX; i++ )
-    if ( util_t::str_compare_ci( name, util_t::set_bonus_string( ( set_type ) i ) ) )
-      return ( set_type ) i;
-
-  return SET_NONE;
 }
 
 // util_t::slot_type_string =================================================
@@ -940,35 +824,27 @@ const char* util_t::stat_type_string( int stat )
   case STAT_ENERGY: return "energy";
   case STAT_AMMO:  return "ammo";
 
-  case STAT_SPELL_POWER:       return "spell_power";
-
-  case STAT_ATTACK_POWER:             return "attack_power";
   case STAT_EXPERTISE_RATING:         return "expertise_rating";
   case STAT_EXPERTISE_RATING2:        return "inverse_expertise_rating";
 
-  case STAT_HIT_RATING:   return "hit_rating";
-  case STAT_HIT_RATING2:  return "inverse_hit_rating";
+  case STAT_ACCURACY_RATING:   return "accuracy_rating";
+  case STAT_ACCURACY_RATING2:  return "inverse_accuracy_rating";
   case STAT_CRIT_RATING:  return "crit_rating";
   case STAT_ALACRITY_RATING: return "alacrity_rating";
+  case STAT_SURGE_RATING: return "surge_rating";
 
-  case STAT_WEAPON_DPS:   return "weapon_dps";
-  case STAT_WEAPON_SPEED: return "weapon_speed";
-
-  case STAT_WEAPON_OFFHAND_DPS:    return "weapon_offhand_dps";
-  case STAT_WEAPON_OFFHAND_SPEED:  return "weapon_offhand_speed";
+  case STAT_WEAPON_DMG:   return "weapon_dmg";
+  case STAT_WEAPON_OFFHAND_DMG:    return "weapon_offhand_dmg";
 
   case STAT_ARMOR:             return "armor";
   case STAT_BONUS_ARMOR:       return "bonus_armor";
-  case STAT_RESILIENCE_RATING: return "resilience_rating";
-  case STAT_DODGE_RATING:      return "dodge_rating";
-  case STAT_PARRY_RATING:      return "parry_rating";
-
-  case STAT_BLOCK_RATING: return "block_rating";
+  case STAT_DEFENSE_RATING:    return "defense_rating";
+  case STAT_SHIELD_RATING:     return "shield_rating";
+  case STAT_ABSORB_RATING:     return "absorb_rating";
 
   case STAT_POWER: return "power";
   case STAT_FORCE_POWER: return "forcepower";
-
-  case STAT_SURGE_RATING: return "surge_rating";
+  case STAT_TECH_POWER: return "techpower";
 
   case STAT_MAX: return "all";
   }
@@ -994,35 +870,27 @@ const char* util_t::stat_type_abbrev( int stat )
   case STAT_ENERGY: return "Energy";
   case STAT_AMMO:   return "Ammo";
 
-  case STAT_SPELL_POWER:       return "SP";
+  case STAT_EXPERTISE_RATING:  return "Exp";
+  case STAT_EXPERTISE_RATING2: return "InvExp";
 
-  case STAT_ATTACK_POWER:             return "AP";
-  case STAT_EXPERTISE_RATING:         return "Exp";
-  case STAT_EXPERTISE_RATING2:        return "InvExp";
-
-  case STAT_HIT_RATING:   return "Hit";
-  case STAT_HIT_RATING2:  return "InvHit";
-  case STAT_CRIT_RATING:  return "Crit";
+  case STAT_ACCURACY_RATING:      return "Acc";
+  case STAT_ACCURACY_RATING2:     return "InvAcc";
+  case STAT_CRIT_RATING:     return "Crit";
   case STAT_ALACRITY_RATING: return "Alacrity";
+  case STAT_SURGE_RATING:    return "Surge";
 
-  case STAT_WEAPON_DPS:   return "Wdps";
-  case STAT_WEAPON_SPEED: return "Wspeed";
+  case STAT_WEAPON_DMG:   return "Wdmg";
+  case STAT_WEAPON_OFFHAND_DMG:   return "WOHdmg";
 
-  case STAT_WEAPON_OFFHAND_DPS:    return "WOHdps";
-  case STAT_WEAPON_OFFHAND_SPEED:  return "WOHspeed";
-
-  case STAT_ARMOR:             return "Armor";
-  case STAT_BONUS_ARMOR:       return "BArmor";
-  case STAT_RESILIENCE_RATING: return "Resil";
-  case STAT_DODGE_RATING:      return "Dodge";
-  case STAT_PARRY_RATING:      return "Parry";
-
-  case STAT_BLOCK_RATING: return "BlockR";
+  case STAT_ARMOR:          return "Armor";
+  case STAT_BONUS_ARMOR:    return "BArmor";
+  case STAT_DEFENSE_RATING: return "Def";
+  case STAT_SHIELD_RATING:  return "Shield";
+  case STAT_ABSORB_RATING:  return "Absorb";
 
   case STAT_POWER: return "Power";
   case STAT_FORCE_POWER: return "Force_Power";
-
-  case STAT_SURGE_RATING: return "Surge";
+  case STAT_TECH_POWER: return "Tech_Power";
 
   case STAT_MAX: return "All";
   }
@@ -1048,23 +916,16 @@ const char* util_t::stat_type_wowhead( int stat )
   case STAT_ENERGY: return "energy";
   case STAT_AMMO:   return "ammo";
 
-  case STAT_SPELL_POWER:       return "spellPower";
+  case STAT_EXPERTISE_RATING: return "expertiseRating";
 
-  case STAT_ATTACK_POWER:             return "attackPower";
-  case STAT_EXPERTISE_RATING:         return "expertiseRating";
-
-  case STAT_HIT_RATING:   return "hitRating";
-  case STAT_CRIT_RATING:  return "critRating";
+  case STAT_ACCURACY_RATING:      return "accuracyRating";
+  case STAT_CRIT_RATING:     return "critRating";
   case STAT_ALACRITY_RATING: return "alacrityRating";
 
-  case STAT_WEAPON_DPS:   return "__dps";
-  case STAT_WEAPON_SPEED: return "__speed";
+  case STAT_WEAPON_DMG:   return "__dmg";
 
   case STAT_ARMOR:             return "armor";
   case STAT_BONUS_ARMOR:       return "__armor"; // FIXME! Does wowhead distinguish "bonus" armor?
-  case STAT_RESILIENCE_RATING: return "resilRating";
-  case STAT_DODGE_RATING:      return "dodgeRating";
-  case STAT_PARRY_RATING:      return "parryRating";
 
   case STAT_MAX: return "__all";
   }
@@ -1090,17 +951,10 @@ stat_type util_t::parse_stat_type( const std::string& name )
   if ( name == "rgdcritstrkrtng" ) return STAT_CRIT_RATING;
 
   // in-case wowhead changes their mind again
-  if ( name == "atkpwr"         ) return STAT_ATTACK_POWER;
   if ( name == "critstrkrtng"   ) return STAT_CRIT_RATING;
-  if ( name == "dodgertng"      ) return STAT_DODGE_RATING;
   if ( name == "exprtng"        ) return STAT_EXPERTISE_RATING;
   if ( name == "alacrityrtng"   ) return STAT_ALACRITY_RATING;
-  if ( name == "hitrtng"        ) return STAT_HIT_RATING;
-  if ( name == "parryrtng"      ) return STAT_PARRY_RATING;
-  if ( name == "resiliencertng" ) return STAT_RESILIENCE_RATING;
-  if ( name == "splpwr"         ) return STAT_SPELL_POWER;
-  if ( util_t::str_compare_ci( name, "__wpds"   ) ) return STAT_WEAPON_DPS;
-  if ( util_t::str_compare_ci( name, "__wspeed" ) ) return STAT_WEAPON_SPEED;
+  if ( name == "accuracy"       ) return STAT_ACCURACY_RATING;
 
   return STAT_NONE;
 }
@@ -1114,11 +968,9 @@ stat_type util_t::parse_reforge_type( const std::string& name )
   switch ( s )
   {
   case STAT_EXPERTISE_RATING:
-  case STAT_HIT_RATING:
+  case STAT_ACCURACY_RATING:
   case STAT_CRIT_RATING:
   case STAT_ALACRITY_RATING:
-  case STAT_DODGE_RATING:
-  case STAT_PARRY_RATING:
     return s;
   default:
     return STAT_NONE;
@@ -1266,18 +1118,11 @@ stat_type util_t::translate_item_mod( int item_mod )
   switch ( item_mod )
   {
   case ITEM_MOD_STRENGTH:            return STAT_STRENGTH;
-  case ITEM_MOD_DODGE_RATING:        return STAT_DODGE_RATING;
-  case ITEM_MOD_PARRY_RATING:        return STAT_PARRY_RATING;
-  case ITEM_MOD_BLOCK_RATING:        return STAT_BLOCK_RATING;
-  case ITEM_MOD_HIT_RATING:          return STAT_HIT_RATING;
+  case ITEM_MOD_HIT_RATING:          return STAT_ACCURACY_RATING;
   case ITEM_MOD_CRIT_RATING:         return STAT_CRIT_RATING;
   case ITEM_MOD_HASTE_RATING:        return STAT_ALACRITY_RATING;
   case ITEM_MOD_EXPERTISE_RATING:    return STAT_EXPERTISE_RATING;
-  case ITEM_MOD_ATTACK_POWER:        return STAT_ATTACK_POWER;
-  case ITEM_MOD_RANGED_ATTACK_POWER: return STAT_ATTACK_POWER;
-  case ITEM_MOD_SPELL_POWER:         return STAT_SPELL_POWER;
   case ITEM_MOD_EXTRA_ARMOR:         return STAT_BONUS_ARMOR;
-  case ITEM_MOD_RESILIENCE_RATING:   return STAT_RESILIENCE_RATING;
   }
 
   return STAT_NONE;
@@ -1285,27 +1130,8 @@ stat_type util_t::translate_item_mod( int item_mod )
 
 // util_t::translate_weapon_subclass ========================================
 
-weapon_type util_t::translate_weapon_subclass( item_subclass_weapon id )
+weapon_type util_t::translate_weapon_subclass( item_subclass_weapon /* id */ )
 {
-  switch ( id )
-  {
-  case ITEM_SUBCLASS_WEAPON_AXE:          return WEAPON_AXE;
-  case ITEM_SUBCLASS_WEAPON_AXE2:         return WEAPON_AXE_2H;
-  case ITEM_SUBCLASS_WEAPON_BOW:          return WEAPON_BOW;
-  case ITEM_SUBCLASS_WEAPON_GUN:          return WEAPON_GUN;
-  case ITEM_SUBCLASS_WEAPON_MACE:         return WEAPON_MACE;
-  case ITEM_SUBCLASS_WEAPON_MACE2:        return WEAPON_MACE_2H;
-  case ITEM_SUBCLASS_WEAPON_POLEARM:      return WEAPON_POLEARM;
-  case ITEM_SUBCLASS_WEAPON_SWORD:        return WEAPON_SWORD;
-  case ITEM_SUBCLASS_WEAPON_SWORD2:       return WEAPON_SWORD_2H;
-  case ITEM_SUBCLASS_WEAPON_STAFF:        return WEAPON_STAFF;
-  case ITEM_SUBCLASS_WEAPON_FIST:         return WEAPON_FIST;
-  case ITEM_SUBCLASS_WEAPON_DAGGER:       return WEAPON_DAGGER;
-  case ITEM_SUBCLASS_WEAPON_THROWN:       return WEAPON_THROWN;
-  case ITEM_SUBCLASS_WEAPON_CROSSBOW:     return WEAPON_CROSSBOW;
-  case ITEM_SUBCLASS_WEAPON_WAND:         return WEAPON_WAND;
-  default: return WEAPON_NONE;
-  }
 
   return WEAPON_NONE;
 }
