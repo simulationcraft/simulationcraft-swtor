@@ -2079,7 +2079,9 @@ void player_t::merge( player_t& other )
 
   for ( buff_t* b = buff_list; b; b = b -> next )
   {
-    b -> merge( buff_t::find( &other, b -> name() ) );
+    buff_t* other_b = buff_t::find( &other, b -> name() );
+    assert( other_b );
+    b -> merge( other_b );
   }
 
   for ( proc_t* proc = proc_list; proc; proc = proc -> next )
