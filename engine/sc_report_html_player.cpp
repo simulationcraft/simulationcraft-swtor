@@ -505,6 +505,7 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
                 "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">cooldown:</span>%.2f</li>\n"
                 "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">base_execute_time:</span>%.2f</li>\n"
                 "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">base_crit:</span>%.2f</li>\n"
+                "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">base_accuracy:</span>%.2f</li>\n"
                 "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">target:</span>%s</li>\n"
                 "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">harmful:</span>%s</li>\n"
                 "\t\t\t\t\t\t\t\t\t\t</ul>\n"
@@ -523,6 +524,7 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
                 a -> cooldown -> duration.total_seconds(),
                 a -> base_execute_time.total_seconds(),
                 a -> base_crit,
+                a -> base_accuracy,
                 a -> target ? a -> target -> name() : "",
                 a -> harmful ? "true" : "false" );
       if ( a -> dd.power_mod || a -> dd.base_min || a -> dd.base_max )

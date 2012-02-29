@@ -1481,7 +1481,7 @@ void player_t::init_scaling()
     scales_with[ primary_attribute    ] = true;
     scales_with[ secondary_attribute  ] = true;
 
-    scales_with[ STAT_ACCURACY_RATING      ] = attack;
+    scales_with[ STAT_ACCURACY_RATING ] = attack;
 
     scales_with[ STAT_CRIT_RATING     ] = true;
     scales_with[ STAT_ALACRITY_RATING ] = true;
