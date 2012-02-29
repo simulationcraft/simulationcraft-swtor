@@ -1018,8 +1018,8 @@ struct jedi_sage_heal_t : public heal_t
 {
   bool influenced_by_inner_strength;
 
-  jedi_sage_heal_t( const char* n, sage_sorcerer_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC, int t=TREE_NONE ) :
-    heal_t( n, p, force_heal_policy, r, s, t ),
+  jedi_sage_heal_t( const std::string& n, sage_sorcerer_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC, int t=TREE_NONE ) :
+    heal_t( n.c_str(), p, force_heal_policy, r, s, t ),
     influenced_by_inner_strength( true )
   {
     may_crit   = true;
@@ -1070,7 +1070,7 @@ struct jedi_sage_heal_t : public heal_t
 struct deliverance_t : public jedi_sage_heal_t
 {
   deliverance_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
-    jedi_sage_heal_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+    jedi_sage_heal_t( n, p, RESOURCE_FORCE, SCHOOL_INTERNAL )
   {
     parse_options( 0, options_str );
 
@@ -1084,7 +1084,28 @@ struct deliverance_t : public jedi_sage_heal_t
     range = 30.0;
 
   }
+};
 
+struct healing_trance_t : public jedi_sage_heal_t
+{
+  healing_trance_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
+    jedi_sage_heal_t( n, p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+  {
+    parse_options( 0, options_str );
+
+    dd.standardhealthpercentmin = dd.standardhealthpercentmax = .0515;
+    dd.power_mod = 1.03;
+
+    td.standardhealthpercentmin = td.standardhealthpercentmax = .0515;
+    td.power_mod = 1.03;
+
+    base_cost = 40.0;
+    base_execute_time = timespan_t::from_seconds( 3.0 );
+    cooldown -> duration = timespan_t::from_seconds( 9.0 );
+
+    range = 30.0;
+
+  }
 };
 
 } // ANONYMOUS NAMESPACE ====================================================
@@ -1113,6 +1134,7 @@ action_t* sage_sorcerer_t::create_action( const std::string& name,
     if ( name == "telekinetic_wave"   ) return new  telekinetic_wave_t( this, "telekinetic_wave", options_str );
     if ( name == "force_potency"      ) return new     force_potency_t( this, "force_potency", options_str );
     if ( name == "deliverance"        ) return new       deliverance_t( this, "deliverance", options_str );
+    if ( name == "healing_trance"     ) return new    healing_trance_t( this, "healing_trance", options_str );
   }
   else if ( type == SITH_SORCERER )
   {
