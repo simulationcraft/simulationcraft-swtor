@@ -954,6 +954,7 @@ stat_type util_t::parse_stat_type( const std::string& name )
   if ( name == "critstrkrtng"   ) return STAT_CRIT_RATING;
   if ( name == "exprtng"        ) return STAT_EXPERTISE_RATING;
   if ( name == "alacrityrtng"   ) return STAT_ALACRITY_RATING;
+  if ( name == "accuracy"       ) return STAT_HIT_RATING;
 
   return STAT_NONE;
 }
