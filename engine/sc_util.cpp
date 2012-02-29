@@ -827,8 +827,8 @@ const char* util_t::stat_type_string( int stat )
   case STAT_EXPERTISE_RATING:         return "expertise_rating";
   case STAT_EXPERTISE_RATING2:        return "inverse_expertise_rating";
 
-  case STAT_HIT_RATING:   return "hit_rating";
-  case STAT_HIT_RATING2:  return "inverse_hit_rating";
+  case STAT_ACCURACY_RATING:   return "accuracy_rating";
+  case STAT_ACCURACY_RATING2:  return "inverse_accuracy_rating";
   case STAT_CRIT_RATING:  return "crit_rating";
   case STAT_ALACRITY_RATING: return "alacrity_rating";
   case STAT_SURGE_RATING: return "surge_rating";
@@ -873,8 +873,8 @@ const char* util_t::stat_type_abbrev( int stat )
   case STAT_EXPERTISE_RATING:  return "Exp";
   case STAT_EXPERTISE_RATING2: return "InvExp";
 
-  case STAT_HIT_RATING:      return "Hit";
-  case STAT_HIT_RATING2:     return "InvHit";
+  case STAT_ACCURACY_RATING:      return "Acc";
+  case STAT_ACCURACY_RATING2:     return "InvAcc";
   case STAT_CRIT_RATING:     return "Crit";
   case STAT_ALACRITY_RATING: return "Alacrity";
   case STAT_SURGE_RATING:    return "Surge";
@@ -918,7 +918,7 @@ const char* util_t::stat_type_wowhead( int stat )
 
   case STAT_EXPERTISE_RATING: return "expertiseRating";
 
-  case STAT_HIT_RATING:      return "hitRating";
+  case STAT_ACCURACY_RATING:      return "accuracyRating";
   case STAT_CRIT_RATING:     return "critRating";
   case STAT_ALACRITY_RATING: return "alacrityRating";
 
@@ -954,7 +954,7 @@ stat_type util_t::parse_stat_type( const std::string& name )
   if ( name == "critstrkrtng"   ) return STAT_CRIT_RATING;
   if ( name == "exprtng"        ) return STAT_EXPERTISE_RATING;
   if ( name == "alacrityrtng"   ) return STAT_ALACRITY_RATING;
-  if ( name == "accuracy"       ) return STAT_HIT_RATING;
+  if ( name == "accuracy"       ) return STAT_ACCURACY_RATING;
 
   return STAT_NONE;
 }
@@ -968,7 +968,7 @@ stat_type util_t::parse_reforge_type( const std::string& name )
   switch ( s )
   {
   case STAT_EXPERTISE_RATING:
-  case STAT_HIT_RATING:
+  case STAT_ACCURACY_RATING:
   case STAT_CRIT_RATING:
   case STAT_ALACRITY_RATING:
     return s;
@@ -1118,7 +1118,7 @@ stat_type util_t::translate_item_mod( int item_mod )
   switch ( item_mod )
   {
   case ITEM_MOD_STRENGTH:            return STAT_STRENGTH;
-  case ITEM_MOD_HIT_RATING:          return STAT_HIT_RATING;
+  case ITEM_MOD_HIT_RATING:          return STAT_ACCURACY_RATING;
   case ITEM_MOD_CRIT_RATING:         return STAT_CRIT_RATING;
   case ITEM_MOD_HASTE_RATING:        return STAT_ALACRITY_RATING;
   case ITEM_MOD_EXPERTISE_RATING:    return STAT_EXPERTISE_RATING;

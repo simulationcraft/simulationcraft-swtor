@@ -1227,7 +1227,7 @@ struct saber_strike_t : public shadow_assassin_attack_t
     dd.power_mod = .33;
 
     // Is a Basic attack
-    base_hit -= 0.10;
+    base_accuracy -= 0.10;
 
     if ( is_consequent_strike )
     {

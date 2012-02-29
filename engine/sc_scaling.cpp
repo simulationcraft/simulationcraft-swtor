@@ -39,7 +39,7 @@ static bool is_scaling_stat( sim_t* sim,
 
 static bool stat_may_cap( int stat )
 {
-  if ( stat == STAT_HIT_RATING ) return true;
+  if ( stat == STAT_ACCURACY_RATING ) return true;
   return false;
 }
 
@@ -108,7 +108,7 @@ scaling_t::scaling_t( sim_t* s ) :
   scale_alacrity_iterations( 1.0 ),
   scale_expertise_iterations( 1.0 ),
   scale_crit_iterations( 1.0 ),
-  scale_hit_iterations( 1.0 ),
+  scale_accuracy_iterations( 1.0 ),
   scale_over( "" ), scale_over_player( "" )
 {
   create_options();
@@ -174,15 +174,15 @@ void scaling_t::init_deltas()
     if ( positive_scale_delta ) stats.expertise_rating2 *= -1;
   }
 
-  if ( stats.hit_rating == 0 )
+  if ( stats.accuracy_rating == 0 )
   {
-    stats.hit_rating = scale_delta_multiplier * ( smooth_scale_factors ? -150 : -300 );
-    if ( positive_scale_delta ) stats.hit_rating *= -1;
+    stats.accuracy_rating = scale_delta_multiplier * ( smooth_scale_factors ? -150 : -300 );
+    if ( positive_scale_delta ) stats.accuracy_rating *= -1;
   }
-  if ( stats.hit_rating2 == 0 )
+  if ( stats.accuracy_rating2 == 0 )
   {
-    stats.hit_rating2 = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
-    if ( positive_scale_delta ) stats.hit_rating2 *= -1;
+    stats.accuracy_rating2 = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
+    if ( positive_scale_delta ) stats.accuracy_rating2 *= -1;
   }
 
   if ( stats.crit_rating  == 0    ) stats.crit_rating     = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
@@ -258,7 +258,7 @@ void scaling_t::analyze_stats()
     if ( i == STAT_ALACRITY_RATING && ( scale_alacrity_iterations != 0 ) ) delta_sim -> iterations = ( int ) ( delta_sim -> iterations * scale_alacrity_iterations );
     if ( i == STAT_EXPERTISE_RATING && ( scale_expertise_iterations != 0 ) ) delta_sim -> iterations = ( int ) ( delta_sim -> iterations * scale_expertise_iterations );
     if ( i == STAT_CRIT_RATING && ( scale_crit_iterations != 0 ) ) delta_sim -> iterations = ( int ) ( delta_sim -> iterations * scale_crit_iterations );
-    if ( i == STAT_HIT_RATING && ( scale_hit_iterations != 0 ) ) delta_sim -> iterations = ( int ) ( delta_sim -> iterations * scale_hit_iterations );
+    if ( i == STAT_ACCURACY_RATING && ( scale_accuracy_iterations != 0 ) ) delta_sim -> iterations = ( int ) ( delta_sim -> iterations * scale_accuracy_iterations );
     delta_sim -> execute();
 
     if ( center )
@@ -268,7 +268,7 @@ void scaling_t::analyze_stats()
       if ( i == STAT_ALACRITY_RATING && ( scale_alacrity_iterations != 0 ) ) ref_sim -> iterations = ( int ) ( ref_sim -> iterations * scale_alacrity_iterations );
       if ( i == STAT_EXPERTISE_RATING && ( scale_expertise_iterations != 0 ) ) ref_sim -> iterations = ( int ) ( ref_sim -> iterations * scale_expertise_iterations );
       if ( i == STAT_CRIT_RATING && ( scale_crit_iterations != 0 ) ) ref_sim -> iterations = ( int ) ( ref_sim -> iterations * scale_crit_iterations );
-      if ( i == STAT_HIT_RATING && ( scale_hit_iterations != 0 ) ) ref_sim -> iterations = ( int ) ( ref_sim -> iterations * scale_hit_iterations );
+      if ( i == STAT_ACCURACY_RATING && ( scale_accuracy_iterations != 0 ) ) ref_sim -> iterations = ( int ) ( ref_sim -> iterations * scale_accuracy_iterations );
       ref_sim -> execute();
     }
 
@@ -427,7 +427,6 @@ void scaling_t::analyze_gear_weights()
 
     if ( p -> is_pet() ) continue;
 
-    chart_t::gear_weights_lootrank  ( p -> gear_weights_lootrank_link,   p );
     chart_t::gear_weights_wowhead   ( p -> gear_weights_wowhead_link,    p );
     chart_t::gear_weights_wowreforge( p -> gear_weights_wowreforge_link, p );
     chart_t::gear_weights_pawn      ( p -> gear_weights_pawn_std_string, p, true  );
@@ -519,7 +518,7 @@ void scaling_t::create_options()
     { "scale_endurance",                OPT_FLT,    &( stats.attribute[ ATTR_ENDURANCE ]    ) },
     { "scale_presence",                 OPT_FLT,    &( stats.attribute[ ATTR_PRESENCE  ]    ) },
     { "scale_expertise_rating",         OPT_FLT,    &( stats.expertise_rating               ) },
-    { "scale_hit_rating",               OPT_FLT,    &( stats.hit_rating                     ) },
+    { "scale_accuracy_rating",          OPT_FLT,    &( stats.accuracy_rating                ) },
     { "scale_crit_rating",              OPT_FLT,    &( stats.crit_rating                    ) },
     { "scale_alacrity_rating",          OPT_FLT,    &( stats.alacrity_rating                ) },
     { "scale_power",                    OPT_FLT,    &( stats.power                          ) },
@@ -533,7 +532,7 @@ void scaling_t::create_options()
     { "scale_alacrity_iterations",      OPT_FLT,    &( scale_alacrity_iterations            ) },
     { "scale_expertise_iterations",     OPT_FLT,    &( scale_expertise_iterations           ) },
     { "scale_crit_iterations",          OPT_FLT,    &( scale_crit_iterations                ) },
-    { "scale_hit_iterations",           OPT_FLT,    &( scale_hit_iterations                 ) },
+    { "scale_accuracy_iterations",      OPT_FLT,    &( scale_accuracy_iterations            ) },
     { "scale_over",                     OPT_STRING, &( scale_over                           ) },
     { "scale_over_player",              OPT_STRING, &( scale_over_player                    ) },
     { NULL, OPT_UNKNOWN, NULL }

@@ -71,7 +71,7 @@ static OptionEntry* getScalingOptions()
   {
     { "Analyze All Stats",                "",         "Scale factors are necessary for gear ranking.\nThey only require an additional simulation for each RELEVANT stat." },
     {
-      "Use Positive Deltas Only",         "",         "Normally Hit/Expertise use negative scale factors to show DPS lost by reducing that stat.\n"
+      "Use Positive Deltas Only",         "",         "Normally Accuracy/Expertise use negative scale factors to show DPS lost by reducing that stat.\n"
       "This option forces a positive scale delta, which is useful for classes with soft caps."
     },
     { "Analyze Strength",                 "strength",     "Calculate scale factor for Strength"               },
@@ -97,7 +97,7 @@ static OptionEntry* getPlotOptions()
   {
     { "Plot DPS per Strength",            "str",        "Generate DPS curve for Strength"     },
     { "Plot DPS per Willpower",           "willpower",  "Generate DPS curve for Willpower"    },
-    { "Plot DPS per Accuracy Rating",     "hit",        "Generate DPS curve for Accuracy Rating" },
+    { "Plot DPS per Accuracy Rating",     "acc",        "Generate DPS curve for Accuracy Rating" },
     { "Plot DPS per Crit Rating",         "crit",       "Generate DPS curve for Crit Rating"  },
     { "Plot DPS per Alacrity Rating",     "alacrity",   "Generate DPS curve for Alacrity Rating" },
     { "Plot DPS per Surge Rating",        "surge",      "Generate DPS curve for Surge Rating" },
@@ -118,7 +118,7 @@ static OptionEntry* getReforgePlotOptions()
     { "Plot Reforge Options for Willpower",         "willpower", "Generate reforge plot data for Willpower"        },
     { "Plot Reforge Options for Power",             "power",     "Generate reforge plot data for Power"            },
     { "Plot Reforge Options for Surge Rating",      "surge",     "Generate reforge plot data for Surge Rating"     },
-    { "Plot Reforge Options for Accuracy Rating",   "hit",       "Generate reforge plot data for Accuracy Rating"  },
+    { "Plot Reforge Options for Accuracy Rating",   "acc",       "Generate reforge plot data for Accuracy Rating"  },
     { "Plot Reforge Options for Crit Rating",       "crit",      "Generate reforge plot data for Crit Rating"      },
     { "Plot Reforge Options for Alacrity Rating",   "alacrity",  "Generate reforge plot data for Alacrity Rating"  },
     { NULL, NULL, NULL }

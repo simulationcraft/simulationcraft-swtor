@@ -99,7 +99,7 @@ static const char* stat_color( int type )
   case STAT_POWER:                    return class_color( JEDI_SAGE );
   case STAT_FORCE_POWER:              return class_text_color( T_VANGUARD );
   case STAT_TECH_POWER:               return class_text_color( T_VANGUARD );
-  case STAT_HIT_RATING:               return class_color( SITH_JUGGERNAUT );
+  case STAT_ACCURACY_RATING:          return class_color( SITH_JUGGERNAUT );
   case STAT_CRIT_RATING:              return class_color( IA_OPERATIVE );
   case STAT_ALACRITY_RATING:          return class_color( SITH_SORCERER );
   case STAT_EXPERTISE_RATING:         return color::red;
@@ -1710,74 +1710,6 @@ const char* chart_t::distribution( std::string& s,
 }
 
 
-// chart_t::gear_weights_lootrank ===========================================
-
-const char* chart_t::gear_weights_lootrank( std::string& s,
-                                            player_t*    p )
-{
-  char buffer[ 1024 ];
-
-  s = "http://www.guildox.com/wr.asp?";
-
-  switch ( p -> type )
-  {
-  default: s+= "&Cla=0"; break;
-  }
-
-  switch ( p -> race )
-  {
-  case RACE_HUMAN:
-  case RACE_MIRIALAN:
-  case RACE_MIRALUKA:
-  case RACE_TWILEK:
-  case RACE_ZABRAK: s += "&F=A"; break;
-
-  // EMPIRE
-  /* case RACE_ORC:
-  case RACE_TROLL:
-  case RACE_UNDEAD:
-  case RACE_BLOOD_ELF:
-  case RACE_GOBLIN:
-  case RACE_TAUREN: s += "&F=H"; break; */
-  default: break;
-  }
-
-  for ( int i=0; i < STAT_MAX; i++ )
-  {
-    double value = p -> scaling.get_stat( i );
-    if ( value == 0 ) continue;
-
-    const char* name=0;
-    switch ( i )
-    {
-    case STAT_STRENGTH:                 name = "Str";  break;
-    case STAT_AIM:                      name = "Aim";  break;
-    case STAT_CUNNING:                  name = "Cun";  break;
-    case STAT_WILLPOWER:                name = "Wil";  break;
-    case STAT_ENDURANCE:                name = "End";  break;
-    case STAT_PRESENCE:                 name = "Pre";  break;
-    case STAT_EXPERTISE_RATING:         name = "Exp";  break;
-    case STAT_HIT_RATING:               name = "mhit"; break;
-    case STAT_CRIT_RATING:              name = "mcr";  break;
-    case STAT_ALACRITY_RATING:          name = "Ala";  break;
-    case STAT_ARMOR:                    name = "Arm";  break;
-    case STAT_WEAPON_DMG:               name = "mh_dmg";  break;
-    case STAT_WEAPON_OFFHAND_DMG:       name = "oh_dmg"; break;
-    }
-
-    if ( name )
-    {
-      snprintf( buffer, sizeof( buffer ), "&%s=%.*f", name, p -> sim -> report_precision, value );
-      s += buffer;
-    }
-  }
-
-  s += "&Ver=6";
-  util_t::urlencode( s );
-
-  return s.c_str();
-}
-
 // chart_t::gear_weights_wowhead ============================================
 
 const char* chart_t::gear_weights_wowhead( std::string& s,
@@ -1813,7 +1745,6 @@ const char* chart_t::gear_weights_wowhead( std::string& s,
     {
     case STAT_STRENGTH:                 id = 20;  break;
     case STAT_EXPERTISE_RATING:         id = 117; break;
-    case STAT_HIT_RATING:               id = 119; break;
     case STAT_CRIT_RATING:              id = 96;  break;
     case STAT_ALACRITY_RATING:          id = 103; break;
     case STAT_ARMOR:                    id = 41;  break;
@@ -1902,7 +1833,7 @@ struct compare_stat_scale_factors
 
 const char* chart_t::gear_weights_pawn( std::string& s,
                                         player_t*    p,
-                                        bool hit_expertise )
+                                        bool accuracy_expertise )
 {
   std::vector<int> stats;
   for ( int i=0; i < STAT_MAX; i++ ) stats.push_back( i );
@@ -1925,8 +1856,8 @@ const char* chart_t::gear_weights_pawn( std::string& s,
     double value = p -> scaling.get_stat( stat );
     if ( value == 0 ) continue;
 
-    if ( ! hit_expertise )
-      if ( stat == STAT_HIT_RATING || stat == STAT_EXPERTISE_RATING )
+    if ( ! accuracy_expertise )
+      if ( stat == STAT_ACCURACY_RATING || stat == STAT_EXPERTISE_RATING )
         value = 0;
 
     const char* name=0;
@@ -1934,7 +1865,7 @@ const char* chart_t::gear_weights_pawn( std::string& s,
     {
     case STAT_STRENGTH:                 name = "Strength";         if ( value*20 > maxR ) maxR = value*20; break;
     case STAT_EXPERTISE_RATING:         name = "ExpertiseRating";  if ( value*20 > maxR ) maxR = value*20; break;
-    case STAT_HIT_RATING:               name = "HitRating";        if ( value*20 > maxY ) maxY = value*20; break;
+    case STAT_ACCURACY_RATING:          name = "AccuracyRating";   if ( value*20 > maxY ) maxY = value*20; break;
     case STAT_CRIT_RATING:              name = "CritRating";       if ( value*20 > maxY ) maxY = value*20; break;
     case STAT_ALACRITY_RATING:          name = "AlacrityRating";   if ( value*20 > maxY ) maxY = value*20; break;
     case STAT_ARMOR:                    name = "Armor";            break;

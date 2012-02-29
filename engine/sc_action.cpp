@@ -21,7 +21,7 @@ class default_policy_t : public attack_policy_interface_t
 public:
   default_policy_t() { name_ = "none"; }
 
-  double hit_chance( const player_t& ) const
+  double accuracy_chance( const player_t& ) const
   { return -1; }
   double avoidance( const player_t& ) const
   { return 0; }
@@ -49,8 +49,8 @@ class melee_policy_t : public physical_policy_t
 public:
   melee_policy_t() { name_ = "melee"; }
 
-  double hit_chance( const player_t& player ) const
-  { return player.melee_hit_chance(); }
+  double accuracy_chance( const player_t& player ) const
+  { return player.melee_accuracy_chance(); }
   double avoidance( const player_t& player ) const
   { return player.melee_avoidance(); }
   double crit_chance( const player_t& player ) const
@@ -64,8 +64,8 @@ class range_policy_t : public physical_policy_t
 public:
   range_policy_t() { name_ = "range"; }
 
-  double hit_chance( const player_t& player ) const
-  { return player.range_hit_chance(); }
+  double accuracy_chance( const player_t& player ) const
+  { return player.range_accuracy_chance(); }
   double avoidance( const player_t& player ) const
   { return player.range_avoidance(); }
   double crit_chance( const player_t& player ) const
@@ -88,8 +88,8 @@ class force_policy_t : public spell_policy_t
 public:
   force_policy_t() { name_ = "force"; }
 
-  double hit_chance( const player_t& player ) const
-  { return player.force_hit_chance(); }
+  double accuracy_chance( const player_t& player ) const
+  { return player.force_accuracy_chance(); }
   double avoidance( const player_t& player ) const
   { return player.force_avoidance(); }
   double crit_chance( const player_t& player ) const
@@ -103,8 +103,8 @@ class tech_policy_t : public spell_policy_t
 public:
   tech_policy_t() { name_ = "tech"; }
 
-  double hit_chance( const player_t& player ) const
-  { return player.tech_hit_chance(); }
+  double accuracy_chance( const player_t& player ) const
+  { return player.tech_accuracy_chance(); }
   double avoidance( const player_t& player ) const
   { return player.tech_avoidance(); }
   double crit_chance( const player_t& player ) const
@@ -124,7 +124,7 @@ class force_heal_policy_t : public heal_policy_t
 public:
   force_heal_policy_t() { name_ = "force_heal"; }
 
-  double hit_chance( const player_t& ) const
+  double accuracy_chance( const player_t& ) const
   { return 1.0; }
   double crit_chance( const player_t& player ) const
   { return player.force_healing_crit_chance(); }
@@ -137,7 +137,7 @@ class tech_heal_policy_t : public heal_policy_t
 public:
   tech_heal_policy_t() { name_ = "tech_heal"; }
 
-  double hit_chance( const player_t& ) const
+  double accuracy_chance( const player_t& ) const
   { return 1.0; }
   double crit_chance( const player_t& player ) const
   { return player.tech_healing_crit_chance(); }
@@ -205,15 +205,15 @@ void action_t::init_action_t_()
   base_tick_time                 = timespan_t::zero;
   base_cost                      = 0.0;
   base_multiplier                = 1.0;
-  base_hit                       = 0.0;
+  base_accuracy                       = 0.0;
   base_crit                      = 0.0;
   base_armor_penetration         = 0.0;
   player_multiplier              = 1.0;
-  player_hit                     = 0.0;
+  player_accuracy                     = 0.0;
   player_crit                    = 0.0;
   player_armor_penetration       = 0.0;
   target_multiplier              = 1.0;
-  target_hit                     = 0.0;
+  target_accuracy                     = 0.0;
   target_crit                    = 0.0;
   target_armor_penetration       = 0.0;
   crit_multiplier                = 1.0;
@@ -602,7 +602,7 @@ void action_t::player_buff()
   player_multiplier              = 1.0;
   dd.player_multiplier           = 1.0;
   td.player_multiplier           = 1.0;
-  player_hit                     = attack_policy -> hit_chance( *player );
+  player_accuracy                     = attack_policy -> accuracy_chance( *player );
   player_crit                    = attack_policy -> crit_chance( *player );
   player_armor_penetration       = player -> armor_penetration();
   player_dd_adder                = 0;
@@ -619,8 +619,8 @@ void action_t::player_buff()
   player_alacrity = alacrity();
 
   if ( sim -> debug )
-    log_t::output( sim, "action_t::player_buff: %s hit=%.2f crit=%.2f",
-                   name(), player_hit, player_crit );
+    log_t::output( sim, "action_t::player_buff: %s accuracy=%.2f crit=%.2f",
+                   name(), player_accuracy, player_crit );
 }
 
 // action_t::target_debuff ==================================================
@@ -954,7 +954,7 @@ void action_t::calculate_result()
 
   // First roll: Accuracy vs. Defense determines if attack lands
   double random = sim -> real();
-  double accuracy = 1.0 + total_hit();
+  double accuracy = 1.0 + total_accuracy();
 
   if ( random < accuracy - target_avoidance )
     result = RESULT_HIT;

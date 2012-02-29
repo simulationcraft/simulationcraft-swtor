@@ -593,8 +593,8 @@ void armory_t::fuzzy_stats( std::string&       encoding_str,
   stat_search( encoding_str, splits, STAT_EXPERTISE_RATING,         "expertise rating" );
 
   stat_search( encoding_str, splits, STAT_ALACRITY_RATING,         "alacrity rating" );
-  stat_search( encoding_str, splits, STAT_HIT_RATING,           "ranged hit rating" );
-  stat_search( encoding_str, splits, STAT_HIT_RATING,           "hit rating" );
+  stat_search( encoding_str, splits, STAT_ACCURACY_RATING,           "ranged accuracy rating" );
+  stat_search( encoding_str, splits, STAT_ACCURACY_RATING,           "accuracy rating" );
   stat_search( encoding_str, splits, STAT_CRIT_RATING,          "ranged critical strike" );
   stat_search( encoding_str, splits, STAT_CRIT_RATING,          "critical strike rating" );
   stat_search( encoding_str, splits, STAT_CRIT_RATING,          "crit rating" );

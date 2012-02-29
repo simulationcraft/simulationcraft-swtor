@@ -856,14 +856,14 @@ static void print_html_stats ( FILE* file, player_t* a )
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr>\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Melee Hit</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Melee Accuracy</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * a -> buffed.melee_hit,
-             100 * a -> melee_hit_chance(),
-             a -> stats.hit_rating );
+             100 * a -> buffed.melee_accuracy,
+             100 * a -> melee_accuracy_chance(),
+             a -> stats.accuracy_rating );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
@@ -896,14 +896,14 @@ static void print_html_stats ( FILE* file, player_t* a )
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr>\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Range Hit</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Range Accuracy</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * a -> buffed.range_hit,
-             100 * a -> range_hit_chance(),
-             a -> stats.hit_rating  );
+             100 * a -> buffed.range_accuracy,
+             100 * a -> range_accuracy_chance(),
+             a -> stats.accuracy_rating  );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
@@ -937,14 +937,14 @@ static void print_html_stats ( FILE* file, player_t* a )
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr>\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Force Hit</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Force Accuracy</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * a -> buffed.force_hit,
-             100 * a -> force_hit_chance(),
-             a -> stats.hit_rating  );
+             100 * a -> buffed.force_accuracy,
+             100 * a -> force_accuracy_chance(),
+             a -> stats.accuracy_rating  );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
@@ -976,14 +976,14 @@ static void print_html_stats ( FILE* file, player_t* a )
              a -> tech_damage_bonus() );
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr>\n"
-             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Tech Hit</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Tech Accuracy</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * a -> buffed.tech_hit,
-             100 * a -> tech_hit_chance(),
-             a -> stats.hit_rating  );
+             100 * a -> buffed.tech_accuracy,
+             100 * a -> tech_accuracy_chance(),
+             a -> stats.accuracy_rating  );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"
@@ -2461,7 +2461,7 @@ static void print_html_player_gear_weights( FILE* file, player_t* p )
              "\t\t\t\t\t\t\t\t\t\t<td>%s</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n"
              "\t\t\t\t\t\t\t\t\t<tr class=\"left\">\n"
-             "\t\t\t\t\t\t\t\t\t\t<th>Zero Hit/Expertise</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th>Zero Accuracy/Expertise</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td>%s</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n"
              "\t\t\t\t\t\t\t\t</table>\n",
@@ -2481,7 +2481,7 @@ static void print_html_player_gear_weights( FILE* file, player_t* p )
              "\t\t\t\t\t\t\t\t\t\t<td>%s</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n"
              "\t\t\t\t\t\t\t\t\t<tr class=\"left\">\n"
-             "\t\t\t\t\t\t\t\t\t\t<th>Zero Hit/Expertise</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th>Zero Accuracy/Expertise</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td>%s</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n"
              "\t\t\t\t\t\t\t\t</table>\n",

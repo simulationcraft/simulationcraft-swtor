@@ -420,7 +420,7 @@ enum stat_type
   STAT_HEALTH, STAT_MANA, STAT_RAGE, STAT_ENERGY, STAT_AMMO,
   STAT_MAX_HEALTH, STAT_MAX_MANA, STAT_MAX_RAGE, STAT_MAX_ENERGY, STAT_MAX_AMMO,
   STAT_EXPERTISE_RATING, STAT_EXPERTISE_RATING2,
-  STAT_HIT_RATING, STAT_HIT_RATING2, STAT_CRIT_RATING, STAT_ALACRITY_RATING,
+  STAT_ACCURACY_RATING, STAT_ACCURACY_RATING2, STAT_CRIT_RATING, STAT_ALACRITY_RATING,
   STAT_WEAPON_DMG,
   STAT_WEAPON_OFFHAND_DMG,
   STAT_ARMOR, STAT_BONUS_ARMOR,
@@ -545,9 +545,9 @@ enum power_type
 
 enum rating_type
 {
-  RATING_MELEE_HIT,
-  RATING_RANGED_HIT,
-  RATING_SPELL_HIT,
+  RATING_MELEE_ACCURACY,
+  RATING_RANGED_ACCURACY,
+  RATING_SPELL_ACCURACY,
   RATING_MELEE_CRIT,
   RATING_RANGED_CRIT,
   RATING_SPELL_CRIT,
@@ -2495,8 +2495,8 @@ struct gear_stats_t
   double resource[ RESOURCE_MAX ];
   double expertise_rating;
   double expertise_rating2;
-  double hit_rating;
-  double hit_rating2;
+  double accuracy_rating;
+  double accuracy_rating2;
   double crit_rating;
   double alacrity_rating;
   double surge_rating;
@@ -3243,7 +3243,7 @@ struct scaling_t
   int    debug_scale_factors;
   std::string scale_only_str;
   int    current_scaling_stat, num_scaling_stats, remaining_scaling_stats;
-  double    scale_alacrity_iterations, scale_expertise_iterations, scale_crit_iterations, scale_hit_iterations;
+  double    scale_alacrity_iterations, scale_expertise_iterations, scale_crit_iterations, scale_accuracy_iterations;
   std::string scale_over;
   std::string scale_over_player;
 
@@ -3379,9 +3379,9 @@ public:
 namespace internal {
 struct rating_t
 {
-  double  spell_alacrity,  spell_hit,  spell_crit;
-  double attack_alacrity, attack_hit, attack_crit;
-  double ranged_alacrity, ranged_hit,ranged_crit;
+  double  spell_alacrity,  spell_accuracy,  spell_crit;
+  double attack_alacrity, attack_accuracy, attack_crit;
+  double ranged_alacrity, ranged_accuracy,ranged_crit;
   double expertise;
 };
 }
@@ -3432,7 +3432,7 @@ public:
   static int armor_divisor( int attacker_level )
   { return 200 * attacker_level + 800; }
 
-  static double base_hit_chance( int attacker_level, int defender_level )
+  static double base_accuracy_chance( int attacker_level, int defender_level )
   {
     ( void )attacker_level; ( void )defender_level;
     return 1.0;
@@ -3859,7 +3859,7 @@ struct player_t : public noncopyable
 
     double shield_chance, shield_absorb;
 
-    double melee_hit,  range_hit,  force_hit,  tech_hit;
+    double melee_accuracy, range_accuracy, force_accuracy, tech_accuracy;
     double melee_crit, range_crit, force_crit, tech_crit;
     double melee_avoidance, range_avoidance, force_avoidance, tech_avoidance;
     double melee_damage_bonus, range_damage_bonus, force_damage_bonus, tech_damage_bonus, force_healing_bonus, tech_healing_bonus;
@@ -4065,7 +4065,7 @@ private:
   double damage_bonus( double stats, double multiplier, double extra_power=0 ) const;
   double healing_bonus( double stats, double multiplier, double extra_power=0 ) const;
   double default_bonus_multiplier() const;
-  double default_hit_chance() const;
+  double default_accuracy_chance() const;
   double default_crit_chance() const;
 
 protected:
@@ -4095,22 +4095,22 @@ protected:
 
 public:
   double melee_damage_bonus() const;
-  virtual double melee_hit_chance() const;
+  virtual double melee_accuracy_chance() const;
   virtual double melee_crit_chance() const;
 
   double range_damage_bonus() const;
-  virtual double range_hit_chance() const;
+  virtual double range_accuracy_chance() const;
   virtual double range_crit_chance() const;
 
   double force_damage_bonus() const;
-  virtual double force_hit_chance() const;
+  virtual double force_accuracy_chance() const;
   virtual double force_crit_chance() const;
 
   double force_healing_bonus() const;
   virtual double force_healing_crit_chance() const;
 
   double tech_damage_bonus() const;
-  virtual double tech_hit_chance() const;
+  virtual double tech_accuracy_chance() const;
   virtual double tech_crit_chance() const;
 
   double tech_healing_bonus() const;
@@ -4368,14 +4368,7 @@ public:
   pet_t( sim_t* sim, player_t* owner, const std::string& name, bool guardian=false );
   pet_t( sim_t* sim, player_t* owner, const std::string& name, pet_type_t pt, player_type type=PLAYER_PET );
 
-  // Pets gain their owners' hit rating, but it rounds down to a
-  // percentage.  Also, heroic presence does not contribute to pet
-  // expertise, so we use raw attack_hit.
-#if 0
-  virtual double composite_attack_expertise() const { return floor( floor( 100.0 * owner -> attack_hit ) * ( 26.0 / 8.0 ) ) / 100.0; }
-  virtual double composite_attack_hit()       const { return floor( 100.0 * owner -> composite_attack_hit() ) / 100.0; }
-  virtual double composite_spell_hit()        const { return floor( 100.0 * owner -> composite_spell_hit() ) / 100.0;  }
-#endif
+
   virtual double endurance() const;
 
   virtual void init_base();
@@ -4477,7 +4470,7 @@ protected:
 public:
   const std::string& name() const { return name_; }
 
-  virtual double hit_chance( const player_t& source ) const = 0;
+  virtual double accuracy_chance( const player_t& source ) const = 0;
   virtual double crit_chance( const player_t& source ) const = 0;
   virtual double damage_bonus( const player_t& source ) const = 0;
 
@@ -4535,9 +4528,9 @@ struct action_t
     {}
   } dd, td;
 
-  double   base_multiplier,   base_hit,   base_crit, base_armor_penetration;
-  double player_multiplier, player_hit, player_crit, player_armor_penetration;
-  double target_multiplier, target_hit, target_crit, target_armor_penetration;
+  double   base_multiplier,   base_accuracy,   base_crit, base_armor_penetration;
+  double player_multiplier, player_accuracy, player_crit, player_armor_penetration;
+  double target_multiplier, target_accuracy, target_crit, target_armor_penetration;
   double target_avoidance, target_shield, target_absorb;
   double crit_multiplier, crit_bonus_multiplier, crit_bonus;
   double base_dd_adder, player_dd_adder, target_dd_adder;
@@ -4643,7 +4636,7 @@ public:
   virtual const char* name() const { return name_str.c_str(); }
 
   double total_multiplier() const { return base_multiplier * player_multiplier * target_multiplier; }
-  double total_hit() const        { return base_hit        + player_hit;                            }
+  double total_accuracy() const        { return base_accuracy   + player_accuracy;                       }
   double total_crit() const       { return base_crit       + player_crit       + target_crit;       }
   double total_crit_bonus() const;
   double total_armor_penetration() const
@@ -5188,7 +5181,6 @@ struct chart_t
   static const char* reforge_dps      ( std::string& s, player_t* );
   static const char* distribution ( std::string& s, sim_t*, const std::vector<int>&, const std::string&, double, double, double );
 
-  static const char* gear_weights_lootrank  ( std::string& s, player_t* );
   static const char* gear_weights_wowhead   ( std::string& s, player_t* );
   static const char* gear_weights_wowreforge( std::string& s, player_t* );
   static const char* gear_weights_pawn      ( std::string& s, player_t*, bool hit_expertise=true );

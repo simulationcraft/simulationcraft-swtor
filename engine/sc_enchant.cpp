@@ -543,7 +543,7 @@ static enchant_data_t* addon_db = enchant_db;
 
 static const stat_type reforge_stats[] =
 {
-  STAT_HIT_RATING,
+  STAT_ACCURACY_RATING,
   STAT_CRIT_RATING,
   STAT_ALACRITY_RATING,
   STAT_EXPERTISE_RATING,

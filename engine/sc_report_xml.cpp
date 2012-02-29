@@ -350,13 +350,13 @@ void print_xml_player_stats( xml_writer_t & writer, player_t * p )
                               p -> presence(),  p -> stats.attribute[ ATTR_PRESENCE  ], p -> buffed.attribute[ ATTR_PRESENCE  ] );
   print_xml_player_attribute( writer, "alacrity",
                               100 * ( 1 - p -> alacrity() ), p -> stats.alacrity_rating, 100 * ( 1 - p -> buffed.alacrity ) );
-  print_xml_player_attribute( writer, "meleehit",
-                              100 * p -> melee_hit_chance(), p -> stats.hit_rating, 100 * p -> buffed.melee_hit );
+  print_xml_player_attribute( writer, "meleeaccuracy",
+                              100 * p -> melee_accuracy_chance(), p -> stats.accuracy_rating, 100 * p -> buffed.melee_accuracy );
   print_xml_player_attribute( writer, "meleecrit",
                               100 * p -> melee_crit_chance(), p -> stats.crit_rating, 100 * p -> buffed.melee_crit );
   // FIXME: Range
-  print_xml_player_attribute( writer, "forcehit",
-                              100 * p -> force_hit_chance(), p -> stats.hit_rating, 100 * p -> buffed.force_hit );
+  print_xml_player_attribute( writer, "forceaccuracy",
+                              100 * p -> force_accuracy_chance(), p -> stats.accuracy_rating, 100 * p -> buffed.force_accuracy );
   print_xml_player_attribute( writer, "forcecrit",
                               100 * p -> force_crit_chance(), p -> stats.crit_rating, 100 * p -> buffed.force_crit );
   // FIXME: Tech
