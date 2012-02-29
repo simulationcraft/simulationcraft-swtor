@@ -288,8 +288,6 @@ void action_t::init_action_t_()
 
   stats = player -> get_stats( name_str , this );
 
-  tree = util_t::talent_tree( tree, player -> type );
-
   rank_level = 0;
 
 #if 0
@@ -320,11 +318,10 @@ action_t::action_t( int               ty,
                     player_t*         p,
                     const policy_t    policy,
                     int               r,
-                    const school_type s,
-                    int               tr ) :
+                    const school_type s ) :
   sim( p -> sim ), type( ty ), name_str( n ),
   player( p ), target( p -> target ), attack_policy( policy ),
-  school( s ), resource( r ), tree( tr )
+  school( s ), resource( r )
 {
   assert( policy );
   init_action_t_();

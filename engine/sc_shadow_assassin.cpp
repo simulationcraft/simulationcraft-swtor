@@ -251,7 +251,7 @@ namespace { // ANONYMOUS NAMESPACE ==========================================
 struct shadow_assassin_attack_t : public action_t
 {
     shadow_assassin_attack_t( const std::string& n, shadow_assassin_t* p, const school_type s=SCHOOL_KINETIC ) :
-        action_t( ACTION_ATTACK, n.c_str(), p, melee_policy, RESOURCE_FORCE, s, TREE_NONE )
+        action_t( ACTION_ATTACK, n.c_str(), p, melee_policy, RESOURCE_FORCE, s )
     {
         may_crit   = true;
     }
@@ -292,7 +292,7 @@ struct shadow_assassin_attack_t : public action_t
 struct shadow_assassin_spell_t : public action_t
 {
     shadow_assassin_spell_t( const std::string& n, shadow_assassin_t* p, const school_type s=SCHOOL_ENERGY ) :
-        action_t( ACTION_ATTACK, n.c_str(), p, force_policy, RESOURCE_FORCE, s, TREE_NONE )
+        action_t( ACTION_ATTACK, n.c_str(), p, force_policy, RESOURCE_FORCE, s )
     {
         may_crit   = true;
         tick_may_crit = true;

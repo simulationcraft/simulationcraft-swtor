@@ -251,7 +251,7 @@ struct jedi_sage_spell_t : public action_t
   bool influenced_by_inner_strength;
 
   jedi_sage_spell_t( const std::string& n, sage_sorcerer_t* p, school_type s=SCHOOL_KINETIC ) :
-    action_t( ACTION_ATTACK, n.c_str(), p, force_policy, RESOURCE_FORCE, s, TREE_NONE ),
+    action_t( ACTION_ATTACK, n.c_str(), p, force_policy, RESOURCE_FORCE, s ),
     influenced_by_inner_strength( true )
   {
     may_crit   = true;
@@ -1018,8 +1018,8 @@ struct jedi_sage_heal_t : public heal_t
 {
   bool influenced_by_inner_strength;
 
-  jedi_sage_heal_t( const char* n, sage_sorcerer_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC, int t=TREE_NONE ) :
-    heal_t( n, p, force_heal_policy, r, s, t ),
+  jedi_sage_heal_t( const char* n, sage_sorcerer_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
+    heal_t( n, p, force_heal_policy, r, s ),
     influenced_by_inner_strength( true )
   {
     may_crit   = true;

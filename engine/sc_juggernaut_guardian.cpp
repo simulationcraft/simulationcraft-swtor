@@ -118,8 +118,8 @@ namespace { // ANONYMOUS NAMESPACE ==========================================
 
 struct juggernaut_guardian_attack_t : public action_t
 {
-    juggernaut_guardian_attack_t( const char* n, juggernaut_guardian_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC, int t=TREE_NONE ) :
-        action_t( ACTION_ATTACK, n, p, melee_policy, r, s, t )
+    juggernaut_guardian_attack_t( const char* n, juggernaut_guardian_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
+        action_t( ACTION_ATTACK, n, p, melee_policy, r, s )
     {
         may_crit   = true;
     }
@@ -128,8 +128,8 @@ struct juggernaut_guardian_attack_t : public action_t
 
 struct juggernaut_guardian_spell_t : public action_t
 {
-    juggernaut_guardian_spell_t( const char* n, juggernaut_guardian_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC, int t=TREE_NONE ) :
-        action_t( ACTION_ATTACK, n, p, force_policy, r, s, t )
+    juggernaut_guardian_spell_t( const char* n, juggernaut_guardian_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
+        action_t( ACTION_ATTACK, n, p, force_policy, r, s )
     {
         may_crit   = true;
         tick_may_crit = true;

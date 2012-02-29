@@ -119,8 +119,8 @@ namespace { // ANONYMOUS NAMESPACE ==========================================
 
 struct marauder_sentinel_attack_t : public action_t
 {
-    marauder_sentinel_attack_t( const char* n, marauder_sentinel_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC, int t=TREE_NONE ) :
-        action_t( ACTION_ATTACK, n, p, melee_policy, r, s, t )
+    marauder_sentinel_attack_t( const char* n, marauder_sentinel_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
+        action_t( ACTION_ATTACK, n, p, melee_policy, r, s )
     {
         may_crit   = true;
     }
@@ -129,8 +129,8 @@ struct marauder_sentinel_attack_t : public action_t
 
 struct marauder_sentinel_spell_t : public action_t
 {
-    marauder_sentinel_spell_t( const char* n, marauder_sentinel_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC, int t=TREE_NONE ) :
-        action_t( ACTION_ATTACK, n, p, force_policy, r, s, t )
+    marauder_sentinel_spell_t( const char* n, marauder_sentinel_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
+        action_t( ACTION_ATTACK, n, p, force_policy, r, s )
     {
         may_crit   = true;
         tick_may_crit = true;

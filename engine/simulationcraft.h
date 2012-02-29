@@ -4498,7 +4498,7 @@ struct action_t
   uint32_t id;
   policy_t attack_policy;
   school_type school;
-  int resource, tree, result, aoe;
+  int resource, result, aoe;
   bool dual, callbacks, channeled, background, sequence, use_off_gcd;
   bool direct_tick, repeating, harmful, proc, item_proc, proc_ignores_slot, discharge_proc, auto_cast, initialized;
   bool may_crit, tick_may_crit, tick_zero, hasted_ticks;
@@ -4587,7 +4587,7 @@ private:
 
 public:
   action_t( int type, const char* name, player_t* p=0, policy_t policy=default_policy,
-            int r=RESOURCE_NONE, const school_type s=SCHOOL_NONE, int t=TREE_NONE );
+            int r=RESOURCE_NONE, const school_type s=SCHOOL_NONE );
   virtual ~action_t();
 
   //void parse_data();
@@ -4689,8 +4689,8 @@ public:
 
 struct attack_t : public action_t
 {
-  attack_t( const char* n=0, player_t* p=0, int r=RESOURCE_NONE, school_type s=SCHOOL_KINETIC, int t=TREE_NONE ) :
-    action_t( ACTION_ATTACK, n, p, melee_policy, r, s, t )
+  attack_t( const char* n=0, player_t* p=0, int r=RESOURCE_NONE, school_type s=SCHOOL_KINETIC ) :
+    action_t( ACTION_ATTACK, n, p, melee_policy, r, s )
   {}
 };
 
@@ -4701,7 +4701,7 @@ struct heal_t : public action_t
   bool group_only;
 
   heal_t( const char* n=0, player_t* p=0, policy_t policy=default_policy,
-          int r=RESOURCE_NONE, school_type s=SCHOOL_NONE, int t=TREE_NONE );
+          int r=RESOURCE_NONE, school_type s=SCHOOL_NONE );
 
   virtual void player_buff();
   virtual void execute();
@@ -4719,7 +4719,7 @@ struct heal_t : public action_t
 struct absorb_t : public action_t
 {
   absorb_t( const char* n=0, player_t* p=0, policy_t policy=default_policy,
-            int r=RESOURCE_NONE, const school_type s=SCHOOL_NONE, int t=TREE_NONE );
+            int r=RESOURCE_NONE, const school_type s=SCHOOL_NONE );
 
   virtual void player_buff();
   virtual void execute();
