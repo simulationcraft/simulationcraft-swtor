@@ -250,8 +250,8 @@ struct jedi_sage_spell_t : public action_t
 {
   bool influenced_by_inner_strength;
 
-  jedi_sage_spell_t( const char* n, sage_sorcerer_t* p, school_type s=SCHOOL_KINETIC ) :
-    action_t( ACTION_ATTACK, n, p, force_policy, RESOURCE_FORCE, s, TREE_NONE ),
+  jedi_sage_spell_t( const std::string& n, sage_sorcerer_t* p, school_type s=SCHOOL_KINETIC ) :
+    action_t( ACTION_ATTACK, n.c_str(), p, force_policy, RESOURCE_FORCE, s, TREE_NONE ),
     influenced_by_inner_strength( true )
   {
     may_crit   = true;
@@ -386,7 +386,7 @@ struct jedi_sage_spell_t : public action_t
 struct force_valor_t : public jedi_sage_spell_t
 {
   force_valor_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
-    jedi_sage_spell_t( n.c_str(), p )
+    jedi_sage_spell_t( n, p )
   {
     parse_options( 0, options_str );
     base_cost = 0.0;
@@ -418,7 +418,7 @@ struct project_t : public jedi_sage_spell_t
   project_t* upheaval;
 
   project_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str, bool is_upheaval = false ) :
-    jedi_sage_spell_t( ( n + std::string( is_upheaval ? "_upheaval" : "" ) ).c_str(), p ),
+    jedi_sage_spell_t( n + std::string( is_upheaval ? "_upheaval" : "" ), p ),
     upheaval( 0 )
   {
     static const int ranks[] = { 1, 4, 7, 11, 14, 17, 23, 34, 47, 50 };
@@ -475,7 +475,7 @@ struct telekinetic_throw_t : public jedi_sage_spell_t
   bool is_buffed_by_psychic_projection;
 
   telekinetic_throw_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
-    jedi_sage_spell_t( n.c_str(), p ),
+    jedi_sage_spell_t( n, p ),
     is_buffed_by_psychic_projection( false )
   {
     static const int ranks[] = { 2, 5, 8, 11, 14, 19, 27, 39, 50 };
@@ -573,7 +573,7 @@ struct disturbance_t : public jedi_sage_spell_t
   jedi_sage_spell_t* tm;
 
   disturbance_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str, bool is_tm = false ) :
-    jedi_sage_spell_t( ( n + std::string( is_tm ? "_tm" : "" ) ).c_str(), p ),
+    jedi_sage_spell_t( n + std::string( is_tm ? "_tm" : "" ), p ),
     tm( 0 )
   {
     static const int ranks[] = { 10, 13, 16, 25, 36, 45, 50 };
@@ -648,7 +648,7 @@ struct mind_crush_t : public jedi_sage_spell_t
   struct mind_crush_dot_t : public jedi_sage_spell_t
   {
     mind_crush_dot_t( sage_sorcerer_t* p, const std::string& n ) :
-      jedi_sage_spell_t( n.c_str(), p )
+      jedi_sage_spell_t( n, p )
     {
       static const int ranks[] = { 14, 19, 30, 41, 50 };
       rank_level_list = util_t::array_to_vector( ranks );
@@ -680,7 +680,7 @@ struct mind_crush_t : public jedi_sage_spell_t
   mind_crush_dot_t* dot_spell;
 
   mind_crush_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
-    jedi_sage_spell_t( n.c_str(), p ),
+    jedi_sage_spell_t( n, p ),
     dot_spell( new mind_crush_dot_t( p, n + "_dot" ) )
   {
     static const int ranks[] = { 14, 19, 30, 41, 50 };
@@ -715,7 +715,7 @@ struct mind_crush_t : public jedi_sage_spell_t
 struct weaken_mind_t : public jedi_sage_spell_t
 {
   weaken_mind_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
-    jedi_sage_spell_t( n.c_str(), p, SCHOOL_INTERNAL )
+    jedi_sage_spell_t( n, p, SCHOOL_INTERNAL )
   {
     static const int ranks[] = { 16, 22, 33, 44, 50 };
     rank_level_list = util_t::array_to_vector( ranks );
@@ -765,7 +765,7 @@ struct turbulence_t : public jedi_sage_spell_t
   jedi_sage_spell_t* tm;
 
   turbulence_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
-    jedi_sage_spell_t( n.c_str(), p, SCHOOL_INTERNAL )
+    jedi_sage_spell_t( n, p, SCHOOL_INTERNAL )
   {
     check_talent( p -> talents.turbulence -> rank() );
 
@@ -818,7 +818,7 @@ struct turbulence_t : public jedi_sage_spell_t
 struct force_in_balance_t : public jedi_sage_spell_t
 {
   force_in_balance_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
-    jedi_sage_spell_t( n.c_str(), p, SCHOOL_INTERNAL )
+    jedi_sage_spell_t( n, p, SCHOOL_INTERNAL )
   {
     check_talent( p -> talents.force_in_balance -> rank() );
 
@@ -854,7 +854,7 @@ struct force_in_balance_t : public jedi_sage_spell_t
 struct sever_force_t : public jedi_sage_spell_t
 {
   sever_force_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
-    jedi_sage_spell_t( n.c_str(), p, SCHOOL_INTERNAL )
+    jedi_sage_spell_t( n, p, SCHOOL_INTERNAL )
   {
     check_talent( p -> talents.sever_force -> rank() );
 
@@ -887,7 +887,7 @@ struct sever_force_t : public jedi_sage_spell_t
 struct mental_alacrity_t : public jedi_sage_spell_t
 {
   mental_alacrity_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
-    jedi_sage_spell_t( n.c_str(), p )
+    jedi_sage_spell_t( n, p )
   {
     check_talent( p -> talents.mental_alacrity -> rank() );
 
@@ -913,7 +913,7 @@ struct telekinetic_wave_t : public jedi_sage_spell_t
   jedi_sage_spell_t* tm;
 
   telekinetic_wave_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str, bool is_tm = false ) :
-    jedi_sage_spell_t( ( n + std::string( is_tm ? "_tm" : "" ) ).c_str(), p ),
+    jedi_sage_spell_t( n + std::string( is_tm ? "_tm" : "" ), p ),
     tm( 0 )
   {
     check_talent( p -> talents.telekinetic_wave -> rank() );
@@ -994,7 +994,7 @@ struct telekinetic_wave_t : public jedi_sage_spell_t
 struct force_potency_t : public jedi_sage_spell_t
 {
   force_potency_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
-    jedi_sage_spell_t( n.c_str(), p )
+    jedi_sage_spell_t( n, p )
   {
     parse_options( 0, options_str );
     cooldown -> duration = timespan_t::from_seconds( 90.0 );
