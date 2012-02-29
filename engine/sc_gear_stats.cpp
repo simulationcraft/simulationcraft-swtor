@@ -158,11 +158,11 @@ double gear_stats_t::get_stat( int stat ) const
   case STAT_EXPERTISE_RATING:  return expertise_rating;
   case STAT_EXPERTISE_RATING2: return expertise_rating2;
 
-  case STAT_ACCURACY_RATING:      return accuracy_rating;
-  case STAT_ACCURACY_RATING2:     return accuracy_rating2;
-  case STAT_CRIT_RATING:     return crit_rating;
-  case STAT_ALACRITY_RATING: return alacrity_rating;
-  case STAT_SURGE_RATING:    return surge_rating;
+  case STAT_ACCURACY_RATING:  return accuracy_rating;
+  case STAT_ACCURACY_RATING2: return accuracy_rating2;
+  case STAT_CRIT_RATING:      return crit_rating;
+  case STAT_ALACRITY_RATING:  return alacrity_rating;
+  case STAT_SURGE_RATING:     return surge_rating;
 
   case STAT_WEAPON_DMG:         return weapon_dmg;
   case STAT_WEAPON_OFFHAND_DMG: return weapon_offhand_dmg;
