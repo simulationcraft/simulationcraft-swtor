@@ -12,38 +12,13 @@
 // talent_t::talent_t =======================================================
 
 talent_t::talent_t( player_t* /* player */, const char* n, unsigned tab_page, unsigned max_rank ) :
-  _name( n ), _tab_page( tab_page ), _max_rank( max_rank ),
-  t_rank( 0 )
+  _rank( 0 ), _tab_page( tab_page ), _name( n ), _max_rank( max_rank )
+{}
+
+bool talent_t::set_rank( unsigned r )
 {
-}
-
-talent_t::~talent_t()
-{
-
-}
-
-bool talent_t::ok() const
-{
-  return ( t_rank > 0 );
-}
-bool talent_t::set_rank( uint32_t r )
-{
-  if ( r > max_rank() )
-    r = max_rank();
-
-  t_rank       = r;
-
+  _rank = std::min( r, max_rank() );
   return true;
-}
-
-uint32_t talent_t::max_rank() const
-{
-  return _max_rank;
-}
-
-uint32_t talent_t::rank() const
-{
-  return t_rank;
 }
 
 // ==========================================================================
@@ -805,6 +780,7 @@ timespan_t spell_id_t::mod_additive_time( property_type_t p_type ) const
   return timespan_t::from_millis(effect -> base_value());
 }
 
+#if 0
 // Glyph basic object
 
 glyph_t::glyph_t( player_t* player, spell_data_t* _sd ) :
@@ -866,4 +842,4 @@ std::string mastery_t::to_str() const
 
   return s.str();
 }
-
+#endif // 0

@@ -16,7 +16,7 @@ struct compare_talents
 {
   bool operator()( const talent_t* l, const talent_t* r ) const
   {
-    return ( l -> _tab_page < r -> _tab_page );
+    return ( l -> tab_page() < r -> tab_page() );
   }
 };
 

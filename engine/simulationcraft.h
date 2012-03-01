@@ -165,7 +165,6 @@ struct reforge_plot_t;
 struct reforge_plot_data_t;
 struct report_t;
 struct rng_t;
-struct talent_t;
 struct spell_id_t;
 struct scaling_t;
 struct sim_t;
@@ -2349,30 +2348,34 @@ private:
 };
 
 // Talent class
-struct talent_t
+class talent_t
 {
-  const char * _name;        // Talent name
-  unsigned     _tab_page;    // Talent tab page
-  //unsigned     _col;         // Talent column
-  //unsigned     _row;         // Talent row
-  unsigned     _max_rank;
+private:
+  unsigned    _rank;
+  unsigned    _tab_page;    // Talent tab page
+  const char* _name;        // Talent name
+  //unsigned    _col;         // Talent column
+  //unsigned    _row;         // Talent row
+  unsigned    _max_rank;
 
-  unsigned t_rank;
 
-  talent_t( player_t* p, const char*, unsigned, unsigned );
-  virtual ~talent_t();
+public:
+  // Careful: name needs
+  talent_t( player_t* p, const char* name, unsigned tab_page, unsigned max_rank );
 
-  virtual bool set_rank( uint32_t value );
-  virtual bool ok() const;
+  bool set_rank( unsigned value );
+  bool ok() const { return ( _rank > 0 ); }
 
-  virtual uint32_t rank() const;
+  unsigned rank() const { return _rank; }
+  unsigned max_rank() const { return _max_rank; }
 
-  virtual uint32_t max_rank() const;
-  const char*          name_cstr() const { return _name; }
+  unsigned tab_page() const { return _tab_page; }
+
+  const char* name_cstr() const { return _name; }
 };
 
-/*
-struct talent_t : spell_id_t
+#if 0
+struct talent_t : public spell_id_t
 {
   const talent_data_t* t_data;
   unsigned             t_rank;
@@ -2448,6 +2451,7 @@ struct mastery_t : public spell_id_t
                              int misc_value = DEFAULT_MISC_VALUE,
                              int misc_value2 = DEFAULT_MISC_VALUE ) const;
 };
+#endif // 0
 
 // Raid Event
 
@@ -4218,7 +4222,7 @@ public:
   virtual void create_talents();
   //virtual void create_glyphs();
 
-  virtual talent_t* find_talent( const std::string& name, int tree = TALENT_TAB_NONE ) const;
+  talent_t* find_talent( const std::string& name, int tree = TALENT_TAB_NONE ) const;
   //virtual glyph_t*  find_glyph ( const std::string& name );
 
   virtual action_expr_t* create_expression( action_t*, const std::string& name );
