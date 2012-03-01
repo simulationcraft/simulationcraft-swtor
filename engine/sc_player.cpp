@@ -613,6 +613,9 @@ bool player_t::init( sim_t* sim )
 
   player_t::jedi_sage_init( sim );
   player_t::shadow_assassin_init( sim );
+  player_t::juggernaut_guardian_init( sim );
+  player_t::marauder_sentinel_init( sim );
+  player_t::commando_mercenary_init( sim );
   player_t::enemy_init( sim );
 
   if ( sim -> debug )
@@ -1913,6 +1916,9 @@ void player_t::combat_begin( sim_t* sim )
 {
   player_t::jedi_sage_combat_begin( sim );
   player_t::shadow_assassin_combat_begin( sim );
+  player_t::juggernaut_guardian_combat_begin( sim );
+  player_t::marauder_sentinel_combat_begin( sim );
+  player_t::commando_mercenary_combat_begin( sim );
   player_t::enemy_combat_begin( sim );
 
   // FIXME: Move to correct classes
@@ -1972,6 +1978,9 @@ void player_t::combat_end( sim_t* sim )
 {
   player_t::jedi_sage_combat_end( sim );
   player_t::shadow_assassin_combat_end( sim );
+  player_t::juggernaut_guardian_combat_end( sim );
+  player_t::marauder_sentinel_combat_end( sim );
+  player_t::commando_mercenary_combat_end( sim );
   player_t::enemy_combat_end( sim );
 }
 
@@ -5455,6 +5464,14 @@ player_t* player_t::create( sim_t*             sim,
   else if ( type == "jedi_sentinel" )
   {
     return player_t::create_jedi_sentinel( sim, name, r );
+  }
+  else if ( type == "commando" )
+  {
+    return player_t::create_commando( sim, name, r );
+  }
+  else if ( type == "mercenary" )
+  {
+    return player_t::create_mercenary( sim, name, r );
   }
 
   else if ( type == "enemy" )

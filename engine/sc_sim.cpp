@@ -627,6 +627,7 @@ sim_t::sim_t( sim_t* p, int index ) :
   register_jedi_sage_targetdata( this );
   register_sith_sorcerer_targetdata( this );
   register_shadow_assassin_targetdata( this );
+  register_commando_mercenary_targetdata( this );
 
   path_str += "|profiles";
 
@@ -1966,6 +1967,8 @@ void sim_t::create_options()
     { "jedi_guardian",                    OPT_FUNC,   ( void* ) ::parse_player                      },
     { "sith_marauder",                    OPT_FUNC,   ( void* ) ::parse_player                      },
     { "jedi_sentinel",                    OPT_FUNC,   ( void* ) ::parse_player                      },
+    { "commando",                         OPT_FUNC,   ( void* ) ::parse_player                      },
+    { "mercenary",                        OPT_FUNC,   ( void* ) ::parse_player                      },
     { "enemy",                            OPT_FUNC,   ( void* ) ::parse_player                      },
     { "pet",                              OPT_FUNC,   ( void* ) ::parse_player                      },
     { "player",                           OPT_FUNC,   ( void* ) ::parse_player                      },

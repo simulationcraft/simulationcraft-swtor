@@ -139,6 +139,7 @@ struct benefit_t;
 struct buff_t;
 struct buff_uptime_t;
 struct callback_t;
+struct commando_mercenary_t;
 struct companion_t;
 struct cooldown_t;
 class  dbc_t;
@@ -186,10 +187,12 @@ struct targetdata_t;
 struct jedi_sage_targetdata_t;
 struct sith_sorcerer_targetdata_t;
 struct shadow_assassin_targetdata_t;
+struct commando_mercenary_targetdata_t;
 
 void register_jedi_sage_targetdata( sim_t* sim );
 void register_sith_sorcerer_targetdata( sim_t* sim );
 void register_shadow_assassin_targetdata( sim_t* sim );
+void register_commando_mercenary_targetdata( sim_t* sim );
 
 #define DATA_DOT 0
 #define DATA_AURA 1
@@ -4244,12 +4247,19 @@ public:
 
   static player_t* create_jedi_sage( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
   static player_t* create_sith_sorcerer( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+
   static player_t* create_jedi_shadow( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
   static player_t* create_sith_assassin( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+
   static player_t* create_sith_juggernaut( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
   static player_t* create_jedi_guardian( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+
   static player_t* create_sith_marauder( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
   static player_t* create_jedi_sentinel( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+
+  static player_t* create_commando( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+  static player_t* create_mercenary( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+
   static player_t* create_enemy       ( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
 
   // Raid-wide aura/buff/debuff maintenance
@@ -4277,6 +4287,11 @@ public:
   static void marauder_sentinel_combat_begin( sim_t* sim );
   static void marauder_sentinel_combat_end  ( sim_t* /* sim */ ) {}
 
+  // Raid-wide Commando/Mercenary buff maintenance
+  static void commando_mercenary_init        ( sim_t* sim );
+  static void commando_mercenary_combat_begin( sim_t* sim );
+  static void commando_mercenary_combat_end  ( sim_t* /* sim */ ) {}
+
   // Raid-wide Enemy buff maintenance
   static void enemy_init        ( sim_t* sim );
   static void enemy_combat_begin( sim_t* sim );
@@ -4289,6 +4304,7 @@ public:
   bool is_shadow_assassin() const { return ( type == JEDI_SHADOW || type == SITH_ASSASSIN ); }
   bool is_juggernaut_guardian() const { return ( type == JEDI_GUARDIAN || type == SITH_JUGGERNAUT ); }
   bool is_marauder_sentinel() const { return ( type == JEDI_SENTINEL || type == SITH_MARAUDER ); }
+  bool is_commando_mercenary() const { return ( type == T_COMMANDO || type == BH_MERCENARY ); }
 
   pet_t* cast_pet() { assert( is_pet() ); return ( pet_t* )this; }
   enemy_t* cast_enemy() { assert( type == ENEMY ); return ( enemy_t*)this; }
@@ -4296,6 +4312,7 @@ public:
   shadow_assassin_t* cast_shadow_assassin() { assert( is_shadow_assassin() ); return ( shadow_assassin_t* )this; }
   juggernaut_guardian_t* cast_juggernaut_guardian() { assert( is_juggernaut_guardian() ); return ( juggernaut_guardian_t* )this; }
   marauder_sentinel_t* cast_marauder_sentinel() { assert( is_marauder_sentinel() ); return ( marauder_sentinel_t* )this; }
+  commando_mercenary_t* cast_commando_mercenary() { assert( is_commando_mercenary() ); return ( commando_mercenary_t* )this; }
 
   bool      in_gcd() const { return gcd_ready > sim -> current_time; }
   item_t*   find_item( const std::string& );
