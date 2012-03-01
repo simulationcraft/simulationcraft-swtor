@@ -5394,16 +5394,58 @@ int parse_gem( item_t& item, const std::string& gem_id, cache::behavior_t b=cach
 
 // Wowreforge ===============================================================
 
-namespace wowreforge
-{
+namespace wowreforge {
 player_t* download_player( sim_t* sim, const std::string& id, cache::behavior_t b=cache::players() );
-};
+}
 #endif // 0
+
+// base36 ===================================================================
+
+class base36_t
+{
+public:
+  typedef char encoding_t[36];
+  typedef std::pair<int,int> pair_t;
+
+  struct bad_char {
+    char c;
+    bad_char( char c ) : c( c ) {}
+  };
+
+private:
+  const encoding_t& encoding;
+
+public:
+  base36_t( const encoding_t& e ) : encoding( e ) {}
+
+  int decode( char c ) const;
+  pair_t decode_pair( char c ) const
+  {
+    int i = decode( c );
+    return std::make_pair( i / 6, i % 6 );
+  }
+
+  pair_t operator () ( char c ) const
+  { return decode_pair( c ); }
+};
 
 // Knotor ===================================================================
 
 namespace knotor {
-bool parse_talents( player_t* player, const std::string& encoding );
+bool parse_talents( player_t& player, const std::string& encoding );
+}
+
+// Ask Mr. Robot ============================================================
+
+namespace mrrobot {
+bool parse_talents( player_t& player, const std::string& encoding );
+}
+
+// Torhead ==================================================================
+
+namespace torhead {
+bool parse_talents( player_t& player, const std::string& encoding );
+std::string encode_talents( const player_t& p );
 }
 
 // HTTP Download  ===========================================================

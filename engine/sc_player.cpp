@@ -45,23 +45,7 @@ static bool parse_talent_url( sim_t* sim,
 
   std::string::size_type cut_pt;
 
-  if ( url.find( "worldofwarcraft" ) != url.npos )
-  {
-    if ( ( cut_pt = url.find_first_of( '=' ) ) != url.npos )
-    {
-      return p -> parse_talents_armory( url.substr( cut_pt + 1 ) );
-    }
-  }
-
-  else if ( url.find( "wowarmory" ) != url.npos )
-  {
-    if ( ( cut_pt = url.find_last_of( '=' ) ) != url.npos )
-    {
-      return p -> parse_talents_armory( url.substr( cut_pt + 1 ) );
-    }
-  }
-
-  else if ( url.find( "wowhead" ) != url.npos || url.find( "torhead" ) != url.npos )
+  if ( url.find( "torhead" ) != url.npos )
   {
     if ( ( cut_pt = url.find_first_of( "#=" ) ) != url.npos )
     {
@@ -70,7 +54,7 @@ static bool parse_talent_url( sim_t* sim,
       if ( cut_pt2 != url.npos )
         return p -> parse_talents_armory( url.substr( cut_pt2 + 1 ) );
       else
-        return p -> parse_talents_wowhead( url.substr( cut_pt + 4 ) );
+        return torhead::parse_talents( *p, url.substr( cut_pt + 4 ) );
     }
   }
 
@@ -78,7 +62,14 @@ static bool parse_talent_url( sim_t* sim,
   {
     // http://knotor.com/skills#.....
     if ( ( cut_pt = url.find( '#' ) ) != url.npos )
-      return knotor::parse_talents( p, url.substr( cut_pt + 1 ) );
+      return knotor::parse_talents( *p, url.substr( cut_pt + 1 ) );
+  }
+
+  else if ( url.find( "mrrobot.com" ) != url.npos )
+  {
+    // http://swtor.askmrrobot.com/skills/[advancedclassname]#[tree 1]-[tree 2]-[tree 3]
+    if ( ( cut_pt = url.find( '#' ) ) != url.npos )
+      return mrrobot::parse_talents( *p, url.substr( cut_pt + 1 ) );
   }
 
   else
@@ -215,141 +206,6 @@ static bool parse_brain_lag_stddev( sim_t* sim,
   }
 
   return true;
-}
-
-// The wowhead encoding that represents pairs of integers in [0..5] with a
-// single character. The character at index i in this array encodes the pair
-// ( floor( i / 6 ), i % 6 ).
-const char wowhead_talent_encoding[] =
-{
-  '0', 'o', 'b', 'h', 'L', 'x',
-  'z', 'k', 'd', 'u', 'p', 't',
-  'M', 'R', 'r', 'G', 'T', 'g',
-  'c', 's', 'f', 'I', 'j', 'e',
-  'm', 'a', 'w', 'N', 'n', 'v',
-  'V', 'q', 'i', 'A', 'y', 'E',
-};
-
-// An exception for wowhead_talent_decode_pair to throw on invalid input.
-struct wowhead_bad_talent_encoding
-{
-  char c;
-  wowhead_bad_talent_encoding( char c ) : c( c ) {}
-};
-
-char wowhead_talent_encode_pair( int first, int second=0 )
-{
-  assert( 0 <= first  && first <= 5 );
-  assert( 0 <= second && second <= 5 );
-  return wowhead_talent_encoding[ 6 * first + second ];
-}
-
-std::pair<int, int> wowhead_talent_decode_pair( char c )
-{
-  for( unsigned i = 0; i < sizeof( wowhead_talent_encoding ) / sizeof( wowhead_talent_encoding[ 0 ] ); ++i)
-  {
-    if ( wowhead_talent_encoding[ i ] == c )
-    {
-      return std::make_pair( i / 6, i % 6 );
-    }
-  }
-
-  throw wowhead_bad_talent_encoding( c );
-}
-
-std::string wowhead_encode_tree( const std::vector<talent_t*>& tree )
-{
-  std::string result;
-
-  unsigned i = 0;
-  while( i < tree.size() )
-  {
-    int first = 0;
-    if ( tree[ i ] )
-      first = tree[ i ] -> rank();
-    ++i;
-
-    int second = 0;
-    if ( i < tree.size() && tree[ i ] )
-      second = tree[ i ] -> rank();
-    ++i;
-
-    result += wowhead_talent_encode_pair( first, second );
-  }
-
-  unsigned length = result.size();
-  while ( length > 0 && result[ length - 1 ] == '0' )
-    --length;
-  result.resize( length );
-
-  return result;
-}
-
-const char* torhead_ac_string( player_type pt )
-{
-  switch( pt )
-  {
-  case SITH_MARAUDER:
-    return "100";
-  case SITH_JUGGERNAUT:
-    return "101";
-  case SITH_ASSASSIN:
-    return "200";
-  case SITH_SORCERER:
-    return "201";
-  case BH_MERCENARY:
-    return "300";
-  case BH_POWERTECH:
-    return "301";
-  case IA_SNIPER:
-    return "400";
-  case IA_OPERATIVE:
-    return "401";
-
-  case JEDI_GUARDIAN:
-    return "500";
-  case JEDI_SENTINEL:
-    return "501";
-  case JEDI_SAGE:
-    return "600";
-  case JEDI_SHADOW:
-    return "601";
-  case S_GUNSLINGER:
-    return "700";
-  case S_SCOUNDREL:
-    return "701";
-  case T_COMMANDO:
-    return "800";
-  case T_VANGUARD:
-    return "801";
-
-  default:
-    return "0";
-  }
-}
-
-std::string torhead_encode_talents( const player_t& p )
-{
-  std::string encoding;
-
-  if ( const char* ac_code = torhead_ac_string( p.type ) )
-  {
-    std::stringstream ss;
-
-    ss << "http://www.torhead.com/skill-calc#" << ac_code;
-
-    // This is necessary because sometimes the talent trees change shape between live/ptr.
-    for ( unsigned i=0; i < sizeof_array( p.talent_trees ); ++i )
-    {
-      if ( i > 0 ) ss << 'Z';
-      ss << wowhead_encode_tree( p.talent_trees[ i ] );
-    }
-
-    ss << ".1";
-    encoding = ss.str();
-  }
-
-  return encoding;
 }
 
 } // ANONYMOUS NAMESPACE ====================================================
@@ -2743,7 +2599,7 @@ int player_t::normalize_by() const
   if ( primary_role() == ROLE_TANK )
     return STAT_ARMOR;
 
-  return primary_attribute;
+  return STAT_POWER;
 }
 
 // player_t::health_percentage() ============================================
@@ -4535,80 +4391,6 @@ bool player_t::parse_talents_armory( const std::string& talent_string )
   return parse_talent_trees( encoding );
 }
 
-// player_t::parse_talents_wowhead ==========================================
-
-bool player_t::parse_talents_wowhead( const std::string& talent_string )
-{
-  // wowhead format: [tree_1]Z[tree_2]Z[tree_3] where the trees are character encodings
-  // each character expands to a pair of numbers [0-5][0-5]
-  // unused deeper talents are simply left blank instead of filling up the string with zero-zero encodings
-
-  int encoding[ MAX_TALENT_SLOTS ];
-  range::fill( encoding, 0 );
-
-  int tree = 0;
-  unsigned tree_count = 0;
-  size_t count = 0;
-
-  for ( unsigned int i=0; i < talent_string.length(); i++ )
-  {
-    if ( tree >= MAX_TALENT_TREES )
-    {
-      sim -> errorf( "Player %s has malformed wowhead talent string. Too many talent trees specified.\n", name() );
-      return false;
-    }
-
-    char c = talent_string[ i ];
-
-    if ( c == '.' ) break;
-
-    if ( c == 'Z' )
-    {
-      count = 0;
-      for ( int j=0; j <= tree; j++ )
-        count += talent_trees[ j ].size();
-      tree++;
-      tree_count = 0;
-      continue;
-    }
-
-    try
-    {
-      std::pair<int, int> decoding = wowhead_talent_decode_pair( c );
-
-      encoding[ count++ ] = decoding.first;
-      ++tree_count;
-
-      if ( tree_count < talent_trees[ tree ].size() )
-      {
-        encoding[ count++ ] = decoding.second;
-        ++tree_count;
-      }
-
-      if ( tree_count > talent_trees[ tree ].size() )
-      {
-        ++tree;
-        tree_count = 0;
-      }
-    }
-
-    catch ( wowhead_bad_talent_encoding )
-    {
-      sim -> errorf( "Player %s has malformed wowhead talent string. Translation for '%c' unknown.\n", name(), c );
-      return false;
-    }
-  }
-
-  if ( sim -> debug )
-  {
-    std::string str_out;
-    for ( size_t i = 0; i < count; i++ ) str_out += '0' + encoding[i];
-    log_t::output( sim, "%s Wowhead talent string translation: %s\n", name(), str_out.c_str() );
-  }
-
-  return parse_talent_trees( encoding );
-}
-
 // player_t::create_talents =================================================
 
 void player_t::create_talents()
@@ -5152,7 +4934,7 @@ bool player_t::create_profile( std::string& profile_str, int save_type, bool sav
 
   if ( save_type == SAVE_ALL || save_type == SAVE_TALENTS )
   {
-    talents_str = torhead_encode_talents( *this );
+    talents_str = torhead::encode_talents( *this );
     if ( ! talents_str.empty() )
       profile_str += "talents=" + talents_str + term;
   }

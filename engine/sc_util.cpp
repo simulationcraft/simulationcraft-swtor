@@ -1798,3 +1798,14 @@ bool str_to_float( std::string src, double& dest )
   return res;
 }
 #endif
+
+int base36_t::decode( char c ) const
+{
+  for( unsigned i = 0; i < 36; ++i)
+  {
+    if ( encoding[ i ] == c )
+      return i;
+  }
+
+  throw bad_char( c );
+}

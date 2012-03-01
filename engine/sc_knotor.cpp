@@ -243,7 +243,7 @@ std::vector<uint8_t> base64_decode( const std::string& encoded )
 
 } // ANONYMOUS namespace ====================================================
 
-bool parse_talents( player_t* p, const std::string& encoded_talent_data )
+bool parse_talents( player_t& p, const std::string& encoded_talent_data )
 {
   std::vector<uint8_t> talent_data = knotor::base64_decode( encoded_talent_data );
 
@@ -259,7 +259,7 @@ bool parse_talents( player_t* p, const std::string& encoded_talent_data )
 
     const map_t& map = get_map( advanced_class, version );
 
-    if ( map.class_map[ 0 ].type != p -> type && map.class_map[ 1 ].type != p -> type )
+    if ( map.class_map[ 0 ].type != p.type && map.class_map[ 1 ].type != p.type )
     {
       // talent spec is for the wrong class
       return false;
@@ -291,12 +291,12 @@ bool parse_talents( player_t* p, const std::string& encoded_talent_data )
 
         if ( false )
         {
-          p -> sim -> errorf( "Tree(%u) Row(%u) Col(%u) = %d : %u\n",
+          p.sim -> errorf( "Tree(%u) Row(%u) Col(%u) = %d : %u\n",
                               tree, row, col, talent_index, points );
         }
 
         if ( talent_index >= 0 )
-          p -> talent_trees[ tree ][ talent_index ] -> set_rank( points );
+          p.talent_trees[ tree ][ talent_index ] -> set_rank( points );
       }
     }
   }

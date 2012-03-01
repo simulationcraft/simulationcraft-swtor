@@ -88,10 +88,11 @@ SRC = \
 	sc_item_data.cpp \
 	sc_js.cpp \
 	sc_juggernaut_guardian.cpp \
-    sc_knotor.cpp \
+  sc_knotor.cpp \
 	sc_log.cpp \
 	sc_main.cpp \
 	sc_marauder_sentinel.cpp \
+	sc_mrrobot.cpp \
 	sc_option.cpp \
 	sc_pet.cpp \
 	sc_player.cpp \
@@ -118,6 +119,7 @@ SRC = \
 	sc_target.cpp \
 	sc_thread.cpp \
 	sc_timespan.cpp \
+	sc_torhead.cpp \
 	sc_unique_gear.cpp \
 	sc_util.cpp \
 	sc_weapon.cpp \
