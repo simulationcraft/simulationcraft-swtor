@@ -151,9 +151,7 @@ static QComboBox* createChoice( int count, ... )
 
 ReforgeButtonGroup::ReforgeButtonGroup( QObject* parent ) :
   QButtonGroup( parent ), selected( 0 )
-{
-
-}
+{}
 
 void ReforgeButtonGroup::setSelected( int state )
 {
@@ -701,9 +699,9 @@ void SimulationCraftWindow::createImportTab()
   importTab = new QTabWidget();
   mainTab->addTab( importTab, "Import" );
 
-  //battleNetView = new SimulationCraftWebView( this );
-  //battleNetView->setUrl( QUrl( "http://us.battle.net/wow/en" ) );
-  // importTab->addTab( battleNetView, "Battle.Net" );
+  mrRobotBuilderView = new SimulationCraftWebView( this );
+  mrRobotBuilderView->setUrl( QUrl( "http://swtor.askmrrobot.com/character" ) );
+  importTab->addTab( mrRobotBuilderView, "Mr. Robot" );
 
   createBestInSlotTab();
 
@@ -1543,7 +1541,7 @@ void SimulationCraftWindow::saveResults()
 void SimulationCraftWindow::closeEvent( QCloseEvent* e )
 {
   saveHistory();
-  //battleNetView->stop();
+  mrRobotBuilderView->stop();
   QCoreApplication::quit();
   e->accept();
 }
@@ -1568,12 +1566,10 @@ void SimulationCraftWindow::cmdLineReturnPressed()
 {
   if ( mainTab->currentIndex() == TAB_IMPORT )
   {
-    if ( cmdLine->text().count( "battle.net" ) ||
-         cmdLine->text().count( "wowarmory.com" ) )
+    if ( cmdLine->text().count( "askmorrobot.com" ) )
     {
-      //battleNetView->setUrl( QUrl::fromUserInput( cmdLine->text() ) );
-      //importTab->setCurrentIndex( TAB_BATTLE_NET );
-      importTab->setCurrentIndex( TAB_BIS );
+      mrRobotBuilderView->setUrl( QUrl::fromUserInput( cmdLine->text() ) );
+      importTab->setCurrentIndex( TAB_MR_ROBOT );
     }
     else
     {
@@ -1682,10 +1678,8 @@ void SimulationCraftWindow::mainTabChanged( int index )
     mainButton->setText( sim ? "Cancel!" : "Simulate!" );
     updateVisibleWebView( siteView );
     break;
-#ifdef SC_PAPERDOLL
   case TAB_PAPERDOLL:
     break;
-#endif
   default: assert( 0 );
   }
   if ( visibleWebView )
@@ -1750,8 +1744,8 @@ void SimulationCraftWindow::historyDoubleClicked( QListWidgetItem* item )
   QString text = item->text();
   QString url = text.section( ' ', 1, 1, QString::SectionSkipEmpty );
 
-  //battleNetView->setUrl( QUrl::fromEncoded( url.toAscii() ) );
-  importTab->setCurrentIndex( TAB_BIS );
+  mrRobotBuilderView->setUrl( QUrl::fromEncoded( url.toAscii() ) );
+  importTab->setCurrentIndex( TAB_MR_ROBOT );
 }
 
 void SimulationCraftWindow::bisDoubleClicked( QTreeWidgetItem* item, int /* col */ )

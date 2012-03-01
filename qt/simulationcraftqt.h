@@ -10,25 +10,25 @@
 #include <QtGui/QtGui>
 #include <QtWebKit>
 
-#define TAB_WELCOME   0
-#define TAB_OPTIONS   1
-#define TAB_IMPORT    2
-#define TAB_SIMULATE  3
-#define TAB_OVERRIDES 4
-#define TAB_HELP      5
-#define TAB_LOG       6
-#define TAB_RESULTS   7
-#define TAB_SITE      8
-#ifdef SC_PAPERDOLL
-#define TAB_PAPERDOLL 9
-#endif
+enum master_tabs {
+  TAB_WELCOME,
+  TAB_OPTIONS,
+  TAB_IMPORT,
+  TAB_SIMULATE,
+  TAB_OVERRIDES,
+  TAB_HELP,
+  TAB_LOG,
+  TAB_RESULTS,
+  TAB_SITE,
+  TAB_PAPERDOLL,
+};
 
-#if 0
-#define TAB_BATTLE_NET 0
-#endif
-#define TAB_BIS        0
-#define TAB_HISTORY    1
-#define TAB_CUSTOM     2
+enum import_tabs {
+  TAB_BIS,
+  TAB_HISTORY,
+  TAB_MR_ROBOT,
+  TAB_CUSTOM,
+};
 
 #define HISTORY_VERSION "1.02"
 
@@ -142,7 +142,7 @@ public:
   QComboBox* reforgePlotAmountChoice;
   QComboBox* reforgePlotStepChoice;
   ReforgeButtonGroup* reforgeplotsButtonGroup;
-  //SimulationCraftWebView* battleNetView;
+  SimulationCraftWebView* mrRobotBuilderView;
   SimulationCraftWebView* siteView;
   SimulationCraftWebView* helpView;
   SimulationCraftWebView* visibleWebView;
@@ -383,7 +383,7 @@ public:
 
   //void importBattleNet();
 
-  void start( sim_t* s, int t, const QString& u ) { sim=s; tab=t; url=u; profile=""; player=0; QThread::start(); }
+  void start( sim_t* s, int t, const QString& u ) { sim=s; tab=t; url=u; profile.clear(); player=0; QThread::start(); }
   virtual void run();
   ImportThread( SimulationCraftWindow* mw ) : mainWindow( mw ), sim( 0 ), player( 0 ) {}
 };
