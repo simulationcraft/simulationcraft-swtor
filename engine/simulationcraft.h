@@ -4218,7 +4218,7 @@ public:
   virtual void create_talents();
   //virtual void create_glyphs();
 
-  virtual talent_t* find_talent( const std::string& name, int tree = TALENT_TAB_NONE );
+  virtual talent_t* find_talent( const std::string& name, int tree = TALENT_TAB_NONE ) const;
   //virtual glyph_t*  find_glyph ( const std::string& name );
 
   virtual action_expr_t* create_expression( action_t*, const std::string& name );
@@ -4226,7 +4226,7 @@ public:
   virtual void create_options();
   virtual bool create_profile( std::string& profile_str, int save_type=SAVE_ALL, bool save_html=false );
 
-  virtual void copy_from( player_t* source );
+  virtual void copy_from( const player_t& source );
 
   virtual action_t* create_action( const std::string& name, const std::string& options );
   virtual void      create_pets() { }

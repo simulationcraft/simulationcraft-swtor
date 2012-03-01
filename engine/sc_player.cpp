@@ -31,63 +31,60 @@ static bool has_foreground_actions( player_t* p )
   return false;
 }
 
-// parse_talent_url =========================================================
+// parse_talent_string ======================================================
 
-static bool parse_talent_url( sim_t* sim,
-                              const std::string& name,
-                              const std::string& url )
+static bool parse_talent_string( player_t& p, const std::string& url )
 {
-  assert( name == "talents" ); ( void )name;
+  p.talents_str = url;
 
-  player_t* p = sim -> active_player;
-
-  p -> talents_str = url;
-
-  std::string::size_type cut_pt;
+  std::string::size_type hash_pos = url.find( '#' );
 
   if ( url.find( "torhead" ) != url.npos )
   {
-    if ( ( cut_pt = url.find_first_of( "#=" ) ) != url.npos )
-    {
-      std::string::size_type cut_pt2 = url.find_first_of( '-', cut_pt + 1 );
-      // Add support for http://www.wowhead.com/talent#priest-033211000000000000000000000000000000000000322032210201222100231
-      if ( cut_pt2 != url.npos )
-        return p -> parse_talents_armory( url.substr( cut_pt2 + 1 ) );
-      else
-        return torhead::parse_talents( *p, url.substr( cut_pt + 4 ) );
-    }
+    // http://torhead.com/skill-calc#...
+    if ( hash_pos != url.npos )
+      return torhead::parse_talents( p, url.substr( hash_pos + 4 ) );
   }
 
   else if ( url.find( "knotor" ) != url.npos )
   {
     // http://knotor.com/skills#.....
-    if ( ( cut_pt = url.find( '#' ) ) != url.npos )
-      return knotor::parse_talents( *p, url.substr( cut_pt + 1 ) );
+    if ( hash_pos != url.npos )
+      return knotor::parse_talents( p, url.substr( hash_pos + 1 ) );
   }
 
   else if ( url.find( "mrrobot.com" ) != url.npos )
   {
     // http://swtor.askmrrobot.com/skills/[advancedclassname]#[tree 1]-[tree 2]-[tree 3]
-    if ( ( cut_pt = url.find( '#' ) ) != url.npos )
-      return mrrobot::parse_talents( *p, url.substr( cut_pt + 1 ) );
+    if ( hash_pos != url.npos )
+      return mrrobot::parse_talents( p, url.substr( hash_pos + 1 ) );
   }
 
   else
   {
     bool all_digits = true;
     for ( size_t i=0; i < url.size() && all_digits; i++ )
+    {
       if ( ! isdigit( url[ i ] ) )
         all_digits = false;
+    }
 
     if ( all_digits )
-    {
-      return p -> parse_talents_armory( url );
-    }
+      return p.parse_talents_armory( url );
   }
 
-  sim -> errorf( "Unable to decode talent string %s for %s\n", url.c_str(), p -> name() );
+  p.sim -> errorf( "Unable to decode talent string %s for %s\n", url.c_str(), p.name() );
 
   return false;
+}
+
+static bool parse_talent_url( sim_t* sim,
+                              const std::string& name,
+                              const std::string& url )
+{
+  assert( name == "talents" ); ( void )name;
+  assert( sim -> active_player );
+  return parse_talent_string( *sim -> active_player, url );
 }
 
 // parse_role_string ========================================================
@@ -4399,7 +4396,7 @@ void player_t::create_talents()
 // player_t::find_talent ====================================================
 
 talent_t* player_t::find_talent( const std::string& n,
-                                 int tree )
+                                 int tree ) const
 {
   for ( int i=0; i < MAX_TALENT_TREES; i++ )
   {
@@ -5037,51 +5034,59 @@ bool player_t::create_profile( std::string& profile_str, int save_type, bool sav
 
 // player_t::copy_from ======================================================
 
-void player_t::copy_from( player_t* source )
+void player_t::copy_from( const player_t& source )
 {
-  origin_str = source -> origin_str;
-  level = source -> level;
-  race_str = source -> race_str;
-  role = source -> role;
-  professions_str = source -> professions_str;
+  origin_str = source.origin_str;
+  level = source.level;
+  race_str = source.race_str;
+  role = source.role;
+  professions_str = source.professions_str;
 
-  position = source -> position;
-  position_str = source -> position_str;
+  position = source.position;
+  position_str = source.position_str;
 
-  use_pre_potion = source -> use_pre_potion;
+  use_pre_potion = source.use_pre_potion;
 
-  talents_str = "http://www.torhead.com/skill-calc#";
-  talents_str += util_t::player_type_string( type );
-  talents_str += "-";
-  // This is necessary because sometimes the talent trees change shape between live/ptr.
-  for ( int i=0; i < MAX_TALENT_TREES; i++ )
+  if ( dbc.ptr == source.dbc.ptr && ! source.talents_str.empty() )
+    parse_talent_string( *this, source.talents_str );
+  else
   {
-    for ( unsigned j = 0; j < talent_trees[ i ].size(); j++ )
+    // This is necessary because sometimes the talent trees change shape between live/ptr.
+    std::stringstream ss;
+
+    for ( int i=0; i < MAX_TALENT_TREES; i++ )
     {
-      talent_t* t = talent_trees[ i ][ j ];
-      talent_t* source_t = source -> find_talent( t -> name_cstr() );
-      if ( source_t ) t -> set_rank( source_t -> rank() );
-      std::stringstream ss;
-      ss << t -> rank();
-      talents_str += ss.str();
+      for ( unsigned j = 0; j < talent_trees[ i ].size(); j++ )
+      {
+        talent_t* t = talent_trees[ i ][ j ];
+        int rank = 0;
+        if ( const talent_t* source_t = source.find_talent( t -> name_cstr() ) )
+        {
+          rank = source_t -> rank();
+          t -> set_rank( rank );
+        }
+        ss << rank;
+      }
     }
+
+    talents_str = ss.str();
   }
 
-  action_list_str = source -> action_list_str;
+  action_list_str = source.action_list_str;
   action_priority_list.clear();
-  for ( unsigned int i = 0; i < source -> action_priority_list.size(); i++ )
+  for ( unsigned int i = 0; i < source.action_priority_list.size(); i++ )
   {
-    action_priority_list.push_back( source -> action_priority_list[ i ] );
+    action_priority_list.push_back( source.action_priority_list[ i ] );
   }
 
   int num_items = ( int ) items.size();
   for ( int i=0; i < num_items; i++ )
   {
-    items[ i ] = source -> items[ i ];
+    items[ i ] = source.items[ i ];
     items[ i ].player = this;
   }
-  gear = source -> gear;
-  enchant = source -> enchant;
+  gear = source.gear;
+  enchant = source.enchant;
 }
 
 // player_t::create_options =================================================

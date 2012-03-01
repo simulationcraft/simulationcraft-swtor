@@ -227,7 +227,7 @@ static bool parse_player( sim_t*             sim,
     }
 
     sim -> active_player = player_t::create( sim, util_t::player_type_string( source -> type ), player_name );
-    if ( sim -> active_player != 0 ) sim -> active_player -> copy_from ( source );
+    if ( sim -> active_player != 0 ) sim -> active_player -> copy_from( *source );
   }
 
   else
