@@ -146,7 +146,7 @@ public:
   SimulationCraftWebView* siteView;
   SimulationCraftWebView* helpView;
   SimulationCraftWebView* visibleWebView;
-  PersistentCookieJar* charDevCookies;
+  PersistentCookieJar* cookieJar;
   QListWidget* historyList;
   QTreeWidget* bisTree;
   SimulationCraftTextEdit* simulateText;

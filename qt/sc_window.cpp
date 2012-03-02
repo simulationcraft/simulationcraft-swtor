@@ -382,6 +382,7 @@ void SimulationCraftWindow::loadHistory()
 
 void SimulationCraftWindow::saveHistory()
 {
+  cookieJar->save();
   http_t::cache_save();
   QFile file( "simc_history.dat" );
   if ( file.open( QIODevice::WriteOnly ) )
@@ -699,7 +700,10 @@ void SimulationCraftWindow::createImportTab()
   importTab = new QTabWidget();
   mainTab->addTab( importTab, "Import" );
 
+  cookieJar = new PersistentCookieJar( "simcqt.cookies" );
+  cookieJar->load();
   mrRobotBuilderView = new SimulationCraftWebView( this );
+  mrRobotBuilderView->page()->networkAccessManager()->setCookieJar( cookieJar );
   mrRobotBuilderView->setUrl( QUrl( "http://swtor.askmrrobot.com/character" ) );
   importTab->addTab( mrRobotBuilderView, "Mr. Robot" );
 
@@ -1029,9 +1033,18 @@ void SimulationCraftWindow::createItemDataSourceSelector( QFormLayout* layout )
 void SimulationCraftWindow::updateVisibleWebView( SimulationCraftWebView* wv )
 {
   visibleWebView = wv;
-  progressBar->setFormat( "%p%" );
-  progressBar->setValue( visibleWebView->progress );
-  cmdLine->setText( visibleWebView->url().toString() );
+  if ( wv )
+  {
+    progressBar->setFormat( "%p%" );
+    progressBar->setValue( wv->progress );
+    cmdLine->setText( wv->url().toString() );
+  }
+  else
+  {
+    progressBar->setFormat( simPhase.c_str() );
+    progressBar->setValue( simProgress );
+    cmdLine->setText( "" );
+  }
 }
 
 // ==========================================================================
@@ -1706,8 +1719,7 @@ void SimulationCraftWindow::importTabChanged( int index )
   }
   else
   {
-    assert( 0 );
-    //updateVisibleWebView( ( SimulationCraftWebView* ) importTab->widget( index ) );
+    updateVisibleWebView( dynamic_cast<SimulationCraftWebView*>( importTab->widget( index ) ) );
   }
 }
 
@@ -1719,7 +1731,7 @@ void SimulationCraftWindow::resultsTabChanged( int index )
   }
   else
   {
-    updateVisibleWebView( ( SimulationCraftWebView* ) resultsTab->widget( index ) );
+    updateVisibleWebView( dynamic_cast<SimulationCraftWebView*>( resultsTab->widget( index ) ) );
     QString s = visibleWebView->url().toString();
     if ( s == "about:blank" ) s = resultsFileText;
     cmdLine->setText( s );
