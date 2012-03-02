@@ -289,7 +289,7 @@ struct jedi_sage_spell_t : public action_t
     if ( base_execute_time > timespan_t::zero )
       p -> buffs.presence_of_mind -> expire();
 
-    if ( dd.base_min > 0 )
+    if ( dd.base_min > 0 || channeled )
       p -> buffs.force_potency -> decrement();
   }
 
@@ -302,7 +302,7 @@ struct jedi_sage_spell_t : public action_t
     if ( base_execute_time > timespan_t::zero && p -> buffs.presence_of_mind -> up() )
       dd.player_multiplier *= 1.20;
 
-    if ( dd.base_min > 0 && p -> buffs.force_potency -> up() )
+    if ( ( dd.base_min > 0 || channeled ) && p -> buffs.force_potency -> up() )
       player_crit += 0.60;
   }
 
