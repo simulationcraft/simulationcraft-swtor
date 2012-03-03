@@ -3270,6 +3270,21 @@ set_bonus_t* player_t::find_set_bonus( const std::string& name )
   return 0;
 }
 
+// player_t::find_stats ======================================================
+
+stats_t* player_t::find_stats( const std::string& n )
+{
+  stats_t* stats = 0;
+
+  for ( stats = stats_list; stats; stats = stats -> next )
+  {
+    if ( stats -> name_str == n )
+      break;
+  }
+
+  return stats;
+}
+
 // player_t::get_cooldown ===================================================
 
 cooldown_t* player_t::get_cooldown( const std::string& name )

@@ -332,6 +332,117 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
     fprintf ( file,
               "\t\t\t\t\t\t\t\t\t\t</tr>\n"
               "\t\t\t\t\t\t\t\t\t</table>\n" );
+    if ( ! s -> portion_aps.simple || ! s -> actual_amount.simple )
+    {
+    fprintf ( file,
+                  "\t\t\t\t\t\t\t\t\t<table class=\"details\">\n"
+                  "\t\t\t\t\t\t\t\t\t\t<tr>\n" );
+      if ( ! s -> portion_aps.simple )
+        fprintf ( file,
+                  "\t\t\t\t\t\t\t\t\t\t\t<th class=\"small\">Portion APS</th>\n"
+                  "\t\t\t\t\t\t\t\t\t\t\t<th class=\"small\">pAPS stddev</th>\n"
+                  "\t\t\t\t\t\t\t\t\t\t\t<th class=\"small\">pAPS mean stddev</th>\n"
+                  "\t\t\t\t\t\t\t\t\t\t\t<th class=\"small\">pAPS error</th>\n" );
+      if ( ! s -> actual_amount.simple )
+        fprintf ( file,
+                  "\t\t\t\t\t\t\t\t\t\t\t<th class=\"small\">Mean Amount</th>\n"
+                  "\t\t\t\t\t\t\t\t\t\t\t<th class=\"small\">Amount stddev</th>\n"
+                  "\t\t\t\t\t\t\t\t\t\t\t<th class=\"small\">Amount mean stddev</th>\n"
+                  "\t\t\t\t\t\t\t\t\t\t\t<th class=\"small\">Amount min</th>\n"
+                  "\t\t\t\t\t\t\t\t\t\t\t<th class=\"small\">Amount max</th>\n");
+        fprintf ( file,
+                  "\t\t\t\t\t\t\t\t\t\t</tr>\n"
+                  "\t\t\t\t\t\t\t\t\t\t<tr>\n" );
+      if ( ! s -> portion_aps.simple )
+        fprintf ( file,
+                  "\t\t\t\t\t\t\t\t\t\t\t<td class=\"right small\">%.2f</td>\n"
+                  "\t\t\t\t\t\t\t\t\t\t\t<td class=\"right small\">%.2f</td>\n"
+                  "\t\t\t\t\t\t\t\t\t\t\t<td class=\"right small\">%.2f</td>\n"
+                  "\t\t\t\t\t\t\t\t\t\t\t<td class=\"right small\">%.2f</td>\n",
+                  s -> portion_aps.mean,
+                  s -> portion_aps.std_dev,
+                  s -> portion_aps.mean_std_dev,
+                  s -> portion_aps.mean_std_dev * p -> sim -> confidence_estimator );
+      if ( ! s -> actual_amount.simple )
+        fprintf ( file,
+                  "\t\t\t\t\t\t\t\t\t\t\t<td class=\"right small\">%.2f</td>\n"
+                  "\t\t\t\t\t\t\t\t\t\t\t<td class=\"right small\">%.2f</td>\n"
+                  "\t\t\t\t\t\t\t\t\t\t\t<td class=\"right small\">%.2f</td>\n"
+                  "\t\t\t\t\t\t\t\t\t\t\t<td class=\"right small\">%.2f</td>\n"
+                  "\t\t\t\t\t\t\t\t\t\t\t<td class=\"right small\">%.2f</td>\n",
+                  s -> actual_amount.mean,
+                  s -> actual_amount.std_dev,
+                  s -> actual_amount.mean_std_dev,
+                  s -> actual_amount.min,
+                  s -> actual_amount.max );
+        fprintf ( file,
+                  "\t\t\t\t\t\t\t\t\t\t</tr>\n"
+                  "\t\t\t\t\t\t\t\t\t</table>\n" );
+
+        if ( ! s -> portion_aps.simple && p -> sim -> scaling -> has_scale_factors() )
+        {
+          int colspan = 0;
+          fprintf( file,
+                   "\t\t\t\t\t\t<table class=\"details\">\n" );
+          fprintf( file,
+                   "\t\t\t\t\t\t\t<tr>\n"
+                   "\t\t\t\t\t\t\t\t<th><a href=\"#help-scale-factors\" class=\"help\">?</a></th>\n" );
+          for ( int i=0; i < STAT_MAX; i++ )
+            if ( p -> scales_with[ i ] )
+            {
+              fprintf( file,
+                       "\t\t\t\t\t\t\t\t<th>%s</th>\n",
+                       util_t::stat_type_abbrev( i ) );
+              colspan++;
+            }
+          if ( p -> sim -> scaling -> scale_lag )
+          {
+            fprintf( file,
+                     "\t\t\t\t\t\t\t\t<th>ms Lag</th>\n" );
+            colspan++;
+          }
+          fprintf( file,
+                   "\t\t\t\t\t\t\t</tr>\n" );
+          fprintf( file,
+                   "\t\t\t\t\t\t\t<tr>\n"
+                   "\t\t\t\t\t\t\t\t<th class=\"left\">Scale Factors</th>\n" );
+          for ( int i=0; i < STAT_MAX; i++ )
+            if ( p -> scales_with[ i ] )
+              fprintf( file,
+                       "\t\t\t\t\t\t\t\t<td>%.*f</td>\n",
+                       p -> sim -> report_precision,
+                       s -> scaling.get_stat( i ) );
+          fprintf( file,
+                   "\t\t\t\t\t\t\t</tr>\n" );
+          fprintf( file,
+                   "\t\t\t\t\t\t\t<tr>\n"
+                   "\t\t\t\t\t\t\t\t<th class=\"left\">Scale Deltas</th>\n" );
+          for ( int i=0; i < STAT_MAX; i++ )
+            if ( p -> scales_with[ i ] )
+              fprintf( file,
+                       "\t\t\t\t\t\t\t\t<td>%.0f</td>\n",
+                       p -> sim -> scaling -> stats.get_stat( i ) );
+          fprintf( file,
+                   "\t\t\t\t\t\t\t</tr>\n" );
+          fprintf( file,
+                   "\t\t\t\t\t\t\t<tr>\n"
+                   "\t\t\t\t\t\t\t\t<th class=\"left\">Error</th>\n" );
+          for ( int i=0; i < STAT_MAX; i++ )
+            if ( p -> scales_with[ i ] )
+              fprintf( file,
+                       "\t\t\t\t\t\t\t\t<td>%.*f</td>\n",
+                       p -> sim -> report_precision,
+                       s -> scaling_error.get_stat( i ) );
+          fprintf( file,
+                   "\t\t\t\t\t\t\t</tr>\n" );
+
+
+
+          fprintf( file,
+                   "\t\t\t\t\t\t</table>\n" );
+
+        }
+    }
 
 
     fprintf ( file,
