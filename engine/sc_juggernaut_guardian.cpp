@@ -105,6 +105,8 @@ struct juggernaut_guardian_t : public player_t
 
     virtual void      init_scaling()
     {
+      player_t::init_scaling();
+
       scales_with[ STAT_FORCE_POWER ] = true;
     }
 };
