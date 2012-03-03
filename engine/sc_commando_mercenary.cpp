@@ -80,8 +80,8 @@ struct commando_mercenary_t : public player_t
     {
 
 
-      primary_attribute = ATTR_STRENGTH;
-      secondary_attribute   = ATTR_WILLPOWER;
+      primary_attribute   = ATTR_AIM;
+      secondary_attribute = ATTR_CUNNING;
 
       create_talents();
       create_options();
@@ -105,8 +105,8 @@ struct commando_mercenary_t : public player_t
     virtual void init_scaling()
     {
       player_t::init_scaling();
-      scales_with[ STAT_WEAPON_DMG         ] = true;
-      scales_with[ STAT_FORCE_POWER        ] = true;
+
+      scales_with[ STAT_TECH_POWER ] = true;
     }
 };
 
