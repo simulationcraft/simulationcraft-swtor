@@ -532,11 +532,15 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
                   "\t\t\t\t\t\t\t\t\t\t<ul>\n"
                   "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">may_crit:</span>%s</li>\n"
                   "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">dd.power_mod:</span>%.6f</li>\n"
+                  "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">dd.standardhealthpercentmin:</span>%.2f</li>\n"
+                  "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">dd.standardhealthpercentmax:</span>%.2f</li>\n"
                   "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">dd.base_min:</span>%.2f</li>\n"
                   "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">dd.base_max:</span>%.2f</li>\n"
                   "\t\t\t\t\t\t\t\t\t\t</ul>\n",
                   a -> may_crit ? "true" : "false",
                   a -> dd.power_mod,
+                  a -> dd.standardhealthpercentmin,
+                  a -> dd.standardhealthpercentmax,
                   a -> dd.base_min,
                   a -> dd.base_max );
       }
@@ -548,6 +552,8 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
                   "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">tick_may_crit:</span>%s</li>\n"
                   "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">tick_zero:</span>%s</li>\n"
                   "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">td.power_mod:</span>%.6f</li>\n"
+                  "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">td.standardhealthpercentmin:</span>%.2f</li>\n"
+                  "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">td.standardhealthpercentmax:</span>%.2f</li>\n"
                   "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">td.base_min:</span>%.2f</li>\n"
                   "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">td.base_max:</span>%.2f</li>\n"
                   "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">num_ticks:</span>%i</li>\n"
@@ -558,6 +564,8 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
                   a -> tick_may_crit?"true":"false",
                   a -> tick_zero?"true":"false",
                   a -> td.power_mod,
+                  a -> td.standardhealthpercentmin,
+                  a -> td.standardhealthpercentmax,
                   a -> td.base_min,
                   a -> td.base_max,
                   a -> num_ticks,
