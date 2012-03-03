@@ -114,6 +114,7 @@ struct shadow_assassin_t : public player_t
         // Darkness|Kinetic Combat
         talent_t* thrashing_blades;
         talent_t* charge_mastery;
+        talent_t* electric_execution;
 
         // Deception|Infiltration
         talent_t* insulation;
@@ -286,6 +287,9 @@ struct shadow_assassin_attack_t : public action_t
 
         if ( p -> actives.charge == SURGING_CHARGE )
           player_armor_penetration += p -> talents.charge_mastery -> rank() * 0.03;
+
+        if ( p -> actives.charge == LIGHTNING_CHARGE )
+          player_crit += p -> talents.charge_mastery -> rank() * 0.01;
     }
 };
 
@@ -947,6 +951,8 @@ struct voltaic_slash_t : public shadow_assassin_attack_t
 
     range = 4.0;
 
+    base_multiplier *= 1.0 + p -> talents.thrashing_blades -> rank() * 0.03;
+
     if ( is_second_strike )
     {
       background = true;
@@ -1343,8 +1349,8 @@ struct lightning_charge_callback_t : public action_callback_t
       background = true;
       cooldown -> duration = timespan_t::from_seconds( 1.5 );
 
-      base_crit *= 1.0 + p -> talents.charge_mastery -> rank() * 0.01;
       base_multiplier *= 1.0 + p -> talents.charge_mastery -> rank() * 0.06;
+      base_multiplier *= 1.0 + p -> talents.electric_execution -> rank() * 0.03;
     }
 
     virtual void player_buff()
@@ -1403,6 +1409,8 @@ struct surging_charge_callback_t : public action_callback_t
           proc = true;
           background = true;
           cooldown -> duration = timespan_t::from_seconds( 1.5 );
+
+          base_multiplier *= 1.0 + p -> talents.electric_execution -> rank() * 0.03;
       }
 
       virtual void player_buff()
@@ -1496,7 +1504,7 @@ struct dark_charge_callback_t : public action_callback_t
       cooldown -> duration = timespan_t::from_seconds( 4.5 );
 
       base_crit *= 1.0 + p -> talents.charge_mastery -> rank() * 0.01;
-      base_multiplier *= 1.0 + p -> talents.charge_mastery -> rank() * 0.06;
+      base_multiplier *= 1.0 + p -> talents.electric_execution -> rank() * 0.03;
     }
 
   };
@@ -1616,6 +1624,7 @@ void shadow_assassin_t::init_talents()
     // Darkness|Kinetic Combat
     talents.thrashing_blades      = find_talent( "Thrashing Blades" );
     talents.charge_mastery        = find_talent( "Charge Mastery" );
+    talents.electric_execution    = find_talent( "Electric Execution" );
 
     // Deception|Infiltration
     talents.insulation            = find_talent( "Insulation" );
