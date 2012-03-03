@@ -906,6 +906,7 @@ bool unique_gear_t::get_equip_encoding( std::string&       encoding,
   else if ( name == "volatile_energy_module"              ) e = "ondamage_170Energy_30%_4.5c";
   else if ( name == "relic_of_vital_rupturing"            ) e = "ondamage_128Internal_30%_4.5cd";
 
+
   if ( e.empty() ) return false;
 
   util_t::tolower( e );
