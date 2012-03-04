@@ -125,50 +125,17 @@ const standard_health_t standard_health_table[] = {
   /* 50 */ { 1610, 7085 },
 };
 
-const standard_health_t& get_standard_health( int level )
+template <typename T, std::size_t N>
+const T& get_table( const T (&table)[N], unsigned int index )
 {
-  unsigned index = level;
-  if ( index >= sizeof( standard_health_table ) / sizeof( standard_health_table[0] ) )
+  if ( index >= N )
     index = 0;
-  return standard_health_table[ index ];
+  return table[ index ];
 }
+
+const standard_health_t& get_standard_health( int level )
+{ return get_table( standard_health_table, level ); }
 } // ANONYMOUS namespace ====================================================
-
-// rating_t::init ===========================================================
-
-void rating_t::init( sim_t* sim, dbc_t& dbc, int level, int type )
-{
-  if ( sim -> debug ) log_t::output( sim, "rating_t::init: level=%d type=%s",
-                                     level, util_t::player_type_string( type ) );
-
-  if ( type == ENEMY || type == ENEMY_ADD )
-  {
-    double max = +1.0E+50;
-    spell_alacrity    = max;
-    spell_accuracy    = max;
-    spell_crit        = max;
-    attack_alacrity   = max;
-    attack_accuracy   = max;
-    attack_crit       = max;
-    ranged_alacrity   = max;
-    ranged_accuracy   = max;
-    ranged_crit       = max;
-    expertise         = max;
-  }
-  else
-  {
-    spell_alacrity    = dbc.combat_rating( RATING_SPELL_ALACRITY,  level );
-    spell_accuracy    = dbc.combat_rating( RATING_SPELL_ACCURACY,    level );
-    spell_crit        = dbc.combat_rating( RATING_SPELL_CRIT,   level );
-    attack_alacrity   = dbc.combat_rating( RATING_MELEE_ALACRITY,  level );
-    attack_accuracy   = dbc.combat_rating( RATING_MELEE_ACCURACY,    level );
-    attack_crit       = dbc.combat_rating( RATING_MELEE_CRIT,   level );
-    ranged_alacrity   = dbc.combat_rating( RATING_RANGED_ALACRITY, level );
-    ranged_accuracy   = dbc.combat_rating( RATING_RANGED_ACCURACY,   level );
-    ranged_crit       = dbc.combat_rating( RATING_RANGED_CRIT,  level );
-    expertise         = dbc.combat_rating( RATING_EXPERTISE,    level );
-  }
-}
 
 // rating_t::standardhealth_damage ==========================================
 
@@ -183,89 +150,4 @@ double rating_t::standardhealth_healing( int level )
 // rating_t::get_base_health ================================================
 
 int rating_t::get_base_health( int level )
-{
-  unsigned index = level;
-  if ( index >= sizeof( base_health_table ) / sizeof( base_health_table[ 0 ] ) )
-    index = 0;
-  return base_health_table[ index ];
-}
-
-#if 0
-// rating_t::interpolate ====================================================
-
-double rating_t::interpolate( int    level,
-                              double val_60,
-                              double val_70,
-                              double val_80,
-                              double val_85 )
-{
-  if ( val_85 < 0 ) val_85 = val_80; // TODO
-  if ( level <= 60 )
-  {
-    return val_60;
-  }
-  else if ( level == 70 )
-  {
-    return val_70;
-  }
-  else if ( level == 80 )
-  {
-    return val_80;
-  }
-  else if ( level >= 85 )
-  {
-    return val_85;
-  }
-  else if ( level < 70 )
-  {
-    // Assume linear progression for now.
-    double adjust = ( level - 60 ) / 10.0;
-    return val_60 + adjust * ( val_70 - val_60 );
-  }
-  else if ( level < 80 )
-  {
-    // Assume linear progression for now.
-    double adjust = ( level - 70 ) / 10.0;
-    return val_70 + adjust * ( val_80 - val_70 );
-  }
-  else // ( level < 85 )
-  {
-    // Assume linear progression for now.
-    double adjust = ( level - 80 ) / 5.0;
-    return val_80 + adjust * ( val_85 - val_80 );
-  }
-  assert( 0 );
-  return 0;
-}
-
-// rating_t::get_attribute_base =============================================
-
-double rating_t::get_attribute_base( sim_t* /* sim */, dbc_t& dbc, int level, player_type class_type, race_type race, base_stat_type stat_type )
-{
-  double res                       = 0.0;
-
-  switch ( stat_type )
-  {
-  case BASE_STAT_STRENGTH:           res = dbc.race_base( race ).strength + dbc.attribute_base( class_type, level ).strength; break;
-#if 0
-  case BASE_STAT_AGILITY:            res = dbc.race_base( race ).agility + dbc.attribute_base( class_type, level ).agility; break;
-  case BASE_STAT_STAMINA:            res = dbc.race_base( race ).stamina + dbc.attribute_base( class_type, level ).stamina; break;
-  case BASE_STAT_INTELLECT:          res = dbc.race_base( race ).intellect + dbc.attribute_base( class_type, level ).intellect; break;
-  case BASE_STAT_SPIRIT:             res = dbc.race_base( race ).spirit + dbc.attribute_base( class_type, level ).spirit;
-                                     if ( race == RACE_HUMAN ) res *= 1.03; break;
-  case BASE_STAT_MP5:                res = dbc.regen_base( class_type, level ); break;
-#endif
-  case BASE_STAT_HEALTH:             res = dbc.attribute_base( class_type, level ).base_health; break;
-  case BASE_STAT_MANA:               res = dbc.attribute_base( class_type, level ).base_resource; break;
-  case BASE_STAT_MELEE_CRIT_PER_AGI: res = dbc.melee_crit_scaling( class_type, level ); break;
-  case BASE_STAT_SPELL_CRIT_PER_INT: res = dbc.spell_crit_scaling( class_type, level ); break;
-  case BASE_STAT_DODGE_PER_AGI:      res = dbc.dodge_scaling( class_type, level ); break;
-  case BASE_STAT_MELEE_CRIT:         res = dbc.melee_crit_base( class_type ); break;
-  case BASE_STAT_SPELL_CRIT:         res = dbc.spell_crit_base( class_type ); break;
-  case BASE_STAT_SPI_REGEN:          res = dbc.regen_spirit( class_type, level ); break;
-  default: break;
-  }
-
-  return res;
-}
-#endif // 0
+{ return get_table( base_health_table, level ); }

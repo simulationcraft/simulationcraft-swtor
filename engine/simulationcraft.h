@@ -3383,59 +3383,65 @@ public:
 };
 
 // Gear Rating Conversions ==================================================
-
-namespace internal {
 struct rating_t
 {
-  double  spell_alacrity,  spell_accuracy,  spell_crit;
-  double attack_alacrity, attack_accuracy, attack_crit;
-  double ranged_alacrity, ranged_accuracy,ranged_crit;
-  double expertise;
-};
-}
-
-struct rating_t : public internal::rating_t
-{
-  typedef internal::rating_t base_t;
-  rating_t() : base_t( base_t() ) {}
-
-  void init( sim_t*, dbc_t& pData, int level, int type );
-
-  static double standardhealth_damage( int level );
-  static double standardhealth_healing( int level );
-  static int get_base_health( int level );
-
 private:
   static double swtor_diminishing_return( double cap, double divisor, int level, double rating )
   {
-    return cap * ( 1.0 - std::pow( ( 1.0 - ( 0.01 / cap ) ),
-                                   std::max( rating, 0.0 ) / std::max( 20, level ) / divisor ) );
+    assert( rating >= 0.0 );
+    return cap * ( 1.0 - std::exp( ( std::log( 1.0 - ( 0.01 / cap ) ) / divisor ) *
+                                   rating / std::max( 20, level ) ) );
   }
 
+  template <int cap, int divisor>
+  class scaling_t
+  {
+    // Performs the swtor_diminishing_return function in 2 steps. The first step (init)
+    // precomputes as much as possible given that cap, divisor, and level are static
+    // for a full simulation run. The second step (operator()) completes the computation
+    // for a given rating.
+  private:
+    double multiplier;
+    mutable double cached_rating, cached_value;
+  public:
+    void init( int level )
+    {
+      multiplier = std::log( 1.0 - ( 1.0 / cap ) ) / ( divisor / 100.0 ) / std::max( 20, level );
+      cached_rating = cached_value = -1;
+    }
+
+    double operator() ( double rating ) const
+    {
+      assert( rating >= 0 );
+      if ( likely( cached_rating == rating ) )
+        return cached_value;
+
+      cached_rating = rating;
+      return cached_value = ( cap / 100.0 ) * ( 1.0 - std::exp( multiplier * rating ) );
+    }
+  };
+
 public:
-  static double absorb_from_rating( double amount, int level )
-  { return swtor_diminishing_return( 0.5, 0.18, level, amount ); }
+  scaling_t<50,  18> absorb;
+  scaling_t<30,  55> accuracy;
+  scaling_t<30,  55> alacrity;
+  scaling_t<30,  45> crit;
+  scaling_t<30, 250> crit_from_stat;
+  scaling_t<30,  55> defense;
+  scaling_t<50,  32> shield;
+  scaling_t<30,  11> surge;
 
-  static double accuracy_from_rating( double amount, int level )
-  { return swtor_diminishing_return( 0.3, 0.55, level, amount ); }
-
-  static double alacrity_from_rating( double amount, int level )
-  { return swtor_diminishing_return( 0.3, 0.55, level, amount ); }
-
-  static double crit_from_stat( double amount, int level )
-  { return swtor_diminishing_return( 0.3, 2.5, level, amount ); }
-
-  static double crit_from_rating( double amount, int level )
-  { return swtor_diminishing_return( 0.3, 0.45, level, amount ); }
-
-  static double defense_from_rating( double amount, int level )
-  { return swtor_diminishing_return( 0.3, 0.55, level, amount ); }
-
-  static double shield_from_rating( double amount, int level )
-  { return swtor_diminishing_return( 0.5, 0.32, level, amount ); }
-
-  static double surge_from_rating( double amount, int level )
-  { return swtor_diminishing_return( 0.3, 0.11, level, amount ); }
+  void init( int level )
+  {
+    absorb.init( level );
+    accuracy.init( level );
+    alacrity.init( level );
+    crit.init( level );
+    crit_from_stat.init( level );
+    defense.init( level );
+    shield.init( level );
+    surge.init( level );
+  }
 
   static int armor_divisor( int attacker_level )
   { return 200 * attacker_level + 800; }
@@ -3446,10 +3452,9 @@ public:
     return 1.0;
   }
 
-#if 0
-  static double interpolate( int level, double val_60, double val_70, double val_80, double val_85 = -1 );
-  static double get_attribute_base( sim_t*, dbc_t& pData, int level, player_type class_type, race_type race, base_stat_type stat_type );
-#endif
+  static double standardhealth_damage( int level );
+  static double standardhealth_healing( int level );
+  static int get_base_health( int level );
 };
 
 // Weapon ===================================================================
@@ -3687,7 +3692,6 @@ struct player_t : public noncopyable
   timespan_t  gcd_ready;
   timespan_t  base_gcd;
   int         potion_used, sleeping, initial_sleeping, initialized;
-  rating_t    rating;
   pet_t*      pet_list;
   int         bugs;
   int         specialization;
@@ -3740,6 +3744,7 @@ struct player_t : public noncopyable
   double initial_defense_rating, defense_rating;
   double initial_shield_rating, shield_rating;
   double initial_absorb_rating, absorb_rating;
+  rating_t rating_scaler;
 
   double alacrity_from_rating,crit_from_rating,accuracy_from_rating, defense_from_rating,shield_from_rating,absorb_from_rating;
 
@@ -4030,7 +4035,6 @@ struct player_t : public noncopyable
   virtual std::string init_use_profession_actions( const std::string& append = std::string() );
   virtual std::string init_use_racial_actions( const std::string& append = std::string() );
   virtual void init_actions();
-  virtual void init_rating();
   virtual void init_scaling();
   virtual void init_talents();
   virtual void init_spells();
@@ -4089,9 +4093,11 @@ protected:
 
   virtual double force_bonus_stats() const;
   virtual double force_bonus_multiplier() const;
+  virtual double force_crit_from_stats() const;
 
   virtual double tech_bonus_stats() const;
   virtual double tech_bonus_multiplier() const;
+  virtual double tech_crit_from_stats() const;
 
   virtual double force_healing_bonus_stats() const;
   virtual double force_healing_bonus_multiplier() const;

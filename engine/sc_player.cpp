@@ -568,6 +568,8 @@ void player_t::init()
   if ( sim -> debug ) log_t::output( sim, "Initializing player %s", name() );
 
   initialized = 1;
+  rating_scaler.init( level );
+
   init_target();
   init_talents();
   init_spells();
@@ -577,7 +579,6 @@ void player_t::init()
   init_position();
   init_professions();
   init_items();
-  init_rating();
   init_core();
   init_spell();
   init_attack();
@@ -830,11 +831,10 @@ void player_t::init_defense()
   initial_shield_rating     = initial_stats.shield_rating;
   initial_absorb_rating     = initial_stats.absorb_rating;
 
-  initial_shield_chance     = base_shield_chance + rating_t::shield_from_rating( initial_shield_rating, level );
-  initial_shield_absorb     = base_shield_absorb + rating_t::absorb_from_rating( initial_absorb_rating, level );
+  initial_shield_chance     = base_shield_chance + rating_scaler.absorb( initial_absorb_rating );
 
-  initial_melee_avoidance   = base_melee_avoidance + rating_t::defense_from_rating( defense_rating, level );
-  initial_range_avoidance   = base_range_avoidance + rating_t::defense_from_rating( defense_rating, level );
+  initial_melee_avoidance   = base_melee_avoidance + rating_scaler.defense( defense_rating );
+  initial_range_avoidance   = base_range_avoidance + rating_scaler.defense( defense_rating );
   initial_force_avoidance   = base_force_avoidance;
   initial_tech_avoidance    = base_tech_avoidance;
 
@@ -1192,18 +1192,6 @@ void player_t::init_actions()
   int capacity = std::max( 1200, ( int ) ( sim -> max_time.total_seconds() / 2.0 ) );
   action_sequence.reserve( capacity );
   action_sequence = "";
-}
-
-// player_t::init_rating ====================================================
-
-void player_t::init_rating()
-{
-  if ( sim -> debug )
-    log_t::output( sim, "player_t::init_rating(): level=%d type=%s",
-                   level, util_t::player_type_string( type ) );
-
-  rating.init( sim, dbc, level, type );
-
 }
 
 // player_t::init_talents ===================================================
@@ -1616,7 +1604,7 @@ double player_t::melee_bonus_multiplier() const
 { return default_bonus_multiplier(); }
 
 double player_t::melee_crit_from_stats() const
-{ return rating_t::crit_from_stat( strength(), level ); }
+{ return rating_scaler.crit_from_stat( strength() ); }
 
 double player_t::melee_damage_bonus() const
 {
@@ -1642,7 +1630,7 @@ double player_t::range_bonus_multiplier() const
 { return default_bonus_multiplier(); }
 
 double player_t::range_crit_from_stats() const
-{ return rating_t::crit_from_stat( aim(), level ); }
+{ return rating_scaler.crit_from_stat( aim() ); }
 
 double player_t::range_damage_bonus() const
 {
@@ -1667,6 +1655,9 @@ double player_t::force_bonus_stats() const
 double player_t::force_bonus_multiplier() const
 { return default_bonus_multiplier(); }
 
+double player_t::force_crit_from_stats() const
+{ return rating_scaler.crit_from_stat( willpower() ); }
+
 double player_t::force_damage_bonus() const
 {
   return damage_bonus( force_bonus_stats(),
@@ -1678,7 +1669,7 @@ double player_t::force_accuracy_chance() const
 { return default_accuracy_chance(); }
 
 double player_t::force_crit_chance() const
-{ return default_crit_chance() + rating_t::crit_from_stat( willpower(), level ); }
+{ return default_crit_chance() + force_crit_from_stats(); }
 
 double player_t::force_avoidance() const
 { return base_force_avoidance; }
@@ -1691,6 +1682,9 @@ double player_t::tech_bonus_stats() const
 double player_t::tech_bonus_multiplier() const
 { return default_bonus_multiplier(); }
 
+double player_t::tech_crit_from_stats() const
+{ return rating_scaler.crit_from_stat( cunning() ); }
+
 double player_t::tech_damage_bonus() const
 {
   return damage_bonus( tech_bonus_stats(),
@@ -1702,7 +1696,7 @@ double player_t::tech_accuracy_chance() const
 { return default_accuracy_chance(); }
 
 double player_t::tech_crit_chance() const
-{ return default_crit_chance() + rating_t::crit_from_stat( cunning(), level ); }
+{ return default_crit_chance() + tech_crit_from_stats(); }
 
 double player_t::tech_avoidance() const
 { return base_tech_avoidance; }
@@ -1718,7 +1712,7 @@ double player_t::force_healing_bonus_stats() const
 { return willpower(); }
 
 double player_t::force_healing_crit_from_stats() const
-{ return rating_t::crit_from_stat( willpower(), level ); }
+{ return rating_scaler.crit_from_stat( willpower() ); }
 
 double player_t::force_healing_crit_chance() const
 { return default_crit_chance() + force_healing_crit_from_stats(); }
@@ -1739,7 +1733,7 @@ double player_t::tech_healing_bonus_stats() const
 { return cunning(); }
 
 double player_t::tech_healing_crit_from_stats() const
-{ return rating_t::crit_from_stat( cunning(), level ); }
+{ return rating_scaler.crit_from_stat( cunning() ); }
 
 double player_t::tech_healing_crit_chance() const
 { return default_crit_chance() + tech_healing_crit_from_stats(); }
@@ -2945,25 +2939,25 @@ double player_t::school_damage_reduction( school_type school ) const
 }
 
 void player_t::recalculate_alacrity_from_rating()
-{ alacrity_from_rating = rating_t::alacrity_from_rating( alacrity_rating, level ); }
+{ alacrity_from_rating = rating_scaler.alacrity( alacrity_rating ); }
 
 void player_t::recalculate_crit_from_rating()
-{ crit_from_rating = rating_t::crit_from_rating( crit_rating, level ); }
+{ crit_from_rating = rating_scaler.crit( crit_rating ); }
 
 void player_t::recalculate_accuracy_from_rating()
-{ accuracy_from_rating = rating_t::accuracy_from_rating( accuracy_rating, level ); }
+{ accuracy_from_rating = rating_scaler.accuracy( accuracy_rating ); }
 
 void player_t::recalculate_surge_from_rating()
-{ surge_bonus = rating_t::surge_from_rating( surge_rating, level ); }
+{ surge_bonus = rating_scaler.surge( surge_rating ); }
 
 void player_t::recalculate_defense_from_rating()
-{ defense_from_rating = rating_t::defense_from_rating( defense_rating, level ); }
+{ defense_from_rating = rating_scaler.defense( defense_rating ); }
 
 void player_t::recalculate_shield_from_rating()
-{ shield_from_rating = rating_t::shield_from_rating( shield_rating, level ); }
+{ shield_from_rating = rating_scaler.shield( shield_rating ); }
 
 void player_t::recalculate_absorb_from_rating()
-{ absorb_from_rating = rating_t::absorb_from_rating( absorb_rating, level ); }
+{ absorb_from_rating = rating_scaler.absorb( absorb_rating ); }
 
 
 // player_t::target_mitigation ==============================================
