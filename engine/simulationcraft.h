@@ -3385,10 +3385,6 @@ public:
 // Gear Rating Conversions ==================================================
 struct rating_t
 {
-  static double standardhealth_damage( int level );
-  static double standardhealth_healing( int level );
-  static int get_base_health( int level );
-
 private:
   static double swtor_diminishing_return( double cap, double divisor, int level, double rating )
   {
@@ -3397,30 +3393,47 @@ private:
                                    rating / std::max( 20, level ) ) );
   }
 
+  template <int cap, int divisor>
+  class scaling_t
+  {
+    // Performs the swtor_diminishing_return function in 2 steps. The first step (set_level)
+    // precomputes as much as possible given that cap, divisor, and level are static
+    // for a full simulation run. The second step (operator()) completes the computation
+    // for a given rating.
+  private:
+    double multiplier;
+  public:
+    void set_level( int level )
+    { multiplier = std::log( 1.0 - ( 1.0 / cap ) ) / ( divisor / 100.0 ) / std::max( 20, level ); }
+
+    double operator() ( double rating ) const
+    {
+      assert( rating >= 0 );
+      return ( cap / 100.0 ) * ( 1.0 - std::exp( multiplier * rating ) );
+    }
+  };
+
 public:
-  static double absorb_from_rating( double amount, int level )
-  { return swtor_diminishing_return( 0.5, 0.18, level, amount ); }
+  scaling_t<50,  18> absorb;
+  scaling_t<30,  55> accuracy;
+  scaling_t<30,  55> alacrity;
+  scaling_t<30,  45> crit;
+  scaling_t<30, 250> crit_from_stat;
+  scaling_t<30,  55> defense;
+  scaling_t<50,  32> shield;
+  scaling_t<30,  11> surge;
 
-  static double accuracy_from_rating( double amount, int level )
-  { return swtor_diminishing_return( 0.3, 0.55, level, amount ); }
-
-  static double alacrity_from_rating( double amount, int level )
-  { return swtor_diminishing_return( 0.3, 0.55, level, amount ); }
-
-  static double crit_from_stat( double amount, int level )
-  { return swtor_diminishing_return( 0.3, 2.5, level, amount ); }
-
-  static double crit_from_rating( double amount, int level )
-  { return swtor_diminishing_return( 0.3, 0.45, level, amount ); }
-
-  static double defense_from_rating( double amount, int level )
-  { return swtor_diminishing_return( 0.3, 0.55, level, amount ); }
-
-  static double shield_from_rating( double amount, int level )
-  { return swtor_diminishing_return( 0.5, 0.32, level, amount ); }
-
-  static double surge_from_rating( double amount, int level )
-  { return swtor_diminishing_return( 0.3, 0.11, level, amount ); }
+  void init( int level )
+  {
+    absorb.set_level( level );
+    accuracy.set_level( level );
+    alacrity.set_level( level );
+    crit.set_level( level );
+    crit_from_stat.set_level( level );
+    defense.set_level( level );
+    shield.set_level( level );
+    surge.set_level( level );
+  }
 
   static int armor_divisor( int attacker_level )
   { return 200 * attacker_level + 800; }
@@ -3430,6 +3443,10 @@ public:
     ( void )attacker_level; ( void )defender_level;
     return 1.0;
   }
+
+  static double standardhealth_damage( int level );
+  static double standardhealth_healing( int level );
+  static int get_base_health( int level );
 };
 
 // Weapon ===================================================================
@@ -3719,6 +3736,7 @@ struct player_t : public noncopyable
   double initial_defense_rating, defense_rating;
   double initial_shield_rating, shield_rating;
   double initial_absorb_rating, absorb_rating;
+  rating_t rating_scaler;
 
   // Attributes
   attribute_type primary_attribute, secondary_attribute;

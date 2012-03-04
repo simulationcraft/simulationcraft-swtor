@@ -566,6 +566,8 @@ void player_t::init()
   if ( sim -> debug ) log_t::output( sim, "Initializing player %s", name() );
 
   initialized = 1;
+  rating_scaler.init( level );
+
   init_target();
   init_talents();
   init_spells();
@@ -827,11 +829,10 @@ void player_t::init_defense()
   initial_shield_rating     = initial_stats.shield_rating;
   initial_absorb_rating     = initial_stats.absorb_rating;
 
-  initial_shield_chance     = base_shield_chance + rating_t::shield_from_rating( initial_shield_rating, level );
-  initial_shield_absorb     = base_shield_absorb + rating_t::absorb_from_rating( initial_absorb_rating, level );
+  initial_shield_chance     = base_shield_chance + rating_scaler.absorb( initial_absorb_rating );
 
-  initial_melee_avoidance   = base_melee_avoidance + rating_t::defense_from_rating( defense_rating, level );
-  initial_range_avoidance   = base_range_avoidance + rating_t::defense_from_rating( defense_rating, level );
+  initial_melee_avoidance   = base_melee_avoidance + rating_scaler.defense( defense_rating );
+  initial_range_avoidance   = base_range_avoidance + rating_scaler.defense( defense_rating );
   initial_force_avoidance   = base_force_avoidance;
   initial_tech_avoidance    = base_tech_avoidance;
 
@@ -1580,11 +1581,11 @@ double player_t::default_bonus_multiplier() const
 }
 
 double player_t::default_accuracy_chance() const
-{ return rating_t::accuracy_from_rating( accuracy_rating, level ); }
+{ return rating_scaler.accuracy( accuracy_rating ); }
 
 double player_t::default_crit_chance() const
 {
-  double c = 0.05 + rating_t::crit_from_rating( crit_rating, level );
+  double c = 0.05 + rating_scaler.crit( crit_rating );
 
   if ( buffs.coordination -> up() )
     c += 0.05;
@@ -1601,7 +1602,7 @@ double player_t::melee_bonus_multiplier() const
 { return default_bonus_multiplier(); }
 
 double player_t::melee_crit_from_stats() const
-{ return rating_t::crit_from_stat( strength(), level ); }
+{ return rating_scaler.crit_from_stat( strength() ); }
 
 double player_t::melee_damage_bonus() const
 {
@@ -1616,7 +1617,7 @@ double player_t::melee_crit_chance() const
 { return default_crit_chance() + melee_crit_from_stats(); }
 
 double player_t::melee_avoidance() const
-{ return base_melee_avoidance + rating_t::defense_from_rating( defense_rating, level ); }
+{ return base_melee_avoidance + rating_scaler.defense( defense_rating ); }
 
 // player_t::range_damage_bonus() ===========================================
 
@@ -1627,7 +1628,7 @@ double player_t::range_bonus_multiplier() const
 { return default_bonus_multiplier(); }
 
 double player_t::range_crit_from_stats() const
-{ return rating_t::crit_from_stat( aim(), level ); }
+{ return rating_scaler.crit_from_stat( aim() ); }
 
 double player_t::range_damage_bonus() const
 {
@@ -1642,7 +1643,7 @@ double player_t::range_crit_chance() const
 { return default_crit_chance() + range_crit_from_stats(); }
 
 double player_t::range_avoidance() const
-{ return base_range_avoidance + rating_t::defense_from_rating( defense_rating, level ); }
+{ return base_range_avoidance + rating_scaler.defense( defense_rating ); }
 
 // player_t::force_damage_bonus() ===========================================
 
@@ -1653,7 +1654,7 @@ double player_t::force_bonus_multiplier() const
 { return default_bonus_multiplier(); }
 
 double player_t::force_crit_from_stats() const
-{ return rating_t::crit_from_stat( willpower(), level ); }
+{ return rating_scaler.crit_from_stat( willpower() ); }
 
 double player_t::force_damage_bonus() const
 {
@@ -1680,7 +1681,7 @@ double player_t::tech_bonus_multiplier() const
 { return default_bonus_multiplier(); }
 
 double player_t::tech_crit_from_stats() const
-{ return rating_t::crit_from_stat( cunning(), level ); }
+{ return rating_scaler.crit_from_stat( cunning() ); }
 
 double player_t::tech_damage_bonus() const
 {
@@ -1709,7 +1710,7 @@ double player_t::force_healing_bonus_stats() const
 { return willpower(); }
 
 double player_t::force_healing_crit_from_stats() const
-{ return rating_t::crit_from_stat( willpower(), level ); }
+{ return rating_scaler.crit_from_stat( willpower() ); }
 
 double player_t::force_healing_crit_chance() const
 { return default_crit_chance() + force_healing_crit_from_stats(); }
@@ -1730,7 +1731,7 @@ double player_t::tech_healing_bonus_stats() const
 { return cunning(); }
 
 double player_t::tech_healing_crit_from_stats() const
-{ return rating_t::crit_from_stat( cunning(), level ); }
+{ return rating_scaler.crit_from_stat( cunning() ); }
 
 double player_t::tech_healing_crit_chance() const
 { return default_crit_chance() + tech_healing_crit_from_stats(); }
@@ -1746,10 +1747,10 @@ double player_t::tech_healing_bonus() const
 }
 
 double player_t::shield_chance() const
-{ return base_shield_chance + rating_t::shield_from_rating( shield_rating, level ); }
+{ return base_shield_chance + rating_scaler.shield( shield_rating ); }
 
 double player_t::shield_absorb() const
-{ return base_shield_absorb + rating_t::absorb_from_rating( absorb_rating, level ); }
+{ return base_shield_absorb + rating_scaler.absorb( absorb_rating ); }
 
 // player_t::combat_begin ===================================================
 
@@ -3165,12 +3166,12 @@ void player_t::register_direct_heal_callback( int64_t mask,
 // player_t::alacrity =======================================================
 
 double player_t::alacrity() const
-{ return 1.0 - rating_t::alacrity_from_rating( alacrity_rating, level ); }
+{ return 1.0 - rating_scaler.alacrity( alacrity_rating ); }
 
 // player_t::recalculate_surge ==============================================
 
 void player_t::recalculate_surge()
-{ surge_bonus = rating_t::surge_from_rating( surge_rating, level ); }
+{ surge_bonus = rating_scaler.surge( surge_rating ); }
 
 // player_t::find_action ====================================================
 
