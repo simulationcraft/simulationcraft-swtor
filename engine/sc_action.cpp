@@ -1283,7 +1283,7 @@ bool action_t::ready()
     if ( ! sim -> roll( player -> skill ) )
       return false;
 
-  if ( cooldown -> remains() > timespan_t::zero )
+  if ( cooldown -> remains() != timespan_t::zero )
     return false;
 
   if ( ! player -> resource_available( resource, cost() ) )

@@ -74,7 +74,8 @@ timespan_t rng_t::gauss( timespan_t mean,
 // rng_t::gauss =============================================================
 
 double rng_t::gauss( double mean,
-                     double stddev )
+                     double stddev,
+                     bool truncate_low_end )
 {
   if ( average_gauss ) return mean;
 
@@ -112,9 +113,11 @@ double rng_t::gauss( double mean,
     gauss_pair_use = true;
   }
 
-  // True gaussian distribution can of course yield any number at some probability.  So truncate on the low end.
   double result = mean + z * stddev;
-  if ( result < 0 ) result = 0;
+
+  // True gaussian distribution can of course yield any number at some probability.  So truncate on the low end.
+  if ( truncate_low_end && result < 0 )
+    result = 0;
 
   num_gauss++;
   expected_gauss += mean;
@@ -556,7 +559,7 @@ rng_sfmt_t::rng_sfmt_t( const std::string& name, bool avg_range, bool avg_gauss 
 
 // rng_sfmt_t::real =========================================================
 
-double rng_sfmt_t::real()
+inline double rng_sfmt_t::real()
 {
   return gen_rand_real( this );
 }
@@ -581,7 +584,7 @@ struct rng_normalized_t : public rng_t
 
   virtual double real() { return base -> real(); }
   virtual double range( double min, double max ) { return ( min + max ) / 2.0; }
-  virtual double gauss( double mean, double /* stddev */ ) { return mean; }
+  virtual double gauss( double mean, double /* stddev */, bool /* truncate_low_end */ ) { return mean; }
   virtual timespan_t gauss( timespan_t mean, timespan_t /* stddev */ ) { return mean; }
   virtual bool    roll( double chance ) = 0; // must be overridden
 };
@@ -631,7 +634,7 @@ struct rng_phase_shift_t : public rng_normalized_t
     actual_range += result;
     return result;
   }
-  virtual double gauss( double mean, double stddev )
+  virtual double gauss( double mean, double stddev, bool /* truncate_low_end */ = false )
   {
     if ( average_gauss ) return mean;
     num_gauss++;
@@ -756,7 +759,7 @@ struct rng_pre_fill_t : public rng_normalized_t
     return result;
   }
 
-  virtual double gauss( double mean, double stddev )
+  virtual double gauss( double mean, double stddev, bool /* truncate_low_end */ = false )
   {
     if ( average_gauss ) return mean;
     int size = ( int ) gauss_distribution.size();
@@ -986,7 +989,7 @@ struct rng_distance_simple_t : public rng_normalized_t
     return result;
   }
 
-  virtual double gauss( double mean, double stddev )
+  virtual double gauss( double mean, double stddev, bool /* truncate_low_end */ = false )
   {
     if ( average_gauss ) return mean;
     num_gauss++;

@@ -5261,7 +5261,7 @@ struct rng_t
   virtual bool    roll( double chance );
   virtual double range( double min, double max );
   timespan_t range( timespan_t min, timespan_t max );
-  virtual double gauss( double mean, double stddev );
+  virtual double gauss( double mean, double stddev, bool truncate_low_end = false );
   timespan_t gauss( timespan_t mean, timespan_t stddev );
   double exgauss( double mean, double stddev, double nu );
   timespan_t exgauss( timespan_t mean, timespan_t stddev, timespan_t nu );
