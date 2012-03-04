@@ -243,6 +243,8 @@ player_t::player_t( sim_t*             s,
   initial_defense_rating( 0 ), defense_rating( 0 ),
   initial_shield_rating( 0 ), shield_rating( 0 ),
   initial_absorb_rating( 0 ), absorb_rating( 0 ),
+  alacrity_from_rating( 0 ), crit_from_rating( 0 ), accuracy_from_rating( 0 ),
+  defense_from_rating( 0 ), shield_from_rating( 0 ), absorb_from_rating( 0 ),
   primary_attribute( ATTRIBUTE_NONE ), secondary_attribute( ATTRIBUTE_NONE ),
 
   // Attack Mechanics
@@ -1593,11 +1595,11 @@ double player_t::default_bonus_multiplier() const
 }
 
 double player_t::default_accuracy_chance() const
-{ return rating_t::accuracy_from_rating( accuracy_rating, level ); }
+{ return accuracy_from_rating; }
 
 double player_t::default_crit_chance() const
 {
-  double c = 0.05 + rating_t::crit_from_rating( crit_rating, level );
+  double c = 0.05 + crit_from_rating;
 
   if ( buffs.coordination -> up() )
     c += 0.05;
@@ -1629,7 +1631,7 @@ double player_t::melee_crit_chance() const
 { return default_crit_chance() + melee_crit_from_stats(); }
 
 double player_t::melee_avoidance() const
-{ return base_melee_avoidance + rating_t::defense_from_rating( defense_rating, level ); }
+{ return base_melee_avoidance + defense_from_rating; }
 
 // player_t::range_damage_bonus() ===========================================
 
@@ -1655,7 +1657,7 @@ double player_t::range_crit_chance() const
 { return default_crit_chance() + range_crit_from_stats(); }
 
 double player_t::range_avoidance() const
-{ return base_range_avoidance + rating_t::defense_from_rating( defense_rating, level ); }
+{ return base_range_avoidance + defense_from_rating; }
 
 // player_t::force_damage_bonus() ===========================================
 
@@ -1664,9 +1666,6 @@ double player_t::force_bonus_stats() const
 
 double player_t::force_bonus_multiplier() const
 { return default_bonus_multiplier(); }
-
-double player_t::force_crit_from_stats() const
-{ return rating_t::crit_from_stat( willpower(), level ); }
 
 double player_t::force_damage_bonus() const
 {
@@ -1679,7 +1678,7 @@ double player_t::force_accuracy_chance() const
 { return default_accuracy_chance(); }
 
 double player_t::force_crit_chance() const
-{ return default_crit_chance() + force_crit_from_stats(); }
+{ return default_crit_chance() + rating_t::crit_from_stat( willpower(), level ); }
 
 double player_t::force_avoidance() const
 { return base_force_avoidance; }
@@ -1692,9 +1691,6 @@ double player_t::tech_bonus_stats() const
 double player_t::tech_bonus_multiplier() const
 { return default_bonus_multiplier(); }
 
-double player_t::tech_crit_from_stats() const
-{ return rating_t::crit_from_stat( cunning(), level ); }
-
 double player_t::tech_damage_bonus() const
 {
   return damage_bonus( tech_bonus_stats(),
@@ -1706,7 +1702,7 @@ double player_t::tech_accuracy_chance() const
 { return default_accuracy_chance(); }
 
 double player_t::tech_crit_chance() const
-{ return default_crit_chance() + tech_crit_from_stats(); }
+{ return default_crit_chance() + rating_t::crit_from_stat( cunning(), level ); }
 
 double player_t::tech_avoidance() const
 { return base_tech_avoidance; }
@@ -1759,10 +1755,10 @@ double player_t::tech_healing_bonus() const
 }
 
 double player_t::shield_chance() const
-{ return base_shield_chance + rating_t::shield_from_rating( shield_rating, level ); }
+{ return base_shield_chance + shield_from_rating; }
 
 double player_t::shield_absorb() const
-{ return base_shield_absorb + rating_t::absorb_from_rating( absorb_rating, level ); }
+{ return base_shield_absorb + absorb_from_rating; }
 
 // player_t::combat_begin ===================================================
 
@@ -2000,10 +1996,17 @@ void player_t::reset()
   crit_rating = initial_crit_rating;
   accuracy_rating = initial_accuracy_rating;
   surge_rating = initial_surge_rating;
-  recalculate_surge();
   defense_rating = initial_defense_rating;
   shield_rating = initial_shield_rating;
   absorb_rating = initial_absorb_rating;
+
+  recalculate_alacrity_from_rating();
+  recalculate_crit_from_rating();
+  recalculate_accuracy_from_rating();
+  recalculate_surge_from_rating();
+  recalculate_defense_from_rating();
+  recalculate_shield_from_rating();
+  recalculate_absorb_from_rating();
 
   range::copy( attribute_initial, attribute );
   range::copy( attribute_multiplier_initial, attribute_multiplier );
@@ -2676,43 +2679,49 @@ void player_t::stat_gain( int       stat,
     stats.accuracy_rating += amount;
     temporary.accuracy_rating += temp_value * amount;
     accuracy_rating += amount;
+    recalculate_accuracy_from_rating();
     break;
 
   case STAT_CRIT_RATING:
     stats.crit_rating += amount;
     temporary.crit_rating += temp_value * amount;
     crit_rating += amount;
+    recalculate_crit_from_rating();
     break;
 
   case STAT_ALACRITY_RATING:
     stats.alacrity_rating += amount;
     temporary.alacrity_rating += temp_value * amount;
     alacrity_rating       += amount;
+    recalculate_alacrity_from_rating();
     break;
 
   case STAT_SURGE_RATING:
     stats.surge_rating += amount;
     temporary.surge_rating += temp_value * amount;
     surge_rating       += amount;
-    recalculate_surge();
+    recalculate_surge_from_rating();
     break;
 
   case STAT_DEFENSE_RATING:
     stats.defense_rating += amount;
     temporary.defense_rating += temp_value * amount;
     defense_rating += amount;
+    recalculate_defense_from_rating();
     break;
 
   case STAT_SHIELD_RATING:
     stats.shield_rating += amount;
     temporary.shield_rating += temp_value * amount;
     shield_rating += amount;
+    recalculate_shield_from_rating();
     break;
 
   case STAT_ABSORB_RATING:
     stats.absorb_rating += amount;
     temporary.absorb_rating += temp_value * amount;
     absorb_rating += amount;
+    recalculate_absorb_from_rating();
     break;
 
   case STAT_ARMOR:          stats.armor          += amount; temporary.armor += temp_value * amount; armor       += amount;                  break;
@@ -2775,43 +2784,49 @@ void player_t::stat_loss( int       stat,
     stats.accuracy_rating -= amount;
     temporary.accuracy_rating -= temp_value * amount;
     accuracy_rating       -= amount;
+    recalculate_accuracy_from_rating();
     break;
 
   case STAT_CRIT_RATING:
     stats.crit_rating -= amount;
     temporary.crit_rating -= temp_value * amount;
     crit_rating       -= amount;
+    recalculate_crit_from_rating();
     break;
 
   case STAT_ALACRITY_RATING:
     stats.alacrity_rating -= amount;
     temporary.alacrity_rating -= temp_value * amount;
     alacrity_rating       -= amount;
+    recalculate_alacrity_from_rating();
     break;
 
   case STAT_SURGE_RATING:
     stats.surge_rating -= amount;
     temporary.surge_rating -= temp_value * amount;
     surge_rating       -= amount;
-    recalculate_surge();
+    recalculate_surge_from_rating();
     break;
 
   case STAT_DEFENSE_RATING:
     stats.defense_rating -= amount;
     temporary.defense_rating -= temp_value * amount;
     defense_rating       -= amount;
+    recalculate_defense_from_rating();
     break;
 
   case STAT_SHIELD_RATING:
     stats.shield_rating -= amount;
     temporary.shield_rating -= temp_value * amount;
     shield_rating       -= amount;
+    recalculate_shield_from_rating();
     break;
 
   case STAT_ABSORB_RATING:
     stats.absorb_rating -= amount;
     temporary.absorb_rating -= temp_value * amount;
     absorb_rating       -= amount;
+    recalculate_absorb_from_rating();
     break;
 
   case STAT_ARMOR:          stats.armor          -= amount; temporary.armor -= temp_value * amount; armor       -= amount;                  break;
@@ -2928,6 +2943,28 @@ double player_t::school_damage_reduction( school_type school ) const
     return 0;
   }
 }
+
+void player_t::recalculate_alacrity_from_rating()
+{ alacrity_from_rating = rating_t::alacrity_from_rating( alacrity_rating, level ); }
+
+void player_t::recalculate_crit_from_rating()
+{ crit_from_rating = rating_t::crit_from_rating( crit_rating, level ); }
+
+void player_t::recalculate_accuracy_from_rating()
+{ accuracy_from_rating = rating_t::accuracy_from_rating( accuracy_rating, level ); }
+
+void player_t::recalculate_surge_from_rating()
+{ surge_bonus = rating_t::surge_from_rating( surge_rating, level ); }
+
+void player_t::recalculate_defense_from_rating()
+{ defense_from_rating = rating_t::defense_from_rating( defense_rating, level ); }
+
+void player_t::recalculate_shield_from_rating()
+{ shield_from_rating = rating_t::shield_from_rating( shield_rating, level ); }
+
+void player_t::recalculate_absorb_from_rating()
+{ absorb_from_rating = rating_t::absorb_from_rating( absorb_rating, level ); }
+
 
 // player_t::target_mitigation ==============================================
 
@@ -3178,12 +3215,7 @@ void player_t::register_direct_heal_callback( int64_t mask,
 // player_t::alacrity =======================================================
 
 double player_t::alacrity() const
-{ return 1.0 - rating_t::alacrity_from_rating( alacrity_rating, level ); }
-
-// player_t::recalculate_surge ==============================================
-
-void player_t::recalculate_surge()
-{ surge_bonus = rating_t::surge_from_rating( surge_rating, level ); }
+{ return 1.0 - alacrity_from_rating; }
 
 // player_t::find_action ====================================================
 

@@ -3741,6 +3741,8 @@ struct player_t : public noncopyable
   double initial_shield_rating, shield_rating;
   double initial_absorb_rating, absorb_rating;
 
+  double alacrity_from_rating,crit_from_rating,accuracy_from_rating, defense_from_rating,shield_from_rating,absorb_from_rating;
+
   // Attributes
   attribute_type primary_attribute, secondary_attribute;
   double attribute                   [ ATTRIBUTE_MAX ];
@@ -4087,11 +4089,9 @@ protected:
 
   virtual double force_bonus_stats() const;
   virtual double force_bonus_multiplier() const;
-  virtual double force_crit_from_stats() const;
 
   virtual double tech_bonus_stats() const;
   virtual double tech_bonus_multiplier() const;
-  virtual double tech_crit_from_stats() const;
 
   virtual double force_healing_bonus_stats() const;
   virtual double force_healing_bonus_multiplier() const;
@@ -4153,6 +4153,16 @@ public:
   virtual double internal_damage_reduction() const;
   virtual double elemental_damage_reduction() const;
   virtual double school_damage_reduction( school_type ) const;
+
+protected:
+  void recalculate_alacrity_from_rating();
+  void recalculate_crit_from_rating();
+  void recalculate_accuracy_from_rating();
+  void recalculate_surge_from_rating();
+  void recalculate_defense_from_rating();
+  void recalculate_shield_from_rating();
+  void recalculate_absorb_from_rating();
+public:
 
   virtual void      interrupt();
   virtual void      halt();
@@ -4239,8 +4249,6 @@ public:
   virtual pet_t*    find_pet  ( const std::string& name );
 
   virtual void trigger_replenishment();
-
-  virtual void recalculate_surge();
 
   virtual void armory_extensions( const std::string& /* region */, const std::string& /* server */, const std::string& /* character */,
                                   cache::behavior_t /* behavior */=cache::players() )

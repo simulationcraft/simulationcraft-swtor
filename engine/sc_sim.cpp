@@ -590,7 +590,8 @@ sim_t::sim_t( sim_t* p, int index ) :
   queue_gcd_reduction( timespan_t::from_seconds( 0.032 ) ), strict_gcd_queue( 0 ),
   confidence( 0.95 ), confidence_estimator( 1.96 ),
   world_lag( timespan_t::from_seconds( 0.1 ) ), world_lag_stddev( timespan_t::min ),
-  travel_variance( 0 ), default_skill( 1.0 ), reaction_time( timespan_t::from_seconds( 0.5 ) ), regen_periodicity( timespan_t::from_seconds( 0.25 ) ),
+  travel_variance( 0 ), default_skill( 1.0 ), reaction_time( timespan_t::from_seconds( 0.5 ) ),
+  regen_periodicity( timespan_t::from_seconds( 1.0 ) ), // observed by philoptik@gmail.com 03/03/2012 according to ingame tooltip
   current_time( timespan_t::zero ), max_time( timespan_t::from_seconds( 300 ) ), expected_time( timespan_t::zero ), vary_combat_length( 0.2 ),
   last_event( timespan_t::zero ), fixed_time( 0 ),
   events_remaining( 0 ), max_events_remaining( 0 ),
@@ -1111,7 +1112,7 @@ bool sim_t::init()
   // Timing wheel depth defaults to about 17 minutes with a granularity of 32 buckets per second.
   // This makes wheel_size = 32K and it's fully used.
   if ( wheel_seconds     <  600 ) wheel_seconds     = 1024; // 2^10  Min of 600 to ensure no wrap-around bugs with Water Shield
-  if ( wheel_granularity <=   0 ) wheel_granularity = 32; // 2^5
+  if ( wheel_granularity <=   0 ) wheel_granularity = 64; // 2^5
 
   wheel_size = ( uint32_t ) ( wheel_seconds * wheel_granularity );
 
