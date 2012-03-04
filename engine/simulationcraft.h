@@ -3383,24 +3383,8 @@ public:
 };
 
 // Gear Rating Conversions ==================================================
-
-namespace internal {
 struct rating_t
 {
-  double  spell_alacrity,  spell_accuracy,  spell_crit;
-  double attack_alacrity, attack_accuracy, attack_crit;
-  double ranged_alacrity, ranged_accuracy,ranged_crit;
-  double expertise;
-};
-}
-
-struct rating_t : public internal::rating_t
-{
-  typedef internal::rating_t base_t;
-  rating_t() : base_t( base_t() ) {}
-
-  void init( sim_t*, dbc_t& pData, int level, int type );
-
   static double standardhealth_damage( int level );
   static double standardhealth_healing( int level );
   static int get_base_health( int level );
@@ -3408,8 +3392,9 @@ struct rating_t : public internal::rating_t
 private:
   static double swtor_diminishing_return( double cap, double divisor, int level, double rating )
   {
-    return cap * ( 1.0 - std::pow( ( 1.0 - ( 0.01 / cap ) ),
-                                   std::max( rating, 0.0 ) / std::max( 20, level ) / divisor ) );
+    assert( rating >= 0.0 );
+    return cap * ( 1.0 - std::exp( ( std::log( 1.0 - ( 0.01 / cap ) ) / divisor ) *
+                                   rating / std::max( 20, level ) ) );
   }
 
 public:
@@ -3445,11 +3430,6 @@ public:
     ( void )attacker_level; ( void )defender_level;
     return 1.0;
   }
-
-#if 0
-  static double interpolate( int level, double val_60, double val_70, double val_80, double val_85 = -1 );
-  static double get_attribute_base( sim_t*, dbc_t& pData, int level, player_type class_type, race_type race, base_stat_type stat_type );
-#endif
 };
 
 // Weapon ===================================================================
@@ -3687,7 +3667,6 @@ struct player_t : public noncopyable
   timespan_t  gcd_ready;
   timespan_t  base_gcd;
   int         potion_used, sleeping, initial_sleeping, initialized;
-  rating_t    rating;
   pet_t*      pet_list;
   int         bugs;
   int         specialization;
@@ -4028,7 +4007,6 @@ struct player_t : public noncopyable
   virtual std::string init_use_profession_actions( const std::string& append = std::string() );
   virtual std::string init_use_racial_actions( const std::string& append = std::string() );
   virtual void init_actions();
-  virtual void init_rating();
   virtual void init_scaling();
   virtual void init_talents();
   virtual void init_spells();

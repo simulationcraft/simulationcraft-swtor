@@ -575,7 +575,6 @@ void player_t::init()
   init_position();
   init_professions();
   init_items();
-  init_rating();
   init_core();
   init_spell();
   init_attack();
@@ -1190,18 +1189,6 @@ void player_t::init_actions()
   int capacity = std::max( 1200, ( int ) ( sim -> max_time.total_seconds() / 2.0 ) );
   action_sequence.reserve( capacity );
   action_sequence = "";
-}
-
-// player_t::init_rating ====================================================
-
-void player_t::init_rating()
-{
-  if ( sim -> debug )
-    log_t::output( sim, "player_t::init_rating(): level=%d type=%s",
-                   level, util_t::player_type_string( type ) );
-
-  rating.init( sim, dbc, level, type );
-
 }
 
 // player_t::init_talents ===================================================
