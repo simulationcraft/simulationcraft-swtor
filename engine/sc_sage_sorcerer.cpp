@@ -351,7 +351,7 @@ struct jedi_sage_spell_t : public action_t
     if ( p -> buffs.telekinetic_effusion -> check() > 0 )
     {
       c *= 0.5;
-      c = floor( c ); // FIXME: floor or ceil?
+      c = ceil( c ); // FIXME: floor or ceil?
     }
 
     return c;

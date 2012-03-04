@@ -2844,7 +2844,7 @@ struct action_expr_t
   virtual ~action_expr_t() {}
   virtual int evaluate() { return result_type; }
   virtual const char* name() { return name_str.c_str(); }
-  virtual bool success() { return ( evaluate() == TOK_NUM ) && ( result_num != 0 ); }
+  finline bool success() { return ( evaluate() == TOK_NUM ) && ( result_num != 0 ); }
 
   static action_expr_t* parse( action_t*, const std::string& expr_str );
 };
@@ -5261,7 +5261,7 @@ struct rng_t
   virtual bool    roll( double chance );
   virtual double range( double min, double max );
   timespan_t range( timespan_t min, timespan_t max );
-  virtual double gauss( double mean, double stddev, bool truncate_low_end = false );
+  virtual double gauss( double mean, double stddev, const bool truncate_low_end = false );
   timespan_t gauss( timespan_t mean, timespan_t stddev );
   double exgauss( double mean, double stddev, double nu );
   timespan_t exgauss( timespan_t mean, timespan_t stddev, timespan_t nu );

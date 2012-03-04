@@ -75,7 +75,7 @@ timespan_t rng_t::gauss( timespan_t mean,
 
 double rng_t::gauss( double mean,
                      double stddev,
-                     bool truncate_low_end )
+                     const bool truncate_low_end )
 {
   if ( average_gauss ) return mean;
 
