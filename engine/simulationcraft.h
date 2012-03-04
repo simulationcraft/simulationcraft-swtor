@@ -3396,20 +3396,28 @@ private:
   template <int cap, int divisor>
   class scaling_t
   {
-    // Performs the swtor_diminishing_return function in 2 steps. The first step (set_level)
+    // Performs the swtor_diminishing_return function in 2 steps. The first step (init)
     // precomputes as much as possible given that cap, divisor, and level are static
     // for a full simulation run. The second step (operator()) completes the computation
     // for a given rating.
   private:
     double multiplier;
+    mutable double cached_rating, cached_value;
   public:
-    void set_level( int level )
-    { multiplier = std::log( 1.0 - ( 1.0 / cap ) ) / ( divisor / 100.0 ) / std::max( 20, level ); }
+    void init( int level )
+    {
+      multiplier = std::log( 1.0 - ( 1.0 / cap ) ) / ( divisor / 100.0 ) / std::max( 20, level );
+      cached_rating = cached_value = -1;
+    }
 
     double operator() ( double rating ) const
     {
       assert( rating >= 0 );
-      return ( cap / 100.0 ) * ( 1.0 - std::exp( multiplier * rating ) );
+      if ( likely( cached_rating == rating ) )
+        return cached_value;
+
+      cached_rating = rating;
+      return cached_value = ( cap / 100.0 ) * ( 1.0 - std::exp( multiplier * rating ) );
     }
   };
 
@@ -3425,14 +3433,14 @@ public:
 
   void init( int level )
   {
-    absorb.set_level( level );
-    accuracy.set_level( level );
-    alacrity.set_level( level );
-    crit.set_level( level );
-    crit_from_stat.set_level( level );
-    defense.set_level( level );
-    shield.set_level( level );
-    surge.set_level( level );
+    absorb.init( level );
+    accuracy.init( level );
+    alacrity.init( level );
+    crit.init( level );
+    crit_from_stat.init( level );
+    defense.init( level );
+    shield.init( level );
+    surge.init( level );
   }
 
   static int armor_divisor( int attacker_level )
