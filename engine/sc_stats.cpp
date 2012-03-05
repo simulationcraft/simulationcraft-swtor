@@ -96,7 +96,7 @@ void stats_t::add_result( double act_amount,
   r -> iteration_actual_amount += act_amount;
   r -> iteration_total_amount += tot_amount;
 
-  int index = ( int ) ( sim -> current_time.total_seconds() );
+  int index = util_t::DoubleToInt( sim -> current_time.total_seconds() );
 
 
   timeline_amount[ index ] += act_amount;
@@ -274,12 +274,12 @@ void stats_t::analyze()
 // stats_results_t::merge ===========================================================
 
 stats_t::stats_results_t::stats_results_t( sim_t* s ) :
-  actual_amount( s -> statistics_level < 8, true ),
+  actual_amount( s -> statistics_level < 8, s -> average_range == 0 ),
   total_amount(),
   fight_actual_amount(),
   fight_total_amount(),
   count( s -> statistics_level < 8 ),
-  avg_actual_amount( s -> statistics_level < 8, true ),
+  avg_actual_amount( s -> statistics_level < 8, s -> average_range == 0 ),
   iteration_count( 0 ),
   iteration_actual_amount( 0 ),
   iteration_total_amount( 0 ),
