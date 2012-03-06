@@ -2405,7 +2405,7 @@ void player_t::regen( const timespan_t periodicity )
     resource_gain( RESOURCE_AMMO, ammo_regen, gains.ammo_regen );
   }
 
-  int index = util_t::DoubleToInt( sim -> current_time.total_seconds() );
+  int index = (int) ( sim -> current_time.total_seconds() );
 
   for ( int i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
   {

@@ -355,8 +355,9 @@ double rng_t::stdnormal_inv( double p )
  * The new BSD License is applied to this software.
  */
 
-// Mersenne Exponent. The period of the sequence is a multiple of 2^MEXP-1.
+// http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/
 
+// Mersenne Exponent. The period of the sequence is a multiple of 2^MEXP-1.
 #define DSFMT_MEXP 19937
 
 #define DSFMT_N ((DSFMT_MEXP - 128) / 104 + 1)

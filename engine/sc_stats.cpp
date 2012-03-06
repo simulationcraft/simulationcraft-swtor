@@ -96,7 +96,7 @@ void stats_t::add_result( double act_amount,
   r -> iteration_actual_amount += act_amount;
   r -> iteration_total_amount += tot_amount;
 
-  int index = util_t::DoubleToInt( sim -> current_time.total_seconds() );
+  int index = (int) ( sim -> current_time.total_seconds() );
 
 
   timeline_amount[ index ] += act_amount;
