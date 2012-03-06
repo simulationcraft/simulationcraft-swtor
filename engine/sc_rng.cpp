@@ -407,7 +407,7 @@ struct rng_sfmt_t : public rng_t
 
   virtual int type() const { return RNG_MERSENNE_TWISTER; }
   virtual double real();
-  virtual void seed( uint32_t start );
+  virtual void seed( uint32_t start=rand() );
 };
 
 inline void do_recursion(w128_t *r, w128_t *a, w128_t * b,w128_t *lung) {
@@ -536,7 +536,7 @@ double dsfmt_genrand_close_open(dsfmt_t *dsfmt) {
 rng_sfmt_t::rng_sfmt_t( const std::string& name, bool avg_range, bool avg_gauss ) :
   rng_t( name, avg_range, avg_gauss )
 {
-  dsfmt_chk_init_gen_rand( &dsfmt_global_data, rand() );
+  seed();
 }
 
 // rng_sfmt_t::real =========================================================
@@ -550,7 +550,7 @@ inline double rng_sfmt_t::real()
 
 void rng_sfmt_t::seed( uint32_t start )
 {
-  //dsfmt_chk_init_gen_rand( &dsfmt_global_data, start );
+  dsfmt_chk_init_gen_rand( &dsfmt_global_data, start );
 }
 
 // ==========================================================================
