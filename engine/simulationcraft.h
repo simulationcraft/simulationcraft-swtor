@@ -53,6 +53,9 @@
 #include <typeinfo>
 #include <vector>
 
+// Boost includes
+#include <boost/range.hpp>
+
 #if _MSC_VER || __cplusplus >= 201103L
 #include <unordered_map>
 #if _MSC_VER < 1600
@@ -669,7 +672,6 @@ void sliding_window_average( Fwd first, Fwd last, Out out )
     fill_n( out, n, std::accumulate( first, last, value_t() ) / n );
   }
 }
-
 
 // Machinery for range-based generic algorithms =============================
 

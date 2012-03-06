@@ -1114,7 +1114,7 @@ bool sim_t::init()
   // Timing wheel depth defaults to about 17 minutes with a granularity of 32 buckets per second.
   // This makes wheel_size = 32K and it's fully used.
   if ( wheel_seconds     <  600 ) wheel_seconds     = 1024; // 2^10  Min of 600 to ensure no wrap-around bugs with Water Shield
-  if ( wheel_granularity <=   0 ) wheel_granularity = 64; // 2^5
+  if ( wheel_granularity <=   0 ) wheel_granularity = 32; // 2^5
 
   wheel_size = ( uint32_t ) ( wheel_seconds * wheel_granularity );
 

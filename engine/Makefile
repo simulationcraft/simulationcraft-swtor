@@ -51,6 +51,8 @@ COPY       = copy
 REMOVE     = del /f
 PATHSEP    = \\
 AR         = ar
+BOOST_PATH = ./
+OPTS += -I $(BOOST_PATH)
 # MinGW W32
 ifeq (32,${BITS})
 CPP_FLAGS += -malign-double
