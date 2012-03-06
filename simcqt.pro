@@ -45,6 +45,7 @@ HEADERS += qt/simulationcraftqt.h
 
 SOURCES += engine/sc_action.cpp
 SOURCES += engine/sc_armory.cpp
+SOURCES += engine/sc_bcp_api.cpp
 SOURCES += engine/sc_buff.cpp
 SOURCES += engine/sc_chart.cpp
 SOURCES += engine/sc_commando_mercenary.cpp
