@@ -4,7 +4,7 @@ QT += core gui network webkit
 #CONFIG += paperdoll
 #CONFIG += openssl
 
-BOOST_PATH = "C:/boost_1_49_0"
+BOOST_PATH = "C:/Dev/boost_1_49_0"
 
 QMAKE_CXXFLAGS_RELEASE += -DNDEBUG
 
