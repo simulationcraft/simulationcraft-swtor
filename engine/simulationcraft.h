@@ -4590,6 +4590,8 @@ struct mmo_champion_t
   static int  parse_gem( item_t& item, const std::string& gem_id,
                          cache::behavior_t b=cache::items() );
 };
+#endif
+
 
 // Blizzard Community Platform API ==========================================
 
@@ -4603,15 +4605,14 @@ bool download_guild( sim_t* sim,
                      int player_type = PLAYER_NONE,
                      int max_rank=0,
                      cache::behavior_t b=cache::players() );
+
 player_t* download_player( sim_t*,
-                           const std::string& region,
-                           const std::string& server,
-                           const std::string& name,
+                           const std::string& id,
                            const std::string& talents=std::string( "active" ),
                            cache::behavior_t b=cache::players() );
+
 bool download_item( item_t&, const std::string& item_id, cache::behavior_t b=cache::items() );
-bool download_glyph( player_t* player, std::string& glyph_name, const std::string& glyph_id,
-                     cache::behavior_t b=cache::items() );
+
 bool download_slot( item_t& item,
                     const std::string& item_id,
                     const std::string& enchant_id,
@@ -4620,9 +4621,9 @@ bool download_slot( item_t& item,
                     const std::string& rsuffix_id,
                     const std::string gem_ids[ 3 ],
                     cache::behavior_t b=cache::items() );
-int parse_gem( item_t& item, const std::string& gem_id, cache::behavior_t b=cache::items() );
 }
 
+#if 0
 // Wowreforge ===============================================================
 
 namespace wowreforge {

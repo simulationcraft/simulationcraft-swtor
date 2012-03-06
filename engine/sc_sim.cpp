@@ -296,6 +296,23 @@ static bool parse_cache( sim_t*             /* sim */,
 
   return true;
 }
+// parse_mrrobot =============================================================
+
+static bool parse_mrrobot( sim_t*             sim,
+                          const std::string& name,
+                          const std::string& value )
+{
+  if ( name == "mrrobot" )
+  {
+    sim -> active_player = bcp_api::download_player( sim, value, "active" );
+    if ( ! sim -> active_player ) return false;
+
+    return true;
+  }
+
+  return false;
+}
+
 
 #if 0
 // parse_armory =============================================================
@@ -1941,6 +1958,7 @@ void sim_t::create_options()
     { "pet",                              OPT_FUNC,   ( void* ) ::parse_player                      },
     { "player",                           OPT_FUNC,   ( void* ) ::parse_player                      },
     { "copy",                             OPT_FUNC,   ( void* ) ::parse_player                      },
+    { "mrrobot",                          OPT_FUNC,   ( void* ) ::parse_mrrobot                     },
 #if 0
     { "armory",                           OPT_DEPRECATED,   ( void* ) ::parse_armory                      },
     { "guild",                            OPT_DEPRECATED,   ( void* ) ::parse_armory                      },

@@ -113,52 +113,6 @@ bool parse_talents( player_t* p, js_node_t* talents )
   return true;
 }
 
-// parse_glyphs =============================================================
-
-bool parse_glyphs( player_t* p, js_node_t* build )
-{
-  static const char* const glyph_type_names[] =
-  {
-    "glyphs/prime", "glyphs/major", "glyphs/minor"
-  };
-
-  for ( std::size_t i = 0; i < sizeof_array( glyph_type_names ); ++i )
-  {
-    if ( js_node_t* glyphs = js_t::get_node( build, glyph_type_names[ i ] ) )
-    {
-      std::vector<js_node_t*> children;
-      if ( js_t::get_children( children, glyphs ) > 0 )
-      {
-        for ( std::size_t j = 0; j < children.size(); ++j )
-        {
-          std::string glyph_name;
-          if ( ! js_t::get_value( glyph_name, children[ j ], "name" ) )
-          {
-            std::string glyph_id;
-            if ( js_t::get_value( glyph_id, children[ j ], "item" ) )
-              item_t::download_glyph( p, glyph_name, glyph_id );
-          }
-
-          if ( ! glyph_name.empty() )
-          {
-            // FIXME: Move this common boilerplate stuff into util_t where all the data
-            //        sources can use it instead of cut'n'pasting.
-            if (      glyph_name.substr( 0, 9 ) == "Glyph of " ) glyph_name.erase( 0, 9 );
-            else if ( glyph_name.substr( 0, 8 ) == "Glyph - "  ) glyph_name.erase( 0, 8 );
-            armory_t::format( glyph_name );
-
-            if ( p -> glyphs_str.length() )
-              p -> glyphs_str += '/';
-            p -> glyphs_str += glyph_name;
-          }
-        }
-      }
-    }
-  }
-
-  return true;
-}
-
 // parse_items ==============================================================
 
 bool parse_items( player_t* p, js_node_t* items )
@@ -224,7 +178,7 @@ bool parse_items( player_t* p, js_node_t* items )
 
 struct player_spec_t
 {
-  std::string region, server, name, url, origin, talent_spec;
+  std::string id, url, origin, talent_spec;
 };
 
 // parse_player =============================================================
@@ -261,9 +215,11 @@ parse_player( sim_t*             sim,
 
   std::string name;
   if ( js_t::get_value( name, profile, "Name"  ) )
-    player.name = name;
-  else
-    name = player.name;
+  {
+    sim -> errorf( "BCP API: Unable to extract player name from '%s'.\n", player.url.c_str() );
+    return 0;
+  }
+
   if ( player.talent_spec != "active" && ! player.talent_spec.empty() )
   {
     name += '_';
@@ -304,10 +260,11 @@ parse_player( sim_t*             sim,
   }
 
   p -> level = level;
-  p -> region_str = player.region.empty() ? sim -> default_region_str : player.region;
 
-  if ( ! js_t::get_value( p -> server_str, profile, "Server" ) && ! player.server.empty() )
-    p -> server_str = player.server;
+  if ( ! js_t::get_value( p -> server_str, profile, "Server" ) )
+  {
+    sim -> errorf( "BCP API: Unable to extract player server from '%s'.\n", player.url.c_str() );
+  }
 
   if ( ! player.origin.empty() )
   {
@@ -346,9 +303,6 @@ parse_player( sim_t*             sim,
   if ( ! parse_items( p, js_t::get_child( profile, "Gear" ) ) )
     return 0;
 
-  if ( ! p -> server_str.empty() )
-    p -> armory_extensions( p -> region_str, p -> server_str, player.name, caching );
-
   return p;
 }
 
@@ -357,25 +311,20 @@ parse_player( sim_t*             sim,
 // bcp_api::download_player =================================================
 
 player_t* download_player( sim_t*             sim,
-                           const std::string& region,
-                           const std::string& server,
-                           const std::string& name,
+                           const std::string& id,
                            const std::string& talents,
                            cache::behavior_t  caching )
 {
-  sim -> current_name = name;
+  // Check form validity of the provided profile id before even starting to access the profile
+
+  sim -> current_name = id;
 
   player_spec_t player;
 
-  std::string battlenet = "http://" + region + ".battle.net/";
+  std::string mrrobot = "http://swtor.askmrrobot.com/";
 
-  player.url = battlenet + "api/wow/character/" +
-               server + '/' + name + "?fields=talents,items,professions&locale=en_US";
-  player.origin = battlenet + "wow/en/character/" + server + '/' + name + "/advanced";
-
-  player.region = region;
-  player.server = server;
-  player.name = name;
+  player.url = mrrobot + "api/character/" + id;
+  player.origin = mrrobot + "character/" + id;
 
   player.talent_spec = talents;
 
@@ -532,7 +481,8 @@ bool download_item_data( item_t& item, item_info_t& item_data,
     return false;
   }
 
-  return item_database_t::load_item_from_data( item, &item_data );
+  assert( 0 );
+  return false;
 }
 
 } // ANONYMOUS namespace ====================================================
@@ -567,14 +517,6 @@ bool download_slot( item_t& item,
   item_info_t item_data;
   if ( ! download_item_data( item, item_data, item_id, caching ) )
     return false;
-
-  item_database_t::parse_gems( item, &item_data, gem_ids );
-
-  if ( ! item_database_t::parse_enchant( item, enchant_id ) )
-  {
-    item.sim -> errorf( "Player %s unable to parse enchant id %s for item \"%s\" at slot %s.\n",
-                        item.player -> name(), enchant_id.c_str(), item.name(), item.slot_name() );
-  }
 
   if ( ! enchant_t::download_addon( item, addon_id ) )
   {
@@ -670,159 +612,18 @@ bool download_guild( sim_t* sim, const std::string& region, const std::string& s
   {
     const std::string& cname = names[ i ];
     util_t::printf( "Downloading character: %s\n", cname.c_str() );
+#if 0
     player_t* player = download_player( sim, region, server, cname, "active", caching );
     if ( !player )
     {
-      sim -> errorf( "BCP API: Failed to download player '%s' trying Wowhead instead\n", cname.c_str() );
-      player = wowhead_t::download_player( sim, region, server, cname, "active", caching );
-      if ( !player )
-        sim -> errorf( "Wowhead: Failed to download player '%s'\n", cname.c_str() );
+      sim -> errorf( "BCP API: Failed to download player '%s'\n", cname.c_str() );
       // Just ignore invalid players
     }
+#endif
   }
 
   return true;
 }
 
-// bcp_api::download_glyph ==================================================
-
-bool download_glyph( player_t*          player,
-                     std::string&       glyph_name,
-                     const std::string& glyph_id,
-                     cache::behavior_t  caching )
-{
-  const std::string& region =
-    ( player -> region_str.empty() ? player -> sim -> default_region_str : player -> region_str );
-
-  js_node_t* item = download_id( player -> sim, region, glyph_id, caching );
-  if ( ! item || ! js_t::get_value( glyph_name, item, "name" ) )
-  {
-    if ( caching != cache::ONLY )
-      player -> sim -> errorf( "BCP API: Unable to download glyph id '%s'\n", glyph_id.c_str() );
-    return false;
-  }
-
-  static const std::string glyph_of = "Glyph of ";
-  static const std::string glyph_dash = "Glyph - ";
-
-  if ( util_t::str_prefix_ci( glyph_name, glyph_of ) )
-    glyph_name.erase( 0, glyph_of.length() );
-  else if ( util_t::str_prefix_ci( glyph_name, glyph_dash ) )
-    glyph_name.erase( 0, glyph_dash.length() );
-  armory_t::format( glyph_name );
-
-  return true;
-}
-
-namespace { // ANONYMOUS ====================================================
-
-// bcp_api::parse_gem_stats =================================================
-
-std::string parse_gem_stats( const std::string& bonus )
-{
-  std::istringstream in( bonus );
-  std::ostringstream out;
-
-  int amount;
-  std::string stat;
-
-  in >> amount;
-  in >> stat;
-
-  stat_type st = util_t::parse_stat_type( stat );
-  if ( st != STAT_NONE )
-    out << amount << util_t::stat_type_abbrev( st );
-
-  in >> stat;
-  if ( in )
-  {
-    if ( util_t::str_compare_ci( stat, "Rating" ) )
-      in >> stat;
-
-    if ( in )
-    {
-      if ( util_t::str_compare_ci( stat, "and" ) )
-      {
-        in >> amount;
-        in >> stat;
-
-        st = util_t::parse_stat_type( stat );
-        if ( st != STAT_NONE )
-          out << '_' << amount << util_t::stat_type_abbrev( st );
-      }
-    }
-  }
-
-  return out.str();
-}
-
-} // ANONYMOUS namespace ====================================================
-
-// bcp_api::parse_gem =======================================================
-
-int parse_gem( item_t& item, const std::string& gem_id, cache::behavior_t caching )
-{
-  const std::string& region =
-    item.player -> region_str.empty()
-    ? item.sim -> default_region_str
-    : item.player -> region_str;
-
-  js_node_t* js = download_id( item.sim, region, gem_id, caching );
-  if ( ! js )
-    return GEM_NONE;
-
-  std::string type_str;
-  if ( ! js_t::get_value( type_str, js, "gemInfo/type/type" ) )
-    return GEM_NONE;
-  armory_t::format( type_str );
-
-  int type = util_t::parse_gem_type( type_str );
-
-  std::string result;
-  if ( type == GEM_META )
-  {
-    if ( ! js_t::get_value( result, js, "name" ) )
-      return GEM_NONE;
-
-    std::string::size_type pos = result.rfind( " Diamond" );
-    if ( pos != std::string::npos ) result.erase( pos );
-  }
-  else
-  {
-    std::string bonus;
-    if ( ! js_t::get_value( bonus, js, "gemInfo/bonus/name" ) )
-      return GEM_NONE;
-    result = parse_gem_stats( bonus );
-  }
-
-  if ( ! result.empty() )
-  {
-    armory_t::format( result );
-    if ( ! item.armory_gems_str.empty() )
-      item.armory_gems_str += '_';
-    item.armory_gems_str += result;
-  }
-
-  return type;
-}
 
 } // namespace bcp_api =====================================================
-
-namespace wowreforge { // ==================================================
-
-player_t* download_player( sim_t*             sim,
-                           const std::string& profile_id,
-                           cache::behavior_t  caching )
-{
-  sim -> current_name = profile_id;
-
-  bcp_api::player_spec_t player;
-
-  player.origin = "http://wowreforge.com/Profiles/" + profile_id;
-  player.url = player.origin + "?json";
-  player.name = "wowreforge_" + profile_id;
-
-  return bcp_api::parse_player( sim, player, caching );
-}
-
-} // namespace wowreforge ==================================================
