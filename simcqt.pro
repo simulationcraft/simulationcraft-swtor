@@ -4,7 +4,7 @@ QT += core gui network webkit
 #CONFIG += paperdoll
 #CONFIG += openssl
 
-BOOST_PATH = "C:/Dev/boost_1_49_0"
+BOOST_PATH = "C:/boost_1_49_0"
 
 QMAKE_CXXFLAGS_RELEASE += -DNDEBUG
 
@@ -48,9 +48,7 @@ SOURCES += engine/sc_armory.cpp
 SOURCES += engine/sc_buff.cpp
 SOURCES += engine/sc_chart.cpp
 SOURCES += engine/sc_commando_mercenary.cpp
-SOURCES += engine/sc_const_data.cpp
 SOURCES += engine/sc_consumable.cpp
-SOURCES += engine/sc_data.cpp
 SOURCES += engine/sc_dot.cpp
 SOURCES += engine/sc_enchant.cpp
 SOURCES += engine/sc_event.cpp
@@ -59,7 +57,6 @@ SOURCES += engine/sc_gear_stats.cpp
 SOURCES += engine/sc_heal.cpp
 SOURCES += engine/sc_http.cpp
 SOURCES += engine/sc_item.cpp
-SOURCES += engine/sc_item_data.cpp
 SOURCES += engine/sc_js.cpp
 SOURCES += engine/sc_juggernaut_guardian.cpp
 SOURCES += engine/sc_knotor.cpp
@@ -86,7 +83,6 @@ SOURCES += engine/sc_sequence.cpp
 SOURCES += engine/sc_set_bonus.cpp
 SOURCES += engine/sc_shadow_assassin.cpp
 SOURCES += engine/sc_sim.cpp
-SOURCES += engine/sc_spell_data.cpp
 SOURCES += engine/sc_stats.cpp
 SOURCES += engine/sc_talent.cpp
 SOURCES += engine/sc_target.cpp

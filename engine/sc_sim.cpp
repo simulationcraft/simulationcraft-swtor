@@ -88,7 +88,7 @@ static bool parse_ptr( sim_t*             sim,
   if ( name != "ptr" ) return false;
 
   if ( SC_USE_PTR )
-    sim -> dbc.ptr = atoi( value.c_str() ) != 0;
+    sim -> ptr = atoi( value.c_str() ) != 0;
   else
     sim -> errorf( "SimulationCraft has not been built with PTR data.  The 'ptr=' option is ignored.\n" );
 
@@ -525,16 +525,6 @@ static bool parse_fight_style( sim_t*             sim,
   return true;
 }
 
-// parse_spell_query ========================================================
-
-static bool parse_spell_query( sim_t*             sim,
-                               const std::string& /* name */,
-                               const std::string& value )
-{
-  sim -> spell_query = spell_data_expr_t::parse( sim, value );
-  return sim -> spell_query > 0;
-}
-
 // parse_item_sources =======================================================
 
 static bool parse_item_sources( sim_t*             sim,
@@ -603,7 +593,7 @@ sim_t::sim_t( sim_t* p, int index ) :
   default_region_str( "us" ),
   save_prefix_str( "save_" ),
   save_talent_str( 0 ),
-  input_is_utf8( false ),
+  input_is_utf8( false ), ptr( false ),
   target_death_pct( 0 ), target_level( -1 ), target_adds( 0 ),
   default_rng_( 0 ), rng_list( 0 ), deterministic_roll( false ),
   rng( 0 ), deterministic_rng( 0 ), smooth_rng( false ), average_range( true ), average_gauss( false ),
@@ -622,8 +612,7 @@ sim_t::sim_t( sim_t* p, int index ) :
   report_rng( 0 ), hosted_html( 0 ), print_styles( false ), report_overheal( 0 ),
   save_raid_summary( 0 ), statistics_level( 1 ), separate_stats_by_actions( 0 ),
   // Multi-Threading
-  threads( 0 ), thread_index( index ),
-  spell_query( 0 )
+  threads( 0 ), thread_index( index )
 {
   register_jedi_sage_targetdata( this );
   register_sith_sorcerer_targetdata( this );
@@ -734,7 +723,6 @@ sim_t::~sim_t()
   range::dispose( children );
 
   delete[] timing_wheel;
-  delete spell_query;
 }
 
 // sim_t::add_event =========================================================
@@ -1878,7 +1866,6 @@ void sim_t::create_options()
     { "ptr",                              OPT_FUNC,   ( void* ) ::parse_ptr                         },
     { "threads",                          OPT_INT,    &( threads                                  ) },
     { "confidence",                       OPT_FLT,    &( confidence                               ) },
-    { "spell_query",                      OPT_FUNC,   ( void* ) ::parse_spell_query                 },
     { "item_db_source",                   OPT_FUNC,   ( void* ) ::parse_item_sources                },
     { "proxy",                            OPT_FUNC,   ( void* ) ::parse_proxy                       },
     // Lag
@@ -2043,7 +2030,7 @@ bool sim_t::parse_options( int    _argc,
       return false;
   }
 
-  if ( player_list == NULL && spell_query == NULL )
+  if ( player_list == NULL )
   {
     errorf( "Nothing to sim!\n" );
     cancel();
@@ -2156,7 +2143,7 @@ int sim_t::main( int argc, char** argv )
 
   thread_t::init();
   http_t::cache_load();
-  dbc_t::init();
+  //dbc_t::init();
 
   if ( ! parse_options( argc, argv ) )
   {
@@ -2168,18 +2155,11 @@ int sim_t::main( int argc, char** argv )
 
   current_throttle = armory_throttle;
 
-  util_t::fprintf( output_file, "\nSimulationCraft %s-%s for World of Warcraft %s %s (build level %s)\n",
-                   SC_MAJOR_VERSION, SC_MINOR_VERSION, dbc_t::wow_version( dbc.ptr ), ( dbc.ptr ? "PTR" : "Live" ), dbc_t::build_level( dbc.ptr ) );
+  util_t::fprintf( output_file, "\nSimulationCraft %s-%s for Star Wars: The Old Republic %s %s \n",
+                   SC_MAJOR_VERSION, SC_MINOR_VERSION, ptr ? SWTOR_VERSION_PTR : SWTOR_VERSION_LIVE, ( ptr ? "PTR" : "Live" ) );
   fflush( output_file );
 
-  if ( spell_query )
-  {
-    errorf( "ERROR! Spell Query currently not available.\n" );
-    cancel();
-    //spell_query -> evaluate();
-    //report_t::print_spell_query( this );
-  }
-  else if ( need_to_save_profiles( this ) )
+  if ( need_to_save_profiles( this ) )
   {
     init();
     util_t::fprintf( stdout, "\nGenerating profiles... \n" ); fflush( stdout );
@@ -2224,7 +2204,7 @@ int sim_t::main( int argc, char** argv )
 
   http_t::cache_save();
   thread_t::de_init();
-  dbc_t::de_init();
+  //dbc_t::de_init();
 
   return 0;
 }

@@ -76,9 +76,7 @@ SRC = \
 	sc_buff.cpp \
 	sc_chart.cpp \
 	sc_commando_mercenary.cpp \
-	sc_const_data.cpp \
 	sc_consumable.cpp \
-	sc_data.cpp \
 	sc_dot.cpp \
 	sc_enchant.cpp \
 	sc_expressions.cpp \
@@ -87,7 +85,6 @@ SRC = \
 	sc_heal.cpp \
 	sc_http.cpp \
 	sc_item.cpp \
-	sc_item_data.cpp \
 	sc_js.cpp \
 	sc_juggernaut_guardian.cpp \
   sc_knotor.cpp \
@@ -115,7 +112,6 @@ SRC = \
 	sc_set_bonus.cpp \
 	sc_shadow_assassin.cpp \
 	sc_sim.cpp \
-	sc_spell_data.cpp \
 	sc_stats.cpp \
 	sc_talent.cpp \
 	sc_target.cpp \

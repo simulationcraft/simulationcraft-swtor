@@ -1210,9 +1210,8 @@ void report_t::print_xml( sim_t* sim )
 
   writer.print_attribute( "major_version", SC_MAJOR_VERSION );
   writer.print_attribute( "minor_version", SC_MINOR_VERSION );
-  writer.print_attribute( "wow_version", dbc_t::wow_version( sim -> dbc.ptr ) );
-  writer.print_attribute( "ptr", sim -> dbc.ptr ? "true" : "false" );
-  writer.print_attribute( "wow_build", dbc_t::build_level( sim -> dbc.ptr ) );
+  writer.print_attribute( "swtor_version", sim -> ptr ? SWTOR_VERSION_PTR : SWTOR_VERSION_LIVE );
+  writer.print_attribute( "ptr", sim -> ptr ? "true" : "false" );
 
 #if SC_BETA
 

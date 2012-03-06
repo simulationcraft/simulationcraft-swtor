@@ -227,13 +227,12 @@ player_t::player_t( sim_t*             s,
   vengeance_enabled( false ), vengeance_damage( 0.0 ), vengeance_value( 0.0 ), vengeance_max( 0.0 ), vengeance_was_attacked( false ),
   active_pets( 0 ),
   reaction_mean( timespan_t::from_seconds( 0.5 ) ), reaction_stddev( timespan_t::zero ), reaction_nu( timespan_t::from_seconds( 0.5 ) ),
-  scale_player( 1 ), avg_ilvl( 0 ), active_companion( 0 ),
+  scale_player( 1 ), avg_ilvl( 0 ), active_companion( 0 ), ptr( false ),
   // Latency
   world_lag( timespan_t::from_seconds( 0.1 ) ), world_lag_stddev( timespan_t::min ),
   brain_lag( timespan_t::min ), brain_lag_stddev( timespan_t::min ),
   world_lag_override( false ), world_lag_stddev_override( false ),
   events( 0 ),
-  dbc( s -> dbc ),
   race( r ),
   // Ratings
   initial_alacrity_rating( 0 ), alacrity_rating( 0 ),
@@ -447,7 +446,7 @@ player_t::~player_t()
     range::dispose( talent_trees[ i ] );
 
   //range::dispose( glyphs );
-  range::dispose( spell_list );
+  //range::dispose( spell_list );
 }
 
 // player_t::init ===========================================================
@@ -4669,7 +4668,7 @@ action_expr_t* player_t::create_expression( action_t* a,
     struct ptr_expr_t : public action_expr_t
     {
       ptr_expr_t( action_t* a ) : action_expr_t( a, "ptr", TOK_NUM ) {}
-      virtual int evaluate() { result_num = action -> player -> dbc.ptr ? 1 : 0; return TOK_NUM; }
+      virtual int evaluate() { result_num = action -> player -> ptr ? 1 : 0; return TOK_NUM; }
     };
     return new ptr_expr_t( a );
   }
@@ -5089,7 +5088,7 @@ void player_t::copy_from( const player_t& source )
 
   use_pre_potion = source.use_pre_potion;
 
-  if ( dbc.ptr == source.dbc.ptr && ! source.talents_str.empty() )
+  if ( ptr == source.ptr && ! source.talents_str.empty() )
     parse_talent_string( *this, source.talents_str );
   else
   {

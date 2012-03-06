@@ -1181,8 +1181,8 @@ static void print_html_masthead( FILE*  file, sim_t* sim )
 
   fprintf( file,
            "\t\t\t<h1><a href=\"http://code.google.com/p/simulationcraft-swtor/\">SimulationCraft %s-%s</a></h1>\n"
-           "\t\t\t<h2>for Star Wars: The Old Republic %s %s (build level %s)</h2>\n\n",
-           SC_MAJOR_VERSION, SC_MINOR_VERSION, dbc_t::wow_version( sim -> dbc.ptr ), ( sim -> dbc.ptr ? "PTR" : "Live" ), dbc_t::build_level( sim -> dbc.ptr ) );
+           "\t\t\t<h2>for Star Wars: The Old Republic %s %s</h2>\n\n",
+           SC_MAJOR_VERSION, SC_MINOR_VERSION, sim -> ptr ? SWTOR_VERSION_PTR : SWTOR_VERSION_LIVE, ( sim -> ptr ? "PTR" : "Live" ) );
 
   time_t rawtime;
   time ( &rawtime );

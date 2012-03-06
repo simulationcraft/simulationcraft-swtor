@@ -193,8 +193,6 @@ bool option_t::parse( sim_t*             sim,
       break;
     case OPT_FUNC:
       return ( ( option_function_t ) address )( sim, n, v );
-    case OPT_SPELL_ENABLED:
-      return ( ( struct spell_id_t * ) address )->enable( atoi( v.c_str() ) != 0 );
     case OPT_DEPRECATED:
       sim -> errorf( "Option '%s' has been deprecated.\n", name );
       if ( address ) sim -> errorf( "Please use option '%s' instead.\n", ( char* ) address );

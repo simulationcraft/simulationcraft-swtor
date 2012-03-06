@@ -1930,18 +1930,14 @@ static void print_html_player_buffs( FILE* file, player_t* p )
                "\t\t\t\t\t\t\t\t<td colspan=\"7\" class=\"filler\">\n"
                "\t\t\t\t\t\t\t\t\t<h4>Database details</h4>\n"
                "\t\t\t\t\t\t\t\t\t<ul>\n"
-               "\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">id:</span>%.i</li>\n"
                "\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">cooldown name:</span>%s</li>\n"
-               "\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">tooltip:</span><span class=\"tooltip-wider\">%s</span></li>\n"
                "\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">max_stacks:</span>%.i</li>\n"
                "\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">duration:</span>%.2f</li>\n"
                "\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">cooldown:</span>%.2f</li>\n"
                "\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">default_chance:</span>%.2f%%</li>\n"
                "\t\t\t\t\t\t\t\t\t</ul>\n"
                "\t\t\t\t\t\t\t\t</td>\n",
-               b -> s_id,
                b -> cooldown -> name_str.c_str(),
-               b -> tooltip(),
                b -> max_stack,
                b -> buff_duration.total_seconds(),
                b -> cooldown -> duration.total_seconds(),
@@ -2014,9 +2010,7 @@ static void print_html_player_buffs( FILE* file, player_t* p )
                  "\t\t\t\t\t\t\t\t\t<td>\n"
                  "\t\t\t\t\t\t\t\t\t\t<h4>Database details</h4>\n"
                  "\t\t\t\t\t\t\t\t\t\t<ul>\n"
-                 "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">id:</span>%.i</li>\n"
                  "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">cooldown name:</span>%s</li>\n"
-                 "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">tooltip:</span><span class=\"tooltip\">%s</span></li>\n"
                  "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">max_stacks:</span>%.i</li>\n"
                  "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">duration:</span>%.2f</li>\n"
                  "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">cooldown:</span>%.2f</li>\n"
@@ -2024,9 +2018,7 @@ static void print_html_player_buffs( FILE* file, player_t* p )
                  "\t\t\t\t\t\t\t\t\t\t</ul>\n"
                  "\t\t\t\t\t\t\t\t\t</td>\n"
                  "\t\t\t\t\t\t\t\t</tr>\n",
-                 ( *b ) -> s_id,
                  ( *b ) -> cooldown -> name_str.c_str(),
-                 ( *b ) -> tooltip(),
                  ( *b ) -> max_stack,
                  ( *b ) -> buff_duration.total_seconds(),
                  ( *b ) -> cooldown -> duration.total_seconds(),

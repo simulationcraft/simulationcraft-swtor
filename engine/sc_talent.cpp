@@ -20,7 +20,7 @@ bool talent_t::set_rank( unsigned r )
   _rank = std::min( r, max_rank() );
   return true;
 }
-
+#if 0
 // ==========================================================================
 // Spell ID
 // ==========================================================================
@@ -843,3 +843,4 @@ std::string mastery_t::to_str() const
   return s.str();
 }
 #endif // 0
+#endif

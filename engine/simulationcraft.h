@@ -115,6 +115,8 @@ namespace std {using namespace tr1; }
 
 #define SC_MAJOR_VERSION "114"
 #define SC_MINOR_VERSION "3"
+#define SWTOR_VERSION_LIVE "1.1.4"
+#define SWTOR_VERSION_PTR "1.1.4"
 #define SC_USE_PTR ( 0 )
 #define SC_BETA ( 0 )
 #define SC_EPSILON ( 0.000001 )
@@ -143,7 +145,7 @@ struct callback_t;
 struct commando_mercenary_t;
 struct companion_t;
 struct cooldown_t;
-class  dbc_t;
+//class  dbc_t;
 struct dot_t;
 struct effect_t;
 struct enemy_t;
@@ -166,11 +168,11 @@ struct reforge_plot_t;
 struct reforge_plot_data_t;
 struct report_t;
 struct rng_t;
-struct spell_id_t;
+//struct spell_id_t;
 struct scaling_t;
 struct sim_t;
-struct spell_data_t;
-struct spelleffect_data_t;
+//struct spell_data_t;
+//struct spelleffect_data_t;
 struct sample_data_t;
 struct shadow_assassin_t;
 struct heal_t;
@@ -1491,6 +1493,7 @@ enum spell_attribute_t
   SPELL_ATTR_EX9_UNK31, // 31
 };
 
+#if 0
 // DBC related classes ======================================================
 
 struct spell_data_t
@@ -1944,7 +1947,7 @@ public:
   // Static helper methods
   static double fmt_value( double v, effect_type_t type, effect_subtype_t sub_type );
 };
-
+#endif
 // Options ==================================================================
 
 enum option_type_t
@@ -1960,7 +1963,6 @@ enum option_type_t
   OPT_LIST,       // std::vector<std::string>*
   OPT_FUNC,       // function pointer
   OPT_TALENT_RANK, // talent rank
-  OPT_SPELL_ENABLED, // spell enabled
   OPT_DEPRECATED,
   OPT_UNKNOWN
 };
@@ -2070,7 +2072,6 @@ public:
   static const char* role_type_string          ( int type );
   static const char* resource_type_string      ( int type );
   static const char* result_type_string        ( int type );
-  static int         school_type_component     ( int s_type, int c_type );
   static const char* school_type_string        ( int type );
   static const char* armor_type_string         ( player_type ptype, int slot_type );
   static const char* slot_type_string          ( int type );
@@ -2205,7 +2206,7 @@ enum s_type_t
   T_SPEC,
   T_ITEM
 };
-
+#if 0
 struct spell_id_t
 {
   s_type_t                   s_type;
@@ -2308,7 +2309,7 @@ struct spell_id_t
   const spelleffect_data_t& effect3() const { return ( ok() ? s_data -> effect3(): *spelleffect_data_t::nil() ); }
 private:
 };
-
+#endif
 // Talent class
 class talent_t
 {
@@ -2560,7 +2561,7 @@ public:
 
 // Buffs ====================================================================
 
-struct buff_t : public spell_id_t
+struct buff_t
 {
   double current_value, react;
   timespan_t buff_duration, buff_cooldown;
@@ -2605,22 +2606,6 @@ struct buff_t : public spell_id_t
           int max_stack=1, timespan_t buff_duration=timespan_t::zero, timespan_t buff_cooldown=timespan_t::zero,
           double chance=1.0, bool quiet=false, bool reverse=false, int rng_type=RNG_CYCLIC, int aura_id=0, bool activated=true );
 
-  // Player Buff with extracted data
-private:
-  void init_from_spell_( player_t*, spell_data_t* );
-public:
-  buff_t( actor_pair_t pair, spell_data_t*, ... );
-
-  // Player Buff as spell_id_t by name
-  buff_t( actor_pair_t pair, const std::string& name, const char* sname,
-          double chance=-1, timespan_t cd=timespan_t::min,
-          bool quiet=false, bool reverse=false, int rng_type=RNG_CYCLIC, bool activated=true );
-
-  // Player Buff as spell_id_t by id
-  buff_t( actor_pair_t pair, const uint32_t id, const std::string& name,
-          double chance=-1, timespan_t cd=timespan_t::min,
-          bool quiet=false, bool reverse=false, int rng_type=RNG_CYCLIC, bool activated=true );
-
   // Use check() inside of ready() methods to prevent skewing of "benefit" calculations.
   // Use up() where the presence of the buff affects the action mechanics.
 
@@ -2662,15 +2647,10 @@ public:
   const char* name() { return name_str.c_str(); }
 
   action_expr_t* create_expression( action_t*, const std::string& type );
-  std::string    to_str() const;
 
   static buff_t* find(   buff_t*, const std::string& name );
   static buff_t* find(    sim_t*, const std::string& name );
   static buff_t* find( player_t*, const std::string& name );
-
-  const spelleffect_data_t& effect1() const { return s_data -> effect1(); }
-  const spelleffect_data_t& effect2() const { return s_data -> effect2(); }
-  const spelleffect_data_t& effect3() const { return s_data -> effect3(); }
 };
 
 struct stat_buff_t : public buff_t
@@ -2682,9 +2662,6 @@ struct stat_buff_t : public buff_t
                int stat, double amount,
                int max_stack=1, timespan_t buff_duration=timespan_t::zero, timespan_t buff_cooldown=timespan_t::zero,
                double chance=1.0, bool quiet=false, bool reverse=false, int rng_type=RNG_CYCLIC, int aura_id=0, bool activated=true );
-  stat_buff_t( player_t*, const uint32_t id, const std::string& name,
-               int stat, double amount,
-               double chance=1.0, timespan_t buff_cooldown=timespan_t::min, bool quiet=false, bool reverse=false, int rng_type=RNG_CYCLIC, bool activated=true );
 
   virtual void bump     ( int stacks=1, double value=-1.0 );
   virtual void decrement( int stacks=1, double value=-1.0 );
@@ -2701,9 +2678,6 @@ struct cost_reduction_buff_t : public buff_t
                          int school, double amount,
                          int max_stack=1, timespan_t buff_duration=timespan_t::zero, timespan_t buff_cooldown=timespan_t::zero,
                          double chance=1.0, bool refreshes=false, bool quiet=false, bool reverse=false, int rng_type=RNG_CYCLIC, int aura_id=0, bool activated=true );
-  cost_reduction_buff_t( player_t*, const uint32_t id, const std::string& name,
-                         int school, double amount,
-                         double chance=1.0, timespan_t buff_cooldown=timespan_t::min, bool refreshes=false, bool quiet=false, bool reverse=false, int rng_type=RNG_CYCLIC, bool activated=true );
 
   virtual void bump     ( int stacks=1, double value=-1.0 );
   virtual void decrement( int stacks=1, double value=-1.0 );
@@ -2717,11 +2691,6 @@ struct debuff_t : public buff_t
   debuff_t( player_t*, const std::string& name,
             int max_stack=1, timespan_t buff_duration=timespan_t::zero, timespan_t buff_cooldown=timespan_t::zero,
             double chance=1.0, bool quiet=false, bool reverse=false, int rng_type=RNG_CYCLIC, int aura_id=0 );
-
-  // Player De-Buff as spell_id_t by id
-  debuff_t( player_t*, const uint32_t id, const std::string& name,
-            double chance=-1, timespan_t duration=timespan_t::min,
-            bool quiet=false, bool reverse=false, int rng_type=RNG_CYCLIC );
 
 };
 
@@ -2811,7 +2780,7 @@ struct action_expr_t
   static action_expr_t* parse( action_t*, const std::string& expr_str );
 };
 
-
+#if 0
 struct spell_data_expr_t
 {
   std::string name_str;
@@ -2849,6 +2818,7 @@ struct spell_data_expr_t
   static spell_data_expr_t* parse( sim_t* sim, const std::string& expr_str );
   static spell_data_expr_t* create_spell_expression( sim_t* sim, const std::string& name_str );
 };
+#endif
 
 namespace thread_impl { // ===================================================
 
@@ -3012,15 +2982,13 @@ struct sim_t : private thread_t
   bool        input_is_utf8;
   std::vector<player_t*> actor_list;
   std::string main_target_str;
+  bool        ptr;
 
   // Target options
   double      target_death_pct;
   int         target_level;
   std::string target_race;
   int         target_adds;
-
-  // Data access
-  dbc_t       dbc;
 
   // Default stat enchants
   gear_stats_t enchant;
@@ -3142,9 +3110,6 @@ public:
   std::vector<sim_t*> children;
   int thread_index;
   virtual void run() { iterate(); }
-
-  // Spell database access
-  spell_data_expr_t* spell_query;
 
   sim_t( sim_t* parent=0, int thrdID=0 );
   virtual ~sim_t();
@@ -3567,7 +3532,9 @@ struct item_t
   bool decode_lfr();
   bool decode_armor_type();
   bool decode_reforge();
+#if 0
   bool decode_random_suffix();
+#endif
   bool decode_ilevel();
   bool decode_quality();
 
@@ -3587,7 +3554,7 @@ struct item_t
                          const std::string& gem_id );
 #endif
 };
-
+#if 0
 // Item database ============================================================
 struct item_database_t
 {
@@ -3622,7 +3589,7 @@ struct item_database_t
                                       const std::string  gem_ids[ 3 ] );
 #endif
 };
-
+#endif
 // Set Bonus ================================================================
 
 struct set_bonus_t
@@ -3677,6 +3644,7 @@ struct player_t : public noncopyable
   int         scale_player;
   double      avg_ilvl;
   pet_t*      active_companion;
+  bool        ptr;
 
   // Latency
   timespan_t  world_lag, world_lag_stddev;
@@ -3684,9 +3652,6 @@ struct player_t : public noncopyable
   bool        world_lag_override, world_lag_stddev_override;
 
   int    events;
-
-  // Data access
-  dbc_t       dbc;
 
   // Option Parsing
   std::vector<option_t> options;
@@ -3697,7 +3662,7 @@ struct player_t : public noncopyable
   std::vector<talent_t*> talent_trees[ MAX_TALENT_TREES ];
   //std::vector<glyph_t*> glyphs;
 
-  std::list<spell_id_t*> spell_list;
+  //std::list<spell_id_t*> spell_list;
 
   // Profs
   std::string professions_str;
@@ -4677,12 +4642,6 @@ public:
   }
 
   void add_child( action_t* child ) { stats -> add_child( child -> stats ); }
-
-  // Move to ability_t in future
-  const spell_data_t* spell;
-  const spelleffect_data_t& effect1() const { return spell -> effect1(); }
-  const spelleffect_data_t& effect2() const { return spell -> effect2(); }
-  const spelleffect_data_t& effect3() const { return spell -> effect3(); }
 
   targetdata_t* targetdata() const
   {

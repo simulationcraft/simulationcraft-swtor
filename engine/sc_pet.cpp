@@ -28,7 +28,7 @@ void pet_t::init_pet_t_()
   party = owner -> party;
 
   // Inherit owner's dbc state
-  dbc.ptr = owner -> dbc.ptr;
+  ptr = owner -> ptr;
 }
 pet_t::pet_t( sim_t*             s,
               player_t*          o,

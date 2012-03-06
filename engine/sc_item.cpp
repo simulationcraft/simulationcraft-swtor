@@ -105,7 +105,7 @@ static int parse_meta_gem( const std::string& prefix,
 
 item_t::item_t( player_t* p, const std::string& o ) :
   sim( p -> sim ), player( p ), slot( SLOT_NONE ), quality( 0 ), ilevel( 0 ), unique( false ), unique_enchant( false ),
-  unique_addon( false ), is_heroic( false ), is_lfr( false ), is_ptr( p -> dbc.ptr ),
+  unique_addon( false ), is_heroic( false ), is_lfr( false ), is_ptr( p -> ptr ),
   is_matching_type( false ), is_reforged( false ), reforged_from( STAT_NONE ), reforged_to( STAT_NONE ),
   options_str( o )
 {
@@ -343,8 +343,8 @@ bool item_t::init()
 
   if ( ! decode_quality() ) return false;
 
-  unique_gear_t::get_equip_encoding( encoded_equip_str, encoded_name_str, heroic(), lfr(), player -> dbc.ptr, id_str );
-  unique_gear_t::get_use_encoding  ( encoded_use_str,   encoded_name_str, heroic(), lfr(), player -> dbc.ptr, id_str );
+  unique_gear_t::get_equip_encoding( encoded_equip_str, encoded_name_str, heroic(), lfr(), player -> ptr, id_str );
+  unique_gear_t::get_use_encoding  ( encoded_use_str,   encoded_name_str, heroic(), lfr(), player -> ptr, id_str );
 
   if ( ! option_stats_str.empty()   ) encoded_stats_str   = option_stats_str;
   if ( ! option_reforge_str.empty() ) encoded_reforge_str = option_reforge_str;
@@ -360,7 +360,9 @@ bool item_t::init()
   if ( ! decode_enchant()       ) return false;
   if ( ! decode_addon()         ) return false;
   if ( ! decode_weapon()        ) return false;
+#if 0
   if ( ! decode_random_suffix() ) return false;
+#endif
   if ( ! decode_reforge()       ) return false;
 
   if ( ! option_equip_str.empty() ) encoded_equip_str = option_equip_str;
@@ -523,6 +525,7 @@ bool item_t::decode_reforge()
   return true;
 }
 
+#if 0
 // item_t::decode_random_suffix =============================================
 
 bool item_t::decode_random_suffix()
@@ -643,6 +646,7 @@ bool item_t::decode_random_suffix()
 
   return true;
 }
+#endif
 
 #if 0
 // item_t::decode_gems ======================================================
@@ -727,7 +731,7 @@ bool item_t::decode_enchant()
   }
 
   std::string use_str;
-  if ( unique_gear_t::get_use_encoding( use_str, encoded_enchant_str, heroic(), lfr(), player -> dbc.ptr ) )
+  if ( unique_gear_t::get_use_encoding( use_str, encoded_enchant_str, heroic(), lfr(), player -> ptr ) )
   {
     unique_enchant = true;
     use.name_str = encoded_enchant_str;
@@ -735,7 +739,7 @@ bool item_t::decode_enchant()
   }
 
   std::string equip_str;
-  if ( unique_gear_t::get_equip_encoding( equip_str, encoded_enchant_str, heroic(), lfr(), player -> dbc.ptr ) )
+  if ( unique_gear_t::get_equip_encoding( equip_str, encoded_enchant_str, heroic(), lfr(), player -> ptr ) )
   {
     unique_enchant = true;
     enchant.name_str = encoded_enchant_str;
@@ -777,7 +781,7 @@ bool item_t::decode_addon()
   }
 
   std::string use_str;
-  if ( unique_gear_t::get_use_encoding( use_str, encoded_addon_str, heroic(), lfr(), player -> dbc.ptr ) )
+  if ( unique_gear_t::get_use_encoding( use_str, encoded_addon_str, heroic(), lfr(), player -> ptr ) )
   {
     unique_addon = true;
     use.name_str = encoded_addon_str;
@@ -785,7 +789,7 @@ bool item_t::decode_addon()
   }
 
   std::string equip_str;
-  if ( unique_gear_t::get_equip_encoding( equip_str, encoded_addon_str, heroic(), lfr(), player -> dbc.ptr ) )
+  if ( unique_gear_t::get_equip_encoding( equip_str, encoded_addon_str, heroic(), lfr(), player -> ptr ) )
   {
     unique_addon = true;
     addon.name_str = encoded_addon_str;
@@ -1163,12 +1167,12 @@ bool item_t::decode_weapon()
 // item_t::download_slot ====================================================
 
 bool item_t::download_slot( item_t& item,
-                            const std::string& item_id,
-                            const std::string& enchant_id,
-                            const std::string& addon_id,
-                            const std::string& reforge_id,
-                            const std::string& rsuffix_id,
-                            const std::string gem_ids[ 3 ] )
+                            const std::string& /* item_id */,
+                            const std::string& /* enchant_id */,
+                            const std::string& /* addon_id */,
+                            const std::string& /* reforge_id */,
+                            const std::string& /* rsuffix_id */,
+                            const std::string[] /* gem_ids[ 3 ] */ )
 {
   const cache::behavior_t cb = cache::items();
   bool success = false;
@@ -1201,8 +1205,9 @@ bool item_t::download_slot( item_t& item,
     }
 
     if ( ! success && has_local )
-      success = item_database_t::download_slot( item, item_id, enchant_id, addon_id, reforge_id,
-                                                rsuffix_id, gem_ids );
+      assert( 0 );
+      /*success = item_database_t::download_slot( item, item_id, enchant_id, addon_id, reforge_id,
+                                                rsuffix_id, gem_ids );*/
   }
 
 #if 0
@@ -1235,15 +1240,17 @@ bool item_t::download_slot( item_t& item,
 
 // item_t::download_item ====================================================
 
-bool item_t::download_item( item_t& item, const std::string& item_id )
+bool item_t::download_item( item_t& /* item */, const std::string& /* item_id */ )
 {
   std::vector<std::string> source_list;
+#if 0
   if ( ! item_database_t::initialize_item_sources( item, source_list ) )
   {
     item.sim -> errorf( "Your item-specific data source string \"%s\" contained no valid sources to download item id %s.\n",
                         item.option_data_source_str.c_str(), item_id.c_str() );
     return false;
   }
+#endif
 
   bool success = false;
   if ( cache::items() != cache::CURRENT )
@@ -1270,7 +1277,8 @@ bool item_t::download_item( item_t& item, const std::string& item_id )
     }
 
     if ( ! success && has_local )
-      success = item_database_t::download_item( item, item_id );
+      assert( 0 );
+      //success = item_database_t::download_item( item, item_id );
   }
 
 #if 0

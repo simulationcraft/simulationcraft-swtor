@@ -546,16 +546,6 @@ int util_t::parse_resource_type( const std::string& name )
   return RESOURCE_NONE;
 }
 
-// util_t::school_type_component ============================================
-
-int util_t::school_type_component( int s_type, int c_type )
-{
-  uint32_t s_mask = spell_id_t::get_school_mask( ( school_type ) s_type );
-  uint32_t c_mask = spell_id_t::get_school_mask( ( school_type ) c_type );
-
-  return s_mask & c_mask;
-}
-
 // util_t::school_type_string ===============================================
 
 const char* util_t::school_type_string( int school )
