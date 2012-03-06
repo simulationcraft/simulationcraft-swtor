@@ -462,7 +462,7 @@ enum rng_type
 
   // Specifies a particular RNG desired
   RNG_STANDARD,          // Creates RNG using srand() and rand()
-  RNG_MERSENNE_TWISTER,  // Creates RNG using SIMD oriented Fast Mersenne Twister
+  RNG_MERSENNE_TWISTER,  // Creates RNG using Double precision SIMD-oriented Fast Mersenne Twister (dSFMT)
   RNG_PHASE_SHIFT,       // Simplistic cycle-based RNG, unsuitable for overlapping procs
   RNG_DISTANCE_SIMPLE,   // Simple normalized proc-separation RNG, suitable for fixed proc chance
   RNG_DISTANCE_BANDS,    // Complex normalized proc-separation RNG, suitable for varying proc chance

@@ -356,45 +356,51 @@ double rng_t::stdnormal_inv( double p )
  */
 
 // Mersenne Exponent. The period of the sequence is a multiple of 2^MEXP-1.
-#define MEXP 1279
 
-// SFMT generator has an internal state array of 128-bit integers, and N_sfmt is its size.
-#define N_sfmt (MEXP / 128 + 1)
+#define DSFMT_MEXP 19937
 
-// N32 is the size of internal state array when regarded as an array of 32-bit integers.
-#define N32 (N_sfmt * 4)
+#define DSFMT_N ((DSFMT_MEXP - 128) / 104 + 1)
 
-// MEXP_1279 paramaters
-#define POS1    7
-#define SL1     14
-#define SL2     3
-#define SR1     5
-#define SR2     1
-#define MSK1    0xf7fefffdU
-#define MSK2    0x7fefcfffU
-#define MSK3    0xaff3ef3fU
-#define MSK4    0xb5ffff7fU
-#define PARITY1 0x00000001U
-#define PARITY2 0x00000000U
-#define PARITY3 0x00000000U
-#define PARITY4 0x20000000U
+#define DSFMT_N64 (DSFMT_N * 2)
 
-// a parity check vector which certificate the period of 2^{MEXP}
-static uint32_t parity[4] = {PARITY1, PARITY2, PARITY3, PARITY4};
+#define UINT64_C(v) (v ## ULL)
 
-// 128-bit data structure
-struct w128_t
-{
-  uint32_t u[4];
+#define DSFMT_LOW_MASK  UINT64_C(0x000FFFFFFFFFFFFF)
+#define DSFMT_HIGH_CONST UINT64_C(0x3FF0000000000000)
+#define DSFMT_SR  12
+
+#define DSFMT_POS1  117
+#define DSFMT_SL1 19
+#define DSFMT_MSK1  UINT64_C(0x000ffafffffffb3f)
+#define DSFMT_MSK2  UINT64_C(0x000ffdfffc90fffd)
+#define DSFMT_MSK32_1 0x000ffaffU
+#define DSFMT_MSK32_2 0xfffffb3fU
+#define DSFMT_MSK32_3 0x000ffdffU
+#define DSFMT_MSK32_4 0xfc90fffdU
+#define DSFMT_FIX1  UINT64_C(0x90014964b32f4329)
+#define DSFMT_FIX2  UINT64_C(0x3b8d12ac548a7c7a)
+#define DSFMT_PCV1  UINT64_C(0x3d84e1ac0dc82880)
+#define DSFMT_PCV2  UINT64_C(0x0000000000000001)
+#define DSFMT_IDSTR "dSFMT2-19937:117-19:ffafffffffb3f-ffdfffc90fffd"
+
+
+/** 128-bit data structure */
+struct w128_t {
+  uint64_t u[2];
+  uint32_t u32[4];
+  double d[2];
+};
+
+/** the 128-bit internal state array */
+struct dsfmt_t {
+    w128_t status[DSFMT_N + 1];
+    int idx;
 };
 
 struct rng_sfmt_t : public rng_t
 {
-  w128_t sfmt[N_sfmt]; // the 128-bit internal state array
-
-  uint32_t *psfmt32; // the 32bit integer pointer to the 128-bit internal state array
-
-  int idx; // index counter to the 32-bit internal state array
+  /** global data */
+  dsfmt_t dsfmt_global_data;
 
   rng_sfmt_t( const std::string& name, bool avg_range=false, bool avg_gauss=false );
 
@@ -403,147 +409,125 @@ struct rng_sfmt_t : public rng_t
   virtual void seed( uint32_t start );
 };
 
-// period_certification =====================================================
+inline void do_recursion(w128_t *r, w128_t *a, w128_t * b,w128_t *lung) {
+    uint64_t t0, t1, L0, L1;
 
-inline static void period_certification( uint32_t* psfmt32 )
-{
-  int inner = 0;
-  int i, j;
-  uint32_t work;
+    t0 = a->u[0];
+    t1 = a->u[1];
+    L0 = lung->u[0];
+    L1 = lung->u[1];
+    lung->u[0] = (t0 << DSFMT_SL1) ^ (L1 >> 32) ^ (L1 << 32) ^ b->u[0];
+    lung->u[1] = (t1 << DSFMT_SL1) ^ (L0 >> 32) ^ (L0 << 32) ^ b->u[1];
+    r->u[0] = (lung->u[0] >> DSFMT_SR) ^ (lung->u[0] & DSFMT_MSK1) ^ t0;
+    r->u[1] = (lung->u[1] >> DSFMT_SR) ^ (lung->u[1] & DSFMT_MSK2) ^ t1;
+}
 
-  for ( i = 0; i < 4; i++ )
-    inner ^= psfmt32[i] & parity[i];
-  for ( i = 16; i > 0; i >>= 1 )
-    inner ^= inner >> i;
-  inner &= 1;
-  /* check OK */
-  if ( inner == 1 )
-  {
-    return;
-  }
-  /* check NG, and modification */
-  for ( i = 0; i < 4; i++ )
-  {
-    work = 1;
-    for ( j = 0; j < 32; j++ )
-    {
-      if ( ( work & parity[i] ) != 0 )
-      {
-        psfmt32[i] ^= work;
-        return;
-      }
-      work = work << 1;
+void dsfmt_gen_rand_all(dsfmt_t *dsfmt) {
+    int i;
+    w128_t lung;
+
+    lung = dsfmt->status[DSFMT_N];
+    do_recursion(&dsfmt->status[0], &dsfmt->status[0],
+     &dsfmt->status[DSFMT_POS1], &lung);
+    for (i = 1; i < DSFMT_N - DSFMT_POS1; i++) {
+  do_recursion(&dsfmt->status[i], &dsfmt->status[i],
+         &dsfmt->status[i + DSFMT_POS1], &lung);
     }
-  }
+    for (; i < DSFMT_N; i++) {
+  do_recursion(&dsfmt->status[i], &dsfmt->status[i],
+         &dsfmt->status[i + DSFMT_POS1 - DSFMT_N], &lung);
+
+    }
+    dsfmt->status[DSFMT_N] = lung;
 }
 
-// init_gen_rand ============================================================
+/**
+ * This function initializes the internal state array to fit the IEEE
+ * 754 format.
+ * @param dsfmt dsfmt state vector.
+ */
+void initial_mask(dsfmt_t *dsfmt) {
+    int i;
+    uint64_t *psfmt;
 
-inline static void init_gen_rand( rng_sfmt_t* r, uint32_t seed )
-{
-  uint32_t* psfmt32 = r -> psfmt32;
-
-  int i;
-
-  psfmt32[0] = seed;
-  for ( i = 1; i < N32; i++ )
-  {
-    psfmt32[i] = 1812433253UL * ( psfmt32[i - 1] ^ ( psfmt32[i - 1] >> 30 ) ) + i;
-  }
-  period_certification( psfmt32 );
+    psfmt = &dsfmt->status[0].u[0];
+    for (i = 0; i < DSFMT_N * 2; i++) {
+        psfmt[i] = (psfmt[i] & DSFMT_LOW_MASK) | DSFMT_HIGH_CONST;
+    }
 }
 
-// rshift128 ================================================================
+/**
+ * This function certificate the period of 2^{SFMT_MEXP}-1.
+ * @param dsfmt dsfmt state vector.
+ */
+void period_certification(dsfmt_t *dsfmt) {
+    uint64_t pcv[2] = {DSFMT_PCV1, DSFMT_PCV2};
+    uint64_t tmp[2];
+    uint64_t inner;
+    int i;
 
-inline static void rshift128( w128_t *out, w128_t const *in, int shift )
-{
-  uint64_t th, tl, oh, ol;
+    tmp[0] = (dsfmt->status[DSFMT_N].u[0] ^ DSFMT_FIX1);
+    tmp[1] = (dsfmt->status[DSFMT_N].u[1] ^ DSFMT_FIX2);
 
-  th = ( ( uint64_t )in->u[3] << 32 ) | ( ( uint64_t )in->u[2] );
-  tl = ( ( uint64_t )in->u[1] << 32 ) | ( ( uint64_t )in->u[0] );
-
-  oh = th >> ( shift * 8 );
-  ol = tl >> ( shift * 8 );
-  ol |= th << ( 64 - shift * 8 );
-  out->u[1] = ( uint32_t )( ol >> 32 );
-  out->u[0] = ( uint32_t )ol;
-  out->u[3] = ( uint32_t )( oh >> 32 );
-  out->u[2] = ( uint32_t )oh;
+    inner = tmp[0] & pcv[0];
+    inner ^= tmp[1] & pcv[1];
+    for (i = 32; i > 0; i >>= 1) {
+        inner ^= inner >> i;
+    }
+    inner &= 1;
+    /* check OK */
+    if (inner == 1) {
+  return;
+    }
+    /* check NG, and modification */
+    dsfmt->status[DSFMT_N].u[1] ^= 1;
+    return;
 }
 
-// lshift128 ================================================================
-
-inline static void lshift128( w128_t *out, w128_t const *in, int shift )
-{
-  uint64_t th, tl, oh, ol;
-
-  th = ( ( uint64_t )in->u[3] << 32 ) | ( ( uint64_t )in->u[2] );
-  tl = ( ( uint64_t )in->u[1] << 32 ) | ( ( uint64_t )in->u[0] );
-
-  oh = th << ( shift * 8 );
-  ol = tl << ( shift * 8 );
-  oh |= tl >> ( 64 - shift * 8 );
-  out->u[1] = ( uint32_t )( ol >> 32 );
-  out->u[0] = ( uint32_t )ol;
-  out->u[3] = ( uint32_t )( oh >> 32 );
-  out->u[2] = ( uint32_t )oh;
+int idxof(int i) {
+    return i;
 }
 
-// do_recursion =============================================================
+/**
+ * This function initializes the internal state array with a 32-bit
+ * integer seed.
+ * @param dsfmt dsfmt state vector.
+ * @param seed a 32-bit integer used as the seed.
+ * @param mexp caller's mersenne expornent
+ */
+void dsfmt_chk_init_gen_rand(dsfmt_t *dsfmt, uint32_t seed) {
+    int i;
+    uint32_t *psfmt;
 
-inline static void do_recursion( w128_t *r, w128_t *a, w128_t *b, w128_t *c, w128_t *d )
-{
-  w128_t x;
-  w128_t y;
 
-  lshift128( &x, a, SL2 );
-  rshift128( &y, c, SR2 );
-  r->u[0] = a->u[0] ^ x.u[0] ^ ( ( b->u[0] >> SR1 ) & MSK1 ) ^ y.u[0] ^ ( d->u[0] << SL1 );
-  r->u[1] = a->u[1] ^ x.u[1] ^ ( ( b->u[1] >> SR1 ) & MSK2 ) ^ y.u[1] ^ ( d->u[1] << SL1 );
-  r->u[2] = a->u[2] ^ x.u[2] ^ ( ( b->u[2] >> SR1 ) & MSK3 ) ^ y.u[2] ^ ( d->u[2] << SL1 );
-  r->u[3] = a->u[3] ^ x.u[3] ^ ( ( b->u[3] >> SR1 ) & MSK4 ) ^ y.u[3] ^ ( d->u[3] << SL1 );
+    psfmt = &dsfmt->status[0].u32[0];
+    psfmt[idxof(0)] = seed;
+    for (i = 1; i < (DSFMT_N + 1) * 4; i++) {
+        psfmt[idxof(i)] = 1812433253UL
+      * (psfmt[idxof(i - 1)] ^ (psfmt[idxof(i - 1)] >> 30)) + i;
+    }
+    initial_mask(dsfmt);
+    period_certification(dsfmt);
+    dsfmt->idx = DSFMT_N64;
 }
 
-// gen_rand_all =============================================================
+/**
+ * This function generates and returns double precision pseudorandom
+ * number which distributes uniformly in the range [1,2).  This is
+ * the primitive and faster than generating numbers in other ranges.
+ * dsfmt_init_gen_rand() or dsfmt_init_by_array() must be called
+ * before this function.
+ */
+double dsfmt_genrand_close_open(dsfmt_t *dsfmt) {
 
-inline static void gen_rand_all( w128_t*   sfmt )
-{
-  int i;
-  w128_t *r1, *r2;
+    double *psfmt64 = &dsfmt->status[0].d[0];
 
-  r1 = &sfmt[N_sfmt - 2];
-  r2 = &sfmt[N_sfmt - 1];
-  for ( i = 0; i < N_sfmt - POS1; i++ )
-  {
-    do_recursion( &sfmt[i], &sfmt[i], &sfmt[i + POS1], r1, r2 );
-    r1 = r2;
-    r2 = &sfmt[i];
-  }
-  for ( ; i < N_sfmt; i++ )
-  {
-    do_recursion( &sfmt[i], &sfmt[i], &sfmt[i + POS1 - N_sfmt], r1, r2 );
-    r1 = r2;
-    r2 = &sfmt[i];
-  }
-}
-
-// gen_rand32 ===============================================================
-
-inline static uint32_t gen_rand32( rng_sfmt_t* r )
-{
-  if ( r->idx >= N32 )
-  {
-    gen_rand_all( r->sfmt );
-    r->idx = 0;
-  }
-  return r->psfmt32[r->idx++];
-}
-
-// gen_rand_real ============================================================
-
-inline static double gen_rand_real( rng_sfmt_t* r )
-{
-  return gen_rand32( r ) * ( 1.0 / 4294967295.0 );  // divide by 2^32-1
+    if (dsfmt->idx >= DSFMT_N64)
+    {
+      dsfmt_gen_rand_all(dsfmt);
+      dsfmt->idx = 0;
+    }
+    return psfmt64[dsfmt->idx++];
 }
 
 // rng_sfmt_t::rng_sfmt_t ===================================================
@@ -551,24 +535,21 @@ inline static double gen_rand_real( rng_sfmt_t* r )
 rng_sfmt_t::rng_sfmt_t( const std::string& name, bool avg_range, bool avg_gauss ) :
   rng_t( name, avg_range, avg_gauss )
 {
-  psfmt32 = &sfmt[0].u[0];
-  idx = N32;
-
-  init_gen_rand( this, rand() );
+  dsfmt_chk_init_gen_rand( &dsfmt_global_data, rand() );
 }
 
 // rng_sfmt_t::real =========================================================
 
 inline double rng_sfmt_t::real()
 {
-  return gen_rand_real( this );
+  return dsfmt_genrand_close_open( &dsfmt_global_data ) - 1.0;
 }
 
 // rng_sfmt_t::seed =========================================================
 
 void rng_sfmt_t::seed( uint32_t start )
 {
-  init_gen_rand( this, start );
+  //dsfmt_chk_init_gen_rand( &dsfmt_global_data, start );
 }
 
 // ==========================================================================
