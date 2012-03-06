@@ -51,7 +51,7 @@ COPY       = copy
 REMOVE     = del /f
 PATHSEP    = \\
 AR         = ar
-BOOST_PATH = ./
+BOOST_PATH = C:\boost_1_49_0
 OPTS += -I $(BOOST_PATH)
 # MinGW W32
 ifeq (32,${BITS})
