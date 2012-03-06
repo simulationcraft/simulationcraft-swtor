@@ -4,6 +4,8 @@ QT += core gui network webkit
 #CONFIG += paperdoll
 #CONFIG += openssl
 
+BOOST_PATH = "C:/boost_1_49_0"
+
 QMAKE_CXXFLAGS_RELEASE += -DNDEBUG
 
 win32 {
@@ -27,9 +29,8 @@ COMPILER_CHECK_CXX = $$replace(QMAKE_CXX,'.*g\\+\\+'.*,'g++')
 contains(COMPILER_CHECK_CXX,'g++') {
   QMAKE_CXXFLAGS += -ffast-math
 }
-BOOST_PATH = C:\boost_1_49_0
-INCLUDEPATH += engine
-INCLUDEPATH += $$BOOST_PATH
+
+INCLUDEPATH += engine "$$BOOST_PATH"
 DEPENDPATH += engine
 
 HEADERS += engine/simulationcraft.h

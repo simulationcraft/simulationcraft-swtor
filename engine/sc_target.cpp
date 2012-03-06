@@ -411,7 +411,7 @@ void enemy_t::init_base()
   if ( initial_armor <= 0 )
   {
     static const double target_armor_percentage = 0.35;
-    initial_armor = ( 200 * level + 800 ) * ( - target_armor_percentage ) / ( target_armor_percentage - 1.0 );
+    initial_armor = ( 200 * level + 800 ) * target_armor_percentage / ( 1.0 - target_armor_percentage );
   }
   player_t::base_armor = initial_armor;
 
