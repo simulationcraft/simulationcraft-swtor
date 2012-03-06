@@ -407,7 +407,7 @@ struct rng_sfmt_t : public rng_t
 
   virtual int type() const { return RNG_MERSENNE_TWISTER; }
   virtual double real();
-  virtual void seed( uint32_t start=rand() );
+  virtual void seed( uint32_t start=time(NULL) );
 };
 
 inline void do_recursion(w128_t *r, w128_t *a, w128_t * b,w128_t *lung) {

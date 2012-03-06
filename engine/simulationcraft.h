@@ -5236,7 +5236,7 @@ struct rng_t
   timespan_t gauss( timespan_t mean, timespan_t stddev );
   double exgauss( double mean, double stddev, double nu );
   timespan_t exgauss( timespan_t mean, timespan_t stddev, timespan_t nu );
-  virtual void   seed( uint32_t start=rand() );
+  virtual void   seed( uint32_t start=time(NULL) );
   void   report( FILE* );
   static double stdnormal_cdf( double u );
   static double stdnormal_inv( double p );
