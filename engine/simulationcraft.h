@@ -2,8 +2,8 @@
 // Dedmonwakeen's Raid DPS/TPS Simulator.
 // Send questions to natehieter@gmail.com
 // ==========================================================================
-#ifndef __SIMULATIONCRAFT_H
-#define __SIMULATIONCRAFT_H
+#ifndef SIMULATIONCRAFT_H
+#define SIMULATIONCRAFT_H
 
 // Platform Initialization ==================================================
 
@@ -79,8 +79,6 @@ namespace std {using namespace tr1; }
 # define finline                     inline
 # define SC_FINLINE_EXT              __attribute__((always_inline))
 #endif
-
-#include "xs_float/xs_Float.h"
 
 #if __BSD_VISIBLE
 #  include <netinet/in.h>
@@ -2175,48 +2173,10 @@ public:
 
   static int snprintf( char* buf, size_t size, const char* fmt, ... ) PRINTF_ATTRIBUTE( 3,4 );
 
-  static int32_t DoubleToInt( double d ) SC_FINLINE_EXT;
-  static int32_t FloorToInt ( double d ) SC_FINLINE_EXT;
-  static int32_t CeilToInt  ( double d ) SC_FINLINE_EXT;
-  static int32_t RoundToInt ( double d ) SC_FINLINE_EXT;
-  static int32_t CRoundToInt( double d ) SC_FINLINE_EXT;
-
   template <typename T, std::size_t N>
   static std::vector<T> array_to_vector( const T (&array)[N] )
   { return std::vector<T>( array, array + N ); }
 };
-
-finline int32_t util_t::DoubleToInt( double d )
-{
-  union Cast
-  {
-    double d;
-    int32_t l;
-  };
-  volatile Cast c;
-  c.d = d + 6755399441055744.0;
-  return c.l;
-}
-
-finline int32_t util_t::FloorToInt( double d )
-{
-  return xs_FloorToInt( d );
-}
-
-finline int32_t util_t::CeilToInt( double d )
-{
-  return xs_CeilToInt( d );
-}
-
-finline int32_t util_t::RoundToInt( double d )
-{
-  return xs_RoundToInt( d );
-}
-
-finline int32_t util_t::CRoundToInt( double d )
-{
-  return xs_CRoundToInt( d );
-}
 
 // Spell information struct, holding static functions to output spell data in a human readable form
 
@@ -3068,11 +3028,26 @@ struct sim_t : private thread_t
   std::vector<std::string> party_encoding;
   std::vector<std::string> item_db_sources;
 
+
   // Random Number Generation
+private:
+  rng_t* default_rng_;     // == (deterministic_roll ? deterministic_rng : rng )
+  rng_t* rng_list;
+  int deterministic_roll;
+public:
   rng_t* rng;
   rng_t* deterministic_rng;
-  rng_t* rng_list;
-  int smooth_rng, deterministic_roll, average_range, average_gauss;
+  int smooth_rng, average_range, average_gauss;
+
+  rng_t* default_rng() const { return default_rng_; }
+
+  bool      roll( double chance ) const;
+  double    range( double min, double max );
+  double    gauss( double mean, double stddev );
+  timespan_t gauss( timespan_t mean, timespan_t stddev );
+  double    real() const;
+  rng_t*    get_rng( const std::string& name, int type=RNG_DEFAULT );
+
 
   // Timing Wheel Event Management
   event_t** timing_wheel;
@@ -3198,12 +3173,6 @@ struct sim_t : private thread_t
   bool      parse_options( int argc, char** argv );
   bool      time_to_think( timespan_t proc_time );
   timespan_t total_reaction_time ();
-  int       roll( double chance );
-  double    range( double min, double max );
-  double    gauss( double mean, double stddev );
-  timespan_t gauss( timespan_t mean, timespan_t stddev );
-  double    real();
-  rng_t*    get_rng( const std::string& name, int type=RNG_DEFAULT );
   double    iteration_adjust();
   player_t* find_player( const std::string& name );
   player_t* find_player( int index );
@@ -5562,12 +5531,21 @@ struct wait_for_cooldown_t : public wait_action_base_t
   virtual timespan_t execute_time() const;
 };
 
-inline buff_t* buff_t::find( sim_t* s, const std::string& name ) { return find( s -> buff_list, name ); }
-inline buff_t* buff_t::find( player_t* p, const std::string& name ) { return find( p -> buff_list, name ); }
+// actor_pair_t inlines
 
 inline actor_pair_t::actor_pair_t( targetdata_t* td )
   : target( td->target ), source( td->source )
 {}
+
+// buff_t inlines
+
+inline buff_t* buff_t::find( sim_t* s, const std::string& name ) { return find( s -> buff_list, name ); }
+inline buff_t* buff_t::find( player_t* p, const std::string& name ) { return find( p -> buff_list, name ); }
+
+// sim_t inlines
+
+inline double sim_t::real() const                { return default_rng_ -> real(); }
+inline bool   sim_t::roll( double chance ) const { return default_rng_ -> roll( chance ); }
 
 #ifdef WHAT_IF
 
@@ -5834,4 +5812,4 @@ struct ability_t : public action_t
 
 #endif
 
-#endif // __SIMULATIONCRAFT_H
+#endif // SIMULATIONCRAFT_H
