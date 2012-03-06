@@ -339,6 +339,8 @@ double rng_t::stdnormal_inv( double p )
   return ( p > 0.5 ? -u : u );
 };
 
+namespace { // ANONYMOUS ====================================================
+
 // ==========================================================================
 // SFMT Random Number Generator
 // ==========================================================================
@@ -386,7 +388,7 @@ double rng_t::stdnormal_inv( double p )
 
 
 /** 128-bit data structure */
-struct w128_t {
+union w128_t {
   uint64_t u[2];
   uint32_t u32[4];
   double d[2];
@@ -398,19 +400,8 @@ struct dsfmt_t {
     int idx;
 };
 
-struct rng_sfmt_t : public rng_t
+inline void do_recursion( w128_t* r, const w128_t* a, const w128_t* b, w128_t* lung )
 {
-  /** global data */
-  dsfmt_t dsfmt_global_data;
-
-  rng_sfmt_t( const std::string& name, bool avg_range=false, bool avg_gauss=false );
-
-  virtual int type() const { return RNG_MERSENNE_TWISTER; }
-  virtual double real();
-  virtual void seed( uint32_t start=time(NULL) );
-};
-
-inline void do_recursion(w128_t *r, w128_t *a, w128_t * b,w128_t *lung) {
     uint64_t t0, t1, L0, L1;
 
     t0 = a->u[0];
@@ -485,7 +476,7 @@ void period_certification(dsfmt_t *dsfmt) {
     return;
 }
 
-int idxof(int i) {
+inline int idxof(int i) {
     return i;
 }
 
@@ -530,6 +521,22 @@ double dsfmt_genrand_close_open(dsfmt_t *dsfmt) {
     }
     return psfmt64[dsfmt->idx++];
 }
+
+} // ANONYMOUS ==============================================================
+
+class rng_sfmt_t : public rng_t
+{
+private:
+  /** global data */
+  dsfmt_t dsfmt_global_data;
+
+public:
+  rng_sfmt_t( const std::string& name, bool avg_range=false, bool avg_gauss=false );
+
+  virtual int type() const { return RNG_MERSENNE_TWISTER; }
+  virtual double real();
+  virtual void seed( uint32_t start=rand() );
+};
 
 // rng_sfmt_t::rng_sfmt_t ===================================================
 
