@@ -14,6 +14,7 @@
 
 :: Update the qt_dir as necessary
 set qt_dir=C:\QtSDK\Desktop\Qt\4.8.0\mingw
+set mingw_dir=C:\MinGW
 
 :: IMPORTANT NOTE FOR DEBUGGING
 :: This script will ONLY copy the optimized Qt dlls
@@ -32,6 +33,7 @@ del /q QtWebKit4.dll
 del /q QtXmlPatterns4.dll
 del /q mingw*.dll
 del /q libgcc*.dll
+del /q libstdc++*.dll
 
 :: Copying new dlls
 xcopy /I %qt_dir%\plugins\imageformats imageformats
@@ -42,5 +44,6 @@ xcopy %qt_dir%\bin\QtNetwork4.dll
 xcopy %qt_dir%\bin\QtWebKit4.dll
 
 :: Copy MingW runtime DLLs
-xcopy %qt_dir%\bin\mingw*.dll .
-xcopy %qt_dir%\bin\libgcc*.dll .
+xcopy %mingw_dir%\bin\mingw*.dll .
+xcopy %mingw_dir%\bin\libgcc*.dll .
+xcopy %mingw_dir%\bin\libstdc++*.dll .
