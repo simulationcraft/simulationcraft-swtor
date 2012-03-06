@@ -12,6 +12,8 @@
 #include <CoreFoundation/CoreFoundation.h>
 #endif
 
+static const bool ENABLE_MRROBOT_TAB = false;
+
 // ==========================================================================
 // Utilities
 // ==========================================================================
@@ -382,7 +384,7 @@ void SimulationCraftWindow::loadHistory()
 
 void SimulationCraftWindow::saveHistory()
 {
-  cookieJar->save();
+  if ( cookieJar ) cookieJar->save();
   http_t::cache_save();
   QFile file( "simc_history.dat" );
   if ( file.open( QIODevice::WriteOnly ) )
@@ -419,7 +421,8 @@ void SimulationCraftWindow::saveHistory()
 SimulationCraftWindow::SimulationCraftWindow( QWidget *parent )
   : QWidget( parent ),
     historyWidth( 0 ), historyHeight( 0 ), historyMaximized( 1 ),
-    visibleWebView( 0 ), sim( 0 ), simPhase( "%p%" ), simProgress( 100 ), simResults( 0 )
+    mrRobotBuilderView( 0 ), visibleWebView( 0 ), cookieJar( 0 ),
+    sim( 0 ), simPhase( "%p%" ), simProgress( 100 ), simResults( 0 )
 {
   cmdLineText = "";
 #ifndef Q_WS_MAC
@@ -700,14 +703,17 @@ void SimulationCraftWindow::createImportTab()
   importTab = new QTabWidget();
   mainTab->addTab( importTab, "Import" );
 
-  cookieJar = new PersistentCookieJar( "simcqt.cookies" );
-  cookieJar->load();
-  mrRobotBuilderView = new SimulationCraftWebView( this );
-  mrRobotBuilderView->page()->networkAccessManager()->setCookieJar( cookieJar );
-  mrRobotBuilderView->setUrl( QUrl( "http://swtor.askmrrobot.com/character" ) );
-  importTab->addTab( mrRobotBuilderView, "Mr. Robot" );
-
   createBestInSlotTab();
+
+  if ( ENABLE_MRROBOT_TAB )
+  {
+    cookieJar = new PersistentCookieJar( "simcqt.cookies" );
+    cookieJar->load();
+    mrRobotBuilderView = new SimulationCraftWebView( this );
+    mrRobotBuilderView->page()->networkAccessManager()->setCookieJar( cookieJar );
+    mrRobotBuilderView->setUrl( QUrl( "http://swtor.askmrrobot.com/character" ) );
+    importTab->addTab( mrRobotBuilderView, "Mr. Robot" );
+  }
 
   historyList = new QListWidget();
   historyList->setSortingEnabled( true );
@@ -757,11 +763,11 @@ void SimulationCraftWindow::createBestInSlotTab()
 #ifndef Q_WS_MAC
     QDir dir = QString( "profiles/" + tprofileList[ i ] );
 #else
-    CFURLRef fileRef = CFBundleCopyResourceURL( CFBundleGetMainBundle(), 
+    CFURLRef fileRef = CFBundleCopyResourceURL( CFBundleGetMainBundle(),
                                                                            CFSTR( "profiles/" ) + CFStringCreateWithCString( NULL,
-                                                                           tprofileList[ i ].toAscii().constData(), 
-                                                                           kCFStringEncodingUTF8 ), 
-                                                0, 
+                                                                           tprofileList[ i ].toAscii().constData(),
+                                                                           kCFStringEncodingUTF8 ),
+                                                0,
                                                 CFSTR( "profiles" ) );
     QDir dir;
     if ( fileRef )
@@ -1559,7 +1565,7 @@ void SimulationCraftWindow::saveResults()
 void SimulationCraftWindow::closeEvent( QCloseEvent* e )
 {
   saveHistory();
-  mrRobotBuilderView->stop();
+  if ( mrRobotBuilderView ) mrRobotBuilderView->stop();
   QCoreApplication::quit();
   e->accept();
 }
@@ -1584,20 +1590,15 @@ void SimulationCraftWindow::cmdLineReturnPressed()
 {
   if ( mainTab->currentIndex() == TAB_IMPORT )
   {
-    if ( cmdLine->text().count( "askmorrobot.com" ) )
+    if ( mrRobotBuilderView && cmdLine->text().count( "askmorrobot.com" ) )
     {
       mrRobotBuilderView->setUrl( QUrl::fromUserInput( cmdLine->text() ) );
       importTab->setCurrentIndex( TAB_MR_ROBOT );
-    }
-    else
-    {
-      if ( ! sim ) mainButtonClicked( true );
+      return;
     }
   }
-  else
-  {
-    if ( ! sim ) mainButtonClicked( true );
-  }
+
+  if ( ! sim ) mainButtonClicked( true );
 }
 
 void SimulationCraftWindow::mainButtonClicked( bool /* checked */ )
@@ -1761,8 +1762,11 @@ void SimulationCraftWindow::historyDoubleClicked( QListWidgetItem* item )
   QString text = item->text();
   QString url = text.section( ' ', 1, 1, QString::SectionSkipEmpty );
 
-  mrRobotBuilderView->setUrl( QUrl::fromEncoded( url.toAscii() ) );
-  importTab->setCurrentIndex( TAB_MR_ROBOT );
+  if ( mrRobotBuilderView )
+  {
+    mrRobotBuilderView->setUrl( QUrl::fromEncoded( url.toAscii() ) );
+    importTab->setCurrentIndex( TAB_MR_ROBOT );
+  }
 }
 
 void SimulationCraftWindow::bisDoubleClicked( QTreeWidgetItem* item, int /* col */ )
