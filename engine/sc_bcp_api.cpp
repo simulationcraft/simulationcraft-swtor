@@ -260,7 +260,7 @@ parse_player( sim_t*             sim,
   }
 
   std::string name;
-  if ( js_t::get_value( name, profile, "name"  ) )
+  if ( js_t::get_value( name, profile, "Name"  ) )
     player.name = name;
   else
     name = player.name;
@@ -273,14 +273,14 @@ parse_player( sim_t*             sim,
     sim -> current_name = name;
 
   int level;
-  if ( ! js_t::get_value( level, profile, "level"  ) )
+  if ( ! js_t::get_value( level, profile, "Level"  ) )
   {
     sim -> errorf( "BCP API: Unable to extract player level from '%s'.\n", player.url.c_str() );
     return 0;
   }
 
   int cid;
-  if ( ! js_t::get_value( cid, profile, "class" ) )
+  if ( ! js_t::get_value( cid, profile, "AdvancedClass" ) )
   {
     sim -> errorf( "BCP API: Unable to extract player class from '%s'.\n", player.url.c_str() );
     return 0;
@@ -288,7 +288,7 @@ parse_player( sim_t*             sim,
   std::string class_name = util_t::player_type_string( util_t::translate_class_id( cid ) );
 
   int rid;
-  if ( ! js_t::get_value( rid, profile, "race" ) )
+  if ( ! js_t::get_value( rid, profile, "Race" ) )
   {
     sim -> errorf( "BCP API: Unable to extract player race from '%s'.\n", player.url.c_str() );
     return 0;
@@ -306,7 +306,7 @@ parse_player( sim_t*             sim,
   p -> level = level;
   p -> region_str = player.region.empty() ? sim -> default_region_str : player.region;
 
-  if ( ! js_t::get_value( p -> server_str, profile, "realm" ) && ! player.server.empty() )
+  if ( ! js_t::get_value( p -> server_str, profile, "Server" ) && ! player.server.empty() )
     p -> server_str = player.server;
 
   if ( ! player.origin.empty() )
@@ -343,10 +343,7 @@ parse_player( sim_t*             sim,
   if ( ! parse_talents( p, build ) )
     return 0;
 
-  if ( ! parse_glyphs( p, build ) )
-    return 0;
-
-  if ( ! parse_items( p, js_t::get_child( profile, "items" ) ) )
+  if ( ! parse_items( p, js_t::get_child( profile, "Gear" ) ) )
     return 0;
 
   if ( ! p -> server_str.empty() )
