@@ -366,7 +366,9 @@ namespace { // ANONYMOUS ====================================================
 
 #define DSFMT_N64 (DSFMT_N * 2)
 
+#ifndef UINT64_C
 #define UINT64_C(v) (v ## ULL)
+#endif
 
 #define DSFMT_LOW_MASK  UINT64_C(0x000FFFFFFFFFFFFF)
 #define DSFMT_HIGH_CONST UINT64_C(0x3FF0000000000000)

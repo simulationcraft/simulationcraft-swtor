@@ -399,6 +399,15 @@ player_t* download_player( sim_t*             sim,
   // Check form validity of the provided profile id before even starting to access the profile
   if ( id.empty() ) return 0;
 
+  if ( id != "test")
+  {
+	boost::uuids::string_generator()( id );
+	/* Catch exception boost::uuids::string_generator::throw_invalid() and output something nicer
+	 * sim -> errorf( "MrRobot id '%s' is not a valid universally unique identifier.\n", url.c_str() );
+     * return 0;
+	 */
+  }
+
   sim -> current_name = id;
   sim -> current_slot = 0;
 
