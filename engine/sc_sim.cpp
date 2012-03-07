@@ -299,18 +299,16 @@ static bool parse_cache( sim_t*             /* sim */,
 // parse_mrrobot =============================================================
 
 static bool parse_mrrobot( sim_t*             sim,
-                          const std::string& name,
-                          const std::string& value )
+                           const std::string& name,
+                           const std::string& value )
 {
-  if ( name == "mrrobot" )
-  {
-    sim -> active_player = bcp_api::download_player( sim, value, "active" );
-    if ( ! sim -> active_player ) return false;
+  assert( name == "mrrobot" ); ( void )name;
 
+  sim -> active_player = mrrobot::download_player( sim, value );
+  if ( ! sim -> active_player )
+    return false;
+  else
     return true;
-  }
-
-  return false;
 }
 
 

@@ -361,8 +361,24 @@ int util_t::translate_class_str( const std::string& s )
   std::string fmt_s( s );
   armory_t::format( fmt_s );
 
-  if      ( fmt_s == "jedi_sage" || fmt_s == "sage"         ) return JEDI_SAGE;
-  else if ( fmt_s == "sith_sorcerer" || fmt_s == "sorceror" ) return SITH_SORCERER;
+  if      ( fmt_s == "jedi_sage"       || fmt_s == "sage"       ) return JEDI_SAGE;
+  else if ( fmt_s == "jedi_shadow"     || fmt_s == "shadow"     ) return JEDI_SHADOW;
+  else if ( fmt_s == "jedi_sentinel"   || fmt_s == "sentinel"   ) return JEDI_SENTINEL;
+  else if ( fmt_s == "jedi_guardian"   || fmt_s == "guardian"   ) return JEDI_GUARDIAN;
+  else if ( fmt_s == "commando"                                 ) return T_COMMANDO;
+  else if ( fmt_s == "vanguard"                                 ) return T_VANGUARD;
+  else if ( fmt_s == "scoundrel"                                ) return S_SCOUNDREL;
+  else if ( fmt_s == "gunslinger"                               ) return S_GUNSLINGER;
+
+  else if ( fmt_s == "sith_sorcerer"   || fmt_s == "sorceror"   ) return SITH_SORCERER;
+  else if ( fmt_s == "sith_assassin"   || fmt_s == "assassin"   ) return SITH_ASSASSIN;
+  else if ( fmt_s == "sith_marauder"   || fmt_s == "marauder"   ) return SITH_MARAUDER;
+  else if ( fmt_s == "sith_juggernaut" || fmt_s == "juggernaut" ) return SITH_JUGGERNAUT;
+  else if ( fmt_s == "mercenary"                                ) return BH_MERCENARY;
+  else if ( fmt_s == "powertech"                                ) return BH_POWERTECH;
+  else if ( fmt_s == "operative"                                ) return IA_OPERATIVE;
+  else if ( fmt_s == "sniper"                                   ) return IA_SNIPER;
+
   else                                                        return PLAYER_NONE;
 }
 

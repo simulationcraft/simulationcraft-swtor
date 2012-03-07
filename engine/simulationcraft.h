@@ -4590,45 +4590,6 @@ struct mmo_champion_t
   static int  parse_gem( item_t& item, const std::string& gem_id,
                          cache::behavior_t b=cache::items() );
 };
-#endif
-
-
-// Blizzard Community Platform API ==========================================
-
-namespace bcp_api
-{
-bool download_guild( sim_t* sim,
-                     const std::string& region,
-                     const std::string& server,
-                     const std::string& name,
-                     const std::vector<int>& ranks,
-                     int player_type = PLAYER_NONE,
-                     int max_rank=0,
-                     cache::behavior_t b=cache::players() );
-
-player_t* download_player( sim_t*,
-                           const std::string& id,
-                           const std::string& talents=std::string( "active" ),
-                           cache::behavior_t b=cache::players() );
-
-bool download_item( item_t&, const std::string& item_id, cache::behavior_t b=cache::items() );
-
-bool download_slot( item_t& item,
-                    const std::string& item_id,
-                    const std::string& enchant_id,
-                    const std::string& addon_id,
-                    const std::string& reforge_id,
-                    const std::string& rsuffix_id,
-                    const std::string gem_ids[ 3 ],
-                    cache::behavior_t b=cache::items() );
-}
-
-#if 0
-// Wowreforge ===============================================================
-
-namespace wowreforge {
-player_t* download_player( sim_t* sim, const std::string& id, cache::behavior_t b=cache::players() );
-}
 #endif // 0
 
 // base36 ===================================================================
@@ -4671,6 +4632,8 @@ bool parse_talents( player_t& player, const std::string& encoding );
 
 namespace mrrobot {
 bool parse_talents( player_t& player, const std::string& encoding );
+player_t* download_player( sim_t* sim, const std::string& profile_id,
+                           cache::behavior_t=cache::players() );
 }
 
 // Torhead ==================================================================

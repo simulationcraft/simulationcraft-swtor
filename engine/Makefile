@@ -74,7 +74,6 @@ SRC = \
 	sc_action.cpp \
 	sc_armory.cpp \
 	sc_buff.cpp \
-	sc_bcp_api.cpp \
 	sc_chart.cpp \
 	sc_commando_mercenary.cpp \
 	sc_consumable.cpp \
