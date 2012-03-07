@@ -1167,9 +1167,19 @@ static void print_html_stats ( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> buffed_armor,
+             a -> buffed.armor,
              a -> composite_armor(),
              ( a -> stats.armor + a -> stats.bonus_armor ) );
+
+    fprintf( file,
+             "\t\t\t\t\t\t\t\t\t<tr>\n"
+             "\t\t\t\t\t\t\t\t\t\t<th class=\"left\">Armor Penetration Debuff</th>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f%%</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f%%</td>\n"
+             "\t\t\t\t\t\t\t\t\t\t<td class=\"right\"></td>\n"
+             "\t\t\t\t\t\t\t\t\t</tr>\n",
+             a -> buffed.armor_penetration_debuff * 100.0,
+             a -> armor_penetration_debuff() * 100.0 );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr class=\"odd\">\n"

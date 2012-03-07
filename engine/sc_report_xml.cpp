@@ -361,7 +361,7 @@ void print_xml_player_stats( xml_writer_t & writer, player_t * p )
                               100 * p -> force_crit_chance(), p -> stats.crit_rating, 100 * p -> buffed.force_crit );
   // FIXME: Tech
   print_xml_player_attribute( writer, "armor",
-                              p -> composite_armor(), ( p -> stats.armor + p -> stats.bonus_armor ), p -> buffed_armor );
+                              p -> composite_armor(), ( p -> stats.armor + p -> stats.bonus_armor ), p -> buffed.armor );
 
   writer.begin_tag( "resource" );
   writer.print_attribute( "name", "health" );

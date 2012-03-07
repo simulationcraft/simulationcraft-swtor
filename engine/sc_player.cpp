@@ -260,7 +260,7 @@ player_t::player_t( sim_t*             s,
 
   // Defense Mechanics
   target_auto_attack( 0 ),
-  base_armor( 0 ),         initial_armor( 0 ),       armor( 0 ),       buffed_armor( 0 ),
+  base_armor( 0 ),         initial_armor( 0 ),       armor( 0 ),
   base_bonus_armor( 0 ),   initial_bonus_armor( 0 ), bonus_armor( 0 ),
   armor_multiplier( 1.0 ), initial_armor_multiplier( 1.0 ),
 
@@ -3866,7 +3866,9 @@ struct snapshot_stats_t : public action_t
     p -> buffed.tech_crit         = p -> tech_crit_chance();
     p -> buffed.tech_avoidance    = p -> tech_avoidance();
 
-    p -> buffed_armor       = p -> composite_armor();
+    p -> buffed.armor       = p -> composite_armor();
+    p -> buffed.armor_penetration_debuff = p -> armor_penetration_debuff();
+
     p -> buffed.shield_chance = p -> shield_chance();
     p -> buffed.shield_absorb = p -> shield_absorb();
 

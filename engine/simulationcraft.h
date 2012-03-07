@@ -2880,7 +2880,7 @@ struct player_t : public noncopyable
 
   // Defense Mechanics
   event_t* target_auto_attack;
-  double base_armor,       initial_armor,       armor,       buffed_armor;
+  double base_armor,       initial_armor,       armor;
   double base_bonus_armor, initial_bonus_armor, bonus_armor;
   double armor_multiplier, initial_armor_multiplier;
 
@@ -2983,6 +2983,8 @@ struct player_t : public noncopyable
     double melee_crit, range_crit, force_crit, tech_crit;
     double melee_avoidance, range_avoidance, force_avoidance, tech_avoidance;
     double melee_damage_bonus, range_damage_bonus, force_damage_bonus, tech_damage_bonus, force_healing_bonus, tech_healing_bonus;
+
+    double armor, armor_penetration_debuff;
   } buffed;
 
   buff_t*   buff_list;

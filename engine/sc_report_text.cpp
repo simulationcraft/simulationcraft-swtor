@@ -374,7 +374,7 @@ static void print_text_defense_stats( FILE* file, player_t* p )
 {
   util_t::fprintf( file,
                    "  Defense Stats:  armor=%.0f|%.0f(%.0f)  rating=%.0f  melee=%.2f%%|%.2f%%  range=%.2f%%|%.2f%%  force=%.2f%%|%.2f%% tech=%.2f%%|%.2f%%  shield=%.2f%%|%.2f%%(%.0f)  absorb=%.2f%%|%.2f%%(%.0f)\n",
-                   p -> buffed_armor,       p -> composite_armor(), ( p -> stats.armor + p -> stats.bonus_armor ),
+                   p -> buffed.armor,       p -> composite_armor(), ( p -> stats.armor + p -> stats.bonus_armor ),
                    p -> stats.defense_rating,
                    100 * p -> buffed.melee_avoidance, 100 * p -> melee_avoidance(),
                    100 * p -> buffed.range_avoidance, 100 * p -> range_avoidance(),
