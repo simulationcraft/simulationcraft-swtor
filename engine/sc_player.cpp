@@ -328,30 +328,30 @@ player_t::player_t( sim_t*             s,
 
   if ( is_pet() ) skill = 1.0;
 
-  fill( attribute, 0 );
-  fill( attribute_base, 0 );
-  fill( attribute_initial, 0 );
+  boost::fill( attribute, 0 );
+  boost::fill( attribute_base, 0 );
+  boost::fill( attribute_initial, 0 );
 
-  fill( attribute_multiplier, 1 );
-  fill( attribute_multiplier_initial, 1 );
+  boost::fill( attribute_multiplier, 1 );
+  boost::fill( attribute_multiplier_initial, 1 );
 
-  fill( infinite_resource, false );
+  boost::fill( infinite_resource, false );
   infinite_resource[ RESOURCE_HEALTH ] = true;
 
-  fill( resource_reduction, 0 );
-  fill( initial_resource_reduction, 0 );
+  boost::fill( resource_reduction, 0 );
+  boost::fill( initial_resource_reduction, 0 );
 
-  fill( resource_base, 0 );
-  fill( resource_initial, 0 );
-  fill( resource_max, 0 );
-  fill( resource_current, 0 );
-  fill( resource_lost, 0 );
-  fill( resource_gained, 0 );
+  boost::fill( resource_base, 0 );
+  boost::fill( resource_initial, 0 );
+  boost::fill( resource_max, 0 );
+  boost::fill( resource_current, 0 );
+  boost::fill( resource_lost, 0 );
+  boost::fill( resource_gained, 0 );
 
-  fill( profession, 0 );
+  boost::fill( profession, 0 );
 
-  fill( scales_with, false );
-  fill( over_cap, 0 );
+  boost::fill( scales_with, false );
+  boost::fill( over_cap, 0 );
 
   items.resize( SLOT_MAX );
   for ( int i=0; i < SLOT_MAX; i++ )
@@ -367,8 +367,8 @@ player_t::player_t( sim_t*             s,
 
   if ( ! sim -> active_files.empty() ) origin_str = sim -> active_files.top();
 
-  fill( talent_tab_points, 0 );
-  fill( tree_type, TREE_NONE );
+  boost::fill( talent_tab_points, 0 );
+  boost::fill( tree_type, TREE_NONE );
 
   if ( reaction_stddev == timespan_t::zero ) reaction_stddev = reaction_mean * 0.25;
 
@@ -1243,8 +1243,8 @@ void player_t::init_rng()
 
 void player_t::init_stats()
 {
-  fill( resource_lost, 0 );
-  fill( resource_gained, 0 );
+  boost::fill( resource_lost, 0 );
+  boost::fill( resource_gained, 0 );
 
   fight_length.reserve( sim -> iterations );
   waiting_time.reserve( sim -> iterations );

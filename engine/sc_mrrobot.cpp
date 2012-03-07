@@ -401,11 +401,11 @@ player_t* download_player( sim_t*             sim,
 
   if ( id != "test")
   {
-	boost::uuids::string_generator()( id );
-	/* Catch exception boost::uuids::string_generator::throw_invalid() and output something nicer
-	 * sim -> errorf( "MrRobot id '%s' is not a valid universally unique identifier.\n", url.c_str() );
+        boost::uuids::string_generator()( id );
+        /* Catch exception boost::uuids::string_generator::throw_invalid() and output something nicer
+         * sim -> errorf( "MrRobot id '%s' is not a valid universally unique identifier.\n", url.c_str() );
      * return 0;
-	 */
+         */
   }
 
   sim -> current_name = id;
@@ -580,7 +580,7 @@ bool parse_talents( player_t& p, const std::string& talent_string )
   // in base 36.
 
   int encoding[ MAX_TALENT_SLOTS ];
-  fill( encoding, 0 );
+  boost::fill( encoding, 0 );
 
   std::vector<std::string> tree_strings;
   util_t::string_split( tree_strings, talent_string, "-" );

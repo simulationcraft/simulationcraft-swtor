@@ -1339,7 +1339,7 @@ void sim_t::analyze_player( player_t* p )
 
 
   // Actor Lists ============================================================
-  if (  ! p -> quiet && ! p -> is_enemy() && ! p -> is_add() && ! ( p -> is_pet() && report_pets_separately ) )
+  if ( ! p -> quiet && ! p -> is_enemy() && ! p -> is_add() && ! ( p -> is_pet() && report_pets_separately ) )
   {
     players_by_dps.push_back( p );
     players_by_hps.push_back( p );

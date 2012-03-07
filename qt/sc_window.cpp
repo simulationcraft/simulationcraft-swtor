@@ -736,7 +736,7 @@ void SimulationCraftWindow::createBestInSlotTab()
   importTab->addTab( bisTree, "BiS" );
 
   QTreeWidgetItem* top[ PLAYER_MAX ];
-  fill( top, 0 );
+  boost::fill( top, nullptr );
 
   // Scan all subfolders in /profiles/ and create a list
 #ifndef Q_WS_MAC
