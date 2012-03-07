@@ -662,7 +662,7 @@ sim_t::sim_t( sim_t* p, int index ) :
 
   // Initialize the default item database source order
   static const char* const dbsources[] = { "local", "bcpapi", "wowhead", "mmoc", "armory", "ptrhead" };
-  item_db_sources.assign( range::begin( dbsources ), range::end( dbsources ) );
+  item_db_sources.assign( boost::begin( dbsources ), boost::end( dbsources ) );
 
   scaling = new scaling_t( this );
   plot    = new    plot_t( this );
@@ -734,8 +734,8 @@ sim_t::~sim_t()
   delete plot;
   delete reforge_plot;
 
-  range::dispose( raid_events );
-  range::dispose( children );
+  dispose( raid_events );
+  dispose( children );
 
   delete[] timing_wheel;
 }
@@ -1320,7 +1320,7 @@ void sim_t::analyze_player( player_t* p )
       s -> timeline_aps.clear();
       s -> timeline_aps.reserve( max_buckets );
       s -> timeline_amount.resize( max_buckets );
-      range::sliding_window_average<10>( s -> timeline_amount, std::back_inserter( s -> timeline_aps ) );
+      sliding_window_average<10>( s -> timeline_amount, std::back_inserter( s -> timeline_aps ) );
       assert( s -> timeline_aps.size() == ( std::size_t ) max_buckets );
 
       chart_t::timeline( s -> timeline_aps_chart, p, s -> timeline_aps, s -> name_str + " APS", s -> aps );
@@ -1404,8 +1404,8 @@ void sim_t::analyze_player( player_t* p )
   }
 
   p -> timeline_dps.reserve( max_buckets );
-  range::sliding_window_average<10>( p -> timeline_dmg,
-                                     std::back_inserter( p -> timeline_dps ) );
+  sliding_window_average<10>( p -> timeline_dmg,
+                              std::back_inserter( p -> timeline_dps ) );
   assert( p -> timeline_dps.size() == ( std::size_t ) max_buckets );
 
   // Charts =================================================================
@@ -1492,10 +1492,10 @@ void sim_t::analyze()
     analyze_player( actor_list[i] );
 
 
-  range::sort( players_by_dps, compare_dps() );
-  range::sort( players_by_hps, compare_hps() );
-  range::sort( players_by_name, compare_name() );
-  range::sort( targets_by_name, compare_name() );
+  boost::sort( players_by_dps, compare_dps() );
+  boost::sort( players_by_hps, compare_hps() );
+  boost::sort( players_by_name, compare_name() );
+  boost::sort( targets_by_name, compare_name() );
 
   chart_t::raid_aps     ( dps_charts,     this, players_by_dps, true );
   chart_t::raid_aps     ( hps_charts,     this, players_by_hps, false );
@@ -1555,7 +1555,7 @@ void sim_t::merge( sim_t& other_sim )
 
   if ( max_events_remaining < other_sim.max_events_remaining ) max_events_remaining = other_sim.max_events_remaining;
 
-  range::copy( other_sim.iteration_timeline, std::back_inserter( iteration_timeline ) );
+  boost::copy( other_sim.iteration_timeline, std::back_inserter( iteration_timeline ) );
 
   for ( buff_t* b = buff_list; b; b = b -> next )
   {
