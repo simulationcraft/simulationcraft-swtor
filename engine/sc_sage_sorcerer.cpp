@@ -686,7 +686,7 @@ struct mind_crush_t : public jedi_sage_spell_t
     dot_spell( new mind_crush_dot_t( p, n + "_dot" ) )
   {
     static const int ranks[] = { 14, 19, 30, 41, 50 };
-    range::copy( ranks, std::back_inserter( rank_level_list ) );
+    rank_level_list = util_t::array_to_vector( ranks );
 
     parse_options( 0, options_str );
 

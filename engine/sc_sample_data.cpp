@@ -188,7 +188,7 @@ void sample_data_t::sort()
 {
   if ( ! is_sorted )
   {
-    range::sort( data );
+    boost::sort( data );
     is_sorted = true;
   }
 }

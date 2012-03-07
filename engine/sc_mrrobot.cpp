@@ -571,7 +571,7 @@ bool parse_talents( player_t& p, const std::string& talent_string )
   // in base 36.
 
   int encoding[ MAX_TALENT_SLOTS ];
-  range::fill( encoding, 0 );
+  fill( encoding, 0 );
 
   std::vector<std::string> tree_strings;
   util_t::string_split( tree_strings, talent_string, "-" );

@@ -328,30 +328,30 @@ player_t::player_t( sim_t*             s,
 
   if ( is_pet() ) skill = 1.0;
 
-  range::fill( attribute, 0 );
-  range::fill( attribute_base, 0 );
-  range::fill( attribute_initial, 0 );
+  fill( attribute, 0 );
+  fill( attribute_base, 0 );
+  fill( attribute_initial, 0 );
 
-  range::fill( attribute_multiplier, 1 );
-  range::fill( attribute_multiplier_initial, 1 );
+  fill( attribute_multiplier, 1 );
+  fill( attribute_multiplier_initial, 1 );
 
-  range::fill( infinite_resource, false );
+  fill( infinite_resource, false );
   infinite_resource[ RESOURCE_HEALTH ] = true;
 
-  range::fill( resource_reduction, 0 );
-  range::fill( initial_resource_reduction, 0 );
+  fill( resource_reduction, 0 );
+  fill( initial_resource_reduction, 0 );
 
-  range::fill( resource_base, 0 );
-  range::fill( resource_initial, 0 );
-  range::fill( resource_max, 0 );
-  range::fill( resource_current, 0 );
-  range::fill( resource_lost, 0 );
-  range::fill( resource_gained, 0 );
+  fill( resource_base, 0 );
+  fill( resource_initial, 0 );
+  fill( resource_max, 0 );
+  fill( resource_current, 0 );
+  fill( resource_lost, 0 );
+  fill( resource_gained, 0 );
 
-  range::fill( profession, 0 );
+  fill( profession, 0 );
 
-  range::fill( scales_with, false );
-  range::fill( over_cap, 0 );
+  fill( scales_with, false );
+  fill( over_cap, 0 );
 
   items.resize( SLOT_MAX );
   for ( int i=0; i < SLOT_MAX; i++ )
@@ -367,8 +367,8 @@ player_t::player_t( sim_t*             s,
 
   if ( ! sim -> active_files.empty() ) origin_str = sim -> active_files.top();
 
-  range::fill( talent_tab_points, 0 );
-  range::fill( tree_type, TREE_NONE );
+  fill( talent_tab_points, 0 );
+  fill( tree_type, TREE_NONE );
 
   if ( reaction_stddev == timespan_t::zero ) reaction_stddev = reaction_mean * 0.25;
 
@@ -382,71 +382,30 @@ player_t::player_t( sim_t*             s,
 
 player_t::~player_t()
 {
-  range::dispose( targetdata );
-
-  while ( action_t* a = action_list )
-  {
-    action_list = a -> next;
-    delete a;
-  }
-  while ( proc_t* p = proc_list )
-  {
-    proc_list = p -> next;
-    delete p;
-  }
-  while ( gain_t* g = gain_list )
-  {
-    gain_list = g -> next;
-    delete g;
-  }
-  while ( stats_t* s = stats_list )
-  {
-    stats_list = s -> next;
-    delete s;
-  }
-  while ( uptime_t* u = uptime_list )
-  {
-    uptime_list = u -> next;
-    delete u;
-  }
-  while ( benefit_t* u = benefit_list )
-  {
-    benefit_list = u -> next;
-    delete u;
-  }
-  while ( rng_t* r = rng_list )
-  {
-    rng_list = r -> next;
-    delete r;
-  }
-  while ( dot_t* d = dot_list )
-  {
-    dot_list = d -> next;
-    delete d;
-  }
-  while ( buff_t* d = buff_list )
-  {
-    buff_list = d -> next;
-    delete d;
-  }
-  while ( cooldown_t* d = cooldown_list )
-  {
-    cooldown_list = d -> next;
-    delete d;
-  }
+  dispose( targetdata );
+  dispose_list( action_list );
+  dispose_list( proc_list );
+  dispose_list( gain_list );
+  dispose_list( stats_list );
+  dispose_list( uptime_list );
+  dispose_list( benefit_list );
+  dispose_list( rng_list );
+  dispose_list( dot_list );
+  dispose_list( buff_list );
+  dispose_list( cooldown_list );
 
   if ( false )
   {
     // FIXME! This cannot be done until we use refcounts.
     // FIXME! I see the same callback pointer being registered multiple times.
-    range::dispose( all_callbacks );
+    dispose( boost::unique<boost::return_begin_found>( boost::sort( all_callbacks ) ) );
   }
 
   for ( size_t i=0; i < sizeof_array( talent_trees ); i++ )
-    range::dispose( talent_trees[ i ] );
+    dispose( talent_trees[ i ] );
 
-  //range::dispose( glyphs );
-  //range::dispose( spell_list );
+  //dispose( glyphs );
+  //dispose( spell_list );
 }
 
 // player_t::init ===========================================================
@@ -1284,8 +1243,8 @@ void player_t::init_rng()
 
 void player_t::init_stats()
 {
-  range::fill( resource_lost, 0 );
-  range::fill( resource_gained, 0 );
+  fill( resource_lost, 0 );
+  fill( resource_gained, 0 );
 
   fight_length.reserve( sim -> iterations );
   waiting_time.reserve( sim -> iterations );
@@ -2005,9 +1964,9 @@ void player_t::reset()
   recalculate_shield_from_rating();
   recalculate_absorb_from_rating();
 
-  range::copy( attribute_initial, attribute );
-  range::copy( attribute_multiplier_initial, attribute_multiplier );
-  range::copy( initial_resource_reduction, resource_reduction );
+  boost::copy( attribute_initial, attribute );
+  boost::copy( attribute_multiplier_initial, attribute_multiplier );
+  boost::copy( initial_resource_reduction, resource_reduction );
 
   armor           = initial_armor;
   bonus_armor     = initial_bonus_armor;
@@ -3883,7 +3842,7 @@ struct snapshot_stats_t : public action_t
     for ( int i=ATTRIBUTE_NONE; i < ATTRIBUTE_MAX; ++i )
       p -> buffed.attribute[ i ] = floor( p -> get_attribute( static_cast<attribute_type>( i ) ) );
 
-    range::copy( p -> resource_max, p -> buffed.resource );
+    boost::copy( p -> resource_max, p -> buffed.resource );
 
     p -> buffed.power             = p -> composite_power();
     p -> buffed.force_power       = p -> composite_force_power();

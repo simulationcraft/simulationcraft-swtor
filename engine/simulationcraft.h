@@ -54,7 +54,7 @@
 #include <vector>
 
 // Boost includes
-#include <boost/range.hpp>
+#include <boost/range/algorithm.hpp>
 
 #if _MSC_VER || __cplusplus >= 201103L
 #include <unordered_map>
@@ -594,21 +594,20 @@ struct delete_disposer_t
   void operator () ( T* t ) const { delete t; }
 };
 
-template <typename T>
-struct iterator_type
-{ typedef typename T::iterator type; };
-
-template <typename T>
-struct iterator_type<const T>
-{ typedef typename T::const_iterator type; };
-
 // Generic algorithms =======================================================
 
 // Wrappers for std::fill, std::fill_n, and std::find that perform any type
 // conversions for t at the callsite instead of per assignment in the loop body.
+// E.g., fill( [container of pointers or pair of iterators to pointers], 0 )
+// knows that 0 is a pointer, std::fill will think it's an integer and explode.
+// This problem disappears in C++11 with nullptr.
 template <typename I>
 inline void fill( I first, I last, typename std::iterator_traits<I>::value_type const& t )
 { std::fill( first, last, t ); }
+
+template <typename Range>
+inline Range& fill( Range& r, typename boost::range_value<Range>::type const& t )
+{ return boost::fill( r, t ); }
 
 template <typename I>
 inline void fill_n( I first, typename std::iterator_traits<I>::difference_type n,
@@ -619,16 +618,48 @@ template <typename I>
 inline I find( I first, I last, typename std::iterator_traits<I>::value_type const& t )
 { return std::find( first, last, t ); }
 
+template <typename Range>
+inline typename boost::range_iterator<Range>::type
+find( Range& r, typename boost::range_value<Range>::type const& t )
+{ return boost::find( r, t ); }
+
 template <typename I, typename D>
 void dispose( I first, I last, D disposer )
 {
   while ( first != last )
-    disposer( *first++ );
+  {
+    I tmp = first;
+    ++first;
+    disposer( *tmp );
+  }
 }
 
 template <typename I>
 inline void dispose( I first, I last )
 { dispose( first, last, delete_disposer_t() ); }
+
+template <typename Range, typename D>
+inline void dispose( Range& r, D disposer )
+{ dispose( boost::begin( r ), boost::end( r ), disposer ); }
+
+template <typename Range>
+inline void dispose( const Range& r )
+{ dispose( r, delete_disposer_t() ); }
+
+template <typename T, typename D>
+void dispose_list( T* t, D disposer )
+{
+  while ( t )
+  {
+    T* tmp = t;
+    t = t -> next;
+    disposer( tmp );
+  }
+}
+
+template <typename T>
+inline void dispose_list( T* t )
+{ dispose_list( t, delete_disposer_t() ); }
 
 template <unsigned HW, typename Fwd, typename Out>
 void sliding_window_average( Fwd first, Fwd last, Out out )
@@ -676,153 +707,9 @@ void sliding_window_average( Fwd first, Fwd last, Out out )
   }
 }
 
-// Machinery for range-based generic algorithms =============================
-
-namespace range { // ========================================================
-template <typename T>
-struct traits
-{
-  typedef typename iterator_type<T>::type iterator;
-  static iterator begin( T& t ) { return t.begin(); }
-  static iterator end( T& t ) { return t.end(); }
-};
-
-template <typename T, size_t N>
-struct traits<T[N]>
-{
-  typedef T* iterator;
-  static iterator begin( T ( &t )[N] ) { return &t[0]; }
-  static iterator end( T ( &t )[N] ) { return begin( t ) + N; }
-};
-
-template <typename T>
-struct traits< std::pair<T,T> >
-{
-  typedef T iterator;
-  static iterator begin( const std::pair<T,T>& t ) { return t.first; }
-  static iterator end( const std::pair<T,T>& t ) { return t.second; }
-};
-
-template <typename T>
-struct traits< const std::pair<T,T> >
-{
-  typedef T iterator;
-  static iterator begin( const std::pair<T,T>& t ) { return t.first; }
-  static iterator end( const std::pair<T,T>& t ) { return t.second; }
-};
-
-template <typename T>
-struct value_type
-{
-  typedef typename std::iterator_traits<typename traits<T>::iterator>::value_type type;
-};
-
-template <typename T>
-inline typename traits<T>::iterator begin( T& t )
-{ return traits<T>::begin( t ); }
-
-template <typename T>
-inline typename traits<const T>::iterator cbegin( const T& t )
-{ return range::begin( t ); }
-
-template <typename T>
-inline typename traits<T>::iterator end( T& t )
-{ return traits<T>::end( t ); }
-
-template <typename T>
-inline typename traits<const T>::iterator cend( const T& t )
-{ return range::end( t ); }
-
-// Range-based generic algorithms ===========================================
-
-template <typename Range, typename Out>
-inline Out copy( const Range& r, Out o )
-{ return std::copy( range::begin( r ), range::end( r ), o ); }
-
-template <typename Range, typename D>
-inline Range& dispose( Range& r, D disposer )
-{ dispose( range::begin( r ), range::end( r ), disposer ); return r; }
-
-template <typename Range>
-inline Range& dispose( Range& r )
-{ return dispose( r, delete_disposer_t() ); }
-
-template <typename Range>
-inline Range& fill( Range& r, typename range::value_type<Range>::type const& t )
-{ std::fill( range::begin( r ), range::end( r ), t ); return r; }
-
-template <typename Range>
-inline typename range::traits<Range>::iterator
-find( Range& r, typename range::value_type<Range>::type const& t )
-{ return std::find( range::begin( r ), range::end( r ), t ); }
-
-template <typename Range, typename F>
-inline F for_each( Range& r, F f )
-{ return std::for_each( range::begin( r ), range::end( r ), f ); }
-
-template <typename Range1, typename Range2, typename Out>
-inline Out set_difference( const Range1& left, const Range2& right, Out o )
-{
-  return std::set_difference( range::begin( left ), range::end( left ),
-                              range::begin( right ), range::end( right ), o );
-}
-
-template <typename Range1, typename Range2, typename Out, typename Compare>
-inline Out set_difference( const Range1& left, const Range2& right, Out o, Compare c )
-{
-  return std::set_difference( range::begin( left ), range::end( left ),
-                              range::begin( right ), range::end( right ), o, c );
-}
-
-template <typename Range1, typename Range2, typename Out>
-inline Out set_intersection( const Range1& left, const Range2& right, Out o )
-{
-  return std::set_intersection( range::begin( left ), range::end( left ),
-                                range::begin( right ), range::end( right ), o );
-}
-
-template <typename Range1, typename Range2, typename Out, typename Compare>
-inline Out set_intersection( const Range1& left, const Range2& right, Out o, Compare c )
-{
-  return std::set_intersection( range::begin( left ), range::end( left ),
-                                range::begin( right ), range::end( right ), o, c );
-}
-
-template <typename Range1, typename Range2, typename Out>
-inline Out set_union( const Range1& left, const Range2& right, Out o )
-{
-  return std::set_union( range::begin( left ), range::end( left ),
-                         range::begin( right ), range::end( right ), o );
-}
-
-template <typename Range1, typename Range2, typename Out, typename Compare>
-inline Out set_union( const Range1& left, const Range2& right, Out o, Compare c )
-{
-  return std::set_union( range::begin( left ), range::end( left ),
-                         range::begin( right ), range::end( right ), o, c );
-}
-
 template <unsigned HW, typename Range, typename Out>
 inline Range& sliding_window_average( Range& r, Out out )
-{ ::sliding_window_average<HW>( range::begin( r ), range::end( r ), out ); return r; }
-
-template <typename Range>
-inline Range& sort( Range& r )
-{ std::sort( range::begin( r ), range::end( r ) ); return r; }
-
-template <typename Range, typename Comp>
-inline Range& sort( Range& r, Comp c )
-{ std::sort( range::begin( r ), range::end( r ), c ); return r; }
-
-template <typename Range>
-inline typename range::traits<Range>::iterator unique( Range& r )
-{ return std::unique( range::begin( r ), range::end( r ) ); }
-
-template <typename Range, typename Comp>
-inline typename range::traits<Range>::iterator unique( Range& r, Comp c )
-{ return std::unique( range::begin( r ), range::end( r ), c ); }
-
-} // namespace range ========================================================
+{ sliding_window_average<HW>( boost::begin( r ), boost::end( r ), out ); return r; }
 
 struct timespan_t
 {

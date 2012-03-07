@@ -512,10 +512,9 @@ void scaling_t::analyze()
         if ( s > 0 ) p -> scaling_stats.push_back( i );
       }
     }
-    range::sort( p -> scaling_stats, compare_scale_factors( p ) );
 
+    boost::sort( p -> scaling_stats, compare_scale_factors( p ) );
   }
-
 }
 
 // scaling_t::create_options ================================================
