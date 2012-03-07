@@ -282,7 +282,7 @@ void action_t::init_action_t_()
   while ( *last ) last = &( ( *last ) -> next );
   *last = this;
 
-  fill( rng, 0 );
+  boost::fill( rng, nullptr );
 
   cooldown = player -> get_cooldown( name_str );
 

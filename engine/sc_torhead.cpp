@@ -113,7 +113,7 @@ bool parse_talents( player_t& p, const std::string& talent_string )
   // unused deeper talents are simply left blank instead of filling up the string with zero-zero encodings
 
   int encoding[ MAX_TALENT_SLOTS ];
-  fill( encoding, 0 );
+  boost::fill( encoding, 0 );
 
   int tree = 0;
   unsigned tree_count = 0;

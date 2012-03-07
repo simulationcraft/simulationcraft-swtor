@@ -647,8 +647,8 @@ void buff_t::expire()
 void buff_t::predict()
 {
   // Guarantee that may_react() will return true if the buff is present.
-  fill( &stack_occurrence[ 0 ], &stack_occurrence[ current_stack + 1 ], timespan_t::min );
-  fill( &stack_react_time[ 0 ], &stack_react_time[ current_stack + 1 ], timespan_t::min );
+  std::fill( &stack_occurrence[ 0 ], &stack_occurrence[ current_stack + 1 ], timespan_t::min );
+  std::fill( &stack_react_time[ 0 ], &stack_react_time[ current_stack + 1 ], timespan_t::min );
 }
 
 // buff_t::aura_gain ========================================================

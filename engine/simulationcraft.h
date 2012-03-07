@@ -54,9 +54,8 @@
 #include <vector>
 
 // Boost includes
+#include <boost/checked_delete.hpp>
 #include <boost/range/algorithm.hpp>
-#include <boost/uuid/string_generator.hpp>
-
 
 
 #if _MSC_VER || __cplusplus >= 201103L
@@ -576,58 +575,37 @@ inline std::size_t sizeof_array( const T ( & )[N] )
 class noncopyable
 {
 public:
-  noncopyable() {} // = default
-  // noncopyable( noncopyable&& ) = default;
-  // noncopyable& operator = ( noncopyable&& ) = default;
+  noncopyable() = default;
+  noncopyable( noncopyable&& ) = default;
+  noncopyable& operator = ( noncopyable&& ) = default;
 private:
-  noncopyable( const noncopyable& ); // = delete
-  noncopyable& operator = ( const noncopyable& ); // = delete
+  noncopyable( const noncopyable& ) = delete;
+  noncopyable& operator = ( const noncopyable& ) = delete;
 };
 
 class nonmoveable : public noncopyable
 {
+public:
+  nonmoveable() = default;
 private:
-  // nonmoveable( nonmoveable&& ) = delete;
-  // nonmoveable& operator = ( nonmoveable&& ) = delete;
+  nonmoveable( const nonmoveable& ) = delete;
+  nonmoveable& operator = ( const nonmoveable& ) = delete;
+  nonmoveable( nonmoveable&& ) = delete;
+  nonmoveable& operator = ( nonmoveable&& ) = delete;
 };
 
-struct delete_disposer_t
+class delete_disposer_t
 {
+public:
   template <typename T>
-  void operator () ( T* t ) const { delete t; }
+  void operator() ( T* t ) const
+  { boost::checked_delete( t ); }
 };
 
 // Generic algorithms =======================================================
 
-// Wrappers for std::fill, std::fill_n, and std::find that perform any type
-// conversions for t at the callsite instead of per assignment in the loop body.
-// E.g., fill( [container of pointers or pair of iterators to pointers], 0 )
-// knows that 0 is a pointer, std::fill will think it's an integer and explode.
-// This problem disappears in C++11 with nullptr.
-template <typename I>
-inline void fill( I first, I last, typename std::iterator_traits<I>::value_type const& t )
-{ std::fill( first, last, t ); }
-
-template <typename Range>
-inline Range& fill( Range& r, typename boost::range_value<Range>::type const& t )
-{ return boost::fill( r, t ); }
-
-template <typename I>
-inline void fill_n( I first, typename std::iterator_traits<I>::difference_type n,
-                    typename std::iterator_traits<I>::value_type const& t )
-{ std::fill_n( first, n, t ); }
-
-template <typename I>
-inline I find( I first, I last, typename std::iterator_traits<I>::value_type const& t )
-{ return std::find( first, last, t ); }
-
-template <typename Range>
-inline typename boost::range_iterator<Range>::type
-find( Range& r, typename boost::range_value<Range>::type const& t )
-{ return boost::find( r, t ); }
-
-template <typename I, typename D>
-void dispose( I first, I last, D disposer )
+template <typename I, typename D=delete_disposer_t>
+void dispose( I first, I last, D disposer=D() )
 {
   while ( first != last )
   {
@@ -637,20 +615,15 @@ void dispose( I first, I last, D disposer )
   }
 }
 
-template <typename I>
-inline void dispose( I first, I last )
-{ dispose( first, last, delete_disposer_t() ); }
+template <typename Range, typename D=delete_disposer_t>
+inline auto dispose( Range&& r, D disposer=D() ) -> decltype( std::forward<Range>( r ) )
+{
+  dispose( boost::begin( r ), boost::end( r ), disposer );
+  return std::forward<Range>( r );
+}
 
-template <typename Range, typename D>
-inline void dispose( Range& r, D disposer )
-{ dispose( boost::begin( r ), boost::end( r ), disposer ); }
-
-template <typename Range>
-inline void dispose( const Range& r )
-{ dispose( r, delete_disposer_t() ); }
-
-template <typename T, typename D>
-void dispose_list( T* t, D disposer )
+template <typename T, typename D=delete_disposer_t>
+void dispose_list( T* t, D disposer=D() )
 {
   while ( t )
   {
@@ -659,10 +632,6 @@ void dispose_list( T* t, D disposer )
     disposer( tmp );
   }
 }
-
-template <typename T>
-inline void dispose_list( T* t )
-{ dispose_list( t, delete_disposer_t() ); }
 
 template <unsigned HW, typename Fwd, typename Out>
 void sliding_window_average( Fwd first, Fwd last, Out out )
@@ -706,13 +675,16 @@ void sliding_window_average( Fwd first, Fwd last, Out out )
   else
   {
     // input is pathologically small compared to window size, just average everything.
-    fill_n( out, n, std::accumulate( first, last, value_t() ) / n );
+    std::fill_n( out, n, std::accumulate( first, last, value_t() ) / n );
   }
 }
 
 template <unsigned HW, typename Range, typename Out>
-inline Range& sliding_window_average( Range& r, Out out )
-{ sliding_window_average<HW>( boost::begin( r ), boost::end( r ), out ); return r; }
+inline auto sliding_window_average( Range&& r, Out out ) -> decltype( std::forward<Range>( r ) )
+{
+  sliding_window_average<HW>( boost::begin( r ), boost::end( r ), out );
+  return std::forward<Range>( r );
+}
 
 struct timespan_t
 {
@@ -976,7 +948,7 @@ inline timespan_t operator*( const uint64_t left, const timespan_t right )
 
 // Cache Control ============================================================
 
-namespace cache {
+namespace cache { // ========================================================
 
 typedef int era_t;
 static const era_t INVALID_ERA = -1;
@@ -1035,7 +1007,7 @@ inline behavior_t items()
 inline void items( behavior_t b )
 { cache_control_t::singleton.cache_items( b ); }
 
-}
+} // namespace cache ========================================================
 
 struct stat_data_t
 {
