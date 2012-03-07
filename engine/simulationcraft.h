@@ -129,7 +129,7 @@ namespace std {using namespace tr1; }
 
 #define MAX_PLAYERS_PER_CHART 20
 
-// TODO: Integer time is only partially working.
+// TODO: Integer time is only partially  working.
 //#define SC_USE_INTEGER_TIME
 
 // Forward Declarations =====================================================
