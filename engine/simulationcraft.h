@@ -56,7 +56,6 @@
 // Boost includes
 #include <boost/checked_delete.hpp>
 #include <boost/range/algorithm.hpp>
-#include <boost/uuid/string_generator.hpp>
 
 
 #if _MSC_VER || __cplusplus >= 201103L
