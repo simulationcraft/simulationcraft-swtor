@@ -18,10 +18,8 @@ CPP_FLAGS  = -Wall -Woverloaded-virtual -W
 OPTS       = -O3 -fomit-frame-pointer -ffast-math -std=gnu++0x
 BITS       = 32
 
-BOOST_PATH = C:/boost_1_49_0
-OPENSSL_PATH =
-
--include ../build.conf
+include ../build.conf
+-include ../override.conf
 
 ifneq (${BOOST_PATH},)
 CPP_FLAGS += -I $(BOOST_PATH)
@@ -171,3 +169,7 @@ clean: mostlyclean
 
 unix windows mac:
 	$(error unix/windows/mac are no longer a valid targets, please read the docs at the top of Makefile)
+
+echo:
+	@echo OS=$(OS)
+	@echo BOOST_PATH=$(BOOST_PATH)
