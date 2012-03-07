@@ -117,7 +117,7 @@ namespace std {using namespace tr1; }
 #include "data_definitions.hh"
 
 #define SC_MAJOR_VERSION "114"
-#define SC_MINOR_VERSION "3"
+#define SC_MINOR_VERSION "4"
 #define SWTOR_VERSION_LIVE "1.1.4"
 #define SWTOR_VERSION_PTR "1.1.4"
 #define SC_USE_PTR ( 0 )
@@ -129,7 +129,7 @@ namespace std {using namespace tr1; }
 
 #define MAX_PLAYERS_PER_CHART 20
 
-// TODO: Integer time is only partially  working.
+// TODO: Integer time is only partially working.
 //#define SC_USE_INTEGER_TIME
 
 // Forward Declarations =====================================================
