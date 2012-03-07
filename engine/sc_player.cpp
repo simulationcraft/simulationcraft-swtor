@@ -926,10 +926,14 @@ void player_t::init_professions()
     }
 
     int prof_type = util_t::parse_profession_type( prof_name );
+
     if ( prof_type == PROFESSION_NONE )
+      continue;
+
+    if ( prof_type == PROFESSION_UNKNOWN )
     {
-      sim -> errorf( "Invalid profession encoding: %s\n", professions_str.c_str() );
-      return;
+      sim -> errorf( "Invalid profession encoding: %s\n", prof_name.c_str() );
+      continue;
     }
 
     profession[ prof_type ] = prof_value;

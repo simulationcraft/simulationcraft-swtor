@@ -307,7 +307,7 @@ int util_t::parse_profession_type( const std::string& name )
     if ( util_t::str_compare_ci( name, util_t::profession_type_string( i ) ) )
       return i;
 
-  return PROFESSION_NONE;
+  return PROFESSION_UNKNOWN;
 }
 
 // util_t::translate_profession_id ==========================================

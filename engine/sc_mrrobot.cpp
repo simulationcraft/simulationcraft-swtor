@@ -24,6 +24,17 @@ const base36_t decoder( talent_encoding );
 
 const bool DEBUG_ITEMS = false;
 
+bool parse_profession ( js_node_t* profile, const std::string& path, std::string& player_profession_string )
+{
+  std::string crafting_skill;
+  if ( js_t::get_value( crafting_skill, profile, path ) )
+  {
+    armory_t::format( crafting_skill );
+    player_profession_string += crafting_skill;
+    return true;
+  }
+  return false;
+}
 // parse_skills =============================================================
 
 bool parse_skills( player_t* p, js_node_t* profile )
@@ -413,7 +424,7 @@ player_t* download_player( sim_t*             sim,
         "        \"SocialLevel\":\"None\",\n"
         "        \"ValorRank\":0,\n"
         "        \"CraftingCrewSkill\":\"None\",\n"
-        "        \"CrewSkill2\":\"None\",\n"
+        "        \"CrewSkill2\":\"Biochem\",\n"
         "        \"CrewSkill3\":\"None\",\n"
         "        \"SkillString\":\"0000000000000000000-00000000000000000000-000000000000000000\",\n"
         "        \"Gear\":[\n"
@@ -524,12 +535,12 @@ player_t* download_player( sim_t*             sim,
 
   p -> origin_str = url;
 
-  std::string crafting_skill;
-  if ( js_t::get_value( crafting_skill, profile, "CraftingCrewSkill" ) )
-  {
-    // FIXME: Do something.
-    ;
-  }
+  if ( parse_profession( profile, "CraftingCrewSkill", p -> professions_str ) )
+    p -> professions_str += "/";
+  if ( parse_profession( profile, "CrewSkill2",        p -> professions_str ) )
+    p -> professions_str += "/";
+  parse_profession( profile, "CrewSkill3",        p -> professions_str );
+
 
   if ( ! parse_skills( p, profile ) )
     return 0;
