@@ -4,6 +4,8 @@ QT += core gui network webkit
 #CONFIG += paperdoll
 #CONFIG += openssl
 
+BOOST_PATH = C:/boost_1_49_0
+
 exists( build.conf ) {
   include( build.conf )
 }

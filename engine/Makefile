@@ -18,7 +18,7 @@ CPP_FLAGS  = -Wall -Woverloaded-virtual -W
 OPTS       = -O3 -fomit-frame-pointer -ffast-math -std=gnu++0x
 BITS       = 32
 
-BOOST_PATH =
+BOOST_PATH = C:/boost_1_49_0
 OPENSSL_PATH =
 
 -include ../build.conf
