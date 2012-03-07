@@ -5,9 +5,6 @@
 
 #include "simulationcraft.h"
 
-// TODO
-// * Split up action_t.
-
 // ==========================================================================
 // Action
 // ==========================================================================
@@ -1370,6 +1367,7 @@ void action_t::init()
       rank_level = player -> level;
     else
     {
+      assert( boost::is_sorted( rank_level_list ) );
       for ( unsigned i = 0 ; i < rank_level_list.size() && player -> level >= rank_level_list[ i ]; ++i )
         rank_level = rank_level_list[ i ];
     }

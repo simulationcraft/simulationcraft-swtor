@@ -12,12 +12,20 @@
 # Override OBJ_DIR if you want your object files built somewhere other than the local directory
 
 OS         = UNIX
-OPENSSL_PATH =
 
 CXX        = g++
 CPP_FLAGS  = -Wall -Woverloaded-virtual -W
 OPTS       = -O3 -fomit-frame-pointer -ffast-math -std=gnu++0x
 BITS       = 32
+
+BOOST_PATH = C:/boost_1_49_0
+OPENSSL_PATH =
+
+-include ../build.conf
+
+ifneq (${BOOST_PATH},)
+CPP_FLAGS += -I $(BOOST_PATH)
+endif
 
 ifeq (64,${BITS})
 CPP_FLAGS += -m64
@@ -51,8 +59,6 @@ COPY       = copy
 REMOVE     = del /f
 PATHSEP    = \\
 AR         = ar
-BOOST_PATH = C:\boost_1_49_0
-OPTS += -I $(BOOST_PATH)
 # MinGW W32
 ifeq (32,${BITS})
 CPP_FLAGS += -malign-double
