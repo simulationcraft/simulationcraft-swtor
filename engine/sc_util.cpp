@@ -370,7 +370,7 @@ int util_t::translate_class_str( const std::string& s )
   else if ( fmt_s == "scoundrel"                                ) return S_SCOUNDREL;
   else if ( fmt_s == "gunslinger"                               ) return S_GUNSLINGER;
 
-  else if ( fmt_s == "sith_sorcerer"   || fmt_s == "sorceror"   ) return SITH_SORCERER;
+  else if ( fmt_s == "sith_sorcerer"   || fmt_s == "sorcerer"   ) return SITH_SORCERER;
   else if ( fmt_s == "sith_assassin"   || fmt_s == "assassin"   ) return SITH_ASSASSIN;
   else if ( fmt_s == "sith_marauder"   || fmt_s == "marauder"   ) return SITH_MARAUDER;
   else if ( fmt_s == "sith_juggernaut" || fmt_s == "juggernaut" ) return SITH_JUGGERNAUT;
@@ -830,8 +830,7 @@ const char* util_t::stat_type_string( int stat )
   case STAT_ENERGY: return "energy";
   case STAT_AMMO:  return "ammo";
 
-  case STAT_EXPERTISE_RATING:         return "expertise_rating";
-  case STAT_EXPERTISE_RATING2:        return "inverse_expertise_rating";
+  case STAT_EXPERTISE_RATING:         return "expertise";
 
   case STAT_ACCURACY_RATING:   return "accuracy_rating";
   case STAT_ACCURACY_RATING2:  return "inverse_accuracy_rating";
@@ -891,8 +890,8 @@ const char* util_t::stat_type_abbrev( int stat )
   case STAT_ARMOR:          return "Armor";
   case STAT_BONUS_ARMOR:    return "BArmor";
   case STAT_DEFENSE_RATING: return "Def";
-  case STAT_SHIELD_RATING:  return "Shield";
-  case STAT_ABSORB_RATING:  return "Absorb";
+  case STAT_SHIELD_RATING:  return "Shld";
+  case STAT_ABSORB_RATING:  return "Abs";
 
   case STAT_POWER: return "Power";
   case STAT_FORCE_POWER: return "Force_Power";
@@ -927,6 +926,7 @@ const char* util_t::stat_type_wowhead( int stat )
   case STAT_ACCURACY_RATING:      return "accuracyRating";
   case STAT_CRIT_RATING:     return "critRating";
   case STAT_ALACRITY_RATING: return "alacrityRating";
+  case STAT_DEFENSE_RATING:    return "defense";
 
   case STAT_WEAPON_DMG:   return "__dmg";
 

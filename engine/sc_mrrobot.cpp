@@ -82,7 +82,7 @@ slot_type translate_slot_name( const std::string& name )
 
   for ( unsigned i = 0; i < sizeof_array( slot_map ); ++i )
   {
-    if ( util_t::str_compare_ci( name, slot_map[ i ] ) )
+    if ( slot_map[ i ] && util_t::str_compare_ci( name, slot_map[ i ] ) )
       return static_cast<slot_type>( i );
   }
 
@@ -100,6 +100,7 @@ bool parse_items( player_t* p, js_node_t* items )
 
   for ( unsigned i = 0; i < nodes.size(); ++i )
   {
+    std::stringstream item_encoding;
     js_node_t* item = nodes[ i ];
 
     std::string slot_name;
@@ -123,6 +124,7 @@ bool parse_items( player_t* p, js_node_t* items )
       continue;
     }
     armory_t::format( name );
+    item_encoding << name;
 
     std::string weapon_type_str;
     if ( js_t::get_value( weapon_type_str, item, "WeaponType" ) )
@@ -137,9 +139,10 @@ bool parse_items( player_t* p, js_node_t* items )
       continue;
     }
 
-    std::stringstream stat_encoding;
     std::vector<js_node_t*> stat_nodes;
     js_t::get_children( stat_nodes, stats );
+
+    item_encoding << ",stats=";
 
     for ( size_t j = 0; j < stat_nodes.size(); ++j )
     {
@@ -152,10 +155,12 @@ bool parse_items( player_t* p, js_node_t* items )
         continue;
       }
 
-      stat_encoding << '_' << stat_value << stat_name;
+      if ( j )
+        item_encoding << '_';
+      item_encoding << stat_value << stat_name;
     }
 
-    ;
+    p -> items[ slot ].options_str = item_encoding.str();
   }
 
   return true;
@@ -386,9 +391,77 @@ player_t* download_player( sim_t*             sim,
   sim -> current_name = id;
   sim -> current_slot = 0;
 
-  std::string url = "http://swtor.askmrrobot.com/character/" + id;
+  std::string url = "http://swtor.askmrrobot.com/api/character/" + id;
   std::string result;
-  if ( ! http_t::get( result, url, caching ) )
+  if ( id == "test" )
+  {
+    result =
+        "{\n"
+        "        \"ProfileId\":\"9674b96a-d94a-47c8-b268-17e65c432915\",\n"
+        "        \"ProfileName\":\"Yellowsix of Juyo (US)\",\n"
+        "        \"LastUpdated\":\"2012-03-05T21:27:35\",\n"
+        "        \"Region\":\"US\",\n"
+        "        \"Server\":\"Juyo\",\n"
+        "        \"Name\":\"Yellowsix\",\n"
+        "        \"Guild\":\"GH-AMR\",\n"
+        "        \"Faction\":\"Empire\",\n"
+        "        \"AdvancedClass\":\"Sorcerer\",\n"
+        "        \"Level\":45,\n"
+        "        \"Gender\":\"Female\",\n"
+        "        \"Race\":\"Chiss\",\n"
+        "        \"Alignment\":\"Neutral\",\n"
+        "        \"SocialLevel\":\"None\",\n"
+        "        \"ValorRank\":0,\n"
+        "        \"CraftingCrewSkill\":\"None\",\n"
+        "        \"CrewSkill2\":\"None\",\n"
+        "        \"CrewSkill3\":\"None\",\n"
+        "        \"SkillString\":\"0000000000000000000-00000000000000000000-000000000000000000\",\n"
+        "        \"Gear\":[\n"
+        "          {\n"
+        "            \"CharacterSlot\":\"Chest\",\n"
+        "            \"Id\":\"30045\",\n"
+        "            \"VariantId\":0,\n"
+        "            \"Mods\":[\n"
+        "              {\n"
+        "                \"Slot\":\"Mod\",\n"
+        "                \"Id\":\"5890\",\n"
+        "                \"Name\":\"Advanced Deflecting Mod 25B\",\n"
+        "                \"Stats\":[\n"
+        "                  {\"Stat\":\"Aim\",\"Value\":61},\n"
+        "                  {\"Stat\":\"Endurance\",\"Value\":37},\n"
+        "                  {\"Stat\":\"Defense\",\"Value\":11}\n"
+        "                ]\n"
+        "              },\n"
+        "              {\n"
+        "                \"Slot\":\"Enhancement\",\n"
+        "                \"Id\":\"9207\",\n"
+        "                \"Name\":\"Advanced Astute Enhancement 25\",\n"
+        "                \"Stats\":[\n"
+        "                  {\"Stat\":\"Endurance\",\"Value\":40},\n"
+        "                  {\"Stat\":\"Accuracy\",\"Value\":51},\n"
+        "                  {\"Stat\":\"Defense\",\"Value\":20}\n"
+        "                ]\n"
+        "              }\n"
+        "            ],\n"
+        "            \"Name\":\"Battlemaster Supercommando's Body Armor\",\n"
+        "            \"ArmorType\":\"Heavy\",\n"
+        "            \"WeaponType\":null,\n"
+        "            \"ShieldType\":null,\n"
+        "            \"Stats\":[\n"
+        "             {\"Stat\":\"Aim\",\"Value\":94},\n"
+        "              {\"Stat\":\"Endurance\",\"Value\":108},\n"
+        "              {\"Stat\":\"Expertise\",\"Value\":50},\n"
+        "              {\"Stat\":\"Accuracy\",\"Value\":51},\n"
+        "              {\"Stat\":\"Defense\",\"Value\":31}\n"
+        "            ],\n"
+        "            \"ItemSetId\":null\n"
+        "          }\n"
+        "        ],\n"
+        "        \"Datacrons\":[]\n"
+        "      }";
+  }
+
+  else if ( ! http_t::get( result, url, caching ) )
   {
     sim -> errorf( "Unable to download player from '%s'\n", url.c_str() );
     return 0;

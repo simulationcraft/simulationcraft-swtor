@@ -201,7 +201,7 @@ bool item_t::parse_options()
   option_name_str = options_str;
   std::string remainder = "";
 
-  std::string::size_type cut_pt = options_str.find_first_of( "," );
+  std::string::size_type cut_pt = options_str.find( ',' );
 
   if ( cut_pt != options_str.npos )
   {
