@@ -423,8 +423,7 @@ struct project_t : public jedi_sage_spell_t
     jedi_sage_spell_t( n + std::string( is_upheaval ? "_upheaval" : "" ), p ),
     upheaval( 0 )
   {
-    static const int ranks[] = { 1, 4, 7, 11, 14, 17, 23, 34, 47, 50 };
-    rank_level_list = util_t::array_to_vector( ranks );
+    rank_level_list = { 1, 4, 7, 11, 14, 17, 23, 34, 47, 50 };
 
     parse_options( 0, options_str );
 
@@ -480,9 +479,7 @@ struct telekinetic_throw_t : public jedi_sage_spell_t
     jedi_sage_spell_t( n, p ),
     is_buffed_by_psychic_projection( false )
   {
-    static const int ranks[] = { 2, 5, 8, 11, 14, 19, 27, 39, 50 };
-    rank_level_list = util_t::array_to_vector( ranks );
-
+    rank_level_list = { 2, 5, 8, 11, 14, 19, 27, 39, 50 };
 
     parse_options( 0, options_str );
 
@@ -578,8 +575,7 @@ struct disturbance_t : public jedi_sage_spell_t
     jedi_sage_spell_t( n + std::string( is_tm ? "_tm" : "" ), p ),
     tm( 0 )
   {
-    static const int ranks[] = { 10, 13, 16, 25, 36, 45, 50 };
-    rank_level_list = util_t::array_to_vector( ranks );
+    rank_level_list = { 10, 13, 16, 25, 36, 45, 50 };
 
     parse_options( 0, options_str );
 
@@ -652,8 +648,7 @@ struct mind_crush_t : public jedi_sage_spell_t
     mind_crush_dot_t( sage_sorcerer_t* p, const std::string& n ) :
       jedi_sage_spell_t( n, p )
     {
-      static const int ranks[] = { 14, 19, 30, 41, 50 };
-      rank_level_list = util_t::array_to_vector( ranks );
+      rank_level_list = { 14, 19, 30, 41, 50 };
 
       td.standardhealthpercentmin = td.standardhealthpercentmax = .0295;
       td.power_mod = 0.295;
@@ -719,8 +714,7 @@ struct weaken_mind_t : public jedi_sage_spell_t
   weaken_mind_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
     jedi_sage_spell_t( n, p, SCHOOL_INTERNAL )
   {
-    static const int ranks[] = { 16, 22, 33, 44, 50 };
-    rank_level_list = util_t::array_to_vector( ranks );
+    rank_level_list = { 16, 22, 33, 44, 50 };
 
     parse_options( 0, options_str );
 

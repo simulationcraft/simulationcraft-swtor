@@ -420,8 +420,7 @@ struct shock_t : public shadow_assassin_spell_t
         shadow_assassin_spell_t( n + ( is_chain_shock ? "_chain_shock" : "" ), p ),
         chain_shock( 0 )
     {
-        static const int ranks[] = { 1, 4, 7, 11, 14, 17, 23, 34, 47, 50 };
-        boost::copy( ranks, std::back_inserter( rank_level_list ) );
+      rank_level_list = { 1, 4, 7, 11, 14, 17, 23, 34, 47, 50 };
 
         parse_options( 0, options_str );
 
@@ -503,8 +502,7 @@ struct force_lightning_t : public shadow_assassin_spell_t
     force_lightning_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
         shadow_assassin_spell_t( n, p )
     {
-        static const int ranks[] = { 2, 5, 8, 11, 14, 19, 27, 39, 50 };
-        boost::copy( ranks, std::back_inserter( rank_level_list ) );
+      rank_level_list = { 2, 5, 8, 11, 14, 19, 27, 39, 50 };
 
         parse_options( 0, options_str );
 
@@ -533,8 +531,7 @@ struct crushing_darkness_t : public shadow_assassin_spell_t
         crushing_darkness_dot_t( shadow_assassin_t* p, const std::string& n ) :
             shadow_assassin_spell_t( n, p, SCHOOL_KINETIC )
         {
-            static const int ranks[] = { 14, 19, 30, 41, 50 };
-            boost::copy( ranks, std::back_inserter( rank_level_list ) );
+          rank_level_list = { 14, 19, 30, 41, 50 };
 
             td.standardhealthpercentmin = td.standardhealthpercentmax = .0295;
             td.power_mod = 0.295;
