@@ -430,7 +430,6 @@ bool player_t::init( sim_t* sim )
   player_t::sage_sorcerer_init( sim );
   player_t::scoundrel_operative_init( sim );
   player_t::sentinel_marauder_init( sim );
-  player_t::commando_mercenary_init( sim );
   player_t::shadow_assassin_init( sim );
   player_t::vanguard_powertech_init( sim );
   player_t::enemy_init( sim );
@@ -1735,7 +1734,6 @@ void player_t::combat_begin( sim_t* sim )
   player_t::sage_sorcerer_combat_begin( sim );
   player_t::scoundrel_operative_combat_begin( sim );
   player_t::sentinel_marauder_combat_begin( sim );
-  player_t::commando_mercenary_combat_begin( sim );
   player_t::shadow_assassin_combat_begin( sim );
   player_t::vanguard_powertech_combat_begin( sim );
   player_t::enemy_combat_begin( sim );
@@ -1801,7 +1799,6 @@ void player_t::combat_end( sim_t* sim )
   player_t::sage_sorcerer_combat_end( sim );
   player_t::scoundrel_operative_combat_end( sim );
   player_t::sentinel_marauder_combat_end( sim );
-  player_t::commando_mercenary_combat_end( sim );
   player_t::shadow_assassin_combat_end( sim );
   player_t::vanguard_powertech_combat_end( sim );
   player_t::enemy_combat_end( sim );
