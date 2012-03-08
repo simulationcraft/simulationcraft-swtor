@@ -388,14 +388,25 @@ player_t* player_t::create_mercenary( sim_t* sim, const std::string& name, race_
 
 // player_t::commando_mercenary_init ===========================================
 
-void player_t::commando_mercenary_init( sim_t* /* sim */ )
+void player_t::commando_mercenary_init( sim_t* sim )
 {
-
+  for ( unsigned int i = 0; i < sim -> actor_list.size(); i++ )
+  {
+    player_t* p = sim -> actor_list[i];
+    p -> buffs.fortification_hunters_boon = new buff_t( p, "fortification_hunters_boon", 1 );
+  }
 }
 
 // player_t::commando_mercenary_combat_begin ===================================
 
-void player_t::commando_mercenary_combat_begin( sim_t* /* sim */ )
+void player_t::commando_mercenary_combat_begin( sim_t* sim )
 {
-
+  for ( player_t* p = sim -> player_list; p; p = p -> next )
+  {
+    if ( p -> ooc_buffs() )
+    {
+      if ( sim -> overrides.fortification_hunters_boon )
+        p -> buffs.fortification_hunters_boon -> override();
+    }
+  }
 }

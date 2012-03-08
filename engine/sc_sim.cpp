@@ -1698,11 +1698,12 @@ void sim_t::use_optimal_buffs_and_debuffs( int value )
 {
   optimal_raid = value;
 
-  overrides.bleeding               = optimal_raid;
-  overrides.coordination           = optimal_raid;
-  overrides.force_valor            = optimal_raid;
-  overrides.shatter_shot           = optimal_raid;
-  overrides.unnatural_might        = optimal_raid;
+  overrides.bleeding                    = optimal_raid;
+  overrides.coordination                = optimal_raid;
+  overrides.force_valor                 = optimal_raid;
+  overrides.fortification_hunters_boon  = optimal_raid;
+  overrides.shatter_shot                = optimal_raid;
+  overrides.unnatural_might             = optimal_raid;
 }
 
 // sim_t::aura_gain =========================================================
@@ -1984,6 +1985,7 @@ void sim_t::create_options()
     { "override.bleeding",                OPT_BOOL,   &( overrides.bleeding                        ) },
     { "override.coordination",            OPT_BOOL,   &( overrides.coordination                    ) },
     { "override.force_valor",             OPT_BOOL,   &( overrides.force_valor                     ) },
+    { "override.fortification_hunters_boon", OPT_BOOL, &( overrides.fortification_hunters_boon     ) },
     { "override.shatter_shot",            OPT_BOOL,   &( overrides.shatter_shot                    ) },
     { "override.unnatural_might",         OPT_BOOL,   &( overrides.unnatural_might                 ) },
     // Stat Enchants

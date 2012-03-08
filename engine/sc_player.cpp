@@ -1496,6 +1496,11 @@ double player_t::composite_attribute_multiplier( int attr ) const
     }
   }
 
+  if ( attr == ATTR_ENDURANCE && buffs.fortification_hunters_boon -> up() )
+  {
+    m += 0.05;
+  }
+
   return m;
 }
 

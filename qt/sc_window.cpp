@@ -32,6 +32,7 @@ static OptionEntry* getBuffOptions()
     { "Toggle All Buffs", "",                         "Toggle all buffs on/off"                           },
     { "Crit",             "override.coordination",    "+5% Crit"                                          },
     { "Stats",            "override.force_valor",     "+5% Stat Buff ( Str, Aim, Cunning, Willpower )"    },
+    { "Endurance",        "override.fortification_hunters_boon","+5% Endurance"                                    },
     { "Damage Bonus",     "override.unnatural_might", "+5% Damage Bonus"                                  },
     { NULL, NULL, NULL }
   };

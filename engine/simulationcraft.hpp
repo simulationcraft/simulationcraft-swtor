@@ -2220,6 +2220,7 @@ public:
     int force_valor; // 5% stat bonus. implement sith version
     int shatter_shot; // -20% target armor. implement as buff, also add equal buffs
     int unnatural_might;// 5% damage bonus. implement as buff, also add equal republic buffs
+    int fortification_hunters_boon; // 5% endurance
   };
   overrides_t overrides;
 
@@ -3028,6 +3029,7 @@ struct player_t : public noncopyable
   {
     buff_t* coordination;
     buff_t* force_valor;
+    buff_t* fortification_hunters_boon;
     buff_t* power_potion;
     buff_t* raid_movement;
     buff_t* self_movement;
