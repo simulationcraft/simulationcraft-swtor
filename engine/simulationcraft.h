@@ -66,8 +66,6 @@
 #define nonpod_offsetof(t, m) ((size_t) ( (volatile char *)&((volatile t *)(size_t)0x10000)->m - (volatile char *)(size_t)0x10000 ))
 #endif
 
-#include "data_enums.hh"
-
 #if defined( _MSC_VER )
 # define finline                     __forceinline
 # define SC_FINLINE_EXT
@@ -103,8 +101,6 @@
 #  define __attribute__(x)
 #endif
 #define PRINTF_ATTRIBUTE(a,b) __attribute__((format(printf,a,b)))
-
-#include "data_definitions.hh"
 
 #define SC_MAJOR_VERSION "114"
 #define SC_MINOR_VERSION "4"
@@ -1477,8 +1473,6 @@ public:
   static int         talent_tree               ( int tree, player_type ptype );
   static const char* talent_tree_string        ( int tree, bool armory_format = true );
   static const char* weapon_type_string        ( int type );
-  static const char* weapon_class_string       ( int class_ );
-  static const char* weapon_subclass_string    ( int subclass );
   static const char* item_quality_string       ( int item_quality );
 
   static int parse_attribute_type              ( const std::string& name );
@@ -1516,9 +1510,6 @@ public:
   static int translate_class_id( int cid );
   static int translate_class_str( const std::string& s );
   static race_type translate_race_id( int rid );
-  static stat_type translate_item_mod( int stat_mod );
-  static slot_type translate_invtype( int inv_type );
-  static weapon_type translate_weapon_subclass( item_subclass_weapon weapon_subclass );
   static profession_type translate_profession_id( int skill_id );
 
   static bool socket_gem_match( int socket, int gem );

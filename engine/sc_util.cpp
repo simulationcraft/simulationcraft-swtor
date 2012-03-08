@@ -675,49 +675,6 @@ const char* util_t::weapon_type_string( int weapon )
   return "unknown";
 }
 
-// util_t::weapon_subclass_string ===========================================
-
-const char* util_t::weapon_subclass_string( int subclass )
-{
-  switch ( subclass )
-  {
-  case ITEM_SUBCLASS_WEAPON_AXE:      return "Axe";
-  case ITEM_SUBCLASS_WEAPON_AXE2:     return "Axe";
-  case ITEM_SUBCLASS_WEAPON_BOW:      return "Bow";
-  case ITEM_SUBCLASS_WEAPON_GUN:      return "Gun";
-  case ITEM_SUBCLASS_WEAPON_MACE:     return "Mace";
-  case ITEM_SUBCLASS_WEAPON_MACE2:    return "Mace";
-  case ITEM_SUBCLASS_WEAPON_POLEARM:  return "Polearm";
-  case ITEM_SUBCLASS_WEAPON_SWORD:    return "Sword";
-  case ITEM_SUBCLASS_WEAPON_SWORD2:   return "Sword";
-  case ITEM_SUBCLASS_WEAPON_STAFF:    return "Staff";
-  case ITEM_SUBCLASS_WEAPON_FIST:     return "Fist Weapon";
-  case ITEM_SUBCLASS_WEAPON_DAGGER:   return "Dagger";
-  case ITEM_SUBCLASS_WEAPON_THROWN:   return "Thrown";
-  case ITEM_SUBCLASS_WEAPON_CROSSBOW: return "Crossbow";
-  case ITEM_SUBCLASS_WEAPON_WAND:     return "Wand";
-  }
-  return "Unknown";
-}
-
-// util_t::weapon_class_string ==============================================
-
-const char* util_t::weapon_class_string( int class_ )
-{
-  switch ( class_ )
-  {
-  case INVTYPE_WEAPON:
-    return "One Hand";
-  case INVTYPE_2HWEAPON:
-    return "Two-Hand";
-  case INVTYPE_WEAPONMAINHAND:
-    return "Main Hand";
-  case INVTYPE_WEAPONOFFHAND:
-    return "Off Hand";
-  }
-  return 0;
-}
-
 // util_t::parse_weapon_type ================================================
 
 int util_t::parse_weapon_type( const std::string& name )
@@ -1105,82 +1062,6 @@ int util_t::translate_class_id( int /* cid */ )
 race_type util_t::translate_race_id( int /* rid */ )
 {
   return RACE_NONE;
-}
-
-// util_t::translate_item_mod ===============================================
-
-stat_type util_t::translate_item_mod( int item_mod )
-{
-  switch ( item_mod )
-  {
-  case ITEM_MOD_STRENGTH:            return STAT_STRENGTH;
-  case ITEM_MOD_HIT_RATING:          return STAT_ACCURACY_RATING;
-  case ITEM_MOD_CRIT_RATING:         return STAT_CRIT_RATING;
-  case ITEM_MOD_HASTE_RATING:        return STAT_ALACRITY_RATING;
-  case ITEM_MOD_EXPERTISE_RATING:    return STAT_EXPERTISE_RATING;
-  case ITEM_MOD_EXTRA_ARMOR:         return STAT_BONUS_ARMOR;
-  }
-
-  return STAT_NONE;
-}
-
-// util_t::translate_weapon_subclass ========================================
-
-weapon_type util_t::translate_weapon_subclass( item_subclass_weapon /* id */ )
-{
-
-  return WEAPON_NONE;
-}
-
-// util_t::translate_invtype ================================================
-
-slot_type util_t::translate_invtype( int inv_type )
-{
-  switch ( inv_type )
-  {
-  case INVTYPE_2HWEAPON:
-  case INVTYPE_WEAPON:
-  case INVTYPE_WEAPONMAINHAND:
-    return SLOT_MAIN_HAND;
-  case INVTYPE_WEAPONOFFHAND:
-  case INVTYPE_SHIELD:
-  case INVTYPE_HOLDABLE:
-    return SLOT_OFF_HAND;
-  case INVTYPE_THROWN:
-  case INVTYPE_RELIC:
-  case INVTYPE_RANGED:
-  case INVTYPE_RANGEDRIGHT:
-    return SLOT_RANGED;
-  case INVTYPE_CHEST:
-  case INVTYPE_ROBE:
-    return SLOT_CHEST;
-  case INVTYPE_CLOAK:
-    return SLOT_BACK;
-  case INVTYPE_FEET:
-    return SLOT_FEET;
-  case INVTYPE_FINGER:
-    return SLOT_IMPLANT_1;
-  case INVTYPE_HANDS:
-    return SLOT_HANDS;
-  case INVTYPE_HEAD:
-    return SLOT_HEAD;
-  case INVTYPE_LEGS:
-    return SLOT_LEGS;
-  case INVTYPE_NECK:
-    return SLOT_EAR;
-  case INVTYPE_SHOULDERS:
-    return SLOT_SHOULDERS;
-  case INVTYPE_TABARD:
-    return SLOT_TABARD;
-  case INVTYPE_TRINKET:
-    return SLOT_RELIC_1;
-  case INVTYPE_WAIST:
-    return SLOT_WAIST;
-  case INVTYPE_WRISTS:
-    return SLOT_WRISTS;
-  }
-
-  return SLOT_NONE;
 }
 
 // util_t::socket_gem_match =================================================

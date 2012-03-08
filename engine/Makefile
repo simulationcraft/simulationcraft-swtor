@@ -74,8 +74,6 @@ endif
 
 SRC = \
 	simulationcraft.h \
-	data_definitions.hh \
-	data_enums.hh \
 	utf8.h \
 	sc_action.cpp \
 	sc_armory.cpp \
