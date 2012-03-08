@@ -424,11 +424,15 @@ bool player_t::init( sim_t* sim )
   if ( sim -> debug )
     log_t::output( sim, "Initializing Auras, Buffs, and De-Buffs." );
 
-  player_t::sage_sorcerer_init( sim );
-  player_t::shadow_assassin_init( sim );
+  player_t::commando_mercenary_init( sim );
+  player_t::gunslinger_sniper_init( sim );
   player_t::juggernaut_guardian_init( sim );
+  player_t::sage_sorcerer_init( sim );
+  player_t::scoundrel_operative_init( sim );
   player_t::sentinel_marauder_init( sim );
   player_t::commando_mercenary_init( sim );
+  player_t::shadow_assassin_init( sim );
+  player_t::vanguard_powertech_init( sim );
   player_t::enemy_init( sim );
 
   if ( sim -> debug )
@@ -1725,11 +1729,15 @@ double player_t::shield_absorb() const
 
 void player_t::combat_begin( sim_t* sim )
 {
-  player_t::sage_sorcerer_combat_begin( sim );
-  player_t::shadow_assassin_combat_begin( sim );
+  player_t::commando_mercenary_combat_begin( sim );
+  player_t::gunslinger_sniper_combat_begin( sim );
   player_t::juggernaut_guardian_combat_begin( sim );
+  player_t::sage_sorcerer_combat_begin( sim );
+  player_t::scoundrel_operative_combat_begin( sim );
   player_t::sentinel_marauder_combat_begin( sim );
   player_t::commando_mercenary_combat_begin( sim );
+  player_t::shadow_assassin_combat_begin( sim );
+  player_t::vanguard_powertech_combat_begin( sim );
   player_t::enemy_combat_begin( sim );
 
   // FIXME: Move to correct classes
@@ -1787,11 +1795,15 @@ void player_t::combat_begin()
 
 void player_t::combat_end( sim_t* sim )
 {
-  player_t::sage_sorcerer_combat_end( sim );
-  player_t::shadow_assassin_combat_end( sim );
+  player_t::commando_mercenary_combat_end( sim );
+  player_t::gunslinger_sniper_combat_end( sim );
   player_t::juggernaut_guardian_combat_end( sim );
+  player_t::sage_sorcerer_combat_end( sim );
+  player_t::scoundrel_operative_combat_end( sim );
   player_t::sentinel_marauder_combat_end( sim );
   player_t::commando_mercenary_combat_end( sim );
+  player_t::shadow_assassin_combat_end( sim );
+  player_t::vanguard_powertech_combat_end( sim );
   player_t::enemy_combat_end( sim );
 }
 
