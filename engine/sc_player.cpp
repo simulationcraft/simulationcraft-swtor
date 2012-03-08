@@ -1924,9 +1924,8 @@ void player_t::merge( player_t& other )
     benefit -> merge( other.get_benefit( benefit -> name_str ) );
   }
 
-  for ( std::map<std::string,int>::const_iterator it = other.action_map.begin(),
-        end = other.action_map.end(); it != end; ++it )
-    action_map[ it -> first ] += it -> second;
+  for ( auto const& item :  other.action_map )
+    action_map[ item.first ] += item.second;
 }
 
 // player_t::reset ==========================================================
@@ -2285,16 +2284,19 @@ void player_t::clear_debuffs()
 
 // player_t::print_action_map ===============================================
 
-std::string player_t::print_action_map( int iterations, int precision )
+std::string player_t::print_action_map( int iterations, int precision ) const
 {
   std::ostringstream ret;
   ret.precision( precision );
   ret << "Label: Number of executes (Average number of executes per iteration)<br />\n";
 
-  for ( std::map<std::string,int>::const_iterator it = action_map.begin(), end = action_map.end(); it != end; ++it )
+  std::vector<std::pair<std::string, int>> vec( action_map.begin(), action_map.end() );
+  boost::sort( vec );
+
+  for ( auto const& item : vec )
   {
-    ret << it -> first << ": " << it -> second;
-    if ( iterations > 0 ) ret << " (" << ( ( double )it -> second ) / iterations << ')';
+    ret << item.first << ": " << item.second;
+    if ( iterations > 0 ) ret << " (" << ( ( double )item.second ) / iterations << ')';
     ret << "<br />\n";
   }
 

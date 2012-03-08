@@ -2229,7 +2229,7 @@ int sim_t::main( int argc, char** argv )
 
 int sim_t::errorf( const char* format, ... )
 {
-  char *p_locale = util_t::dup( setlocale( LC_CTYPE, NULL ) );
+  std::string p_locale = setlocale( LC_CTYPE, NULL );
   setlocale( LC_CTYPE, "" );
 
   va_list fmtargs;
@@ -2244,8 +2244,7 @@ int sim_t::errorf( const char* format, ... )
   fputs( buffer, output_file );
   fputc( '\n', output_file );
 
-  setlocale( LC_CTYPE, p_locale );
-  free( p_locale );
+  setlocale( LC_CTYPE, p_locale.c_str() );
 
   error_list.push_back( buffer );
   return retcode;

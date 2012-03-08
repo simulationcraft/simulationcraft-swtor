@@ -7,7 +7,7 @@
 
 // Platform Initialization ==================================================
 
-#if defined( _MSC_VER ) || defined( __MINGW__ ) ||defined( __MINGW32__ ) || defined( _WINDOWS ) || defined( WIN32 )
+#if defined( _MSC_VER ) || defined( __MINGW__ ) || defined( __MINGW32__ ) || defined( _WINDOWS ) || defined( WIN32 )
 #  define WIN32_LEAN_AND_MEAN
 #  define VC_EXTRALEAN
 #  define _CRT_SECURE_NO_WARNINGS
@@ -51,23 +51,13 @@
 #include <stack>
 #include <string>
 #include <typeinfo>
+#include <unordered_map>
 #include <vector>
 
 // Boost includes
 #include <boost/checked_delete.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext.hpp>
-
-
-#if _MSC_VER || __cplusplus >= 201103L
-#include <unordered_map>
-#if _MSC_VER < 1600
-namespace std {using namespace tr1; }
-#endif
-#else
-#include <tr1/unordered_map>
-namespace std {using namespace tr1; }
-#endif
 
 // GCC (and probably the C++ standard in general) doesn't like offsetof on non-POD types
 #ifdef _MSC_VER
@@ -1364,7 +1354,6 @@ enum option_type_t
   OPT_NONE=0,
   OPT_STRING,     // std::string*
   OPT_APPEND,     // std::string* (append)
-  OPT_CHARP,      // char*
   OPT_BOOL,       // int (only valid values are 1 and 0)
   OPT_INT,        // int
   OPT_FLT,        // double
@@ -1465,8 +1454,6 @@ public:
 
   static double ability_rank( int player_level, double ability_value, int ability_level, ... );
   static int    ability_rank( int player_level, int    ability_value, int ability_level, ... );
-
-  static char* dup( const char* );
 
   static const char* attribute_type_string     ( int type );
   static const char* dmg_type_string           ( int type );
@@ -2002,7 +1989,7 @@ struct action_expr_t
   virtual ~action_expr_t() {}
   virtual int evaluate() { return result_type; }
   virtual const char* name() { return name_str.c_str(); }
-  finline bool success() { return ( evaluate() == TOK_NUM ) && ( result_num != 0 ); }
+  bool success() { return ( evaluate() == TOK_NUM ) && ( result_num != 0 ); }
 
   static action_expr_t* parse( action_t*, const std::string& expr_str );
 };
@@ -2180,7 +2167,7 @@ struct sim_t : private thread_t
   // Default stat enchants
   gear_stats_t enchant;
 
-  std::map<std::string,std::string> var_map;
+  std::unordered_map<std::string,std::string> var_map;
   std::vector<option_t> options;
   std::vector<std::string> party_encoding;
   std::vector<std::string> item_db_sources;
@@ -2925,7 +2912,7 @@ struct player_t : public noncopyable
   int         action_list_default;
   cooldown_t* cooldown_list;
   dot_t*      dot_list;
-  std::map<std::string,int> action_map;
+  std::unordered_map<std::string,int> action_map;
   std::vector<action_priority_list_t*> action_priority_list;
 
   // Reporting
@@ -3261,7 +3248,7 @@ public:
   virtual timespan_t available() const { return timespan_t::from_seconds( 0.1 ); }
   virtual action_t* execute_action();
 
-  virtual std::string print_action_map( int iterations, int precision );
+  std::string print_action_map( int iterations, int precision ) const;
 
   virtual void   regen( timespan_t periodicity=timespan_t::from_seconds( 0.25 ) );
   virtual double resource_gain( int resource, double amount, gain_t* g=0, action_t* a=0 );

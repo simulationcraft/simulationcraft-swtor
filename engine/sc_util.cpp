@@ -173,16 +173,6 @@ int util_t::ability_rank( int player_level,
   return ability_value;
 }
 
-// util_t::dup ==============================================================
-
-char* util_t::dup( const char *value )
-{
-  std::size_t n = strlen( value ) + 1;
-  void *p = malloc( n );
-  if ( p ) memcpy( p, value, n );
-  return static_cast<char*>( p );
-}
-
 #ifdef _MSC_VER
 // vsnprintf ================================================================
 
@@ -1446,13 +1436,12 @@ int64_t util_t::parse_date( const std::string& month_day_year )
 
 int util_t::vfprintf_helper( FILE *stream, const char *format, va_list args )
 {
-  char *p_locale = util_t::dup( setlocale( LC_CTYPE, NULL ) );
+  std::string p_locale = setlocale( LC_CTYPE, NULL );
   setlocale( LC_CTYPE, "" );
 
   int retcode = ::vfprintf( stream, format, args );
 
-  setlocale( LC_CTYPE, p_locale );
-  free( p_locale );
+  setlocale( LC_CTYPE, p_locale.c_str() );
 
   return retcode;
 }
