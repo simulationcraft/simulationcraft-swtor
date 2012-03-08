@@ -130,7 +130,7 @@ SRC = \
 	class_modules\sc_shadow_assassin.cpp \
 	class_modules\sc_vanguard_powertech.cpp
 
-SRC_H   := $(filter %.h, $(SRC)) $(filter %.hh, $(SRC))
+SRC_H   := $(filter %.h, $(SRC)) $(filter %.hh, $(SRC)) $(filter %.hpp, $(SRC))
 SRC_CPP := $(filter %.cpp, $(SRC))
 OBJ_DIR = .
 OBJ_EXT = o
