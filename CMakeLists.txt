@@ -73,7 +73,7 @@ SET(SIMC_ENGINE_SOURCE
 )
 
 SET(SIMC_ENGINE_HEADERS
-  "engine/simulationcraft.h"
+  "engine/simulationcraft.hpp"
 )
 
 IF(OPENSSL_FOUND)
@@ -138,7 +138,7 @@ IF(QT4_FOUND)
   )
   
   SET(SIMC_QT_HEADERS_MOC
-    "qt/simulationcraftqt.h"
+    "qt/simulationcraftqt.hpp"
   )
 
   SET(SIMC_QT_HEADERS

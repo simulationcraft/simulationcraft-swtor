@@ -1,9 +1,9 @@
 // ==========================================================================
-// Dedmonwakeen's Raid DPS/TPS Simulator.
-// Send questions to natehieter@gmail.com
+// SimulationCraft for Star Wars: The Old Republic
+// http://code.google.com/p/simulationcraft-swtor/
 // ==========================================================================
 
-#include "simulationcraft.h"
+#include "simulationcraft.hpp"
 
 // TODO
 // * Move all of the buffed_XXX stats into player_t::buffed.

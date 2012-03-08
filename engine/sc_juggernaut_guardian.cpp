@@ -1,9 +1,9 @@
 // ==========================================================================
-// Dedmonwakeen's DPS-DPM Simulator.
-// Send questions to natehieter@gmail.com
+// SimulationCraft for Star Wars: The Old Republic
+// http://code.google.com/p/simulationcraft-swtor/
 // ==========================================================================
 
-#include "simulationcraft.h"
+#include "simulationcraft.hpp"
 
 struct juggernaut_guardian_targetdata_t : public targetdata_t
 {

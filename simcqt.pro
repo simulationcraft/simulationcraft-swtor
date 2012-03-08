@@ -40,7 +40,7 @@ DEPENDPATH += engine
   INCLUDEPATH += "$$BOOST_PATH"
 }
 
-HEADERS += engine/simulationcraft.h
+HEADERS += engine/simulationcraft.hpp
 HEADERS += engine/data_enums.hh
 HEADERS += engine/data_definitions.hh
 HEADERS += engine/utf8.h
@@ -48,7 +48,7 @@ HEADERS += engine/utf8/core.h
 HEADERS += engine/utf8/checked.h
 HEADERS += engine/utf8/unchecked.h
 HEADERS += qt/sc_autoupdate.h
-HEADERS += qt/simulationcraftqt.h
+HEADERS += qt/simulationcraftqt.hpp
 
 SOURCES += engine/sc_action.cpp
 SOURCES += engine/sc_armory.cpp

@@ -1,6 +1,6 @@
 # ==========================================================================
-# Dedmonwakeen's Raid DPS/TPS Simulator.
-# Send questions to natehieter@gmail.com
+# SimulationCraft for Star Wars: The Old Republic
+# http://code.google.com/p/simulationcraft-swtor/
 # ==========================================================================
 
 # To build on Unix/Mac: make
@@ -73,7 +73,7 @@ LINK_LIBS += -L$(OPENSSL_PATH)/lib -lssleay32
 endif
 
 SRC = \
-	simulationcraft.h \
+	simulationcraft.hpp \
 	utf8.h \
 	sc_action.cpp \
 	sc_armory.cpp \

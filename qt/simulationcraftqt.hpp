@@ -1,12 +1,12 @@
 // ==========================================================================
-// Dedmonwakeen's Raid DPS/TPS Simulator.
-// Send questions to natehieter@gmail.com
+// SimulationCraft for Star Wars: The Old Republic
+// http://code.google.com/p/simulationcraft-swtor/
 // ==========================================================================
 
 #ifndef SIMULATIONCRAFTQT_H
 #define SIMULATIONCRAFTQT_H
 
-#include "simulationcraft.h"
+#include "simulationcraft.hpp"
 #include <QtGui/QtGui>
 #include <QtWebKit>
 

@@ -1,9 +1,9 @@
 // ==========================================================================
 // Dedmonwakeen's DPS-DPM Simulator.
-// Send questions to natehieter@gmail.com
+// http://code.google.com/p/simulationcraft-swtor/
 // ==========================================================================
 
-#include "simulationcraft.h"
+#include "simulationcraft.hpp"
 
 struct jedi_sage_targetdata_t : public targetdata_t
 {

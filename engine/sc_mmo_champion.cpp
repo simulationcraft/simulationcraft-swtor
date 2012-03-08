@@ -1,9 +1,9 @@
 // ==========================================================================
-// Dedmonwakeen's Raid DPS/TPS Simulator.
-// Send questions to natehieter@gmail.com
+// SimulationCraft for Star Wars: The Old Republic
+// http://code.google.com/p/simulationcraft-swtor/
 // ==========================================================================
 
-#include "simulationcraft.h"
+#include "simulationcraft.hpp"
 #define RANGE_BITS 24
 #define RANGE_HIGH ((1<<RANGE_BITS)-1)
 #define RANGE_HIGH_MASK (0x3f<<(RANGE_BITS-6))

@@ -1,10 +1,10 @@
 // ==========================================================================
-// Dedmonwakeen's Raid DPS/TPS Simulator.
-// Send questions to natehieter@gmail.com
+// SimulationCraft for Star Wars: The Old Republic
+// http://code.google.com/p/simulationcraft-swtor/
 // ==========================================================================
 
 #include <locale>
-#include "simulationcraft.h"
+#include "simulationcraft.hpp"
 
 // ==========================================================================
 // MAIN
