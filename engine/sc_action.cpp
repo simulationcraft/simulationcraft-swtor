@@ -262,10 +262,11 @@ void action_t::init_action_t_()
   last_reaction_time             = timespan_t::zero;
   cached_targetdata = NULL;
   cached_targetdata_target = NULL;
-  action_dot = NULL;
-  targetdata_dot_offset = -1;
 
-  init_dot( name_str );
+  cached_dot = nullptr;
+  cached_dot_target = nullptr;
+
+  action_dot = NULL;
 
   if ( sim -> debug ) log_t::output( sim, "Player %s creates action %s", player -> name(), name() );
 
@@ -286,28 +287,6 @@ void action_t::init_action_t_()
   stats = player -> get_stats( name_str , this );
 
   rank_level = 0;
-
-#if 0
-  parse_data();
-
-  const spell_data_t* spell = player -> dbc.spell( id );
-
-  if ( id && spell && ! spell -> is_level( player -> level ) && spell -> level() <= MAX_LEVEL )
-  {
-    sim -> errorf( "Player %s attempting to execute action %s without the required level (%d < %d).\n",
-                   player -> name(), name(), player -> level, spell -> level() );
-
-    background = true; // prevent action from being executed
-  }
-#endif
-}
-
-void action_t::init_dot( const std::string& name )
-{
-  std::unordered_map<std::string, std::pair<player_type, size_t> >::iterator doti =
-      sim -> targetdata_items[0].find( name );
-  if ( doti != sim -> targetdata_items[0].end() && doti -> second.first == player -> type )
-    targetdata_dot_offset = ( int )doti->second.second;
 }
 
 action_t::action_t( int               ty,
@@ -329,138 +308,6 @@ action_t::~action_t()
   delete if_expr;
   delete interrupt_if_expr;
 }
-
-#if 0
-// action_t::parse_data =====================================================
-
-void action_t::parse_data()
-{
-  if ( id > 0 && ( spell = player -> dbc.spell( id ) ) )
-  {
-    base_execute_time    = spell -> cast_time( player -> level );
-    cooldown -> duration = spell -> cooldown();
-    range                = spell -> max_range();
-    travel_speed         = spell -> missile_speed();
-    trigger_gcd          = spell -> gcd();
-    school               = spell_id_t::get_school_type( spell -> school_mask() );
-    stats -> school      = school;
-    resource             = spell -> power_type();
-    rp_gain              = spell -> runic_power_gain();
-
-    // For mana it returns the % of base mana, not the absolute cost
-    if ( resource == RESOURCE_MANA )
-      base_cost = floor ( spell -> cost() * player -> resource_base[ RESOURCE_MANA ] );
-    else
-      base_cost = spell -> cost();
-
-    for ( int i=1; i <= MAX_EFFECTS; i++ )
-    {
-      parse_effect_data( id, i );
-    }
-  }
-}
-
-// action_t::parse_effect_data ==============================================
-void action_t::parse_effect_data( int spell_id, int effect_nr )
-{
-  if ( ! spell_id )
-  {
-    sim -> errorf( "%s %s: parse_effect_data: no spell_id provided.\n", player -> name(), name() );
-    return;
-  }
-
-  const spell_data_t* spell = player -> dbc.spell( spell_id );
-  const spelleffect_data_t* effect = player -> dbc.effect( spell -> effect_id( effect_nr ) );
-
-  assert( spell );
-
-  if ( ! effect )
-  {
-    sim -> errorf( "%s %s: parse_effect_data: no effect to parse.\n", player -> name(), name() );
-    return;
-  }
-
-  switch ( effect -> type() )
-  {
-    // Direct Damage
-  case E_HEAL:
-  case E_SCHOOL_DAMAGE:
-  case E_HEALTH_LEECH:
-    direct_power_mod = effect -> coeff();
-    base_dd_min      = player -> dbc.effect_min( effect -> id(), player -> level );
-    base_dd_max      = player -> dbc.effect_max( effect -> id(), player -> level );
-    break;
-
-  case E_NORMALIZED_WEAPON_DMG:
-    normalize_weapon_speed = true;
-  case E_WEAPON_DAMAGE:
-    base_dd_min      = player -> dbc.effect_min( effect -> id(), player -> level );
-    base_dd_max      = player -> dbc.effect_max( effect -> id(), player -> level );
-    weapon = &( player -> main_hand_weapon );
-    break;
-
-  case E_WEAPON_PERCENT_DAMAGE:
-    weapon = &( player -> main_hand_weapon );
-    weapon_multiplier = player -> dbc.effect_min( effect -> id(), player -> level );
-    break;
-
-    // Dot
-  case E_PERSISTENT_AREA_AURA:
-  case E_APPLY_AURA:
-    switch ( effect -> subtype() )
-    {
-    case A_PERIODIC_DAMAGE:
-      if ( school == SCHOOL_PHYSICAL )
-        school = stats -> school = SCHOOL_BLEED;
-    case A_PERIODIC_LEECH:
-    case A_PERIODIC_HEAL:
-      tick_power_mod   = effect -> coeff();
-      base_td_init     = player -> dbc.effect_average( effect -> id(), player -> level );
-      base_td          = base_td_init;
-    case A_PERIODIC_ENERGIZE:
-    case A_PERIODIC_TRIGGER_SPELL_WITH_VALUE:
-    case A_PERIODIC_HEALTH_FUNNEL:
-    case A_PERIODIC_MANA_LEECH:
-    case A_PERIODIC_DAMAGE_PERCENT:
-    case A_PERIODIC_DUMMY:
-    case A_PERIODIC_TRIGGER_SPELL:
-      base_tick_time   = effect -> period();
-      num_ticks        = ( int ) ( spell -> duration() / base_tick_time );
-      break;
-    case A_SCHOOL_ABSORB:
-      direct_power_mod = effect -> coeff();
-      base_dd_min      = player -> dbc.effect_min( effect -> id(), player -> level );
-      base_dd_max      = player -> dbc.effect_max( effect -> id(), player -> level );
-      break;
-    case A_ADD_FLAT_MODIFIER:
-      switch ( effect -> misc_value1() )
-      case E_APPLY_AURA:
-      switch ( effect -> subtype() )
-      {
-      case P_CRIT:
-        base_crit += 0.01 * effect -> base_value();
-        break;
-      case P_COOLDOWN:
-        cooldown -> duration += effect -> time_value();
-        break;
-      default: break;
-      }
-      break;
-    case A_ADD_PCT_MODIFIER:
-      switch ( effect -> misc_value1() )
-      {
-      case P_RESOURCE_COST:
-        base_cost *= 1 + 0.01 * effect -> base_value();
-        break;
-      }
-      break;
-    default: break;
-    }
-    break;
-  default: break;
-  }
-}
-#endif
 
 // action_t::parse_options ==================================================
 
@@ -1024,6 +871,7 @@ void action_t::impact( player_t* t, int impact_result, double travel_dmg=0 )
     if ( num_ticks > 0 )
     {
       dot_t* dot = this -> dot();
+      assert( dot );
       if ( dot_behavior != DOT_REFRESH ) dot -> cancel();
       dot -> action = this;
       dot -> num_ticks = hasted_num_ticks();
@@ -1692,9 +1540,11 @@ action_expr_t* action_t::create_expression( const std::string& name_str )
 
   if ( num_splits == 3 && ( splits[0] == "buff" || splits[0] == "debuff" || splits[0] == "aura" ) )
   {
-    buff_t* buff = sim -> get_targetdata_aura( player, target, splits[1] );
-    if ( buff )
-      return buff -> create_expression( this, splits[ 2 ] );
+    if ( targetdata_t* td = player -> get_targetdata( target ) )
+    {
+      if ( buff_t* buff = td -> get_buff( splits[ 1 ] ) )
+        return buff -> create_expression( this, splits[ 2 ] );
+    }
   }
 
   if ( num_splits >= 2 && ( splits[ 0 ] == "debuff" || splits[ 0 ] == "dot" ) )

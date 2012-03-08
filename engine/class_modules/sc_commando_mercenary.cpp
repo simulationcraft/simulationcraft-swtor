@@ -7,18 +7,10 @@
 
 struct commando_mercenary_targetdata_t : public targetdata_t
 {
-    commando_mercenary_targetdata_t( player_t* source, player_t* target )
-        : targetdata_t( source, target )
-    {}
+  commando_mercenary_targetdata_t( player_t& source, player_t& target )
+    : targetdata_t( source, target )
+  {}
 };
-
-void register_commando_mercenary_targetdata( sim_t* /* sim */ )
-{
-    // player_type t = BH_MERCENARY;
-    typedef commando_mercenary_targetdata_t type;
-
-}
-
 
 // ==========================================================================
 // Commando | Mercenary
@@ -88,7 +80,9 @@ struct commando_mercenary_t : public player_t
     }
 
     // Character Definition
-    virtual targetdata_t* new_targetdata( player_t* source, player_t* target ) {return new commando_mercenary_targetdata_t( source, target );}
+    virtual targetdata_t* new_targetdata( player_t& target ) // override
+    { return new commando_mercenary_targetdata_t( *this, target ); }
+
     virtual action_t* create_action( const std::string& name, const std::string& options );
     virtual void      init_talents();
     virtual void      init_base();

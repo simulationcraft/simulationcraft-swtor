@@ -629,20 +629,6 @@ sim_t::sim_t( sim_t* p, int index ) :
   // Multi-Threading
   threads( 0 ), thread_index( index )
 {
-  register_sage_sorcerer_targetdata( this );
-  register_sith_sorcerer_targetdata( this );
-
-  register_commando_mercenary_targetdata( this );
-  register_gunslinger_sniper_targetdata( this );
-  register_juggernaut_guardian_targetdata( this );
-  register_sentinel_marauder_targetdata( this );
-  //register_sage_sorcerer_targetdata( this );
-  register_shadow_assassin_targetdata( this );
-  register_commando_mercenary_targetdata( this );
-  register_scoundrel_operative_targetdata( this );
-  register_shadow_assassin_targetdata( this );
-  register_vanguard_powertech_targetdata( this );
-
   path_str += "|profiles";
 
   path_str += "|..";
@@ -707,35 +693,11 @@ sim_t::~sim_t()
 {
   flush_events();
 
-  while ( player_t* t = target_list )
-  {
-    target_list = t -> next;
-    delete t;
-  }
-
-  while ( player_t* p = player_list )
-  {
-    player_list = p -> next;
-    delete p;
-  }
-
-  while ( rng_t* r = rng_list )
-  {
-    rng_list = r -> next;
-    delete r;
-  }
-
-  while ( buff_t* b = buff_list )
-  {
-    buff_list = b -> next;
-    delete b;
-  }
-
-  while ( cooldown_t* d = cooldown_list )
-  {
-    cooldown_list = d -> next;
-    delete d;
-  }
+  dispose_list( target_list );
+  dispose_list( player_list );
+  dispose_list( rng_list );
+  dispose_list( buff_list );
+  dispose_list( cooldown_list );
 
   delete rng;
   delete deterministic_rng;
@@ -1126,7 +1088,7 @@ bool sim_t::init()
   // Timing wheel depth defaults to about 17 minutes with a granularity of 32 buckets per second.
   // This makes wheel_size = 32K and it's fully used.
   if ( wheel_seconds     <  600 ) wheel_seconds     = 1024; // 2^10  Min of 600 to ensure no wrap-around bugs with Water Shield
-  if ( wheel_granularity <=   0 ) wheel_granularity = 32; // 2^5
+  if ( wheel_granularity <=   0 ) wheel_granularity = 32;   // 2^5
 
   wheel_size = ( uint32_t ) ( wheel_seconds * wheel_granularity );
 
@@ -1137,8 +1099,8 @@ bool sim_t::init()
 
   // The timing wheel represents an array of event lists: Each time slice has an event list.
   delete[] timing_wheel;
-  timing_wheel= new event_t*[wheel_size];
-  memset( timing_wheel,0,sizeof( event_t* )*wheel_size );
+  timing_wheel = new event_t*[wheel_size];
+  std::fill( timing_wheel, timing_wheel + wheel_size, nullptr );
 
 
   if (   queue_lag_stddev == timespan_t::zero )   queue_lag_stddev =   queue_lag * 0.25;
@@ -2259,25 +2221,4 @@ int sim_t::errorf( const char* format, ... )
 
   error_list.push_back( buffer );
   return retcode;
-}
-
-void sim_t::register_targetdata_item( int kind, const char* name, player_type type, size_t offset )
-{
-  std::string s = name;
-  targetdata_items[kind][s] = std::make_pair( type, offset );
-  if ( kind == DATA_DOT )
-    targetdata_dots[type].push_back( std::make_pair( offset, s ) );
-}
-
-void* sim_t::get_targetdata_item( player_t* source, player_t* target, int kind, const std::string& name )
-{
-  std::unordered_map<std::string, std::pair<player_type, size_t> >::iterator i = targetdata_items[kind].find( name );
-  if ( i != targetdata_items[kind].end() )
-  {
-    if ( source->type == i->second.first )
-    {
-      return *( void** )( ( char* )targetdata_t::get( source, target ) + i->second.second );
-    }
-  }
-  return 0;
 }

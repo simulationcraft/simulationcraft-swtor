@@ -7,49 +7,33 @@
 
 struct sage_sorcerer_targetdata_t : public targetdata_t
 {
-  dot_t* dots_telekinetic_throw;
-  dot_t* dots_mind_crush;
-  dot_t* dots_weaken_mind;
-  dot_t* dots_sever_force;
+  dot_t dot_telekinetic_throw;
+  dot_t dot_mind_crush;
+  dot_t dot_weaken_mind;
+  dot_t dot_sever_force;
 
-  sage_sorcerer_targetdata_t( player_t* source, player_t* target )
-    : targetdata_t( source, target )
-  {}
+  sage_sorcerer_targetdata_t( player_t& source, player_t& target )
+    : targetdata_t( source, target ),
+      dot_telekinetic_throw( "telekinetic_throw", &source ),
+      dot_mind_crush( "mind_crush", &source ),
+      dot_weaken_mind( "weaken_mind", &source ),
+      dot_sever_force( "sever_force", &source )
+  {
+    add( dot_telekinetic_throw );
+    alias( dot_telekinetic_throw, "force_lightning" );
+
+    add( dot_mind_crush );
+    alias( dot_mind_crush, "mind_crush_dot" );
+    alias( dot_mind_crush, "crushing_darkness" );
+    alias( dot_mind_crush, "crushing_darkness_dot" );
+
+    add( dot_weaken_mind );
+    alias( dot_weaken_mind, "affliction" );
+
+    add( dot_sever_force );
+    alias( dot_sever_force, "creeping_terror" );
+  }
 };
-
-void register_sage_sorcerer_targetdata( sim_t*  sim  )
-{
-  player_type t = JEDI_SAGE;
-  typedef sage_sorcerer_targetdata_t type;
-
-  REGISTER_DOT( telekinetic_throw, telekinetic_throw );
-  REGISTER_DOT( mind_crush, mind_crush );
-  REGISTER_DOT( weaken_mind, weaken_mind );
-  REGISTER_DOT( sever_force, sever_force );
-}
-
-struct sith_sorcerer_targetdata_t : public targetdata_t
-{
-  dot_t* dots_force_lightning;
-  dot_t* dots_crushing_darkness;
-  dot_t* dots_affliction;
-  dot_t* dots_creeping_terror;
-
-  sith_sorcerer_targetdata_t( player_t* source, player_t* target )
-    : targetdata_t( source, target )
-  {}
-};
-
-void register_sith_sorcerer_targetdata( sim_t*  sim  )
-{
-  player_type t = SITH_SORCERER;
-  typedef sith_sorcerer_targetdata_t type;
-
-  REGISTER_DOT( force_lightning, force_lightning );
-  REGISTER_DOT( crushing_darkness, crushing_darkness );
-  REGISTER_DOT( affliction, affliction );
-  REGISTER_DOT( creeping_terror, creeping_terror );
-}
 
 // ==========================================================================
 // Jedi Sage
@@ -189,8 +173,8 @@ struct sage_sorcerer_t : public player_t
   }
 
   // Character Definition
-  virtual targetdata_t* new_targetdata( player_t* source, player_t* target )
-  { return new sage_sorcerer_targetdata_t( source, target ); }
+  virtual targetdata_t* new_targetdata( player_t& target ) // override
+  { return new sage_sorcerer_targetdata_t( *this, target ); }
 
   virtual void      init_talents();
   virtual void      init_base();
@@ -243,17 +227,31 @@ struct sage_sorcerer_t : public player_t
 
 namespace { // ANONYMOUS NAMESPACE ==========================================
 
+class sage_sorcerer_action_t : public action_t
+{
+public:
+  sage_sorcerer_action_t( const std::string& n, sage_sorcerer_t* player,
+                          attack_policy_t policy, resource_type r, school_type s ) :
+    action_t( ACTION_ATTACK, n.c_str(), player, policy, r, s )
+  {}
+
+  sage_sorcerer_targetdata_t* targetdata() const
+  { return static_cast<sage_sorcerer_targetdata_t*>( action_t::targetdata() ); }
+
+  sage_sorcerer_t* cast() const
+  { return static_cast<sage_sorcerer_t*>( player ); }
+};
 
 // ==========================================================================
 // Jedi Sage Abilities
 // ==========================================================================
 
-struct sage_sorcerer_spell_t : public action_t
+struct sage_sorcerer_spell_t : public sage_sorcerer_action_t
 {
   bool influenced_by_inner_strength;
 
   sage_sorcerer_spell_t( const std::string& n, sage_sorcerer_t* p, school_type s=SCHOOL_KINETIC ) :
-    action_t( ACTION_ATTACK, n.c_str(), p, force_policy, RESOURCE_FORCE, s ),
+    sage_sorcerer_action_t( n, p, force_policy, RESOURCE_FORCE, s ),
     influenced_by_inner_strength( true )
   {
     may_crit   = true;
@@ -264,7 +262,7 @@ struct sage_sorcerer_spell_t : public action_t
   {
     action_t::init();
 
-    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+    sage_sorcerer_t* p = cast();
 
     if ( td.base_min > 0 && ! channeled )
       crit_bonus += p -> talents.mental_scarring -> rank() * 0.1;
@@ -274,7 +272,7 @@ struct sage_sorcerer_spell_t : public action_t
   {
     timespan_t et = action_t::execute_time();
 
-    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+    sage_sorcerer_t* p = cast();
 
     if ( base_execute_time > timespan_t::zero && p -> buffs.presence_of_mind -> up() )
       et = timespan_t::zero;
@@ -286,7 +284,7 @@ struct sage_sorcerer_spell_t : public action_t
   {
     action_t::execute();
 
-    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+    sage_sorcerer_t* p = cast();
 
     if ( base_execute_time > timespan_t::zero )
       p -> buffs.presence_of_mind -> expire();
@@ -299,7 +297,7 @@ struct sage_sorcerer_spell_t : public action_t
   {
     action_t::player_buff();
 
-    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+    sage_sorcerer_t* p = cast();
 
     if ( base_execute_time > timespan_t::zero && p -> buffs.presence_of_mind -> up() )
       dd.player_multiplier *= 1.20;
@@ -312,7 +310,7 @@ struct sage_sorcerer_spell_t : public action_t
   {
     action_t::target_debuff( t, dmg_type );
 
-    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+    sage_sorcerer_t* p = cast();
 
     // This method is in target_debuff so that it is checked before every dot tick
 
@@ -326,7 +324,7 @@ struct sage_sorcerer_spell_t : public action_t
   {
     action_t::assess_damage( t, dmg_amount, dmg_type, dmg_result );
 
-    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+    sage_sorcerer_t* p = cast();
 
     // Procs from all critical damage including dot ticks. Source:  17/01/2012 http://sithwarrior.com/forums/Thread-Sorcerer-Sage-Mechanics-and-Quirks
 
@@ -340,7 +338,7 @@ struct sage_sorcerer_spell_t : public action_t
   {
     double c = action_t::cost();
 
-    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+    sage_sorcerer_t* p = cast();
 
     if ( p -> talents.inner_strength -> rank() > 0 && influenced_by_inner_strength )
     {
@@ -361,7 +359,7 @@ struct sage_sorcerer_spell_t : public action_t
   {
     action_t::consume_resource();
 
-    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+    sage_sorcerer_t* p = cast();
 
     p -> buffs.telekinetic_effusion -> up();
   }
@@ -370,7 +368,7 @@ struct sage_sorcerer_spell_t : public action_t
   {
     action_t::tick( d );
 
-    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+    sage_sorcerer_t* p = cast();
 
     if ( tick_dmg > 0 && !channeled )
     {
@@ -463,7 +461,7 @@ struct project_t : public sage_sorcerer_spell_t
 
     if ( upheaval )
     {
-      sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+      sage_sorcerer_t* p = cast();
 
       if ( p -> rngs.upheaval -> roll( p -> talents.upheaval -> rank() * 0.15 ) )
         upheaval -> execute();
@@ -511,7 +509,7 @@ struct telekinetic_throw_t : public sage_sorcerer_spell_t
 
   virtual void execute()
   {
-    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+    sage_sorcerer_t* p = cast();
 
     if ( p -> buffs.psychic_projection -> up()
          || ( p -> buffs.psychic_projection_dd -> up() && p -> rngs.psychic_projection_dd -> roll ( p -> psychic_projection_dd_chance ) )
@@ -543,7 +541,7 @@ struct telekinetic_throw_t : public sage_sorcerer_spell_t
   {
     sage_sorcerer_spell_t::last_tick( d );
 
-    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+    sage_sorcerer_t* p = cast();
 
     if ( is_buffed_by_psychic_projection )
       p -> buffs.psychic_projection -> expire();
@@ -555,7 +553,7 @@ struct telekinetic_throw_t : public sage_sorcerer_spell_t
 
     if ( tick_dmg > 0 )
     {
-      sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+      sage_sorcerer_t* p = cast();
 
       if ( p -> talents.psychic_barrier -> rank() > 0 && p -> rngs.psychic_barrier -> roll( p -> talents.psychic_barrier -> rank() * ( 1 / 3.0 ) ) )
       {
@@ -615,7 +613,7 @@ struct disturbance_t : public sage_sorcerer_spell_t
 
     if ( result_is_hit( impact_result ) )
     {
-      sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+      sage_sorcerer_t* p = cast();
 
       p -> buffs.concentration -> trigger();
 
@@ -630,7 +628,7 @@ struct disturbance_t : public sage_sorcerer_spell_t
 
     if ( tm )
     {
-      sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+      sage_sorcerer_t* p = cast();
 
       if ( p -> rngs.tm -> roll( p -> talents.telekinetic_momentum -> rank() * 0.10 ) )
       {
@@ -667,7 +665,7 @@ struct mind_crush_t : public sage_sorcerer_spell_t
     {
       sage_sorcerer_spell_t::target_debuff( t, dmg_type );
 
-      sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+      sage_sorcerer_t* p = cast();
 
       if ( p -> talents.force_suppression -> rank() > 0 )
         p -> benefits.fs_mind_crush -> update( p -> buffs.force_suppression -> check() > 0 );
@@ -735,7 +733,7 @@ struct weaken_mind_t : public sage_sorcerer_spell_t
   {
     sage_sorcerer_spell_t::tick( d );
 
-    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+    sage_sorcerer_t* p = cast();
 
     if ( result == RESULT_CRIT && p -> talents.psychic_projection -> rank() > 0 )
     {
@@ -749,7 +747,7 @@ struct weaken_mind_t : public sage_sorcerer_spell_t
   {
     sage_sorcerer_spell_t::target_debuff( t, dmg_type );
 
-    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+    sage_sorcerer_t* p = cast();
 
     if ( p -> talents.force_suppression -> rank() > 0 )
       p -> benefits.fs_weaken_mind -> update( p -> buffs.force_suppression -> check() > 0 );
@@ -785,26 +783,11 @@ struct turbulence_t : public sage_sorcerer_spell_t
     sage_sorcerer_spell_t::target_debuff( t, dmg_type );
 
     assert( t == target );
+    sage_sorcerer_targetdata_t& td = dynamic_cast<sage_sorcerer_targetdata_t&>( *targetdata() );
 
-    bool increase_crit_chance = false;
-    if ( player -> type == JEDI_SAGE )
-    {
-      sage_sorcerer_targetdata_t* td = targetdata() -> cast_sage_sorcerer();
+    bool increase_crit_chance = td.dot_weaken_mind.ticking != 0;
 
-      if ( td -> dots_weaken_mind -> ticking )
-        increase_crit_chance = true;
-    }
-    else if ( player -> type == SITH_SORCERER )
-    {
-      sith_sorcerer_targetdata_t* td = targetdata() -> cast_sith_sorcerer();
-
-      if ( td -> dots_affliction -> ticking )
-        increase_crit_chance = true;
-    }
-    else
-      assert( 0 );
-
-    player -> cast_sage_sorcerer() -> benefits.turbulence -> update( increase_crit_chance );
+    cast() -> benefits.turbulence -> update( increase_crit_chance );
 
     if ( increase_crit_chance )
       target_crit += 1.0;
@@ -839,7 +822,7 @@ struct force_in_balance_t : public sage_sorcerer_spell_t
   {
     sage_sorcerer_spell_t::execute();
 
-    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+    sage_sorcerer_t* p = cast();
 
     // ToDo: Move buff to targetdata and buff trigger to impact
 
@@ -873,7 +856,7 @@ struct sever_force_t : public sage_sorcerer_spell_t
   {
     sage_sorcerer_spell_t::target_debuff( t, dmg_type );
 
-    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+    sage_sorcerer_t* p = cast();
 
     if ( p -> talents.force_suppression -> rank() > 0 )
       p -> benefits.fs_sever_force -> update( p -> buffs.force_suppression -> check() > 0 );
@@ -898,7 +881,7 @@ struct mental_alacrity_t : public sage_sorcerer_spell_t
   {
     sage_sorcerer_spell_t::execute();
 
-    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+    sage_sorcerer_t* p = cast();
 
     p -> buffs.mental_alacrity -> trigger();
   }
@@ -955,7 +938,7 @@ struct telekinetic_wave_t : public sage_sorcerer_spell_t
 
     if ( tm )
     {
-      sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+      sage_sorcerer_t* p = cast();
 
       if ( p -> rngs.tm -> roll( p -> talents.telekinetic_momentum -> rank() * 0.10 ) )
       {
@@ -969,7 +952,7 @@ struct telekinetic_wave_t : public sage_sorcerer_spell_t
   {
     timespan_t et = sage_sorcerer_spell_t::execute_time();
 
-    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+    sage_sorcerer_t* p = cast();
 
     if ( p -> buffs.tidal_force -> up() )
       et = timespan_t::zero;
@@ -981,7 +964,7 @@ struct telekinetic_wave_t : public sage_sorcerer_spell_t
   {
     sage_sorcerer_spell_t::update_ready();
 
-    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+    sage_sorcerer_t* p = cast();
 
     p -> buffs.tidal_force -> expire();
   }
@@ -1003,7 +986,7 @@ struct force_potency_t : public sage_sorcerer_spell_t
   {
     sage_sorcerer_spell_t::execute();
 
-    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+    sage_sorcerer_t* p = cast();
 
     p -> buffs.force_potency -> trigger( 2 );
   }
@@ -1022,11 +1005,13 @@ struct sage_sorcerer_heal_t : public heal_t
     tick_may_crit = true;
   }
 
+  sage_sorcerer_t* cast() const { return static_cast<sage_sorcerer_t*>( player ); }
+
   virtual void init()
   {
     heal_t::init();
 
-    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+    sage_sorcerer_t* p = cast();
 
     if ( td.base_min > 0 && !channeled )
       crit_bonus += p -> talents.mental_scarring -> rank() * 0.1;
@@ -1036,7 +1021,7 @@ struct sage_sorcerer_heal_t : public heal_t
   {
     double c = heal_t::cost();
 
-    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+    sage_sorcerer_t* p = cast();
 
     if ( p -> talents.inner_strength -> rank() > 0 && influenced_by_inner_strength )
     {
@@ -1057,7 +1042,7 @@ struct sage_sorcerer_heal_t : public heal_t
   {
     heal_t::consume_resource();
 
-    sage_sorcerer_t* p = player -> cast_sage_sorcerer();
+    sage_sorcerer_t* p = cast();
 
     p -> buffs.telekinetic_effusion -> up();
   }

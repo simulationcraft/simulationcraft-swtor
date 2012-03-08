@@ -5,27 +5,19 @@
 
 #include "../simulationcraft.hpp"
 
-struct gunslinger_sniper_targetdata_t : public targetdata_t
-{
-    gunslinger_sniper_targetdata_t( player_t* source, player_t* target )
-        : targetdata_t( source, target )
-    {}
-};
-
-void register_gunslinger_sniper_targetdata( sim_t* /* sim */ )
-{
-    // player_type t = SITH_MARAUDER;
-    typedef gunslinger_sniper_targetdata_t type;
-
-}
-
-
 // ==========================================================================
 // Gunslinger / Sniper
 // ==========================================================================
 
 struct gunslinger_sniper_t : public player_t
 {
+  struct targetdata_t : public ::targetdata_t
+  {
+    targetdata_t( player_t& source, player_t& target )
+      : ::targetdata_t( source, target )
+    {}
+  };
+
     // Buffs
     struct buffs_t
     {
@@ -88,7 +80,8 @@ struct gunslinger_sniper_t : public player_t
     }
 
     // Character Definition
-    virtual targetdata_t* new_targetdata( player_t* source, player_t* target ) {return new gunslinger_sniper_targetdata_t( source, target );}
+    virtual ::targetdata_t* new_targetdata( player_t& target ) // override
+    { return new targetdata_t( *this, target ); }
     virtual action_t* create_action( const std::string& name, const std::string& options );
     virtual void      init_talents();
     virtual void      init_base();

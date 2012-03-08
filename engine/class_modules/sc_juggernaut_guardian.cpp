@@ -7,18 +7,10 @@
 
 struct juggernaut_guardian_targetdata_t : public targetdata_t
 {
-
-    juggernaut_guardian_targetdata_t( player_t* source, player_t* target )
-        : targetdata_t( source, target )
-    {}
+  juggernaut_guardian_targetdata_t( player_t& source, player_t& target )
+    : targetdata_t( source, target )
+  {}
 };
-
-void register_juggernaut_guardian_targetdata( sim_t* /* sim */ )
-{
-    // player_type t = SITH_JUGGERNAUT;
-    typedef juggernaut_guardian_targetdata_t type;
-
-}
 
 
 // ==========================================================================
@@ -89,7 +81,9 @@ struct juggernaut_guardian_t : public player_t
     }
 
     // Character Definition
-    virtual targetdata_t* new_targetdata( player_t* source, player_t* target ) {return new juggernaut_guardian_targetdata_t( source, target );}
+    virtual targetdata_t* new_targetdata( player_t& target ) // override
+    { return new juggernaut_guardian_targetdata_t( *this, target ); }
+
     virtual action_t* create_action( const std::string& name, const std::string& options );
     virtual void      init_talents();
     virtual void      init_base();

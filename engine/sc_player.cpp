@@ -306,7 +306,7 @@ player_t::player_t( sim_t*             s,
   // Movement & Position
   base_movement_speed( 7.0 ), x_position( 0.0 ), y_position( 0.0 ),
   buffs( buffs_t() ), debuffs( debuffs_t() ), gains( gains_t() ), rng_list( 0 ), rngs( rngs_t() ),
-  set_bonus( set_bonuses_t() ), targetdata_id( -1 )
+  set_bonus( set_bonuses_t() ), targetdata_id( s -> num_targetdata_ids++ )
 {
   sim -> actor_list.push_back( this );
 
@@ -412,15 +412,43 @@ player_t::~player_t()
 
 bool player_t::init( sim_t* sim )
 {
-  if ( sim -> debug )
-    log_t::output( sim, "Creating Pets." );
-
-  for ( unsigned int i = 0; i < sim -> actor_list.size(); i++ )
+  // ========================================================================
   {
-    player_t* p = sim -> actor_list[i];
-    p -> create_pets();
+    if ( sim -> debug )
+      log_t::output( sim, "Creating Pets." );
+
+    for ( unsigned int i = 0; i < sim -> actor_list.size(); i++ )
+    {
+      player_t* p = sim -> actor_list[i];
+      p -> create_pets();
+    }
   }
 
+  // ========================================================================
+  {
+    if ( sim -> debug )
+      log_t::output( sim, "Initializing Targetdata." );
+
+    for ( player_t* p : sim -> actor_list )
+    {
+      p -> targetdata.resize( sim -> num_targetdata_ids, nullptr );
+      p -> sourcedata.resize( sim -> num_targetdata_ids, nullptr );
+    }
+
+    for ( player_t* p : sim -> actor_list )
+    {
+      assert( p );
+      for ( player_t* q : sim -> actor_list )
+      {
+        assert( q );
+        targetdata_t* td = p -> new_targetdata( *q );
+        p -> targetdata[ q -> targetdata_id ] = td;
+        q -> sourcedata[ p -> targetdata_id ] = td;
+      }
+    }
+  }
+
+  // ========================================================================
   if ( sim -> debug )
     log_t::output( sim, "Initializing Auras, Buffs, and De-Buffs." );
 
@@ -434,6 +462,7 @@ bool player_t::init( sim_t* sim )
   player_t::vanguard_powertech_init( sim );
   player_t::enemy_init( sim );
 
+  // ========================================================================
   if ( sim -> debug )
     log_t::output( sim, "Initializing Players." );
 
@@ -449,6 +478,7 @@ bool player_t::init( sim_t* sim )
     if ( p -> primary_role() != ROLE_HEAL && p -> primary_role() != ROLE_TANK && ! p -> is_pet() ) zero_dds = false;
   }
 
+  // ========================================================================
   if ( too_quiet && ! sim -> debug )
   {
     sim -> errorf( "No active players in sim!" );
@@ -459,7 +489,8 @@ bool player_t::init( sim_t* sim )
   if ( zero_dds && ! sim -> debug )
     sim -> fixed_time = true;
 
-  // Parties
+
+  // ========================================================================
   if ( sim -> debug )
     log_t::output( sim, "Building Parties." );
 
@@ -509,7 +540,8 @@ bool player_t::init( sim_t* sim )
     }
   }
 
-  // Callbacks
+
+  // ========================================================================
   if ( sim -> debug )
     log_t::output( sim, "Registering Callbacks." );
 
@@ -2044,10 +2076,10 @@ void player_t::reset()
 
   for ( dot_t* d = dot_list; d; d = d -> next ) d -> reset();
 
-  for ( std::vector<targetdata_t*>::iterator i = targetdata.begin(); i != targetdata.end(); ++i )
+  for ( auto p : targetdata )
   {
-    if ( *i )
-      ( *i )->reset();
+    if ( p )
+      p -> reset();
   }
 
   for ( stats_t* s = stats_list; s; s = s -> next ) s -> reset();
@@ -4439,36 +4471,6 @@ talent_t* player_t::find_talent( const std::string& n,
   return 0;
 }
 
-#if 0
-// player_t::create_glyphs ==================================================
-
-void player_t::create_glyphs()
-{
-  std::vector<unsigned> glyph_ids = dbc_t::glyphs( util_t::class_id( type ), dbc.ptr );
-
-  size_t size=glyph_ids.size();
-  for ( size_t i=0; i < size; i++ )
-    glyphs.push_back( new glyph_t( this, spell_data_t::find( glyph_ids[ i ], dbc.ptr ) ) );
-}
-
-// player_t::find_glyph =====================================================
-
-glyph_t* player_t::find_glyph( const std::string& n )
-{
-  size_t size=glyphs.size();
-  for ( size_t i=0; i < size; i++ )
-  {
-    glyph_t* g = glyphs[ i ];
-    if ( n == g -> sd -> name_cstr() ) return g;
-    if ( n == g -> s_token ) return g; // Armory-ized
-  }
-
-  sim -> errorf( "\nPlayer %s unable to find glyph %s\n", name(), n.c_str() );
-
-  return 0;
-}
-#endif
-
 // player_t::create_expression ==============================================
 
 action_expr_t* player_t::create_expression( action_t* a,
@@ -4774,8 +4776,7 @@ action_expr_t* player_t::create_expression( action_t* a,
   {
     if ( splits[ 0 ] == "buff" || splits[ 0 ] == "debuff" || splits[ 0 ] == "aura" )
     {
-      buff_t* buff;
-      buff = sim->get_targetdata_aura( a -> player, this, splits[1] );
+      buff_t* buff = get_targetdata( this ) -> get_buff( splits[ 1 ] );
       if ( ! buff ) buff = buff_t::find( this, splits[ 1 ] );
       if ( ! buff ) buff = buff_t::find( sim, splits[ 1 ] );
       if ( ! buff ) return 0;
@@ -4798,7 +4799,11 @@ action_expr_t* player_t::create_expression( action_t* a,
     else if ( splits[ 0 ] == "dot" )
     {
       dot_t* dot = 0;
-      dot = sim->get_targetdata_dot( a -> player, this, splits[1] );
+      for ( targetdata_t* p : sourcedata )
+      {
+        if ( p && ( dot = p -> get_dot( splits[ 1 ] ) ) )
+          break;
+      }
       if ( ! dot )
         dot = get_dot( splits[ 1 ] );
       if ( ! dot )
@@ -5288,53 +5293,84 @@ player_t* player_t::create( sim_t*             sim,
   return 0;
 }
 
-targetdata_t* player_t::new_targetdata( player_t* source, player_t* target )
-{
-  return new targetdata_t( source, target );
-}
-
 // ==========================================================================
 // Target data
 // ==========================================================================
 
-targetdata_t* targetdata_t::get( player_t* source, player_t* target )
+targetdata_t* player_t::get_targetdata( player_t* target ) const
 {
-  int id = source->targetdata_id;
-  if ( id < 0 )
-    source -> targetdata_id = id = source -> sim -> num_targetdata_ids++;
-
-  if ( id >= ( int ) target -> targetdata.size() )
-    target -> targetdata.resize( id + 1 );
-
-  targetdata_t* p = target->targetdata[id];
-  if ( ! p )
-    target -> targetdata[id] = p = source -> new_targetdata( source, target );
-
-  return p;
+  if ( ! target ) return nullptr;
+  assert( target -> targetdata_id < targetdata.size() );
+  return targetdata[ target -> targetdata_id ];
 }
 
-targetdata_t::targetdata_t( player_t* source, player_t* target )
-  : source( ( player_t* )source ), target( ( player_t* )target ), dot_list( NULL )
+targetdata_t* player_t::get_sourcedata( player_t* source ) const
 {
-  std::vector<std::pair<size_t, std::string> >& v = source->sim->targetdata_dots[source->type];
-  for ( std::vector<std::pair<size_t, std::string> >::iterator i = v.begin(); i != v.end(); ++i )
-  {
-    *( dot_t** )( ( char* )this + i->first ) = add_dot( new dot_t( i->second, this->target ) );
-  }
+  if ( ! source ) return nullptr;
+  assert( source -> targetdata_id < sourcedata.size() );
+  return sourcedata[ source -> targetdata_id ];
 }
+
+targetdata_t::targetdata_t( player_t& s, player_t& t )
+  : source( s ), target( t )
+{}
 
 targetdata_t::~targetdata_t()
+{}
+
+void targetdata_t::add( buff_t& b )
 {
-  while ( dot_t* d = dot_list )
+  assert( boost::find( buffs, &b ) == buffs.end() );
+  buffs.push_back( &b );
+  alias( b, b.name_str );
+}
+
+void targetdata_t::alias( buff_t& b, const std::string& name )
+{ buffs_by_name[ name ] = &b; }
+
+buff_t* targetdata_t::get_buff( const std::string& name ) const
+{
+  auto p = buffs_by_name.find( name );
+  if ( p != buffs_by_name.end() )
+    return p -> second;
+  else
+    return nullptr;
+}
+
+void targetdata_t::add( dot_t& d )
+{
+  assert( boost::find( dots, &d ) == dots.end() );
+  dots.push_back( &d );
+  alias( d, d.name_str );
+}
+
+void targetdata_t::alias( dot_t& d, const std::string& name )
+{ dots_by_name[ name ] = &d; }
+
+dot_t* targetdata_t::get_dot( const std::string& name ) const
+{
+  const bool DEBUG_PARANOIA = false;
+
+  if ( DEBUG_PARANOIA )
+    std::cerr << "get_dot(\"" << name << "\") = ";
+  auto p = dots_by_name.find( name );
+  if ( p != dots_by_name.end() )
   {
-    dot_list = d -> next;
-    delete d;
+    if ( DEBUG_PARANOIA )
+      std::cerr << p -> second << '\n';
+    return p -> second;
+  }
+  else
+  {
+    if ( DEBUG_PARANOIA )
+      std::cerr << "nullptr\n";
+    return nullptr;
   }
 }
 
 void targetdata_t::reset()
 {
-  for ( dot_t* d = dot_list; d; d = d->next )
+  for ( dot_t* d : dots )
     d -> reset();
 }
 
@@ -5342,21 +5378,6 @@ void targetdata_t::clear_debuffs()
 {
   // FIXME: should clear debuffs as well according to similar FIXME in player_t::clear_debuffs()
 
-  for ( dot_t* d = dot_list; d; d = d->next )
+  for ( dot_t* d : dots )
     d -> cancel();
-}
-
-dot_t* targetdata_t::add_dot( dot_t* d )
-{
-  d -> next = dot_list;
-  dot_list = d;
-
-  return d;
-}
-
-aura_t* targetdata_t::add_aura( aura_t* a )
-{
-  assert( a->player == this->target );
-  assert( a->initial_source == this->source );
-  return a;
 }

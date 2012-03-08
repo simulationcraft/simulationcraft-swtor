@@ -40,6 +40,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <iostream>
 #include <iterator>
 #include <limits>
 #include <list>
@@ -58,13 +59,6 @@
 #include <boost/checked_delete.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext.hpp>
-
-// GCC (and probably the C++ standard in general) doesn't like offsetof on non-POD types
-#ifdef _MSC_VER
-#define nonpod_offsetof(t, m) offsetof(t, m)
-#else
-#define nonpod_offsetof(t, m) ((size_t) ( (volatile char *)&((volatile t *)(size_t)0x10000)->m - (volatile char *)(size_t)0x10000 ))
-#endif
 
 #if defined( _MSC_VER )
 # define finline                     __forceinline
@@ -175,33 +169,33 @@ struct shadow_assassin_t;
 struct vanguard_powertech_t;
 
 // Targetdata
-struct targetdata_t;
+class targetdata_t
+{
+public:
+  player_t& source;
+  player_t& target;
 
-struct sage_sorcerer_targetdata_t;
-struct sith_sorcerer_targetdata_t;
+private:
+  std::vector<buff_t*> buffs;
+  std::vector<dot_t*> dots;
+  std::unordered_map<std::string,buff_t*> buffs_by_name;
+  std::unordered_map<std::string,dot_t*> dots_by_name;
 
-struct commando_mercenary_targetdata_t;
-struct gunslinger_sniper_targetdata_t;
-struct juggernaut_guardian_targetdata_t;
-struct sentinel_marauder_targetdata_t;
-struct scoundrel_operative_targetdata_t;
-struct shadow_assassin_targetdata_t;
-struct vanguard_powertech_targetdata_t;
+public:
+  targetdata_t( player_t& s, player_t& t );
+  virtual ~targetdata_t();
 
-void register_sage_sorcerer_targetdata( sim_t* sim );
-void register_sith_sorcerer_targetdata( sim_t* sim );
+  void    add( buff_t& );
+  void    alias( buff_t&, const std::string& name );
+  void    add( dot_t& );
+  void    alias( dot_t&, const std::string& name );
 
-void register_commando_mercenary_targetdata( sim_t* sim );
-void register_gunslinger_sniper_targetdata( sim_t* sim );
-void register_juggernaut_guardian_targetdata( sim_t* sim );
-void register_sentinel_marauder_targetdata( sim_t* sim );
-void register_scoundrel_operative_targetdata( sim_t* sim );
-void register_shadow_assassin_targetdata( sim_t* sim );
-void register_vanguard_powertech_targetdata( sim_t* sim );
+  buff_t* get_buff( const std::string& name ) const;
+  dot_t*  get_dot( const std::string& name ) const;
 
-#define DATA_DOT 0
-#define DATA_AURA 1
-#define DATA_COUNT 2
+  void reset();
+  void clear_debuffs();
+};
 
 struct actor_pair_t
 {
@@ -216,7 +210,9 @@ struct actor_pair_t
     : target( p ), source( p )
   {}
 
-  actor_pair_t( targetdata_t* td );
+  actor_pair_t( const targetdata_t& td ) :
+    target( &td.target ), source( &td.source )
+  {}
 };
 
 // Enumerations =============================================================
@@ -1755,10 +1751,6 @@ public:
 
 // Simulation Engine ========================================================
 
-#define REGISTER_DOT(n, q) sim->register_targetdata_item(DATA_DOT, #q, t, nonpod_offsetof(type, dots_##n))
-#define REGISTER_BUFF(n) sim->register_targetdata_item(DATA_AURA, #n, t, nonpod_offsetof(type, buffs_##n))
-#define REGISTER_DEBUFF(n) sim->register_targetdata_item(DATA_AURA, #n, t, nonpod_offsetof(type, debuffs_##n))
-
 struct sim_t : private thread_t
 {
   int         argc;
@@ -1771,7 +1763,7 @@ struct sim_t : private thread_t
   player_t*   active_player;
   int         num_players;
   int         num_enemies;
-  int         num_targetdata_ids;
+  size_t      num_targetdata_ids;
   int         max_player_level;
   int         canceled;
   timespan_t  queue_lag, queue_lag_stddev;
@@ -1922,9 +1914,6 @@ public:
   int statistics_level;
   int separate_stats_by_actions;
 
-  std::unordered_map<std::string, std::pair<player_type, size_t> > targetdata_items[DATA_COUNT];
-  std::vector<std::pair<size_t, std::string> > targetdata_dots[PLAYER_MAX];
-
   // Multi-Threading
   int threads;
   std::vector<sim_t*> children;
@@ -1969,18 +1958,6 @@ public:
   void      aura_loss( const char* name, int aura_id=0 );
   action_expr_t* create_expression( action_t*, const std::string& name );
   int       errorf( const char* format, ... ) PRINTF_ATTRIBUTE( 2,3 );
-  void register_targetdata_item( int kind, const char* name, player_type type, size_t offset );
-  void* get_targetdata_item( player_t* source, player_t* target, int kind, const std::string& name );
-
-  dot_t* get_targetdata_dot( player_t* source, player_t* target, const std::string& name )
-  {
-    return ( dot_t* )get_targetdata_item( source, target, DATA_DOT, name );
-  }
-
-  buff_t* get_targetdata_aura( player_t* source, player_t* target, const std::string& name )
-  {
-    return ( buff_t* )get_targetdata_item( source, target, DATA_AURA, name );
-  }
 };
 
 // Scaling ==================================================================
@@ -2719,8 +2696,9 @@ struct player_t : public noncopyable
   };
   set_bonuses_t set_bonus;
 
-  int targetdata_id;
+  const size_t targetdata_id;
   std::vector<targetdata_t*> targetdata;
+  std::vector<targetdata_t*> sourcedata;
 
   player_t( sim_t* sim, player_type type, const std::string& name, race_type race_type = RACE_NONE );
 
@@ -2728,7 +2706,10 @@ struct player_t : public noncopyable
 
   virtual const char* name() const { return name_str.c_str(); }
 
-  virtual targetdata_t* new_targetdata( player_t* source, player_t* target );
+  virtual targetdata_t* new_targetdata( player_t& target ) { return new targetdata_t( *this, target ); }
+  targetdata_t* get_targetdata( player_t* target ) const;
+  targetdata_t* get_sourcedata( player_t* source ) const;
+
   virtual void init();
   virtual void init_base() = 0;
   virtual void init_items();
@@ -3059,26 +3040,8 @@ public:
   bool is_enemy() const { return type == ENEMY || type == ENEMY_ADD; }
   bool is_add() const { return type == ENEMY_ADD; }
 
-  bool is_commando_mercenary()  const { return ( type == T_COMMANDO     || type == BH_MERCENARY     ); }
-  bool is_gunslinger_sniper()   const { return ( type == S_GUNSLINGER   || type == IA_SNIPER        ); }
-  bool is_juggernaut_guardian() const { return ( type == JEDI_GUARDIAN  || type == SITH_JUGGERNAUT  ); }
-  bool is_sentinel_marauder()   const { return ( type == JEDI_SENTINEL  || type == SITH_MARAUDER    ); }
-  bool is_sage_sorcerer()       const { return ( type == JEDI_SAGE      || type == SITH_SORCERER    ); }
-  bool is_scoundrel_operative() const { return ( type == S_SCOUNDREL    || type == IA_OPERATIVE     ); }
-  bool is_shadow_assassin()     const { return ( type == JEDI_SHADOW    || type == SITH_ASSASSIN    ); }
-  bool is_vanguard_powertech()  const { return ( type == T_VANGUARD     || type == BH_POWERTECH     ); }
-
   pet_t*                  cast_pet()                  { assert( is_pet() );                 return ( pet_t* )                 this; }
   enemy_t*                cast_enemy()                { assert( type == ENEMY );            return ( enemy_t*)                this; }
-
-  commando_mercenary_t*   cast_commando_mercenary()   { assert( is_commando_mercenary() );  return ( commando_mercenary_t* )  this; }
-  gunslinger_sniper_t*    cast_gunslinger_sniper()    { assert( is_gunslinger_sniper() );   return ( gunslinger_sniper_t*)    this; }
-  juggernaut_guardian_t*  cast_juggernaut_guardian()  { assert( is_juggernaut_guardian() ); return ( juggernaut_guardian_t* ) this; }
-  sentinel_marauder_t*    cast_sentinel_marauder()    { assert( is_sentinel_marauder() );   return ( sentinel_marauder_t* )   this; }
-  sage_sorcerer_t*        cast_sage_sorcerer()        { assert( is_sage_sorcerer() );       return ( sage_sorcerer_t*)        this; }
-  scoundrel_operative_t*  cast_scoundrel_operative()  { assert( is_scoundrel_operative() ); return ( scoundrel_operative_t*)  this; }
-  shadow_assassin_t*      cast_shadow_assassin()      { assert( is_shadow_assassin() );     return ( shadow_assassin_t* )     this; }
-  vanguard_powertech_t*   cast_vanguard_powertech()   { assert( is_vanguard_powertech() );  return ( vanguard_powertech_t*)   this; }
 
   bool      in_gcd() const { return gcd_ready > sim -> current_time; }
   item_t*   find_item( const std::string& );
@@ -3108,30 +3071,6 @@ public:
 
   // Opportunity to perform any stat fixups before analysis
   virtual void pre_analyze_hook() {}
-};
-
-struct targetdata_t : public noncopyable
-{
-  player_t* source;
-  player_t* target;
-
-  dot_t* dot_list;
-
-  targetdata_t( player_t* source, player_t* target );
-
-  virtual ~targetdata_t();
-  virtual void reset();
-  virtual void clear_debuffs();
-
-  static targetdata_t* get( player_t* source, player_t* target );
-
-  sage_sorcerer_targetdata_t* cast_sage_sorcerer() { assert( source->type == JEDI_SAGE  ); return ( sage_sorcerer_targetdata_t* ) this; }
-  sith_sorcerer_targetdata_t* cast_sith_sorcerer() { assert( source->type == SITH_SORCERER ); return ( sith_sorcerer_targetdata_t* ) this; }
-  shadow_assassin_targetdata_t* cast_shadow_assassin() { assert( source->type == JEDI_SAGE || source -> type == SITH_ASSASSIN ); return ( shadow_assassin_targetdata_t* ) this; }
-
-protected:
-  dot_t* add_dot( dot_t* d );
-  aura_t* add_aura( aura_t* b );
 };
 
 // Pet ======================================================================
@@ -3359,7 +3298,6 @@ struct action_t
   std::string target_str;
   std::string label_str;
   timespan_t last_reaction_time;
-  int targetdata_dot_offset;
 
 protected:
   std::vector<int> rank_level_list;
@@ -3368,9 +3306,10 @@ protected:
 private:
   mutable player_t* cached_targetdata_target;
   mutable targetdata_t* cached_targetdata;
+  mutable player_t* cached_dot_target;
+  mutable dot_t* cached_dot;
 
   void init_action_t_();
-  void init_dot( const std::string& dot_name );
 
 public:
   action_t( int type, const char* name, player_t* p=0, policy_t policy=default_policy,
@@ -3442,14 +3381,12 @@ public:
 
   dot_t* dot() const
   {
-    if ( targetdata_dot_offset >= 0 )
-      return *( dot_t** )( ( char* )targetdata() + targetdata_dot_offset );
-    else
+    if ( cached_dot_target != target )
     {
-      if ( ! action_dot )
-        action_dot = player -> get_dot( name_str );
-      return action_dot;
+      cached_dot = targetdata() -> get_dot( name_str );
+      cached_dot_target = target;
     }
+    return cached_dot;
   }
 
   void add_child( action_t* child ) { stats -> add_child( child -> stats ); }
@@ -3458,8 +3395,8 @@ public:
   {
     if ( cached_targetdata_target != target )
     {
+      cached_targetdata = player -> get_targetdata( target );
       cached_targetdata_target = target;
-      cached_targetdata = targetdata_t::get( player, target );
     }
     return cached_targetdata;
   }
@@ -4174,12 +4111,6 @@ struct wait_for_cooldown_t : public wait_action_base_t
   virtual bool usable_moving() { return a -> usable_moving(); }
   virtual timespan_t execute_time() const;
 };
-
-// actor_pair_t inlines
-
-inline actor_pair_t::actor_pair_t( targetdata_t* td )
-  : target( td->target ), source( td->source )
-{}
 
 // buff_t inlines
 

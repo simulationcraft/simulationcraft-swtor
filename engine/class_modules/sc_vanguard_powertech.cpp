@@ -7,17 +7,10 @@
 
 struct vanguard_powertech_targetdata_t : public targetdata_t
 {
-    vanguard_powertech_targetdata_t( player_t* source, player_t* target )
-        : targetdata_t( source, target )
-    {}
+  vanguard_powertech_targetdata_t( player_t& source, player_t& target )
+    : targetdata_t( source, target )
+  {}
 };
-
-void register_vanguard_powertech_targetdata( sim_t* /* sim */ )
-{
-    // player_type t = SITH_MARAUDER;
-    typedef vanguard_powertech_targetdata_t type;
-
-}
 
 
 // ==========================================================================
@@ -88,7 +81,9 @@ struct vanguard_powertech_t : public player_t
     }
 
     // Character Definition
-    virtual targetdata_t* new_targetdata( player_t* source, player_t* target ) {return new vanguard_powertech_targetdata_t( source, target );}
+    virtual targetdata_t* new_targetdata( player_t& target ) // override
+    { return new vanguard_powertech_targetdata_t( *this, target ); }
+
     virtual action_t* create_action( const std::string& name, const std::string& options );
     virtual void      init_talents();
     virtual void      init_base();
