@@ -132,6 +132,7 @@ public:
   QComboBox* defaultRoleChoice;
   QComboBox* debugChoice;
   QComboBox* reportpetsChoice;
+  QComboBox* printstyleChoice;
   QListWidget* itemDbOrder;
   QButtonGroup* buffsButtonGroup;
   QButtonGroup* debuffsButtonGroup;

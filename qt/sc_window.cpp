@@ -211,6 +211,8 @@ void SimulationCraftWindow::decodeOptions( QString encoding )
 #endif
   if ( i < tokens.count() )
        reportpetsChoice->setCurrentIndex( tokens[ i++ ].toInt() );
+  if ( i < tokens.count() )
+       printstyleChoice->setCurrentIndex( tokens[ i++ ].toInt() );
 
   QList<QAbstractButton*>       buff_buttons  =        buffsButtonGroup->buttons();
   QList<QAbstractButton*>     debuff_buttons  =      debuffsButtonGroup->buttons();
@@ -270,6 +272,7 @@ QString SimulationCraftWindow::encodeOptions()
   ss << ' ' << latencyChoice->currentIndex();
   //ss << ' ' << targetLevelChoice->currentIndex();
   ss << ' ' << reportpetsChoice->currentIndex();
+  ss << ' ' << printstyleChoice->currentIndex();
 
   QList<QAbstractButton*> buttons = buffsButtonGroup->buttons();
   OptionEntry* buffs = getBuffOptions();
@@ -559,6 +562,7 @@ void SimulationCraftWindow::createGlobalsTab()
   globalsLayout->addRow(   "Default Role",   defaultRoleChoice = createChoice( 4, "auto", "dps", "heal", "tank" ) );
   globalsLayout->addRow( "Generate Debug",         debugChoice = createChoice( 3, "None", "Log Only", "Gory Details" ) );
   globalsLayout->addRow( "Report Pets Separately", reportpetsChoice = createChoice( 2, "Yes", "No" ) );
+  globalsLayout->addRow( "Report Print Style", printstyleChoice = createChoice( 2, "Classic", "White" ) );
   iterationsChoice->setCurrentIndex( 1 );
   fightLengthChoice->setCurrentIndex( 4 );
   fightVarianceChoice->setCurrentIndex( 2 );
@@ -971,6 +975,8 @@ void SimulationCraftWindow::createToolTips()
   defaultRoleChoice->setToolTip( "Specify the character role during import to ensure correct action priority list." );
 
   reportpetsChoice->setToolTip( "Specify if pets get reported separately in detail." );
+
+  printstyleChoice->setToolTip( "Specify html report print style." );
 
   debugChoice->setToolTip( "When a log is generated, only one iteration is used.\n"
                            "Gory details are very gory.  No documentation will be forthcoming.\n"
@@ -1478,6 +1484,10 @@ QString SimulationCraftWindow::mergeOptions()
   if ( reportpetsChoice->currentIndex() != 1 )
   {
     options += "report_pets_separately=1\n";
+  }
+  if ( printstyleChoice->currentIndex() == 1 )
+  {
+    options += "print_styles=1\n";
   }
   return options;
 }

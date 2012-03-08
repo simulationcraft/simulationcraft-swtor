@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 PROJECT(simulationcraft)
@@ -10,7 +9,7 @@ SET(CPACK_PACKAGE_VERSION_PATCH "0")
 
 FIND_PACKAGE(Qt4 COMPONENTS QtCore QtGui QtWebKit QtMain QtNetwork)
 FIND_PACKAGE(Threads REQUIRED)
-FIND_PACKAGE(OpenSSL)
+#FIND_PACKAGE(OpenSSL)
 
 SET(EXECUTABLE_OUTPUT_PATH bin)
 SET(LIBRARY_OUTPUT_PATH lib)
@@ -25,14 +24,10 @@ SET(SIMC_ENGINE_INCLUDE_DIRS
 SET(SIMC_ENGINE_SOURCE
   "engine/sc_action.cpp"
   "engine/sc_armory.cpp"
-  "engine/sc_attack.cpp"
   "engine/sc_battle_net.cpp"
-  "engine/sc_bcp_api.cpp"
   "engine/sc_buff.cpp"
   "engine/sc_chart.cpp"
-  "engine/sc_const_data.cpp"
   "engine/sc_consumable.cpp"
-  "engine/sc_data.cpp"
   "engine/sc_dot.cpp"
   "engine/sc_enchant.cpp"
   "engine/sc_event.cpp"
@@ -41,7 +36,6 @@ SET(SIMC_ENGINE_SOURCE
   "engine/sc_heal.cpp"
   "engine/sc_http.cpp"
   "engine/sc_item.cpp"
-  "engine/sc_item_data.cpp"
   "engine/sc_js.cpp"
   "engine/sc_log.cpp"
   "engine/sc_mmo_champion.cpp"
@@ -65,8 +59,6 @@ SET(SIMC_ENGINE_SOURCE
   "engine/sc_set_bonus.cpp"
   "engine/sc_shadow_assassin.cpp"
   "engine/sc_sim.cpp"
-  "engine/sc_spell.cpp"
-  "engine/sc_spell_data.cpp"
   "engine/sc_stats.cpp"
   "engine/sc_talent.cpp"
   "engine/sc_target.cpp"
