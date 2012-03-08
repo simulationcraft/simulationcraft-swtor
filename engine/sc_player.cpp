@@ -1486,26 +1486,21 @@ double player_t::composite_attribute_multiplier( int attr ) const
 
   switch( attr )
   {
-    case ATTR_STRENGTH:
-    case ATTR_AIM:
-    case ATTR_CUNNING:
-    case ATTR_WILLPOWER:
+  case ATTR_STRENGTH:
+  case ATTR_AIM:
+  case ATTR_CUNNING:
+  case ATTR_WILLPOWER:
     if ( buffs.force_valor -> up() )
-    {
       m += 0.05;
-    }
     break;
-    case ATTR_ENDURANCE:
+  case ATTR_ENDURANCE:
     if ( buffs.fortification_hunters_boon -> up() )
-    {
       m += 0.05;
-    }
     break;
-    default:
+    break;
+  default:
     break;
   }
-
-
 
   return m;
 }

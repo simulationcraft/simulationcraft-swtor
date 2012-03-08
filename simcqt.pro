@@ -41,8 +41,6 @@ DEPENDPATH += engine
 }
 
 HEADERS += engine/simulationcraft.hpp
-HEADERS += engine/data_enums.hh
-HEADERS += engine/data_definitions.hh
 HEADERS += engine/utf8.h
 HEADERS += engine/utf8/core.h
 HEADERS += engine/utf8/checked.h
