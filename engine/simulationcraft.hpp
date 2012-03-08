@@ -2697,18 +2697,20 @@ struct player_t : public noncopyable
   set_bonuses_t set_bonus;
 
   const size_t targetdata_id;
+private:
   std::vector<targetdata_t*> targetdata;
   std::vector<targetdata_t*> sourcedata;
 
+public:
   player_t( sim_t* sim, player_type type, const std::string& name, race_type race_type = RACE_NONE );
 
   virtual ~player_t();
 
   virtual const char* name() const { return name_str.c_str(); }
 
-  virtual targetdata_t* new_targetdata( player_t& target ) { return new targetdata_t( *this, target ); }
-  targetdata_t* get_targetdata( player_t* target ) const;
-  targetdata_t* get_sourcedata( player_t* source ) const;
+  virtual targetdata_t* new_targetdata( player_t& target );
+  targetdata_t* get_targetdata( player_t* target );
+  targetdata_t* get_sourcedata( player_t* source );
 
   virtual void init();
   virtual void init_base() = 0;

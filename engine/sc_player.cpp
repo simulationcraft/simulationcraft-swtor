@@ -10,6 +10,9 @@
 
 namespace { // ANONYMOUS NAMESPACE ==========================================
 
+// FIXME: Lazy init may interfere with "self.dot."
+const bool LAZY_TARGETDATA_INIT = true;
+
 // compare_talents ==========================================================
 
 struct compare_talents
@@ -431,19 +434,22 @@ bool player_t::init( sim_t* sim )
 
     for ( player_t* p : sim -> actor_list )
     {
-      p -> targetdata.resize( sim -> num_targetdata_ids, nullptr );
-      p -> sourcedata.resize( sim -> num_targetdata_ids, nullptr );
+      p -> targetdata.resize( sim -> num_targetdata_ids );
+      p -> sourcedata.resize( sim -> num_targetdata_ids );
     }
 
-    for ( player_t* p : sim -> actor_list )
+    if ( ! LAZY_TARGETDATA_INIT )
     {
-      assert( p );
-      for ( player_t* q : sim -> actor_list )
+      for ( player_t* p : sim -> actor_list )
       {
-        assert( q );
-        targetdata_t* td = p -> new_targetdata( *q );
-        p -> targetdata[ q -> targetdata_id ] = td;
-        q -> sourcedata[ p -> targetdata_id ] = td;
+        assert( p );
+        for ( player_t* q : sim -> actor_list )
+        {
+          assert( q );
+          targetdata_t* td = p -> new_targetdata( *q );
+          p -> targetdata[ q -> targetdata_id ] = td;
+          q -> sourcedata[ p -> targetdata_id ] = td;
+        }
       }
     }
   }
@@ -5297,18 +5303,34 @@ player_t* player_t::create( sim_t*             sim,
 // Target data
 // ==========================================================================
 
-targetdata_t* player_t::get_targetdata( player_t* target ) const
+targetdata_t* player_t::new_targetdata( player_t& target )
+{ return new targetdata_t( *this, target ); }
+
+targetdata_t* player_t::get_targetdata( player_t* target )
 {
   if ( ! target ) return nullptr;
-  assert( target -> targetdata_id < targetdata.size() );
-  return targetdata[ target -> targetdata_id ];
+
+  const size_t id = target -> targetdata_id;
+  assert( id < targetdata.size() );
+
+  targetdata_t*& td = targetdata[ id ];
+
+  if ( LAZY_TARGETDATA_INIT && td == nullptr )
+  {
+    assert( targetdata_id < target -> sourcedata.size() );
+    assert( target -> sourcedata[ targetdata_id ] == nullptr );
+    target -> sourcedata[ targetdata_id ] =
+        td = new_targetdata( *target );
+  }
+
+  assert( td );
+  return td;
 }
 
-targetdata_t* player_t::get_sourcedata( player_t* source ) const
+targetdata_t* player_t::get_sourcedata( player_t* source )
 {
   if ( ! source ) return nullptr;
-  assert( source -> targetdata_id < sourcedata.size() );
-  return sourcedata[ source -> targetdata_id ];
+  return source -> get_targetdata( this );
 }
 
 targetdata_t::targetdata_t( player_t& s, player_t& t )
