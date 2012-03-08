@@ -316,7 +316,7 @@ const char* util_t::player_type_string( int type )
 {
   switch ( type )
   {
-  case JEDI_SAGE:        return "jedi_sage";
+  case JEDI_SAGE:        return "sage_sorcerer";
   case JEDI_SHADOW:      return "jedi_shadow";
   case JEDI_SENTINEL:    return "jedi_sentinel";
   case JEDI_GUARDIAN:    return "jedi_guardian";
@@ -351,7 +351,7 @@ int util_t::translate_class_str( const std::string& s )
   std::string fmt_s( s );
   armory_t::format( fmt_s );
 
-  if      ( fmt_s == "jedi_sage"       || fmt_s == "sage"       ) return JEDI_SAGE;
+  if      ( fmt_s == "sage_sorcerer"       || fmt_s == "sage"       ) return JEDI_SAGE;
   else if ( fmt_s == "jedi_shadow"     || fmt_s == "shadow"     ) return JEDI_SHADOW;
   else if ( fmt_s == "jedi_sentinel"   || fmt_s == "sentinel"   ) return JEDI_SENTINEL;
   else if ( fmt_s == "jedi_guardian"   || fmt_s == "guardian"   ) return JEDI_GUARDIAN;

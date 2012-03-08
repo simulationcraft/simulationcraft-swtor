@@ -424,10 +424,10 @@ bool player_t::init( sim_t* sim )
   if ( sim -> debug )
     log_t::output( sim, "Initializing Auras, Buffs, and De-Buffs." );
 
-  player_t::jedi_sage_init( sim );
+  player_t::sage_sorcerer_init( sim );
   player_t::shadow_assassin_init( sim );
   player_t::juggernaut_guardian_init( sim );
-  player_t::marauder_sentinel_init( sim );
+  player_t::sentinel_marauder_init( sim );
   player_t::commando_mercenary_init( sim );
   player_t::enemy_init( sim );
 
@@ -1720,10 +1720,10 @@ double player_t::shield_absorb() const
 
 void player_t::combat_begin( sim_t* sim )
 {
-  player_t::jedi_sage_combat_begin( sim );
+  player_t::sage_sorcerer_combat_begin( sim );
   player_t::shadow_assassin_combat_begin( sim );
   player_t::juggernaut_guardian_combat_begin( sim );
-  player_t::marauder_sentinel_combat_begin( sim );
+  player_t::sentinel_marauder_combat_begin( sim );
   player_t::commando_mercenary_combat_begin( sim );
   player_t::enemy_combat_begin( sim );
 
@@ -1782,10 +1782,10 @@ void player_t::combat_begin()
 
 void player_t::combat_end( sim_t* sim )
 {
-  player_t::jedi_sage_combat_end( sim );
+  player_t::sage_sorcerer_combat_end( sim );
   player_t::shadow_assassin_combat_end( sim );
   player_t::juggernaut_guardian_combat_end( sim );
-  player_t::marauder_sentinel_combat_end( sim );
+  player_t::sentinel_marauder_combat_end( sim );
   player_t::commando_mercenary_combat_end( sim );
   player_t::enemy_combat_end( sim );
 }
@@ -5228,9 +5228,9 @@ player_t* player_t::create( sim_t*             sim,
                             const std::string& name,
                             race_type r )
 {
-  if ( type == "jedi_sage" )
+  if ( type == "sage_sorcerer" )
   {
-    return player_t::create_jedi_sage( sim, name, r );
+    return player_t::create_sage_sorcerer( sim, name, r );
   }
   else if ( type == "sith_sorcerer" )
   {

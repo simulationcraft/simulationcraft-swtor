@@ -79,7 +79,6 @@ SRC = \
 	sc_armory.cpp \
 	sc_buff.cpp \
 	sc_chart.cpp \
-	sc_commando_mercenary.cpp \
 	sc_consumable.cpp \
 	sc_dot.cpp \
 	sc_enchant.cpp \
@@ -90,11 +89,9 @@ SRC = \
 	sc_http.cpp \
 	sc_item.cpp \
 	sc_js.cpp \
-	sc_juggernaut_guardian.cpp \
-  sc_knotor.cpp \
+  	sc_knotor.cpp \
 	sc_log.cpp \
 	sc_main.cpp \
-	sc_marauder_sentinel.cpp \
 	sc_mrrobot.cpp \
 	sc_option.cpp \
 	sc_pet.cpp \
@@ -109,12 +106,10 @@ SRC = \
 	sc_report_xml.cpp \
 	sc_report.cpp \
 	sc_rng.cpp \
-	sc_sage_sorcerer.cpp \
 	sc_sample_data.cpp \
 	sc_scaling.cpp \
 	sc_sequence.cpp \
 	sc_set_bonus.cpp \
-	sc_shadow_assassin.cpp \
 	sc_sim.cpp \
 	sc_stats.cpp \
 	sc_talent.cpp \
@@ -125,7 +120,15 @@ SRC = \
 	sc_unique_gear.cpp \
 	sc_util.cpp \
 	sc_weapon.cpp \
-	sc_xml.cpp
+	sc_xml.cpp \
+	class_modules\sc_commando_mercenary.cpp \
+	class_modules\sc_gunslinger_sniper.cpp \
+	class_modules\sc_juggernaut_guardian.cpp \
+	class_modules\sc_sage_sorcerer.cpp \
+	class_modules\sc_scoundrel_operative.cpp \
+	class_modules\sc_sentinel_marauder.cpp \
+	class_modules\sc_shadow_assassin.cpp \
+	class_modules\sc_vanguard_powertech.cpp
 
 SRC_H   := $(filter %.h, $(SRC)) $(filter %.hh, $(SRC))
 SRC_CPP := $(filter %.cpp, $(SRC))

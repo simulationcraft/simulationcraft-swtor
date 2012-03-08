@@ -629,10 +629,19 @@ sim_t::sim_t( sim_t* p, int index ) :
   // Multi-Threading
   threads( 0 ), thread_index( index )
 {
-  register_jedi_sage_targetdata( this );
+  register_sage_sorcerer_targetdata( this );
   register_sith_sorcerer_targetdata( this );
+
+  register_commando_mercenary_targetdata( this );
+  register_gunslinger_sniper_targetdata( this );
+  register_juggernaut_guardian_targetdata( this );
+  register_sentinel_marauder_targetdata( this );
+  //register_sage_sorcerer_targetdata( this );
   register_shadow_assassin_targetdata( this );
   register_commando_mercenary_targetdata( this );
+  register_scoundrel_operative_targetdata( this );
+  register_shadow_assassin_targetdata( this );
+  register_vanguard_powertech_targetdata( this );
 
   path_str += "|profiles";
 
@@ -1942,7 +1951,7 @@ void sim_t::create_options()
     { "target_level",                     OPT_INT,    &( target_level                             ) },
     { "target_race",                      OPT_STRING, &( target_race                              ) },
     // Character Creation
-    { "jedi_sage",                        OPT_FUNC,   ( void* ) ::parse_player                      },
+    { "sage_sorcerer",                        OPT_FUNC,   ( void* ) ::parse_player                      },
     { "sith_sorcerer",                    OPT_FUNC,   ( void* ) ::parse_player                      },
     { "jedi_shadow",                      OPT_FUNC,   ( void* ) ::parse_player                      },
     { "sith_assassin",                    OPT_FUNC,   ( void* ) ::parse_player                      },

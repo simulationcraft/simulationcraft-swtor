@@ -3,28 +3,28 @@
 // http://code.google.com/p/simulationcraft-swtor/
 // ==========================================================================
 
-#include "simulationcraft.hpp"
+#include "../simulationcraft.hpp"
 
-struct marauder_sentinel_targetdata_t : public targetdata_t
+struct gunslinger_sniper_targetdata_t : public targetdata_t
 {
-    marauder_sentinel_targetdata_t( player_t* source, player_t* target )
+    gunslinger_sniper_targetdata_t( player_t* source, player_t* target )
         : targetdata_t( source, target )
     {}
 };
 
-void register_marauder_sentinel_targetdata( sim_t* /* sim */ )
+void register_gunslinger_sniper_targetdata( sim_t* /* sim */ )
 {
     // player_type t = SITH_MARAUDER;
-    typedef marauder_sentinel_targetdata_t type;
+    typedef gunslinger_sniper_targetdata_t type;
 
 }
 
 
 // ==========================================================================
-// Jedi Shadow | Sith Assassin
+// Gunslinger / Sniper
 // ==========================================================================
 
-struct marauder_sentinel_t : public player_t
+struct gunslinger_sniper_t : public player_t
 {
     // Buffs
     struct buffs_t
@@ -75,8 +75,8 @@ struct marauder_sentinel_t : public player_t
 
     } talents;
 
-    marauder_sentinel_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
-        player_t( sim, pt == SITH_MARAUDER ? SITH_MARAUDER : JEDI_SENTINEL, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
+    gunslinger_sniper_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
+        player_t( sim, pt == IA_SNIPER ? IA_SNIPER : S_GUNSLINGER, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
     {
 
 
@@ -88,7 +88,7 @@ struct marauder_sentinel_t : public player_t
     }
 
     // Character Definition
-    virtual targetdata_t* new_targetdata( player_t* source, player_t* target ) {return new marauder_sentinel_targetdata_t( source, target );}
+    virtual targetdata_t* new_targetdata( player_t* source, player_t* target ) {return new gunslinger_sniper_targetdata_t( source, target );}
     virtual action_t* create_action( const std::string& name, const std::string& options );
     virtual void      init_talents();
     virtual void      init_base();
@@ -113,12 +113,12 @@ namespace { // ANONYMOUS NAMESPACE ==========================================
 
 
 // ==========================================================================
-// Sith assassin Abilities
+// Gunslinger / Sniper Abilities
 // ==========================================================================
 
-struct marauder_sentinel_attack_t : public action_t
+struct gunslinger_sniper_attack_t : public action_t
 {
-    marauder_sentinel_attack_t( const char* n, marauder_sentinel_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
+    gunslinger_sniper_attack_t( const char* n, gunslinger_sniper_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
         action_t( ACTION_ATTACK, n, p, melee_policy, r, s )
     {
         may_crit   = true;
@@ -126,9 +126,9 @@ struct marauder_sentinel_attack_t : public action_t
 
 };
 
-struct marauder_sentinel_spell_t : public action_t
+struct gunslinger_sniper_spell_t : public action_t
 {
-    marauder_sentinel_spell_t( const char* n, marauder_sentinel_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
+    gunslinger_sniper_spell_t( const char* n, gunslinger_sniper_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
         action_t( ACTION_ATTACK, n, p, force_policy, r, s )
     {
         may_crit   = true;
@@ -143,19 +143,19 @@ struct marauder_sentinel_spell_t : public action_t
 } // ANONYMOUS NAMESPACE ====================================================
 
 // ==========================================================================
-// marauder_sentinel Character Definition
+// Gunslinger / Sniper Character Definition
 // ==========================================================================
 
-// marauder_sentinel_t::create_action ====================================================
+// gunslinger_sniper_t::create_action ====================================================
 
-action_t* marauder_sentinel_t::create_action( const std::string& name,
+action_t* gunslinger_sniper_t::create_action( const std::string& name,
                                             const std::string& options_str )
 {
-    if ( type == SITH_MARAUDER )
+    if ( type == IA_SNIPER )
     {
 
     }
-    else if ( type == JEDI_SENTINEL )
+    else if ( type == S_GUNSLINGER )
     {
 
     }
@@ -165,9 +165,9 @@ action_t* marauder_sentinel_t::create_action( const std::string& name,
     return player_t::create_action( name, options_str );
 }
 
-// marauder_sentinel_t::init_talents =====================================================
+// gunslinger_sniper_t::init_talents =====================================================
 
-void marauder_sentinel_t::init_talents()
+void gunslinger_sniper_t::init_talents()
 {
     player_t::init_talents();
 
@@ -179,9 +179,9 @@ void marauder_sentinel_t::init_talents()
     // Madness|Balance
 }
 
-// marauder_sentinel_t::init_base ========================================================
+// gunslinger_sniper_t::init_base ========================================================
 
-void marauder_sentinel_t::init_base()
+void gunslinger_sniper_t::init_base()
 {
     player_t::init_base();
 
@@ -190,17 +190,17 @@ void marauder_sentinel_t::init_base()
 
 }
 
-// marauder_sentinel_t::init_benefits =======================================================
+// gunslinger_sniper_t::init_benefits =======================================================
 
-void marauder_sentinel_t::init_benefits()
+void gunslinger_sniper_t::init_benefits()
 {
     player_t::init_benefits();
 
 }
 
-// marauder_sentinel_t::init_buffs =======================================================
+// gunslinger_sniper_t::init_buffs =======================================================
 
-void marauder_sentinel_t::init_buffs()
+void gunslinger_sniper_t::init_buffs()
 {
     player_t::init_buffs();
 
@@ -214,43 +214,43 @@ void marauder_sentinel_t::init_buffs()
 
 }
 
-// marauder_sentinel_t::init_gains =======================================================
+// gunslinger_sniper_t::init_gains =======================================================
 
-void marauder_sentinel_t::init_gains()
+void gunslinger_sniper_t::init_gains()
 {
     player_t::init_gains();
 
 }
 
-// marauder_sentinel_t::init_procs =======================================================
+// gunslinger_sniper_t::init_procs =======================================================
 
-void marauder_sentinel_t::init_procs()
+void gunslinger_sniper_t::init_procs()
 {
     player_t::init_procs();
 
 }
 
-// marauder_sentinel_t::init_rng =========================================================
+// gunslinger_sniper_t::init_rng =========================================================
 
-void marauder_sentinel_t::init_rng()
+void gunslinger_sniper_t::init_rng()
 {
     player_t::init_rng();
 
 }
 
-// marauder_sentinel_t::init_actions =====================================================
+// gunslinger_sniper_t::init_actions =====================================================
 
-void marauder_sentinel_t::init_actions()
+void gunslinger_sniper_t::init_actions()
 {
     //======================================================================================
     //
-    //   Please Mirror all changes between Jedi Shadow and Sith Assassin!!!
+    //   Please Mirror all changes between Gunslinger and Sniper!!!
     //
     //======================================================================================
 
     if ( action_list_str.empty() )
     {
-        if ( type == JEDI_SENTINEL )
+        if ( type == S_GUNSLINGER )
         {
             action_list_str += "stim,type=exotech_resolve";
             action_list_str += "/snapshot_stats";
@@ -265,7 +265,7 @@ void marauder_sentinel_t::init_actions()
             action_list_default = 1;
         }
 
-        // Sith ASSASSIN
+        // IA_SNIPER
         else
         {
             action_list_str += "stim,type=exotech_resolve";
@@ -284,16 +284,16 @@ void marauder_sentinel_t::init_actions()
     player_t::init_actions();
 }
 
-// marauder_sentinel_t::primary_resource ==================================================
+// gunslinger_sniper_t::primary_resource ==================================================
 
-int marauder_sentinel_t::primary_resource() const
+int gunslinger_sniper_t::primary_resource() const
 {
     return RESOURCE_FORCE;
 }
 
-// marauder_sentinel_t::primary_role ==================================================
+// gunslinger_sniper_t::primary_role ==================================================
 
-int marauder_sentinel_t::primary_role() const
+int gunslinger_sniper_t::primary_role() const
 {
     switch ( player_t::primary_role() )
     {
@@ -310,9 +310,9 @@ int marauder_sentinel_t::primary_role() const
     return ROLE_HYBRID;
 }
 
-// marauder_sentinel_t::create_talents ==================================================
+// gunslinger_sniper_t::create_talents ==================================================
 
-void marauder_sentinel_t::create_talents()
+void gunslinger_sniper_t::create_talents()
 {
 #if 0
     static const struct
@@ -370,30 +370,30 @@ void marauder_sentinel_t::create_talents()
 // PLAYER_T EXTENSIONS
 // ==========================================================================
 
-// player_t::create_jedi_shadow  ============================================
+// player_t::create_gunslinger  ============================================
 
-player_t* player_t::create_jedi_sentinel( sim_t* sim, const std::string& name, race_type r )
+player_t* player_t::create_gunslinger( sim_t* sim, const std::string& name, race_type r )
 {
-    return new marauder_sentinel_t( sim, JEDI_SENTINEL, name, r );
+    return new gunslinger_sniper_t( sim, S_GUNSLINGER, name, r );
 }
 
-// player_t::create_SITH_MARAUDER  ==========================================
+// player_t::create_sniper  ==========================================
 
-player_t* player_t::create_sith_marauder( sim_t* sim, const std::string& name, race_type r )
+player_t* player_t::create_sniper( sim_t* sim, const std::string& name, race_type r )
 {
-    return new marauder_sentinel_t( sim, SITH_MARAUDER, name, r );
+    return new gunslinger_sniper_t( sim, IA_SNIPER, name, r );
 }
 
-// player_t::marauder_sentinel_init ===========================================
+// player_t::gunslinger_sniper_init ===========================================
 
-void player_t::marauder_sentinel_init( sim_t* /* sim */ )
+void player_t::gunslinger_sniper_init( sim_t* /* sim */ )
 {
 
 }
 
-// player_t::marauder_sentinel_combat_begin ===================================
+// player_t::gunslinger_sniper_combat_begin ===================================
 
-void player_t::marauder_sentinel_combat_begin( sim_t* /* sim */ )
+void player_t::gunslinger_sniper_combat_begin( sim_t* /* sim */ )
 {
 
 }

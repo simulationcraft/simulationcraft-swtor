@@ -131,7 +131,6 @@ struct benefit_t;
 struct buff_t;
 struct buff_uptime_t;
 struct callback_t;
-struct commando_mercenary_t;
 struct companion_t;
 struct cooldown_t;
 //class  dbc_t;
@@ -142,28 +141,21 @@ struct enchant_t;
 struct event_t;
 struct gain_t;
 struct item_t;
-struct sage_sorcerer_t;
-struct juggernaut_guardian_t;
 struct js_node_t;
 struct option_t;
 struct pet_t;
 struct player_t;
 struct plot_t;
 struct proc_t;
-struct marauder_sentinel_t;
 struct raid_event_t;
 struct rating_t;
 struct reforge_plot_t;
 struct reforge_plot_data_t;
 struct report_t;
 struct rng_t;
-//struct spell_id_t;
 struct scaling_t;
 struct sim_t;
-//struct spell_data_t;
-//struct spelleffect_data_t;
 struct sample_data_t;
-struct shadow_assassin_t;
 struct heal_t;
 struct stats_t;
 struct talent_t;
@@ -174,16 +166,42 @@ struct uptime_t;
 struct weapon_t;
 struct xml_node_t;
 
-struct targetdata_t;
-struct jedi_sage_targetdata_t;
-struct sith_sorcerer_targetdata_t;
-struct shadow_assassin_targetdata_t;
-struct commando_mercenary_targetdata_t;
+// Classes
+struct commando_mercenary_t;
+struct gunslinger_sniper_t;
+struct juggernaut_guardian_t;
+struct sentinel_marauder_t;
+struct sage_sorcerer_t;
+struct scoundrel_operative_t;
+struct shadow_assassin_t;
+struct vanguard_powertech_t;
 
-void register_jedi_sage_targetdata( sim_t* sim );
+// Targetdata
+struct targetdata_t;
+
+struct sage_sorcerer_targetdata_t;
+struct sith_sorcerer_targetdata_t;
+
+struct commando_mercenary_targetdata_t;
+struct gunslinger_sniper_targetdata_t;
+struct juggernaut_guardian_targetdata_t;
+struct sentinel_marauder_targetdata_t;
+//struct sage_sorcerer_targetdata_t;
+struct scoundrel_operative_targetdata_t;
+struct shadow_assassin_targetdata_t;
+struct vanguard_powertech_targetdata_t;
+
+void register_sage_sorcerer_targetdata( sim_t* sim );
 void register_sith_sorcerer_targetdata( sim_t* sim );
-void register_shadow_assassin_targetdata( sim_t* sim );
+
 void register_commando_mercenary_targetdata( sim_t* sim );
+void register_gunslinger_sniper_targetdata( sim_t* sim );
+void register_juggernaut_guardian_targetdata( sim_t* sim );
+void register_sentinel_marauder_targetdata( sim_t* sim );
+//void register_sage_sorcerer_targetdata( sim_t* sim );
+void register_scoundrel_operative_targetdata( sim_t* sim );
+void register_shadow_assassin_targetdata( sim_t* sim );
+void register_vanguard_powertech_targetdata( sim_t* sim );
 
 #define DATA_DOT 0
 #define DATA_AURA 1
@@ -3322,20 +3340,30 @@ public:
 
   static player_t* create( sim_t* sim, const std::string& type, const std::string& name, race_type r = RACE_NONE );
 
-  static player_t* create_jedi_sage( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
-  static player_t* create_sith_sorcerer( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+  static player_t* create_commando( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+  static player_t* create_mercenary( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
 
-  static player_t* create_jedi_shadow( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
-  static player_t* create_sith_assassin( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+  static player_t* create_gunslinger( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+  static player_t* create_sniper( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
 
   static player_t* create_sith_juggernaut( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
   static player_t* create_jedi_guardian( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
 
+  static player_t* create_sage_sorcerer( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+  static player_t* create_sith_sorcerer( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+
+  static player_t* create_scoundrel( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+  static player_t* create_operative( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+
   static player_t* create_sith_marauder( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
   static player_t* create_jedi_sentinel( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
 
-  static player_t* create_commando( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
-  static player_t* create_mercenary( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+  static player_t* create_jedi_shadow( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+  static player_t* create_sith_assassin( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+
+  static player_t* create_vanguard( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+  static player_t* create_powertech( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+
 
   static player_t* create_enemy       ( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
 
@@ -3344,30 +3372,45 @@ public:
   static void combat_begin( sim_t* sim );
   static void combat_end  ( sim_t* sim );
 
-  // Raid-wide Sage / Sorcerer buff maintenance
-  static void jedi_sage_init        ( sim_t* sim );
-  static void jedi_sage_combat_begin( sim_t* sim );
-  static void jedi_sage_combat_end  ( sim_t* /* sim */ ) {}
+  // Raid-wide Commando/Mercenary buff maintenance
+  static void commando_mercenary_init        ( sim_t* sim );
+  static void commando_mercenary_combat_begin( sim_t* sim );
+  static void commando_mercenary_combat_end  ( sim_t* /* sim */ ) {}
 
-  // Raid-wide Shadow / Assassin buff maintenance
-  static void shadow_assassin_init        ( sim_t* sim );
-  static void shadow_assassin_combat_begin( sim_t* sim );
-  static void shadow_assassin_combat_end  ( sim_t* /* sim */ ) {}
+  // Raid-wide Gunslinger / Sniper buff maintenance
+  static void gunslinger_sniper_init        ( sim_t* sim );
+  static void gunslinger_sniper_combat_begin( sim_t* sim );
+  static void gunslinger_sniper_combat_end  ( sim_t* /* sim */ ) {}
 
   // Raid-wide Juggernaut|Guardian buff maintenance
   static void juggernaut_guardian_init        ( sim_t* sim );
   static void juggernaut_guardian_combat_begin( sim_t* sim );
   static void juggernaut_guardian_combat_end  ( sim_t* /* sim */ ) {}
 
-  // Raid-wide Warrior|Sentinel buff maintenance
-  static void marauder_sentinel_init        ( sim_t* sim );
-  static void marauder_sentinel_combat_begin( sim_t* sim );
-  static void marauder_sentinel_combat_end  ( sim_t* /* sim */ ) {}
+  // Raid-wide Sage / Sorcerer buff maintenance
+  static void sage_sorcerer_init        ( sim_t* sim );
+  static void sage_sorcerer_combat_begin( sim_t* sim );
+  static void sage_sorcerer_combat_end  ( sim_t* /* sim */ ) {}
 
-  // Raid-wide Commando/Mercenary buff maintenance
-  static void commando_mercenary_init        ( sim_t* sim );
-  static void commando_mercenary_combat_begin( sim_t* sim );
-  static void commando_mercenary_combat_end  ( sim_t* /* sim */ ) {}
+  // Raid-wide Scoundrel / Operative buff maintenance
+  static void scoundrel_operative_init        ( sim_t* sim );
+  static void scoundrel_operative_combat_begin( sim_t* sim );
+  static void scoundrel_operative_combat_end  ( sim_t* /* sim */ ) {}
+
+  // Raid-wide Sentinel / Marauder buff maintenance
+  static void sentinel_marauder_init        ( sim_t* sim );
+  static void sentinel_marauder_combat_begin( sim_t* sim );
+  static void sentinel_marauder_combat_end  ( sim_t* /* sim */ ) {}
+
+  // Raid-wide Shadow / Assassin buff maintenance
+  static void shadow_assassin_init        ( sim_t* sim );
+  static void shadow_assassin_combat_begin( sim_t* sim );
+  static void shadow_assassin_combat_end  ( sim_t* /* sim */ ) {}
+
+  // Raid-wide Vanguard / Powertech buff maintenance
+  static void vanguard_powertech_init        ( sim_t* sim );
+  static void vanguard_powertech_combat_begin( sim_t* sim );
+  static void vanguard_powertech_combat_end  ( sim_t* /* sim */ ) {}
 
   // Raid-wide Enemy buff maintenance
   static void enemy_init        ( sim_t* sim );
@@ -3377,19 +3420,27 @@ public:
   bool is_pet() const { return type == PLAYER_PET || type == PLAYER_GUARDIAN || type == ENEMY_ADD; }
   bool is_enemy() const { return type == ENEMY || type == ENEMY_ADD; }
   bool is_add() const { return type == ENEMY_ADD; }
-  bool is_sage_sorcerer() const { return ( type == JEDI_SAGE || type == SITH_SORCERER ); }
-  bool is_shadow_assassin() const { return ( type == JEDI_SHADOW || type == SITH_ASSASSIN ); }
-  bool is_juggernaut_guardian() const { return ( type == JEDI_GUARDIAN || type == SITH_JUGGERNAUT ); }
-  bool is_marauder_sentinel() const { return ( type == JEDI_SENTINEL || type == SITH_MARAUDER ); }
-  bool is_commando_mercenary() const { return ( type == T_COMMANDO || type == BH_MERCENARY ); }
 
-  pet_t* cast_pet() { assert( is_pet() ); return ( pet_t* )this; }
-  enemy_t* cast_enemy() { assert( type == ENEMY ); return ( enemy_t*)this; }
-  sage_sorcerer_t* cast_sage_sorcerer() { assert( is_sage_sorcerer() ); return ( sage_sorcerer_t*)this; }
-  shadow_assassin_t* cast_shadow_assassin() { assert( is_shadow_assassin() ); return ( shadow_assassin_t* )this; }
-  juggernaut_guardian_t* cast_juggernaut_guardian() { assert( is_juggernaut_guardian() ); return ( juggernaut_guardian_t* )this; }
-  marauder_sentinel_t* cast_marauder_sentinel() { assert( is_marauder_sentinel() ); return ( marauder_sentinel_t* )this; }
-  commando_mercenary_t* cast_commando_mercenary() { assert( is_commando_mercenary() ); return ( commando_mercenary_t* )this; }
+  bool is_commando_mercenary()  const { return ( type == T_COMMANDO     || type == BH_MERCENARY     ); }
+  bool is_gunslinger_sniper()   const { return ( type == S_GUNSLINGER   || type == IA_SNIPER        ); }
+  bool is_juggernaut_guardian() const { return ( type == JEDI_GUARDIAN  || type == SITH_JUGGERNAUT  ); }
+  bool is_sentinel_marauder()   const { return ( type == JEDI_SENTINEL  || type == SITH_MARAUDER    ); }
+  bool is_sage_sorcerer()       const { return ( type == JEDI_SAGE      || type == SITH_SORCERER    ); }
+  bool is_scoundrel_operative() const { return ( type == S_SCOUNDREL    || type == IA_OPERATIVE     ); }
+  bool is_shadow_assassin()     const { return ( type == JEDI_SHADOW    || type == SITH_ASSASSIN    ); }
+  bool is_vanguard_powertech()  const { return ( type == T_VANGUARD     || type == BH_POWERTECH     ); }
+
+  pet_t*                  cast_pet()                  { assert( is_pet() );                 return ( pet_t* )                 this; }
+  enemy_t*                cast_enemy()                { assert( type == ENEMY );            return ( enemy_t*)                this; }
+
+  commando_mercenary_t*   cast_commando_mercenary()   { assert( is_commando_mercenary() );  return ( commando_mercenary_t* )  this; }
+  gunslinger_sniper_t*    cast_gunslinger_sniper()    { assert( is_gunslinger_sniper() );   return ( gunslinger_sniper_t*)    this; }
+  juggernaut_guardian_t*  cast_juggernaut_guardian()  { assert( is_juggernaut_guardian() ); return ( juggernaut_guardian_t* ) this; }
+  sentinel_marauder_t*    cast_sentinel_marauder()    { assert( is_sentinel_marauder() );   return ( sentinel_marauder_t* )   this; }
+  sage_sorcerer_t*        cast_sage_sorcerer()        { assert( is_sage_sorcerer() );       return ( sage_sorcerer_t*)        this; }
+  scoundrel_operative_t*  cast_scoundrel_operative()  { assert( is_scoundrel_operative() ); return ( scoundrel_operative_t*)  this; }
+  shadow_assassin_t*      cast_shadow_assassin()      { assert( is_shadow_assassin() );     return ( shadow_assassin_t* )     this; }
+  vanguard_powertech_t*   cast_vanguard_powertech()   { assert( is_vanguard_powertech() );  return ( vanguard_powertech_t*)   this; }
 
   bool      in_gcd() const { return gcd_ready > sim -> current_time; }
   item_t*   find_item( const std::string& );
@@ -3436,7 +3487,7 @@ struct targetdata_t : public noncopyable
 
   static targetdata_t* get( player_t* source, player_t* target );
 
-  jedi_sage_targetdata_t* cast_jedi_sage() { assert( source->type == JEDI_SAGE  ); return ( jedi_sage_targetdata_t* ) this; }
+  sage_sorcerer_targetdata_t* cast_sage_sorcerer() { assert( source->type == JEDI_SAGE  ); return ( sage_sorcerer_targetdata_t* ) this; }
   sith_sorcerer_targetdata_t* cast_sith_sorcerer() { assert( source->type == SITH_SORCERER ); return ( sith_sorcerer_targetdata_t* ) this; }
   shadow_assassin_targetdata_t* cast_shadow_assassin() { assert( source->type == JEDI_SAGE || source -> type == SITH_ASSASSIN ); return ( shadow_assassin_targetdata_t* ) this; }
 

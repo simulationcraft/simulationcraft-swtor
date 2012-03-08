@@ -3,7 +3,7 @@
 // http://code.google.com/p/simulationcraft-swtor/
 // ==========================================================================
 
-#include "simulationcraft.hpp"
+#include "../simulationcraft.hpp"
 
 enum charge_type_t
 {

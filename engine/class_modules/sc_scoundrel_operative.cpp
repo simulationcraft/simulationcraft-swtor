@@ -3,29 +3,28 @@
 // http://code.google.com/p/simulationcraft-swtor/
 // ==========================================================================
 
-#include "simulationcraft.hpp"
+#include "../simulationcraft.hpp"
 
-struct juggernaut_guardian_targetdata_t : public targetdata_t
+struct scoundrel_operative_targetdata_t : public targetdata_t
 {
-
-    juggernaut_guardian_targetdata_t( player_t* source, player_t* target )
+    scoundrel_operative_targetdata_t( player_t* source, player_t* target )
         : targetdata_t( source, target )
     {}
 };
 
-void register_juggernaut_guardian_targetdata( sim_t* /* sim */ )
+void register_scoundrel_operative_targetdata( sim_t* /* sim */ )
 {
-    // player_type t = SITH_JUGGERNAUT;
-    typedef juggernaut_guardian_targetdata_t type;
+    // player_type t = SITH_MARAUDER;
+    typedef scoundrel_operative_targetdata_t type;
 
 }
 
 
 // ==========================================================================
-// Jedi Shadow | Sith Assassin
+// Scoundrel / Operative
 // ==========================================================================
 
-struct juggernaut_guardian_t : public player_t
+struct scoundrel_operative_t : public player_t
 {
     // Buffs
     struct buffs_t
@@ -76,20 +75,20 @@ struct juggernaut_guardian_t : public player_t
 
     } talents;
 
-    juggernaut_guardian_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
-        player_t( sim, pt == SITH_JUGGERNAUT ? SITH_JUGGERNAUT : JEDI_GUARDIAN, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
+    scoundrel_operative_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
+        player_t( sim, pt == IA_OPERATIVE ? IA_OPERATIVE: S_SCOUNDREL, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
     {
 
 
-        primary_attribute   = ATTR_STRENGTH;
-        secondary_attribute = ATTR_WILLPOWER;
+      primary_attribute   = ATTR_STRENGTH;
+      secondary_attribute = ATTR_WILLPOWER;
 
-        create_talents();
-        create_options();
+      create_talents();
+      create_options();
     }
 
     // Character Definition
-    virtual targetdata_t* new_targetdata( player_t* source, player_t* target ) {return new juggernaut_guardian_targetdata_t( source, target );}
+    virtual targetdata_t* new_targetdata( player_t* source, player_t* target ) {return new scoundrel_operative_targetdata_t( source, target );}
     virtual action_t* create_action( const std::string& name, const std::string& options );
     virtual void      init_talents();
     virtual void      init_base();
@@ -103,10 +102,9 @@ struct juggernaut_guardian_t : public player_t
     virtual int       primary_role() const;
     virtual void      create_talents();
 
-    virtual void      init_scaling()
+    virtual void init_scaling()
     {
       player_t::init_scaling();
-
       scales_with[ STAT_FORCE_POWER ] = true;
     }
 };
@@ -115,12 +113,12 @@ namespace { // ANONYMOUS NAMESPACE ==========================================
 
 
 // ==========================================================================
-// Sith assassin Abilities
+// Scoundrel / Operative Abilities
 // ==========================================================================
 
-struct juggernaut_guardian_attack_t : public action_t
+struct scoundrel_operative_attack_t : public action_t
 {
-    juggernaut_guardian_attack_t( const char* n, juggernaut_guardian_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
+    scoundrel_operative_attack_t( const char* n, scoundrel_operative_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
         action_t( ACTION_ATTACK, n, p, melee_policy, r, s )
     {
         may_crit   = true;
@@ -128,9 +126,9 @@ struct juggernaut_guardian_attack_t : public action_t
 
 };
 
-struct juggernaut_guardian_spell_t : public action_t
+struct scoundrel_operative_spell_t : public action_t
 {
-    juggernaut_guardian_spell_t( const char* n, juggernaut_guardian_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
+    scoundrel_operative_spell_t( const char* n, scoundrel_operative_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
         action_t( ACTION_ATTACK, n, p, force_policy, r, s )
     {
         may_crit   = true;
@@ -145,19 +143,19 @@ struct juggernaut_guardian_spell_t : public action_t
 } // ANONYMOUS NAMESPACE ====================================================
 
 // ==========================================================================
-// juggernaut_guardian Character Definition
+// scoundrel_operative Character Definition
 // ==========================================================================
 
-// juggernaut_guardian_t::create_action ====================================================
+// scoundrel_operative_t::create_action ====================================================
 
-action_t* juggernaut_guardian_t::create_action( const std::string& name,
+action_t* scoundrel_operative_t::create_action( const std::string& name,
                                             const std::string& options_str )
 {
-    if ( type == SITH_JUGGERNAUT )
+    if ( type == IA_OPERATIVE )
     {
 
     }
-    else if ( type == JEDI_GUARDIAN )
+    else if ( type == S_SCOUNDREL )
     {
 
     }
@@ -167,9 +165,9 @@ action_t* juggernaut_guardian_t::create_action( const std::string& name,
     return player_t::create_action( name, options_str );
 }
 
-// juggernaut_guardian_t::init_talents =====================================================
+// scoundrel_operative_t::init_talents =====================================================
 
-void juggernaut_guardian_t::init_talents()
+void scoundrel_operative_t::init_talents()
 {
     player_t::init_talents();
 
@@ -181,9 +179,9 @@ void juggernaut_guardian_t::init_talents()
     // Madness|Balance
 }
 
-// juggernaut_guardian_t::init_base ========================================================
+// scoundrel_operative_t::init_base ========================================================
 
-void juggernaut_guardian_t::init_base()
+void scoundrel_operative_t::init_base()
 {
     player_t::init_base();
 
@@ -192,17 +190,17 @@ void juggernaut_guardian_t::init_base()
 
 }
 
-// juggernaut_guardian_t::init_benefits =======================================================
+// scoundrel_operative_t::init_benefits =======================================================
 
-void juggernaut_guardian_t::init_benefits()
+void scoundrel_operative_t::init_benefits()
 {
     player_t::init_benefits();
 
 }
 
-// juggernaut_guardian_t::init_buffs =======================================================
+// scoundrel_operative_t::init_buffs =======================================================
 
-void juggernaut_guardian_t::init_buffs()
+void scoundrel_operative_t::init_buffs()
 {
     player_t::init_buffs();
 
@@ -210,39 +208,39 @@ void juggernaut_guardian_t::init_buffs()
     // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
     // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
 
-    //bool is_juggernaut = ( type == SITH_JUGGERNAUT );
+    //bool is_juggernaut = ( type == SITH_MARAUDER );
 
 
 
 }
 
-// juggernaut_guardian_t::init_gains =======================================================
+// scoundrel_operative_t::init_gains =======================================================
 
-void juggernaut_guardian_t::init_gains()
+void scoundrel_operative_t::init_gains()
 {
     player_t::init_gains();
 
 }
 
-// juggernaut_guardian_t::init_procs =======================================================
+// scoundrel_operative_t::init_procs =======================================================
 
-void juggernaut_guardian_t::init_procs()
+void scoundrel_operative_t::init_procs()
 {
     player_t::init_procs();
 
 }
 
-// juggernaut_guardian_t::init_rng =========================================================
+// scoundrel_operative_t::init_rng =========================================================
 
-void juggernaut_guardian_t::init_rng()
+void scoundrel_operative_t::init_rng()
 {
     player_t::init_rng();
 
 }
 
-// juggernaut_guardian_t::init_actions =====================================================
+// scoundrel_operative_t::init_actions =====================================================
 
-void juggernaut_guardian_t::init_actions()
+void scoundrel_operative_t::init_actions()
 {
     //======================================================================================
     //
@@ -252,7 +250,7 @@ void juggernaut_guardian_t::init_actions()
 
     if ( action_list_str.empty() )
     {
-        if ( type == JEDI_GUARDIAN )
+        if ( type == IA_OPERATIVE )
         {
             action_list_str += "stim,type=exotech_resolve";
             action_list_str += "/snapshot_stats";
@@ -267,7 +265,7 @@ void juggernaut_guardian_t::init_actions()
             action_list_default = 1;
         }
 
-        // Sith ASSASSIN
+        // S_SCOUNDREL
         else
         {
             action_list_str += "stim,type=exotech_resolve";
@@ -286,16 +284,16 @@ void juggernaut_guardian_t::init_actions()
     player_t::init_actions();
 }
 
-// juggernaut_guardian_t::primary_resource ==================================================
+// scoundrel_operative_t::primary_resource ==================================================
 
-int juggernaut_guardian_t::primary_resource() const
+int scoundrel_operative_t::primary_resource() const
 {
     return RESOURCE_FORCE;
 }
 
-// juggernaut_guardian_t::primary_role ==================================================
+// scoundrel_operative_t::primary_role ==================================================
 
-int juggernaut_guardian_t::primary_role() const
+int scoundrel_operative_t::primary_role() const
 {
     switch ( player_t::primary_role() )
     {
@@ -312,9 +310,9 @@ int juggernaut_guardian_t::primary_role() const
     return ROLE_HYBRID;
 }
 
-// juggernaut_guardian_t::create_talents ==================================================
+// scoundrel_operative_t::create_talents ==================================================
 
-void juggernaut_guardian_t::create_talents()
+void scoundrel_operative_t::create_talents()
 {
 #if 0
     static const struct
@@ -372,30 +370,30 @@ void juggernaut_guardian_t::create_talents()
 // PLAYER_T EXTENSIONS
 // ==========================================================================
 
-// player_t::create_jedi_shadow  ============================================
+// player_t::create_scoundrel ============================================
 
-player_t* player_t::create_jedi_guardian( sim_t* sim, const std::string& name, race_type r )
+player_t* player_t::create_scoundrel( sim_t* sim, const std::string& name, race_type r )
 {
-    return new juggernaut_guardian_t( sim, JEDI_GUARDIAN, name, r );
+    return new scoundrel_operative_t( sim, S_SCOUNDREL, name, r );
 }
 
-// player_t::create_SITH_JUGGERNAUT  ==========================================
+// player_t::create_operative ==========================================
 
-player_t* player_t::create_sith_juggernaut( sim_t* sim, const std::string& name, race_type r )
+player_t* player_t::create_operative( sim_t* sim, const std::string& name, race_type r )
 {
-    return new juggernaut_guardian_t( sim, SITH_JUGGERNAUT, name, r );
+    return new scoundrel_operative_t( sim, IA_OPERATIVE, name, r );
 }
 
-// player_t::juggernaut_guardian_init ===========================================
+// player_t::scoundrel_operative_init ===========================================
 
-void player_t::juggernaut_guardian_init( sim_t* /* sim */ )
+void player_t::scoundrel_operative_init( sim_t* /* sim */ )
 {
 
 }
 
-// player_t::juggernaut_guardian_combat_begin ===================================
+// player_t::scoundrel_operative_combat_begin ===================================
 
-void player_t::juggernaut_guardian_combat_begin( sim_t* /* sim */ )
+void player_t::scoundrel_operative_combat_begin( sim_t* /* sim */ )
 {
 
 }

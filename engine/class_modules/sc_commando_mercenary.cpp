@@ -3,7 +3,7 @@
 // http://code.google.com/p/simulationcraft-swtor/
 // ==========================================================================
 
-#include "simulationcraft.hpp"
+#include "../simulationcraft.hpp"
 
 struct commando_mercenary_targetdata_t : public targetdata_t
 {
