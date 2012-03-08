@@ -36,7 +36,7 @@ void register_shadow_assassin_targetdata( sim_t* sim )
 // Jedi Shadow | Sith Assassin
 // ==========================================================================
 
-struct shadow_assassin_t: public player_t
+struct shadow_assassin_t : public player_t
 {
   //Active
   struct actives_t
@@ -202,6 +202,7 @@ struct shadow_assassin_t: public player_t
   virtual void init_scaling()
   {
     player_t::init_scaling();
+
     scales_with[STAT_ALACRITY_RATING] = false;
     scales_with[STAT_FORCE_POWER] = true;
   }
@@ -248,7 +249,7 @@ namespace
 // Sith assassin Abilities
 // ==========================================================================
 
-struct shadow_assassin_attack_t: public action_t
+struct shadow_assassin_attack_t : public action_t
 {
   shadow_assassin_attack_t( const std::string& n, shadow_assassin_t* p, const school_type s = SCHOOL_KINETIC ) :
       action_t( ACTION_ATTACK, n.c_str(), p, melee_policy, RESOURCE_FORCE, s )
@@ -292,7 +293,7 @@ struct shadow_assassin_attack_t: public action_t
   }
 };
 
-struct shadow_assassin_spell_t: public action_t
+struct shadow_assassin_spell_t : public action_t
 {
   shadow_assassin_spell_t( const std::string& n, shadow_assassin_t* p, const school_type s = SCHOOL_ENERGY ) :
       action_t( ACTION_ATTACK, n.c_str(), p, force_policy, RESOURCE_FORCE, s )
@@ -379,7 +380,7 @@ struct shadow_assassin_spell_t: public action_t
 
 // Mark of Power | Force Valor =======================
 
-struct mark_of_power_t: public shadow_assassin_spell_t
+struct mark_of_power_t : public shadow_assassin_spell_t
 {
   mark_of_power_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
       shadow_assassin_spell_t( n, p )
@@ -411,15 +412,14 @@ struct mark_of_power_t: public shadow_assassin_spell_t
 
 // Shock | Project =======================
 
-struct shock_t: public shadow_assassin_spell_t
+struct shock_t : public shadow_assassin_spell_t
 {
   shock_t* chain_shock;
 
   shock_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str, bool is_chain_shock = false ) :
       shadow_assassin_spell_t( n + ( is_chain_shock ? "_chain_shock" : "" ), p ), chain_shock( 0 )
   {
-    rank_level_list =
-    { 1, 4, 7, 11, 14, 17, 23, 34, 47, 50};
+    rank_level_list = { 1, 4, 7, 11, 14, 17, 23, 34, 47, 50};
 
     parse_options( 0, options_str );
 
@@ -496,13 +496,12 @@ struct shock_t: public shadow_assassin_spell_t
 
 // Force Lightning | Telekinetic Throw ======
 
-struct force_lightning_t: public shadow_assassin_spell_t
+struct force_lightning_t : public shadow_assassin_spell_t
 {
   force_lightning_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
       shadow_assassin_spell_t( n, p )
   {
-    rank_level_list =
-    { 2, 5, 8, 11, 14, 19, 27, 39, 50};
+    rank_level_list = { 2, 5, 8, 11, 14, 19, 27, 39, 50};
 
     parse_options( 0, options_str );
 
@@ -524,15 +523,14 @@ struct force_lightning_t: public shadow_assassin_spell_t
 
 // Crushing Darkness | Mind Crush =====================
 
-struct crushing_darkness_t: public shadow_assassin_spell_t
+struct crushing_darkness_t : public shadow_assassin_spell_t
 {
-  struct crushing_darkness_dot_t: public shadow_assassin_spell_t
+  struct crushing_darkness_dot_t : public shadow_assassin_spell_t
   {
     crushing_darkness_dot_t( shadow_assassin_t* p, const std::string& n ) :
         shadow_assassin_spell_t( n, p, SCHOOL_KINETIC )
     {
-      rank_level_list =
-      { 14, 19, 30, 41, 50};
+      rank_level_list = { 14, 19, 30, 41, 50};
 
       td.standardhealthpercentmin = td.standardhealthpercentmax = .0295;
       td.power_mod = 0.295;
@@ -561,8 +559,7 @@ struct crushing_darkness_t: public shadow_assassin_spell_t
   shadow_assassin_spell_t( n, p, SCHOOL_KINETIC ),
   dot_spell( new crushing_darkness_dot_t( p, n + "_dot" ) )
   {
-    rank_level_list =
-    { 14, 19, 30, 41, 50};
+    rank_level_list = { 14, 19, 30, 41, 50};
 
     parse_options( 0, options_str );
 
@@ -628,7 +625,7 @@ struct crushing_darkness_t: public shadow_assassin_spell_t
 
 // Death Field | Force in Balance =======================
 
-struct death_field_t: public shadow_assassin_spell_t
+struct death_field_t : public shadow_assassin_spell_t
 {
   death_field_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
       shadow_assassin_spell_t( n, p, SCHOOL_INTERNAL )
@@ -665,7 +662,7 @@ struct death_field_t: public shadow_assassin_spell_t
 
 // Creeping Terror | Sever Force ==================================
 
-struct creeping_terror_t: public shadow_assassin_spell_t
+struct creeping_terror_t : public shadow_assassin_spell_t
 {
   creeping_terror_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
       shadow_assassin_spell_t( n, p, SCHOOL_INTERNAL )
@@ -699,7 +696,7 @@ struct creeping_terror_t: public shadow_assassin_spell_t
 
 // Recklessness | Force Potency ==================
 
-struct recklessness_t: public shadow_assassin_spell_t
+struct recklessness_t : public shadow_assassin_spell_t
 {
   recklessness_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
       shadow_assassin_spell_t( n, p, SCHOOL_INTERNAL )
@@ -754,7 +751,7 @@ struct discharge_t: public shadow_assassin_spell_t
     }
   };
 
-  struct surging_discharge_t: public shadow_assassin_spell_t
+  struct surging_discharge_t : public shadow_assassin_spell_t
   {
     surging_discharge_t( shadow_assassin_t* p, const std::string& n ) :
         shadow_assassin_spell_t( n, p, SCHOOL_INTERNAL )
@@ -773,7 +770,7 @@ struct discharge_t: public shadow_assassin_spell_t
     }
   };
 
-  struct dark_discharge_t: public shadow_assassin_spell_t
+  struct dark_discharge_t : public shadow_assassin_spell_t
   {
     dark_discharge_t( shadow_assassin_t* p, const std::string& n ) :
         shadow_assassin_spell_t( n, p, SCHOOL_INTERNAL )
@@ -845,7 +842,7 @@ struct discharge_t: public shadow_assassin_spell_t
 
 // Apply Charge ======================================
 
-struct apply_charge_t: public shadow_assassin_spell_t
+struct apply_charge_t : public shadow_assassin_spell_t
 {
   charge_type_t charge;
 
@@ -879,7 +876,7 @@ struct apply_charge_t: public shadow_assassin_spell_t
   }
 };
 
-struct lightning_charge_t: public apply_charge_t
+struct lightning_charge_t : public apply_charge_t
 {
   lightning_charge_t( shadow_assassin_t* p, const std::string& name, const std::string& options_str ) :
       apply_charge_t( p, name, LIGHTNING_CHARGE, options_str )
@@ -887,7 +884,7 @@ struct lightning_charge_t: public apply_charge_t
   }
 };
 
-struct surging_charge_t: public apply_charge_t
+struct surging_charge_t : public apply_charge_t
 {
   surging_charge_t( shadow_assassin_t* p, const std::string& name, const std::string& options_str ) :
       apply_charge_t( p, name, SURGING_CHARGE, options_str )
@@ -895,7 +892,7 @@ struct surging_charge_t: public apply_charge_t
   }
 };
 
-struct dark_charge_t: public apply_charge_t
+struct dark_charge_t : public apply_charge_t
 {
   dark_charge_t( shadow_assassin_t* p, const std::string& name, const std::string& options_str ) :
       apply_charge_t( p, name, DARK_CHARGE, options_str )
@@ -905,7 +902,7 @@ struct dark_charge_t: public apply_charge_t
 
 // Low Slash =====================================
 
-struct low_slash_t: public shadow_assassin_attack_t
+struct low_slash_t : public shadow_assassin_attack_t
 {
 
   low_slash_t( shadow_assassin_t* p, const std::string& options_str ) :
@@ -927,7 +924,7 @@ struct low_slash_t: public shadow_assassin_attack_t
 
 // Voltaic Slash | Clairvoyant Strike ===============
 
-struct voltaic_slash_t: public shadow_assassin_attack_t
+struct voltaic_slash_t : public shadow_assassin_attack_t
 {
 
   voltaic_slash_t* second_strike;
@@ -990,7 +987,7 @@ struct voltaic_slash_t: public shadow_assassin_attack_t
 
 // Overcharge Saber | Battle Readiness ================
 
-struct overcharge_saber_t: public shadow_assassin_spell_t
+struct overcharge_saber_t : public shadow_assassin_spell_t
 {
   overcharge_saber_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
       shadow_assassin_spell_t( n, p )
@@ -1014,7 +1011,7 @@ struct overcharge_saber_t: public shadow_assassin_spell_t
 
 // Assassinate | Spinning Strike ==============================================
 
-struct assassinate_t: public shadow_assassin_attack_t
+struct assassinate_t : public shadow_assassin_attack_t
 {
   assassinate_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
       shadow_assassin_attack_t( n, p )
@@ -1053,7 +1050,7 @@ struct assassinate_t: public shadow_assassin_attack_t
 
 // Lacerate | Whirling Blow ==================================
 
-struct lacerate_t: public shadow_assassin_attack_t
+struct lacerate_t : public shadow_assassin_attack_t
 {
 
   lacerate_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
@@ -1074,7 +1071,7 @@ struct lacerate_t: public shadow_assassin_attack_t
   }
 };
 
-struct stealth_base_t: public shadow_assassin_spell_t
+struct stealth_base_t : public shadow_assassin_spell_t
 {
   stealth_base_t( shadow_assassin_t* p, const std::string& n ) :
       shadow_assassin_spell_t( n, p )
@@ -1095,7 +1092,7 @@ struct stealth_base_t: public shadow_assassin_spell_t
 
 // Blackout ================================
 
-struct blackout_t: public stealth_base_t
+struct blackout_t : public stealth_base_t
 {
   blackout_t( shadow_assassin_t* p, const std::string& options_str ) :
       stealth_base_t( p, "blackout" )
@@ -1116,7 +1113,7 @@ struct blackout_t: public stealth_base_t
 
 // Force Cloak ==========================================
 
-struct force_cloak_t: public stealth_base_t
+struct force_cloak_t : public stealth_base_t
 {
   force_cloak_t( shadow_assassin_t* p, const std::string& options_str ) :
       stealth_base_t( p, "force_cloak" )
@@ -1128,7 +1125,7 @@ struct force_cloak_t: public stealth_base_t
 
 // Stealth
 
-struct stealth_t: public stealth_base_t
+struct stealth_t : public stealth_base_t
 {
   stealth_t( shadow_assassin_t* p, const std::string& options_str ) :
       stealth_base_t( p, "stealth" )
@@ -1152,7 +1149,7 @@ struct stealth_t: public stealth_base_t
 
 // Maul | Shadow Strike ===================
 
-struct maul_t: public shadow_assassin_attack_t
+struct maul_t : public shadow_assassin_attack_t
 {
   maul_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
       shadow_assassin_attack_t( n, p )
@@ -1208,7 +1205,7 @@ struct maul_t: public shadow_assassin_attack_t
 
 // Saber Strike ==================================
 
-struct saber_strike_t: public shadow_assassin_attack_t
+struct saber_strike_t : public shadow_assassin_attack_t
 {
 
   saber_strike_t* second_strike;
@@ -1264,7 +1261,7 @@ struct saber_strike_t: public shadow_assassin_attack_t
 
 // Thrash | Double Strike ==================================
 
-struct thrash_t: public shadow_assassin_attack_t
+struct thrash_t : public shadow_assassin_attack_t
 {
   thrash_t* second_strike;
 
@@ -1326,9 +1323,9 @@ struct thrash_t: public shadow_assassin_attack_t
 
 // Lightning Charge | Force Technique ===========
 
-struct lightning_charge_callback_t: public action_callback_t
+struct lightning_charge_callback_t : public action_callback_t
 {
-  struct lightning_charge_spell_t: public shadow_assassin_spell_t
+  struct lightning_charge_spell_t : public shadow_assassin_spell_t
   {
     lightning_charge_spell_t( shadow_assassin_t* p, const std::string& n ) :
         shadow_assassin_spell_t( n, p )
@@ -1387,9 +1384,9 @@ struct lightning_charge_callback_t: public action_callback_t
 
 // Surging Charge | Shadow Technique ========================
 
-struct surging_charge_callback_t: public action_callback_t
+struct surging_charge_callback_t : public action_callback_t
 {
-  struct surging_charge_spell_t: public shadow_assassin_spell_t
+  struct surging_charge_spell_t : public shadow_assassin_spell_t
   {
     surging_charge_spell_t( shadow_assassin_t* p, const std::string& n ) :
         shadow_assassin_spell_t( n, p, SCHOOL_INTERNAL )
@@ -1481,9 +1478,9 @@ struct surging_charge_callback_t: public action_callback_t
 
 // Dark Charge |  ===========
 
-struct dark_charge_callback_t: public action_callback_t
+struct dark_charge_callback_t : public action_callback_t
 {
-  struct dark_charge_spell_t: public shadow_assassin_spell_t
+  struct dark_charge_spell_t : public shadow_assassin_spell_t
   {
     dark_charge_spell_t( shadow_assassin_t* p, const std::string& n ) :
         shadow_assassin_spell_t( n, p, SCHOOL_INTERNAL )
