@@ -883,7 +883,7 @@ void SimulationCraftWindow::createLogTab()
 void SimulationCraftWindow::createHelpTab()
 {
   helpView = new SimulationCraftWebView( this );
-  helpView->setUrl( QUrl( "http://code.google.com/p/simulationcraft-swtor/" ) ); // FIXME: change back to a starters guide / help wiki page once there is one
+  helpView->setUrl( QUrl( "http://code.google.com/p/simulationcraft-swtor/wiki/StartersGuide" ) );
   mainTab->addTab( helpView, "Help" );
 }
 
@@ -1263,6 +1263,7 @@ void SimulateThread::run()
   }
 
   sim -> html_file_str = "simc_report.html";
+  sim -> xml_file_str  = "simc_report.xml";
 
   QStringList stringList = options.split( '\n', QString::SkipEmptyParts );
 
