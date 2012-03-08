@@ -888,34 +888,8 @@ void SimulationCraftWindow::createHelpTab()
 
 void SimulationCraftWindow::createResultsTab()
 {
-  QString s = "<div align=center><h1>Understanding SimulationCraft Output!</h1>If you are seeing this text, then Legend.html was unable to load.</div>";
-  QString legendFile = "Legend.html";
-#ifdef Q_WS_MAC
-  CFURLRef fileRef    = CFBundleCopyResourceURL( CFBundleGetMainBundle(), CFSTR( "Legend" ), CFSTR( "html" ), 0 );
-  if ( fileRef )
-  {
-    CFStringRef macPath = CFURLCopyFileSystemPath( fileRef, kCFURLPOSIXPathStyle );
-    legendFile          = CFStringGetCStringPtr( macPath, CFStringGetSystemEncoding() );
-
-    CFRelease( fileRef );
-    CFRelease( macPath );
-  }
-#endif
-
-  QFile file( legendFile );
-  if ( file.open( QIODevice::ReadOnly ) )
-  {
-    s = file.readAll();
-    file.close();
-  }
-
-  QTextBrowser* legendBanner = new QTextBrowser();
-  legendBanner->setHtml( s );
-  legendBanner->moveCursor( QTextCursor::Start );
-
   resultsTab = new QTabWidget();
   resultsTab->setTabsClosable( true );
-  resultsTab->addTab( legendBanner, "Legend" );
   connect( resultsTab, SIGNAL( currentChanged( int ) ),    this, SLOT( resultsTabChanged( int ) )      );
   connect( resultsTab, SIGNAL( tabCloseRequested( int ) ), this, SLOT( resultsTabCloseRequest( int ) ) );
   mainTab->addTab( resultsTab, "Results" );
@@ -1756,15 +1730,8 @@ void SimulationCraftWindow::resultsTabChanged( int index )
 
 void SimulationCraftWindow::resultsTabCloseRequest( int index )
 {
-  if ( index <= 0 )
-  {
-    // Ignore attempts to close Legend
-  }
-  else
-  {
-    resultsTab->removeTab( index );
-    resultsHtml.removeAt( index-1 );
-  }
+  resultsTab->removeTab( index );
+  resultsHtml.removeAt( index-1 );
 }
 
 void SimulationCraftWindow::historyDoubleClicked( QListWidgetItem* item )
