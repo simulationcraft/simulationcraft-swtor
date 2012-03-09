@@ -1,4 +1,4 @@
-Please visit http://code.google.com/p/simulationcraft-swtor/wiki/HowToBuild for a up-to-date version of this file.
+Please visit http://code.google.com/p/simulationcraft-swtor/wiki/HowToBuild for a up-to-date version of this file. Things in this file look a bit strange because it is simply a dump from the wiki with markup included.
 
 There is also a guide on how to set up a IDE ( Integrated Development Environment ) using Eclipse at 
 http://code.google.com/p/simulationcraft-swtor/wiki/Configure_IDE
