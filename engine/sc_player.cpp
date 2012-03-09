@@ -227,7 +227,7 @@ player_t::player_t( sim_t*             s,
   vengeance_enabled( false ), vengeance_damage( 0.0 ), vengeance_value( 0.0 ), vengeance_max( 0.0 ), vengeance_was_attacked( false ),
   active_pets( 0 ),
   reaction_mean( timespan_t::from_seconds( 0.5 ) ), reaction_stddev( timespan_t::zero ), reaction_nu( timespan_t::from_seconds( 0.5 ) ),
-  scale_player( 1 ), avg_ilvl( 0 ), active_companion( 0 ), ptr( false ),
+  scale_player( 1 ), avg_ilvl( 0 ), active_companion( 0 ), ptr( s -> ptr ),
   // Latency
   world_lag( timespan_t::from_seconds( 0.1 ) ), world_lag_stddev( timespan_t::min ),
   brain_lag( timespan_t::min ), brain_lag_stddev( timespan_t::min ),

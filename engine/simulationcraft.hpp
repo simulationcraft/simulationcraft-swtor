@@ -98,9 +98,9 @@
 
 #define SC_MAJOR_VERSION "114"
 #define SC_MINOR_VERSION "4"
-#define SWTOR_VERSION_LIVE "1.1.4"
-#define SWTOR_VERSION_PTR "1.1.4"
-#define SC_USE_PTR ( 0 )
+#define SWTOR_VERSION_LIVE "1.1.5"
+#define SWTOR_VERSION_PTR "1.2.0"
+#define SC_USE_PTR ( 1 )
 #define SC_BETA ( 0 )
 #define SC_EPSILON ( 0.000001 )
 #ifndef M_PI

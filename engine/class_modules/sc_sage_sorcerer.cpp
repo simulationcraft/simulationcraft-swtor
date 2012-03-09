@@ -518,7 +518,7 @@ struct telekinetic_throw_t : public sage_sorcerer_spell_t
          )
     {
       is_buffed_by_psychic_projection = true;
-      if ( p -> bugs && p -> buffs.psychic_projection -> check() )
+      if ( p -> bugs && ! p -> ptr && p -> buffs.psychic_projection -> check() )
       {
         p -> buffs.psychic_projection_dd -> trigger();
       }
