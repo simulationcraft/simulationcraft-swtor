@@ -5,6 +5,14 @@
 
 #include "../simulationcraft.hpp"
 
+struct gunslinger_sniper_targetdata_t : public targetdata_t
+{
+  gunslinger_sniper_targetdata_t( player_t& source, player_t& target )
+    : targetdata_t( source, target )
+  {}
+};
+
+
 // ==========================================================================
 // Gunslinger / Sniper
 // ==========================================================================
@@ -104,34 +112,45 @@ struct gunslinger_sniper_t : public player_t
 
 namespace { // ANONYMOUS NAMESPACE ==========================================
 
+class gunslinger_sniper_action_t : public action_t
+{
+public:
+  gunslinger_sniper_action_t( const std::string& n, gunslinger_sniper_t* player,
+                          attack_policy_t policy, resource_type r, school_type s ) :
+    action_t( ACTION_ATTACK, n.c_str(), player, policy, r, s )
+  {}
+
+  gunslinger_sniper_targetdata_t* targetdata() const
+  { return static_cast<gunslinger_sniper_targetdata_t*>( action_t::targetdata() ); }
+
+  gunslinger_sniper_t* cast() const
+  { return static_cast<gunslinger_sniper_t*>( player ); }
+};
 
 // ==========================================================================
 // Gunslinger / Sniper Abilities
 // ==========================================================================
 
-struct gunslinger_sniper_attack_t : public action_t
+struct gunslinger_sniper_attack_t : public gunslinger_sniper_action_t
 {
-    gunslinger_sniper_attack_t( const char* n, gunslinger_sniper_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
-        action_t( ACTION_ATTACK, n, p, melee_policy, r, s )
+    gunslinger_sniper_attack_t( const std::string& n, gunslinger_sniper_t* p, school_type s=SCHOOL_KINETIC ) :
+      gunslinger_sniper_action_t( n, p, melee_policy, RESOURCE_NONE, s )
     {
         may_crit   = true;
     }
 
 };
 
-struct gunslinger_sniper_spell_t : public action_t
+struct gunslinger_sniper_spell_t : public gunslinger_sniper_action_t
 {
-    gunslinger_sniper_spell_t( const char* n, gunslinger_sniper_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
-        action_t( ACTION_ATTACK, n, p, force_policy, r, s )
+    gunslinger_sniper_spell_t( const std::string& n, gunslinger_sniper_t* p, school_type s=SCHOOL_KINETIC ) :
+      gunslinger_sniper_action_t( n, p, force_policy, RESOURCE_NONE, s )
     {
         may_crit   = true;
         tick_may_crit = true;
     }
 
 };
-
-
-
 
 } // ANONYMOUS NAMESPACE ====================================================
 

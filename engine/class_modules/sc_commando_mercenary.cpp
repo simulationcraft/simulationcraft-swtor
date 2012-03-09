@@ -106,34 +106,45 @@ struct commando_mercenary_t : public player_t
 
 namespace { // ANONYMOUS NAMESPACE ==========================================
 
-
-// ==========================================================================
-// Sith assassin Abilities
-// ==========================================================================
-
-struct commando_mercenary_melee_attack_t : public action_t
+class commando_mercenary_action_t : public action_t
 {
-    commando_mercenary_melee_attack_t( const char* n, commando_mercenary_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
-        action_t( ACTION_ATTACK, n, p, melee_policy, r, s )
+public:
+  commando_mercenary_action_t( const std::string& n, commando_mercenary_t* player,
+                          attack_policy_t policy, resource_type r, school_type s ) :
+    action_t( ACTION_ATTACK, n.c_str(), player, policy, r, s )
+  {}
+
+  commando_mercenary_targetdata_t* targetdata() const
+  { return static_cast<commando_mercenary_targetdata_t*>( action_t::targetdata() ); }
+
+  commando_mercenary_t* cast() const
+  { return static_cast<commando_mercenary_t*>( player ); }
+};
+
+// ==========================================================================
+// Commando / Mercenary Abilities
+// ==========================================================================
+
+struct commando_mercenary_attack_t : public commando_mercenary_action_t
+{
+    commando_mercenary_attack_t( const std::string& n, commando_mercenary_t* p, school_type s=SCHOOL_KINETIC ) :
+      commando_mercenary_action_t( n, p, melee_policy, RESOURCE_NONE, s )
     {
         may_crit   = true;
     }
 
 };
 
-struct commando_mercenary_force_attack_t : public action_t
+struct commando_mercenary_spell_t : public commando_mercenary_action_t
 {
-    commando_mercenary_force_attack_t( const char* n, commando_mercenary_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
-        action_t( ACTION_ATTACK, n, p, force_policy, r, s )
+    commando_mercenary_spell_t( const std::string& n, commando_mercenary_t* p, school_type s=SCHOOL_KINETIC ) :
+      commando_mercenary_action_t( n, p, force_policy, RESOURCE_NONE, s )
     {
         may_crit   = true;
         tick_may_crit = true;
     }
 
 };
-
-
-
 
 } // ANONYMOUS NAMESPACE ====================================================
 

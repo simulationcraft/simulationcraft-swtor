@@ -106,33 +106,45 @@ struct sentinel_marauder_t : public player_t
 
 namespace { // ANONYMOUS NAMESPACE ==========================================
 
-
-// ==========================================================================
-// Sith assassin Abilities
-// ==========================================================================
-
-struct sentinel_marauder_attack_t : public action_t
+class sentinel_marauder_action_t : public action_t
 {
-    sentinel_marauder_attack_t( const char* n, sentinel_marauder_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
-        action_t( ACTION_ATTACK, n, p, melee_policy, r, s )
+public:
+  sentinel_marauder_action_t( const std::string& n, sentinel_marauder_t* player,
+                          attack_policy_t policy, resource_type r, school_type s ) :
+    action_t( ACTION_ATTACK, n.c_str(), player, policy, r, s )
+  {}
+
+  sentinel_marauder_targetdata_t* targetdata() const
+  { return static_cast<sentinel_marauder_targetdata_t*>( action_t::targetdata() ); }
+
+  sentinel_marauder_t* cast() const
+  { return static_cast<sentinel_marauder_t*>( player ); }
+};
+
+// ==========================================================================
+// Sentinel / Marauder Abilities
+// ==========================================================================
+
+struct sentinel_marauder_attack_t : public sentinel_marauder_action_t
+{
+    sentinel_marauder_attack_t( const std::string& n, sentinel_marauder_t* p, school_type s=SCHOOL_KINETIC ) :
+      sentinel_marauder_action_t( n, p, melee_policy, RESOURCE_NONE, s )
     {
         may_crit   = true;
     }
 
 };
 
-struct sentinel_marauder_spell_t : public action_t
+struct sentinel_marauder_spell_t : public sentinel_marauder_action_t
 {
-    sentinel_marauder_spell_t( const char* n, sentinel_marauder_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
-        action_t( ACTION_ATTACK, n, p, force_policy, r, s )
+    sentinel_marauder_spell_t( const std::string& n, sentinel_marauder_t* p, school_type s=SCHOOL_KINETIC ) :
+      sentinel_marauder_action_t( n, p, force_policy, RESOURCE_NONE, s )
     {
         may_crit   = true;
         tick_may_crit = true;
     }
 
 };
-
-
 
 
 } // ANONYMOUS NAMESPACE ====================================================

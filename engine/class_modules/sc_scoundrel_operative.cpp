@@ -106,34 +106,45 @@ struct scoundrel_operative_t : public player_t
 
 namespace { // ANONYMOUS NAMESPACE ==========================================
 
+class scoundrel_operative_action_t : public action_t
+{
+public:
+  scoundrel_operative_action_t( const std::string& n, scoundrel_operative_t* player,
+                          attack_policy_t policy, resource_type r, school_type s ) :
+    action_t( ACTION_ATTACK, n.c_str(), player, policy, r, s )
+  {}
+
+  scoundrel_operative_targetdata_t* targetdata() const
+  { return static_cast<scoundrel_operative_targetdata_t*>( action_t::targetdata() ); }
+
+  scoundrel_operative_t* cast() const
+  { return static_cast<scoundrel_operative_t*>( player ); }
+};
 
 // ==========================================================================
 // Scoundrel / Operative Abilities
 // ==========================================================================
 
-struct scoundrel_operative_attack_t : public action_t
+struct scoundrel_operative_attack_t : public scoundrel_operative_action_t
 {
-    scoundrel_operative_attack_t( const char* n, scoundrel_operative_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
-        action_t( ACTION_ATTACK, n, p, melee_policy, r, s )
+    scoundrel_operative_attack_t( const std::string& n, scoundrel_operative_t* p, school_type s=SCHOOL_KINETIC ) :
+      scoundrel_operative_action_t( n, p, melee_policy, RESOURCE_NONE, s )
     {
         may_crit   = true;
     }
 
 };
 
-struct scoundrel_operative_spell_t : public action_t
+struct scoundrel_operative_spell_t : public scoundrel_operative_action_t
 {
-    scoundrel_operative_spell_t( const char* n, scoundrel_operative_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
-        action_t( ACTION_ATTACK, n, p, force_policy, r, s )
+    scoundrel_operative_spell_t( const std::string& n, scoundrel_operative_t* p, school_type s=SCHOOL_KINETIC ) :
+      scoundrel_operative_action_t( n, p, force_policy, RESOURCE_NONE, s )
     {
         may_crit   = true;
         tick_may_crit = true;
     }
 
 };
-
-
-
 
 } // ANONYMOUS NAMESPACE ====================================================
 

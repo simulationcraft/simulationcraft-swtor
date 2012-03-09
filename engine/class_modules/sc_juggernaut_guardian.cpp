@@ -107,34 +107,45 @@ struct juggernaut_guardian_t : public player_t
 
 namespace { // ANONYMOUS NAMESPACE ==========================================
 
-
-// ==========================================================================
-// Sith assassin Abilities
-// ==========================================================================
-
-struct juggernaut_guardian_attack_t : public action_t
+class juggernaut_guardian_action_t : public action_t
 {
-    juggernaut_guardian_attack_t( const char* n, juggernaut_guardian_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
-        action_t( ACTION_ATTACK, n, p, melee_policy, r, s )
+public:
+  juggernaut_guardian_action_t( const std::string& n, juggernaut_guardian_t* player,
+                          attack_policy_t policy, resource_type r, school_type s ) :
+    action_t( ACTION_ATTACK, n.c_str(), player, policy, r, s )
+  {}
+
+  juggernaut_guardian_targetdata_t* targetdata() const
+  { return static_cast<juggernaut_guardian_targetdata_t*>( action_t::targetdata() ); }
+
+  juggernaut_guardian_t* cast() const
+  { return static_cast<juggernaut_guardian_t*>( player ); }
+};
+
+// ==========================================================================
+// Juggernaut / Guardian Abilities
+// ==========================================================================
+
+struct juggernaut_guardian_attack_t : public juggernaut_guardian_action_t
+{
+    juggernaut_guardian_attack_t( const std::string& n, juggernaut_guardian_t* p, school_type s=SCHOOL_KINETIC ) :
+      juggernaut_guardian_action_t( n, p, melee_policy, RESOURCE_NONE, s )
     {
         may_crit   = true;
     }
 
 };
 
-struct juggernaut_guardian_spell_t : public action_t
+struct juggernaut_guardian_spell_t : public juggernaut_guardian_action_t
 {
-    juggernaut_guardian_spell_t( const char* n, juggernaut_guardian_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
-        action_t( ACTION_ATTACK, n, p, force_policy, r, s )
+    juggernaut_guardian_spell_t( const std::string& n, juggernaut_guardian_t* p, school_type s=SCHOOL_KINETIC ) :
+      juggernaut_guardian_action_t( n, p, force_policy, RESOURCE_NONE, s )
     {
         may_crit   = true;
         tick_may_crit = true;
     }
 
 };
-
-
-
 
 } // ANONYMOUS NAMESPACE ====================================================
 
