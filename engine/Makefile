@@ -18,8 +18,7 @@ CPP_FLAGS  = -Wall -Woverloaded-virtual -W -I.
 OPTS       = -O3 -fomit-frame-pointer -ffast-math -std=gnu++0x
 BITS       = 32
 
-include ../build.conf
--include ../override.conf
+-include ../build.conf
 
 ifeq (64,${BITS})
 CPP_FLAGS += -m64

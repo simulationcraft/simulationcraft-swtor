@@ -4,9 +4,8 @@ QT += core gui network webkit
 #CONFIG += paperdoll
 #CONFIG += openssl
 
-include( build.conf )
-exists( override.conf ) {
-  include( override.conf )
+exists( build.conf ) {
+  include( build.conf )
 }
 
 QMAKE_CXXFLAGS_RELEASE += -DNDEBUG
