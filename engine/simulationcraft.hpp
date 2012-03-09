@@ -92,9 +92,9 @@
 
 #define SC_MAJOR_VERSION "114"
 #define SC_MINOR_VERSION "4"
-#define SWTOR_VERSION_LIVE "1.1.4"
-#define SWTOR_VERSION_PTR "1.1.4"
-#define SC_USE_PTR ( 0 )
+#define SWTOR_VERSION_LIVE "1.1.5"
+#define SWTOR_VERSION_PTR "1.2.0"
+#define SC_USE_PTR ( 1 )
 #define SC_BETA ( 0 )
 #define SC_EPSILON ( 0.000001 )
 #ifndef M_PI
@@ -1137,6 +1137,12 @@ public:
   static double round( double X, unsigned int decplaces = 0 );
 
   static std::string& tolower( std::string& str ) { tolower_( str ); return str; }
+
+private:
+  static void format_name_( std::string& s );
+public:
+  static std::string& format_name( std::string& s )
+  { format_name_( s ); return s; }
 
   static int snprintf( char* buf, size_t size, const char* fmt, ... ) PRINTF_ATTRIBUTE( 3,4 );
 
@@ -3904,17 +3910,6 @@ void replace_char( std::string& str, char old_c, char new_c  );
 void replace_str( std::string& str, const std::string& old_str, const std::string& new_str  );
 bool str_to_float( const std::string& src, double& dest );
 #endif // UNUSED
-
-// Armory ===================================================================
-
-struct armory_t
-{
-private:
-  static void format_( std::string& s );
-public:
-  static std::string& format( std::string& s )
-  { format_( s ); return s; }
-};
 
 // base36 ===================================================================
 

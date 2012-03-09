@@ -316,7 +316,7 @@ const char* util_t::player_type_string( int type )
 {
   switch ( type )
   {
-  case JEDI_SAGE:        return "sage_sorcerer";
+  case JEDI_SAGE:        return "jedi_sage";
   case JEDI_SHADOW:      return "jedi_shadow";
   case JEDI_SENTINEL:    return "jedi_sentinel";
   case JEDI_GUARDIAN:    return "jedi_guardian";
@@ -349,7 +349,7 @@ const char* util_t::player_type_string( int type )
 int util_t::translate_class_str( const std::string& s )
 {
   std::string fmt_s( s );
-  armory_t::format( fmt_s );
+  util_t::format_name( fmt_s );
 
   if      ( fmt_s == "sage_sorcerer"       || fmt_s == "sage"       ) return JEDI_SAGE;
   else if ( fmt_s == "jedi_shadow"     || fmt_s == "shadow"     ) return JEDI_SHADOW;
@@ -1614,4 +1614,43 @@ int base36_t::decode( char c ) const
   }
 
   throw bad_char( c );
+}
+
+// util_t::format_name_ ========================================================
+
+void util_t::format_name_( std::string& name )
+{
+  if ( name.empty() ) return;
+
+  util_t::str_to_utf8( name );
+
+  std::string buffer;
+
+  for ( size_t i = 0, size = name.size(); i < size; i++ )
+  {
+    char c = name[ i ];
+
+    if ( unlikely( c & 0x80 ) )
+      continue;
+
+    else if ( std::isalpha( c ) )
+      c = std::tolower( c );
+
+    else if ( c == ' ' )
+      c = '_';
+
+    else if ( ( c == '_' || c == '+' ) && i == 0 )
+      continue;
+
+    else if ( c != '_' &&
+              c != '+' &&
+              c != '.' &&
+              c != '%' &&
+              ! std::isdigit( c ) )
+      continue;
+
+    buffer += c;
+  }
+
+  name.swap( buffer );
 }

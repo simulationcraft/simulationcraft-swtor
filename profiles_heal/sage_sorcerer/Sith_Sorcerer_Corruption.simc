@@ -1,0 +1,40 @@
+#!./simc 
+
+sith_sorcerer=Sith_Sorcerer_Corruption
+origin="create_Sith_Sorcerer.simc"
+level=50
+race=human
+position=ranged_front
+role=heal
+use_pre_potion=0
+talents=http://www.torhead.com/skill-calc#201GGbRrdzdGzZf00MZ0M.1
+actions=stim,type=exotech_resolve
+actions+=/mark_of_power
+actions+=/snapshot_stats
+actions+=/dark_infusion
+head=rakata_force_masters_headgear,stats=_44end_61willpower__37end_61willpower_11power__24end_37power_51alacrity
+ear=columi_force_masters_relay,stats=80end_97willpower_41power_48alacrity__28willpower
+shirt=datacrons,stats=40willpower
+chest=rakata_force_masters_vestments,stats=_55end_51willpower__29end_48willpower_37crit__24end_37crit_51alacrity
+waist=rakata_stalkers_waistwrap,stats=71end_103willpower_11crit
+legs=rakata_force_masters_lower_robe,stats=_44end_61willpower__37end_61willpower_11crit__24end_37crit_51alacrity
+feet=rakata_force_masters_boots,stats=_55end_51willpower__29end_48willpower_37crit__24end_37crit_51alacrity
+wrists=rakata_force_masters_bracers,stats=71end_103willpower_11power
+hands=rakata_force_masters_gloves,stats=_44end_61willpower__37end_61willpower_11power__24end_37power_51alacrity
+implant1=rakata_stalkers_implant,stats=85end_103willpower_44crit_51surge
+implant2=rakata_stalkers_implant,stats=85end_103willpower_44crit_51surge
+relic1=matrix_cube_m7r3,stats=50end_58willpower_24crit
+relic2=plasma_burst_device,stats=77end,equip=ondamage_168elemental_30%_4.5cd
+main_hand=echo_of_xoxaan,stats=_41power__612forcepower_44end_61willpower__37end_61willpower_11power__24end_37power_51alacrity
+off_hand=rakata_stalkers_power_generator,stats=85end_103willpower_612forcepower_77crit_51surge
+# Gear Summary
+# gear_willpower=1424
+# gear_endurance=1240
+# gear_crit_rating=396
+# gear_alacrity_rating=354
+# gear_power=237
+# gear_forcepower=1224
+# gear_surge_rating=153
+# Set Bonuses
+# set_bonus=rakata_force_masters_2pc
+# set_bonus=rakata_force_masters_4pc

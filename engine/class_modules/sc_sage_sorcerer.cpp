@@ -99,8 +99,25 @@ struct sage_sorcerer_t : public player_t
   struct talents_t
   {
     // Seer|Corruption
+    talent_t* immutable_force;
     talent_t* penetrating_light;
+    talent_t* wisdom;
+    talent_t* foresight;
+    talent_t* pain_bearer;
     talent_t* psychic_suffusion;
+    talent_t* conveyance;
+    talent_t* rejuvenate;
+    talent_t* valiance;
+    talent_t* preservation;
+    talent_t* mend_wounds;
+    talent_t* force_shelter;
+    talent_t* egress;
+    talent_t* confound;
+    talent_t* healing_trance;
+    talent_t* serenity;
+    talent_t* resplendence;
+    talent_t* clairvoyance;
+    talent_t* salvation;
 
     // Telekinetics|Lightning
     talent_t* inner_strength;
@@ -997,8 +1014,8 @@ struct sage_sorcerer_heal_t : public heal_t
 {
   bool influenced_by_inner_strength;
 
-  sage_sorcerer_heal_t( const char* n, sage_sorcerer_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
-    heal_t( n, p, force_heal_policy, r, s ),
+  sage_sorcerer_heal_t( const std::string& n, sage_sorcerer_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
+    heal_t( n.c_str(), p, force_heal_policy, r, s ),
     influenced_by_inner_strength( true )
   {
     may_crit   = true;
@@ -1051,7 +1068,7 @@ struct sage_sorcerer_heal_t : public heal_t
 struct deliverance_t : public sage_sorcerer_heal_t
 {
   deliverance_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
-    sage_sorcerer_heal_t( n.c_str(), p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+    sage_sorcerer_heal_t( n, p, RESOURCE_FORCE, SCHOOL_INTERNAL )
   {
     parse_options( 0, options_str );
 
@@ -1065,7 +1082,28 @@ struct deliverance_t : public sage_sorcerer_heal_t
     range = 30.0;
 
   }
+};
 
+struct healing_trance_t : public sage_sorcerer_heal_t
+{
+  healing_trance_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
+    sage_sorcerer_heal_t( n, p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+  {
+    parse_options( 0, options_str );
+
+    dd.standardhealthpercentmin = dd.standardhealthpercentmax = .0515;
+    dd.power_mod = 1.03;
+
+    td.standardhealthpercentmin = td.standardhealthpercentmax = .0515;
+    td.power_mod = 1.03;
+
+    base_cost = 40.0;
+    base_execute_time = timespan_t::from_seconds( 3.0 );
+    cooldown -> duration = timespan_t::from_seconds( 9.0 );
+
+    range = 30.0;
+
+  }
 };
 
 } // ANONYMOUS NAMESPACE ====================================================
@@ -1093,7 +1131,10 @@ action_t* sage_sorcerer_t::create_action( const std::string& name,
     if ( name == "mental_alacrity"    ) return new   mental_alacrity_t( this, "mental_alacrity", options_str );
     if ( name == "telekinetic_wave"   ) return new  telekinetic_wave_t( this, "telekinetic_wave", options_str );
     if ( name == "force_potency"      ) return new     force_potency_t( this, "force_potency", options_str );
+
+    // Add Empire version of all those healing spells
     if ( name == "deliverance"        ) return new       deliverance_t( this, "deliverance", options_str );
+    if ( name == "healing_trance"     ) return new    healing_trance_t( this, "healing_trance", options_str );
   }
   else if ( type == SITH_SORCERER )
   {
@@ -1109,6 +1150,7 @@ action_t* sage_sorcerer_t::create_action( const std::string& name,
     if ( name == "polarity_shift"     ) return new   mental_alacrity_t( this, "polarity_shift", options_str );
     if ( name == "chain_lightning"    ) return new  telekinetic_wave_t( this, "chain_lightning", options_str );
     if ( name == "recklessness"       ) return new     force_potency_t( this, "recklessness", options_str );
+    if ( name == "dark_infusion"        ) return new     deliverance_t( this, "dark_infusion", options_str );
   }
 
   return player_t::create_action( name, options_str );
@@ -1121,50 +1163,67 @@ void sage_sorcerer_t::init_talents()
   player_t::init_talents();
 
   // Seer|Corruption
-  talents.penetrating_light = find_talent( "Penetrating Light" );
-  talents.psychic_suffusion = find_talent( "Psychic Suffusion" );
+  talents.immutable_force       = find_talent( "Immutable Force" );
+  talents.penetrating_light     = find_talent( "Penetrating Light" );
+  talents.wisdom                = find_talent( "Wisdom" );
+  talents.foresight             = find_talent( "Foresight" );
+  talents.pain_bearer           = find_talent( "Pain Bearer" );
+  talents.psychic_suffusion     = find_talent( "Psychic Suffusion" );
+  talents.conveyance            = find_talent( "Conveyance" );
+  talents.rejuvenate            = find_talent( "Rejuvenate" );
+  talents.valiance              = find_talent( "Valiance" );
+  talents.preservation          = find_talent( "Preservation" );
+  talents.mend_wounds           = find_talent( "Mend Wounds" );
+  talents.force_shelter         = find_talent( "Force Shelter" );
+  talents.egress                = find_talent( "Egress" );
+  talents.confound              = find_talent( "Confound" );
+  talents.healing_trance        = find_talent( "Healing Trance" );
+  talents.serenity              = find_talent( "Serenity" );
+  talents.resplendence          = find_talent( "Resplendence" );
+  talents.clairvoyance          = find_talent( "Clairvoyance" );
+  talents.salvation             = find_talent( "Salvation" );
 
   // Telekinetics|Lightning
-  talents.inner_strength = find_talent( "Inner Strength" );
-  talents.mental_longevity = find_talent( "Mental Longevity" );
-  talents.clamoring_force = find_talent( "Clamoring Force" );
-  talents.minds_eye = find_talent( "Minds Eye" );
-  talents.disturb_mind = find_talent( "Disturb Mind" );
-  talents.concentration = find_talent( "Concentration" );
-  talents.telekinetic_defense = find_talent( "Telekinetic Defense" );
-  talents.blockout = find_talent( "Blockout" );
-  talents.telekinetic_wave = find_talent( "Telekinetic Wave" );
-  talents.psychic_projection = find_talent( "Psychic Projection" );
-  talents.force_wake = find_talent( "Force Wake" );
-  talents.tidal_force = find_talent( "Tidal Force" );
-  talents.telekinetic_effusion = find_talent( "Telekinetic Effusion" );
-  talents.kinetic_collapse = find_talent( "Kinetic Collapse" );
-  talents.tremors = find_talent( "Tremors" );
-  talents.telekinetic_momentum = find_talent( "Telekinetic Momentum" );
-  talents.mental_alacrity = find_talent( "Mental Alacrity" );
-  talents.reverberation = find_talent( "Reverberation" );
-  talents.turbulence = find_talent( "Turbulence" );
+  talents.inner_strength        = find_talent( "Inner Strength" );
+  talents.mental_longevity      = find_talent( "Mental Longevity" );
+  talents.clamoring_force       = find_talent( "Clamoring Force" );
+  talents.minds_eye             = find_talent( "Minds Eye" );
+  talents.disturb_mind          = find_talent( "Disturb Mind" );
+  talents.concentration         = find_talent( "Concentration" );
+  talents.telekinetic_defense   = find_talent( "Telekinetic Defense" );
+  talents.blockout              = find_talent( "Blockout" );
+  talents.telekinetic_wave      = find_talent( "Telekinetic Wave" );
+  talents.psychic_projection    = find_talent( "Psychic Projection" );
+  talents.force_wake            = find_talent( "Force Wake" );
+  talents.tidal_force           = find_talent( "Tidal Force" );
+  talents.telekinetic_effusion  = find_talent( "Telekinetic Effusion" );
+  talents.kinetic_collapse      = find_talent( "Kinetic Collapse" );
+  talents.tremors               = find_talent( "Tremors" );
+  talents.telekinetic_momentum  = find_talent( "Telekinetic Momentum" );
+  talents.mental_alacrity       = find_talent( "Mental Alacrity" );
+  talents.reverberation         = find_talent( "Reverberation" );
+  talents.turbulence            = find_talent( "Turbulence" );
 
   // Balance|Madness
-  talents.empowered_throw = find_talent( "Empowered Throw" );
-  talents.jedi_resistance = find_talent( "Jedi Resistance" );
-  talents.will_of_the_jedi = find_talent( "Will of the Jedi" );
-  talents.pinning_resolve = find_talent( "Pinning Resolve" );
-  talents.upheaval = find_talent( "Upheaval" );
-  talents.focused_insight = find_talent( "Focused Insight" );
-  talents.critical_kinesis = find_talent( "Critical Kinesis" );
-  talents.force_in_balance = find_talent( "Force in Balance" );
-  talents.psychic_barrier = find_talent( "Psychic Barrier" );
-  talents.telekinetic_balance = find_talent( "Telekinetic Balance" );
-  talents.containment = find_talent( "Containment" );
-  talents.mind_ward = find_talent( "Mind Ward" );
-  talents.presence_of_mind = find_talent( "Presence of Mind" );
-  talents.force_suppression = find_talent( "Force Suppression" );
-  talents.drain_thoughts = find_talent( "Drain Thoughts" );
-  talents.assertion = find_talent( "Assertion" );
-  talents.mental_scarring = find_talent( "Mental Scarring" );
-  talents.psychic_absorption = find_talent( "Psychic Absorption" );
-  talents.sever_force = find_talent( "Sever Force" );
+  talents.empowered_throw       = find_talent( "Empowered Throw" );
+  talents.jedi_resistance       = find_talent( "Jedi Resistance" );
+  talents.will_of_the_jedi      = find_talent( "Will of the Jedi" );
+  talents.pinning_resolve       = find_talent( "Pinning Resolve" );
+  talents.upheaval              = find_talent( "Upheaval" );
+  talents.focused_insight       = find_talent( "Focused Insight" );
+  talents.critical_kinesis      = find_talent( "Critical Kinesis" );
+  talents.force_in_balance      = find_talent( "Force in Balance" );
+  talents.psychic_barrier       = find_talent( "Psychic Barrier" );
+  talents.telekinetic_balance   = find_talent( "Telekinetic Balance" );
+  talents.containment           = find_talent( "Containment" );
+  talents.mind_ward             = find_talent( "Mind Ward" );
+  talents.presence_of_mind      = find_talent( "Presence of Mind" );
+  talents.force_suppression     = find_talent( "Force Suppression" );
+  talents.drain_thoughts        = find_talent( "Drain Thoughts" );
+  talents.assertion             = find_talent( "Assertion" );
+  talents.mental_scarring       = find_talent( "Mental Scarring" );
+  talents.psychic_absorption    = find_talent( "Psychic Absorption" );
+  talents.sever_force           = find_talent( "Sever Force" );
 }
 
 // sage_sorcerer_t::init_base ========================================================
@@ -1401,6 +1460,12 @@ void sage_sorcerer_t::init_actions()
       action_list_str += "/crushing_darkness";
       action_list_str += "/lightning_strike";
       action_list_str += "/shock,moving=1";
+
+      break;
+
+      case TREE_CORRUPTION:
+
+      action_list_str += "/dark_infusion";
 
       break;
 

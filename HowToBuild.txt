@@ -1,0 +1,111 @@
+Please visit http://code.google.com/p/simulationcraft-swtor/wiki/HowToBuild for a up-to-date version of this file. Things in this file look a bit strange because it is simply a dump from the wiki with markup included.
+
+There is also a guide on how to set up a IDE ( Integrated Development Environment ) using Eclipse at 
+http://code.google.com/p/simulationcraft-swtor/wiki/Configure_IDE
+
+----------------------------------------------------------------------------------------------------------------------------------------
+
+
+= Introduction =
+
+!SimulationCraft is a C++ project based on C++11 / GNU GCC Compiler 4.6 and uses the Boost ( http://www.boost.org ) libraries.
+
+The Graphical User Interface is based on QT and requires at least version 4.7.4 libraries, version 4.8.0 is recommended.
+
+While we try to make it as easy for new and unexperienced developers to join the project, we choose to have such "steep" requirements to allow us to use the more sophisticated methods provided by C++11 and the boost library. Since coding time is always sparse, this enables us to use a very rich tool set without having to re-do all the work on basic mechanics.
+
+We hope you manage to at least build the CLI to begin with. If there are any problems, just contact us and we'll gladly help you.
+
+= Downloading the Source =
+
+ * Downloading via GIT
+  * If you don't already have a GIT client, go to [http://git-scm.com/]
+   * Create a new parent folder with a name of your choice
+   * Use the 'git clone' command found on the [http://code.google.com/p/simulationcraft/source/checkout source page]. For example git clone https://code.google.com/p/simulationcraft-swtor/ . This will create a new subfolder /simulationcraft-swtor .
+
+= Building !SimulationCraft =
+
+ * Building the command line interface (CLI) is very easy on all platforms
+ * Building the graphical user interface (GUI) is considerably harder
+  * The GUI was built using [http://qt.nokia.com/downloads Qt]
+  * Building the GUI requires that the Qt SDK or Framework be downloaded and installed
+  * Qt DLLs are used at runtime, so a subset must be copied into the build area
+  * Refer to platform-specific directions below
+
+= Building !SimulationCraft on Windows =
+
+=== Command Line Interface using MinGW ===
+
+ * Use these [http://www.mingw.org/wiki/Getting_Started instructions] to download the MinGW compiler
+  * I recommend using the `mingw-get-inst` graphical user interface installer
+  * After installed, you need to update your `PATH` environment variable
+   * Right-Click *My Computer* and choose *Properties*
+   * Click *Advanced* tab
+   * Click *Environment Variables* button
+   * Scroll *System Variables* and select *Path*
+   * Click *Edit* button
+   * Add the directory where your MinGW binaries are at the end of the `PATH`, separated by `;`. Typically `;c:\mingw\bin`.
+ * Open command prompt window and run
+  * `cd your_simc_source_dir\engine`
+  * `mingw32-make OS=WINDOWS BOOST_PATH=C:\boost_1_49_0` where BOOST_PATH is the path to your extracted boost folder
+ * Creates executable `your_simc_source_dir\engine\simc.exe`
+
+=== Graphical User Interface using QtSDK for Windows ===
+
+ * Download [http://qt.nokia.com/downloads/sdk-windows-cpp QtSDK] (includes MinGW compiler) 
+ * Edit `your_simc_source_dir/qt_dll_setup.bat` and change the `qt_dir=` line appropriately
+ * Run `your_simc_source_dir/qt_dll_setup.bat` to copy DLLs from Qt into your build area
+ * Open the `simcqt.pro` project file with QTCreator
+ * Specify your own MinGW as Toolchain for building
+ * Build All
+ * Creates executable `your_simc_source_dir\SimulationCraft.exe`
+
+= Building !SimulationCraft on Linux =
+
+=== Command Line Interface ===
+
+ * Your Linux distro should have come with Git and g++ by default.  
+ * If not, use the built-in software update mechanism to download and install a developer suite.
+ * `cd your_simc_source_dir/engine`
+ * `make OS=UNIX`
+ * This builds an optimized executable named `simc`
+
+=== Graphical User Interface using Qt SDK (not just the Qt Framework) ===
+
+ * Download and install the Qt SDK for Linux at [http://qt.nokia.com/downloads Qt]
+  * Choose "Go LPGL"
+  * Select the appropriate "SDK for Linux" for your hardware
+ * Start QTCreator (`qtcreator`)
+ * Open the project file `your_simc_source_dir/simcqt.pro`
+ * Choose a target of Desktop
+ * Build and run
+
+= Building !SimulationCraft on OSX =
+
+=== Command Line Interface ===
+
+ * `cd your_simc_source_dir/engine`
+ * Modify your build.conf and adjust BOOST_PATH and set OS=UNIX
+ * `make OS=UNIX`
+ * This builds an optimized executable named `simc`
+
+=== Graphical User Interface ===
+
+ Warning: _The XCode project files might be outdated since we have now active Mac developer_
+
+ * Get and install [http://sparkle.andymatuschak.org/ Sparkle]
+  * Install Sparkle.framework to `/Library/Frameworks`
+ * Get and install [http://qt.nokia.com/downloads/qt-for-open-source-cpp-development-on-mac-os-x Qt]
+ * Open `your_simc_source_dir/simc.xcodeproj`
+ * Build `libsimc` target
+ * Build "Generate Qt Project" target
+ * Build `simc` target
+ * You should now have
+  * `your_simc_source_dir/simc`, the command line simulator, and
+  * `your_simc_source_dir/simcqt.app`, the simulator GUI.
+
+
+= Tips and Tricks =
+ * Compiler Options:
+  * Add -j n  where n is the number of threads used for compiling
+  * The GCC flag -dM will stop the compiler after the preprocessing pass and make it dump all #defines
