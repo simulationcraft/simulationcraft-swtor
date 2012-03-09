@@ -49,56 +49,6 @@ static int parse_tokens( std::vector<token_t>& tokens,
   return num_splits;
 }
 
-#if 0
-// is_meta_prefix ===========================================================
-
-static bool is_meta_prefix( const std::string& option_name )
-{
-  for ( int i=0; i < META_GEM_MAX; i++ )
-  {
-    const char* meta_gem_name = util_t::meta_gem_type_string( i );
-
-    for ( int j=0; tolower( meta_gem_name[ j ] ) == tolower( option_name[ j ] ); j++ )
-      if ( option_name[ j+1 ] == '\0' )
-        return true;
-  }
-
-  return false;
-}
-
-// is_meta_suffix ===========================================================
-
-static bool is_meta_suffix( const std::string& option_name )
-{
-  for ( int i=0; i < META_GEM_MAX; i++ )
-  {
-    const char* meta_gem_name = util_t::meta_gem_type_string( i );
-
-    const char* s = strstr( meta_gem_name, "_" );
-    if ( ! s ) continue;
-    s++;
-
-    for ( int j=0; tolower( s[ j ] ) == tolower( option_name[ j ] ); j++ )
-      if ( option_name[ j ] == '\0' )
-        return true;
-  }
-
-  return false;
-}
-
-// parse_meta_gem ===========================================================
-
-static int parse_meta_gem( const std::string& prefix,
-                           const std::string& suffix )
-{
-  if ( prefix.empty() || suffix.empty() ) return META_GEM_NONE;
-
-  std::string name = prefix + "_" + suffix;
-
-  return util_t::parse_meta_gem_type( name );
-}
-#endif // 0
-
 } // ANONYMOUS NAMESPACE ====================================================
 
 // item_t::item_t ===========================================================
@@ -213,7 +163,6 @@ bool item_t::parse_options()
   {
     { "id",      OPT_STRING, &option_id_str            },
     { "stats",   OPT_STRING, &option_stats_str         },
-    { "gems",    OPT_STRING, &option_gems_str          },
     { "enchant", OPT_STRING, &option_enchant_str       },
     { "addon",   OPT_STRING, &option_addon_str         },
     { "equip",   OPT_STRING, &option_equip_str         },
@@ -236,7 +185,6 @@ bool item_t::parse_options()
 
   util_t::tolower( option_id_str            );
   util_t::tolower( option_stats_str         );
-  util_t::tolower( option_gems_str          );
   util_t::tolower( option_enchant_str       );
   util_t::tolower( option_addon_str         );
   util_t::tolower( option_equip_str         );
@@ -270,7 +218,6 @@ void item_t::encode_options()
   if ( ! encoded_quality_str.empty()       ) { o += ",quality="; o += encoded_quality_str;       }
   if ( ! encoded_stats_str.empty()         ) { o += ",stats=";   o += encoded_stats_str;         }
   if ( ! encoded_reforge_str.empty()       ) { o += ",reforge="; o += encoded_reforge_str;       }
-  if ( ! encoded_gems_str.empty()          ) { o += ",gems=";    o += encoded_gems_str;          }
   if ( ! encoded_enchant_str.empty()       ) { o += ",enchant="; o += encoded_enchant_str;       }
   if ( ! encoded_addon_str.empty()         ) { o += ",addon=";   o += encoded_addon_str;         }
   if ( ! encoded_equip_str.empty()         ) { o += ",equip=";   o += encoded_equip_str;         }
@@ -311,7 +258,6 @@ bool item_t::init()
     id_str                    = armory_id_str;
     encoded_stats_str         = armory_stats_str;
     encoded_reforge_str       = armory_reforge_str;
-    encoded_gems_str          = armory_gems_str;
     encoded_enchant_str       = armory_enchant_str;
     encoded_addon_str         = armory_addon_str;
     encoded_weapon_str        = armory_weapon_str;
@@ -348,7 +294,6 @@ bool item_t::init()
 
   if ( ! option_stats_str.empty()   ) encoded_stats_str   = option_stats_str;
   if ( ! option_reforge_str.empty() ) encoded_reforge_str = option_reforge_str;
-  if ( ! option_gems_str.empty()    ) encoded_gems_str    = option_gems_str;
   if ( ! option_enchant_str.empty() ) encoded_enchant_str = option_enchant_str;
   if ( ! option_addon_str.empty()   ) encoded_addon_str   = option_addon_str;
   if ( ! option_weapon_str.empty()  ) encoded_weapon_str  = option_weapon_str;
@@ -356,7 +301,6 @@ bool item_t::init()
 
 
   if ( ! decode_stats()         ) return false;
-  // if ( ! decode_gems()          ) return false;
   if ( ! decode_enchant()       ) return false;
   if ( ! decode_addon()         ) return false;
   if ( ! decode_weapon()        ) return false;
@@ -647,53 +591,6 @@ bool item_t::decode_random_suffix()
   return true;
 }
 #endif
-
-#if 0
-// item_t::decode_gems ======================================================
-
-bool item_t::decode_gems()
-{
-  if ( encoded_gems_str == "none" ) return true;
-
-  std::vector<token_t> tokens;
-  int num_tokens = parse_tokens( tokens, encoded_gems_str );
-
-  std::string meta_prefix, meta_suffix;
-
-  for ( int i=0; i < num_tokens; i++ )
-  {
-    token_t& t = tokens[ i ];
-    int s;
-
-    if ( ( s = util_t::parse_stat_type( t.name ) ) != STAT_NONE )
-    {
-      stats.add_stat( s, t.value );
-    }
-    else if ( is_meta_prefix( t.name ) )
-    {
-      meta_prefix = t.name;
-    }
-    else if ( is_meta_suffix( t.name ) )
-    {
-      meta_suffix = t.name;
-    }
-    else
-    {
-      sim -> errorf( "Player %s has unknown 'gems=' token '%s' at slot %s\n", player -> name(), t.full.c_str(), slot_name() );
-      //return false;
-    }
-  }
-
-  int meta_gem = parse_meta_gem( meta_prefix, meta_suffix );
-
-  if ( meta_gem != META_GEM_NONE )
-  {
-    player -> meta_gem = meta_gem;
-  }
-
-  return true;
-}
-#endif // 0
 
 // item_t::decode_enchant ===================================================
 
@@ -1171,8 +1068,7 @@ bool item_t::download_slot( item_t& item,
                             const std::string& /* enchant_id */,
                             const std::string& /* addon_id */,
                             const std::string& /* reforge_id */,
-                            const std::string& /* rsuffix_id */,
-                            const std::string[] /* gem_ids[ 3 ] */ )
+                            const std::string& /* rsuffix_id */ )
 {
   const cache::behavior_t cb = cache::items();
   bool success = false;
