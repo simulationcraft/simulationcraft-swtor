@@ -24,12 +24,6 @@
 #  define SC_X64
 #endif
 
-#if defined( _MSC_VER )
-#  include "../vs/stdint.h"
-#else
-#  include <stdint.h>
-#endif
-
 #include <algorithm>
 #include <cassert>
 #include <cctype>
@@ -66,14 +60,6 @@
 #define nonpod_offsetof(t, m) ((size_t) ( (volatile char *)&((volatile t *)(size_t)0x10000)->m - (volatile char *)(size_t)0x10000 ))
 #endif
 
-#if defined( _MSC_VER )
-# define finline                     __forceinline
-# define SC_FINLINE_EXT
-#elif defined( __GNUC__ )
-# define finline                     inline
-# define SC_FINLINE_EXT              __attribute__((always_inline))
-#endif
-
 #if __BSD_VISIBLE
 #  include <netinet/in.h>
 #  if !defined(CLOCKS_PER_SEC)
@@ -93,14 +79,22 @@
 #endif
 
 #if defined(__GNUC__)
-#  define likely(x)       __builtin_expect((x),1)
-#  define unlikely(x)     __builtin_expect((x),0)
+#  define likely(x)   __builtin_expect((x),1)
+#  define unlikely(x) __builtin_expect((x),0)
 #else
-#  define likely(x) (x)
-#  define unlikely(x) (x)
+#  define likely(x)    (x)
+#  define unlikely(x)  (x)
 #  define __attribute__(x)
 #endif
+
 #define PRINTF_ATTRIBUTE(a,b) __attribute__((format(printf,a,b)))
+#define SC_FINLINE_EXT        __attribute__((always_inline))
+
+#if defined( _MSC_VER )
+# define finline              __forceinline
+#else
+# define finline              inline
+#endif
 
 #define SC_MAJOR_VERSION "114"
 #define SC_MINOR_VERSION "4"
@@ -126,7 +120,6 @@ struct action_expr_t;
 struct action_priority_list_t;
 struct alias_t;
 class attack_policy_interface_t;
-typedef const attack_policy_interface_t* attack_policy_t;
 struct benefit_t;
 struct buff_t;
 struct buff_uptime_t;
@@ -164,7 +157,7 @@ struct uptime_t;
 struct weapon_t;
 struct xml_node_t;
 
-// Classes
+// Advanced Classes
 struct commando_mercenary_t;
 struct gunslinger_sniper_t;
 struct juggernaut_guardian_t;
@@ -173,6 +166,8 @@ struct sage_sorcerer_t;
 struct scoundrel_operative_t;
 struct shadow_assassin_t;
 struct vanguard_powertech_t;
+
+typedef const attack_policy_interface_t* attack_policy_t;
 
 // Targetdata
 struct targetdata_t;
@@ -202,22 +197,6 @@ void register_vanguard_powertech_targetdata( sim_t* sim );
 #define DATA_DOT 0
 #define DATA_AURA 1
 #define DATA_COUNT 2
-
-struct actor_pair_t
-{
-  player_t* target;
-  player_t* source;
-
-  actor_pair_t( player_t* target, player_t* source )
-    : target( target ), source( source )
-  {}
-
-  actor_pair_t( player_t* p = 0 )
-    : target( p ), source( p )
-  {}
-
-  actor_pair_t( targetdata_t* td );
-};
 
 // Enumerations =============================================================
 
@@ -366,14 +345,6 @@ enum weapon_type
   WEAPON_MAX
 };
 
-enum glyph_type
-{
-  GLYPH_MAJOR=0,
-  GLYPH_MINOR,
-  GLYPH_PRIME,
-  GLYPH_MAX
-};
-
 enum slot_type   // these enum values should match armory settings
 {
   SLOT_NONE      = -1,
@@ -402,23 +373,6 @@ enum slot_type   // these enum values should match armory settings
 const int64_t DEFAULT_SET_BONUS_SLOT_MASK = ( ( int64_t( 1 ) << SLOT_HEAD )   | ( int64_t( 1 ) << SLOT_CHEST ) |
                                             ( int64_t( 1 ) << SLOT_HANDS  )   | ( int64_t( 1 ) << SLOT_LEGS )  |
                                             ( int64_t( 1 ) << SLOT_FEET   )  );
-
-
-enum gem_type
-{
-  GEM_NONE=0,
-  GEM_META, GEM_PRISMATIC,
-  GEM_RED, GEM_YELLOW, GEM_BLUE,
-  GEM_ORANGE, GEM_GREEN, GEM_PURPLE,
-  GEM_COGWHEEL,
-  GEM_MAX
-};
-
-enum meta_gem_type
-{
-  META_GEM_NONE=0,
-  META_GEM_MAX
-};
 
 // Keep this in sync with enum attribute_type
 enum stat_type
@@ -486,25 +440,6 @@ enum save_type
   SAVE_ACTIONS,
   SAVE_MAX
 };
-
-enum format_type
-{
-  FORMAT_NONE=0,
-  FORMAT_NAME,
-  FORMAT_CHAR_NAME,
-  FORMAT_CONVERT_HEX,
-  FORMAT_CONVERT_UTF8,
-  FORMAT_MAX
-};
-
-#define FORMAT_CHAR_NAME_MASK  ( (1<<FORMAT_NAME) | (1<<FORMAT_CHAR_NAME) )
-#define FORMAT_GUILD_NAME_MASK ( (1<<FORMAT_NAME) )
-#define FORMAT_ALL_NAME_MASK   ( (1<<FORMAT_NAME) | (1<<FORMAT_CHAR_NAME) )
-#define FORMAT_UTF8_MASK       ( (1<<FORMAT_CONVERT_HEX) | (1<<FORMAT_CONVERT_UTF8) )
-#define FORMAT_ASCII_MASK      ( (1<<FORMAT_CONVERT_UTF8) )
-#define FORMAT_CONVERT_MASK    ( (1<<FORMAT_CONVERT_HEX) | (1<<FORMAT_CONVERT_UTF8) )
-#define FORMAT_DEFAULT         ( FORMAT_ASCII_MASK )
-#define FORMAT_ALL_MASK        -1
 
 // Data Access ==============================================================
 #ifndef MAX_LEVEL
@@ -619,7 +554,7 @@ void dispose( I first, I last, D disposer=D() )
 template <typename Range, typename D=delete_disposer_t>
 inline auto dispose( Range&& r, D disposer=D() ) -> decltype( std::forward<Range>( r ) )
 {
-  dispose( boost::begin( r ), boost::end( r ), disposer );
+  dispose( std::begin( r ), std::end( r ), disposer );
   return std::forward<Range>( r );
 }
 
@@ -1108,8 +1043,6 @@ public:
   static const char* attribute_type_string     ( int type );
   static const char* dmg_type_string           ( int type );
   static const char* stim_type_string         ( int type );
-  static const char* gem_type_string           ( int type );
-  static const char* meta_gem_type_string      ( int type );
   static const char* player_type_string        ( int type );
   static const char* pet_type_string           ( int type );
   static const char* position_type_string      ( int type );
@@ -1132,8 +1065,6 @@ public:
   static int parse_attribute_type              ( const std::string& name );
   static int parse_dmg_type                    ( const std::string& name );
   static int parse_stim_type                  ( const std::string& name );
-  static int parse_gem_type                    ( const std::string& name );
-  static int parse_meta_gem_type               ( const std::string& name );
   static player_type parse_player_type         ( const std::string& name );
   static pet_type_t parse_pet_type             ( const std::string& name );
   static int parse_profession_type             ( const std::string& name );
@@ -1165,8 +1096,6 @@ public:
   static int translate_class_str( const std::string& s );
   static race_type translate_race_id( int rid );
   static profession_type translate_profession_id( int skill_id );
-
-  static bool socket_gem_match( int socket, int gem );
 
   static int string_split( std::vector<std::string>& results, const std::string& str, const char* delim, bool allow_quotes = false )
   { string_split_( results, str, delim, allow_quotes ); return static_cast<int>( results.size() ); }
@@ -1422,6 +1351,22 @@ public:
 
 struct buff_t
 {
+  struct actor_pair_t
+  {
+    player_t* target;
+    player_t* source;
+
+    actor_pair_t( player_t* target, player_t* source )
+      : target( target ), source( source )
+    {}
+
+    actor_pair_t( player_t* p )
+      : target( p ), source( p )
+    {}
+
+    actor_pair_t( targetdata_t* td );
+  };
+
   double current_value, react;
   timespan_t buff_duration, buff_cooldown;
   double default_chance;
@@ -2230,7 +2175,9 @@ struct weapon_t
   int    group() const;
 
   weapon_t( int t=WEAPON_NONE, double d=0, school_type s=SCHOOL_KINETIC ) :
-    type( t ), school( s ), damage( d ), min_dmg( d ), max_dmg( d ), slot( SLOT_NONE ), buff_type( 0 ), buff_value( 0 ), bonus_dmg( 0 ) { }
+    type( t ), school( s ), damage( d ), min_dmg( d ), max_dmg( d ),
+    slot( SLOT_NONE ), buff_type( 0 ), buff_value( 0 ), bonus_dmg( 0 )
+  {}
 };
 
 // Item =====================================================================
@@ -2248,7 +2195,6 @@ struct item_t
   std::string option_name_str;
   std::string option_id_str;
   std::string option_stats_str;
-  std::string option_gems_str;
   std::string option_enchant_str;
   std::string option_addon_str;
   std::string option_equip_str;
@@ -2268,7 +2214,6 @@ struct item_t
   std::string armory_name_str;
   std::string armory_id_str;
   std::string armory_stats_str;
-  std::string armory_gems_str;
   std::string armory_enchant_str;
   std::string armory_addon_str;
   std::string armory_weapon_str;
@@ -2284,7 +2229,6 @@ struct item_t
   std::string id_str;
   std::string encoded_name_str;
   std::string encoded_stats_str;
-  std::string encoded_gems_str;
   std::string encoded_enchant_str;
   std::string encoded_addon_str;
   std::string encoded_equip_str;
@@ -2360,8 +2304,7 @@ struct item_t
                              const std::string& enchant_id,
                              const std::string& addon_id,
                              const std::string& reforge_id,
-                             const std::string& rsuffix_id,
-                             const std::string gem_ids[ 3 ] );
+                             const std::string& rsuffix_id );
   static bool download_item( item_t&, const std::string& item_id );
 };
 
@@ -4029,8 +3972,11 @@ bool str_to_float( const std::string& src, double& dest );
 
 struct armory_t
 {
-  static void fuzzy_stats( std::string& encoding, const std::string& description );
-  static std::string& format( std::string& name, int format_type = FORMAT_DEFAULT );
+private:
+  static void format_( std::string& s );
+public:
+  static std::string& format( std::string& s )
+  { format_( s ); return s; }
 };
 
 // base36 ===================================================================
@@ -4175,16 +4121,13 @@ struct wait_for_cooldown_t : public wait_action_base_t
   virtual timespan_t execute_time() const;
 };
 
-// actor_pair_t inlines
-
-inline actor_pair_t::actor_pair_t( targetdata_t* td )
-  : target( td->target ), source( td->source )
-{}
-
 // buff_t inlines
 
 inline buff_t* buff_t::find( sim_t* s, const std::string& name ) { return find( s -> buff_list, name ); }
 inline buff_t* buff_t::find( player_t* p, const std::string& name ) { return find( p -> buff_list, name ); }
+inline buff_t::actor_pair_t::actor_pair_t( targetdata_t* td )
+  : target( td->target ), source( td->source )
+{}
 
 // sim_t inlines
 
