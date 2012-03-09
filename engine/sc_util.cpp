@@ -445,58 +445,6 @@ const char* util_t::dmg_type_string( int type )
   return "unknown";
 }
 
-// util_t::gem_type_string ==================================================
-
-const char* util_t::gem_type_string( int type )
-{
-  switch ( type )
-  {
-  case GEM_META:      return "meta";
-  case GEM_PRISMATIC: return "prismatic";
-  case GEM_RED:       return "red";
-  case GEM_YELLOW:    return "yellow";
-  case GEM_BLUE:      return "blue";
-  case GEM_ORANGE:    return "orange";
-  case GEM_GREEN:     return "green";
-  case GEM_PURPLE:    return "purple";
-  case GEM_COGWHEEL:  return "cogwheel";
-  }
-  return "unknown";
-}
-
-// util_t::parse_gem_type ===================================================
-
-int util_t::parse_gem_type( const std::string& name )
-{
-  for ( int i=0; i < GEM_MAX; i++ )
-    if ( util_t::str_compare_ci( name, util_t::gem_type_string( i ) ) )
-      return i;
-
-  return GEM_NONE;
-}
-
-// util_t::meta_gem_type_string =============================================
-
-const char* util_t::meta_gem_type_string( int type )
-{
-  switch ( type )
-  {
-    case META_GEM_NONE:         return "none";
-  }
-  return "unknown";
-}
-
-// util_t::parse_meta_gem_type ==============================================
-
-int util_t::parse_meta_gem_type( const std::string& name )
-{
-  for ( int i=0; i < META_GEM_MAX; i++ )
-    if ( util_t::str_compare_ci( name, util_t::meta_gem_type_string( i ) ) )
-      return i;
-
-  return META_GEM_NONE;
-}
-
 // util_t::result_type_string ===============================================
 
 const char* util_t::result_type_string( int type )
@@ -1062,24 +1010,6 @@ int util_t::translate_class_id( int /* cid */ )
 race_type util_t::translate_race_id( int /* rid */ )
 {
   return RACE_NONE;
-}
-
-// util_t::socket_gem_match =================================================
-
-bool util_t::socket_gem_match( int socket,
-                               int gem )
-{
-  if ( socket == GEM_NONE || gem == GEM_PRISMATIC ) return true;
-
-  if ( socket == GEM_COGWHEEL && gem == GEM_COGWHEEL ) return true;
-
-  if ( socket == GEM_META ) return ( gem == GEM_META );
-
-  if ( socket == GEM_RED    ) return ( gem == GEM_RED    || gem == GEM_ORANGE || gem == GEM_PURPLE );
-  if ( socket == GEM_YELLOW ) return ( gem == GEM_YELLOW || gem == GEM_ORANGE || gem == GEM_GREEN  );
-  if ( socket == GEM_BLUE   ) return ( gem == GEM_BLUE   || gem == GEM_PURPLE || gem == GEM_GREEN  );
-
-  return false;
 }
 
 // util_t::item_quality_string ==============================================
