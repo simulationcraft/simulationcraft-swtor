@@ -36,10 +36,6 @@ contains(COMPILER_CHECK_CXX,'g++') {
 INCLUDEPATH += engine
 DEPENDPATH += engine
 
-!isEmpty(BOOST_PATH) {
-  INCLUDEPATH += "$$BOOST_PATH"
-}
-
 HEADERS += engine/simulationcraft.hpp
 HEADERS += engine/utf8.h
 HEADERS += engine/utf8/core.h
