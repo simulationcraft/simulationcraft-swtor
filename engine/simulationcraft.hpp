@@ -441,25 +441,6 @@ enum save_type
   SAVE_MAX
 };
 
-enum format_type
-{
-  FORMAT_NONE=0,
-  FORMAT_NAME,
-  FORMAT_CHAR_NAME,
-  FORMAT_CONVERT_HEX,
-  FORMAT_CONVERT_UTF8,
-  FORMAT_MAX
-};
-
-#define FORMAT_CHAR_NAME_MASK  ( (1<<FORMAT_NAME) | (1<<FORMAT_CHAR_NAME) )
-#define FORMAT_GUILD_NAME_MASK ( (1<<FORMAT_NAME) )
-#define FORMAT_ALL_NAME_MASK   ( (1<<FORMAT_NAME) | (1<<FORMAT_CHAR_NAME) )
-#define FORMAT_UTF8_MASK       ( (1<<FORMAT_CONVERT_HEX) | (1<<FORMAT_CONVERT_UTF8) )
-#define FORMAT_ASCII_MASK      ( (1<<FORMAT_CONVERT_UTF8) )
-#define FORMAT_CONVERT_MASK    ( (1<<FORMAT_CONVERT_HEX) | (1<<FORMAT_CONVERT_UTF8) )
-#define FORMAT_DEFAULT         ( FORMAT_ASCII_MASK )
-#define FORMAT_ALL_MASK        -1
-
 // Data Access ==============================================================
 #ifndef MAX_LEVEL
 #define MAX_LEVEL (50)
@@ -573,7 +554,7 @@ void dispose( I first, I last, D disposer=D() )
 template <typename Range, typename D=delete_disposer_t>
 inline auto dispose( Range&& r, D disposer=D() ) -> decltype( std::forward<Range>( r ) )
 {
-  dispose( boost::begin( r ), boost::end( r ), disposer );
+  dispose( std::begin( r ), std::end( r ), disposer );
   return std::forward<Range>( r );
 }
 
@@ -3991,8 +3972,11 @@ bool str_to_float( const std::string& src, double& dest );
 
 struct armory_t
 {
-  static void fuzzy_stats( std::string& encoding, const std::string& description );
-  static std::string& format( std::string& name, int format_type = FORMAT_DEFAULT );
+private:
+  static void format_( std::string& s );
+public:
+  static std::string& format( std::string& s )
+  { format_( s ); return s; }
 };
 
 // base36 ===================================================================
