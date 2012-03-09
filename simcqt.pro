@@ -4,9 +4,8 @@ QT += core gui network webkit
 #CONFIG += paperdoll
 #CONFIG += openssl
 
-include( build.conf )
-exists( override.conf ) {
-  include( override.conf )
+exists( build.conf ) {
+  include( build.conf )
 }
 
 QMAKE_CXXFLAGS_RELEASE += -DNDEBUG
@@ -35,10 +34,6 @@ contains(COMPILER_CHECK_CXX,'g++') {
 
 INCLUDEPATH += engine
 DEPENDPATH += engine
-
-!isEmpty(BOOST_PATH) {
-  INCLUDEPATH += "$$BOOST_PATH"
-}
 
 HEADERS += engine/simulationcraft.hpp
 HEADERS += engine/utf8.h

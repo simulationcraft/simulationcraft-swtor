@@ -11,19 +11,14 @@
 # Override MODULE on the cmd-line invocation if you want to build a custom named executable, e.g. 'simc64'
 # Override OBJ_DIR if you want your object files built somewhere other than the local directory
 
-OS         = UNIX
+OS         = WINDOWS
 
 CXX        = g++
-CPP_FLAGS  = -Wall -Woverloaded-virtual -W
+CPP_FLAGS  = -Wall -Wextra -Woverloaded-virtual -I.
 OPTS       = -O3 -fomit-frame-pointer -ffast-math -std=gnu++0x
 BITS       = 32
 
-include ../build.conf
--include ../override.conf
-
-ifneq (${BOOST_PATH},)
-CPP_FLAGS += -I $(BOOST_PATH)
-endif
+-include ../build.conf
 
 ifeq (64,${BITS})
 CPP_FLAGS += -m64
