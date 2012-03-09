@@ -669,6 +669,16 @@ sim_t::sim_t( sim_t* p, int index ) :
   path_str += DIRECTORY_DELIMITER;
   path_str += "shadow_assassin";
 
+  // sage_sorcerer HEAL
+  path_str += "|profiles_heal";
+  path_str += DIRECTORY_DELIMITER;
+  path_str += "sage_sorcerer";
+  path_str += "|..";
+  path_str += DIRECTORY_DELIMITER;
+  path_str += "profiles_heal";
+  path_str += DIRECTORY_DELIMITER;
+  path_str += "sage_sorcerer";
+
   // Initialize the default item database source order
   static const char* const dbsources[] = { "local", "bcpapi", "wowhead", "mmoc", "armory", "ptrhead" };
   item_db_sources.assign( boost::begin( dbsources ), boost::end( dbsources ) );

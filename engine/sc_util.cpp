@@ -316,7 +316,7 @@ const char* util_t::player_type_string( int type )
 {
   switch ( type )
   {
-  case JEDI_SAGE:        return "sage_sorcerer";
+  case JEDI_SAGE:        return "jedi_sage";
   case JEDI_SHADOW:      return "jedi_shadow";
   case JEDI_SENTINEL:    return "jedi_sentinel";
   case JEDI_GUARDIAN:    return "jedi_guardian";
