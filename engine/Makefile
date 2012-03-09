@@ -76,7 +76,6 @@ SRC = \
 	simulationcraft.hpp \
 	utf8.h \
 	sc_action.cpp \
-	sc_armory.cpp \
 	sc_buff.cpp \
 	sc_chart.cpp \
 	sc_consumable.cpp \

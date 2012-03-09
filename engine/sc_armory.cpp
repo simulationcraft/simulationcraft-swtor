@@ -103,7 +103,7 @@ void armory_t::fuzzy_stats( std::string&       encoding_str,
   if ( description_str.empty() ) return;
 
   std::string buffer = description_str;
-  armory_t::format( buffer );
+  util_t::format_name( buffer );
 
   if ( is_proc_description( buffer ) )
     return;
@@ -137,41 +137,3 @@ void armory_t::fuzzy_stats( std::string&       encoding_str,
 }
 #endif
 
-// armory_t::format_ ========================================================
-
-void armory_t::format_( std::string& name )
-{
-  if ( name.empty() ) return;
-
-  util_t::str_to_utf8( name );
-
-  std::string buffer;
-
-  for ( size_t i = 0, size = name.size(); i < size; i++ )
-  {
-    char c = name[ i ];
-
-    if ( unlikely( c & 0x80 ) )
-      continue;
-
-    else if ( std::isalpha( c ) )
-      c = std::tolower( c );
-
-    else if ( c == ' ' )
-      c = '_';
-
-    else if ( ( c == '_' || c == '+' ) && i == 0 )
-      continue;
-
-    else if ( c != '_' &&
-              c != '+' &&
-              c != '.' &&
-              c != '%' &&
-              ! std::isdigit( c ) )
-      continue;
-
-    buffer += c;
-  }
-
-  name.swap( buffer );
-}

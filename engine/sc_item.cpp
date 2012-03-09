@@ -181,7 +181,7 @@ bool item_t::parse_options()
 
   option_t::parse( sim, option_name_str.c_str(), options, remainder );
 
-  armory_t::format( option_name_str );
+  util_t::format_name( option_name_str );
 
   util_t::tolower( option_id_str            );
   util_t::tolower( option_stats_str         );
@@ -566,7 +566,7 @@ bool item_t::decode_random_suffix()
   }
 
   std::string name_str = suffix_data.suffix;
-  armory_t::format( name_str );
+  util_t::format_name( name_str );
 
   if ( encoded_name_str.find( name_str ) == std::string::npos )
   {

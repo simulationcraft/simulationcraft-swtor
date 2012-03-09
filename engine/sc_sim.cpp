@@ -564,7 +564,7 @@ static bool parse_item_sources( sim_t*             sim,
       continue;
     }
 
-    sim -> item_db_sources.push_back( armory_t::format( sources[ i ] ) );
+    sim -> item_db_sources.push_back( util_t::format_name( sources[ i ] ) );
   }
 
   if ( sim -> item_db_sources.empty() )

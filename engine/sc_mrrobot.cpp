@@ -30,7 +30,7 @@ bool parse_profession ( js_node_t* profile, const std::string& path, std::string
   std::string crafting_skill;
   if ( js_t::get_value( crafting_skill, profile, path ) )
   {
-    armory_t::format( crafting_skill );
+    util_t::format_name( crafting_skill );
     player_profession_string += crafting_skill;
     return true;
   }
@@ -135,7 +135,7 @@ bool parse_items( player_t* p, js_node_t* items )
       // FIXME: Report weirdness.
       continue;
     }
-    armory_t::format( name );
+    util_t::format_name( name );
     item_encoding << name;
 
     std::string weapon_type_str;
@@ -380,13 +380,13 @@ js_node_t* download_roster( sim_t* sim,
 
 void canonical_class_name( std::string& name )
 {
-  armory_t::format( name );
+  util_t::format_name( name );
   name = util_t::player_type_string( util_t::translate_class_str( name ) );
 }
 
 void canonical_race_name( std::string& name )
 {
-  armory_t::format( name );
+  util_t::format_name( name );
   name = util_t::race_type_string( util_t::parse_race_type( name ) );
 }
 } // ANONYMOUS namespace ====================================================
