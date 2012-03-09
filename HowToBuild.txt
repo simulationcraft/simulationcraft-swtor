@@ -8,13 +8,11 @@ http://code.google.com/p/simulationcraft-swtor/wiki/Configure_IDE
 
 = Introduction =
 
-!SimulationCraft is a C++ project based on C++11 / GNU GCC Compiler 4.6 and requires the Boost ( http://www.boost.org ) libraries.
+!SimulationCraft is a C++ project based on C++11 / GNU GCC Compiler 4.6 and uses the Boost ( http://www.boost.org ) libraries.
 
 The Graphical User Interface is based on QT and requires at least version 4.7.4 libraries, version 4.8.0 is recommended.
 
-While we try to make it as easy for new and unexperienced developers to join the project, we choose to have such "steep" requirements 
-to allow us to use the more sophisticated methods provided by C++11 and the boost library. Since coding time is always sparse, this 
-enables us to use a very rich tool set without having to re-do all the work on basic mechanics.
+While we try to make it as easy for new and unexperienced developers to join the project, we choose to have such "steep" requirements to allow us to use the more sophisticated methods provided by C++11 and the boost library. Since coding time is always sparse, this enables us to use a very rich tool set without having to re-do all the work on basic mechanics.
 
 We hope you manage to at least build the CLI to begin with. If there are any problems, just contact us and we'll gladly help you.
 
@@ -23,8 +21,7 @@ We hope you manage to at least build the CLI to begin with. If there are any pro
  * Downloading via GIT
   * If you don't already have a GIT client, go to [http://git-scm.com/]
    * Create a new parent folder with a name of your choice
-   * Use the 'git clone' command found on the [http://code.google.com/p/simulationcraft/source/checkout source page]. For example 
-   git clone https://code.google.com/p/simulationcraft-swtor/ . This will create a new subfolder /simulationcraft-swtor .
+   * Use the 'git clone' command found on the [http://code.google.com/p/simulationcraft/source/checkout source page]. For example git clone https://code.google.com/p/simulationcraft-swtor/ . This will create a new subfolder /simulationcraft-swtor .
 
 = Building !SimulationCraft =
 
@@ -34,15 +31,6 @@ We hope you manage to at least build the CLI to begin with. If there are any pro
   * Building the GUI requires that the Qt SDK or Framework be downloaded and installed
   * Qt DLLs are used at runtime, so a subset must be copied into the build area
   * Refer to platform-specific directions below
-
-== Modifying your build.conf ==
- There is a file build.conf in the SimC source directory, which specifys variables used for the build process. While you can modify the build.conf to your need, we encourage developers to create a new override.conf file, which contains their overridden build settings. The build.conf should remain the same as a default configuration, and not get changed every time a developers makes a commit.
-
- The build.conf file currently contains:
-
- BOOST_PATH=c:\boost_1_49_0
-
- OS=WINDOWS
 
 = Building !SimulationCraft on Windows =
 
@@ -57,8 +45,6 @@ We hope you manage to at least build the CLI to begin with. If there are any pro
    * Scroll *System Variables* and select *Path*
    * Click *Edit* button
    * Add the directory where your MinGW binaries are at the end of the `PATH`, separated by `;`. Typically `;c:\mingw\bin`.
- * Installing Boost:
-  * You need boost from [http://www.boost.org/] . Just download the archive and extract it. It is best extracted to C:\boost_1_49_0 .
  * Open command prompt window and run
   * `cd your_simc_source_dir\engine`
   * `mingw32-make OS=WINDOWS BOOST_PATH=C:\boost_1_49_0` where BOOST_PATH is the path to your extracted boost folder
@@ -81,7 +67,7 @@ We hope you manage to at least build the CLI to begin with. If there are any pro
  * Your Linux distro should have come with Git and g++ by default.  
  * If not, use the built-in software update mechanism to download and install a developer suite.
  * `cd your_simc_source_dir/engine`
- * `make`
+ * `make OS=UNIX`
  * This builds an optimized executable named `simc`
 
 === Graphical User Interface using Qt SDK (not just the Qt Framework) ===
@@ -100,7 +86,7 @@ We hope you manage to at least build the CLI to begin with. If there are any pro
 
  * `cd your_simc_source_dir/engine`
  * Modify your build.conf and adjust BOOST_PATH and set OS=UNIX
- * `make`
+ * `make OS=UNIX`
  * This builds an optimized executable named `simc`
 
 === Graphical User Interface ===
@@ -117,3 +103,9 @@ We hope you manage to at least build the CLI to begin with. If there are any pro
  * You should now have
   * `your_simc_source_dir/simc`, the command line simulator, and
   * `your_simc_source_dir/simcqt.app`, the simulator GUI.
+
+
+= Tips and Tricks =
+ * Compiler Options:
+  * Add -j n  where n is the number of threads used for compiling
+  * The GCC flag -dM will stop the compiler after the preprocessing pass and make it dump all #defines
