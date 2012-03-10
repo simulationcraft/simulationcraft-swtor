@@ -89,10 +89,10 @@ static const char* school_color( int type )
 {
   switch ( type )
   {
-  case SCHOOL_INTERNAL:     return class_color( T_COMMANDO );
-  case SCHOOL_ELEMENTAL:  	return class_color( SITH_SORCERER );
-  case SCHOOL_KINETIC:     	return class_color( SITH_SORCERER );
-  case SCHOOL_ENERGY: 	    return "000066";
+  case SCHOOL_INTERNAL:     return color::purple;
+  case SCHOOL_ELEMENTAL:  	return color::blue;
+  case SCHOOL_KINETIC:     	return color::taupe;
+  case SCHOOL_ENERGY: 	    return color::yellow;
   case SCHOOL_NONE:         return color::white;
   default: return "";
   }
