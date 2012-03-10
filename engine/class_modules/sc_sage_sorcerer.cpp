@@ -55,6 +55,7 @@ struct sage_sorcerer_t : public player_t
     buff_t* force_potency;
     buff_t* psychic_projection_dd;
     buff_t* rakata_force_masters_4pc;
+    buff_t* noble_sacrifice;
   } buffs;
 
   // Gains
@@ -63,6 +64,9 @@ struct sage_sorcerer_t : public player_t
     gain_t* concentration;
     gain_t* focused_insight;
     gain_t* psychic_barrier;
+    gain_t* noble_sacrifice_power;
+    gain_t* noble_sacrifice_health;
+    gain_t* noble_sacrifice_power_regen_lost;
   } gains;
 
   // Procs
@@ -216,7 +220,7 @@ struct sage_sorcerer_t : public player_t
   virtual void      regen( timespan_t periodicity );
 
   virtual double    force_bonus_multiplier() const;
-  // virtual double    force_healing_bonus_multiplier() const;
+  virtual double    force_healing_bonus_multiplier() const;
   virtual double    alacrity() const;
 
   virtual double force_crit_chance() const
@@ -430,6 +434,28 @@ struct force_valor_t : public sage_sorcerer_spell_t
   }
 };
 
+struct noble_sacrifice_t : public sage_sorcerer_spell_t
+{
+  noble_sacrifice_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
+    sage_sorcerer_spell_t( n, p )
+  {
+    parse_options( 0, options_str );
+    base_cost = 0.0;
+    harmful = false;
+  }
+
+  virtual void execute()
+  {
+    sage_sorcerer_spell_t::execute();
+
+    sage_sorcerer_t* p = cast();
+
+    p -> resource_loss( RESOURCE_HEALTH, p -> resource_max[ RESOURCE_HEALTH ] * 0.15 , p -> gains.noble_sacrifice_health );
+    p -> resource_gain( RESOURCE_FORCE, p -> resource_max[ RESOURCE_FORCE ] * 0.08 , p -> gains.noble_sacrifice_power );
+
+    p -> buffs.noble_sacrifice -> trigger();
+  }
+};
 struct project_t : public sage_sorcerer_spell_t
 {
   project_t* upheaval;
@@ -1080,7 +1106,24 @@ struct deliverance_t : public sage_sorcerer_heal_t
     base_execute_time = timespan_t::from_seconds( 3.0 );
 
     range = 30.0;
+  }
+};
 
+struct benevolence_t : public sage_sorcerer_heal_t
+{
+  benevolence_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
+    sage_sorcerer_heal_t( n, p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+  {
+    parse_options( 0, options_str );
+
+    dd.standardhealthpercentmin = .078;
+    dd.standardhealthpercentmax = .098;
+    dd.power_mod = 1.75;
+
+    base_cost = 50.0;
+    base_execute_time = timespan_t::from_seconds( 1.5 );
+
+    range = 30.0;
   }
 };
 
@@ -1131,9 +1174,12 @@ action_t* sage_sorcerer_t::create_action( const std::string& name,
     if ( name == "mental_alacrity"    ) return new   mental_alacrity_t( this, "mental_alacrity", options_str );
     if ( name == "telekinetic_wave"   ) return new  telekinetic_wave_t( this, "telekinetic_wave", options_str );
     if ( name == "force_potency"      ) return new     force_potency_t( this, "force_potency", options_str );
+    if ( name == "noble_sacrifice"    ) return new   noble_sacrifice_t( this, "noble_sacrifice", options_str );
+
 
     // Add Empire version of all those healing spells
     if ( name == "deliverance"        ) return new       deliverance_t( this, "deliverance", options_str );
+    if ( name == "benevolence"        ) return new       benevolence_t( this, "benevolence", options_str );
     if ( name == "healing_trance"     ) return new    healing_trance_t( this, "healing_trance", options_str );
   }
   else if ( type == SITH_SORCERER )
@@ -1151,6 +1197,7 @@ action_t* sage_sorcerer_t::create_action( const std::string& name,
     if ( name == "chain_lightning"    ) return new  telekinetic_wave_t( this, "chain_lightning", options_str );
     if ( name == "recklessness"       ) return new     force_potency_t( this, "recklessness", options_str );
     if ( name == "dark_infusion"        ) return new     deliverance_t( this, "dark_infusion", options_str );
+    if ( name == "consumption"        ) return new   noble_sacrifice_t( this, "consumption", options_str );
   }
 
   return player_t::create_action( name, options_str );
@@ -1285,6 +1332,7 @@ void sage_sorcerer_t::init_buffs()
   buffs.force_potency = new buff_t( this, is_sage ? "force_potency" : "recklessness", 2, timespan_t::from_seconds( 20.0 ) );
   buffs.psychic_projection_dd = new buff_t( this, is_sage ? "psychic_projection_dd" : "lightning_barrage_dd", 1, timespan_t::from_seconds( 2.0 ), timespan_t::zero );
   buffs.rakata_force_masters_4pc = new buff_t( this, "rakata_force_masters_4pc", 1, timespan_t::from_seconds( 15.0 ), timespan_t::from_seconds( 20.0 ), set_bonus.rakata_force_masters -> four_pc() ? 0.10 : 0.0 );
+  buffs.noble_sacrifice = new buff_t( this, "noble_sacrifice", 4, timespan_t::from_seconds( 10.0 ) );
 }
 
 // sage_sorcerer_t::init_gains =======================================================
@@ -1298,6 +1346,9 @@ void sage_sorcerer_t::init_gains()
   gains.concentration   = get_gain( is_sage ? "concentration" : "subversion" );
   gains.focused_insight = get_gain( is_sage ? "focused_insight" : "parasitism" );
   gains.psychic_barrier = get_gain( is_sage ? "psychic_barrier" : "sith_efficacy" );
+  gains.noble_sacrifice_health = get_gain( is_sage ? "noble_sacrifice_health" : "consumption_health" );
+  gains.noble_sacrifice_power = get_gain( is_sage ? "noble_sacrifice_power" : "consumption_power" );
+  gains.noble_sacrifice_power_regen_lost = get_gain( is_sage ? "noble_sacrifice_power_regen_lost" : "consumption_power_regen_lost" );
 }
 
 // sage_sorcerer_t::init_procs =======================================================
@@ -1515,6 +1566,11 @@ void sage_sorcerer_t::regen( timespan_t periodicity )
     double force_regen = periodicity.total_seconds() * force_regen_per_second() * buffs.concentration -> check() * 0.10;
     resource_gain( RESOURCE_FORCE, force_regen, gains.concentration );
   }
+  if ( buffs.noble_sacrifice -> up() )
+  {
+    double force_regen = periodicity.total_seconds() * force_regen_per_second() * buffs.noble_sacrifice -> check() * 0.25;
+    resource_loss( RESOURCE_FORCE, force_regen, gains.noble_sacrifice_power_regen_lost );
+  }
 }
 
 // sage_sorcerer_t::force_bonus_multiplier ================================
@@ -1525,13 +1581,11 @@ double sage_sorcerer_t::force_bonus_multiplier() const
       buffs.tremors -> stack() * 0.01;
 }
 
-#if 0
 double sage_sorcerer_t::force_healing_bonus_multiplier() const
 {
   return player_t::force_healing_bonus_multiplier() +
       talents.clairvoyance -> rank() * 0.02;
 }
-#endif
 
 // sage_sorcerer_t::alacrity =============================================
 

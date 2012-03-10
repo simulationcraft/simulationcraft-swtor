@@ -2433,6 +2433,7 @@ void player_t::regen( const timespan_t periodicity )
 
 double player_t::resource_loss( int       resource,
                                 double    amount,
+                                gain_t*   source,
                                 action_t* action )
 {
   if ( amount == 0 )
@@ -2457,6 +2458,21 @@ double player_t::resource_loss( int       resource,
     actual_amount = amount;
     resource_current[ resource ] -= actual_amount;
     resource_lost[ resource ] += actual_amount;
+  }
+
+  if ( source )
+  {
+    if ( source -> type == RESOURCE_NONE )
+      source -> type = ( resource_type ) resource;
+
+    if ( resource != source -> type )
+    {
+      sim -> errorf( "player_t::resource_gain: player=%s gain=%s resource_gain type not identical to gain resource type..\n resource=%s gain=%s",
+                     name(), source -> name_str.c_str(), util_t::resource_type_string( resource ), util_t::resource_type_string( source -> type ) );
+      assert ( 0 );
+    }
+
+    source -> add( -actual_amount, actual_amount - amount );
   }
 
   action_callback_t::trigger( resource_loss_callbacks[ resource ], action, ( void* ) &actual_amount );
@@ -2762,11 +2778,11 @@ void player_t::stat_loss( int       stat,
 
   case STAT_MAX: for ( int i=0; i < ATTRIBUTE_MAX; i++ ) { stats.attribute[ i ] -= amount; temporary.attribute[ i ] -= temp_value * amount; attribute[ i ] -= amount; } break;
 
-  case STAT_HEALTH: resource_loss( RESOURCE_HEALTH, amount, action ); break;
-  case STAT_MANA:   resource_loss( RESOURCE_MANA,   amount, action ); break;
-  case STAT_RAGE:   resource_loss( RESOURCE_RAGE,   amount, action ); break;
-  case STAT_ENERGY: resource_loss( RESOURCE_ENERGY, amount, action ); break;
-  case STAT_AMMO:   resource_loss( RESOURCE_AMMO,   amount, action ); break;
+  case STAT_HEALTH: resource_loss( RESOURCE_HEALTH, amount, 0, action ); break;
+  case STAT_MANA:   resource_loss( RESOURCE_MANA,   amount, 0, action ); break;
+  case STAT_RAGE:   resource_loss( RESOURCE_RAGE,   amount, 0, action ); break;
+  case STAT_ENERGY: resource_loss( RESOURCE_ENERGY, amount, 0, action ); break;
+  case STAT_AMMO:   resource_loss( RESOURCE_AMMO,   amount, 0, action ); break;
 
   case STAT_MAX_HEALTH:
   case STAT_MAX_MANA:
@@ -2780,7 +2796,7 @@ void player_t::stat_loss( int       stat,
               ( stat == STAT_MAX_ENERGY ) ? RESOURCE_ENERGY : RESOURCE_AMMO );
     recalculate_resource_max( r );
     double delta = resource_current[ r ] - resource_max[ r ];
-    if ( delta > 0 ) resource_loss( r, delta, action );
+    if ( delta > 0 ) resource_loss( r, delta, 0, action );
   }
   break;
 
@@ -2906,7 +2922,7 @@ double player_t::assess_damage( double            amount,
 
   iteration_dmg_taken += mitigated_amount;
 
-  double actual_amount = resource_loss( RESOURCE_HEALTH, mitigated_amount, action );
+  double actual_amount = resource_loss( RESOURCE_HEALTH, mitigated_amount, 0, action );
 
   if ( resource_current[ RESOURCE_HEALTH ] <= 0 && !is_enemy() && infinite_resource[ RESOURCE_HEALTH ] == 0 )
   {
