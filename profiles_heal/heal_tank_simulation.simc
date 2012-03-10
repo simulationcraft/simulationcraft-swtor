@@ -1,0 +1,23 @@
+statistics_level=2
+Sith_Assassin_Tankdummy.simc
+infinite_health=0
+scale_player=0
+
+Sith_Sorcerer_Corruption.simc
+target=Sith_Assassin_Tankdummy
+actions=stim,type=exotech_resolve
+actions+=/mark_of_power
+actions+=/snapshot_stats
+actions+=/innervate,if=!ticking
+actions+=/resurgence,if=!ticking
+actions+=/dark_infusion,if=target.health_pct<60
+gear_accuracy_rating=100
+# gear accuracy set to allow -30 accuracy scale factor generation
+
+enemy=Enemy_Hitting_all_Tanks
+actions=snapshot_stats
+actions+=/spell_nuke,damage=3000,cooldown=10,attack_speed=1.0,aoe_tanks=1
+actions+=/melee_attack,damage=1700,trigger_gcd=3.0,aoe_tanks=1
+
+
+scale_only=willpower,power,force_power,crit,surge,alacrity

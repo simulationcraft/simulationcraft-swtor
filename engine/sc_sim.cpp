@@ -655,6 +655,12 @@ sim_t::sim_t( sim_t* p, int index ) :
   path_str += DIRECTORY_DELIMITER;
   path_str += "shadow_assassin";
 
+  path_str += "|profiles_heal";
+
+  path_str += "|..";
+  path_str += DIRECTORY_DELIMITER;
+  path_str += "profiles_heal";
+
   // sage_sorcerer HEAL
   path_str += "|profiles_heal";
   path_str += DIRECTORY_DELIMITER;
@@ -664,6 +670,22 @@ sim_t::sim_t( sim_t* p, int index ) :
   path_str += "profiles_heal";
   path_str += DIRECTORY_DELIMITER;
   path_str += "sage_sorcerer";
+
+  path_str += "|profiles_tank";
+
+  path_str += "|..";
+  path_str += DIRECTORY_DELIMITER;
+  path_str += "profiles_tank";
+
+  // shadow_assassin tank
+  path_str += "|profiles_tank";
+  path_str += DIRECTORY_DELIMITER;
+  path_str += "shadow_assassin";
+  path_str += "|..";
+  path_str += DIRECTORY_DELIMITER;
+  path_str += "profiles_tank";
+  path_str += DIRECTORY_DELIMITER;
+  path_str += "shadow_assassin";
 
   // Initialize the default item database source order
   static const char* const dbsources[] = { "local", "bcpapi", "wowhead", "mmoc", "armory", "ptrhead" };

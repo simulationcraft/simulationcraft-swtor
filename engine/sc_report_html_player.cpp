@@ -2524,7 +2524,7 @@ static void print_html_player_deaths( FILE* file, player_t* p )
              "\t\t\t\t\t\t\t\t\t<td class=\"left\">death count pct</td>\n"
              "\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t</tr>\n",
-             ( double ) p -> deaths.size() / p -> sim -> iterations );
+             ( double ) p -> deaths.size() / p -> sim -> iterations * 100.0);
     fprintf( file,
              "\t\t\t\t\t\t\t\t<tr>\n"
              "\t\t\t\t\t\t\t\t\t<td class=\"left\">avg death time</td>\n"

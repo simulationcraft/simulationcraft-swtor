@@ -119,19 +119,32 @@ namespace { // ANONYMOUS NAMESPACE ==========================================
 
 // Melee ====================================================================
 
-struct melee_t : public action_t
+struct melee_attack_t : public action_t
 {
-  melee_t( const char* name, player_t* player ) :
-    action_t( ACTION_ATTACK, name, player, melee_policy, RESOURCE_NONE, SCHOOL_KINETIC )
+  melee_attack_t( player_t* player, const std::string& options_str ) :
+    action_t( ACTION_ATTACK, "melee_attack" , player, melee_policy, RESOURCE_NONE, SCHOOL_KINETIC )
   {
+    dd.base_min = 2000;
+
+    int aoe_tanks = 0;
+    option_t options[] =
+    {
+      { "damage",       OPT_FLT,      &dd.base_min          },
+      { "trigger_gcd",  OPT_TIMESPAN, &trigger_gcd    },
+      { "cooldown",     OPT_TIMESPAN, &cooldown -> duration },
+      { "aoe_tanks",    OPT_BOOL,     &aoe_tanks },
+      { NULL, OPT_UNKNOWN, NULL }
+    };
+    parse_options( options, options_str );
+
+    if ( aoe_tanks == 1 )
+      aoe = -1;
+    dd.base_max = dd.base_min;
+    if ( trigger_gcd <= timespan_t::zero )
+      trigger_gcd = timespan_t::from_seconds( 3.0 );
+
     may_crit    = true;
-    background  = true;
-    repeating   = true;
-    trigger_gcd = timespan_t::zero;
     base_cost   = 0;
-    dd.base_min = 260000;
-    base_execute_time = timespan_t::from_seconds( 2.4 );
-    aoe = -1;
   }
 
   virtual std::vector<player_t*> available_targets() const
@@ -151,67 +164,6 @@ struct melee_t : public action_t
   }
 };
 
-#if 0
-// FIXME
-
-// Auto Attack ==============================================================
-
-struct auto_attack_t : public attack_t
-{
-  auto_attack_t( player_t* p, const std::string& options_str ) :
-    attack_t( "auto_attack", p, RESOURCE_MANA, SCHOOL_KINETIC )
-  {
-    p -> main_hand_attack = new melee_t( "melee_main_hand", player );
-    p -> main_hand_attack -> weapon = &( p -> main_hand_weapon );
-    p -> main_hand_attack -> base_execute_time = timespan_t::from_seconds( 2.4 );
-
-    int aoe_tanks = 0;
-    option_t options[] =
-    {
-      { "damage",       OPT_FLT,      &p -> main_hand_attack -> dd.base_min       },
-      { "attack_speed", OPT_TIMESPAN, &p -> main_hand_attack -> base_execute_time },
-      { "aoe_tanks",    OPT_BOOL,     &aoe_tanks },
-      { NULL, OPT_UNKNOWN, NULL }
-    };
-    parse_options( options, options_str );
-
-    p -> main_hand_attack -> target = target;
-
-    if ( aoe_tanks == 1 )
-      p -> main_hand_attack -> aoe = -1;
-
-    p -> main_hand_attack -> dd.base_max = p -> main_hand_attack -> dd.base_min;
-    if ( p -> main_hand_attack -> base_execute_time < timespan_t::from_seconds( 0.01 ) )
-      p -> main_hand_attack -> base_execute_time = timespan_t::from_seconds( 2.4 );
-
-    cooldown = player -> get_cooldown( name_str + "_" + target -> name() );
-    stats = player -> get_stats( name_str + "_" + target -> name(), this );
-    stats -> school = school;
-    name_str = name_str + "_" + target -> name();
-
-    trigger_gcd = timespan_t::zero;
-  }
-
-  virtual void execute()
-  {
-    enemy_t* p = player -> cast_enemy();
-
-    p -> main_hand_attack -> schedule_execute();
-    if ( p -> off_hand_attack )
-    {
-      p -> off_hand_attack -> schedule_execute();
-    }
-  }
-
-  virtual bool ready()
-  {
-    enemy_t* p = player -> cast_enemy();
-    if ( p -> is_moving() ) return false;
-    return( p -> main_hand_attack -> execute_event == 0 ); // not swinging
-  }
-};
-#endif
-
 // Spell Nuke ===============================================================
 
 struct spell_nuke_t : public action_t
@@ -220,7 +172,7 @@ struct spell_nuke_t : public action_t
     action_t( ACTION_ATTACK, "spell_nuke", p, force_policy, RESOURCE_NONE, SCHOOL_INTERNAL )
   {
     base_execute_time = timespan_t::from_seconds( 3.0 );
-    dd.base_min = 50000;
+    dd.base_min = 4000;
 
     cooldown = player -> get_cooldown( name_str + "_" + target -> name() );
 
@@ -237,7 +189,7 @@ struct spell_nuke_t : public action_t
 
     dd.base_max = dd.base_min;
     if ( base_execute_time < timespan_t::zero )
-      base_execute_time = timespan_t::from_seconds( 3.0 );
+      base_execute_time = timespan_t::from_seconds( 1.0 );
 
     stats = player -> get_stats( name_str + "_" + target -> name(), this );
     stats -> school = school;
@@ -379,6 +331,7 @@ struct summon_add_t : public action_t
 action_t* enemy_t::create_action( const std::string& name,
                                   const std::string& options_str )
 {
+  if ( name == "melee_attack") return new  melee_attack_t( this, options_str );
   if ( name == "spell_nuke"  ) return new  spell_nuke_t( this, options_str );
   if ( name == "spell_aoe"   ) return new   spell_aoe_t( this, options_str );
   if ( name == "summon_add"  ) return new  summon_add_t( this, options_str );
@@ -477,8 +430,8 @@ void enemy_t::init_actions()
 
       if ( target != this )
       {
-        //action_list_str += "/auto_attack,damage=260000,attack_speed=2.4,aoe_tanks=1";
-        action_list_str += "/spell_nuke,damage=6000,cooldown=4,attack_speed=0.1,aoe_tanks=1";
+        action_list_str += "/spell_nuke,damage=2000,cooldown=10,attack_speed=1.0,aoe_tanks=1";
+        action_list_str += "/melee_attack,damage=2000,trigger_gcd=3.0,aoe_tanks=1";
       }
     }
   }
