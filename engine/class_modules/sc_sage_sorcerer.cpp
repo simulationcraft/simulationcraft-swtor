@@ -14,6 +14,7 @@ struct sage_sorcerer_targetdata_t : public targetdata_t
 
   dot_t dot_healing_trance;
   dot_t dot_salvation;
+  dot_t dot_rejuvenate;
 
   sage_sorcerer_targetdata_t( player_t& source, player_t& target )
     : targetdata_t( source, target ),
@@ -22,7 +23,8 @@ struct sage_sorcerer_targetdata_t : public targetdata_t
       dot_weaken_mind( "weaken_mind", &source ),
       dot_sever_force( "sever_force", &source ),
       dot_healing_trance( "healing_trance", &source ),
-      dot_salvation( "salvation", &source )
+      dot_salvation( "salvation", &source ),
+      dot_rejuvenate( "rejuvenate", &source)
   {
     add( dot_telekinetic_throw );
     alias( dot_telekinetic_throw, "force_lightning" );
@@ -43,6 +45,9 @@ struct sage_sorcerer_targetdata_t : public targetdata_t
 
     add( dot_salvation );
     alias( dot_salvation, "revivification" );
+
+    add( dot_rejuvenate );
+    alias( dot_rejuvenate, "resurgence" );
   }
 };
 
@@ -67,6 +72,7 @@ struct sage_sorcerer_t : public player_t
     buff_t* psychic_projection_dd;
     buff_t* rakata_force_masters_4pc;
     buff_t* noble_sacrifice;
+    buff_t* resplendence;
   } buffs;
 
   // Gains
@@ -234,8 +240,27 @@ struct sage_sorcerer_t : public player_t
   virtual double    force_healing_bonus_multiplier() const;
   virtual double    alacrity() const;
 
+  virtual double default_accuracy_chance() const
+  { return player_t::default_accuracy_chance() + talents.clairvoyance -> rank() * 0.01; }
+
   virtual double force_crit_chance() const
   { return player_t::force_crit_chance() + talents.penetrating_light -> rank() * 0.01; }
+
+  virtual double force_healing_crit_chance() const
+  { return player_t::force_healing_crit_chance() + talents.penetrating_light -> rank() * 0.01 + talents.serenity -> rank() * 0.01; }
+
+  virtual double    composite_player_heal_multiplier( const school_type school ) const
+  { return player_t::composite_player_heal_multiplier( school ) + talents.wisdom -> rank() * 0.01; }
+
+  double school_damage_reduction( school_type school ) const
+  { return player_t::school_damage_reduction( school ) + talents.serenity -> rank() * 0.01; }
+
+  player_t::heal_info_t assess_heal( double amount,  const school_type school,int  dmg_type, int result, action_t* action )
+  {
+    amount *= 1.0 + talents.pain_bearer -> rank() * 0.04;
+
+    return player_t::assess_heal( amount, school, dmg_type, result, action );
+  }
 
   virtual action_t* create_action( const std::string& name, const std::string& options );
   virtual void      create_talents();
@@ -461,10 +486,12 @@ struct noble_sacrifice_t : public sage_sorcerer_spell_t
 
     sage_sorcerer_t* p = cast();
 
-    p -> resource_loss( RESOURCE_HEALTH, p -> resource_max[ RESOURCE_HEALTH ] * 0.15 , p -> gains.noble_sacrifice_health );
+    double health_loss = p -> buffs.resplendence -> up() ? 0 : p -> resource_max[ RESOURCE_HEALTH ] * ( 0.15 - p -> talents.valiance -> rank() * 0.01 );
+    p -> resource_loss( RESOURCE_HEALTH, health_loss, p -> gains.noble_sacrifice_health );
     p -> resource_gain( RESOURCE_FORCE, p -> resource_max[ RESOURCE_FORCE ] * 0.08 , p -> gains.noble_sacrifice_power );
 
-    p -> buffs.noble_sacrifice -> trigger();
+    if ( ! p -> buffs.resplendence -> check() )
+      p -> buffs.noble_sacrifice -> trigger();
   }
 };
 
@@ -1120,6 +1147,7 @@ struct deliverance_t : public sage_sorcerer_heal_t
 
     base_cost = 55.0;
     base_execute_time = timespan_t::from_seconds( 3.0 );
+    base_execute_time -= timespan_t::from_seconds( p -> talents.immutable_force -> rank() * 0.25 );
 
     range = 30.0;
   }
@@ -1161,7 +1189,42 @@ struct healing_trance_t : public sage_sorcerer_heal_t
     cooldown -> duration = timespan_t::from_seconds( 9.0 );
 
     range = 30.0;
+  }
 
+  virtual void impact( player_t* t, int impact_result, double travel_dmg )
+  {
+    sage_sorcerer_heal_t::impact( t, impact_result, travel_dmg );
+
+    if ( impact_result == RESULT_CRIT )
+    {
+      sage_sorcerer_t* p = cast();
+
+      p -> buffs.resplendence -> trigger();
+    }
+  }
+};
+
+struct rejuvenate_t : public sage_sorcerer_heal_t
+{
+  rejuvenate_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
+    sage_sorcerer_heal_t( n, p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+  {
+    parse_options( 0, options_str );
+
+    dd.standardhealthpercentmin = .035;
+    dd.standardhealthpercentmax = .055;
+    dd.power_mod = 0.91;
+
+    td.standardhealthpercentmin = td.standardhealthpercentmax = .016;
+    td.power_mod = 0.33;
+
+    base_cost = 30.0;
+    cooldown -> duration = timespan_t::from_seconds( 6.0 );
+
+    num_ticks = 3 + p -> talents.force_shelter -> rank();
+    base_tick_time = timespan_t::from_seconds( 3.0 );
+
+    range = 30.0;
   }
 };
 
@@ -1181,6 +1244,7 @@ struct salvation_t : public sage_sorcerer_heal_t
 
       range = 30.0;
 
+      base_multiplier *= 1.0 + p -> talents.psychic_suffusion -> rank() * 0.05;
 
       stats = player -> get_stats( n.c_str(), this );
     }
@@ -1206,7 +1270,6 @@ struct salvation_t : public sage_sorcerer_heal_t
     range = 30.0;
 
     tick_spell = new salvation_tick_spell_t( p, n );
-
   }
 
   virtual void tick( dot_t* d )
@@ -1247,6 +1310,7 @@ action_t* sage_sorcerer_t::create_action( const std::string& name,
     if ( name == "deliverance"        ) return new       deliverance_t( this, "deliverance", options_str );
     if ( name == "benevolence"        ) return new       benevolence_t( this, "benevolence", options_str );
     if ( name == "healing_trance"     ) return new    healing_trance_t( this, "healing_trance", options_str );
+    if ( name == "rejuvenate"         ) return new        rejuvenate_t( this, "rejuvenate", options_str );
     if ( name == "salvation"          ) return new         salvation_t( this, "salvation", options_str );
   }
   else if ( type == SITH_SORCERER )
@@ -1270,6 +1334,7 @@ action_t* sage_sorcerer_t::create_action( const std::string& name,
     if ( name == "dark_infusion"      ) return new       deliverance_t( this, "dark_infusion", options_str );
     if ( name == "dark_heal"          ) return new       benevolence_t( this, "dark_heal", options_str );
     if ( name == "innervate"          ) return new    healing_trance_t( this, "innervate", options_str );
+    if ( name == "resurgence"         ) return new        rejuvenate_t( this, "resurgence", options_str );
     if ( name == "revivification"     ) return new         salvation_t( this, "revivification", options_str );
   }
 
@@ -1289,14 +1354,14 @@ void sage_sorcerer_t::init_talents()
   talents.foresight             = find_talent( "Foresight" );
   talents.pain_bearer           = find_talent( "Pain Bearer" );
   talents.psychic_suffusion     = find_talent( "Psychic Suffusion" );
-  talents.conveyance            = find_talent( "Conveyance" );
+  talents.conveyance            = find_talent( "Conveyance" ); // add
   talents.rejuvenate            = find_talent( "Rejuvenate" );
   talents.valiance              = find_talent( "Valiance" );
-  talents.preservation          = find_talent( "Preservation" );
+  talents.preservation          = find_talent( "Preservation" ); // add
   talents.mend_wounds           = find_talent( "Mend Wounds" );
-  talents.force_shelter         = find_talent( "Force Shelter" );
-  talents.egress                = find_talent( "Egress" );
-  talents.confound              = find_talent( "Confound" );
+  talents.force_shelter         = find_talent( "Force Shelter" ); // add buff
+  talents.egress                = find_talent( "Egress" ); // add
+  talents.confound              = find_talent( "Confound" ); // add
   talents.healing_trance        = find_talent( "Healing Trance" );
   talents.serenity              = find_talent( "Serenity" );
   talents.resplendence          = find_talent( "Resplendence" );
@@ -1406,6 +1471,7 @@ void sage_sorcerer_t::init_buffs()
   buffs.psychic_projection_dd = new buff_t( this, is_sage ? "psychic_projection_dd" : "lightning_barrage_dd", 1, timespan_t::from_seconds( 2.0 ), timespan_t::zero );
   buffs.rakata_force_masters_4pc = new buff_t( this, "rakata_force_masters_4pc", 1, timespan_t::from_seconds( 15.0 ), timespan_t::from_seconds( 20.0 ), set_bonus.rakata_force_masters -> four_pc() ? 0.10 : 0.0 );
   buffs.noble_sacrifice = new buff_t( this, "noble_sacrifice", 4, timespan_t::from_seconds( 10.0 ) );
+  buffs.resplendence = new buff_t( this, is_sage ? "resplendence" : "force_surge", 1 , timespan_t::zero, timespan_t::zero, talents.resplendence -> rank() / 2.0 );
 }
 
 // sage_sorcerer_t::init_gains =======================================================
@@ -1589,8 +1655,9 @@ void sage_sorcerer_t::init_actions()
 
       case TREE_CORRUPTION:
 
-      action_list_str += "/revivification,if=force>100";
+     // action_list_str += "/revivification,if=force>300";
       action_list_str += "/innervate,if=!ticking";
+      action_list_str += "/resurgence,if=!ticking";
       action_list_str += "/dark_infusion";
 
       break;

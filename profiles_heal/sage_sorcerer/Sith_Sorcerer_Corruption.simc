@@ -11,8 +11,8 @@ talents=http://www.torhead.com/skill-calc#201GGbRrdzdGzZf00MZ0M.1
 actions=stim,type=exotech_resolve
 actions+=/mark_of_power
 actions+=/snapshot_stats
-actions+=/revivification,if=force>100
 actions+=/innervate,if=!ticking
+actions+=/resurgence,if=!ticking
 actions+=/dark_infusion
 head=rakata_force_masters_headgear,stats=44end_61willpower__37end_61willpower_11power__24end_37power_51alacrity
 ear=columi_force_masters_relay,stats=80end_97willpower_41power_48alacrity__28willpower

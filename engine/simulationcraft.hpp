@@ -2719,14 +2719,13 @@ public:
 
   virtual double composite_movement_speed() const;
 
-private:
-  double damage_bonus( double stats, double multiplier, double extra_power=0 ) const;
-  double healing_bonus( double stats, double multiplier, double extra_power=0 ) const;
-  double default_bonus_multiplier() const;
-  double default_accuracy_chance() const;
-  double default_crit_chance() const;
-
 protected:
+  virtual double damage_bonus( double stats, double multiplier, double extra_power=0 ) const;
+  virtual double healing_bonus( double stats, double multiplier, double extra_power=0 ) const;
+  virtual double default_bonus_multiplier() const;
+  virtual double default_accuracy_chance() const;
+  virtual double default_crit_chance() const;
+
   virtual double melee_bonus_stats() const;
   virtual double melee_bonus_multiplier() const;
   virtual double melee_crit_from_stats() const;
