@@ -3881,16 +3881,11 @@ struct snapshot_stats_t : public action_t
   {
     parse_options( NULL, options_str );
     trigger_gcd = timespan_t::zero;
-
-    dd.base_min = 10;
-    dd.base_max = 1000;
   }
 
   virtual void execute()
   {
     player_t* p = player;
-
-    action_t::execute();
 
     if ( sim -> log ) log_t::output( sim, "%s performs %s", p -> name(), name() );
 
