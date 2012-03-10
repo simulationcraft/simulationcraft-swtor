@@ -12,12 +12,17 @@ struct sage_sorcerer_targetdata_t : public targetdata_t
   dot_t dot_weaken_mind;
   dot_t dot_sever_force;
 
+  dot_t dot_healing_trance;
+  dot_t dot_salvation;
+
   sage_sorcerer_targetdata_t( player_t& source, player_t& target )
     : targetdata_t( source, target ),
       dot_telekinetic_throw( "telekinetic_throw", &source ),
       dot_mind_crush( "mind_crush", &source ),
       dot_weaken_mind( "weaken_mind", &source ),
-      dot_sever_force( "sever_force", &source )
+      dot_sever_force( "sever_force", &source ),
+      dot_healing_trance( "healing_trance", &source ),
+      dot_salvation( "salvation", &source )
   {
     add( dot_telekinetic_throw );
     alias( dot_telekinetic_throw, "force_lightning" );
@@ -32,6 +37,12 @@ struct sage_sorcerer_targetdata_t : public targetdata_t
 
     add( dot_sever_force );
     alias( dot_sever_force, "creeping_terror" );
+
+    add( dot_healing_trance );
+    alias( dot_healing_trance, "innervate" );
+
+    add( dot_salvation );
+    alias( dot_salvation, "revivification" );
   }
 };
 
@@ -456,6 +467,7 @@ struct noble_sacrifice_t : public sage_sorcerer_spell_t
     p -> buffs.noble_sacrifice -> trigger();
   }
 };
+
 struct project_t : public sage_sorcerer_spell_t
 {
   project_t* upheaval;
@@ -1048,7 +1060,11 @@ struct sage_sorcerer_heal_t : public heal_t
     tick_may_crit = true;
   }
 
-  sage_sorcerer_t* cast() const { return static_cast<sage_sorcerer_t*>( player ); }
+  sage_sorcerer_targetdata_t* targetdata() const
+  { return static_cast<sage_sorcerer_targetdata_t*>( action_t::targetdata() ); }
+
+  sage_sorcerer_t* cast() const
+  { return static_cast<sage_sorcerer_t*>( player ); }
 
   virtual void init()
   {
@@ -1149,6 +1165,57 @@ struct healing_trance_t : public sage_sorcerer_heal_t
   }
 };
 
+struct salvation_t : public sage_sorcerer_heal_t
+{
+  struct salvation_tick_spell_t : public sage_sorcerer_heal_t
+  {
+    salvation_tick_spell_t( sage_sorcerer_t* p, const std::string& n ) :
+      sage_sorcerer_heal_t( n + "tick_spell", p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+    {
+      dd.standardhealthpercentmin = dd.standardhealthpercentmax = .019;
+      dd.power_mod = 0.376;
+
+      background = true;
+      dual        = true;
+      direct_tick = true;
+
+      range = 30.0;
+
+
+      stats = player -> get_stats( n.c_str(), this );
+    }
+  };
+
+  salvation_tick_spell_t* tick_spell;
+
+  salvation_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
+    sage_sorcerer_heal_t( n, p, RESOURCE_FORCE, SCHOOL_INTERNAL ),
+    tick_spell( 0 )
+  {
+    parse_options( 0, options_str );
+    harmful = false;
+
+    num_ticks = 10;
+    tick_zero = true;
+    base_tick_time = timespan_t::from_seconds( 1.0 );
+
+    base_cost = 100.0;
+    base_execute_time = timespan_t::from_seconds( 2.0 );
+    cooldown -> duration = timespan_t::from_seconds( 15.0 );
+
+    range = 30.0;
+
+    tick_spell = new salvation_tick_spell_t( p, n );
+
+  }
+
+  virtual void tick( dot_t* d )
+  {
+    sage_sorcerer_heal_t::tick( d );
+
+    tick_spell -> execute();
+  }
+};
 } // ANONYMOUS NAMESPACE ====================================================
 
 // ==========================================================================
@@ -1176,11 +1243,11 @@ action_t* sage_sorcerer_t::create_action( const std::string& name,
     if ( name == "force_potency"      ) return new     force_potency_t( this, "force_potency", options_str );
     if ( name == "noble_sacrifice"    ) return new   noble_sacrifice_t( this, "noble_sacrifice", options_str );
 
-
-    // Add Empire version of all those healing spells
+    // Heal
     if ( name == "deliverance"        ) return new       deliverance_t( this, "deliverance", options_str );
     if ( name == "benevolence"        ) return new       benevolence_t( this, "benevolence", options_str );
     if ( name == "healing_trance"     ) return new    healing_trance_t( this, "healing_trance", options_str );
+    if ( name == "salvation"          ) return new         salvation_t( this, "salvation", options_str );
   }
   else if ( type == SITH_SORCERER )
   {
@@ -1196,8 +1263,14 @@ action_t* sage_sorcerer_t::create_action( const std::string& name,
     if ( name == "polarity_shift"     ) return new   mental_alacrity_t( this, "polarity_shift", options_str );
     if ( name == "chain_lightning"    ) return new  telekinetic_wave_t( this, "chain_lightning", options_str );
     if ( name == "recklessness"       ) return new     force_potency_t( this, "recklessness", options_str );
-    if ( name == "dark_infusion"        ) return new     deliverance_t( this, "dark_infusion", options_str );
+    if ( name == "dark_infusion"      ) return new       deliverance_t( this, "dark_infusion", options_str );
     if ( name == "consumption"        ) return new   noble_sacrifice_t( this, "consumption", options_str );
+
+    // Heal
+    if ( name == "dark_infusion"      ) return new       deliverance_t( this, "dark_infusion", options_str );
+    if ( name == "dark_heal"          ) return new       benevolence_t( this, "dark_heal", options_str );
+    if ( name == "innervate"          ) return new    healing_trance_t( this, "innervate", options_str );
+    if ( name == "revivification"     ) return new         salvation_t( this, "revivification", options_str );
   }
 
   return player_t::create_action( name, options_str );
@@ -1516,6 +1589,8 @@ void sage_sorcerer_t::init_actions()
 
       case TREE_CORRUPTION:
 
+      action_list_str += "/revivification,if=force>100";
+      action_list_str += "/innervate,if=!ticking";
       action_list_str += "/dark_infusion";
 
       break;

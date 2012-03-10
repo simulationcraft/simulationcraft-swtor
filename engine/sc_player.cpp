@@ -2472,7 +2472,7 @@ double player_t::resource_loss( int       resource,
       assert ( 0 );
     }
 
-    source -> add( -actual_amount, actual_amount - amount );
+    source -> add( (-1.0 ) * actual_amount, actual_amount - amount );
   }
 
   action_callback_t::trigger( resource_loss_callbacks[ resource ], action, ( void* ) &actual_amount );
