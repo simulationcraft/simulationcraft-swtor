@@ -351,7 +351,7 @@ int util_t::translate_class_str( const std::string& s )
   std::string fmt_s( s );
   util_t::format_name( fmt_s );
 
-  if      ( fmt_s == "sage_sorcerer"       || fmt_s == "sage"       ) return JEDI_SAGE;
+  if      ( fmt_s == "jedi_sage"       || fmt_s == "sage"       ) return JEDI_SAGE;
   else if ( fmt_s == "jedi_shadow"     || fmt_s == "shadow"     ) return JEDI_SHADOW;
   else if ( fmt_s == "jedi_sentinel"   || fmt_s == "sentinel"   ) return JEDI_SENTINEL;
   else if ( fmt_s == "jedi_guardian"   || fmt_s == "guardian"   ) return JEDI_GUARDIAN;

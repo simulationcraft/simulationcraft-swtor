@@ -2917,7 +2917,7 @@ public:
   static player_t* create_sith_juggernaut( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
   static player_t* create_jedi_guardian( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
 
-  static player_t* create_sage_sorcerer( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
+  static player_t* create_jedi_sage( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
   static player_t* create_sith_sorcerer( sim_t* sim, const std::string& name, race_type r = RACE_NONE );
 
   static player_t* create_scoundrel( sim_t* sim, const std::string& name, race_type r = RACE_NONE );

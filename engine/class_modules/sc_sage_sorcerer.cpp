@@ -1615,9 +1615,9 @@ void sage_sorcerer_t::create_options()
 // PLAYER_T EXTENSIONS
 // ==========================================================================
 
-// player_t::create_sage_sorcerer  ===================================================
+// player_t::create_jedi_sage  ===================================================
 
-player_t* player_t::create_sage_sorcerer( sim_t* sim, const std::string& name, race_type r )
+player_t* player_t::create_jedi_sage( sim_t* sim, const std::string& name, race_type r )
 {
   return new sage_sorcerer_t( sim, JEDI_SAGE, name, r );
 }

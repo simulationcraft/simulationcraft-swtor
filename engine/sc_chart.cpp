@@ -8,6 +8,7 @@
 namespace { // ANONYMOUS NAMESPACE ==========================================
 
 namespace color {
+// http://www.brobstsystems.com/colors1.htm
 const char* const blue = "2459FF";
 const char* const cyan = "69CCF0";
 const char* const green = "336600";
@@ -19,6 +20,9 @@ const char* const red = "C41F3B";
 const char* const taupe = "C79C6E";
 const char* const white = "FFFFFF";
 const char* const yellow = "FFF569";
+const char* const olive = "909000";
+const char* const orange = "FF6F00";
+const char* const teal = "009090";
 }
 
 static const char* class_color( player_type type )
@@ -28,28 +32,32 @@ static const char* class_color( player_type type )
   case PLAYER_NONE:     return color::white;
 
   case SITH_MARAUDER:
-  case SITH_JUGGERNAUT: return color::red;
+  case JEDI_SENTINEL:   return color::red;
 
-  case SITH_ASSASSIN:   return color::blue;
-  case SITH_SORCERER:   return color::purple;
 
-  case BH_MERCENARY:
-  case BH_POWERTECH:    return color::green;
+  case JEDI_SHADOW:
+  case SITH_ASSASSIN:   return color::yellow;
 
-  case IA_SNIPER:
-  case IA_OPERATIVE:    return color::pink;
-
-  case JEDI_GUARDIAN:
-  case JEDI_SENTINEL:   return color::taupe;
 
   case JEDI_SAGE:
-  case JEDI_SHADOW:     return color::grey;
+  case SITH_SORCERER:   return color::purple;
 
-  case S_GUNSLINGER:
-  case S_SCOUNDREL:     return color::yellow;
+
+  case IA_SNIPER:
+  case S_GUNSLINGER: return color::teal;
+
+  case S_SCOUNDREL:
+  case IA_OPERATIVE:    return color::grey;
+
+  case JEDI_GUARDIAN:
+  case SITH_JUGGERNAUT: return color::blue;
+
 
   case T_COMMANDO:
-  case T_VANGUARD:      return color::cyan;
+  case BH_MERCENARY:  return color::orange;
+
+  case T_VANGUARD:
+  case BH_POWERTECH:    return color::olive;
 
   case ENEMY:           return color::white;
   case ENEMY_ADD:       return color::nearly_white;

@@ -3881,11 +3881,16 @@ struct snapshot_stats_t : public action_t
   {
     parse_options( NULL, options_str );
     trigger_gcd = timespan_t::zero;
+
+    dd.base_min = 10;
+    dd.base_max = 1000;
   }
 
   virtual void execute()
   {
     player_t* p = player;
+
+    action_t::execute();
 
     if ( sim -> log ) log_t::output( sim, "%s performs %s", p -> name(), name() );
 
@@ -5251,9 +5256,9 @@ player_t* player_t::create( sim_t*             sim,
                             const std::string& name,
                             race_type r )
 {
-  if ( type == "sage_sorcerer" )
+  if ( type == "jedi_sage" )
   {
-    return player_t::create_sage_sorcerer( sim, name, r );
+    return player_t::create_jedi_sage( sim, name, r );
   }
   else if ( type == "sith_sorcerer" )
   {
@@ -5290,6 +5295,30 @@ player_t* player_t::create( sim_t*             sim,
   else if ( type == "mercenary" )
   {
     return player_t::create_mercenary( sim, name, r );
+  }
+  else if ( type == "scoundrel" )
+  {
+    return player_t::create_scoundrel( sim, name, r );
+  }
+  else if ( type == "operative" )
+  {
+    return player_t::create_operative( sim, name, r );
+  }
+  else if ( type == "vanguard" )
+  {
+    return player_t::create_vanguard( sim, name, r );
+  }
+  else if ( type == "powertech" )
+  {
+    return player_t::create_powertech( sim, name, r );
+  }
+  else if ( type == "gunslinger" )
+  {
+    return player_t::create_gunslinger( sim, name, r );
+  }
+  else if ( type == "sniper" )
+  {
+    return player_t::create_sniper( sim, name, r );
   }
 
   else if ( type == "enemy" )

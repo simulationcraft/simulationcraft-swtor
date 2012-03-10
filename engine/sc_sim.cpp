@@ -1924,7 +1924,7 @@ void sim_t::create_options()
     { "target_level",                     OPT_INT,    &( target_level                             ) },
     { "target_race",                      OPT_STRING, &( target_race                              ) },
     // Character Creation
-    { "sage_sorcerer",                        OPT_FUNC,   ( void* ) ::parse_player                      },
+    { "jedi_sage",                        OPT_FUNC,   ( void* ) ::parse_player                      },
     { "sith_sorcerer",                    OPT_FUNC,   ( void* ) ::parse_player                      },
     { "jedi_shadow",                      OPT_FUNC,   ( void* ) ::parse_player                      },
     { "sith_assassin",                    OPT_FUNC,   ( void* ) ::parse_player                      },
@@ -1934,6 +1934,13 @@ void sim_t::create_options()
     { "jedi_sentinel",                    OPT_FUNC,   ( void* ) ::parse_player                      },
     { "commando",                         OPT_FUNC,   ( void* ) ::parse_player                      },
     { "mercenary",                        OPT_FUNC,   ( void* ) ::parse_player                      },
+    { "gunslinger",                       OPT_FUNC,   ( void* ) ::parse_player                      },
+    { "sniper",                           OPT_FUNC,   ( void* ) ::parse_player                      },
+    { "scoundrel",                        OPT_FUNC,   ( void* ) ::parse_player                      },
+    { "operative",                        OPT_FUNC,   ( void* ) ::parse_player                      },
+    { "vanguard",                         OPT_FUNC,   ( void* ) ::parse_player                      },
+    { "powertech",                        OPT_FUNC,   ( void* ) ::parse_player                      },
+
     { "enemy",                            OPT_FUNC,   ( void* ) ::parse_player                      },
     { "pet",                              OPT_FUNC,   ( void* ) ::parse_player                      },
     { "player",                           OPT_FUNC,   ( void* ) ::parse_player                      },
