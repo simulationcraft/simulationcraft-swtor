@@ -16,10 +16,11 @@ const char* const grey = "C0C0C0";
 const char* const nearly_white = "FCFFFF";
 const char* const pink = "F58CBA";
 const char* const purple = "9482C9";
+const char* const purple_dark = "7668A1";
 const char* const red = "C41F3B";
 const char* const taupe = "C79C6E";
 const char* const white = "FFFFFF";
-const char* const yellow = "FFF569";
+const char* const yellow = "FFCC00";
 const char* const olive = "909000";
 const char* const orange = "FF6F00";
 const char* const teal = "009090";
@@ -34,17 +35,14 @@ static const char* class_color( player_type type )
   case SITH_MARAUDER:
   case JEDI_SENTINEL:   return color::red;
 
-
   case JEDI_SHADOW:
   case SITH_ASSASSIN:   return color::yellow;
 
-
-  case JEDI_SAGE:
-  case SITH_SORCERER:   return color::purple;
-
+  case JEDI_SAGE:       return color::purple;
+  case SITH_SORCERER:   return color::purple_dark;
 
   case IA_SNIPER:
-  case S_GUNSLINGER: return color::teal;
+  case S_GUNSLINGER:    return color::teal;
 
   case S_SCOUNDREL:
   case IA_OPERATIVE:    return color::grey;
@@ -52,9 +50,8 @@ static const char* class_color( player_type type )
   case JEDI_GUARDIAN:
   case SITH_JUGGERNAUT: return color::blue;
 
-
   case T_COMMANDO:
-  case BH_MERCENARY:  return color::orange;
+  case BH_MERCENARY:    return color::orange;
 
   case T_VANGUARD:
   case BH_POWERTECH:    return color::olive;
@@ -62,7 +59,7 @@ static const char* class_color( player_type type )
   case ENEMY:           return color::white;
   case ENEMY_ADD:       return color::nearly_white;
 
-  default: assert( 0 );
+  default: assert( 0 ); break;
   }
 
   return 0;
@@ -70,15 +67,20 @@ static const char* class_color( player_type type )
 
 // The above colors don't all work for text rendered on a light (white) background.
 // These colors work better by reducing the brightness HSV component of the above colors.
-static const char* class_text_color( player_type type )
+static const char* class_text_color( player_type type, int print_styles=0 )
 {
-  switch ( type )
+  if ( !print_styles )
   {
-  case T_COMMANDO:
-  case T_VANGUARD: return "59ADCC"; // darker blue
-  case JEDI_SAGE:  return "8A8A8A"; // darker silver
-  //case SMUGGLER: return "C0B84F"; // darker yellow
-  default:         return class_color( type );
+    return class_color( type );
+  }
+  else
+  {
+    switch ( type )
+    {
+      case SITH_ASSASSIN: return "000000";
+
+      default:         return class_color( type );
+    }
   }
 }
 
@@ -131,9 +133,9 @@ static const char* get_text_color( player_t* p )
 {
   if ( p -> is_pet() )
   {
-    return class_text_color( p -> cast_pet() -> owner -> type );
+    return class_text_color( p -> cast_pet() -> owner -> type, p -> sim -> print_styles );
   }
-  return class_text_color ( p -> type );
+  return class_text_color ( p -> type, p -> sim -> print_styles );
 }
 
 static unsigned char simple_encoding( int number )
