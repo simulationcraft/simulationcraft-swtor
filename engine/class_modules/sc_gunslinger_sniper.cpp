@@ -123,7 +123,7 @@ public:
   gunslinger_sniper_targetdata_t* targetdata() const
   { return static_cast<gunslinger_sniper_targetdata_t*>( action_t::targetdata() ); }
 
-  gunslinger_sniper_t* cast() const
+  gunslinger_sniper_t* p() const
   { return static_cast<gunslinger_sniper_t*>( player ); }
 };
 

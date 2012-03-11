@@ -263,8 +263,11 @@ public:
     action_t( ACTION_ATTACK, name.c_str(), player, policy, resource, school )
   {}
 
-  shadow_assassin_t* cast() const
+  shadow_assassin_t* p() const
   { return static_cast<shadow_assassin_t*>( player ); }
+
+  shadow_assassin_t* cast() const
+  { return p(); }
 
   shadow_assassin_t::targetdata_t* targetdata() const
   { return static_cast<shadow_assassin_t::targetdata_t*>( action_t::targetdata() ); }

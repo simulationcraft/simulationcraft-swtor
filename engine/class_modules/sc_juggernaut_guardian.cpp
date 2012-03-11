@@ -118,7 +118,7 @@ public:
   juggernaut_guardian_targetdata_t* targetdata() const
   { return static_cast<juggernaut_guardian_targetdata_t*>( action_t::targetdata() ); }
 
-  juggernaut_guardian_t* cast() const
+  juggernaut_guardian_t* p() const
   { return static_cast<juggernaut_guardian_t*>( player ); }
 };
 

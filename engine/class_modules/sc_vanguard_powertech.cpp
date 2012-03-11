@@ -117,7 +117,7 @@ public:
   vanguard_powertech_targetdata_t* targetdata() const
   { return static_cast<vanguard_powertech_targetdata_t*>( action_t::targetdata() ); }
 
-  vanguard_powertech_t* cast() const
+  vanguard_powertech_t* p() const
   { return static_cast<vanguard_powertech_t*>( player ); }
 };
 

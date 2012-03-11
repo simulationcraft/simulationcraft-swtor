@@ -117,7 +117,7 @@ public:
   commando_mercenary_targetdata_t* targetdata() const
   { return static_cast<commando_mercenary_targetdata_t*>( action_t::targetdata() ); }
 
-  commando_mercenary_t* cast() const
+  commando_mercenary_t* p() const
   { return static_cast<commando_mercenary_t*>( player ); }
 };
 

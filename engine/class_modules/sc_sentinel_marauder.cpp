@@ -117,7 +117,7 @@ public:
   sentinel_marauder_targetdata_t* targetdata() const
   { return static_cast<sentinel_marauder_targetdata_t*>( action_t::targetdata() ); }
 
-  sentinel_marauder_t* cast() const
+  sentinel_marauder_t* p() const
   { return static_cast<sentinel_marauder_t*>( player ); }
 };
 

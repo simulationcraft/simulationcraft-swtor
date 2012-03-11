@@ -73,6 +73,7 @@ struct sage_sorcerer_t : public player_t
     buff_t* rakata_force_masters_4pc;
     buff_t* noble_sacrifice;
     buff_t* resplendence;
+    buff_t* conveyance;
   } buffs;
 
   // Gains
@@ -295,8 +296,11 @@ public:
   sage_sorcerer_targetdata_t* targetdata() const
   { return static_cast<sage_sorcerer_targetdata_t*>( action_t::targetdata() ); }
 
-  sage_sorcerer_t* cast() const
+  sage_sorcerer_t* p() const
   { return static_cast<sage_sorcerer_t*>( player ); }
+
+  sage_sorcerer_t* cast() const
+  { return p(); }
 };
 
 // ==========================================================================
@@ -1090,32 +1094,32 @@ struct sage_sorcerer_heal_t : public heal_t
   sage_sorcerer_targetdata_t* targetdata() const
   { return static_cast<sage_sorcerer_targetdata_t*>( action_t::targetdata() ); }
 
-  sage_sorcerer_t* cast() const
+  sage_sorcerer_t* p() const
   { return static_cast<sage_sorcerer_t*>( player ); }
+
+  sage_sorcerer_t* cast() const
+  { return p(); }
+
 
   virtual void init()
   {
     heal_t::init();
 
-    sage_sorcerer_t* p = cast();
-
     if ( td.base_min > 0 && !channeled )
-      crit_bonus += p -> talents.mental_scarring -> rank() * 0.1;
+      crit_bonus += p() -> talents.mental_scarring -> rank() * 0.1;
   }
 
   virtual double cost() const
   {
     double c = heal_t::cost();
 
-    sage_sorcerer_t* p = cast();
-
-    if ( p -> talents.inner_strength -> rank() > 0 && influenced_by_inner_strength )
+    if ( p() -> talents.inner_strength -> rank() > 0 && influenced_by_inner_strength )
     {
-      c *= 1.0 - p -> talents.inner_strength -> rank() * 0.03;
+      c *= 1.0 - p() -> talents.inner_strength -> rank() * 0.03;
       c = ceil( c ); // 17/01/2012 According to http://sithwarrior.com/forums/Thread-Sorcerer-Sage-Mechanics-and-Quirks
     }
 
-    if ( p -> buffs.telekinetic_effusion -> check() > 0 )
+    if ( p() -> buffs.telekinetic_effusion -> check() > 0 )
     {
       c *= 0.5;
       c = floor( c ); // FIXME: floor or ceil?
@@ -1128,9 +1132,7 @@ struct sage_sorcerer_heal_t : public heal_t
   {
     heal_t::consume_resource();
 
-    sage_sorcerer_t* p = cast();
-
-    p -> buffs.telekinetic_effusion -> up();
+    p() -> buffs.telekinetic_effusion -> up();
   }
 };
 
@@ -1151,6 +1153,24 @@ struct deliverance_t : public sage_sorcerer_heal_t
 
     range = 30.0;
   }
+
+  virtual timespan_t execution_time()
+  {
+    timespan_t et = sage_sorcerer_heal_t::execute_time();
+
+    // FIXME: check if -1.0s becomes before or after Alacrity
+    if ( p() -> buffs.conveyance -> up() )
+      et -= timespan_t::from_seconds( 1.0 );
+
+    return et;
+  }
+
+  virtual void execute()
+  {
+    sage_sorcerer_heal_t::execute();
+
+    p() -> buffs.conveyance -> expire();
+  }
 };
 
 struct benevolence_t : public sage_sorcerer_heal_t
@@ -1168,6 +1188,33 @@ struct benevolence_t : public sage_sorcerer_heal_t
     base_execute_time = timespan_t::from_seconds( 1.5 );
 
     range = 30.0;
+  }
+
+  virtual double cost() const
+  {
+    double c = sage_sorcerer_heal_t::cost();
+
+    if ( p() -> buffs.conveyance -> check() )
+    {
+      c *= 0.5;
+      c = ceil( c );
+    }
+
+    return c;
+  }
+
+  virtual void consume_resource()
+  {
+    sage_sorcerer_heal_t::consume_resource();
+
+    p() -> buffs.conveyance -> up(); // uptime tracking
+  }
+
+  virtual void execute()
+  {
+    sage_sorcerer_heal_t::execute();
+
+    p() -> buffs.conveyance -> expire();
   }
 };
 
@@ -1197,10 +1244,23 @@ struct healing_trance_t : public sage_sorcerer_heal_t
 
     if ( impact_result == RESULT_CRIT )
     {
-      sage_sorcerer_t* p = cast();
-
-      p -> buffs.resplendence -> trigger();
+      p() -> buffs.resplendence -> trigger();
     }
+  }
+
+  virtual void player_buff()
+  {
+    sage_sorcerer_heal_t::player_buff();
+
+    if ( p() -> buffs.conveyance -> up() )
+      player_crit += 0.25;
+  }
+
+  virtual void execute()
+  {
+    sage_sorcerer_heal_t::execute();
+
+    p() -> buffs.conveyance -> expire();
   }
 };
 
@@ -1225,6 +1285,16 @@ struct rejuvenate_t : public sage_sorcerer_heal_t
     base_tick_time = timespan_t::from_seconds( 3.0 );
 
     range = 30.0;
+  }
+
+  virtual void execute()
+  {
+    sage_sorcerer_heal_t::execute();
+
+    // FIXME: check assumption
+    // Assuming conveyance is only trigger once on rejuvenate execution, not on tick
+
+    p() -> buffs.conveyance -> trigger();
   }
 };
 
@@ -1277,6 +1347,33 @@ struct salvation_t : public sage_sorcerer_heal_t
     sage_sorcerer_heal_t::tick( d );
 
     tick_spell -> execute();
+  }
+
+  virtual double cost() const
+  {
+    double c = sage_sorcerer_heal_t::cost();
+
+    if ( p() -> buffs.conveyance -> check() )
+    {
+      c *= 0.7;
+      c = ceil( c );
+    }
+
+    return c;
+  }
+
+  virtual void consume_resource()
+  {
+    sage_sorcerer_heal_t::consume_resource();
+
+    p() -> buffs.conveyance -> up(); // uptime tracking
+  }
+
+  virtual void execute()
+  {
+    sage_sorcerer_heal_t::execute();
+
+    p() -> buffs.conveyance -> expire();
   }
 };
 } // ANONYMOUS NAMESPACE ====================================================
@@ -1354,7 +1451,7 @@ void sage_sorcerer_t::init_talents()
   talents.foresight             = find_talent( "Foresight" );
   talents.pain_bearer           = find_talent( "Pain Bearer" );
   talents.psychic_suffusion     = find_talent( "Psychic Suffusion" );
-  talents.conveyance            = find_talent( "Conveyance" ); // add
+  talents.conveyance            = find_talent( "Conveyance" );
   talents.rejuvenate            = find_talent( "Rejuvenate" );
   talents.valiance              = find_talent( "Valiance" );
   talents.preservation          = find_talent( "Preservation" ); // add
@@ -1472,6 +1569,7 @@ void sage_sorcerer_t::init_buffs()
   buffs.rakata_force_masters_4pc = new buff_t( this, "rakata_force_masters_4pc", 1, timespan_t::from_seconds( 15.0 ), timespan_t::from_seconds( 20.0 ), set_bonus.rakata_force_masters -> four_pc() ? 0.10 : 0.0 );
   buffs.noble_sacrifice = new buff_t( this, "noble_sacrifice", 4, timespan_t::from_seconds( 10.0 ) );
   buffs.resplendence = new buff_t( this, is_sage ? "resplendence" : "force_surge", 1 , timespan_t::zero, timespan_t::zero, talents.resplendence -> rank() / 2.0 );
+  buffs.conveyance = new buff_t( this, is_sage ? "conveyace" : "force_bending", 1, timespan_t::zero, timespan_t::zero, talents.conveyance -> rank() / 2.0 );
 }
 
 // sage_sorcerer_t::init_gains =======================================================

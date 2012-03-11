@@ -117,7 +117,7 @@ public:
   scoundrel_operative_targetdata_t* targetdata() const
   { return static_cast<scoundrel_operative_targetdata_t*>( action_t::targetdata() ); }
 
-  scoundrel_operative_t* cast() const
+  scoundrel_operative_t* p() const
   { return static_cast<scoundrel_operative_t*>( player ); }
 };
 
