@@ -3333,6 +3333,13 @@ public:
       cached_dot = targetdata() -> get_dot( name_str );
       cached_dot_target = target;
     }
+
+    if ( ! cached_dot )
+    {
+      sim -> errorf( "action_t::dot() action %s from player %s trying to access dot not available in targetdata().\n", name(), player -> name() );
+      assert( 0 );
+    }
+
     return cached_dot;
   }
 
