@@ -1097,9 +1097,6 @@ struct sage_sorcerer_heal_t : public heal_t
   sage_sorcerer_t* p() const
   { return static_cast<sage_sorcerer_t*>( player ); }
 
-  sage_sorcerer_t* cast() const
-  { return p(); }
-
 
   virtual void init()
   {
@@ -1376,6 +1373,59 @@ struct salvation_t : public sage_sorcerer_heal_t
     p() -> buffs.conveyance -> expire();
   }
 };
+
+struct sage_sorcerer_absorb_t : public absorb_t
+{
+  sage_sorcerer_absorb_t( const std::string& n, sage_sorcerer_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
+    absorb_t( n.c_str(), p, force_heal_policy, r, s )
+  {
+  }
+
+  sage_sorcerer_targetdata_t* targetdata() const
+  { return static_cast<sage_sorcerer_targetdata_t*>( action_t::targetdata() ); }
+
+  sage_sorcerer_t* p() const
+  { return static_cast<sage_sorcerer_t*>( player ); }
+
+
+  // FIXME: check
+  virtual void consume_resource()
+  {
+    absorb_t::consume_resource();
+
+    p() -> buffs.telekinetic_effusion -> up();
+  }
+};
+
+struct force_armor_t : public sage_sorcerer_absorb_t
+{
+  force_armor_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
+    sage_sorcerer_absorb_t( n, p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+  {
+    parse_options( 0, options_str );
+
+    dd.standardhealthpercentmin = .164;
+    dd.standardhealthpercentmax = .164;
+    dd.power_mod = 3.27;
+
+    base_cost = 65.0;
+    base_cost -= p -> talents.preservation -> rank() * 15.0;
+    cooldown -> duration = timespan_t::from_seconds( 4.5 );
+    cooldown -> duration -= timespan_t::from_seconds( p -> talents.preservation -> rank() * 1.5 );
+
+    range = 30.0;
+
+    base_multiplier *= p -> talents.telekinetic_defense -> rank() * 0.10;
+  }
+
+  virtual void execute()
+  {
+    sage_sorcerer_absorb_t::execute();
+
+    p() -> buffs.conveyance -> expire();
+  }
+};
+
 } // ANONYMOUS NAMESPACE ====================================================
 
 // ==========================================================================

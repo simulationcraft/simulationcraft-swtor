@@ -2094,7 +2094,6 @@ private:
 
     double operator() ( double rating ) const
     {
-      assert( rating >= 0 );
       if ( likely( cached_rating == rating ) )
         return cached_value;
 

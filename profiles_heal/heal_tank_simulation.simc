@@ -11,8 +11,6 @@ actions+=/snapshot_stats
 actions+=/innervate,if=!ticking
 actions+=/resurgence,if=!ticking
 actions+=/dark_infusion,if=target.health_pct<60
-gear_accuracy_rating=100
-# gear accuracy set to allow -30 accuracy scale factor generation
 
 enemy=Enemy_Hitting_all_Tanks
 actions=snapshot_stats
