@@ -2370,18 +2370,38 @@ struct player_t : public noncopyable
   std::string race_str;
   race_type race;
 
+
   // Ratings
-  double initial_alacrity_rating, alacrity_rating;
+private:
+  double initial_accuracy_rating, accuracy_rating_, base_accuracy_, computed_accuracy;
+  double initial_alacrity_rating, alacrity_rating_, base_alacrity_, computed_alacrity;
   double initial_crit_rating, crit_rating;
-  double initial_accuracy_rating, accuracy_rating;
   double initial_surge_rating, surge_rating;
   double initial_defense_rating, defense_rating;
   double initial_shield_rating, shield_rating;
   double initial_absorb_rating, absorb_rating;
+
+  double crit_from_rating, defense_from_rating, shield_from_rating, absorb_from_rating;
+
+  void recalculate_accuracy();
+  void recalculate_alacrity();
+
+protected:
   rating_t rating_scaler;
 
-  double alacrity_from_rating,crit_from_rating,accuracy_from_rating, defense_from_rating,shield_from_rating,absorb_from_rating;
+  void set_base_accuracy( double value )   { base_accuracy_ = value;   recalculate_accuracy(); }
+  void set_accuracy_rating( double value ) { accuracy_rating_ = value; recalculate_accuracy(); }
+  void set_base_alacrity( double value )   { base_alacrity_ = value;   recalculate_alacrity(); }
+  void set_alacrity_rating( double value ) { alacrity_rating_ = value; recalculate_alacrity(); }
 
+public:
+  double get_base_accuracy() const { return base_accuracy_; }
+  double get_accuracy_rating() const { return accuracy_rating_; }
+  double get_base_alacrity() const { return base_alacrity_; }
+  double get_alacrity_rating() const { return alacrity_rating_; }
+
+
+public:
   // Attributes
   attribute_type primary_attribute, secondary_attribute;
   double attribute                   [ ATTRIBUTE_MAX ];
@@ -2395,7 +2415,7 @@ struct player_t : public noncopyable
   double base_force_power, initial_force_power, force_power;
   double base_tech_power,  initial_tech_power,  tech_power;
 
-  double surge_bonus, buffed_surge;
+  double surge_bonus;
   double base_armor_penetration;
 
   // Resource Regen
@@ -2503,6 +2523,7 @@ struct player_t : public noncopyable
     double attribute[ ATTRIBUTE_MAX ];
     double resource[ RESOURCE_MAX ];
     double alacrity;
+    double surge;
 
     double power, force_power, tech_power;
 
@@ -2718,12 +2739,14 @@ public:
 
   virtual double composite_movement_speed() const;
 
+private:
+  double damage_bonus( double stats, double multiplier, double extra_power=0 ) const;
+  double healing_bonus( double stats, double multiplier, double extra_power=0 ) const;
+  double default_bonus_multiplier() const;
+  double default_crit_chance() const;
+  double default_accuracy_chance() const { return computed_accuracy; }
+
 protected:
-  virtual double damage_bonus( double stats, double multiplier, double extra_power=0 ) const;
-  virtual double healing_bonus( double stats, double multiplier, double extra_power=0 ) const;
-  virtual double default_bonus_multiplier() const;
-  virtual double default_accuracy_chance() const;
-  virtual double default_crit_chance() const;
 
   virtual double melee_bonus_stats() const;
   virtual double melee_bonus_multiplier() const;
@@ -2803,9 +2826,7 @@ public:
   virtual double school_damage_reduction( school_type ) const;
 
 protected:
-  void recalculate_alacrity_from_rating();
   void recalculate_crit_from_rating();
-  void recalculate_accuracy_from_rating();
   void recalculate_surge_from_rating();
   void recalculate_defense_from_rating();
   void recalculate_shield_from_rating();
