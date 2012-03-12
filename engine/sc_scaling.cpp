@@ -93,7 +93,7 @@ scaling_t::scaling_t( sim_t* s ) :
   sim( s ), baseline_sim( 0 ), ref_sim( 0 ), delta_sim( 0 ), ref_sim2( 0 ), delta_sim2( 0 ),
   scale_stat( STAT_NONE ),
   scale_value( 0 ),
-  scale_delta_multiplier( 0.2 ),
+  scale_delta_multiplier( 1.0 ),
   calculate_scale_factors( 0 ),
   center_scale_delta( 0 ),
   positive_scale_delta( 0 ),
@@ -153,50 +153,50 @@ void scaling_t::init_deltas()
 
   for ( int i=ATTRIBUTE_NONE+1; i < ATTRIBUTE_MAX; i++ )
   {
-    if ( stats.attribute[ i ] == 0 ) stats.attribute[ i ] = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
+    if ( stats.attribute[ i ] == 0 ) stats.attribute[ i ] = scale_delta_multiplier * ( smooth_scale_factors ? 15 : 30 );
   }
 
-  if ( stats.power == 0 ) stats.power = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
-  if ( stats.force_power == 0 ) stats.force_power = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
-  if ( stats.tech_power == 0 )  stats.tech_power  = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
+  if ( stats.power == 0 ) stats.power = scale_delta_multiplier * ( smooth_scale_factors ? 15 : 30 );
+  if ( stats.force_power == 0 ) stats.force_power = scale_delta_multiplier * ( smooth_scale_factors ? 15 : 30 );
+  if ( stats.tech_power == 0 )  stats.tech_power  = scale_delta_multiplier * ( smooth_scale_factors ? 15 : 30 );
 
-  if ( stats.surge_rating == 0 ) stats.surge_rating = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
+  if ( stats.surge_rating == 0 ) stats.surge_rating = scale_delta_multiplier * ( smooth_scale_factors ? 15 : 30 );
 
 
   if ( stats.expertise_rating == 0 )
   {
-    stats.expertise_rating =  scale_delta_multiplier * ( smooth_scale_factors ? -100 : -200 );
+    stats.expertise_rating =  scale_delta_multiplier * ( smooth_scale_factors ? -15 :  -30 );
     if ( positive_scale_delta ) stats.expertise_rating *= -1;
   }
   if ( stats.expertise_rating2 == 0 )
   {
-    stats.expertise_rating2 =  scale_delta_multiplier * ( smooth_scale_factors ? 100 : 200 );
+    stats.expertise_rating2 =  scale_delta_multiplier * ( smooth_scale_factors ? 15 :  30 );
     if ( positive_scale_delta ) stats.expertise_rating2 *= -1;
   }
 
   if ( stats.accuracy_rating == 0 )
   {
-    stats.accuracy_rating = scale_delta_multiplier * ( smooth_scale_factors ? -150 : -300 );
+    stats.accuracy_rating = scale_delta_multiplier * ( smooth_scale_factors ? -15 : -30 );
     if ( positive_scale_delta ) stats.accuracy_rating *= -1;
   }
   if ( stats.accuracy_rating2 == 0 )
   {
-    stats.accuracy_rating2 = scale_delta_multiplier * ( smooth_scale_factors ? 150 : 300 );
+    stats.accuracy_rating2 = scale_delta_multiplier * ( smooth_scale_factors ? 15 : 30 );
     if ( positive_scale_delta ) stats.accuracy_rating2 *= -1;
   }
 
-  if ( stats.crit_rating  == 0    ) stats.crit_rating     = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
-  if ( stats.alacrity_rating == 0 ) stats.alacrity_rating = scale_delta_multiplier * ( smooth_scale_factors ?  150 :  300 );
+  if ( stats.crit_rating  == 0    ) stats.crit_rating     = scale_delta_multiplier * ( smooth_scale_factors ?  15 :  30 );
+  if ( stats.alacrity_rating == 0 ) stats.alacrity_rating = scale_delta_multiplier * ( smooth_scale_factors ?  15 :  30 );
 
   // Defensive
-  if ( stats.defense_rating == 0 ) stats.defense_rating = scale_delta_multiplier * ( smooth_scale_factors ? 60 : 120 );
-  if ( stats.shield_rating == 0 ) stats.shield_rating = scale_delta_multiplier * ( smooth_scale_factors ? 60 : 120 );
-  if ( stats.absorb_rating == 0 ) stats.absorb_rating = scale_delta_multiplier * ( smooth_scale_factors ? 60 : 120 );
-  if ( stats.armor == 0 ) stats.armor = smooth_scale_factors ? 1500 : 3000;
+  if ( stats.defense_rating == 0 ) stats.defense_rating = scale_delta_multiplier * ( smooth_scale_factors ? 15 :  30 );
+  if ( stats.shield_rating == 0 ) stats.shield_rating = scale_delta_multiplier * ( smooth_scale_factors ? 15 :  30 );
+  if ( stats.absorb_rating == 0 ) stats.absorb_rating = scale_delta_multiplier * ( smooth_scale_factors ? 15 :  30 );
+  if ( stats.armor == 0 ) stats.armor = smooth_scale_factors ? 150 : 300;
 
 
-  if ( stats.weapon_dmg            == 0 ) stats.weapon_dmg            = scale_delta_multiplier * ( smooth_scale_factors ? 50 : 100 );
-  if ( stats.weapon_offhand_dmg    == 0 ) stats.weapon_offhand_dmg    = scale_delta_multiplier * ( smooth_scale_factors ? 50 : 100 );
+  if ( stats.weapon_dmg            == 0 ) stats.weapon_dmg            = scale_delta_multiplier * ( smooth_scale_factors ? 5 : 10 );
+  if ( stats.weapon_offhand_dmg    == 0 ) stats.weapon_offhand_dmg    = scale_delta_multiplier * ( smooth_scale_factors ? 5 : 10 );
 
 }
 
