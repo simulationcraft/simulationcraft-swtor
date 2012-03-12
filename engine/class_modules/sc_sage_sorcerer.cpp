@@ -1222,24 +1222,26 @@ struct healing_trance_t : public sage_sorcerer_heal_t
   {
     parse_options( 0, options_str );
 
-    dd.standardhealthpercentmin = dd.standardhealthpercentmax = .0515;
-    dd.power_mod = 1.03;
-
     td.standardhealthpercentmin = td.standardhealthpercentmax = .0515;
     td.power_mod = 1.03;
 
+    tick_zero = true;
+    channeled = true;
+
     base_cost = 40.0;
-    base_execute_time = timespan_t::from_seconds( 3.0 );
+
+    num_ticks = 3;
+    base_tick_time = timespan_t::from_seconds( 3.0 );
     cooldown -> duration = timespan_t::from_seconds( 9.0 );
 
     range = 30.0;
   }
 
-  virtual void impact( player_t* t, int impact_result, double travel_dmg )
+  virtual void tick( dot_t* d )
   {
-    sage_sorcerer_heal_t::impact( t, impact_result, travel_dmg );
+    sage_sorcerer_heal_t::tick( d );
 
-    if ( impact_result == RESULT_CRIT )
+    if ( result == RESULT_CRIT )
     {
       p() -> buffs.resplendence -> trigger();
     }
@@ -1249,6 +1251,7 @@ struct healing_trance_t : public sage_sorcerer_heal_t
   {
     sage_sorcerer_heal_t::player_buff();
 
+    // FIXME: probably needs to be saved for whole channel of the spell
     if ( p() -> buffs.conveyance -> up() )
       player_crit += 0.25;
   }
