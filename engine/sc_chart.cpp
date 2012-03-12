@@ -1063,23 +1063,23 @@ const char* chart_t::gains( std::string& s,
 
 struct compare_scale_factors
 {
-  player_t* player;
-  compare_scale_factors( player_t* p ) : player( p ) {}
+  const gear_stats_t& scale_factors;
+  compare_scale_factors( const gear_stats_t& s ) : scale_factors( s ) {}
   bool operator()( int l, int r ) const
   {
-    return player -> scaling.get_stat( l ) >
-           player -> scaling.get_stat( r );
+    return scale_factors.get_stat( l ) >
+    scale_factors.get_stat( r );
   }
 };
 
 const char* chart_t::scale_factors( std::string& s,
-                                    player_t* p )
+                                    player_t* p, const std::string& scale_factors_name, const gear_stats_t& scale_factors, const gear_stats_t& scale_factors_error )
 {
   std::vector<int> scaling_stats;
 
   for ( int i=0; i < ( int ) sizeof_array( p -> scales_with ); ++i )
   {
-    if ( p -> scales_with[ i ] && p -> scaling.get_stat( i ) > 0 )
+    if ( p -> scales_with[ i ] && scale_factors.get_stat( i ) > 0 )
       scaling_stats.push_back( i );
   }
 
@@ -1087,9 +1087,9 @@ const char* chart_t::scale_factors( std::string& s,
   int num_scaling_stats = static_cast<int>( scaling_stats.size() );
   if ( num_scaling_stats == 0 ) return 0;
 
-  boost::sort( scaling_stats, compare_scale_factors( p ) );
+  boost::sort( scaling_stats, compare_scale_factors( scale_factors ) );
 
-  double max_scale_factor = p -> scaling.get_stat( scaling_stats[ 0 ] );
+  double max_scale_factor = scale_factors.get_stat( scaling_stats[ 0 ] );
 
   char buffer[ 1024 ];
 
@@ -1108,19 +1108,19 @@ const char* chart_t::scale_factors( std::string& s,
   snprintf( buffer, sizeof( buffer ), "chd=t%i:" , 1 ); s += buffer;
   for ( int i=0; i < num_scaling_stats; i++ )
   {
-    double factor = p -> scaling.get_stat( scaling_stats[ i ] );
+    double factor = scale_factors.get_stat( scaling_stats[ i ] );
     snprintf( buffer, sizeof( buffer ), "%s%.*f", ( i?",":"" ), p -> sim -> report_precision, factor ); s += buffer;
   }
   s += "|";
   for ( int i=0; i < num_scaling_stats; i++ )
   {
-    double factor = p -> scaling.get_stat( scaling_stats[ i ] ) - p -> scaling_error.get_stat( scaling_stats[ i ] );
+    double factor = std::max( scale_factors.get_stat( scaling_stats[ i ] ) - scale_factors_error.get_stat( scaling_stats[ i ] ), 0.0 );
     snprintf( buffer, sizeof( buffer ), "%s%.*f", ( i?",":"" ), p -> sim -> report_precision, factor ); s += buffer;
   }
   s += "|";
   for ( int i=0; i < num_scaling_stats; i++ )
   {
-    double factor = p -> scaling.get_stat( scaling_stats[ i ] ) + p -> scaling_error.get_stat( scaling_stats[ i ] );
+    double factor = scale_factors.get_stat( scaling_stats[ i ] ) + scale_factors_error.get_stat( scaling_stats[ i ] );
     snprintf( buffer, sizeof( buffer ), "%s%.*f", ( i?",":"" ), p -> sim -> report_precision, factor ); s += buffer;
   }
   s += "&amp;";
@@ -1133,14 +1133,14 @@ const char* chart_t::scale_factors( std::string& s,
   snprintf( buffer, sizeof( buffer ), "E,FF0000,1:0,,1:20|" ); s += buffer;
   for ( int i=0; i < num_scaling_stats; i++ )
   {
-    double factor = p -> scaling.get_stat( scaling_stats[ i ] );
+    double factor = scale_factors.get_stat( scaling_stats[ i ] );
     const char* name = util_t::stat_type_abbrev( scaling_stats[ i ] );
     snprintf( buffer, sizeof( buffer ), "%st++++%.*f++%s,%s,0,%d,15,0.1", ( i?"|":"" ),
               p -> sim -> report_precision, factor, name, class_text_color( p -> type ), i ); s += buffer;
   }
 
   s += "&amp;";
-  std::string formatted_name = p -> name_str;
+  std::string formatted_name = scale_factors_name;
   util_t::urlencode( util_t::str_to_utf8( formatted_name ) );
   snprintf( buffer, sizeof( buffer ), "chtt=%s+Scale+Factors", formatted_name.c_str() ); s += buffer;
   s += "&amp;";

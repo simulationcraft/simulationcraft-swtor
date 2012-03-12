@@ -500,7 +500,7 @@ void scaling_t::analyze()
   {
     if ( p -> quiet ) continue;
 
-    chart_t::scale_factors( p -> scale_factors_chart, p );
+    chart_t::scale_factors( p -> scale_factors_chart, p, p -> name_str, p -> scaling, p -> scaling_error );
 
     // Sort scaling results
     for ( int i=0; i < STAT_MAX; i++ )

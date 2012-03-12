@@ -400,6 +400,15 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
           fprintf( file,
                    "\t\t\t\t\t\t</table>\n" );
 
+          std::string scale_factor_str;
+          chart_t::scale_factors( scale_factor_str, p, s->name_str, s -> scaling, s -> scaling_error );
+
+          if ( ! scale_factor_str.empty() )
+          {
+            scale_factor_str = "<img src=\"" + scale_factor_str + "\" alt=\"DPS Error Chart\" />\n";
+            fprintf ( file, "\t\t\t\t\t\t\t\t\t%s\n",
+                    scale_factor_str.c_str() );
+          }
         }
     }
 
