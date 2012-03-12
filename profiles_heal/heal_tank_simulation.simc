@@ -8,14 +8,15 @@ target=Sith_Assassin_Tankdummy
 actions=stim,type=exotech_resolve
 actions+=/mark_of_power
 actions+=/snapshot_stats
-actions+=/innervate,if=!ticking
 actions+=/resurgence,if=!ticking
+actions+=/innervate,if=target.health_pct<70
 actions+=/dark_infusion,if=target.health_pct<60
+actions+=/consumption,if=buff.force_surge.react&force.pct<=92
 
 enemy=Enemy_Hitting_all_Tanks
 actions=snapshot_stats
-actions+=/spell_nuke,damage=3000,cooldown=10,attack_speed=1.0,aoe_tanks=1
-actions+=/melee_attack,damage=1700,trigger_gcd=3.0,aoe_tanks=1
+actions+=/spell_nuke,damage=6000,cooldown=10,attack_speed=1.0,aoe_tanks=1
+actions+=/melee_attack,damage=3500,trigger_gcd=3.0,aoe_tanks=1
 
 
 scale_only=willpower,power,force_power,crit,surge,alacrity

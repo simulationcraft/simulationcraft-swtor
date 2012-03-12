@@ -1,5 +1,5 @@
 set simc_path=..
-set iterations=1000
+set iterations=100000
 set calculate_scale_factors=1
 set threads=4
 set center_scale_delta=1

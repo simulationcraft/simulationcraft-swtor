@@ -4695,6 +4695,25 @@ action_expr_t* player_t::create_expression( action_t* a,
   }
   std::vector<std::string> splits;
   int num_splits = util_t::string_split( splits, name_str, "." );
+
+  if ( num_splits == 2 )
+  {
+    int resource_type = util_t::parse_resource_type( splits[ 0 ] );
+    if ( resource_type != RESOURCE_NONE )
+    {
+      if ( splits[ 1 ] == "pct" )
+      {
+        struct resource_pct_expr_t : public action_expr_t
+        {
+          int resource_type;
+          resource_pct_expr_t( action_t* a, const std::string& n, int r ) : action_expr_t( a, n, TOK_NUM ), resource_type( r ) {}
+          virtual int evaluate() { result_num = action -> player -> resource_current[ resource_type ] / action -> player -> resource_max[ resource_type ]; return TOK_NUM; }
+        };
+        return new resource_pct_expr_t( a, name_str, resource_type );
+      }
+    }
+  }
+
   if ( splits[ 0 ] == "pet" )
   {
     pet_t* pet = find_pet( splits[ 1 ] );

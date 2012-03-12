@@ -936,10 +936,10 @@ static void print_html_styles( FILE*  file, sim_t* sim )
   {
     fprintf( file,
              "\t\t<style type=\"text/css\" media=\"screen\">\n"
-             "\t\t\t@import url('http://www.simulationcraft.org/css/styles.css');\n"
+             "\t\t\t@import url('http://www.simulationcraft.org/css/swtor_styles.css');\n"
              "\t\t</style>\n"
              "\t\t<style type=\"text/css\" media=\"print\">\n"
-             "\t\t  @import url('http://www.simulationcraft.org/css/styles-print.css');\n"
+             "\t\t  @import url('http://www.simulationcraft.org/css/swtor_styles-print.css');\n"
              "\t\t</style>\n" );
   }
   else if ( sim -> print_styles )

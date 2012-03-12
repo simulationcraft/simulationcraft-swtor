@@ -1231,7 +1231,7 @@ struct healing_trance_t : public sage_sorcerer_heal_t
     base_cost = 40.0;
 
     num_ticks = 3;
-    base_tick_time = timespan_t::from_seconds( 3.0 );
+    base_tick_time = timespan_t::from_seconds( 1.0 );
     cooldown -> duration = timespan_t::from_seconds( 9.0 );
 
     range = 30.0;
