@@ -237,16 +237,17 @@ player_t::player_t( sim_t*             s,
   world_lag_override( false ), world_lag_stddev_override( false ),
   events( 0 ),
   race( r ),
+
   // Ratings
-  initial_alacrity_rating( 0 ), alacrity_rating( 0 ),
+  initial_accuracy_rating( 0 ), accuracy_rating_( 0 ), base_accuracy_( 0 ), computed_accuracy( 0 ),
+  initial_alacrity_rating( 0 ), alacrity_rating_( 0 ), base_alacrity_( 0 ), computed_alacrity( 0 ),
   initial_crit_rating( 0 ), crit_rating( 0 ),
-  initial_accuracy_rating( 0 ), accuracy_rating( 0 ),
   initial_surge_rating( 0 ), surge_rating( 0 ),
   initial_defense_rating( 0 ), defense_rating( 0 ),
   initial_shield_rating( 0 ), shield_rating( 0 ),
   initial_absorb_rating( 0 ), absorb_rating( 0 ),
-  alacrity_from_rating( 0 ), crit_from_rating( 0 ), accuracy_from_rating( 0 ),
-  defense_from_rating( 0 ), shield_from_rating( 0 ), absorb_from_rating( 0 ),
+  crit_from_rating( 0 ), defense_from_rating( 0 ), shield_from_rating( 0 ), absorb_from_rating( 0 ),
+
   primary_attribute( ATTRIBUTE_NONE ), secondary_attribute( ATTRIBUTE_NONE ),
 
   // Attack Mechanics
@@ -1588,9 +1589,6 @@ double player_t::default_bonus_multiplier() const
   return m;
 }
 
-double player_t::default_accuracy_chance() const
-{ return accuracy_from_rating; }
-
 double player_t::default_crit_chance() const
 {
   double c = 0.05 + crit_from_rating;
@@ -1997,17 +1995,15 @@ void player_t::reset()
 
   vengeance_damage = vengeance_value = vengeance_max = 0.0;
 
-  alacrity_rating = initial_alacrity_rating;
+  set_alacrity_rating( initial_alacrity_rating );
   crit_rating = initial_crit_rating;
-  accuracy_rating = initial_accuracy_rating;
+  set_accuracy_rating( initial_accuracy_rating );
   surge_rating = initial_surge_rating;
   defense_rating = initial_defense_rating;
   shield_rating = initial_shield_rating;
   absorb_rating = initial_absorb_rating;
 
-  recalculate_alacrity_from_rating();
   recalculate_crit_from_rating();
-  recalculate_accuracy_from_rating();
   recalculate_surge_from_rating();
   recalculate_defense_from_rating();
   recalculate_shield_from_rating();
@@ -2702,8 +2698,7 @@ void player_t::stat_gain( int       stat,
   case STAT_ACCURACY_RATING:
     stats.accuracy_rating += amount;
     temporary.accuracy_rating += temp_value * amount;
-    accuracy_rating += amount;
-    recalculate_accuracy_from_rating();
+    set_accuracy_rating( get_accuracy_rating() + amount );
     break;
 
   case STAT_CRIT_RATING:
@@ -2716,8 +2711,7 @@ void player_t::stat_gain( int       stat,
   case STAT_ALACRITY_RATING:
     stats.alacrity_rating += amount;
     temporary.alacrity_rating += temp_value * amount;
-    alacrity_rating       += amount;
-    recalculate_alacrity_from_rating();
+    set_alacrity_rating( get_alacrity_rating() + amount );
     break;
 
   case STAT_SURGE_RATING:
@@ -2807,8 +2801,7 @@ void player_t::stat_loss( int       stat,
   case STAT_ACCURACY_RATING:
     stats.accuracy_rating -= amount;
     temporary.accuracy_rating -= temp_value * amount;
-    accuracy_rating       -= amount;
-    recalculate_accuracy_from_rating();
+    set_accuracy_rating( get_accuracy_rating() - amount );
     break;
 
   case STAT_CRIT_RATING:
@@ -2821,8 +2814,7 @@ void player_t::stat_loss( int       stat,
   case STAT_ALACRITY_RATING:
     stats.alacrity_rating -= amount;
     temporary.alacrity_rating -= temp_value * amount;
-    alacrity_rating       -= amount;
-    recalculate_alacrity_from_rating();
+    set_alacrity_rating( get_alacrity_rating() - amount );
     break;
 
   case STAT_SURGE_RATING:
@@ -2968,14 +2960,14 @@ double player_t::school_damage_reduction( school_type school ) const
   }
 }
 
-void player_t::recalculate_alacrity_from_rating()
-{ alacrity_from_rating = rating_scaler.alacrity( alacrity_rating ); }
+void player_t::recalculate_alacrity()
+{ computed_alacrity = get_base_alacrity() + rating_scaler.alacrity( get_alacrity_rating() ); }
 
 void player_t::recalculate_crit_from_rating()
 { crit_from_rating = rating_scaler.crit( crit_rating ); }
 
-void player_t::recalculate_accuracy_from_rating()
-{ accuracy_from_rating = rating_scaler.accuracy( accuracy_rating ); }
+void player_t::recalculate_accuracy()
+{ computed_accuracy = get_base_accuracy() + rating_scaler.accuracy( get_accuracy_rating() ); }
 
 void player_t::recalculate_surge_from_rating()
 { surge_bonus = rating_scaler.surge( surge_rating ); }
@@ -3239,7 +3231,7 @@ void player_t::register_direct_heal_callback( int64_t mask,
 // player_t::alacrity =======================================================
 
 double player_t::alacrity() const
-{ return 1.0 - alacrity_from_rating; }
+{ return 1.0 - computed_alacrity; }
 
 // player_t::find_action ====================================================
 

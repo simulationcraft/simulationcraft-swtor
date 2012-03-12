@@ -241,9 +241,6 @@ struct sage_sorcerer_t : public player_t
   virtual double    force_healing_bonus_multiplier() const;
   virtual double    alacrity() const;
 
-  virtual double default_accuracy_chance() const
-  { return player_t::default_accuracy_chance() + talents.clairvoyance -> rank() * 0.01; }
-
   virtual double force_crit_chance() const
   { return player_t::force_crit_chance() + talents.penetrating_light -> rank() * 0.01; }
 
@@ -1559,6 +1556,8 @@ void sage_sorcerer_t::init_talents()
   talents.mental_scarring       = find_talent( "Mental Scarring" );
   talents.psychic_absorption    = find_talent( "Psychic Absorption" );
   talents.sever_force           = find_talent( "Sever Force" );
+
+  set_base_accuracy( get_base_accuracy() + 0.01 * talents.clairvoyance -> rank() );
 }
 
 // sage_sorcerer_t::init_base ========================================================
