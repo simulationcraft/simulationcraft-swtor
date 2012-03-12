@@ -2395,7 +2395,7 @@ struct player_t : public noncopyable
   double base_force_power, initial_force_power, force_power;
   double base_tech_power,  initial_tech_power,  tech_power;
 
-  double surge_bonus, buffed_surge;
+  double surge_bonus;
   double base_armor_penetration;
 
   // Resource Regen
@@ -2503,6 +2503,7 @@ struct player_t : public noncopyable
     double attribute[ ATTRIBUTE_MAX ];
     double resource[ RESOURCE_MAX ];
     double alacrity;
+    double surge;
 
     double power, force_power, tech_power;
 

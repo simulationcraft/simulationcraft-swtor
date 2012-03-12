@@ -940,7 +940,7 @@ static void print_html_stats ( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * a -> buffed_surge,
+             100 * a -> buffed.surge,
              100 * a -> surge_bonus,
              a -> stats.surge_rating );
 

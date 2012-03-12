@@ -253,7 +253,7 @@ player_t::player_t( sim_t*             s,
   base_power( 0 ),       initial_power( 0 ),       power( 0 ),
   base_force_power( 0 ), initial_force_power( 0 ), force_power( 0 ),
   base_tech_power( 0 ),  initial_tech_power( 0 ),  tech_power( 0 ),
-  surge_bonus( 0 ), buffed_surge( 0 ),
+  surge_bonus( 0 ),
   base_armor_penetration( 0 ),
 
   // Resource Regen
@@ -3916,7 +3916,7 @@ struct snapshot_stats_t : public action_t
     p -> buffed.force_power       = p -> composite_force_power();
     p -> buffed.tech_power        = p -> composite_tech_power();
 
-    p -> buffed_surge             = p -> surge_bonus;
+    p -> buffed.surge             = p -> surge_bonus;
 
     p -> buffed.melee_accuracy    = p -> melee_accuracy_chance();
     p -> buffed.melee_crit        = p -> melee_crit_chance();
