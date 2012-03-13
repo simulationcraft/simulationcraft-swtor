@@ -5101,6 +5101,119 @@ bool player_t::create_profile( std::string& profile_str, int save_type, bool sav
   return true;
 }
 
+bool player_t::create_json_profile( std::string& profile_str, int save_type, bool save_html )
+{
+  std::string term = "\n";
+
+  profile_str += "{" + term;
+
+  profile_str += "\t\"Character\" : " + term;
+  profile_str += "\t{" + term;
+
+  // Basic Character Definitions
+  profile_str += "\t\t\"Definitions\" : " + term;
+  profile_str += "\t\t{" + term;
+  if ( save_type == SAVE_ALL )
+  {
+    std::string pname = name_str;
+
+    profile_str += "\t\t\t\"Class\" : \"";
+    profile_str += util_t::player_type_string( type );
+    profile_str += "\"," + term;
+    profile_str += "\t\t\t\"Name\" : " + util_t::format_text( pname, sim -> input_is_utf8 ) + "\"," + term;
+    profile_str += "\t\t\t\"Origin\" : " + origin_str + "\"" + term;
+    profile_str += "\t\t\t\"Level\"" + util_t::to_string( level ) + "\"," + term;
+    profile_str += "\t\t\t\"Race\" : \"" + race_str + "\"," + term;
+
+    if ( professions_str.size() > 0 )
+    {
+      profile_str += "\t\t\t\"Professions\" : \"" + professions_str + "\"," + term;
+    };
+  }
+  profile_str += "\t\t}," + term;
+
+  // Talents
+  profile_str += "\t\t\"Talents\" : " + term;
+  profile_str += "\t\t{" + term;
+  talents_str = torhead::encode_talents( *this );
+  if ( ! talents_str.empty() )
+    profile_str += "\t\t\ttalents=" + talents_str + term;
+  profile_str += "\t\t}," + term;
+
+  // Gear
+  profile_str += "\t\t\"Gear\" : " + term;
+  profile_str += "\t\t{" + term;
+
+    for ( int i=0; i < SLOT_MAX; i++ )
+    {
+      item_t& item = items[ i ];
+
+      if ( item.active() )
+      {
+        profile_str += "\t\t\t\"";
+        profile_str += item.slot_name();
+        profile_str += "\" : \"" + item.options_str + "\"," + term;
+      }
+    }
+  profile_str += "\t\t}" + term;
+
+
+    profile_str += "\t}," + term;
+
+    profile_str += "\t\"SimulationCraft\" : " + term;
+    profile_str += "\t{" + term;
+    profile_str += "\t\t\"Position\" : \"" + position_str + "\"," + term;
+    profile_str += "\t\t\"Role\" : \"";
+    profile_str += util_t::role_type_string( primary_role() );
+    profile_str += "\"," + term;
+    profile_str += "\t\t\"Use_pre_potion\" : \"" + util_t::to_string( use_pre_potion ) + "\"," + term;
+
+    // Action Priority List
+    profile_str += "\t\t\"ActionPriorityList\" : \"" + term;
+    profile_str += "\t\t\t";
+      if ( ! action_list_str.empty() )
+      {
+        int i = 0;
+        for ( action_t* a = action_list; a; a = a -> next )
+        {
+          if ( a -> signature_str.empty() ) continue;
+          std::string encoded_action = a -> signature_str;
+          if ( save_html )
+            report_t::encode_html( encoded_action );
+          profile_str += encoded_action;
+          profile_str += i ? "/" : "";
+          i++;
+        }
+      }
+    profile_str += term + "\t\t\"," + term;
+
+    // Gear Summary
+    profile_str += "\t\t\"Gear Summary\" : \"" + term;
+    for ( int i=0; i < STAT_MAX; i++ )
+    {
+      double value = initial_stats.get_stat( i );
+      if ( value != 0 )
+      {
+        profile_str += "\t\t\tgear_";
+        profile_str += util_t::stat_type_string( i );
+        profile_str += "=" + util_t::to_string( value, 0 ) + term;
+      }
+    }
+    profile_str += "\t\t\t# Set Bonuses" + term;
+    for ( set_bonus_t* sb = set_bonus_list; sb; sb = sb -> next )
+    {
+      if ( sb -> two_pc() )  profile_str += "\t\t\tset_bonus=" + sb -> name + "_2pc" + term ;
+      if ( sb -> four_pc() ) profile_str += "\t\t\tset_bonus=" + sb -> name + "_4pc" + term ;
+    }
+    profile_str += "\t\t\"," + term;
+
+  profile_str += "\t}" + term;
+
+  profile_str += "}";
+
+  return true;
+}
+
 // player_t::copy_from ======================================================
 
 void player_t::copy_from( const player_t& source )
@@ -5191,6 +5304,7 @@ void player_t::create_options()
     { "save_gear",                            OPT_STRING,   &( save_gear_str                          ) },
     { "save_talents",                         OPT_STRING,   &( save_talents_str                       ) },
     { "save_actions",                         OPT_STRING,   &( save_actions_str                       ) },
+    { "save_json",                            OPT_STRING,   &( save_json_str                          ) },
     { "comment",                              OPT_STRING,   &( comment_str                            ) },
     { "bugs",                                 OPT_BOOL,     &( bugs                                   ) },
     { "world_lag",                            OPT_FUNC,     ( void* ) ::parse_world_lag                 },

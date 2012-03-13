@@ -202,6 +202,49 @@ void report_t::print_profiles( sim_t* sim )
   }
 }
 
+void report_t::print_json_profiles( sim_t* sim )
+{
+  int k = 0;
+  for ( unsigned int i = 0; i < sim -> actor_list.size(); i++ )
+  {
+    player_t* p = sim -> actor_list[i];
+    if ( p -> is_pet() ) continue;
+
+    k++;
+    FILE* file = NULL;
+
+    std::string file_name = p -> save_json_str;
+
+    if ( file_name.empty() && sim -> save_profiles )
+    {
+      file_name  = sim -> save_prefix_str;
+      file_name += p -> name_str;
+      if ( sim -> save_talent_str != 0 )
+      {
+        file_name += "_";
+        file_name += p -> primary_tree_name();
+      }
+      file_name += sim -> save_suffix_str;
+      file_name += ".simc";
+      util_t::urlencode( util_t::format_text( file_name, sim -> input_is_utf8 ) );
+    }
+
+    if ( file_name.empty() ) continue;
+
+    file = fopen( file_name.c_str(), "w" );
+    if ( ! file )
+    {
+      sim -> errorf( "Unable to save profile %s for player %s\n", file_name.c_str(), p -> name() );
+      continue;
+    }
+
+    std::string profile_str = "";
+    p -> create_json_profile( profile_str );
+    fprintf( file, "%s", profile_str.c_str() );
+    fclose( file );
+  }
+}
+
 // report_t::print_spell_query ==============================================
 /*
 void report_t::print_spell_query( sim_t* sim )

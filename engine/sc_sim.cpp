@@ -73,7 +73,7 @@ static bool need_to_save_profiles( sim_t* sim )
   if ( sim -> save_profiles ) return true;
 
   for ( player_t* p = sim -> player_list; p; p = p -> next )
-    if ( ! p -> save_str.empty() )
+    if ( ! p -> save_str.empty() || ! p -> save_json_str.empty() )
       return true;
 
   return false;
@@ -2192,6 +2192,7 @@ int sim_t::main( int argc, char** argv )
     init();
     util_t::fprintf( stdout, "\nGenerating profiles... \n" ); fflush( stdout );
     report_t::print_profiles( this );
+    report_t::print_json_profiles( this );
   }
   else
   {
