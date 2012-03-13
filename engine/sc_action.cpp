@@ -266,8 +266,6 @@ void action_t::init_action_t_()
   cached_dot = nullptr;
   cached_dot_target = nullptr;
 
-  action_dot = NULL;
-
   if ( sim -> debug ) log_t::output( sim, "Player %s creates action %s", player -> name(), name() );
 
   if ( unlikely( ! player -> initialized ) )
@@ -1267,8 +1265,6 @@ void action_t::init()
 void action_t::reset()
 {
   cooldown -> reset();
-  if ( action_dot )
-    action_dot -> reset();
   result = RESULT_NONE;
   execute_event = 0;
   travel_event = 0;

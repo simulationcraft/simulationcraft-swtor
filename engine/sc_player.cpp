@@ -2333,18 +2333,12 @@ void player_t::clear_debuffs()
 {
   // FIXME! At the moment we are just clearing DoTs
 
-  if ( sim -> log ) log_t::output( sim, "%s clears debuffs from %s", name(), sim -> target -> name() );
+  if ( sim -> log ) log_t::output( sim, "%s clears all debuffs", name() );
 
-  for ( action_t* a = action_list; a; a = a -> next )
+  for ( auto p : targetdata )
   {
-    if ( a -> action_dot && a -> action_dot -> ticking )
-      a -> action_dot -> cancel();
-  }
-
-  for ( std::vector<targetdata_t*>::iterator i = targetdata.begin(); i != targetdata.end(); ++i )
-  {
-    if ( *i )
-      ( *i )->clear_debuffs();
+    if ( p )
+      p -> clear_debuffs();
   }
 }
 

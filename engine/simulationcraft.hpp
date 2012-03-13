@@ -3255,7 +3255,6 @@ struct action_t
   rng_t* rng[ RESULT_MAX ];
   rng_t* rng_travel;
   cooldown_t* cooldown;
-  mutable dot_t* action_dot;
   stats_t* stats;
   event_t* execute_event;
   event_t* travel_event;
