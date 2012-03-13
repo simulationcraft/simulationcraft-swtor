@@ -108,23 +108,46 @@ static bool parse_role_string( sim_t* sim,
 // parse_role_string ========================================================
 
 static bool parse_set_bonus( sim_t* sim,
-                               const std::string& name,
-                               const std::string& value )
+                             const std::string& opt_name,
+                             const std::string& value )
 {
-  assert( name == "set_bonus" ); ( void )name;
+  assert( opt_name == "set_bonus" ); ( void )opt_name;
 
-  std::string::size_type cut_pt;
-  if ( ( cut_pt = value.find( "_2pc" ) ) != value.npos )
+  bool disable = value.find( "no_" ) == 0;
+  std::string::size_type cut_pt, first = disable ? 3 : 0;
+
+  bool is_2pc;
+  if ( ( cut_pt = value.find( "_2pc", first ) ) != value.npos )
+    is_2pc = true;
+  else if ( ( cut_pt = value.find( "_4pc", first ) ) != value.npos )
+    is_2pc = false;
+  else
+    return false;
+
+  std::string name = value.substr( first, cut_pt - first );
+
+  set_bonus_t* sb = sim -> active_player -> find_set_bonus( name );
+
+  std::cerr << "parse_set_bonus(\"" << opt_name << "\", \"" << value << "\") = "
+            << ( disable ? "(disable) " : "" )
+            << '\"' << name << "\" = " << sb << std::endl;
+
+  if ( ! sb )
+    return false;
+
+  if ( disable )
   {
-    set_bonus_t* sb = sim -> active_player -> find_set_bonus( value.substr( 0, cut_pt ) );
-    if ( sb && sb -> count < 2 )
-      sb -> count = 2;
+    if ( is_2pc )
+      sb -> force_disable_2pc = true;
+    else
+      sb -> force_disable_4pc = true;
   }
-  if ( ( cut_pt = value.find( "_4pc" ) ) != value.npos )
+  else
   {
-    set_bonus_t* sb = sim -> active_player -> find_set_bonus( value.substr( 0, cut_pt ) );
-    if ( sb && sb -> count < 4 )
-      sb -> count = 4;
+    if ( is_2pc )
+      sb -> force_enable_2pc = true;
+    else
+      sb -> force_enable_4pc = true;
   }
 
   return true;
@@ -3560,27 +3583,24 @@ rng_t* player_t::get_rng( const std::string& n, int type )
 
 // player_t::get_set_bonus =======================================================
 
-set_bonus_t* player_t::get_set_bonus( const std::string& name, std::string filter, int64_t slot_filter )
+set_bonus_t* player_t::get_set_bonus( const std::string& name, std::string filter, slot_mask_t slot_filter )
 {
-  set_bonus_t* sb=0;
+  set_bonus_t* sb=find_set_bonus( name );
 
-  for ( sb = set_bonus_list; sb; sb = sb -> next )
+  if ( ! sb )
   {
-    if ( sb -> name == name )
-      return sb;
+    sb = new set_bonus_t( name, filter, slot_filter );
+
+    set_bonus_t** tail = &set_bonus_list;
+
+    while ( *tail && name > ( ( *tail ) -> name ) )
+    {
+      tail = &( ( *tail ) -> next );
+    }
+
+    sb -> next = *tail;
+    *tail = sb;
   }
-
-  sb = new set_bonus_t( name, filter, slot_filter );
-
-  set_bonus_t** tail = &set_bonus_list;
-
-  while ( *tail && name > ( ( *tail ) -> name ) )
-  {
-    tail = &( ( *tail ) -> next );
-  }
-
-  sb -> next = *tail;
-  *tail = sb;
 
   return sb;
 }

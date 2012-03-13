@@ -339,7 +339,7 @@ enum weapon_type
   WEAPON_MAX
 };
 
-enum slot_type   // these enum values should match armory settings
+enum slot_type
 {
   SLOT_NONE      = -1,
   SLOT_HEAD      = 0,
@@ -364,9 +364,18 @@ enum slot_type   // these enum values should match armory settings
   SLOT_MAX       = 19
 };
 
-const int64_t DEFAULT_SET_BONUS_SLOT_MASK = ( ( int64_t( 1 ) << SLOT_HEAD )   | ( int64_t( 1 ) << SLOT_CHEST ) |
-                                            ( int64_t( 1 ) << SLOT_HANDS  )   | ( int64_t( 1 ) << SLOT_LEGS )  |
-                                            ( int64_t( 1 ) << SLOT_FEET   )  );
+typedef uint_fast32_t slot_mask_t;
+static_assert( SLOT_MAX <= std::numeric_limits<slot_mask_t>::digits,
+               "slot masks won't fit in slot_mask_t." );
+
+constexpr slot_mask_t slot_mask( slot_type s )
+{ return slot_mask_t( 1 ) << s; }
+
+template <typename ... Types>
+constexpr slot_mask_t slot_mask( slot_type s, Types ... args )
+{ return slot_mask( s ) | slot_mask( args... ); }
+
+constexpr slot_mask_t DEFAULT_SET_BONUS_SLOT_MASK = slot_mask( SLOT_HEAD, SLOT_CHEST, SLOT_HANDS, SLOT_LEGS, SLOT_FEET );
 
 // Keep this in sync with enum attribute_type
 enum stat_type
@@ -2292,18 +2301,22 @@ struct item_t
 
 struct set_bonus_t
 {
+  bool has_2pc, has_4pc;
   set_bonus_t* next;
   std::string name;
   std::vector<std::string> filters;
   int count;
-  int64_t slot_mask;
+  slot_mask_t mask;
+  bool force_enable_2pc, force_disable_2pc;
+  bool force_enable_4pc, force_disable_4pc;
 
-  set_bonus_t( const std::string& name, const std::string& filters=std::string(), int64_t s_mask=DEFAULT_SET_BONUS_SLOT_MASK );
+  set_bonus_t( const std::string& name, const std::string& filters=std::string(),
+               slot_mask_t s_mask=DEFAULT_SET_BONUS_SLOT_MASK );
 
   void init( const player_t& );
 
-  bool two_pc() const { return ( count >= 2 ); }
-  bool four_pc() const { return ( count >= 4 ); }
+  bool two_pc() const { return has_2pc; }
+  bool four_pc() const { return has_4pc; }
 
   //action_expr_t* create_expression( action_t*, const std::string& type );
 
@@ -3032,7 +3045,8 @@ public:
   benefit_t*  get_benefit ( const std::string& name );
   uptime_t*   get_uptime  ( const std::string& name );
   rng_t*      get_rng     ( const std::string& name, int type=RNG_DEFAULT );
-  set_bonus_t* get_set_bonus( const std::string& name, std::string filter, int64_t slot_filter=DEFAULT_SET_BONUS_SLOT_MASK );
+  set_bonus_t* get_set_bonus( const std::string& name, std::string filter,
+                              slot_mask_t slot_filter=DEFAULT_SET_BONUS_SLOT_MASK );
   double      get_player_distance( const player_t* p ) const;
   double      get_position_distance( double m=0, double v=0 ) const;
   action_priority_list_t* get_action_priority_list( const std::string& name );

@@ -7,8 +7,11 @@
 
 // set_bonus_t::set_bonus_t =================================================
 
-set_bonus_t::set_bonus_t( const std::string& n, const std::string& f, int64_t s_mask ) :
- next( 0 ), name( n ), count( 0 ), slot_mask( s_mask )
+set_bonus_t::set_bonus_t( const std::string& n, const std::string& f, slot_mask_t s ) :
+  has_2pc( false ), has_4pc( false ),
+  next( 0 ), name( n ), count( 0 ), mask( s ),
+  force_enable_2pc( false ), force_disable_2pc( false ),
+  force_enable_4pc( false ), force_disable_4pc( false )
 {
   if ( f.empty() )
     filters.push_back( name );
@@ -20,18 +23,19 @@ set_bonus_t::set_bonus_t( const std::string& n, const std::string& f, int64_t s_
 
 bool set_bonus_t::decode( const item_t& item ) const
 {
-  if ( ( item.slot > 0 && slot_mask < 0 ) || ( slot_mask & ( int64_t( 1 ) << item.slot ) ) )
-  {
-    if ( item.name() )
-    {
-      std::string s = item.name();
+  if ( mask != 0 &&
+       ( mask & slot_mask( static_cast<slot_type>( item.slot ) ) ) == 0 )
+    return false;
 
-      for ( unsigned int i = 0; i < filters.size(); i++ )
-      {
-        if ( s.find( filters[ i ] ) != s.npos )
-          return true;
-      }
-    }
+  if ( ! item.name() )
+    return false;
+
+  std::string s = item.name();
+
+  for ( auto& filter : filters )
+  {
+    if ( s.find( filter ) != s.npos )
+      return true;
   }
 
   return false;
@@ -43,10 +47,12 @@ void set_bonus_t::init( const player_t& p )
 {
   count = 0;
 
-  int num_items = p.items.size();
-  for ( int i=0; i < num_items; i++ )
+  for( auto& i : p.items )
   {
-    if ( decode( p.items[ i ] ) )
+    if ( decode( i ) )
       ++count;
   }
+
+  has_2pc = force_enable_2pc || ( ! force_disable_2pc && count >= 2 );
+  has_4pc = force_enable_4pc || ( ! force_disable_4pc && count >= 4 );
 }
