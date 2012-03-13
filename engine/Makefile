@@ -115,14 +115,14 @@ SRC = \
 	sc_util.cpp \
 	sc_weapon.cpp \
 	sc_xml.cpp \
-	class_modules\sc_commando_mercenary.cpp \
-	class_modules\sc_gunslinger_sniper.cpp \
-	class_modules\sc_juggernaut_guardian.cpp \
-	class_modules\sc_sage_sorcerer.cpp \
-	class_modules\sc_scoundrel_operative.cpp \
-	class_modules\sc_sentinel_marauder.cpp \
-	class_modules\sc_shadow_assassin.cpp \
-	class_modules\sc_vanguard_powertech.cpp
+	class_modules$(PATHSEP)sc_commando_mercenary.cpp \
+	class_modules$(PATHSEP)sc_gunslinger_sniper.cpp \
+	class_modules$(PATHSEP)sc_juggernaut_guardian.cpp \
+	class_modules$(PATHSEP)sc_sage_sorcerer.cpp \
+	class_modules$(PATHSEP)sc_scoundrel_operative.cpp \
+	class_modules$(PATHSEP)sc_sentinel_marauder.cpp \
+	class_modules$(PATHSEP)sc_shadow_assassin.cpp \
+	class_modules$(PATHSEP)sc_vanguard_powertech.cpp
 
 SRC_H   := $(filter %.h, $(SRC)) $(filter %.hh, $(SRC)) $(filter %.hpp, $(SRC))
 SRC_CPP := $(filter %.cpp, $(SRC))
