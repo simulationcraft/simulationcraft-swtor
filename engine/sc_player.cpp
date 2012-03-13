@@ -421,12 +421,9 @@ player_t::~player_t()
   dispose_list( buff_list );
   dispose_list( cooldown_list );
 
-  if ( false )
-  {
-    // FIXME! This cannot be done until we use refcounts.
-    // FIXME! I see the same callback pointer being registered multiple times.
-    dispose( boost::unique<boost::return_begin_found>( boost::sort( all_callbacks ) ) );
-  }
+  // NOTE: Must defend against multiple free()ing, since the same callback
+  //       pointer is often registered multiple times.
+  dispose( boost::sort( all_callbacks ) | boost::adaptors::uniqued );
 
   for ( size_t i=0; i < sizeof_array( talent_trees ); i++ )
     dispose( talent_trees[ i ] );

@@ -51,6 +51,7 @@
 
 // Boost includes
 #include <boost/checked_delete.hpp>
+#include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext.hpp>
 
@@ -2328,12 +2329,12 @@ private:
 
 struct player_t : public noncopyable
 {
-  sim_t*      sim;
+  sim_t* const sim;
   std::string name_str, talents_str, id_str, target_str;
   std::string region_str, server_str, origin_str;
   player_t*   next;
   int         index;
-  player_type type;
+  const player_type type;
   role_type   role;
   player_t*   target;
   int         level, use_pre_potion, party, member;
