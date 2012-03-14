@@ -253,9 +253,9 @@ void action_t::init_action_t_()
   interrupt                      = 0;
   round_base_dmg                 = true;
   if_expr_str.clear();
-  if_expr                        = NULL;
+  if_expr.release();
   interrupt_if_expr_str.clear();
-  interrupt_if_expr              = NULL;
+  interrupt_if_expr.release();
   sync_str.clear();
   sync_action                    = NULL;
   next                           = NULL;
@@ -302,10 +302,7 @@ action_t::action_t( int               ty,
 }
 
 action_t::~action_t()
-{
-  delete if_expr;
-  delete interrupt_if_expr;
-}
+{}
 
 // action_t::parse_options ==================================================
 
@@ -1246,12 +1243,12 @@ void action_t::init()
 
   if ( ! if_expr_str.empty() )
   {
-    if_expr = action_expr_t::parse( this, if_expr_str );
+    if_expr.reset( action_expr_t::parse( this, if_expr_str ) );
   }
 
   if ( ! interrupt_if_expr_str.empty() )
   {
-    interrupt_if_expr = action_expr_t::parse( this, interrupt_if_expr_str );
+    interrupt_if_expr.reset( action_expr_t::parse( this, interrupt_if_expr_str ) );
   }
 
   if ( sim -> travel_variance && travel_speed && player -> distance )
@@ -1540,6 +1537,15 @@ action_expr_t* action_t::create_expression( const std::string& name_str )
     {
       if ( buff_t* buff = td -> get_buff( splits[ 1 ] ) )
         return buff -> create_expression( this, splits[ 2 ] );
+    }
+  }
+
+  if ( num_splits == 3 && splits[0] == "dot" )
+  {
+    if ( targetdata_t* td = player -> get_targetdata( target ) )
+    {
+      if ( dot_t* dot = td -> get_dot( splits[ 1 ] ) )
+        return dot -> create_expression( this, splits[ 2 ] );
     }
   }
 

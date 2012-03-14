@@ -4816,54 +4816,7 @@ action_expr_t* player_t::create_expression( action_t* a,
         dot = get_dot( splits[ 1 ] );
       if ( ! dot )
         return 0;
-      if ( splits[ 2 ] == "duration" )
-      {
-        struct duration_expr_t : public action_expr_t
-        {
-          duration_expr_t( action_t* a ) : action_expr_t( a, "dot_duration", TOK_NUM ) {}
-          virtual int evaluate() { result_num = action -> num_ticks * action -> tick_time().total_seconds(); return TOK_NUM; }
-        };
-        return new duration_expr_t( a );
-      }
-      if ( splits[ 2 ] == "multiplier" )
-      {
-        struct multiplier_expr_t : public action_expr_t
-        {
-          multiplier_expr_t( action_t* a ) : action_expr_t( a, "dot_multiplier", TOK_NUM ) {}
-          virtual int evaluate() { result_num = action -> player_multiplier; return TOK_NUM; }
-        };
-        return new multiplier_expr_t( a );
-      }
-      if ( splits[ 2 ] == "remains" )
-      {
-        struct dot_remains_expr_t : public action_expr_t
-        {
-          dot_t* dot;
-          dot_remains_expr_t( action_t* a, dot_t* d ) : action_expr_t( a, "dot_remains", TOK_NUM ), dot( d ) {}
-          virtual int evaluate() { result_num = dot -> remains().total_seconds(); return TOK_NUM; }
-        };
-        return new dot_remains_expr_t( a, dot );
-      }
-      if ( splits[ 2 ] == "ticks_remain" )
-      {
-        struct dot_ticks_remain_expr_t : public action_expr_t
-        {
-          dot_t* dot;
-          dot_ticks_remain_expr_t( action_t* a, dot_t* d ) : action_expr_t( a, "dot_ticks_remain", TOK_NUM ), dot( d ) {}
-          virtual int evaluate() { result_num = dot -> ticks(); return TOK_NUM; }
-        };
-        return new dot_ticks_remain_expr_t( a, dot );
-      }
-      else if ( splits[ 2 ] == "ticking" )
-      {
-        struct dot_ticking_expr_t : public action_expr_t
-        {
-          dot_t* dot;
-          dot_ticking_expr_t( action_t* a, dot_t* d ) : action_expr_t( a, "dot_ticking", TOK_NUM ), dot( d ) {}
-          virtual int evaluate() { result_num = dot -> ticking; return TOK_NUM; }
-        };
-        return new dot_ticking_expr_t( a, dot );
-      }
+      return dot -> create_expression( a, splits[ 2 ] );
     }
     else if ( splits[ 0 ] == "action" )
     {

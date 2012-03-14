@@ -196,3 +196,72 @@ int dot_t::ticks()
   if ( ! ticking ) return 0;
   return ( num_ticks - current_tick );
 }
+
+// dot_t::create_expression =================================================
+
+action_expr_t* dot_t::create_expression( action_t* a, const std::string& name )
+{
+  struct dot_expr_t : public action_expr_t
+  {
+    dot_t* dot;
+
+    dot_expr_t( action_t* a, const std::string& n, dot_t* d ) :
+      action_expr_t( a, n, TOK_NUM ), dot( d ) {}
+  };
+
+  if ( name == "duration" )
+  {
+    struct duration_expr_t : public dot_expr_t
+    {
+      duration_expr_t( action_t* a, dot_t* d ) : dot_expr_t( a, "dot_duration", d ) {}
+      virtual int evaluate()
+      {
+        result_num = dot -> action -> num_ticks * dot -> action -> tick_time().total_seconds();
+        return TOK_NUM;
+      }
+    };
+    return new duration_expr_t( a, this );
+  }
+
+  if ( name == "multiplier" )
+  {
+    struct multiplier_expr_t : public dot_expr_t
+    {
+      multiplier_expr_t( action_t* a, dot_t* d ) : dot_expr_t( a, "dot_multiplier", d ) {}
+      virtual int evaluate() { result_num = dot -> action -> player_multiplier; return TOK_NUM; }
+    };
+    return new multiplier_expr_t( a, this );
+  }
+
+  if ( name == "remains" )
+  {
+    struct remains_expr_t : public dot_expr_t
+    {
+      remains_expr_t( action_t* a, dot_t* d ) : dot_expr_t( a, "dot_remains", d ) {}
+      virtual int evaluate() { result_num = dot -> remains().total_seconds(); return TOK_NUM; }
+    };
+    return new remains_expr_t( a, this );
+  }
+
+  if ( name == "ticks_remain" )
+  {
+    struct ticks_remain_expr_t : public dot_expr_t
+    {
+      ticks_remain_expr_t( action_t* a, dot_t* d ) : dot_expr_t( a, "dot_ticks_remain", d ) {}
+      virtual int evaluate() { result_num = dot -> ticks(); return TOK_NUM; }
+    };
+    return new ticks_remain_expr_t( a, this );
+  }
+
+  if ( name == "ticking" )
+  {
+    struct ticking_expr_t : public dot_expr_t
+    {
+      ticking_expr_t( action_t* a, dot_t* d ) : dot_expr_t( a, "dot_ticking", d ) {}
+      virtual int evaluate() { result_num = dot -> ticking; return TOK_NUM; }
+    };
+    return new ticking_expr_t( a, this );
+  }
+
+  return nullptr;
+}

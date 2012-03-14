@@ -1574,7 +1574,7 @@ struct expression_t
   static bool convert_to_rpn( action_t* action, std::vector<expr_token_t>& tokens );
 };
 
-struct action_expr_t
+struct action_expr_t : public noncopyable
 {
   action_t* action;
   std::string name_str;
@@ -1583,9 +1583,12 @@ struct action_expr_t
   double result_num;
   std::string result_str;
 
-  action_expr_t( action_t* a, const std::string& n, int t=TOK_UNKNOWN ) : action( a ), name_str( n ), result_type( t ), result_num( 0 ) {}
-  action_expr_t( action_t* a, const std::string& n, double       constant_value ) : action( a ), name_str( n ) { result_type = TOK_NUM; result_num = constant_value; }
-  action_expr_t( action_t* a, const std::string& n, std::string& constant_value ) : action( a ), name_str( n ) { result_type = TOK_STR; result_str = constant_value; }
+  action_expr_t( action_t* a, const std::string& n, int t=TOK_UNKNOWN ) :
+    action( a ), name_str( n ), result_type( t ), result_num( 0 ) {}
+  action_expr_t( action_t* a, const std::string& n, double constant_value ) :
+    action( a ), name_str( n ), result_type( TOK_NUM ), result_num( constant_value ) {}
+  action_expr_t( action_t* a, const std::string& n, std::string& constant_value ) :
+    action( a ), name_str( n ), result_type( TOK_STR ), result_str( constant_value ) {}
   virtual ~action_expr_t() {}
   virtual int evaluate() { return result_type; }
   virtual const char* name() { return name_str.c_str(); }
@@ -3271,9 +3274,9 @@ struct action_t
   bool round_base_dmg;
 
   std::string if_expr_str;
-  action_expr_t* if_expr;
+  std::unique_ptr<action_expr_t> if_expr;
   std::string interrupt_if_expr_str;
-  action_expr_t* interrupt_if_expr;
+  std::unique_ptr<action_expr_t> interrupt_if_expr;
   std::string sync_str;
   action_t* sync_action;
   action_t* next;
@@ -3513,6 +3516,8 @@ struct dot_t
   int    ticks();
 
   const char* name() { return name_str.c_str(); }
+
+  action_expr_t* create_expression( action_t* action, const std::string& name );
 };
 
 // Action Callback ==========================================================
