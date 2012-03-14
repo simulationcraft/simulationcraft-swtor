@@ -27,8 +27,6 @@ struct enemy_t : public player_t
     *last = this;
     next = 0;
 
-    create_talents();
-    //create_glyphs();
     create_options();
   }
 

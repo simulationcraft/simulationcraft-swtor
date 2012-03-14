@@ -206,7 +206,7 @@ struct shadow_assassin_t : public player_t
   virtual int       primary_role() const;
   virtual void      regen( timespan_t periodicity );
   virtual void      reset();
-  virtual void      create_talents();
+          void      create_talents();
 
   virtual void init_scaling()
   {
@@ -2028,13 +2028,14 @@ void shadow_assassin_t::regen( timespan_t periodicity )
   }
 }
 
-// shadow_assassin_t::create_talents ==================================================
+// shadow_assassin_t::reset ===========================================================
 
 void shadow_assassin_t::reset()
 {
   player_t::reset();
 
   actives.charge = CHARGE_NONE;
+  stealth_tag = false;
 }
 
 // shadow_assassin_t::create_talents ==================================================
@@ -2087,8 +2088,6 @@ void shadow_assassin_t::create_talents()
     }
     ++i;
   }
-
-  player_t::create_talents();
 }
 
 // ==========================================================================

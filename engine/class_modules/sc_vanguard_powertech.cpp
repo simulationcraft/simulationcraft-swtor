@@ -95,7 +95,7 @@ struct vanguard_powertech_t : public player_t
     virtual void      init_actions();
     virtual int       primary_resource() const;
     virtual int       primary_role() const;
-    virtual void      create_talents();
+            void      create_talents();
 
     virtual void init_scaling()
     {
@@ -372,7 +372,6 @@ void vanguard_powertech_t::create_talents()
         ++i;
     }
 #endif
-    player_t::create_talents();
 }
 
 // ==========================================================================

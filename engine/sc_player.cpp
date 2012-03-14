@@ -4460,11 +4460,6 @@ bool player_t::parse_talents_armory( const std::string& talent_string )
   return parse_talent_trees( encoding );
 }
 
-// player_t::create_talents =================================================
-
-void player_t::create_talents()
-{}
-
 // player_t::find_talent ====================================================
 
 talent_t* player_t::find_talent( const std::string& n,

@@ -2917,11 +2917,7 @@ public:
   bool parse_talents_armory ( const std::string& talent_string );
   bool parse_talents_wowhead( const std::string& talent_string );
 
-  virtual void create_talents();
-  //virtual void create_glyphs();
-
   talent_t* find_talent( const std::string& name, int tree = TALENT_TAB_NONE ) const;
-  //virtual glyph_t*  find_glyph ( const std::string& name );
 
   virtual action_expr_t* create_expression( action_t*, const std::string& name );
 

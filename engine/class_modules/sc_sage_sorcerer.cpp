@@ -261,7 +261,7 @@ struct sage_sorcerer_t : public player_t
   }
 
   virtual action_t* create_action( const std::string& name, const std::string& options );
-  virtual void      create_talents();
+          void      create_talents();
   virtual void      create_options();
 
   void trigger_tidal_force( double pc )
@@ -1937,8 +1937,6 @@ void sage_sorcerer_t::create_talents()
     }
     ++i;
   }
-
-  player_t::create_talents();
 }
 
 // sage_sorcerer_t::create_options =================================================

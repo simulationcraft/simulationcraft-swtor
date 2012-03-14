@@ -83,6 +83,7 @@ struct commando_mercenary_t : public player_t
     virtual targetdata_t* new_targetdata( player_t& target ) // override
     { return new commando_mercenary_targetdata_t( *this, target ); }
 
+            void      create_talents();
     virtual action_t* create_action( const std::string& name, const std::string& options );
     virtual void      init_talents();
     virtual void      init_base();
@@ -94,7 +95,6 @@ struct commando_mercenary_t : public player_t
     virtual void      init_actions();
     virtual int       primary_resource() const;
     virtual int       primary_role() const;
-    virtual void      create_talents();
 
     virtual void init_scaling()
     {
@@ -370,7 +370,6 @@ void commando_mercenary_t::create_talents()
         ++i;
     }
 #endif
-    player_t::create_talents();
 }
 
 // ==========================================================================
