@@ -4501,17 +4501,17 @@ talent_t* player_t::find_talent( const std::string& n,
 action_expr_t* player_t::create_expression( action_t* a,
                                             const std::string& name_str )
 {
-  int resource_type = util_t::parse_resource_type( name_str );
-  if ( resource_type != RESOURCE_NONE )
+  struct resource_expr_t : public action_expr_t
   {
-    struct resource_expr_t : public action_expr_t
-    {
-      int resource_type;
-      resource_expr_t( action_t* a, const std::string& n, int r ) : action_expr_t( a, n, TOK_NUM ), resource_type( r ) {}
-      virtual int evaluate() { result_num = action -> player -> resource_current[ resource_type ]; return TOK_NUM; }
-    };
-    return new resource_expr_t( a, name_str, resource_type );
-  }
+    resource_type rt;
+    resource_expr_t( action_t* a, const std::string& n, resource_type r ) : action_expr_t( a, n, TOK_NUM ), rt( r ) {}
+    virtual int evaluate() { result_num = action -> player -> resource_current[ rt ]; return TOK_NUM; }
+  };
+
+  resource_type rt = static_cast<resource_type>( util_t::parse_resource_type( name_str ) );
+  if ( rt != RESOURCE_NONE )
+    return new resource_expr_t( a, name_str, rt );
+
   if ( name_str == "level" )
   {
     struct level_expr_t : public action_expr_t
@@ -4529,34 +4529,6 @@ action_expr_t* player_t::create_expression( action_t* a,
       virtual int evaluate() { player_t* p = action -> player; result_num = p -> composite_player_multiplier( action -> school, action ); return TOK_NUM; }
     };
     return new multiplier_expr_t( a );
-  }
-  if ( name_str == "mana_pct" )
-  {
-    struct mana_pct_expr_t : public action_expr_t
-    {
-      mana_pct_expr_t( action_t* a ) : action_expr_t( a, "mana_pct", TOK_NUM ) {}
-      virtual int evaluate() { player_t* p = action -> player; result_num = 100 * ( p -> resource_current[ RESOURCE_MANA ] / p -> resource_max[ RESOURCE_MANA ] ); return TOK_NUM; }
-    };
-    return new mana_pct_expr_t( a );
-  }
-  if ( name_str == "health_pct" )
-  {
-    struct health_pct_expr_t : public action_expr_t
-    {
-      player_t* player;
-      health_pct_expr_t( action_t* a, player_t* p ) : action_expr_t( a, "health_pct", TOK_NUM ), player( p ) {}
-      virtual int evaluate() { result_num = player -> health_percentage(); return TOK_NUM; }
-    };
-    return new health_pct_expr_t( a, this );
-  }
-  if ( name_str == "mana_deficit" )
-  {
-    struct mana_deficit_expr_t : public action_expr_t
-    {
-      mana_deficit_expr_t( action_t* a ) : action_expr_t( a, "mana_deficit", TOK_NUM ) {}
-      virtual int evaluate() { player_t* p = action -> player; result_num = ( p -> resource_max[ RESOURCE_MANA ] - p -> resource_current[ RESOURCE_MANA ] ); return TOK_NUM; }
-    };
-    return new mana_deficit_expr_t( a );
   }
   if ( name_str == "in_combat" )
   {
@@ -4633,42 +4605,6 @@ action_expr_t* player_t::create_expression( action_t* a,
     };
     return new time_to_max_ammo_expr_t( a );
   }
-  if ( name_str == "max_energy" )
-  {
-    struct max_energy_expr_t : public action_expr_t
-    {
-      max_energy_expr_t( action_t* a ) : action_expr_t( a, "max_energy", TOK_NUM ) {}
-      virtual int evaluate() { result_num = action -> player -> resource_max[ RESOURCE_ENERGY ]; return TOK_NUM; }
-    };
-    return new max_energy_expr_t( a );
-  }
-  if ( name_str == "max_ammo" )
-  {
-    struct max_ammo_expr_t : public action_expr_t
-    {
-      max_ammo_expr_t( action_t* a ) : action_expr_t( a, "max_ammo", TOK_NUM ) {}
-      virtual int evaluate() { result_num = action -> player -> resource_max[ RESOURCE_AMMO ]; return TOK_NUM; }
-    };
-    return new max_ammo_expr_t( a );
-  }
-  if ( name_str == "max_rage" )
-  {
-    struct max_rage_expr_t : public action_expr_t
-    {
-      max_rage_expr_t( action_t* a ) : action_expr_t( a, "max_rage", TOK_NUM ) {}
-      virtual int evaluate() { result_num = action -> player -> resource_max[ RESOURCE_RAGE ]; return TOK_NUM; }
-    };
-    return new max_rage_expr_t( a );
-  }
-  if ( name_str == "max_mana" )
-  {
-    struct max_mana_expr_t : public action_expr_t
-    {
-      max_mana_expr_t( action_t* a ) : action_expr_t( a, "max_mana", TOK_NUM ) {}
-      virtual int evaluate() { result_num = action -> player -> resource_max[ RESOURCE_MANA ]; return TOK_NUM; }
-    };
-    return new max_mana_expr_t( a );
-  }
   if ( name_str == "ptr" )
   {
     struct ptr_expr_t : public action_expr_t
@@ -4696,24 +4632,52 @@ action_expr_t* player_t::create_expression( action_t* a,
     };
     return new position_back_expr_t( a );
   }
+
   std::vector<std::string> splits;
   int num_splits = util_t::string_split( splits, name_str, "." );
 
-  if ( num_splits == 2 )
+  if ( num_splits == 2 && ( rt = static_cast<resource_type>( util_t::parse_resource_type( splits[ 0 ] ) ) ) != RESOURCE_NONE )
   {
-    int resource_type = util_t::parse_resource_type( splits[ 0 ] );
-    if ( resource_type != RESOURCE_NONE )
+    if ( splits[ 1 ] == "deficit" )
     {
-      if ( splits[ 1 ] == "pct" )
+      struct resource_deficit_expr_t : public resource_expr_t
       {
-        struct resource_pct_expr_t : public action_expr_t
+        resource_deficit_expr_t( action_t* a, const std::string& n, resource_type r ) : resource_expr_t( a, n, r ) {}
+        virtual int evaluate()
         {
-          int resource_type;
-          resource_pct_expr_t( action_t* a, const std::string& n, int r ) : action_expr_t( a, n, TOK_NUM ), resource_type( r ) {}
-          virtual int evaluate() { result_num = action -> player -> resource_current[ resource_type ] / action -> player -> resource_max[ resource_type ]; return TOK_NUM; }
-        };
-        return new resource_pct_expr_t( a, name_str, resource_type );
-      }
+          const player_t& p = *action -> player;
+          result_num = p.resource_max[ rt ] - p.resource_current[ rt ];
+          return TOK_NUM;
+        }
+      };
+      return new resource_deficit_expr_t( a, name_str, rt );
+    }
+
+    if ( splits[ 1 ] == "pct" || splits[ 1 ] == "percent" )
+    {
+      struct resource_pct_expr_t : public resource_expr_t
+      {
+        resource_pct_expr_t( action_t* a, const std::string& n, resource_type r ) : resource_expr_t( a, n, r ) {}
+        virtual int evaluate()
+        {
+          if ( rt == RESOURCE_HEALTH )
+            result_num = action -> player -> health_percentage();
+          else
+            result_num = 100.0 * action -> player -> resource_current[ rt ] / action -> player -> resource_max[ rt ];
+          return TOK_NUM;
+        }
+      };
+      return new resource_pct_expr_t( a, name_str, rt );
+    }
+
+    if ( splits[ 1 ] == "max" )
+    {
+      struct resource_max_expr_t : public resource_expr_t
+      {
+        resource_max_expr_t( action_t* a, const std::string& n, resource_type r ) : resource_expr_t( a, n, r ) {}
+        virtual int evaluate() { result_num = action -> player -> resource_max[ rt ]; return TOK_NUM; }
+      };
+      return new resource_max_expr_t( a, name_str, rt );
     }
   }
 
