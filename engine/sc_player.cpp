@@ -2457,35 +2457,30 @@ double player_t::resource_loss( int       resource,
 
   double actual_amount;
 
-  if ( infinite_resource[ resource ] == 0 || is_enemy() )
-  {
+  if ( infinite_resource[ resource ] == 0 || is_enemy() ) // FIXME: WTF special case for is_enemy()?
     actual_amount = std::min( amount, resource_current[ resource ] );
-    resource_current[ resource ] -= actual_amount;
-    resource_lost[ resource ] += actual_amount;
-  }
   else
-  {
     actual_amount = amount;
-    resource_current[ resource ] -= actual_amount;
-    resource_lost[ resource ] += actual_amount;
-  }
+
+  resource_current[ resource ] -= actual_amount;
+  resource_lost   [ resource ] += actual_amount;
 
   if ( source )
   {
     if ( source -> type == RESOURCE_NONE )
-      source -> type = ( resource_type ) resource;
+      source -> type = static_cast<resource_type>( resource );
 
     if ( resource != source -> type )
     {
-      sim -> errorf( "player_t::resource_gain: player=%s gain=%s resource_gain type not identical to gain resource type..\n resource=%s gain=%s",
+      sim -> errorf( "player_t::resource_loss: player=%s gain=%s resource type not identical to gain -> resource type..\n resource=%s gain=%s",
                      name(), source -> name_str.c_str(), util_t::resource_type_string( resource ), util_t::resource_type_string( source -> type ) );
       assert ( 0 );
     }
 
-    source -> add( (-1.0 ) * actual_amount, actual_amount - amount );
+    source -> add( -actual_amount, actual_amount - amount );
   }
 
-  action_callback_t::trigger( resource_loss_callbacks[ resource ], action, ( void* ) &actual_amount );
+  action_callback_t::trigger( resource_loss_callbacks[ resource ], action, &actual_amount );
 
   if ( sim -> debug )
     log_t::output( sim, "Player %s loses %.2f (%.2f) %s. health pct: %.2f",
@@ -2518,11 +2513,11 @@ double player_t::resource_gain( int       resource,
   if ( source )
   {
     if ( source -> type == RESOURCE_NONE )
-      source -> type = ( resource_type ) resource;
+      source -> type = static_cast<resource_type>( resource );
 
     if ( resource != source -> type )
     {
-      sim -> errorf( "player_t::resource_gain: player=%s gain=%s resource_gain type not identical to gain resource type..\n resource=%s gain=%s",
+      sim -> errorf( "player_t::resource_gain: player=%s gain=%s resource type not identical to gain -> resource type..\n resource=%s gain=%s",
                      name(), source -> name_str.c_str(), util_t::resource_type_string( resource ), util_t::resource_type_string( source -> type ) );
       assert ( 0 );
     }
@@ -2530,7 +2525,7 @@ double player_t::resource_gain( int       resource,
     source -> add( actual_amount, amount - actual_amount );
   }
 
-  action_callback_t::trigger( resource_gain_callbacks[ resource ], action, ( void* ) &actual_amount );
+  action_callback_t::trigger( resource_gain_callbacks[ resource ], action, &actual_amount );
 
   if ( sim -> log )
   {

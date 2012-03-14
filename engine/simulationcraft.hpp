@@ -2865,8 +2865,8 @@ public:
   std::string print_action_map( int iterations, int precision ) const;
 
   virtual void   regen( timespan_t periodicity=timespan_t::from_seconds( 0.25 ) );
-  virtual double resource_gain( int resource, double amount, gain_t* g=0, action_t* a=0 );
-  virtual double resource_loss( int resource, double amount, gain_t* g=0, action_t* a=0 );
+          double resource_gain( int resource, double amount, gain_t* g=0, action_t* a=0 );
+          double resource_loss( int resource, double amount, gain_t* g=0, action_t* a=0 );
   virtual void   recalculate_resource_max( int resource );
   virtual bool   resource_available( int resource, double cost ) const;
   virtual int    primary_resource() const { return RESOURCE_NONE; }
