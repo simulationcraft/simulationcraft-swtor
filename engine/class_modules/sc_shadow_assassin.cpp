@@ -42,7 +42,7 @@ struct shadow_assassin_t : public player_t
     }
   };
 
-  //Active
+  // Active
   struct actives_t
   {
     int charge;
@@ -1804,9 +1804,10 @@ void shadow_assassin_t::init_actions()
 
   if ( action_list_str.empty() )
   {
+    action_list_str += "stim,type=exotech_resolve";
+
     if ( type == JEDI_SHADOW )
     {
-      action_list_str += "stim,type=exotech_resolve";
       action_list_str += "/force_valor";
       action_list_str += "/snapshot_stats";
 
@@ -1834,146 +1835,69 @@ void shadow_assassin_t::init_actions()
     // Sith ASSASSIN
     else
     {
-
-      action_list_str += "stim,type=exotech_resolve";
       action_list_str += "/mark_of_power";
 
+      if ( talents.surging_charge->rank() )
+        action_list_str += "/surging_charge";
+      else
+        action_list_str += "/lightning_charge";
 
-      switch ( primary_tree() )
+      action_list_str += "/snapshot_stats";
+
+      if ( talents.dark_embrace->rank() )
+        action_list_str += "/stealth";
+
+      action_list_str += "/power_potion";
+      action_list_str += "/recklessness";
+
+      if ( talents.dark_embrace->rank() )
       {
-      case TREE_MADNESS:
-
-        if ( talents.surging_charge->rank() )
-               action_list_str += "/surging_charge";
-             else
-               action_list_str += "/lightning_charge";
-
-             action_list_str += "/snapshot_stats";
-
-             if ( talents.dark_embrace->rank() )
-               action_list_str += "/stealth";
-
-             action_list_str += "/power_potion";
-             action_list_str += "/recklessness";
-
-             if ( talents.dark_embrace->rank() )
-             {
-               if ( talents.darkswell->rank() )
-                 action_list_str += "/blackout,if=buff.dark_embrace.down&force<90";
-               action_list_str += "/force_cloak,if=buff.dark_embrace.down";
-             }
-
-             action_list_str += "/overcharge_saber";
-
-             if ( talents.death_field->rank() )
-               action_list_str += "/death_field";
-
-             if ( talents.raze->rank() )
-               action_list_str += "/crushing_darkness,if=buff.raze.react";
-
-             if ( !talents.surging_charge->rank() )
-               action_list_str += "/discharge,if=!dot.lightning_discharge.ticking";
-
-             action_list_str += "/assassinate";
-
-             if ( talents.creeping_terror->rank() )
-               action_list_str += "/creeping_terror,if=!ticking";
-
-             if ( talents.duplicity->rank() )
-               action_list_str += "/maul,if=buff.exploit_weakness.react";
-
-             if ( talents.surging_charge->rank() )
-             {
-               action_list_str += "/discharge";
-               if ( talents.static_charges->rank() )
-                 action_list_str += ",if=buff.static_charges.stack>0";
-             }
-
-             if ( talents.voltaic_slash->rank() )
-               action_list_str += "/voltaic_slash";
-             else
-             {
-               action_list_str += "/thrash,if=force>70";
-               if ( talents.dark_embrace->rank() )
-                 action_list_str += "-12*buff.dark_embrace.up";
-             }
-
-             action_list_str += "/saber_strike";
-
-        break;
-
-      case TREE_DECEPTION:
-
-        if ( talents.surging_charge->rank() )
-               action_list_str += "/surging_charge";
-             else
-               action_list_str += "/lightning_charge";
-
-             action_list_str += "/snapshot_stats";
-
-             if ( talents.dark_embrace->rank() )
-               action_list_str += "/stealth";
-
-             action_list_str += "/power_potion";
-             action_list_str += "/recklessness";
-
-             if ( talents.dark_embrace->rank() )
-             {
-               if ( talents.darkswell->rank() )
-                 action_list_str += "/blackout,if=buff.dark_embrace.down&force<90";
-               action_list_str += "/force_cloak,if=buff.dark_embrace.down";
-             }
-
-             action_list_str += "/overcharge_saber";
-
-             if ( talents.death_field->rank() )
-               action_list_str += "/death_field";
-
-             if ( talents.raze->rank() )
-               action_list_str += "/crushing_darkness,if=buff.raze.react";
-
-             if ( !talents.surging_charge->rank() )
-               action_list_str += "/discharge,if=!dot.lightning_discharge.ticking";
-
-             action_list_str += "/assassinate";
-
-             if ( talents.creeping_terror->rank() )
-               action_list_str += "/creeping_terror,if=!ticking";
-
-             if ( talents.duplicity->rank() )
-               action_list_str += "/maul,if=buff.exploit_weakness.react";
-
-             if ( talents.surging_charge->rank() )
-             {
-               action_list_str += "/discharge";
-               if ( talents.static_charges->rank() )
-                 action_list_str += ",if=buff.static_charges.stack>0";
-             }
-
-             action_list_str += "/shock";
-             if ( talents.unearthed_knowledge->rank() )
-               action_list_str += ",if=buff.unearthed_knowledge.down";
-             else if ( talents.induction->rank() )
-               action_list_str += ",if=buff.induction.stack=2";
-
-             if ( talents.voltaic_slash->rank() )
-               action_list_str += "/voltaic_slash";
-             else
-             {
-               action_list_str += "/thrash,if=force>70";
-               if ( talents.dark_embrace->rank() )
-                 action_list_str += "-12*buff.dark_embrace.up";
-             }
-
-             action_list_str += "/saber_strike";
-
-        break;
-
-      default:
-        break;
+        if ( talents.darkswell->rank() )
+          action_list_str += "/blackout,if=buff.dark_embrace.down&force<90";
+        action_list_str += "/force_cloak,if=buff.dark_embrace.down";
       }
 
+      action_list_str += "/overcharge_saber";
 
+      if ( talents.death_field->rank() )
+        action_list_str += "/death_field";
+
+      if ( talents.raze->rank() )
+        action_list_str += "/crushing_darkness,if=buff.raze.react";
+
+      if ( !talents.surging_charge->rank() )
+        action_list_str += "/discharge,if=!dot.lightning_discharge.ticking";
+
+      action_list_str += "/assassinate";
+
+      if ( talents.creeping_terror->rank() )
+        action_list_str += "/creeping_terror,if=!ticking";
+
+      if ( talents.duplicity->rank() )
+        action_list_str += "/maul,if=buff.exploit_weakness.react";
+
+      if ( talents.surging_charge->rank() )
+      {
+        action_list_str += "/discharge";
+        if ( talents.static_charges->rank() )
+          action_list_str += ",if=buff.static_charges.stack>0";
+      }
+
+      if ( talents.unearthed_knowledge->rank() )
+        action_list_str += "/shock,if=buff.unearthed_knowledge.down";
+      if ( talents.induction->rank() )
+        action_list_str += "/shock,if=buff.induction.stack=2";
+
+      if ( talents.voltaic_slash->rank() )
+        action_list_str += "/voltaic_slash";
+      else
+      {
+        action_list_str += "/thrash,if=force>70";
+        if ( talents.dark_embrace->rank() )
+          action_list_str += "-12*buff.dark_embrace.up";
+      }
+
+      action_list_str += "/saber_strike";
 
       action_list_default = 1;
     }
