@@ -1696,7 +1696,7 @@ void sage_sorcerer_t::init_actions()
         action_list_str += "/mind_crush,if=buff.presence_of_mind.react";
 
       if ( talents.telekinetic_wave -> rank() && talents.presence_of_mind -> rank() )
-        action_list_str += "/telekinetic_wave,if=buff.presence_of_mind.react&force>76+6*target.health_pct&cooldown.mind_crush.remains>4";
+        action_list_str += "/telekinetic_wave,if=buff.presence_of_mind.react&force>76+6*target.health.pct&cooldown.mind_crush.remains>4";
 
       if ( talents.sever_force -> rank() > 0 )
         action_list_str += "/sever_force,if=!ticking";
@@ -1765,7 +1765,7 @@ void sage_sorcerer_t::init_actions()
         action_list_str += "/crushing_darkness,if=buff.wrath.react";
 
       if ( talents.telekinetic_wave -> rank() && talents.presence_of_mind -> rank() )
-        action_list_str += "/chain_lightning,if=buff.wrath.react&force>76+6*target.health_pct&cooldown.crushing_darkness.remains>4";
+        action_list_str += "/chain_lightning,if=buff.wrath.react&force>76+6*target.health.pct&cooldown.crushing_darkness.remains>4";
 
       if ( talents.sever_force -> rank() > 0 )
         action_list_str += "/creeping_terror,if=!ticking";

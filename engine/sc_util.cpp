@@ -1526,10 +1526,11 @@ void util_t::tolower_( std::string& str )
 // utility functions
 std::string tolower( const std::string& src )
 {
-  std::string dest;
-  for ( std::string::size_type i = 0, n = src.length(); i < n; ++i )
-    dest.push_back( tolower( src[ i ] ) );
-  return dest;
+  std::string result;
+  result.reserve( src.size() );
+  for ( char c : src )
+    result += std::tolower( c );
+  return result;
 }
 
 #if 0 // UNUSED

@@ -1555,49 +1555,32 @@ action_expr_t* action_t::create_expression( const std::string& name_str )
   }
 
   if ( num_splits >= 2 && splits[ 0 ] == "aura" )
-  {
     return sim -> create_expression( this, name_str );
-  }
 
-  if ( num_splits == 2 && splits[ 0 ] == "target" )
-  {
-    return target -> create_expression( this, splits[ 1 ] );
-  }
+  if ( num_splits > 1 && splits[ 0 ] == "target" )
+    return target -> create_expression( this, join( splits.begin() + 1, splits.end(), '.' ) );
 
-  if ( num_splits > 2 && splits[ 0 ] == "target" )
+  if ( num_splits > 2 && splits[ 0 ] == "actor" )
   {
     // Find target
     player_t* expr_target = sim -> find_player( splits[ 1 ] );
     if ( ! expr_target )
     {
-      sim -> errorf( "Unable to find target for %s", name_str.c_str() );
+      sim -> errorf( "Unable to find actor %s for expression %s", splits[ 1 ].c_str(), name_str.c_str() );
       sim -> cancel();
+      return 0;
     }
 
-    std::string rest = splits[ 2 ];
-    for ( int i = 3; i < num_splits; ++i )
-      rest += '.' + splits[ i ];
-
-    return expr_target -> create_expression( this, rest );
+    return expr_target -> create_expression( this, join( splits.begin() + 2, splits.end(), '.' ) );
   }
 
   // necessary for self.target.*, self.dot.*
-  if ( num_splits >= 2 && splits[ 0 ] == "self" )
-  {
-    std::string rest = splits[1];
-    for ( int i = 2; i < num_splits; ++i )
-      rest += '.' + splits[i];
-    return player -> create_expression( this, rest );
-  }
+  if ( num_splits > 1 && splits[ 0 ] == "self" )
+    return player -> create_expression( this, join( splits.begin() + 1, splits.end(), '.' ) );
 
   // necessary for sim.target.*
   if ( num_splits >= 2 && splits[ 0 ] == "sim" )
-  {
-    std::string rest = splits[1];
-    for ( int i = 2; i < num_splits; ++i )
-      rest += '.' + splits[i];
-    return sim -> create_expression( this, rest );
-  }
+    return sim -> create_expression( this, join( splits.begin() + 1, splits.end(), '.' ) );
 
   return player -> create_expression( this, name_str );
 }

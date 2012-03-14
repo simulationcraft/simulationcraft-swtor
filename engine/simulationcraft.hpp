@@ -3950,8 +3950,28 @@ struct rng_t
 
 // String utils =============================================================
 
+template <typename Fwd, typename Delim>
+std::string join( Fwd first, Fwd last, Delim d )
+{
+  std::string result;
+
+  if ( first != last )
+    result += *first++;
+
+  while ( first != last )
+  {
+    result += d;
+    result += *first++;
+  }
+
+  return result;
+}
+
+template <typename Range, typename Delim>
+inline std::string join( Range&& r, Delim d )
+{ return join( std::begin( r ), std::end( r ), d ); }
+
 std::string tolower( const std::string& src );
-std::string proper_option_name( const std::string& full_name );
 #if 0 // UNUSED
 std::string trim( const std::string& src );
 void replace_char( std::string& str, char old_c, char new_c  );
