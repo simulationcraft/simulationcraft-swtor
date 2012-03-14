@@ -12,8 +12,11 @@
 dot_t::dot_t( const std::string& n, player_t* p ) :
   sim( p -> sim ), player( p ), action( 0 ), tick_event( 0 ), next( 0 ),
   num_ticks( 0 ), current_tick( 0 ), added_ticks( 0 ), ticking( 0 ),
-  added_seconds( timespan_t::zero ), ready( timespan_t::min ), miss_time( timespan_t::min ),time_to_tick( timespan_t::zero ), name_str( n )
+  added_seconds( timespan_t::zero() ), ready( timespan_t::min() ),
+  miss_time( timespan_t::min() ),time_to_tick( timespan_t::zero() ),
+  name_str( n )
 {}
+
 // dot_t::cancel ===================================================
 
 void dot_t::cancel()
@@ -90,14 +93,14 @@ void dot_t::extend_duration_seconds( timespan_t extra_seconds )
   if ( sim -> debug )
   {
     log_t::output( sim, "%s extends duration of %s on %s by %.1f second(s). h: %.2f => %.2f, num_t: %d => %d, rem_t: %d => %d",
-                   action -> player -> name(), name(), player -> name(), extra_seconds.total_seconds(),
+                   action -> player -> name(), name(), player -> name(), to_seconds( extra_seconds ),
                    old_haste_factor, ( 1.0 / action -> player_alacrity ),
                    old_num_ticks, num_ticks,
                    old_remaining_ticks, new_remaining_ticks );
   }
   else if ( sim -> log )
   {
-    log_t::output( sim, "%s extends duration of %s on %s by %.1f second(s).", action -> player -> name(), name(), player -> name(), extra_seconds.total_seconds() );
+    log_t::output( sim, "%s extends duration of %s on %s by %.1f second(s).", action -> player -> name(), name(), player -> name(), to_seconds( extra_seconds ) );
   }
 
   recalculate_ready();
@@ -131,7 +134,7 @@ void dot_t::refresh_duration()
 
   current_tick = 0;
   added_ticks = 0;
-  added_seconds = timespan_t::zero;
+  added_seconds = timespan_t::zero();
   num_ticks = action -> hasted_num_ticks();
 
   // tick zero dots tick when refreshed
@@ -145,8 +148,8 @@ void dot_t::refresh_duration()
 
 timespan_t dot_t::remains()
 {
-  if ( ! action ) return timespan_t::zero;
-  if ( ! ticking ) return timespan_t::zero;
+  if ( ! action ) return timespan_t::zero();
+  if ( ! ticking ) return timespan_t::zero();
   return ready - player -> sim -> current_time;
 }
 
@@ -158,9 +161,9 @@ void dot_t::reset()
   current_tick=0;
   added_ticks=0;
   ticking=0;
-  added_seconds=timespan_t::zero;
-  ready=timespan_t::min;
-  miss_time=timespan_t::min;
+  added_seconds=timespan_t::zero();
+  ready=timespan_t::min();
+  miss_time=timespan_t::min();
 }
 
 // dot_t::schedule_tick =====================================================
@@ -174,7 +177,7 @@ void dot_t::schedule_tick()
   {
     if ( action -> tick_zero )
     {
-      time_to_tick = timespan_t::zero;
+      time_to_tick = timespan_t::zero();
       action -> tick( this );
     }
   }
@@ -216,7 +219,7 @@ action_expr_t* dot_t::create_expression( action_t* a, const std::string& name )
       duration_expr_t( action_t* a, dot_t* d ) : dot_expr_t( a, "dot_duration", d ) {}
       virtual int evaluate()
       {
-        result_num = dot -> action -> num_ticks * dot -> action -> tick_time().total_seconds();
+        result_num = dot -> action -> num_ticks * to_seconds( dot -> action -> tick_time() );
         return TOK_NUM;
       }
     };
@@ -238,7 +241,7 @@ action_expr_t* dot_t::create_expression( action_t* a, const std::string& name )
     struct remains_expr_t : public dot_expr_t
     {
       remains_expr_t( action_t* a, dot_t* d ) : dot_expr_t( a, "dot_remains", d ) {}
-      virtual int evaluate() { result_num = dot -> remains().total_seconds(); return TOK_NUM; }
+      virtual int evaluate() { result_num = to_seconds( dot -> remains() ); return TOK_NUM; }
     };
     return new remains_expr_t( a, this );
   }

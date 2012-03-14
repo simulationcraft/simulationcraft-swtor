@@ -70,7 +70,7 @@ void event_t::reschedule( timespan_t new_time )
 {
   reschedule_time = sim -> current_time + new_time;
 
-  if ( sim -> debug ) log_t::output( sim, "Rescheduling event %s (%d) from %.2f to %.2f", name, id, time.total_seconds(), reschedule_time.total_seconds() );
+  if ( sim -> debug ) log_t::output( sim, "Rescheduling event %s (%d) from %.2f to %.2f", name, id, to_seconds( time ), to_seconds( reschedule_time ) );
 
 //  if ( ! strcmp( name, "Rabid Expiration" ) ) assert( false );
 }
@@ -148,7 +148,7 @@ void player_ready_event_t::execute()
     // Waiting Debug
     if ( sim -> debug )
     {
-      log_t::output( sim, "%s is waiting for %.4f resource=%.2f", player -> name(), x.total_seconds(), player -> resource_current[ player -> primary_resource() ] );
+      log_t::output( sim, "%s is waiting for %.4f resource=%.2f", player -> name(), to_seconds( x ), player -> resource_current[ player -> primary_resource() ] );
     }
   }
 }
@@ -191,7 +191,7 @@ void player_gcd_event_t::execute()
     }
   }
 
-  player -> off_gcd = new ( sim ) player_gcd_event_t( sim, player, timespan_t::from_seconds( 0.1 ) );
+  player -> off_gcd = new ( sim ) player_gcd_event_t( sim, player, from_seconds( 0.1 ) );
 }
 
 // ==========================================================================
@@ -206,7 +206,7 @@ action_execute_event_t::action_execute_event_t( sim_t*    sim,
                                                 event_t( sim, a -> player ), action( a )
 {
   name = "Action-Execute";
-  if ( sim -> debug ) log_t::output( sim, "New Action Execute Event: %s %s %.1f", player -> name(), a -> name(), time_to_execute.total_seconds() );
+  if ( sim -> debug ) log_t::output( sim, "New Action Execute Event: %s %s %.1f", player -> name(), a -> name(), to_seconds( time_to_execute ) );
   sim -> add_event( this, time_to_execute );
 }
 
@@ -222,7 +222,7 @@ void action_execute_event_t::execute()
   {
     if ( player -> readying ) fprintf( sim -> output_file, "Danger Will Robinson!  Danger!  action %s\n", action -> name() );
 
-    player -> schedule_ready( timespan_t::zero );
+    player -> schedule_ready( timespan_t::zero() );
   }
 
   if ( player -> off_gcd_actions.size() == 0 )
@@ -232,7 +232,7 @@ void action_execute_event_t::execute()
   if ( player -> off_gcd )
     event_t::cancel( player -> off_gcd );
 
-  player -> off_gcd = new ( sim ) player_gcd_event_t( sim, player, timespan_t::zero );
+  player -> off_gcd = new ( sim ) player_gcd_event_t( sim, player, timespan_t::zero() );
 }
 
 // ==========================================================================
@@ -250,7 +250,7 @@ dot_tick_event_t::dot_tick_event_t( sim_t* sim,
 
   if ( sim -> debug )
     log_t::output( sim, "New DoT Tick Event: %s %s %d-of-%d %.2f",
-                   player -> name(), dot -> name(), dot -> current_tick + 1, dot -> num_ticks, time_to_tick.total_seconds() );
+                   player -> name(), dot -> name(), dot -> current_tick + 1, dot -> num_ticks, to_seconds( time_to_tick ) );
 
   sim -> add_event( this, time_to_tick );
 }
@@ -307,14 +307,14 @@ void dot_tick_event_t::execute()
 
   if ( dot -> current_tick == dot -> num_ticks )
   {
-    dot -> time_to_tick = timespan_t::zero;
+    dot -> time_to_tick = timespan_t::zero();
     dot -> action -> last_tick( dot );
 
     if ( dot -> action -> channeled )
     {
       if ( dot -> action -> player -> readying ) fprintf( sim -> output_file, "Danger Will Robinson!  Danger!  %s\n", dot -> name() );
 
-      dot -> action -> player -> schedule_ready( timespan_t::zero );
+      dot -> action -> player -> schedule_ready( timespan_t::zero() );
     }
   }
   else dot -> schedule_tick();
@@ -338,7 +338,7 @@ action_travel_event_t::action_travel_event_t( sim_t*    sim,
 
   if ( sim -> debug )
     log_t::output( sim, "New Action Travel Event: %s %s %.2f",
-                   player -> name(), a -> name(), time_to_travel.total_seconds() );
+                   player -> name(), a -> name(), to_seconds( time_to_travel ) );
 
   sim -> add_event( this, time_to_travel );
 }

@@ -239,13 +239,13 @@ static void print_html_sim_summary( FILE*  file, sim_t* sim )
            "\t\t\t\t\t\t\t\t<th>CPU Seconds:</th>\n"
            "\t\t\t\t\t\t\t\t<td>%.4f</td>\n"
            "\t\t\t\t\t\t\t</tr>\n",
-           sim -> elapsed_cpu.total_seconds() );
+           to_seconds( sim -> elapsed_cpu ) );
   fprintf( file,
            "\t\t\t\t\t\t\t<tr class=\"left\">\n"
            "\t\t\t\t\t\t\t\t<th>Speed Up:</th>\n"
            "\t\t\t\t\t\t\t\t<td>%.0f</td>\n"
            "\t\t\t\t\t\t\t</tr>\n",
-           sim -> iterations * sim -> simulation_length.mean / sim -> elapsed_cpu.total_seconds() );
+           sim -> iterations * sim -> simulation_length.mean / to_seconds( sim -> elapsed_cpu ) );
 
   fprintf( file,
            "\t\t\t\t\t\t\t<tr class=\"left\">\n"
@@ -257,13 +257,13 @@ static void print_html_sim_summary( FILE*  file, sim_t* sim )
            "\t\t\t\t\t\t\t\t<th>World Lag:</th>\n"
            "\t\t\t\t\t\t\t\t<td>%.0f ms ( stddev = %.0f ms )</td>\n"
            "\t\t\t\t\t\t\t</tr>\n",
-           ( double )sim -> world_lag.total_millis(), ( double )sim -> world_lag_stddev.total_millis() );
+           to_millis( sim -> world_lag ), to_millis( sim -> world_lag_stddev ) );
   fprintf( file,
            "\t\t\t\t\t\t\t<tr class=\"left\">\n"
            "\t\t\t\t\t\t\t\t<th>Queue Lag:</th>\n"
            "\t\t\t\t\t\t\t\t<td>%.0f ms ( stddev = %.0f ms )</td>\n"
            "\t\t\t\t\t\t\t</tr>\n",
-           ( double )sim -> queue_lag.total_millis(), ( double )sim -> queue_lag_stddev.total_millis() );
+           to_millis( sim -> queue_lag ), to_millis( sim -> queue_lag_stddev ) );
   if ( sim -> strict_gcd_queue )
   {
     fprintf( file,
@@ -271,19 +271,19 @@ static void print_html_sim_summary( FILE*  file, sim_t* sim )
              "\t\t\t\t\t\t\t\t<th>GCD Lag:</th>\n"
              "\t\t\t\t\t\t\t\t<td>%.0f ms ( stddev = %.0f ms )</td>\n"
              "\t\t\t\t\t\t\t</tr>\n",
-             ( double )sim -> gcd_lag.total_millis(), ( double )sim -> gcd_lag_stddev.total_millis() );
+             to_millis( sim -> gcd_lag ), to_millis( sim -> gcd_lag_stddev ) );
     fprintf( file,
              "\t\t\t\t\t\t\t<tr class=\"left\">\n"
              "\t\t\t\t\t\t\t\t<th>Channel Lag:</th>\n"
              "\t\t\t\t\t\t\t\t<td>%.0f ms ( stddev = %.0f ms )</td>\n"
              "\t\t\t\t\t\t\t</tr>\n",
-             ( double )sim -> channel_lag.total_millis(), ( double )sim -> channel_lag_stddev.total_millis() );
+             to_millis( sim -> channel_lag ), to_millis( sim -> channel_lag_stddev ) );
     fprintf( file,
              "\t\t\t\t\t\t\t<tr class=\"left\">\n"
              "\t\t\t\t\t\t\t\t<th>Queue GCD Reduction:</th>\n"
              "\t\t\t\t\t\t\t\t<td>%.0f ms</td>\n"
              "\t\t\t\t\t\t\t</tr>\n",
-             ( double )sim -> queue_gcd_reduction.total_millis() );
+             to_millis( sim -> queue_gcd_reduction ) );
   }
 
 
@@ -910,7 +910,7 @@ static void print_html_help_boxes( FILE*  file, sim_t* sim )
            "\t\t\t\t<p>Fight Length is the specified average fight duration. If vary_combat_length is set, the fight length will vary by +/- that portion of the value. See <a href=\"http://code.google.com/p/simulationcraft-swtor/wiki/Options#Combat_Length\" class=\"ext\">Combat Length</a> in the wiki for further details.</p>\n"
            "\t\t\t</div>\n"
            "\t\t</div>\n",
-           sim -> max_time.total_seconds(),
+           to_seconds( sim -> max_time ),
            sim -> vary_combat_length );
 
   fprintf( file,
@@ -1202,14 +1202,14 @@ static void print_html_masthead( FILE*  file, sim_t* sim )
     timespan_t max_length = sim -> max_time * ( 1 + sim -> vary_combat_length );
     fprintf( file,
              "\t\t\t\t<li class=\"linked\"><a href=\"#help-fight-length\" class=\"help\"><b>Fight Length:</b> %.0f - %.0f</a></li>\n",
-             min_length.total_seconds(),
-             max_length.total_seconds() );
+             to_seconds( min_length ),
+             to_seconds( max_length ) );
   }
   else
   {
     fprintf( file,
              "\t\t\t\t<li><b>Fight Length:</b> %.0f</li>\n",
-             sim -> max_time.total_seconds() );
+             to_seconds( sim -> max_time ) );
   }
   fprintf( file,
            "\t\t\t\t<li><b>Fight Style:</b> %s</li>\n",

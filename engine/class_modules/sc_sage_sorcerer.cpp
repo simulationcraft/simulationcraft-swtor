@@ -332,8 +332,8 @@ struct sage_sorcerer_spell_t : public sage_sorcerer_action_t
 
     sage_sorcerer_t* p = cast();
 
-    if ( base_execute_time > timespan_t::zero && p -> buffs.presence_of_mind -> up() )
-      et = timespan_t::zero;
+    if ( base_execute_time > timespan_t::zero() && p -> buffs.presence_of_mind -> up() )
+      et = timespan_t::zero();
 
     return et;
   }
@@ -344,7 +344,7 @@ struct sage_sorcerer_spell_t : public sage_sorcerer_action_t
 
     sage_sorcerer_t* p = cast();
 
-    if ( base_execute_time > timespan_t::zero )
+    if ( base_execute_time > timespan_t::zero() )
       p -> buffs.presence_of_mind -> expire();
 
     if ( dd.base_min > 0 )
@@ -357,7 +357,7 @@ struct sage_sorcerer_spell_t : public sage_sorcerer_action_t
 
     sage_sorcerer_t* p = cast();
 
-    if ( base_execute_time > timespan_t::zero && p -> buffs.presence_of_mind -> up() )
+    if ( base_execute_time > timespan_t::zero() && p -> buffs.presence_of_mind -> up() )
       dd.player_multiplier *= 1.20;
 
     if ( ( dd.base_min > 0 || channeled ) && p -> buffs.force_potency -> up() )
@@ -535,7 +535,7 @@ struct project_t : public sage_sorcerer_spell_t
 
       base_cost = 45.0;
 
-      cooldown -> duration = timespan_t::from_seconds( 6.0 );
+      cooldown -> duration = from_seconds( 6.0 );
 
       if ( p -> talents.upheaval -> rank() > 0 )
       {
@@ -582,15 +582,15 @@ struct telekinetic_throw_t : public sage_sorcerer_spell_t
 
     range = 30.0;
     num_ticks = 3;
-    base_tick_time = timespan_t::from_seconds( 1.0 );
+    base_tick_time = from_seconds( 1.0 );
     may_crit = false;
     channeled = true;
     tick_zero = true;
 
     if ( p -> talents.telekinetic_balance -> rank() > 0 )
-      cooldown -> duration = timespan_t::zero;
+      cooldown -> duration = timespan_t::zero();
     else
-      cooldown -> duration = timespan_t::from_seconds( 6.0 );
+      cooldown -> duration = from_seconds( 6.0 );
 
     base_crit += p -> talents.critical_kinesis -> rank() * 0.05;
 
@@ -669,7 +669,7 @@ struct disturbance_t : public sage_sorcerer_spell_t
     dd.standardhealthpercentmax = .152;
     dd.power_mod = 1.32;
 
-    base_execute_time = timespan_t::from_seconds( 1.5 );
+    base_execute_time = from_seconds( 1.5 );
 
     base_cost = 30.0;
     if ( player -> set_bonus.rakata_force_masters -> two_pc() )
@@ -739,7 +739,7 @@ struct mind_crush_t : public sage_sorcerer_spell_t
       td.standardhealthpercentmin = td.standardhealthpercentmax = .0295;
       td.power_mod = 0.295;
 
-      base_tick_time = timespan_t::from_seconds( 1.0 );
+      base_tick_time = from_seconds( 1.0 );
       num_ticks = 6 + p -> talents.assertion -> rank() * 1;
       range = 30.0;
       influenced_by_inner_strength = false;
@@ -775,12 +775,12 @@ struct mind_crush_t : public sage_sorcerer_spell_t
     dd.standardhealthpercentmax = .143;
     dd.power_mod = 1.23;
 
-    base_execute_time = timespan_t::from_seconds( 2.0 );
+    base_execute_time = from_seconds( 2.0 );
     base_cost = 40.0;
     range = 30.0;
-    cooldown -> duration = timespan_t::from_seconds( 15.0 );
+    cooldown -> duration = from_seconds( 15.0 );
     if ( player -> set_bonus.battlemaster_force_masters -> two_pc() )
-      cooldown -> duration -= timespan_t::from_seconds( 1.5 );
+      cooldown -> duration -= from_seconds( 1.5 );
     influenced_by_inner_strength = false;
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
@@ -807,7 +807,7 @@ struct weaken_mind_t : public sage_sorcerer_spell_t
     td.standardhealthpercentmin = td.standardhealthpercentmax = .031;
     td.power_mod = 0.31;
 
-    base_tick_time = timespan_t::from_seconds( 3.0 );
+    base_tick_time = from_seconds( 3.0 );
     num_ticks = 5 + p -> talents.disturb_mind -> rank();
     base_cost = 35.0;
     range = 30.0;
@@ -857,13 +857,13 @@ struct turbulence_t : public sage_sorcerer_spell_t
     dd.standardhealthpercentmax = .178;
     dd.power_mod = 1.58;
 
-    base_execute_time = timespan_t::from_seconds( 2.0 );
+    base_execute_time = from_seconds( 2.0 );
     base_cost = 45.0;
     range = 30.0;
     crit_bonus += p -> talents.reverberation -> rank() * 0.1;
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
-    cooldown -> duration = timespan_t::from_seconds( 9.0 );
+    cooldown -> duration = from_seconds( 9.0 );
   }
 
   virtual void target_debuff( player_t *t, int dmg_type )
@@ -895,12 +895,12 @@ struct force_in_balance_t : public sage_sorcerer_spell_t
     dd.standardhealthpercentmax = .207;
     dd.power_mod = 1.87;
 
-    ability_lag = timespan_t::from_seconds( 0.2 );
+    ability_lag = from_seconds( 0.2 );
     base_cost = 50.0;
     range = 30.0;
     aoe = 2;
 
-    cooldown -> duration = timespan_t::from_seconds( 15.0 );
+    cooldown -> duration = from_seconds( 15.0 );
 
     crit_bonus += p -> talents.mental_scarring -> rank() * 0.1;
     base_multiplier *= 1.0 + p -> talents.psychic_suffusion -> rank() * 0.05;
@@ -930,12 +930,12 @@ struct sever_force_t : public sage_sorcerer_spell_t
     td.standardhealthpercentmin = td.standardhealthpercentmax = .031;
     td.power_mod = 0.311;
 
-    base_tick_time = timespan_t::from_seconds( 3.0 );
+    base_tick_time = from_seconds( 3.0 );
     num_ticks = 6;
     base_cost = 20.0;
     range = 30.0;
     may_crit = false;
-    cooldown -> duration = timespan_t::from_seconds( 9.0 );
+    cooldown -> duration = from_seconds( 9.0 );
     tick_zero = true;
     influenced_by_inner_strength = false;
   }
@@ -959,7 +959,7 @@ struct mental_alacrity_t : public sage_sorcerer_spell_t
     check_talent( p -> talents.mental_alacrity -> rank() );
 
     parse_options( 0, options_str );
-    cooldown -> duration = timespan_t::from_seconds( 120.0 );
+    cooldown -> duration = from_seconds( 120.0 );
     harmful = false;
 
     // TODO: Does it trigger a gcd?
@@ -1003,8 +1003,8 @@ struct telekinetic_wave_t : public sage_sorcerer_spell_t
       dd.power_mod = 2.02;
 
       base_cost = 50.0;
-      cooldown -> duration = timespan_t::from_seconds( 6.0 );
-      base_execute_time = timespan_t::from_seconds( 3.0 );
+      cooldown -> duration = from_seconds( 6.0 );
+      base_execute_time = from_seconds( 3.0 );
 
       if ( p -> talents.telekinetic_momentum -> rank() > 0 )
       {
@@ -1043,7 +1043,7 @@ struct telekinetic_wave_t : public sage_sorcerer_spell_t
     sage_sorcerer_t* p = cast();
 
     if ( p -> buffs.tidal_force -> up() )
-      et = timespan_t::zero;
+      et = timespan_t::zero();
 
     return et;
   }
@@ -1064,10 +1064,10 @@ struct force_potency_t : public sage_sorcerer_spell_t
     sage_sorcerer_spell_t( n, p )
   {
     parse_options( 0, options_str );
-    cooldown -> duration = timespan_t::from_seconds( 90.0 );
+    cooldown -> duration = from_seconds( 90.0 );
     harmful = false;
 
-    trigger_gcd = timespan_t::zero;
+    trigger_gcd = timespan_t::zero();
   }
 
   virtual void execute()
@@ -1147,8 +1147,8 @@ struct deliverance_t : public sage_sorcerer_heal_t
     dd.power_mod = 3.41;
 
     base_cost = 55.0;
-    base_execute_time = timespan_t::from_seconds( 3.0 );
-    base_execute_time -= timespan_t::from_seconds( p -> talents.immutable_force -> rank() * 0.25 );
+    base_execute_time = from_seconds( 3.0 );
+    base_execute_time -= from_seconds( p -> talents.immutable_force -> rank() * 0.25 );
 
     range = 30.0;
   }
@@ -1159,7 +1159,7 @@ struct deliverance_t : public sage_sorcerer_heal_t
 
     // FIXME: check if -1.0s becomes before or after Alacrity
     if ( p() -> buffs.conveyance -> up() )
-      et -= timespan_t::from_seconds( 1.0 );
+      et -= from_seconds( 1.0 );
 
     return et;
   }
@@ -1184,7 +1184,7 @@ struct benevolence_t : public sage_sorcerer_heal_t
     dd.power_mod = 1.75;
 
     base_cost = 50.0;
-    base_execute_time = timespan_t::from_seconds( 1.5 );
+    base_execute_time = from_seconds( 1.5 );
 
     range = 30.0;
   }
@@ -1233,8 +1233,8 @@ struct healing_trance_t : public sage_sorcerer_heal_t
     base_cost = 40.0;
 
     num_ticks = 3;
-    base_tick_time = timespan_t::from_seconds( 1.0 );
-    cooldown -> duration = timespan_t::from_seconds( 9.0 );
+    base_tick_time = from_seconds( 1.0 );
+    cooldown -> duration = from_seconds( 9.0 );
 
     range = 30.0;
   }
@@ -1281,10 +1281,10 @@ struct rejuvenate_t : public sage_sorcerer_heal_t
     td.power_mod = 0.33;
 
     base_cost = 30.0;
-    cooldown -> duration = timespan_t::from_seconds( 6.0 );
+    cooldown -> duration = from_seconds( 6.0 );
 
     num_ticks = 3 + p -> talents.force_shelter -> rank();
-    base_tick_time = timespan_t::from_seconds( 3.0 );
+    base_tick_time = from_seconds( 3.0 );
 
     range = 30.0;
   }
@@ -1333,11 +1333,11 @@ struct salvation_t : public sage_sorcerer_heal_t
 
     num_ticks = 10;
     tick_zero = true;
-    base_tick_time = timespan_t::from_seconds( 1.0 );
+    base_tick_time = from_seconds( 1.0 );
 
     base_cost = 100.0;
-    base_execute_time = timespan_t::from_seconds( 2.0 );
-    cooldown -> duration = timespan_t::from_seconds( 15.0 );
+    base_execute_time = from_seconds( 2.0 );
+    cooldown -> duration = from_seconds( 15.0 );
 
     range = 30.0;
 
@@ -1415,8 +1415,8 @@ struct force_armor_t : public sage_sorcerer_absorb_t
 
     base_cost = 65.0;
     base_cost -= p -> talents.preservation -> rank() * 15.0;
-    cooldown -> duration = timespan_t::from_seconds( 4.5 );
-    cooldown -> duration -= timespan_t::from_seconds( p -> talents.preservation -> rank() * 1.5 );
+    cooldown -> duration = from_seconds( 4.5 );
+    cooldown -> duration -= from_seconds( p -> talents.preservation -> rank() * 1.5 );
 
     range = 30.0;
 
@@ -1613,20 +1613,20 @@ void sage_sorcerer_t::init_buffs()
 
   bool is_sage = ( type == JEDI_SAGE );
 
-  buffs.concentration = new buff_t( this, is_sage ? "concentration" : "subversion", 3, timespan_t::from_seconds( 10.0 ), timespan_t::zero, 0.5 * talents.concentration -> rank() );
-  buffs.psychic_projection = new buff_t( this, is_sage ? "psychic_projection" : "lightning_barrage", 1, timespan_t::zero, timespan_t::from_seconds( 10.0 ), 0.5 * talents.psychic_projection -> rank() );
-  buffs.tidal_force = new buff_t( this, is_sage ? "tidal_force" : "lightning_storm", 1, timespan_t::zero, timespan_t::from_seconds( 10.0 ) );
-  buffs.telekinetic_effusion = new buff_t( this, is_sage ? "telekinetic_effusion" : "lightning_effusion", 2, timespan_t::zero, timespan_t::zero, 0.5 * talents.telekinetic_effusion -> rank() );
-  buffs.tremors = new buff_t( this, is_sage ? "tremors" : "conduction", 3, timespan_t::from_seconds( 30.0 ) );
-  buffs.presence_of_mind = new buff_t( this, is_sage ? "presence_of_mind" : "wrath", 1, timespan_t::zero, timespan_t::zero, talents.presence_of_mind -> rank() * 0.3 );
-  buffs.force_suppression = new buff_t( this, is_sage ? "force_suppression" : "deathmark", 10, timespan_t::from_seconds( 30.0 ), timespan_t::zero, talents.force_suppression -> rank() );
-  buffs.mental_alacrity = new buff_t( this, is_sage ? "mental_alacrity" : "polarity_shift", 1, timespan_t::from_seconds( 10.0 ) );
-  buffs.force_potency = new buff_t( this, is_sage ? "force_potency" : "recklessness", 2, timespan_t::from_seconds( 20.0 ) );
-  buffs.psychic_projection_dd = new buff_t( this, is_sage ? "psychic_projection_dd" : "lightning_barrage_dd", 1, timespan_t::from_seconds( 2.0 ), timespan_t::zero );
-  buffs.rakata_force_masters_4pc = new buff_t( this, "rakata_force_masters_4pc", 1, timespan_t::from_seconds( 15.0 ), timespan_t::from_seconds( 20.0 ), set_bonus.rakata_force_masters -> four_pc() ? 0.10 : 0.0 );
-  buffs.noble_sacrifice = new buff_t( this, "noble_sacrifice", 4, timespan_t::from_seconds( 10.0 ) );
-  buffs.resplendence = new buff_t( this, is_sage ? "resplendence" : "force_surge", 1 , timespan_t::zero, timespan_t::zero, talents.resplendence -> rank() / 2.0 );
-  buffs.conveyance = new buff_t( this, is_sage ? "conveyace" : "force_bending", 1, timespan_t::zero, timespan_t::zero, talents.conveyance -> rank() / 2.0 );
+  buffs.concentration = new buff_t( this, is_sage ? "concentration" : "subversion", 3, from_seconds( 10.0 ), timespan_t::zero(), 0.5 * talents.concentration -> rank() );
+  buffs.psychic_projection = new buff_t( this, is_sage ? "psychic_projection" : "lightning_barrage", 1, timespan_t::zero(), from_seconds( 10.0 ), 0.5 * talents.psychic_projection -> rank() );
+  buffs.tidal_force = new buff_t( this, is_sage ? "tidal_force" : "lightning_storm", 1, timespan_t::zero(), from_seconds( 10.0 ) );
+  buffs.telekinetic_effusion = new buff_t( this, is_sage ? "telekinetic_effusion" : "lightning_effusion", 2, timespan_t::zero(), timespan_t::zero(), 0.5 * talents.telekinetic_effusion -> rank() );
+  buffs.tremors = new buff_t( this, is_sage ? "tremors" : "conduction", 3, from_seconds( 30.0 ) );
+  buffs.presence_of_mind = new buff_t( this, is_sage ? "presence_of_mind" : "wrath", 1, timespan_t::zero(), timespan_t::zero(), talents.presence_of_mind -> rank() * 0.3 );
+  buffs.force_suppression = new buff_t( this, is_sage ? "force_suppression" : "deathmark", 10, from_seconds( 30.0 ), timespan_t::zero(), talents.force_suppression -> rank() );
+  buffs.mental_alacrity = new buff_t( this, is_sage ? "mental_alacrity" : "polarity_shift", 1, from_seconds( 10.0 ) );
+  buffs.force_potency = new buff_t( this, is_sage ? "force_potency" : "recklessness", 2, from_seconds( 20.0 ) );
+  buffs.psychic_projection_dd = new buff_t( this, is_sage ? "psychic_projection_dd" : "lightning_barrage_dd", 1, from_seconds( 2.0 ), timespan_t::zero() );
+  buffs.rakata_force_masters_4pc = new buff_t( this, "rakata_force_masters_4pc", 1, from_seconds( 15.0 ), from_seconds( 20.0 ), set_bonus.rakata_force_masters -> four_pc() ? 0.10 : 0.0 );
+  buffs.noble_sacrifice = new buff_t( this, "noble_sacrifice", 4, from_seconds( 10.0 ) );
+  buffs.resplendence = new buff_t( this, is_sage ? "resplendence" : "force_surge", 1 , timespan_t::zero(), timespan_t::zero(), talents.resplendence -> rank() / 2.0 );
+  buffs.conveyance = new buff_t( this, is_sage ? "conveyace" : "force_bending", 1, timespan_t::zero(), timespan_t::zero(), talents.conveyance -> rank() / 2.0 );
 }
 
 // sage_sorcerer_t::init_gains =======================================================
@@ -1860,12 +1860,12 @@ void sage_sorcerer_t::regen( timespan_t periodicity )
 
   if ( buffs.concentration -> up() )
   {
-    double force_regen = periodicity.total_seconds() * force_regen_per_second() * buffs.concentration -> check() * 0.10;
+    double force_regen = to_seconds( periodicity ) * force_regen_per_second() * buffs.concentration -> check() * 0.10;
     resource_gain( RESOURCE_FORCE, force_regen, gains.concentration );
   }
   if ( buffs.noble_sacrifice -> up() )
   {
-    double force_regen = periodicity.total_seconds() * force_regen_per_second() * buffs.noble_sacrifice -> check() * 0.25;
+    double force_regen = to_seconds( periodicity ) * force_regen_per_second() * buffs.noble_sacrifice -> check() * 0.25;
     resource_loss( RESOURCE_FORCE, force_regen, gains.noble_sacrifice_power_regen_lost );
   }
 }

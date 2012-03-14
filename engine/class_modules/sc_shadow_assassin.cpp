@@ -468,7 +468,7 @@ struct shock_t : public shadow_assassin_spell_t
       dd.power_mod = 1.85;
       base_cost = 45.0 - p -> talents.torment -> rank() * 3;
 
-      cooldown -> duration = timespan_t::from_seconds( 6.0 );
+      cooldown -> duration = from_seconds( 6.0 );
 
       if ( p -> talents.chain_shock -> rank() > 0 )
       {
@@ -540,11 +540,11 @@ struct force_lightning_t : public shadow_assassin_spell_t
     base_cost -= 2.0;
     range = 10.0;
     num_ticks = 3;
-    base_tick_time = timespan_t::from_seconds( 1.0 );
+    base_tick_time = from_seconds( 1.0 );
     may_crit = false;
     channeled = true;
     tick_zero = true;
-    cooldown -> duration = timespan_t::from_seconds( 6.0 );
+    cooldown -> duration = from_seconds( 6.0 );
   }
 };
 
@@ -562,7 +562,7 @@ struct crushing_darkness_t : public shadow_assassin_spell_t
       td.standardhealthpercentmin = td.standardhealthpercentmax = .0295;
       td.power_mod = 0.295;
 
-      base_tick_time = timespan_t::from_seconds( 1.0 );
+      base_tick_time = from_seconds( 1.0 );
       num_ticks = 6;
       range = 10.0;
       background = true;
@@ -594,10 +594,10 @@ struct crushing_darkness_t : public shadow_assassin_spell_t
     dd.standardhealthpercentmax = .143;
     dd.power_mod = 1.23;
 
-    base_execute_time = timespan_t::from_seconds( 2.0 );
+    base_execute_time = from_seconds( 2.0 );
     base_cost = 40.0;
     range = 10.0;
-    cooldown -> duration = timespan_t::from_seconds( 15.0 );
+    cooldown -> duration = from_seconds( 15.0 );
 
     add_child( dot_spell );
   }
@@ -635,7 +635,7 @@ struct crushing_darkness_t : public shadow_assassin_spell_t
     shadow_assassin_t* p = cast();
 
     if ( p -> buffs.raze -> up() )
-    et = timespan_t::zero;
+    et = timespan_t::zero();
 
     return et;
   }
@@ -667,12 +667,12 @@ struct death_field_t : public shadow_assassin_spell_t
 
     crit_bonus += p->talents.creeping_death->rank() * 0.1;
 
-    ability_lag = timespan_t::from_seconds( 0.2 );
+    ability_lag = from_seconds( 0.2 );
     base_cost = 50.0 * ( 1 - p->talents.fanaticism->rank() * 0.25 );
     range = 30.0;
     aoe = 3;
 
-    cooldown->duration = timespan_t::from_seconds( 15.0 );
+    cooldown->duration = from_seconds( 15.0 );
   }
 
   virtual void execute()
@@ -701,12 +701,12 @@ struct creeping_terror_t : public shadow_assassin_spell_t
     td.standardhealthpercentmin = td.standardhealthpercentmax = .031;
     td.power_mod = 0.311;
 
-    base_tick_time = timespan_t::from_seconds( 3.0 );
+    base_tick_time = from_seconds( 3.0 );
     num_ticks = 6;
     base_cost = 20.0;
     range = 30.0;
     may_crit = false;
-    cooldown->duration = timespan_t::from_seconds( 9.0 );
+    cooldown->duration = from_seconds( 9.0 );
     tick_zero = true;
   }
 
@@ -729,10 +729,10 @@ struct recklessness_t : public shadow_assassin_spell_t
       shadow_assassin_spell_t( n, p, SCHOOL_INTERNAL )
   {
     parse_options( 0, options_str );
-    cooldown->duration = timespan_t::from_seconds( 90.0 );
+    cooldown->duration = from_seconds( 90.0 );
     harmful = false;
 
-    trigger_gcd = timespan_t::zero;
+    trigger_gcd = timespan_t::zero();
   }
 
   virtual void execute()
@@ -757,7 +757,7 @@ struct discharge_t: public shadow_assassin_spell_t
       td.standardhealthpercentmin = td.standardhealthpercentmax = .038;
       td.power_mod = 0.38;
 
-      base_tick_time = timespan_t::from_seconds( 3.0 );
+      base_tick_time = from_seconds( 3.0 );
       num_ticks = 6;
       may_crit = false;
       tick_zero = true;
@@ -787,7 +787,7 @@ struct discharge_t: public shadow_assassin_spell_t
       dd.standardhealthpercentmax = .194;
       dd.power_mod = 1.74;
 
-      base_tick_time = timespan_t::from_seconds( 3.0 );
+      base_tick_time = from_seconds( 3.0 );
 
       background = true;
 
@@ -848,7 +848,7 @@ struct discharge_t: public shadow_assassin_spell_t
   {
     shadow_assassin_t* p = cast();
 
-    cooldown->duration = timespan_t::from_seconds( 15.0 - p->talents.recirculation->rank() * 1.5 );
+    cooldown->duration = from_seconds( 15.0 - p->talents.recirculation->rank() * 1.5 );
 
     if ( p->actives.charge == LIGHTNING_CHARGE && p->talents.crackling_charge->rank() > 0 )
       cooldown->duration -= cooldown->duration * p->talents.crackling_charge->rank() * 0.25;
@@ -945,7 +945,7 @@ struct low_slash_t : public shadow_assassin_attack_t
 
     base_cost = 30;
     range = 4.0;
-    cooldown->duration = timespan_t::from_seconds( 15 );
+    cooldown->duration = from_seconds( 15 );
   }
 };
 
@@ -975,7 +975,7 @@ struct voltaic_slash_t : public shadow_assassin_attack_t
     {
       background = true;
       dual = true;
-      base_execute_time = timespan_t::from_seconds( 0.3 );
+      base_execute_time = from_seconds( 0.3 );
     }
     else
     {
@@ -1020,10 +1020,10 @@ struct overcharge_saber_t : public shadow_assassin_spell_t
       shadow_assassin_spell_t( n, p )
   {
     parse_options( 0, options_str );
-    cooldown->duration = timespan_t::from_seconds( 120.0 - p->talents.resourcefulness->rank() * 15 );
+    cooldown->duration = from_seconds( 120.0 - p->talents.resourcefulness->rank() * 15 );
     harmful = false;
 
-    trigger_gcd = timespan_t::zero;
+    trigger_gcd = timespan_t::zero();
   }
 
   virtual void execute()
@@ -1053,7 +1053,7 @@ struct assassinate_t : public shadow_assassin_attack_t
 
     base_cost = 25.0;
     range = 4.0;
-    cooldown->duration = timespan_t::from_seconds( 6.0 );
+    cooldown->duration = from_seconds( 6.0 );
   }
 
   virtual void execute()
@@ -1104,7 +1104,7 @@ struct stealth_base_t : public shadow_assassin_spell_t
       shadow_assassin_spell_t( n, p )
   {
     harmful = false;
-    trigger_gcd = timespan_t::zero;
+    trigger_gcd = timespan_t::zero();
   }
 
   virtual void execute()
@@ -1126,7 +1126,7 @@ struct blackout_t : public stealth_base_t
   {
     check_talent( p->talents.darkswell->rank() );
     parse_options( 0, options_str );
-    cooldown->duration = timespan_t::from_seconds( 60.0 - 7.5 * p->talents.fade->rank() );
+    cooldown->duration = from_seconds( 60.0 - 7.5 * p->talents.fade->rank() );
   }
 
   virtual void execute()
@@ -1146,7 +1146,7 @@ struct force_cloak_t : public stealth_base_t
       stealth_base_t( p, "force_cloak" )
   {
     parse_options( 0, options_str );
-    cooldown->duration = timespan_t::from_seconds( 180.0 - 30 * p->talents.fade->rank() );
+    cooldown->duration = from_seconds( 180.0 - 30 * p->talents.fade->rank() );
   }
 };
 
@@ -1264,9 +1264,9 @@ struct saber_strike_t : public shadow_assassin_attack_t
     else
     {
       second_strike = new saber_strike_t( p, options_str, true );
-      second_strike->base_execute_time = timespan_t::from_seconds( 0.5 );
+      second_strike->base_execute_time = from_seconds( 0.5 );
       third_strike = new saber_strike_t( p, options_str, true );
-      third_strike->base_execute_time = timespan_t::from_seconds( 1.0 );
+      third_strike->base_execute_time = from_seconds( 1.0 );
     }
   }
 
@@ -1316,7 +1316,7 @@ struct thrash_t : public shadow_assassin_attack_t
     {
       background = true;
       dual = true;
-      base_execute_time = timespan_t::from_seconds( 0.5 ); // Add correct delta timing for second attack here.
+      base_execute_time = from_seconds( 0.5 ); // Add correct delta timing for second attack here.
     }
     else
     {
@@ -1377,7 +1377,7 @@ struct lightning_charge_callback_t : public shadow_assassin_action_callback_t
 
       proc = true;
       background = true;
-      cooldown->duration = timespan_t::from_seconds( 1.5 );
+      cooldown->duration = from_seconds( 1.5 );
 
       base_multiplier *= 1.0 + p->talents.charge_mastery->rank() * 0.06;
       base_multiplier *= 1.0 + p->talents.electric_execution->rank() * 0.03;
@@ -1414,7 +1414,7 @@ struct lightning_charge_callback_t : public shadow_assassin_action_callback_t
     if ( p->actives.charge != LIGHTNING_CHARGE )
       return;
 
-    if ( lightning_charge_damage_proc->cooldown->remains() > timespan_t::zero )
+    if ( lightning_charge_damage_proc->cooldown->remains() > timespan_t::zero() )
       return;
 
     if ( !rng_lightning_charge->roll( 0.5 ) )
@@ -1438,7 +1438,7 @@ struct surging_charge_callback_t : public shadow_assassin_action_callback_t
 
       proc = true;
       background = true;
-      cooldown->duration = timespan_t::from_seconds( 1.5 );
+      cooldown->duration = from_seconds( 1.5 );
 
       base_multiplier *= 1.0 + p->talents.electric_execution->rank() * 0.03;
     }
@@ -1482,7 +1482,7 @@ struct surging_charge_callback_t : public shadow_assassin_action_callback_t
     rngs.saber_conduit = p->get_rng( "saber_conduit" );
 
     saber_conduit_cd = p->get_cooldown( "saber_conduit" );
-    saber_conduit_cd->duration = timespan_t::from_seconds( 10 );
+    saber_conduit_cd->duration = from_seconds( 10 );
 
     saber_conduit_gain = p->get_gain( "saber_conduit" );
 
@@ -1499,7 +1499,7 @@ struct surging_charge_callback_t : public shadow_assassin_action_callback_t
     if ( p->actives.charge != SURGING_CHARGE )
       return;
 
-    if ( surging_charge_damage_proc->cooldown->remains() > timespan_t::zero )
+    if ( surging_charge_damage_proc->cooldown->remains() > timespan_t::zero() )
       return;
 
     if ( !rngs.surging_charge->roll( 0.25 ) )
@@ -1507,7 +1507,7 @@ struct surging_charge_callback_t : public shadow_assassin_action_callback_t
 
     surging_charge_damage_proc->execute();
 
-    if ( saber_conduit_cd->remains() > timespan_t::zero )
+    if ( saber_conduit_cd->remains() > timespan_t::zero() )
       return;
 
     if ( rngs.saber_conduit->roll( p->talents.saber_conduit->rank() * ( 1.0 / 3 ) ) )
@@ -1532,7 +1532,7 @@ struct dark_charge_callback_t : public shadow_assassin_action_callback_t
 
       proc = true;
       background = true;
-      cooldown->duration = timespan_t::from_seconds( 4.5 );
+      cooldown->duration = from_seconds( 4.5 );
 
       base_crit *= 1.0 + p->talents.charge_mastery->rank() * 0.01;
       base_multiplier *= 1.0 + p->talents.electric_execution->rank() * 0.03;
@@ -1561,7 +1561,7 @@ struct dark_charge_callback_t : public shadow_assassin_action_callback_t
     if ( p->actives.charge != DARK_CHARGE )
       return;
 
-    if ( dark_charge_damage_proc->cooldown->remains() > timespan_t::zero )
+    if ( dark_charge_damage_proc->cooldown->remains() > timespan_t::zero() )
       return;
 
     if ( !rng_dark_charge->roll( 0.5 ) )
@@ -1758,17 +1758,17 @@ void shadow_assassin_t::init_buffs()
   const char* unearthed_knowledge = is_shadow ? "twin_disciplines" : "unearthed_knowledge";
   const char* voltaic_slash = is_shadow ? "clairvoyant_strike" : "voltaic_slash";
 
-  buffs.exploit_weakness    = new buff_t( this, exploit_weakness,    1, timespan_t::from_seconds( 10.0 ), timespan_t::from_seconds( 10.0 ), talents.duplicity -> rank () * 0.1 );
-  buffs.dark_embrace        = new buff_t( this, dark_embrace,        1, timespan_t::from_seconds(  6.0 ), timespan_t::zero );
-  buffs.induction           = new buff_t( this, induction,           2, timespan_t::from_seconds( 10.0 ), timespan_t::zero, talents.induction -> rank() * 0.5 );
-  buffs.voltaic_slash       = new buff_t( this, voltaic_slash,       2, timespan_t::from_seconds( 10.0 ), timespan_t::zero );
-  buffs.static_charges      = new buff_t( this, static_charges,      5, timespan_t::from_seconds( 30.0 ), timespan_t::zero, talents.static_charges -> rank() * 0.5 );
-  buffs.exploitive_strikes  = new buff_t( this, exploitive_strikes,  1, timespan_t::from_seconds( 10.0 ), timespan_t::zero );
-  buffs.raze                = new buff_t( this, raze,                1, timespan_t::from_seconds( 15.0 ), timespan_t::from_seconds( 7.5 ), talents.raze -> rank() * 0.6 );
-  buffs.unearthed_knowledge = new buff_t( this, unearthed_knowledge, 1, timespan_t::from_seconds( 20.0 ), timespan_t::zero, talents.unearthed_knowledge -> rank() * 0.5 );
-  buffs.recklessness        = new buff_t( this, recklessness,        2, timespan_t::from_seconds( 20.0 ) );
-  buffs.deathmark           = new buff_t( this, deathmark,          10, timespan_t::from_seconds( 30.0 ), timespan_t::zero );
-  buffs.overcharge_saber    = new buff_t( this, overcharge_saber,    1, timespan_t::from_seconds( 15.0 ) );
+  buffs.exploit_weakness    = new buff_t( this, exploit_weakness,    1, from_seconds( 10.0 ), from_seconds( 10.0 ), talents.duplicity -> rank () * 0.1 );
+  buffs.dark_embrace        = new buff_t( this, dark_embrace,        1, from_seconds(  6.0 ), timespan_t::zero() );
+  buffs.induction           = new buff_t( this, induction,           2, from_seconds( 10.0 ), timespan_t::zero(),   talents.induction -> rank() * 0.5 );
+  buffs.voltaic_slash       = new buff_t( this, voltaic_slash,       2, from_seconds( 10.0 ), timespan_t::zero() );
+  buffs.static_charges      = new buff_t( this, static_charges,      5, from_seconds( 30.0 ), timespan_t::zero(),   talents.static_charges -> rank() * 0.5 );
+  buffs.exploitive_strikes  = new buff_t( this, exploitive_strikes,  1, from_seconds( 10.0 ), timespan_t::zero() );
+  buffs.raze                = new buff_t( this, raze,                1, from_seconds( 15.0 ), from_seconds( 7.5 ),  talents.raze -> rank() * 0.6 );
+  buffs.unearthed_knowledge = new buff_t( this, unearthed_knowledge, 1, from_seconds( 20.0 ), timespan_t::zero(),   talents.unearthed_knowledge -> rank() * 0.5 );
+  buffs.recklessness        = new buff_t( this, recklessness,        2, from_seconds( 20.0 ) );
+  buffs.deathmark           = new buff_t( this, deathmark,          10, from_seconds( 30.0 ), timespan_t::zero() );
+  buffs.overcharge_saber    = new buff_t( this, overcharge_saber,    1, from_seconds( 15.0 ) );
 }
 
 // shadow_assassin_t::init_gains =======================================================
@@ -2022,7 +2022,7 @@ void shadow_assassin_t::regen( timespan_t periodicity )
 
   if ( buffs.dark_embrace->up() )
   {
-    double force_regen = periodicity.total_seconds() * force_regen_per_second() * buffs.dark_embrace->check() * talents.dark_embrace->rank()
+    double force_regen = to_seconds( periodicity ) * force_regen_per_second() * buffs.dark_embrace->check() * talents.dark_embrace->rank()
         * 0.25;
     resource_gain( RESOURCE_FORCE, force_regen, gains.dark_embrace );
   }

@@ -27,7 +27,7 @@ struct stim_t : public action_t
     };
     parse_options( options, options_str );
 
-    trigger_gcd = timespan_t::zero;
+    trigger_gcd = timespan_t::zero();
     harmful = false;
     for ( int i=0; i < STIM_MAX; i++ )
     {
@@ -92,10 +92,10 @@ struct power_potion_t : public action_t
     };
     parse_options( options, options_str );
 
-    trigger_gcd = timespan_t::zero;
+    trigger_gcd = timespan_t::zero();
     harmful = false;
     cooldown = p -> get_cooldown( "potion" );
-    cooldown -> duration = timespan_t::from_seconds( 180.0 );
+    cooldown -> duration = from_seconds( 180.0 );
   }
 
   virtual void execute()
@@ -106,11 +106,11 @@ struct power_potion_t : public action_t
     }
     else
     {
-      cooldown -> duration -= timespan_t::from_seconds( 5.0 );
-      player -> buffs.power_potion -> buff_duration -= timespan_t::from_seconds( 5.0 );
+      cooldown -> duration -= from_seconds( 5.0 );
+      player -> buffs.power_potion -> buff_duration -= from_seconds( 5.0 );
       player -> buffs.power_potion -> trigger( 1, amount);
-      cooldown -> duration += timespan_t::from_seconds( 5.0 );
-      player -> buffs.power_potion -> buff_duration += timespan_t::from_seconds( 5.0 );
+      cooldown -> duration += from_seconds( 5.0 );
+      player -> buffs.power_potion -> buff_duration += from_seconds( 5.0 );
 
     }
 

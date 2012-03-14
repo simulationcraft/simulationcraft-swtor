@@ -198,7 +198,7 @@ struct movement_event_t : public raid_event_t
       { NULL, OPT_UNKNOWN, NULL }
     };
     parse_options( options, options_str );
-    is_distance = move_distance || ( move_to >= -1 && duration == timespan_t::zero );
+    is_distance = move_distance || ( move_to >= -1 && duration == timespan_t::zero() );
     if ( is_distance ) name_str = "movement_distance";
   }
 
@@ -210,7 +210,7 @@ struct movement_event_t : public raid_event_t
     {
       player_t* p = affected_players[ i ];
       if ( p -> is_pet() && players_only ) continue;
-      double my_duration;
+      timespan_t my_duration;
       if ( is_distance )
       {
         double my_move_distance = move_distance;
@@ -221,15 +221,15 @@ struct movement_event_t : public raid_event_t
             my_move_distance = abs( new_distance - p -> distance );
           p -> distance = new_distance;
         }
-        my_duration = my_move_distance / p -> composite_movement_speed();
+        my_duration = from_seconds( my_move_distance / p -> composite_movement_speed() );
       }
       else
       {
-        my_duration = saved_duration.total_seconds();
+        my_duration = saved_duration;
       }
-      if ( my_duration > 0 )
+      if ( my_duration > timespan_t::zero() )
       {
-        p -> buffs.raid_movement -> buff_duration = timespan_t::from_seconds( my_duration );
+        p -> buffs.raid_movement -> buff_duration = my_duration;
         p -> buffs.raid_movement -> trigger();
       }
       if ( p -> sleeping ) continue;
@@ -318,7 +318,7 @@ struct damage_event_t : public raid_event_t
     {
       may_crit = false;
       background = true;
-      trigger_gcd = timespan_t::zero;
+      trigger_gcd = timespan_t::zero();
     }
   };
 
@@ -339,7 +339,7 @@ struct damage_event_t : public raid_event_t
     };
     parse_options( options, options_str );
 
-    assert( duration == timespan_t::zero );
+    assert( duration == timespan_t::zero() );
 
     name_str = "raid_damage_" + type_str;
 
@@ -381,7 +381,7 @@ struct heal_event_t : public raid_event_t
     };
     parse_options( options, options_str );
 
-    assert( duration == timespan_t::zero );
+    assert( duration == timespan_t::zero() );
   }
 
   virtual void start()
@@ -473,12 +473,12 @@ struct position_event_t : public raid_event_t
 
 raid_event_t::raid_event_t( sim_t* s, const char* n ) :
   sim( s ), name_str( n ),
-  num_starts( 0 ), first( timespan_t::zero ), last( timespan_t::zero ),
-  cooldown( timespan_t::zero ), cooldown_stddev( timespan_t::zero ),
-  cooldown_min( timespan_t::zero ), cooldown_max( timespan_t::zero ),
-  duration( timespan_t::zero ), duration_stddev( timespan_t::zero ),
-  duration_min( timespan_t::zero ), duration_max( timespan_t::zero ),
-  distance_min( 0 ), distance_max( 0 ), saved_duration( timespan_t::zero ),
+  num_starts( 0 ), first( timespan_t::zero() ), last( timespan_t::zero() ),
+  cooldown( timespan_t::zero() ), cooldown_stddev( timespan_t::zero() ),
+  cooldown_min( timespan_t::zero() ), cooldown_max( timespan_t::zero() ),
+  duration( timespan_t::zero() ), duration_stddev( timespan_t::zero() ),
+  duration_min( timespan_t::zero() ), duration_max( timespan_t::zero() ),
+  distance_min( 0 ), distance_max( 0 ), saved_duration( timespan_t::zero() ),
   rng( s -> default_rng() )
 {}
 
@@ -490,15 +490,15 @@ timespan_t raid_event_t::cooldown_time() const
 
   if ( num_starts == 0 )
   {
-    time = timespan_t::zero;
+    time = timespan_t::zero();
 
-    if ( first > timespan_t::zero )
+    if ( first > timespan_t::zero() )
     {
       time = first;
     }
     else
     {
-      time = timespan_t::from_millis( 10 );
+      time = from_millis( 10 );
     }
   }
   else
@@ -596,15 +596,15 @@ void raid_event_t::schedule()
 
       timespan_t ct = raid_event -> cooldown_time();
 
-      if ( ct <= raid_event -> saved_duration ) ct = raid_event -> saved_duration + timespan_t::from_seconds( 0.01 );
+      if ( ct <= raid_event -> saved_duration ) ct = raid_event -> saved_duration + from_seconds( 0.01 );
 
-      if ( raid_event -> saved_duration > timespan_t::zero )
+      if ( raid_event -> saved_duration > timespan_t::zero() )
       {
         new ( sim ) duration_event_t( sim, raid_event, raid_event -> saved_duration );
       }
       else raid_event -> finish();
 
-      if ( raid_event -> last <= timespan_t::zero ||
+      if ( raid_event -> last <= timespan_t::zero() ||
            raid_event -> last > ( sim -> current_time + ct ) )
       {
         new ( sim ) cooldown_event_t( sim, raid_event, ct );
@@ -621,11 +621,11 @@ void raid_event_t::reset()
 {
   num_starts = 0;
 
-  if ( cooldown_min == timespan_t::zero ) cooldown_min = cooldown * 0.5;
-  if ( cooldown_max == timespan_t::zero ) cooldown_max = cooldown * 1.5;
+  if ( cooldown_min == timespan_t::zero() ) cooldown_min = cooldown * 0.5;
+  if ( cooldown_max == timespan_t::zero() ) cooldown_max = cooldown * 1.5;
 
-  if ( duration_min == timespan_t::zero ) duration_min = duration * 0.5;
-  if ( duration_max == timespan_t::zero ) duration_max = duration * 1.5;
+  if ( duration_min == timespan_t::zero() ) duration_min = duration * 0.5;
+  if ( duration_max == timespan_t::zero() ) duration_max = duration * 1.5;
 
   affected_players.clear();
 }
@@ -727,7 +727,7 @@ void raid_event_t::init( sim_t* sim )
       continue;
     }
 
-    assert( e -> cooldown > timespan_t::zero );
+    assert( e -> cooldown > timespan_t::zero() );
     assert( e -> cooldown > e -> cooldown_stddev );
 
     sim -> raid_events.push_back( e );

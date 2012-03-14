@@ -758,19 +758,19 @@ bool item_t::decode_special( special_effect_t& effect,
     }
     else if ( t.name == "ppm" )
     {
-      effect.proc_chance = -( t.value );
+      effect.proc_chance = -t.value;
     }
     else if ( t.name == "duration" || t.name == "dur" )
     {
-      effect.duration = timespan_t::from_seconds( t.value );
+      effect.duration = from_seconds( t.value );
     }
     else if ( t.name == "cooldown" || t.name == "cd" )
     {
-      effect.cooldown = timespan_t::from_seconds( t.value );
+      effect.cooldown = from_seconds( t.value );
     }
     else if ( t.name == "tick" )
     {
-      effect.tick = timespan_t::from_seconds( t.value );
+      effect.tick = from_seconds( t.value );
     }
     else if ( t.full == "reverse" )
     {

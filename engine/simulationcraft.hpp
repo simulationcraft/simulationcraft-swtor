@@ -28,6 +28,7 @@
 #include <cassert>
 #include <cctype>
 #include <cfloat>
+#include <chrono>
 #include <cmath>
 #include <cstdarg>
 #include <cstdio>
@@ -146,7 +147,6 @@ struct scaling_t;
 struct sim_t;
 struct stats_t;
 struct talent_t;
-struct timespan_t;
 struct unique_gear_t;
 struct uptime_t;
 struct weapon_t;
@@ -626,265 +626,42 @@ inline auto sliding_window_average( Range&& r, Out out ) -> decltype( std::forwa
   return std::forward<Range>( r );
 }
 
-struct timespan_t
-{
-
-#ifdef SC_USE_INTEGER_TIME
-
-#ifdef SC_X64
-  typedef int64_t time_t;
+#if defined(SC_USE_INTEGER_TIME)
+typedef std::chrono::milliseconds timespan_t;
 #else
-  // CAREFUL: Using int32_t implies that no overflowing happens during calculation.
-  typedef int32_t time_t;
+typedef std::chrono::duration<double> timespan_t;
 #endif
 
-private:
-  time_t time;
+template <typename Rep>
+constexpr timespan_t from_millis( Rep r )
+{ return std::chrono::duration_cast<timespan_t>( std::chrono::duration<Rep,std::milli>( r ) ); }
 
-  static const time_t MILLIS_PER_SECOND;
-  static const double SECONDS_PER_MILLI;
-  static const time_t MILLIS_PER_MINUTE;
-  static const double MINUTES_PER_MILLI;
+template <typename Rep>
+constexpr timespan_t from_seconds( Rep r )
+{ return std::chrono::duration_cast<timespan_t>( std::chrono::duration<Rep>( r ) ); }
 
+template <typename Rep=double>
+constexpr Rep to_millis( timespan_t t )
+{ return std::chrono::duration_cast<std::chrono::duration<Rep,std::milli>>( t ).count(); }
 
-  explicit timespan_t( const time_t millis ) : time( millis ) { }
+template <typename Rep=double>
+constexpr Rep to_seconds( timespan_t t )
+{ return std::chrono::duration_cast<std::chrono::duration<Rep>>( t ).count(); }
 
-public:
+template <typename Rep=double>
+constexpr Rep to_minutes( timespan_t t )
+{ return std::chrono::duration_cast<std::chrono::duration<Rep,std::ratio<60>>>( t ).count(); }
 
-  double total_minutes() const { return time * MINUTES_PER_MILLI; }
-  double total_seconds() const { return time * SECONDS_PER_MILLI; }
-  time_t total_millis() const { return time; }
+template <typename Rep=double>
+constexpr Rep to_hours( timespan_t t )
+{ return std::chrono::duration_cast<std::chrono::duration<Rep,std::ratio<60*60>>>( t ).count(); }
 
-  static timespan_t from_millis( const uint64_t millis ) { return timespan_t( ( time_t )millis ); }
-  static timespan_t from_millis( const int64_t millis ) { return timespan_t( ( time_t )millis ); }
-  static timespan_t from_millis( const uint32_t millis ) { return timespan_t( ( time_t )millis ); }
-  static timespan_t from_millis( const int32_t millis ) { return timespan_t( ( time_t )millis ); }
-  static timespan_t from_millis( const double millis ) { return timespan_t( ( time_t )millis ); }
-  static timespan_t from_seconds( const double seconds ) { return timespan_t( ( time_t )( seconds * MILLIS_PER_SECOND ) );  }
-  static timespan_t from_minutes( const double minutes ) { return timespan_t( ( time_t )( minutes * MILLIS_PER_MINUTE ) ); }
+constexpr timespan_t::rep TIMESPAN_TO_NATIVE_VALUE( timespan_t t )
+{ return t.count(); }
 
-#else // !SC_USE_INTEGER_TIME
-
-  typedef double time_t;
-
-private:
-  time_t time;
-
-  static const double MILLIS_PER_SECOND;
-  static const double MINUTES_PER_SECOND;
-  static const time_t SECONDS_PER_MILLI;
-  static const time_t SECONDS_PER_MINUTE;
-
-
-  explicit timespan_t( const time_t millis ) : time( millis ) { }
-
-public:
-  double total_minutes() const { return time * MINUTES_PER_SECOND; }
-  double total_seconds() const { return time; }
-  time_t total_millis() const { return time * MILLIS_PER_SECOND; }
-
-  static timespan_t from_millis( const uint64_t millis ) { return timespan_t( ( time_t )millis * SECONDS_PER_MILLI ); }
-  static timespan_t from_millis( const int64_t millis ) { return timespan_t( ( time_t )millis * SECONDS_PER_MILLI ); }
-  static timespan_t from_millis( const uint32_t millis ) { return timespan_t( ( time_t )millis * SECONDS_PER_MILLI ); }
-  static timespan_t from_millis( const int32_t millis ) { return timespan_t( ( time_t )millis * SECONDS_PER_MILLI ); }
-  static timespan_t from_millis( const double millis ) { return timespan_t( ( time_t )millis * SECONDS_PER_MILLI ); }
-  static timespan_t from_seconds( const double seconds ) { return timespan_t( seconds );  }
-  static timespan_t from_minutes( const double minutes ) { return timespan_t( ( time_t )( minutes * SECONDS_PER_MINUTE ) ); }
-
-#endif
-
-public:
-  timespan_t() : time( 0 ) { }
-
-  bool operator==( const timespan_t right ) const { return time == right.time; }
-  bool operator!=( const timespan_t right ) const { return time != right.time; }
-
-  bool operator>( const timespan_t right ) const { return time > right.time; }
-  bool operator>=( const timespan_t right ) const { return time >= right.time; }
-  bool operator<( const timespan_t right ) const { return time < right.time; }
-  bool operator<=( const timespan_t right ) const { return time <= right.time; }
-
-  timespan_t & operator+=( const timespan_t right )
-  {
-    time += right.time;
-    return *this;
-  }
-  timespan_t operator-=( const timespan_t right )
-  {
-    time -= right.time;
-    return *this;
-  }
-  timespan_t operator*=( const double right )
-  {
-    time = ( time_t )( time * right );
-    return *this;
-  }
-  timespan_t operator*=( const int32_t right )
-  {
-    time *= right;
-    return *this;
-  }
-  timespan_t operator*=( const int64_t right )
-  {
-    time = ( time_t )( time * right );
-    return *this;
-  }
-  timespan_t operator*=( const uint32_t right )
-  {
-    time *= right;
-    return *this;
-  }
-  timespan_t operator*=( const uint64_t right )
-  {
-    time = ( time_t )( time * right );
-    return *this;
-  }
-
-  timespan_t operator/=( const double right )
-  {
-    time = ( time_t )( time / right );
-    return *this;
-  }
-  timespan_t operator/=( const int32_t right )
-  {
-    time /= right;
-    return *this;
-  }
-  timespan_t operator/=( const int64_t right )
-  {
-    time = ( time_t )( time / right );
-    return *this;
-  }
-  timespan_t operator/=( const uint32_t right )
-  {
-    time /= right;
-    return *this;
-  }
-  timespan_t operator/=( const uint64_t right )
-  {
-    time = ( time_t )( time / right );
-    return *this;
-  }
-
-  friend timespan_t operator+( const timespan_t right );
-  friend timespan_t operator-( const timespan_t right );
-
-  friend timespan_t operator+( const timespan_t left, const timespan_t right );
-  friend timespan_t operator-( const timespan_t left, const timespan_t right );
-  friend timespan_t operator*( const timespan_t left, const double right );
-  friend timespan_t operator*( const timespan_t left, const int32_t right );
-  friend timespan_t operator*( const timespan_t left, const int64_t right );
-  friend timespan_t operator*( const timespan_t left, const uint32_t right );
-  friend timespan_t operator*( const timespan_t left, const uint64_t right );
-  friend timespan_t operator/( const timespan_t left, const double right );
-  friend timespan_t operator/( const timespan_t left, const int32_t right );
-  friend timespan_t operator/( const timespan_t left, const int64_t right );
-  friend timespan_t operator/( const timespan_t left, const uint32_t right );
-  friend timespan_t operator/( const timespan_t left, const uint64_t right );
-  friend double operator/( const timespan_t left, const timespan_t right );
-
-  friend timespan_t operator*( const double left, const timespan_t right );
-  friend timespan_t operator*( const int32_t left, const timespan_t right );
-  friend timespan_t operator*( const int64_t left, const timespan_t right );
-  friend timespan_t operator*( const uint32_t left, const timespan_t right );
-  friend timespan_t operator*( const uint64_t left, const timespan_t right );
-
-  static const timespan_t zero;
-  static const timespan_t min;
-  static const timespan_t max;
-};
-
-#ifdef SC_USE_INTEGER_TIME
-#define TIMESPAN_TO_NATIVE_VALUE(t) ((t).total_millis())
-#define TIMESPAN_FROM_NATIVE_VALUE(v) (timespan_t::from_millis(v))
-#else // #ifndef SC_USE_INTEGER_TIME
-#define TIMESPAN_TO_NATIVE_VALUE(t) ((t).total_seconds())
-#define TIMESPAN_FROM_NATIVE_VALUE(v) (timespan_t::from_seconds(v))
-#endif
-
-inline timespan_t operator+( const timespan_t right )
-{
-  return right;
-}
-
-inline timespan_t operator-( const timespan_t right )
-{
-  return timespan_t( -right.time );
-}
-
-inline timespan_t operator+( const timespan_t left, const timespan_t right )
-{
-  return timespan_t( left.time + right.time );
-}
-inline timespan_t operator-( const timespan_t left, const timespan_t right )
-{
-  return timespan_t( left.time - right.time );
-}
-inline timespan_t operator*( const timespan_t left, const double right )
-{
-  return timespan_t( ( timespan_t::time_t )( left.time * right ) );
-}
-inline timespan_t operator*( const timespan_t left, const int32_t right )
-{
-  return timespan_t( ( timespan_t::time_t )( left.time * right ) );
-}
-inline timespan_t operator*( const timespan_t left, const int64_t right )
-{
-  return timespan_t( ( timespan_t::time_t )( left.time * right ) );
-}
-inline timespan_t operator*( const timespan_t left, const uint32_t right )
-{
-  return timespan_t( ( timespan_t::time_t )( left.time * right ) );
-}
-inline timespan_t operator*( const timespan_t left, const uint64_t right )
-{
-  return timespan_t( ( timespan_t::time_t )( left.time * right ) );
-}
-inline timespan_t operator/( const timespan_t left, const double right )
-{
-  return timespan_t( ( timespan_t::time_t )( left.time / right ) );
-}
-inline timespan_t operator/( const timespan_t left, const int32_t right )
-{
-  return timespan_t( ( timespan_t::time_t )( left.time / right ) );
-}
-inline timespan_t operator/( const timespan_t left, const int64_t right )
-{
-  return timespan_t( ( timespan_t::time_t )( left.time / ( timespan_t::time_t )right ) );
-}
-inline timespan_t operator/( const timespan_t left, const uint32_t right )
-{
-  return timespan_t( ( timespan_t::time_t )( left.time / ( timespan_t::time_t )right ) );
-}
-inline timespan_t operator/( const timespan_t left, const uint64_t right )
-{
-  return timespan_t( ( timespan_t::time_t )( left.time / ( timespan_t::time_t )right ) );
-}
-inline double operator/( const timespan_t left, const timespan_t right )
-{
-  return ( double )left.time / right.time;
-}
-
-inline timespan_t operator*( const double left, const timespan_t right )
-{
-  return timespan_t( ( timespan_t::time_t )( left * right.time ) );
-}
-inline timespan_t operator*( const int32_t left, const timespan_t right )
-{
-  return timespan_t( ( timespan_t::time_t )( left * right.time ) );
-}
-inline timespan_t operator*( const int64_t left, const timespan_t right )
-{
-  return timespan_t( ( timespan_t::time_t )( left * right.time ) );
-}
-inline timespan_t operator*( const uint32_t left, const timespan_t right )
-{
-  return timespan_t( ( timespan_t::time_t )( left * right.time ) );
-}
-inline timespan_t operator*( const uint64_t left, const timespan_t right )
-{
-  return timespan_t( ( timespan_t::time_t )( left * right.time ) );
-}
+template <typename Rep>
+constexpr timespan_t TIMESPAN_FROM_NATIVE_VALUE( Rep r )
+{ return std::chrono::duration_cast<timespan_t>( std::chrono::duration<Rep,timespan_t::period>( r ) ); }
 
 // Cache Control ============================================================
 
@@ -1116,6 +893,8 @@ public:
 
   static std::string to_string( double f );
   static std::string to_string( double f, int precision );
+  static std::string to_string( timespan_t t )
+  { return to_string( to_seconds( t ) ); }
 
   static int64_t milliseconds();
   static int64_t parse_date( const std::string& month_day_year );
@@ -1412,12 +1191,12 @@ struct buff_t
 
   // Raid Aura
   buff_t( sim_t*, const std::string& name,
-          int max_stack=1, timespan_t buff_duration=timespan_t::zero, timespan_t buff_cooldown=timespan_t::zero,
+          int max_stack=1, timespan_t buff_duration=timespan_t::zero(), timespan_t buff_cooldown=timespan_t::zero(),
           double chance=1.0, bool quiet=false, bool reverse=false, int rng_type=RNG_CYCLIC, int aura_id=0 );
 
   // Player Buff
   buff_t( actor_pair_t pair, const std::string& name,
-          int max_stack=1, timespan_t buff_duration=timespan_t::zero, timespan_t buff_cooldown=timespan_t::zero,
+          int max_stack=1, timespan_t buff_duration=timespan_t::zero(), timespan_t buff_cooldown=timespan_t::zero(),
           double chance=1.0, bool quiet=false, bool reverse=false, int rng_type=RNG_CYCLIC, int aura_id=0, bool activated=true );
 
   // Use check() inside of ready() methods to prevent skewing of "benefit" calculations.
@@ -1458,7 +1237,7 @@ struct buff_t
   virtual void combat_begin();
   virtual void combat_end();
 
-  const char* name() { return name_str.c_str(); }
+  const char* name() const { return name_str.c_str(); }
 
   action_expr_t* create_expression( action_t*, const std::string& type );
 
@@ -1474,7 +1253,7 @@ struct stat_buff_t : public buff_t
 
   stat_buff_t( player_t*, const std::string& name,
                int stat, double amount,
-               int max_stack=1, timespan_t buff_duration=timespan_t::zero, timespan_t buff_cooldown=timespan_t::zero,
+               int max_stack=1, timespan_t buff_duration=timespan_t::zero(), timespan_t buff_cooldown=timespan_t::zero(),
                double chance=1.0, bool quiet=false, bool reverse=false, int rng_type=RNG_CYCLIC, int aura_id=0, bool activated=true );
 
   virtual void bump     ( int stacks=1, double value=-1.0 );
@@ -1490,7 +1269,7 @@ struct cost_reduction_buff_t : public buff_t
 
   cost_reduction_buff_t( player_t*, const std::string& name,
                          int school, double amount,
-                         int max_stack=1, timespan_t buff_duration=timespan_t::zero, timespan_t buff_cooldown=timespan_t::zero,
+                         int max_stack=1, timespan_t buff_duration=timespan_t::zero(), timespan_t buff_cooldown=timespan_t::zero(),
                          double chance=1.0, bool refreshes=false, bool quiet=false, bool reverse=false, int rng_type=RNG_CYCLIC, int aura_id=0, bool activated=true );
 
   virtual void bump     ( int stacks=1, double value=-1.0 );
@@ -1503,7 +1282,7 @@ struct debuff_t : public buff_t
 {
   // Player De-Buff
   debuff_t( player_t*, const std::string& name,
-            int max_stack=1, timespan_t buff_duration=timespan_t::zero, timespan_t buff_cooldown=timespan_t::zero,
+            int max_stack=1, timespan_t buff_duration=timespan_t::zero(), timespan_t buff_cooldown=timespan_t::zero(),
             double chance=1.0, bool quiet=false, bool reverse=false, int rng_type=RNG_CYCLIC, int aura_id=0 );
 
 };
@@ -2046,11 +1825,11 @@ public:
   int       canceled;
   const char* name;
   event_t( sim_t* s, player_t* p=0, const char* n="" ) :
-    next( 0 ), sim( s ), player( p ), time( timespan_t::zero ), reschedule_time( timespan_t::zero ), canceled( 0 ), name( n )
+    next( 0 ), sim( s ), player( p ), time( timespan_t::zero() ), reschedule_time( timespan_t::zero() ), canceled( 0 ), name( n )
   {
     if ( ! name ) name = "unknown";
   }
-  timespan_t occurs()  const { return ( reschedule_time != timespan_t::zero ) ? reschedule_time : time; }
+  timespan_t occurs()  const { return ( reschedule_time != timespan_t::zero() ) ? reschedule_time : time; }
   timespan_t remains() const { return occurs() - sim -> current_time; }
   virtual void reschedule( timespan_t new_time );
   virtual void execute() = 0;
@@ -2258,8 +2037,8 @@ struct item_t
     special_effect_t() :
       trigger_type( 0 ), trigger_mask( 0 ), stat( 0 ), school( SCHOOL_NONE ),
       max_stacks( 0 ), stat_amount( 0 ), discharge_amount( 0 ), discharge_scaling( 0 ),
-      proc_chance( 0 ), duration( timespan_t::zero ), cooldown( timespan_t::zero ),
-      tick( timespan_t::zero ), cost_reduction( false ), no_crit( false ), no_player_benefits( false ), no_debuffs( false ),
+      proc_chance( 0 ), duration( timespan_t::zero() ), cooldown( timespan_t::zero() ),
+      tick( timespan_t::zero() ), cost_reduction( false ), no_crit( false ), no_player_benefits( false ), no_debuffs( false ),
       no_refresh( false ), chance_to_discharge( false ), reverse( false ) {}
     bool active() { return stat || school; }
   } use, equip, enchant, addon;
@@ -2866,15 +2645,15 @@ public:
   virtual void      moving();
   virtual void      stun();
   virtual void      clear_debuffs();
-  virtual void      schedule_ready( timespan_t delta_time=timespan_t::zero, bool waiting=false );
+  virtual void      schedule_ready( timespan_t delta_time=timespan_t::zero(), bool waiting=false );
   virtual void      arise();
   virtual void      demise();
-  virtual timespan_t available() const { return timespan_t::from_seconds( 0.1 ); }
+  virtual timespan_t available() const { return std::chrono::milliseconds( 100 ); }
   virtual action_t* execute_action();
 
   std::string print_action_map( int iterations, int precision ) const;
 
-  virtual void   regen( timespan_t periodicity=timespan_t::from_seconds( 0.25 ) );
+  virtual void   regen( timespan_t periodicity=from_seconds( 0.25 ) );
           double resource_gain( int resource, double amount, gain_t* g=0, action_t* a=0 );
           double resource_loss( int resource, double amount, gain_t* g=0, action_t* a=0 );
   virtual void   recalculate_resource_max( int resource );
@@ -2903,7 +2682,7 @@ public:
   struct heal_info_t { double actual, amount; };
   virtual heal_info_t assess_heal( double amount, const school_type school, int type, int result, action_t* a );
 
-  virtual void  summon_pet( const char* name, timespan_t duration=timespan_t::zero );
+  virtual void  summon_pet( const char* name, timespan_t duration=timespan_t::zero() );
   virtual void dismiss_pet( const char* name );
 
   virtual bool ooc_buffs() { return true; }
@@ -3092,7 +2871,7 @@ public:
   virtual void init_talents();
   virtual void init_target();
   virtual void reset();
-  virtual void summon( timespan_t duration=timespan_t::zero );
+  virtual void summon( timespan_t duration=timespan_t::zero() );
   virtual void dismiss();
   virtual bool ooc_buffs() { return false; }
   virtual double assess_damage( double amount, const school_type school, int type, int result, action_t* a=0 );
@@ -3108,7 +2887,7 @@ struct companion_t : pet_t
 {
   companion_t( sim_t* sim, player_t* owner, const std::string& name, pet_type_t pt );
 
-  virtual void summon( timespan_t duration=timespan_t::zero );
+  virtual void summon( timespan_t duration=timespan_t::zero() );
   virtual void dismiss();
 };
 
@@ -3317,7 +3096,7 @@ public:
   virtual timespan_t gcd() const;
   virtual timespan_t execute_time() const;
   virtual timespan_t tick_time() const;
-  virtual int    hasted_num_ticks( timespan_t d=timespan_t::min ) const;
+  virtual int    hasted_num_ticks( timespan_t d=timespan_t::min() ) const;
   virtual timespan_t travel_time();
   virtual void   player_buff();
   virtual void   target_debuff( player_t* t, int dmg_type );
@@ -3474,19 +3253,19 @@ struct cooldown_t
   timespan_t ready;
   cooldown_t* next;
 
-  cooldown_t( const std::string& n, player_t* p ) : sim( p->sim ), player( p ), name_str( n ), duration( timespan_t::zero ), ready( timespan_t::min ), next( 0 ) {}
-  cooldown_t( const std::string& n, sim_t* s ) : sim( s ), player( 0 ), name_str( n ), duration( timespan_t::zero ), ready( timespan_t::min ), next( 0 ) {}
+  cooldown_t( const std::string& n, player_t* p ) : sim( p->sim ), player( p ), name_str( n ), duration( timespan_t::zero() ), ready( timespan_t::min() ), next( 0 ) {}
+  cooldown_t( const std::string& n, sim_t* s ) : sim( s ), player( 0 ), name_str( n ), duration( timespan_t::zero() ), ready( timespan_t::min() ), next( 0 ) {}
 
-  void reset() { ready=timespan_t::min; }
-  void start( timespan_t override=timespan_t::min, timespan_t delay=timespan_t::zero )
+  void reset() { ready=timespan_t::min(); }
+  void start( timespan_t override=timespan_t::min(), timespan_t delay=timespan_t::zero() )
   {
-    if ( override >= timespan_t::zero ) duration = override;
-    if ( duration > timespan_t::zero ) ready = sim -> current_time + duration + delay;
+    if ( override >= timespan_t::zero() ) duration = override;
+    if ( duration > timespan_t::zero() ) ready = sim -> current_time + duration + delay;
   }
   timespan_t remains()
   {
     timespan_t diff = ready - sim -> current_time;
-    if ( diff < timespan_t::zero ) diff = timespan_t::zero;
+    if ( diff < timespan_t::zero() ) diff = timespan_t::zero();
     return diff;
   }
   const char* name() { return name_str.c_str(); }
@@ -3650,7 +3429,7 @@ struct unique_gear_t
   static action_callback_t* register_stat_proc( int type, int64_t mask, const std::string& name, player_t*,
                                                 int stat, int max_stacks, double amount,
                                                 double proc_chance, timespan_t duration, timespan_t cooldown,
-                                                timespan_t tick=timespan_t::zero, bool reverse=false, int rng_type=RNG_DEFAULT );
+                                                timespan_t tick=timespan_t::zero(), bool reverse=false, int rng_type=RNG_DEFAULT );
 
   static action_callback_t* register_cost_reduction_proc( int type, int64_t mask, const std::string& name, player_t*,
                                                           int school, int max_stacks, double amount,
@@ -3756,7 +3535,7 @@ struct uptime_common_t
   double uptime;
 
   uptime_common_t( sim_t* s ) :
-    last_start( timespan_t::min ), uptime_sum( timespan_t::zero ), sim( s ),
+    last_start( timespan_t::min() ), uptime_sum( timespan_t::zero() ), sim( s ),
     uptime( std::numeric_limits<double>::quiet_NaN() )
   {}
 
@@ -3764,20 +3543,20 @@ struct uptime_common_t
   {
     if ( is_up )
     {
-      if ( last_start < timespan_t::zero )
+      if ( last_start < timespan_t::zero() )
         last_start = sim -> current_time;
     }
-    else if ( last_start >= timespan_t::zero )
+    else if ( last_start >= timespan_t::zero() )
     {
       uptime_sum += sim -> current_time - last_start;
-      last_start = timespan_t::min;
+      last_start = timespan_t::min();
     }
   }
 
-  void reset() { last_start = timespan_t::min; }
+  void reset() { last_start = timespan_t::min(); }
 
   void analyze()
-  { uptime = uptime_sum.total_seconds() / sim -> iterations / sim -> simulation_length.mean; }
+  { uptime = to_seconds( uptime_sum ) / sim -> iterations / sim -> simulation_length.mean; }
 
   void merge( const uptime_common_t& other )
   { uptime_sum += other.uptime_sum; }
@@ -3835,14 +3614,14 @@ struct proc_t
   proc_t* next;
 
   proc_t( sim_t* s, const std::string& n ) :
-    count( 0 ), last_proc( timespan_t::zero ), interval_sum( timespan_t::zero ), interval_count( 0 ),
+    count( 0 ), last_proc( timespan_t::zero() ), interval_sum( timespan_t::zero() ), interval_count( 0 ),
     frequency( 0 ), sim( s ), player( 0 ), name_str( n ), next( 0 )
   {}
 
   void occur()
   {
     count++;
-    if ( last_proc > timespan_t::zero && last_proc < sim -> current_time )
+    if ( last_proc > timespan_t::zero() && last_proc < sim -> current_time )
     {
       interval_sum += sim -> current_time - last_proc;
       interval_count++;
@@ -3860,7 +3639,7 @@ struct proc_t
   void analyze( const sim_t* sim )
   {
     count /= sim -> iterations;
-    if ( interval_count > 0 ) frequency = interval_sum.total_seconds() / interval_count;
+    if ( interval_count > 0 ) frequency = to_seconds( interval_sum ) / interval_count;
   }
 
   const char* name() const { return name_str.c_str(); }
@@ -4110,7 +3889,7 @@ struct wait_action_base_t : public action_t
 {
   wait_action_base_t( player_t* player, const char* name ) :
     action_t( ACTION_OTHER, name, player )
-  { trigger_gcd = timespan_t::zero; }
+  { trigger_gcd = timespan_t::zero(); }
 
   virtual void execute()
   { player -> iteration_waiting_time += time_to_execute; }
