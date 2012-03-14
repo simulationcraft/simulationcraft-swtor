@@ -516,7 +516,7 @@ double enemy_t::health_percentage() const
     return ( remainder / sim -> expected_time ) * ( initial_health_percentage - sim -> target_death_pct ) + sim ->  target_death_pct;
   }
 
-  return resource_current[ RESOURCE_HEALTH ] / resource_max[ RESOURCE_HEALTH ] * 100 ;
+  return player_t::health_percentage();
 }
 
 // enemy_t::recalculate_health ==============================================
@@ -547,7 +547,7 @@ void enemy_t::recalculate_health()
 // enemy_t::create_expression ===============================================
 
 action_expr_t* enemy_t::create_expression( action_t* action,
-    const std::string& name_str )
+                                           const std::string& name_str )
 {
   if ( name_str == "adds" )
   {

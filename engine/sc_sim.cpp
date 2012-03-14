@@ -1795,6 +1795,8 @@ double sim_t::iteration_adjust()
 action_expr_t* sim_t::create_expression( action_t* a,
                                          const std::string& name_str )
 {
+  assert( a -> sim == this );
+
   if ( name_str == "time" )
   {
     struct time_expr_t : public action_expr_t
@@ -1818,30 +1820,24 @@ action_expr_t* sim_t::create_expression( action_t* a,
   std::vector<std::string> splits;
   int num_splits = util_t::string_split( splits, name_str, "." );
 
-  if ( num_splits == 3 )
+  if ( num_splits == 3 && splits[ 0 ] == "aura" )
   {
-    if ( splits[ 0 ] == "aura" )
-    {
-      buff_t* buff = buff_t::find( this, splits[ 1 ] );
-      if ( ! buff ) return 0;
-      return buff -> create_expression( a, splits[ 2 ] );
-    }
+    buff_t* buff = buff_t::find( this, splits[ 1 ] );
+    if ( ! buff ) return 0;
+    return buff -> create_expression( a, splits[ 2 ] );
   }
+
   if ( num_splits >= 3 && splits[ 0 ] == "actors" )
   {
     player_t* actor = sim_t::find_player( splits[ 1 ] );
-    if ( ! target ) return 0;
-    std::string rest = splits[2];
-    for ( int i = 3; i < num_splits; ++i )
-      rest += '.' + splits[i];
-    return actor -> create_expression( a, rest );
+    if ( ! actor ) return 0;
+    return actor -> create_expression( a, join( splits.begin() + 2, splits.end(), '.' ) );
   }
+
   if ( num_splits >= 2 && splits[ 0 ] == "target" )
   {
-    std::string rest = splits[1];
-    for ( int i = 2; i < num_splits; ++i )
-      rest += '.' + splits[i];
-    return target -> create_expression( a, rest );
+    if ( ! target ) return nullptr;
+    return target -> create_expression( a, join( splits.begin() + 1, splits.end(), ',' ) );
   }
 
   return 0;

@@ -10,11 +10,15 @@
 struct expr_unary_t : public action_expr_t
 {
   int operation;
-  action_expr_t* input;
-  expr_unary_t( action_t* a, const std::string& n, int o, action_expr_t* i ) : action_expr_t( a,n ), operation( o ), input( i ) {}
-  ~expr_unary_t() { delete input; }
+  std::unique_ptr<action_expr_t> input;
+
+  expr_unary_t( action_t* a, const std::string& n, int o, action_expr_t* i ) :
+    action_expr_t( a, n ), operation( o ), input( i )
+  {}
+
   virtual int evaluate()
   {
+    assert( input );
     result_type = TOK_UNKNOWN;
     int input_result = input -> evaluate();
     if ( input_result == TOK_NUM )
@@ -44,12 +48,17 @@ struct expr_unary_t : public action_expr_t
 struct expr_binary_t : public action_expr_t
 {
   int operation;
-  action_expr_t* left;
-  action_expr_t* right;
-  expr_binary_t( action_t* a, const std::string& n, int o, action_expr_t* l, action_expr_t* r ) : action_expr_t( a,n ), operation( o ), left( l ), right( r ) {}
-  ~expr_binary_t() { delete left; delete right; }
+  std::unique_ptr<action_expr_t> left, right;
+
+  expr_binary_t( action_t* a, const std::string& n, int o, action_expr_t* l, action_expr_t* r ) :
+    action_expr_t( a, n ), operation( o ), left( l ), right( r )
+  {}
+
   virtual int evaluate()
   {
+    assert( left );
+    assert( right );
+
     result_type = TOK_UNKNOWN;
     int right_result,
         left_result = left -> evaluate();

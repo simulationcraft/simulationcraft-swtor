@@ -4496,136 +4496,158 @@ talent_t* player_t::find_talent( const std::string& n,
 action_expr_t* player_t::create_expression( action_t* a,
                                             const std::string& name_str )
 {
-  struct resource_expr_t : public action_expr_t
+  if ( name_str == "health_pct" )
+  {
+    sim -> errorf( "Use of \"health_pct\" in action expressions is deprecated: use \"health.pct\" instead.\n" );
+    return create_expression( a, "health.pct" );
+  }
+
+  struct player_expr_t : public action_expr_t
+  {
+    player_t* player;
+
+    player_expr_t( action_t* a, const std::string& n, player_t* p ) :
+      action_expr_t( a, n, TOK_NUM ), player( p )
+    {}
+  };
+
+  struct resource_expr_t : public player_expr_t
   {
     resource_type rt;
-    resource_expr_t( action_t* a, const std::string& n, resource_type r ) : action_expr_t( a, n, TOK_NUM ), rt( r ) {}
-    virtual int evaluate() { result_num = action -> player -> resource_current[ rt ]; return TOK_NUM; }
+
+    resource_expr_t( action_t* a, const std::string& n, player_t* p, resource_type r ) :
+      player_expr_t( a, n, p ), rt( r )
+    {}
+
+    virtual int evaluate()
+    {
+      result_num = player -> resource_current[ rt ];
+      return TOK_NUM;
+    }
   };
 
   resource_type rt = static_cast<resource_type>( util_t::parse_resource_type( name_str ) );
   if ( rt != RESOURCE_NONE )
-    return new resource_expr_t( a, name_str, rt );
+    return new resource_expr_t( a, name_str, this, rt );
 
   if ( name_str == "level" )
   {
-    struct level_expr_t : public action_expr_t
+    struct level_expr_t : public player_expr_t
     {
-      level_expr_t( action_t* a ) : action_expr_t( a, "level", TOK_NUM ) {}
-      virtual int evaluate() { player_t* p = action -> player; result_num = p -> level; return TOK_NUM; }
+      level_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "level", p ) {}
+      virtual int evaluate() { result_num = player -> level; return TOK_NUM; }
     };
-    return new level_expr_t( a );
+    return new level_expr_t( a, this );
   }
   if ( name_str == "multiplier" )
   {
-    struct multiplier_expr_t : public action_expr_t
+    struct multiplier_expr_t : public player_expr_t
     {
-      multiplier_expr_t( action_t* a ) : action_expr_t( a, "multiplier", TOK_NUM ) {}
-      virtual int evaluate() { player_t* p = action -> player; result_num = p -> composite_player_multiplier( action -> school, action ); return TOK_NUM; }
+      multiplier_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "multiplier", p ) {}
+      virtual int evaluate() { result_num = player -> composite_player_multiplier( action -> school, action ); return TOK_NUM; }
     };
-    return new multiplier_expr_t( a );
+    return new multiplier_expr_t( a, this );
   }
   if ( name_str == "in_combat" )
   {
-    struct in_combat_expr_t : public action_expr_t
+    struct in_combat_expr_t : public player_expr_t
     {
-      in_combat_expr_t( action_t* a ) : action_expr_t( a, "in_combat", TOK_NUM ) {}
-      virtual int evaluate() { result_num = ( action -> player -> in_combat  ? 1 : 0 ); return TOK_NUM; }
+      in_combat_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "in_combat", p ) {}
+      virtual int evaluate() { result_num = ( player -> in_combat ? 1 : 0 ); return TOK_NUM; }
     };
-    return new in_combat_expr_t( a );
+    return new in_combat_expr_t( a, this );
   }
   if ( name_str == "alacrity" )
   {
-    struct alacrity_expr_t : public action_expr_t
+    struct alacrity_expr_t : public player_expr_t
     {
-      alacrity_expr_t( action_t* a ) : action_expr_t( a, "alacrity", TOK_NUM ) {}
-      virtual int evaluate() { result_num = action -> player -> alacrity(); return TOK_NUM; }
+      alacrity_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "alacrity", p ) {}
+      virtual int evaluate() { result_num = player -> alacrity(); return TOK_NUM; }
     };
-    return new alacrity_expr_t( a );
+    return new alacrity_expr_t( a, this );
   }
   if ( name_str == "energy_regen" )
   {
-    struct energy_regen_expr_t : public action_expr_t
+    struct energy_regen_expr_t : public player_expr_t
     {
-      energy_regen_expr_t( action_t* a ) : action_expr_t( a, "energy_regen", TOK_NUM ) {}
-      virtual int evaluate() { result_num = action -> player -> energy_regen_per_second(); return TOK_NUM; }
+      energy_regen_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "energy_regen", p ) {}
+      virtual int evaluate() { result_num = player -> energy_regen_per_second(); return TOK_NUM; }
     };
-    return new energy_regen_expr_t( a );
+    return new energy_regen_expr_t( a, this );
   }
   if ( name_str == "ammo_regen" )
   {
-    struct ammo_regen_expr_t : public action_expr_t
+    struct ammo_regen_expr_t : public player_expr_t
     {
-      ammo_regen_expr_t( action_t* a ) : action_expr_t( a, "ammo_regen", TOK_NUM ) {}
-      virtual int evaluate() { result_num = action -> player -> ammo_regen_per_second(); return TOK_NUM; }
+      ammo_regen_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "ammo_regen", p ) {}
+      virtual int evaluate() { result_num = player -> ammo_regen_per_second(); return TOK_NUM; }
     };
-    return new ammo_regen_expr_t( a );
+    return new ammo_regen_expr_t( a, this );
   }
   if ( name_str == "time_to_die" )
   {
-    struct time_to_die_expr_t : public action_expr_t
+    struct time_to_die_expr_t : public player_expr_t
     {
-      player_t* player;
-      time_to_die_expr_t( action_t* a, player_t* p ) :
-        action_expr_t( a, "target_time_to_die", TOK_NUM ), player( p ) {}
+      time_to_die_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "target_time_to_die", p ) {}
       virtual int evaluate() { result_num = player -> time_to_die().total_seconds();  return TOK_NUM; }
     };
     return new time_to_die_expr_t( a, this );
   }
   if ( name_str == "time_to_max_energy" )
   {
-    struct time_to_max_energy_expr_t : public action_expr_t
+    struct time_to_max_energy_expr_t : public player_expr_t
     {
-      time_to_max_energy_expr_t( action_t* a ) : action_expr_t( a, "time_to_max_energy", TOK_NUM ) {}
+      time_to_max_energy_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "time_to_max_energy", p ) {}
       virtual int evaluate()
       {
-        result_num = ( action -> player -> resource_max[ RESOURCE_ENERGY ] -
-                       action -> player -> resource_current[ RESOURCE_ENERGY ] ) /
-                     action -> player -> energy_regen_per_second(); return TOK_NUM;
+        result_num = ( player -> resource_max[ RESOURCE_ENERGY ] -
+                       player -> resource_current[ RESOURCE_ENERGY ] ) /
+                     player -> energy_regen_per_second(); return TOK_NUM;
       }
     };
-    return new time_to_max_energy_expr_t( a );
+    return new time_to_max_energy_expr_t( a, this );
   }
   if ( name_str == "time_to_max_ammo" )
   {
-    struct time_to_max_ammo_expr_t : public action_expr_t
+    struct time_to_max_ammo_expr_t : public player_expr_t
     {
-      time_to_max_ammo_expr_t( action_t* a ) : action_expr_t( a, "time_to_max_ammo", TOK_NUM ) {}
+      time_to_max_ammo_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "time_to_max_ammo", p ) {}
       virtual int evaluate()
       {
-        result_num = ( action -> player -> resource_max[ RESOURCE_AMMO ] -
-                       action -> player -> resource_current[ RESOURCE_AMMO ] ) /
-                     action -> player -> ammo_regen_per_second(); return TOK_NUM;
+        result_num = ( player -> resource_max[ RESOURCE_AMMO ] -
+                       player -> resource_current[ RESOURCE_AMMO ] ) /
+                     player -> ammo_regen_per_second(); return TOK_NUM;
       }
     };
-    return new time_to_max_ammo_expr_t( a );
+    return new time_to_max_ammo_expr_t( a, this );
   }
   if ( name_str == "ptr" )
   {
-    struct ptr_expr_t : public action_expr_t
+    struct ptr_expr_t : public player_expr_t
     {
-      ptr_expr_t( action_t* a ) : action_expr_t( a, "ptr", TOK_NUM ) {}
-      virtual int evaluate() { result_num = action -> player -> ptr ? 1 : 0; return TOK_NUM; }
+      ptr_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "ptr", p ) {}
+      virtual int evaluate() { result_num = player -> ptr ? 1 : 0; return TOK_NUM; }
     };
-    return new ptr_expr_t( a );
+    return new ptr_expr_t( a, this );
   }
   if ( name_str == "position_front" )
   {
-    struct position_front_expr_t : public action_expr_t
+    struct position_front_expr_t : public player_expr_t
     {
-      position_front_expr_t( action_t* a ) : action_expr_t( a, "position_front", TOK_NUM ) {}
-      virtual int evaluate() { result_num = ( action -> player -> position == POSITION_FRONT || action -> player -> position == POSITION_RANGED_FRONT ) ? 1 : 0; return TOK_NUM; }
+      position_front_expr_t( action_t* a, player_t* p ) :
+        player_expr_t( a, "position_front", p ) {}
+      virtual int evaluate() { result_num = ( player -> position == POSITION_FRONT || player -> position == POSITION_RANGED_FRONT ) ? 1 : 0; return TOK_NUM; }
     };
-    return new position_front_expr_t( a );
+    return new position_front_expr_t( a, this );
   }
   if ( name_str == "position_back" )
   {
-    struct position_back_expr_t : public action_expr_t
+    struct position_back_expr_t : public player_expr_t
     {
-      position_back_expr_t( action_t* a ) : action_expr_t( a, "position_back", TOK_NUM ) {}
-      virtual int evaluate() { result_num = ( action -> player -> position == POSITION_BACK || action -> player -> position == POSITION_RANGED_BACK ) ? 1 : 0; return TOK_NUM; }
+      position_back_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "position_back", p ) {}
+      virtual int evaluate() { result_num = ( player -> position == POSITION_BACK || player -> position == POSITION_RANGED_BACK ) ? 1 : 0; return TOK_NUM; }
     };
-    return new position_back_expr_t( a );
+    return new position_back_expr_t( a, this );
   }
 
   std::vector<std::string> splits;
@@ -4637,42 +4659,44 @@ action_expr_t* player_t::create_expression( action_t* a,
     {
       struct resource_deficit_expr_t : public resource_expr_t
       {
-        resource_deficit_expr_t( action_t* a, const std::string& n, resource_type r ) : resource_expr_t( a, n, r ) {}
+        resource_deficit_expr_t( action_t* a, const std::string& n, player_t* p, resource_type r ) :
+          resource_expr_t( a, n, p, r ) {}
         virtual int evaluate()
         {
-          const player_t& p = *action -> player;
-          result_num = p.resource_max[ rt ] - p.resource_current[ rt ];
+          result_num = player -> resource_max[ rt ] - player -> resource_current[ rt ];
           return TOK_NUM;
         }
       };
-      return new resource_deficit_expr_t( a, name_str, rt );
+      return new resource_deficit_expr_t( a, name_str, this, rt );
     }
 
     if ( splits[ 1 ] == "pct" || splits[ 1 ] == "percent" )
     {
       struct resource_pct_expr_t : public resource_expr_t
       {
-        resource_pct_expr_t( action_t* a, const std::string& n, resource_type r ) : resource_expr_t( a, n, r ) {}
+        resource_pct_expr_t( action_t* a, const std::string& n, player_t* p, resource_type r ) :
+          resource_expr_t( a, n, p, r ) {}
         virtual int evaluate()
         {
           if ( rt == RESOURCE_HEALTH )
-            result_num = action -> player -> health_percentage() / 100.0;
+            result_num = player -> health_percentage() / 100.0;
           else
-            result_num = action -> player -> resource_current[ rt ] / action -> player -> resource_max[ rt ];
+            result_num = player -> resource_current[ rt ] / action -> player -> resource_max[ rt ];
           return TOK_NUM;
         }
       };
-      return new resource_pct_expr_t( a, name_str, rt );
+      return new resource_pct_expr_t( a, name_str, this, rt );
     }
 
     if ( splits[ 1 ] == "max" )
     {
       struct resource_max_expr_t : public resource_expr_t
       {
-        resource_max_expr_t( action_t* a, const std::string& n, resource_type r ) : resource_expr_t( a, n, r ) {}
-        virtual int evaluate() { result_num = action -> player -> resource_max[ rt ]; return TOK_NUM; }
+        resource_max_expr_t( action_t* a, const std::string& n, player_t* p, resource_type r ) :
+          resource_expr_t( a, n, p, r ) {}
+        virtual int evaluate() { result_num = player -> resource_max[ rt ]; return TOK_NUM; }
       };
-      return new resource_max_expr_t( a, name_str, rt );
+      return new resource_max_expr_t( a, name_str, this, rt );
     }
   }
 
@@ -4681,44 +4705,50 @@ action_expr_t* player_t::create_expression( action_t* a,
     pet_t* pet = find_pet( splits[ 1 ] );
     if ( pet )
     {
+      struct pet_expr_t : public action_expr_t
+      {
+        pet_t* pet;
+        pet_expr_t( action_t* a, const std::string& n, pet_t* p ) :
+          action_expr_t( a, n, TOK_NUM ), pet( p )
+        {}
+      };
+
       if ( splits[ 2 ] == "active" )
       {
-        struct pet_active_expr_t : public action_expr_t
+        struct pet_active_expr_t : public pet_expr_t
         {
-          pet_t* pet;
-          pet_active_expr_t( action_t* a, pet_t* p ) : action_expr_t( a, "pet_active", TOK_NUM ), pet( p ) {}
+          pet_active_expr_t( action_t* a, pet_t* p ) : pet_expr_t( a, "pet_active", p ) {}
           virtual int evaluate() { result_num = ( pet -> sleeping ) ? 0 : 1; return TOK_NUM; }
         };
         return new pet_active_expr_t( a, pet );
       }
       else if ( splits[ 2 ] == "remains" )
       {
-        struct pet_remains_expr_t : public action_expr_t
+        struct pet_remains_expr_t : public pet_expr_t
         {
-          pet_t* pet;
-          pet_remains_expr_t( action_t* a, pet_t* p ) : action_expr_t( a, "pet_remains", TOK_NUM ), pet( p ) {}
+          pet_remains_expr_t( action_t* a, pet_t* p ) : pet_expr_t( a, "pet_remains", p ) {}
           virtual int evaluate() { result_num = ( pet -> expiration && pet -> expiration-> remains() > timespan_t::zero ) ? pet -> expiration -> remains().total_seconds() : 0; return TOK_NUM; }
         };
         return new pet_remains_expr_t( a, pet );
       }
       else
       {
-        return pet -> create_expression( a, name_str.substr( splits[ 1 ].length() + 5 ) );
+        return pet -> create_expression( a, name_str.substr( splits[ 1 ].length() + std::strlen( "pet" ) + 2 ) );
       }
     }
   }
+
   else if ( splits[ 0 ] == "owner" )
   {
-    if ( is_pet() )
+    if ( pet_t* pet = dynamic_cast<pet_t*>( this ) )
     {
-      pet_t* pet = ( pet_t* ) this;
-
-      if ( pet-> owner )
+      if ( pet -> owner )
       {
         return pet -> owner -> create_expression( a, name_str.substr( 6 ) );
       }
     }
   }
+
   else if ( splits[ 0 ] == "temporary_bonus" )
   {
     int stat = util_t::parse_stat_type( splits[ 1 ] );
@@ -4730,48 +4760,50 @@ action_expr_t* player_t::create_expression( action_t* a,
 
       switch ( stat )
       {
-        case STAT_STRENGTH:         p_stat = &( a -> player -> temporary.attribute[ ATTR_STRENGTH  ] ); attr = ATTR_STRENGTH;  break;
-        case STAT_AIM:              p_stat = &( a -> player -> temporary.attribute[ ATTR_AIM       ] ); attr = ATTR_AIM;       break;
-        case STAT_CUNNING:          p_stat = &( a -> player -> temporary.attribute[ ATTR_CUNNING   ] ); attr = ATTR_CUNNING;   break;
-        case STAT_WILLPOWER:        p_stat = &( a -> player -> temporary.attribute[ ATTR_WILLPOWER ] ); attr = ATTR_WILLPOWER; break;
-        case STAT_ENDURANCE:        p_stat = &( a -> player -> temporary.attribute[ ATTR_ENDURANCE ] ); attr = ATTR_ENDURANCE; break;
-        case STAT_PRESENCE:         p_stat = &( a -> player -> temporary.attribute[ ATTR_PRESENCE  ] ); attr = ATTR_PRESENCE;  break;
-        case STAT_EXPERTISE_RATING: p_stat = &( a -> player -> temporary.expertise_rating            ); break;
-        case STAT_ACCURACY_RATING:  p_stat = &( a -> player -> temporary.accuracy_rating             ); break;
-        case STAT_CRIT_RATING:      p_stat = &( a -> player -> temporary.crit_rating                 ); break;
-        case STAT_ALACRITY_RATING:  p_stat = &( a -> player -> temporary.alacrity_rating             ); break;
-        case STAT_ARMOR:            p_stat = &( a -> player -> temporary.armor                       ); break;
-        case STAT_POWER:            p_stat = &( a -> player -> temporary.power                       ); break;
-        case STAT_FORCE_POWER:      p_stat = &( a -> player -> temporary.force_power                 ); break;
-        case STAT_TECH_POWER:       p_stat = &( a -> player -> temporary.tech_power                  ); break;
-        case STAT_SURGE_RATING:     p_stat = &( a -> player -> temporary.surge_rating                ); break;
-        case STAT_DEFENSE_RATING:   p_stat = &( a -> player -> temporary.defense_rating              ); break;
-        case STAT_SHIELD_RATING:    p_stat = &( a -> player -> temporary.shield_rating               ); break;
-        case STAT_ABSORB_RATING:    p_stat = &( a -> player -> temporary.absorb_rating               ); break;
+        case STAT_STRENGTH:         p_stat = &( temporary.attribute[ ATTR_STRENGTH  ] ); attr = ATTR_STRENGTH;  break;
+        case STAT_AIM:              p_stat = &( temporary.attribute[ ATTR_AIM       ] ); attr = ATTR_AIM;       break;
+        case STAT_CUNNING:          p_stat = &( temporary.attribute[ ATTR_CUNNING   ] ); attr = ATTR_CUNNING;   break;
+        case STAT_WILLPOWER:        p_stat = &( temporary.attribute[ ATTR_WILLPOWER ] ); attr = ATTR_WILLPOWER; break;
+        case STAT_ENDURANCE:        p_stat = &( temporary.attribute[ ATTR_ENDURANCE ] ); attr = ATTR_ENDURANCE; break;
+        case STAT_PRESENCE:         p_stat = &( temporary.attribute[ ATTR_PRESENCE  ] ); attr = ATTR_PRESENCE;  break;
+        case STAT_EXPERTISE_RATING: p_stat = &( temporary.expertise_rating            ); break;
+        case STAT_ACCURACY_RATING:  p_stat = &( temporary.accuracy_rating             ); break;
+        case STAT_CRIT_RATING:      p_stat = &( temporary.crit_rating                 ); break;
+        case STAT_ALACRITY_RATING:  p_stat = &( temporary.alacrity_rating             ); break;
+        case STAT_ARMOR:            p_stat = &( temporary.armor                       ); break;
+        case STAT_POWER:            p_stat = &( temporary.power                       ); break;
+        case STAT_FORCE_POWER:      p_stat = &( temporary.force_power                 ); break;
+        case STAT_TECH_POWER:       p_stat = &( temporary.tech_power                  ); break;
+        case STAT_SURGE_RATING:     p_stat = &( temporary.surge_rating                ); break;
+        case STAT_DEFENSE_RATING:   p_stat = &( temporary.defense_rating              ); break;
+        case STAT_SHIELD_RATING:    p_stat = &( temporary.shield_rating               ); break;
+        case STAT_ABSORB_RATING:    p_stat = &( temporary.absorb_rating               ); break;
 
         default: assert( 0 ); break;
       }
 
       if ( p_stat )
       {
-        struct temporary_stat_expr_t : public action_expr_t
+        struct temporary_stat_expr_t : public player_expr_t
         {
           int attr;
           int stat_type;
           double& stat;
-          temporary_stat_expr_t( action_t* a, double* p_stat, int stat_type, int attr ) :
-            action_expr_t( a, "temporary_stat", TOK_NUM ), attr( attr ), stat_type( stat_type ), stat( *p_stat ) { }
+
+          temporary_stat_expr_t( action_t* a, player_t* p, double* p_stat, int stat_type, int attr ) :
+            player_expr_t( a, "temporary_stat", p ), attr( attr ), stat_type( stat_type ), stat( *p_stat ) {}
 
           virtual int evaluate()
           {
             result_num = stat;
             if ( attr != -1 )
-              result_num *= action -> player -> composite_attribute_multiplier( attr );
+              result_num *= player -> composite_attribute_multiplier( attr );
 
             return TOK_NUM;
           }
         };
-        return new temporary_stat_expr_t( a, p_stat, stat, attr );
+
+        return new temporary_stat_expr_t( a, this, p_stat, stat, attr );
       }
     }
   }
@@ -4835,18 +4867,27 @@ action_expr_t* player_t::create_expression( action_t* a,
         struct in_flight_multi_expr_t : public action_expr_t
         {
           std::vector<action_t*> action_list;
-          in_flight_multi_expr_t( std::vector<action_t*> al ) : action_expr_t( al[ 0 ], "in_flight", TOK_NUM ), action_list( al ) {}
+
+          in_flight_multi_expr_t( action_t* a, std::vector<action_t*>&& al ) :
+            action_expr_t( a, "in_flight", TOK_NUM ),
+            action_list( std::move( al ) )
+          {}
+
           virtual int evaluate()
           {
             result_num = false;
-            for ( int i = 0; i < ( int ) action_list.size(); i++ )
+            for ( action_t* a : action_list )
             {
-              if ( action_list[ i ] -> travel_event != NULL ) result_num = true;
+              if ( a -> travel_event != NULL )
+              {
+                result_num = true;
+                break;
+              }
             }
             return TOK_NUM;
           }
         };
-        return new in_flight_multi_expr_t( in_flight_list );
+        return new in_flight_multi_expr_t( a, std::move( in_flight_list ) );
       }
     }
   }
@@ -4854,17 +4895,12 @@ action_expr_t* player_t::create_expression( action_t* a,
   {
     if ( splits[ 0 ] == "set_bonus" )
     {
-      return a -> player -> set_bonus.create_expression( a, splits[ 1 ] );
+      return this -> set_bonus.create_expression( a, splits[ 1 ] );
     }
   }*/
 
   if ( num_splits >= 2 && splits[ 0 ] == "target" )
-  {
-    std::string rest = splits[1];
-    for ( int i = 2; i < num_splits; ++i )
-      rest += '.' + splits[i];
-    return target -> create_expression( a, rest );
-  }
+    return target -> create_expression( a, join( splits.begin() + 1, splits.end(), '.' ) );
 
   return sim -> create_expression( a, name_str );
 }
