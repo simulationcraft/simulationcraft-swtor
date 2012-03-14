@@ -160,9 +160,12 @@ struct shadow_assassin_t : public player_t
     talent_t* creeping_terror;
   } talents;
 
-    shadow_assassin_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
-        player_t( sim, pt == SITH_ASSASSIN ? SITH_ASSASSIN : JEDI_SHADOW, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
-    {
+  bool stealth_tag;
+
+  shadow_assassin_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
+    player_t( sim, pt == SITH_ASSASSIN ? SITH_ASSASSIN : JEDI_SHADOW, name, ( r == RACE_NONE ) ? RACE_HUMAN : r ),
+    stealth_tag( false )
+  {
     if ( pt == SITH_ASSASSIN )
     {
       tree_type[ SITH_ASSASSIN_DARKNESS ]   = TREE_DARKNESS;
@@ -1157,14 +1160,18 @@ struct stealth_t : public stealth_base_t
     parse_options( 0, options_str );
   }
 
-  virtual bool ready()
+  virtual void execute() // override
   {
-    shadow_assassin_t* p = cast();
+    stealth_base_t::execute();
+    p()->stealth_tag = true;
+  }
 
-    if ( p->in_combat )
+  virtual bool ready() // override
+  {
+    if ( p()->in_combat )
       return false;
 
-    if ( p->buffs.dark_embrace->check() )
+    if ( p()->stealth_tag )
       return false;
 
     return stealth_base_t::ready();
