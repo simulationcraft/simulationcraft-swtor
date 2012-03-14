@@ -1591,52 +1591,53 @@ struct duplicity_callback_t: shadow_assassin_action_callback_t
 // shadow_assassin Character Definition
 // ==========================================================================
 
-// shadow_assassin_t::create_action ====================================================
+// shadow_assassin_t::create_action =========================================
 
 action_t* shadow_assassin_t::create_action( const std::string& name,
                                             const std::string& options_str )
 {
   if ( type == SITH_ASSASSIN )
   {
-    if ( name == "assassinate"        ) return new         assassinate_t( this, "assassinate", options_str );
-    if ( name == "creeping_terror"    ) return new     creeping_terror_t( this, "creeping_terror", options_str );
-    if ( name == "crushing_darkness"  ) return new   crushing_darkness_t( this, "crushing_darkness", options_str );
+    if ( name == "assassinate"        ) return new         assassinate_t( this, name, options_str );
+    if ( name == "creeping_terror"    ) return new     creeping_terror_t( this, name, options_str );
+    if ( name == "crushing_darkness"  ) return new   crushing_darkness_t( this, name, options_str );
     if ( name == "dark_charge"        ) return new         dark_charge_t( this, name, options_str );
-    if ( name == "death_field"        ) return new         death_field_t( this, "death_field", options_str );
-    if ( name == "discharge"          ) return new           discharge_t( this, "discharge", options_str );
-    if ( name == "force_lightning"    ) return new     force_lightning_t( this, "force_lightning", options_str );
-    if ( name == "lacerate"           ) return new            lacerate_t( this, "lacerate", options_str );
+    if ( name == "death_field"        ) return new         death_field_t( this, name, options_str );
+    if ( name == "discharge"          ) return new           discharge_t( this, name, options_str );
+    if ( name == "force_lightning"    ) return new     force_lightning_t( this, name, options_str );
+    if ( name == "lacerate"           ) return new            lacerate_t( this, name, options_str );
     if ( name == "lightning_charge"   ) return new    lightning_charge_t( this, name, options_str );
-    if ( name == "mark_of_power"      ) return new       mark_of_power_t( this, "mark_of_power", options_str );
-    if ( name == "maul"               ) return new                maul_t( this, "maul", options_str );
-    if ( name == "overcharge_saber"   ) return new    overcharge_saber_t( this, "overcharge_saber", options_str );
-    if ( name == "recklessness"       ) return new        recklessness_t( this, "recklessness", options_str );
-    if ( name == "shock"              ) return new               shock_t( this, "shock", options_str );
+    if ( name == "mark_of_power"      ) return new       mark_of_power_t( this, name, options_str );
+    if ( name == "maul"               ) return new                maul_t( this, name, options_str );
+    if ( name == "overcharge_saber"   ) return new    overcharge_saber_t( this, name, options_str );
+    if ( name == "recklessness"       ) return new        recklessness_t( this, name, options_str );
+    if ( name == "shock"              ) return new               shock_t( this, name, options_str );
     if ( name == "surging_charge"     ) return new      surging_charge_t( this, name, options_str );
-    if ( name == "thrash"             ) return new              thrash_t( this, "thrash", options_str );
-    if ( name == "voltaic_slash"      ) return new       voltaic_slash_t( this, "voltaic_slash", options_str );
+    if ( name == "thrash"             ) return new              thrash_t( this, name, options_str );
+    if ( name == "voltaic_slash"      ) return new       voltaic_slash_t( this, name, options_str );
   }
   else if ( type == JEDI_SHADOW )
   {
-    if ( name == "spinning_strike"    ) return new         assassinate_t( this, "spinning_strike", options_str );
-    if ( name == "sever_force"        ) return new     creeping_terror_t( this, "sever_force", options_str );
-    if ( name == "mind_crush"         ) return new   crushing_darkness_t( this, "mind_crush", options_str );
+    if ( name == "spinning_strike"    ) return new         assassinate_t( this, name, options_str );
+    if ( name == "sever_force"        ) return new     creeping_terror_t( this, name, options_str );
+    if ( name == "mind_crush"         ) return new   crushing_darkness_t( this, name, options_str );
     if ( name == "combat_technique"   ) return new         dark_charge_t( this, name, options_str );
-    if ( name == "force_in_balance"   ) return new         death_field_t( this, "force_in_balance", options_str );
-    if ( name == "force_breach"       ) return new           discharge_t( this, "force_breach", options_str );
-    if ( name == "telekinetic_throw"  ) return new     force_lightning_t( this, "telekinetic_throw", options_str );
-    if ( name == "whirling_blow"      ) return new            lacerate_t( this, "whirling_blow", options_str );
+    if ( name == "force_in_balance"   ) return new         death_field_t( this, name, options_str );
+    if ( name == "force_breach"       ) return new           discharge_t( this, name, options_str );
+    if ( name == "telekinetic_throw"  ) return new     force_lightning_t( this, name, options_str );
+    if ( name == "whirling_blow"      ) return new            lacerate_t( this, name, options_str );
     if ( name == "force_technique"    ) return new    lightning_charge_t( this, name, options_str );
-    if ( name == "force_valor"        ) return new       mark_of_power_t( this, "force_valor", options_str );
-    if ( name == "shadow_strike"      ) return new                maul_t( this, "shadow_strike", options_str );
-    if ( name == "battle_readiness"   ) return new    overcharge_saber_t( this, "battle_readiness", options_str );
-    if ( name == "force_potency"      ) return new        recklessness_t( this, "force_potency", options_str );
-    if ( name == "project"            ) return new               shock_t( this, "project", options_str );
+    if ( name == "force_valor"        ) return new       mark_of_power_t( this, name, options_str );
+    if ( name == "shadow_strike"      ) return new                maul_t( this, name, options_str );
+    if ( name == "battle_readiness"   ) return new    overcharge_saber_t( this, name, options_str );
+    if ( name == "force_potency"      ) return new        recklessness_t( this, name, options_str );
+    if ( name == "project"            ) return new               shock_t( this, name, options_str );
     if ( name == "shadow_technique"   ) return new      surging_charge_t( this, name, options_str );
-    if ( name == "double_strike"      ) return new              thrash_t( this, "double_strike", options_str );
-    if ( name == "clairvoyant_strike" ) return new       voltaic_slash_t( this, "clairvoyant_strike", options_str );
+    if ( name == "double_strike"      ) return new              thrash_t( this, name, options_str );
+    if ( name == "clairvoyant_strike" ) return new       voltaic_slash_t( this, name, options_str );
   }
 
+  // Abilities with the same name for Shadow and Assassin
   if ( name == "blackout"               ) return new            blackout_t( this, options_str );
   if ( name == "force_cloak"            ) return new         force_cloak_t( this, options_str );
   if ( name == "low_slash"              ) return new           low_slash_t( this, options_str );
@@ -1745,18 +1746,29 @@ void shadow_assassin_t::init_buffs()
 
   bool is_shadow = ( type == JEDI_SHADOW );
 
-  buffs.exploit_weakness    = new buff_t( this, "exploit_weakness",   1, timespan_t::from_seconds( 10.0 ), timespan_t::from_seconds( 10.0 ), talents.duplicity -> rank () * 0.1 );
-  buffs.dark_embrace        = new buff_t( this, "dark_embrace",       1, timespan_t::from_seconds(  6.0 ), timespan_t::zero );
-  buffs.induction           = new buff_t( this, "induction",          2, timespan_t::from_seconds( 10.0 ), timespan_t::zero, talents.induction -> rank() * 0.5 );
-  buffs.voltaic_slash       = new buff_t( this, "voltaic_slash",      2, timespan_t::from_seconds( 10.0 ), timespan_t::zero );
-  buffs.static_charges      = new buff_t( this, "static_charges",     5, timespan_t::from_seconds( 30.0 ), timespan_t::zero, talents.static_charges -> rank() * 0.5 );
-  buffs.exploitive_strikes  = new buff_t( this, "exploitive_strikes", 1, timespan_t::from_seconds( 10.0 ), timespan_t::zero );
-  buffs.raze                = new buff_t( this, "raze",               1, timespan_t::from_seconds( 15.0 ), timespan_t::from_seconds( 7.5 ), talents.raze -> rank() * 0.6 );
-  buffs.unearthed_knowledge = new buff_t( this, "unearthed_knowledge",1, timespan_t::from_seconds( 20.0 ), timespan_t::zero, talents.unearthed_knowledge -> rank() * 0.5 );
-  buffs.recklessness        = new buff_t( this, is_shadow ? "force_potency" : "recklessness", 2, timespan_t::from_seconds( 20.0 ) );
-  buffs.deathmark           = new buff_t( this, "deathmark",          10, timespan_t::from_seconds( 30.0 ), timespan_t::zero );
-  buffs.overcharge_saber    = new buff_t( this, "overcharge_saber",   1, timespan_t::from_seconds( 15.0 ) );
+  const char* dark_embrace = is_shadow ? "shadows_respite" : "dark_embrace";
+  const char* deathmark = is_shadow ? "force_suppression" : "deathmark";
+  const char* exploit_weakness = is_shadow ? "find_weakness" : "exploit_weakness";
+  const char* exploitive_strikes = is_shadow ? "force_synergy" : "exploitive_strikes";
+  const char* induction = is_shadow ? "circling_shadows" : "induction";
+  const char* overcharge_saber = is_shadow ? "battle_readiness" : "overcharge_saber";
+  const char* raze = is_shadow ? "force_strike" : "raze";
+  const char* recklessness = is_shadow ? "force_potency" : "recklessness";
+  const char* static_charges = is_shadow ? "exit_strategy" : "static_charges";
+  const char* unearthed_knowledge = is_shadow ? "twin_disciplines" : "unearthed_knowledge";
+  const char* voltaic_slash = is_shadow ? "clairvoyant_strike" : "voltaic_slash";
 
+  buffs.exploit_weakness    = new buff_t( this, exploit_weakness,    1, timespan_t::from_seconds( 10.0 ), timespan_t::from_seconds( 10.0 ), talents.duplicity -> rank () * 0.1 );
+  buffs.dark_embrace        = new buff_t( this, dark_embrace,        1, timespan_t::from_seconds(  6.0 ), timespan_t::zero );
+  buffs.induction           = new buff_t( this, induction,           2, timespan_t::from_seconds( 10.0 ), timespan_t::zero, talents.induction -> rank() * 0.5 );
+  buffs.voltaic_slash       = new buff_t( this, voltaic_slash,       2, timespan_t::from_seconds( 10.0 ), timespan_t::zero );
+  buffs.static_charges      = new buff_t( this, static_charges,      5, timespan_t::from_seconds( 30.0 ), timespan_t::zero, talents.static_charges -> rank() * 0.5 );
+  buffs.exploitive_strikes  = new buff_t( this, exploitive_strikes,  1, timespan_t::from_seconds( 10.0 ), timespan_t::zero );
+  buffs.raze                = new buff_t( this, raze,                1, timespan_t::from_seconds( 15.0 ), timespan_t::from_seconds( 7.5 ), talents.raze -> rank() * 0.6 );
+  buffs.unearthed_knowledge = new buff_t( this, unearthed_knowledge, 1, timespan_t::from_seconds( 20.0 ), timespan_t::zero, talents.unearthed_knowledge -> rank() * 0.5 );
+  buffs.recklessness        = new buff_t( this, recklessness,        2, timespan_t::from_seconds( 20.0 ) );
+  buffs.deathmark           = new buff_t( this, deathmark,          10, timespan_t::from_seconds( 30.0 ), timespan_t::zero );
+  buffs.overcharge_saber    = new buff_t( this, overcharge_saber,    1, timespan_t::from_seconds( 15.0 ) );
 }
 
 // shadow_assassin_t::init_gains =======================================================
@@ -1811,32 +1823,74 @@ void shadow_assassin_t::init_actions()
 
   if ( action_list_str.empty() )
   {
+    action_list_default = 1;
     action_list_str += "stim,type=exotech_resolve";
 
     if ( type == JEDI_SHADOW )
     {
       action_list_str += "/force_valor";
+
+      if ( talents.surging_charge->rank() )
+        action_list_str += "/shadow_technique";
+      else
+        action_list_str += "/force_technique";
+
       action_list_str += "/snapshot_stats";
 
-      switch ( primary_tree() )
+      if ( talents.dark_embrace->rank() )
+        action_list_str += "/stealth";
+
+      action_list_str += "/power_potion"
+                         "/force_potency";
+
+      if ( talents.dark_embrace->rank() )
       {
-      case TREE_BALANCE:
-
-        // Balance Actions
-
-        break;
-
-      case TREE_INFILTRATION:
-
-        // Infiltration Actions
-
-        break;
-
-      default:
-        break;
+        if ( talents.darkswell->rank() )
+          action_list_str += "/blackout,if=buff.shadows_respite.down&force<90";
+        action_list_str += "/force_cloak,if=buff.shadows_respite.down";
       }
 
-      action_list_default = 1;
+      action_list_str += "/battle_readiness";
+
+      if ( talents.death_field->rank() )
+        action_list_str += "/force_in_balance";
+
+      if ( talents.raze->rank() )
+        action_list_str += "/mind_crush,if=buff.force_strike.react";
+
+      if ( !talents.surging_charge->rank() )
+        action_list_str += "/force_breach,if=!dot.force_technique.ticking";
+
+      action_list_str += "/spinning_strike";
+
+      if ( talents.creeping_terror->rank() )
+        action_list_str += "/sever_force,if=!ticking";
+
+      if ( talents.duplicity->rank() )
+        action_list_str += "/shadow_strike,if=buff.find_weakness.react";
+
+      if ( talents.surging_charge->rank() )
+      {
+        action_list_str += "/force_breach";
+        if ( talents.static_charges->rank() )
+          action_list_str += ",if=buff.exit_strategy.stack>0";
+      }
+
+      if ( talents.unearthed_knowledge->rank() )
+        action_list_str += "/project,if=buff.twin_disciplines.down";
+      if ( talents.induction->rank() )
+        action_list_str += "/project,if=buff.circling_shadows.stack=2";
+
+      if ( talents.voltaic_slash->rank() )
+        action_list_str += "/clairvoyant_strike"; // TESTME: Does this need a cap threshold like thrash has?
+      else
+      {
+        action_list_str += "/double_strike,if=force>70";
+        if ( talents.dark_embrace->rank() )
+          action_list_str += "-12*buff.shadows_respite.up";
+      }
+
+      action_list_str += "/saber_strike";
     }
 
     // Sith ASSASSIN
@@ -1854,8 +1908,8 @@ void shadow_assassin_t::init_actions()
       if ( talents.dark_embrace->rank() )
         action_list_str += "/stealth";
 
-      action_list_str += "/power_potion";
-      action_list_str += "/recklessness";
+      action_list_str += "/power_potion"
+                         "/recklessness";
 
       if ( talents.dark_embrace->rank() )
       {
@@ -1896,7 +1950,7 @@ void shadow_assassin_t::init_actions()
         action_list_str += "/shock,if=buff.induction.stack=2";
 
       if ( talents.voltaic_slash->rank() )
-        action_list_str += "/voltaic_slash";
+        action_list_str += "/voltaic_slash"; // TESTME: Does this need a cap threshold like thrash has?
       else
       {
         action_list_str += "/thrash,if=force>70";
@@ -1905,8 +1959,6 @@ void shadow_assassin_t::init_actions()
       }
 
       action_list_str += "/saber_strike";
-
-      action_list_default = 1;
     }
   }
 
