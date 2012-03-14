@@ -2371,13 +2371,23 @@ struct player_t : public noncopyable
   // Option Parsing
   std::vector<option_t> options;
 
+
   // Talent Parsing
   int tree_type[ MAX_TALENT_TREES ];
   int talent_tab_points[ MAX_TALENT_TREES ];
   std::vector<talent_t*> talent_trees[ MAX_TALENT_TREES ];
-  //std::vector<glyph_t*> glyphs;
 
-  //std::list<spell_id_t*> spell_list;
+  struct talentinfo_t
+  {
+    const char* name;
+    unsigned points;
+  };
+
+  void init_talent_tree( unsigned tree_index, const talentinfo_t* first, const talentinfo_t* last );
+  template <size_t N>
+  void init_talent_tree( unsigned tree_index, const talentinfo_t (&descriptions)[N] )
+  { init_talent_tree( tree_index, descriptions, descriptions + N ); }
+
 
   // Profs
   std::string professions_str;

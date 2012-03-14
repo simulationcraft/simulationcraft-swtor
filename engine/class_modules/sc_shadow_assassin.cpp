@@ -2042,13 +2042,8 @@ void shadow_assassin_t::reset()
 
 void shadow_assassin_t::create_talents()
 {
-  static const struct
-  {
-    const char* name;
-    int maxpoints;
-  } talent_descriptions[] = {
-
-    // Darkness|Kinetic Combat
+  // Darkness|Kinetic Combat
+  static const talentinfo_t darkness_tree[] = {
     { "Thrashing Blades", 2 }, { "Lightning Reflexes", 2 }, { "Charge Mastery", 3 },
     { "Shroud of Darkness", 3 }, { "Lightning Recovery", 2 }, { "Swelling Shadows", 2 }, { "Electric Execution", 3 },
     { "Disjunction", 1 }, { "Energize", 1 }, { "Dark Ward", 1 }, { "Premonition", 2 },
@@ -2056,9 +2051,11 @@ void shadow_assassin_t::create_talents()
     { "Electrify", 1 }, { "Eye of the Storm", 1 }, { "Force Pull", 1 }, { "Nerve Wracking", 3 },
     { "Harnessed Darkness", 2 }, { "Mounting Darkness", 3 },
     { "Wither", 1 },
-    { 0, 0 },
+  };
+  init_talent_tree( SITH_ASSASSIN_DARKNESS, darkness_tree );
 
-     // Deception|Infiltration
+  // Deception|Infiltration
+  static const talentinfo_t deception_tree[] = {
     { "Insulation", 2 }, { "Duplicity", 3 }, { "Dark Embrace", 2 },
     { "Obfuscation", 3 }, { "Recirculation", 2 }, { "Avoidance", 2 },
     { "Induction", 2 }, { "Surging Charge", 1 }, { "Darkswell", 1 }, { "Deceptive Power", 1 },
@@ -2066,9 +2063,11 @@ void shadow_assassin_t::create_talents()
     { "Resourcefulness", 2 }, { "Static Charges", 2 }, { "Low Slash", 1 },
     { "Crackling Blasts", 5 },
     { "Voltaic Slash", 1 },
-    { 0, 0 },
+  };
+  init_talent_tree( SITH_ASSASSIN_DECEPTION, deception_tree );
 
-    // Madness|Balance
+  // Madness|Balance
+  static const talentinfo_t madness_tree[] = {
     { "Exploitive Strikes", 3 }, { "Sith Defiance", 2 }, { "Crackling Charge", 2 },
     { "Oppressing Force", 2 }, { "Chain Shock", 3 }, { "Parasitism", 2 }, { "Torment", 2 },
     { "Death Field", 1 }, { "Fanaticism", 2 }, { "Claws of Decay", 2 },
@@ -2076,18 +2075,8 @@ void shadow_assassin_t::create_talents()
     { "Deathmark", 1 }, { "Calculating Mind", 2 }, { "Unearthed Knowledge", 2 },
     { "Creeping Death", 3 }, { "Devour", 2 },
     { "Creeping Terror", 1 },
-    { 0, 0 },
   };
-
-  unsigned i = 0;
-  for (unsigned tree = 0; tree < 3; ++tree)
-  {
-    for (; talent_descriptions[i].name != 0; ++i)
-    {
-      talent_trees[tree].push_back( new talent_t( this, talent_descriptions[i].name, tree, talent_descriptions[i].maxpoints ) );
-    }
-    ++i;
-  }
+  init_talent_tree( SITH_ASSASSIN_MADNESS, madness_tree );
 }
 
 // ==========================================================================

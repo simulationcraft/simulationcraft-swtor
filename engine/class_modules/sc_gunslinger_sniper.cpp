@@ -326,55 +326,7 @@ int gunslinger_sniper_t::primary_role() const
 
 void gunslinger_sniper_t::create_talents()
 {
-#if 0
-    static const struct
-    {
-        const char* name;
-        int maxpoints;
-    } talent_descriptions[] = {
-        // Darkness|Kinetic Combat
-        { "Thrashing Blades", 2 }, { "Lightning Reflexes", 2 }, { "Charge Mastery", 3 },
-        { "Shroud of Darkness", 3 }, { "Lightning Recovery", 2 }, { "Swelling Shadows", 2 }, { "Electric Execution", 3 },
-        { "Disjunction", 1 }, { "Energize", 1 }, { "Dark Ward", 1 }, { "Premonition", 2 },
-        { "Hollow", 2 }, { "Blood of Sith", 3 },
-        { "Electrify", 1 }, { "Eye of the Storm", 1 }, { "Force Pull", 1 }, { "Nerve Wracking", 3 },
-        { "Harnessed Darkness", 2 }, { "Mounting Darkness", 3 },
-        { "Wither", 1 },
-        { 0, 0 },
-
-        // Deception|Infiltration
-        { "Insulation", 2 }, { "Duplicity", 3 }, { "Dark Embrace", 2 },
-        { "Obfuscation", 3 }, { "Recirculation", 2 }, { "Avoidance", 2 },
-        { "Induction", 2 }, { "Surging Charge", 1 }, { "Darkswell", 1 }, { "Deceptive Power", 1 },
-        { "Entropic Field", 2 }, { "Saber Conduit", 3 }, { "Fade", 2 }, { "Static Cling", 2 },
-        { "Resourcefulness", 2 }, { "Static Charges", 2 }, { "Low Slash", 1 },
-        { "Crackling Blasts", 5 },
-        { "Voltaic Slash", 1 },
-        { 0, 0 },
-
-        // Madness|Balance
-        { "Exploitive Strikes", 3 }, { "Sith Defiance", 2 }, { "Crackling Charge", 2 },
-        { "Oppressing Force", 2 }, { "Chain Shock", 3 }, { "Parasitism", 2 }, { "Torment", 2 },
-        { "Death Field", 1 }, { "Fanaticism", 2 }, { "Claws of Decay", 2 },
-        { "Haunted Dreams", 2 }, { "Corrupted Flesh", 2 }, { "Raze", 1 },
-        { "Deathmark", 1 }, { "Calculating Mind", 2 }, { "Unearthed Knowledge", 2 },
-        { "Creeping Death", 3 }, { "Devour", 2 },
-        { "Creeping Terror", 1 },
-        { 0, 0 },
-
-    };
-
-    unsigned i = 0;
-    for ( unsigned tree = 0; tree < 3; ++tree )
-    {
-        for(; talent_descriptions[ i ].name != 0; ++i )
-        {
-            talent_trees[ tree ].push_back( new talent_t( this, talent_descriptions[ i ].name, tree,
-                                                          talent_descriptions[ i ].maxpoints ) );
-        }
-        ++i;
-    }
-#endif
+  // See sage_sorcerer_t::create_talents()
 }
 
 // ==========================================================================

@@ -432,6 +432,20 @@ player_t::~player_t()
   //dispose( spell_list );
 }
 
+// player_t::init_talent_tree ===============================================
+
+void player_t::init_talent_tree( unsigned tree_index,
+                                 const talentinfo_t* first,
+                                 const talentinfo_t* last )
+{
+  talent_trees[ tree_index ].clear();
+  for( ; first != last; ++first )
+  {
+    talent_t* t = new talent_t( this, first -> name, tree_index, first -> points );
+    talent_trees[ tree_index ].push_back( t );
+  }
+}
+
 // player_t::init ===========================================================
 
 bool player_t::init( sim_t* sim )

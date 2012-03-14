@@ -1896,47 +1896,36 @@ double sage_sorcerer_t::alacrity() const
 
 void sage_sorcerer_t::create_talents()
 {
-  static const struct
-  {
-    const char* name;
-    int maxpoints;
-  } talent_descriptions[] = {
-    // Seer|Corruption
+  // Seer|Corruption
+  static const talentinfo_t seer_tree[] = {
     { "Immutable Force", 2 }, { "Penetrating Light", 3 }, { "Wisdom", 2 }, { "Foresight", 3 },
     { "Pain Bearer", 2 }, { "Psychic Suffusion", 2 }, { "Conveyance", 2 }, { "Rejuvenate", 1 },
     { "Valiance", 2 }, { "Preservation", 2 }, { "Mend Wounds", 1 }, { "Force Shelter", 2 },
     { "Egress", 2 }, { "Confound", 2 }, { "Healing Trance", 1 }, { "Serenity", 2 },
-    { "Resplendence", 2 }, { "Clairvoyance", 3 }, { "Salvation", 1 },
-    { 0, 0 },
+    { "Resplendence", 2 }, { "Clairvoyance", 3 }, { "Salvation", 1 }
+  };
+  init_talent_tree( JEDI_SAGE_SEER, seer_tree );
 
-    // Telekinetics|Lightning
+  // Telekinetics|Lightning
+  static const talentinfo_t telekinetics_tree[] = {
     { "Inner Strength", 3 }, { "Mental Longevity", 2 }, { "Clamoring Force", 3 }, { "Minds Eye", 1 },
     { "Disturb Mind", 2 }, { "Concentration", 2 }, { "Telekinetic Defense",  2 }, { "Blockout", 2 },
     { "Telekinetic Wave", 1 }, { "Psychic Projection", 2 }, { "Force Wake", 2 },
     { "Tidal Force", 1 }, { "Telekinetic Effusion", 2 }, { "Kinetic Collapse", 2 }, { "Tremors", 1 },
     { "Telekinetic Momentum", 3 }, { "Mental Alacrity", 1 }, { "Reverberation", 5 }, { "Turbulence", 1 },
-    { 0, 0 },
+  };
+  init_talent_tree( JEDI_SAGE_TELEKINETICS, telekinetics_tree );
 
-     // Balance|Madness
+   // Balance|Madness
+  static const talentinfo_t balance_tree[] = {
     { "Empowered Throw", 3 }, { "Jedi Resistance", 2 }, { "Will of the Jedi", 2 },
     { "Pinning Resolve", 2 }, { "Upheaval", 3 }, { "Focused Insight", 2 }, { "Critical Kinesis", 2 },
     { "Force in Balance", 1 }, { "Psychic Barrier", 3 }, { "Telekinetic Balance", 1 },
     { "Containment", 2 }, { "Mind Ward", 2 }, { "Presence of Mind", 1 }, { "Force Suppression", 1 },
     { "Drain Thoughts", 2 }, { "Assertion", 2 }, { "Mental Scarring", 3 }, { "Psychic Absorption", 2 },
     { "Sever Force", 1 },
-    { 0, 0 },
   };
-
-  unsigned i = 0;
-  for ( unsigned tree = 0; tree < 3; ++tree )
-  {
-    for(; talent_descriptions[ i ].name != 0; ++i )
-    {
-      talent_trees[ tree ].push_back( new talent_t( this, talent_descriptions[ i ].name, tree,
-                                                    talent_descriptions[ i ].maxpoints ) );
-    }
-    ++i;
-  }
+  init_talent_tree( JEDI_SAGE_BALANCE, balance_tree );
 }
 
 // sage_sorcerer_t::create_options =================================================
@@ -1947,8 +1936,8 @@ void sage_sorcerer_t::create_options()
 
   option_t sage_sorcerer_options[] =
   {
-    { "psychic_projection_dd_chance",       OPT_FLT, &( psychic_projection_dd_chance      ) },
-    { "lightning_barrage_dd_chance",        OPT_FLT, &( psychic_projection_dd_chance      ) },
+    { "psychic_projection_dd_chance", OPT_FLT, &( psychic_projection_dd_chance ) },
+    { "lightning_barrage_dd_chance",  OPT_FLT, &( psychic_projection_dd_chance ) },
     { NULL, OPT_UNKNOWN, NULL }
   };
 
