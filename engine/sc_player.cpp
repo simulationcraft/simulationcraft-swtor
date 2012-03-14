@@ -4656,9 +4656,9 @@ action_expr_t* player_t::create_expression( action_t* a,
         virtual int evaluate()
         {
           if ( rt == RESOURCE_HEALTH )
-            result_num = action -> player -> health_percentage();
+            result_num = action -> player -> health_percentage() / 100.0;
           else
-            result_num = 100.0 * action -> player -> resource_current[ rt ] / action -> player -> resource_max[ rt ];
+            result_num = action -> player -> resource_current[ rt ] / action -> player -> resource_max[ rt ];
           return TOK_NUM;
         }
       };
