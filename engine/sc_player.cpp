@@ -4630,6 +4630,20 @@ action_expr_t* player_t::create_expression( action_t* a,
     };
     return new time_to_max_ammo_expr_t( a, this );
   }
+  if ( name_str == "time_to_max_force" )
+  {
+    struct time_to_max_force_expr_t : public player_expr_t
+    {
+      time_to_max_force_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "time_to_max_force", p ) {}
+      virtual int evaluate()
+      {
+        result_num = ( player -> resource_max[ RESOURCE_FORCE ] -
+                       player -> resource_current[ RESOURCE_FORCE ] ) /
+                     player -> force_regen_per_second(); return TOK_NUM;
+      }
+    };
+    return new time_to_max_force_expr_t( a, this );
+  }
   if ( name_str == "ptr" )
   {
     struct ptr_expr_t : public player_expr_t
