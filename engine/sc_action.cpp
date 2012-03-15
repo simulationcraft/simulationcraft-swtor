@@ -793,22 +793,21 @@ void action_t::calculate_result()
   double accuracy = 1.0 + total_accuracy();
 
   if ( random < accuracy - target_avoidance )
-    result = RESULT_HIT;
-  else if ( random < accuracy )
-    result = RESULT_AVOID;
-  else
-    result = RESULT_MISS;
-
-  if ( result_is_hit() )
   {
     // Second roll: Crit vs. Shield chance
     random = sim -> real();
 
-    if ( random < total_crit() )
+    if ( may_crit && random < total_crit() )
       result = RESULT_CRIT;
     else if ( random > 1.0 - target_shield )
       result = RESULT_BLOCK;
+    else
+      result = RESULT_HIT;
   }
+  else if ( random < accuracy )
+    result = RESULT_AVOID;
+  else
+    result = RESULT_MISS;
 
   if ( sim -> debug ) log_t::output( sim, "%s result for %s is %s", player -> name(), name(), util_t::result_type_string( result ) );
 }
