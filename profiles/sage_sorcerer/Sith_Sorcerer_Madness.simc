@@ -15,7 +15,7 @@ actions+=/power_potion
 actions+=/recklessness
 actions+=/use_relics
 actions+=/affliction,if=!ticking
-actions+=/death_field,if=force>100
+actions+=/death_field,if=force>80
 actions+=/crushing_darkness,if=buff.wrath.react
 actions+=/creeping_terror,if=!ticking
 actions+=/force_lightning

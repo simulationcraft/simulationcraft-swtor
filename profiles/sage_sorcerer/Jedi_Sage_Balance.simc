@@ -15,7 +15,7 @@ actions+=/power_potion
 actions+=/force_potency
 actions+=/use_relics
 actions+=/weaken_mind,if=!ticking
-actions+=/force_in_balance,if=force>100
+actions+=/force_in_balance,if=force>80
 actions+=/mind_crush,if=buff.presence_of_mind.react
 actions+=/sever_force,if=!ticking
 actions+=/telekinetic_throw
