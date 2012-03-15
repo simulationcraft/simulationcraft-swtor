@@ -20,10 +20,6 @@
 #  define SC_SIGACTION
 #endif
 
-#if defined(_LP64) || defined(__LP64__) || defined(_WIN64) || defined(_AMD64_)
-#  define SC_X64
-#endif
-
 #include <algorithm>
 #include <cassert>
 #include <cctype>
@@ -58,9 +54,6 @@
 
 #if __BSD_VISIBLE
 #  include <netinet/in.h>
-#  if !defined(CLOCKS_PER_SEC)
-#    define CLOCKS_PER_SEC 1000000
-#  endif
 #endif
 
 #if defined( NO_THREADS )
@@ -896,7 +889,6 @@ public:
   static std::string to_string( timespan_t t )
   { return to_string( to_seconds( t ) ); }
 
-  static int64_t milliseconds();
   static int64_t parse_date( const std::string& month_day_year );
 
   static int printf( const char *format, ... ) PRINTF_ATTRIBUTE( 1,2 );
@@ -2648,7 +2640,7 @@ public:
   virtual void      schedule_ready( timespan_t delta_time=timespan_t::zero(), bool waiting=false );
   virtual void      arise();
   virtual void      demise();
-  virtual timespan_t available() const { return std::chrono::milliseconds( 100 ); }
+  virtual timespan_t available() const { return from_millis( 100 ); }
   virtual action_t* execute_action();
 
   std::string print_action_map( int iterations, int precision ) const;

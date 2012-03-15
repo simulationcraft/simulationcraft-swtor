@@ -1623,14 +1623,16 @@ void sim_t::partition()
 
 bool sim_t::execute()
 {
-  int64_t start_time = util_t::milliseconds();
+  typedef std::chrono::high_resolution_clock clock;
+
+  clock::time_point start_time = clock::now();
 
   partition();
   if ( ! iterate() ) return false;
   merge();
   analyze();
 
-  elapsed_cpu = from_millis( util_t::milliseconds() - start_time );
+  elapsed_cpu = std::chrono::duration_cast<timespan_t>( clock::now() - start_time );
 
   return true;
 }

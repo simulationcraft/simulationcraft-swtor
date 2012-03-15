@@ -1196,13 +1196,6 @@ std::string util_t::to_string( double f )
     return to_string( f, 3 );
 }
 
-// util_t::milliseconds =====================================================
-
-int64_t util_t::milliseconds()
-{
-  return 1000 * clock() / CLOCKS_PER_SEC;
-}
-
 // util_t::parse_date =======================================================
 
 int64_t util_t::parse_date( const std::string& month_day_year )
