@@ -594,7 +594,7 @@ sim_t::sim_t( sim_t* p, int index ) :
   channel_lag( from_seconds( 0.200 ) ), channel_lag_stddev( timespan_t::zero() ),
   queue_gcd_reduction( from_seconds( 0.032 ) ), strict_gcd_queue( 0 ),
   confidence( 0.95 ), confidence_estimator( 1.96 ),
-  world_lag( from_seconds( 0.1 ) ), world_lag_stddev( timespan_t::min() ),
+  world_lag( from_seconds( 0.1 ) ), world_lag_stddev( timespan_t_min() ),
   travel_variance( 0 ), default_skill( 1.0 ), reaction_time( from_seconds( 0.5 ) ),
   regen_periodicity( from_seconds( 1.0 ) ), // observed by philoptik@gmail.com 03/03/2012 according to ingame tooltip
   current_time( timespan_t::zero() ), max_time( from_seconds( 300 ) ), expected_time( timespan_t::zero() ), vary_combat_length( 0.2 ),

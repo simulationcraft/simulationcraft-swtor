@@ -258,8 +258,8 @@ player_t::player_t( sim_t*             s,
   reaction_nu( from_seconds( 0.5 ) ),
   scale_player( 1 ), avg_ilvl( 0 ), active_companion( 0 ), ptr( s -> ptr ),
   // Latency
-  world_lag( from_seconds( 0.1 ) ), world_lag_stddev( timespan_t::min() ),
-  brain_lag( timespan_t::min() ), brain_lag_stddev( timespan_t::min() ),
+  world_lag( from_seconds( 0.1 ) ), world_lag_stddev( timespan_t_min() ),
+  brain_lag( timespan_t_min() ), brain_lag_stddev( timespan_t_min() ),
   world_lag_override( false ), world_lag_stddev_override( false ),
   events( 0 ),
   race( r ),
@@ -2268,7 +2268,7 @@ void player_t::demise()
 
   assert( arise_time >= timespan_t::zero() );
   iteration_fight_length += sim -> current_time - arise_time;
-  arise_time = timespan_t::min();
+  arise_time = timespan_t_min();
 
   sleeping = 1;
   if ( readying )

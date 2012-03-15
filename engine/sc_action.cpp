@@ -1071,7 +1071,7 @@ void action_t::update_ready()
       if ( sim -> debug ) log_t::output( sim, "%s delaying the cooldown finish of %s by %f", player -> name(), name(), to_seconds( delay ) );
     }
 
-    cooldown -> start( timespan_t::min(), delay );
+    cooldown -> start( timespan_t_min(), delay );
 
     if ( sim -> debug ) log_t::output( sim, "%s starts cooldown for %s (%s). Will be ready at %.4f", player -> name(), name(), cooldown -> name(), to_seconds( cooldown -> ready ) );
   }
@@ -1468,7 +1468,7 @@ action_expr_t* action_t::create_expression( const std::string& name_str )
       virtual int evaluate()
       {
         dot_t* dot = action -> dot();
-        if ( dot -> miss_time == timespan_t::min() ||
+        if ( dot -> miss_time == timespan_t_min() ||
              action -> sim -> current_time >= ( dot -> miss_time + action -> last_reaction_time ) )
         {
           result_num = 1;

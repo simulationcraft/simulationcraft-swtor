@@ -625,6 +625,13 @@ typedef std::chrono::milliseconds timespan_t;
 typedef std::chrono::duration<double> timespan_t;
 #endif
 
+// libc++ in GCC 4.6 has a bug in std::chrono::duration::min().
+// It's returning std::numeric_limits<>::min() when it should
+// return std::numeric_limits<>::lowest(). Use timespan_t_min()
+// in place of timespan_t_min() as a workaround.
+constexpr timespan_t timespan_t_min()
+{ return timespan_t( std::numeric_limits<timespan_t::rep>::lowest() ); }
+
 template <typename Rep>
 constexpr timespan_t from_millis( Rep r )
 { return std::chrono::duration_cast<timespan_t>( std::chrono::duration<Rep,std::milli>( r ) ); }
@@ -3088,7 +3095,7 @@ public:
   virtual timespan_t gcd() const;
   virtual timespan_t execute_time() const;
   virtual timespan_t tick_time() const;
-  virtual int    hasted_num_ticks( timespan_t d=timespan_t::min() ) const;
+  virtual int    hasted_num_ticks( timespan_t d=timespan_t_min() ) const;
   virtual timespan_t travel_time();
   virtual void   player_buff();
   virtual void   target_debuff( player_t* t, int dmg_type );
@@ -3245,11 +3252,11 @@ struct cooldown_t
   timespan_t ready;
   cooldown_t* next;
 
-  cooldown_t( const std::string& n, player_t* p ) : sim( p->sim ), player( p ), name_str( n ), duration( timespan_t::zero() ), ready( timespan_t::min() ), next( 0 ) {}
-  cooldown_t( const std::string& n, sim_t* s ) : sim( s ), player( 0 ), name_str( n ), duration( timespan_t::zero() ), ready( timespan_t::min() ), next( 0 ) {}
+  cooldown_t( const std::string& n, player_t* p ) : sim( p->sim ), player( p ), name_str( n ), duration( timespan_t::zero() ), ready( timespan_t_min() ), next( 0 ) {}
+  cooldown_t( const std::string& n, sim_t* s ) : sim( s ), player( 0 ), name_str( n ), duration( timespan_t::zero() ), ready( timespan_t_min() ), next( 0 ) {}
 
-  void reset() { ready=timespan_t::min(); }
-  void start( timespan_t override=timespan_t::min(), timespan_t delay=timespan_t::zero() )
+  void reset() { ready=timespan_t_min(); }
+  void start( timespan_t override=timespan_t_min(), timespan_t delay=timespan_t::zero() )
   {
     if ( override >= timespan_t::zero() ) duration = override;
     if ( duration > timespan_t::zero() ) ready = sim -> current_time + duration + delay;
@@ -3527,7 +3534,7 @@ struct uptime_common_t
   double uptime;
 
   uptime_common_t( sim_t* s ) :
-    last_start( timespan_t::min() ), uptime_sum( timespan_t::zero() ), sim( s ),
+    last_start( timespan_t_min() ), uptime_sum( timespan_t::zero() ), sim( s ),
     uptime( std::numeric_limits<double>::quiet_NaN() )
   {}
 
@@ -3541,11 +3548,11 @@ struct uptime_common_t
     else if ( last_start >= timespan_t::zero() )
     {
       uptime_sum += sim -> current_time - last_start;
-      last_start = timespan_t::min();
+      last_start = timespan_t_min();
     }
   }
 
-  void reset() { last_start = timespan_t::min(); }
+  void reset() { last_start = timespan_t_min(); }
 
   void analyze()
   { uptime = to_seconds( uptime_sum ) / sim -> iterations / sim -> simulation_length.mean; }

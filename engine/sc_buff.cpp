@@ -142,8 +142,8 @@ void buff_t::init_buff_shared()
 {
   current_stack = 0;
   current_value = 0;
-  last_start = timespan_t::min();
-  last_trigger = timespan_t::min();
+  last_start = timespan_t_min();
+  last_trigger = timespan_t_min();
   start_intervals_sum = timespan_t::zero();
   trigger_intervals_sum = timespan_t::zero();
   iteration_uptime_sum = timespan_t::zero();
@@ -293,7 +293,7 @@ timespan_t buff_t::remains()
   {
     return expiration -> occurs() - sim -> current_time;
   }
-  return timespan_t::min();
+  return timespan_t_min();
 }
 
 // buff_t::remains_gt =======================================================
@@ -304,7 +304,7 @@ bool buff_t::remains_gt( timespan_t time )
 
   if ( time_remaining == timespan_t::zero() ) return false;
 
-  if ( time_remaining == timespan_t::min() ) return true;
+  if ( time_remaining == timespan_t_min() ) return true;
 
   return ( time_remaining > time );
 }
@@ -315,7 +315,7 @@ bool buff_t::remains_lt( timespan_t time )
 {
   timespan_t time_remaining = remains();
 
-  if ( time_remaining == timespan_t::min() ) return false;
+  if ( time_remaining == timespan_t_min() ) return false;
 
   return ( time_remaining < time );
 }
@@ -648,8 +648,8 @@ void buff_t::expire()
 void buff_t::predict()
 {
   // Guarantee that may_react() will return true if the buff is present.
-  std::fill( &stack_occurrence[ 0 ], &stack_occurrence[ current_stack + 1 ], timespan_t::min() );
-  std::fill( &stack_react_time[ 0 ], &stack_react_time[ current_stack + 1 ], timespan_t::min() );
+  std::fill( &stack_occurrence[ 0 ], &stack_occurrence[ current_stack + 1 ], timespan_t_min() );
+  std::fill( &stack_react_time[ 0 ], &stack_react_time[ current_stack + 1 ], timespan_t_min() );
 }
 
 // buff_t::aura_gain ========================================================
@@ -698,8 +698,8 @@ void buff_t::reset()
   event_t::cancel( delay );
   cooldown -> reset();
   expire();
-  last_start = timespan_t::min();
-  last_trigger = timespan_t::min();
+  last_start = timespan_t_min();
+  last_trigger = timespan_t_min();
 }
 
 // buff_t::merge ============================================================

@@ -19,7 +19,7 @@ stats_t::stats_t( const std::string& n, player_t* p ) :
   aps( 0 ), ape( 0 ), apet( 0 ), apr( 0 ),
   /* rpe( 0 ), */ etpe( 0 ), ttpt( 0 ),
   total_intervals( timespan_t::zero() ), num_intervals( 0 ),
-  last_execute( timespan_t::min() ),
+  last_execute( timespan_t_min() ),
   iteration_actual_amount( 0 ), actual_amount( p -> sim -> statistics_level < 3 ),
   total_amount( p -> sim -> statistics_level < 3 ),portion_aps( p -> sim -> statistics_level < 3 ),
   compound_actual( 0 ), compound_amount( 0 ), opportunity_cost( 0 ),
@@ -65,7 +65,7 @@ void stats_t::add_child( stats_t* child )
 
 void stats_t::reset()
 {
-  last_execute = timespan_t::min();
+  last_execute = timespan_t_min();
 }
 
 // stats_t::add_result ======================================================

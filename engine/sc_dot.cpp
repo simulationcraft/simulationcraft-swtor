@@ -12,8 +12,8 @@
 dot_t::dot_t( const std::string& n, player_t* p ) :
   sim( p -> sim ), player( p ), action( 0 ), tick_event( 0 ), next( 0 ),
   num_ticks( 0 ), current_tick( 0 ), added_ticks( 0 ), ticking( 0 ),
-  added_seconds( timespan_t::zero() ), ready( timespan_t::min() ),
-  miss_time( timespan_t::min() ),time_to_tick( timespan_t::zero() ),
+  added_seconds( timespan_t::zero() ), ready( timespan_t_min() ),
+  miss_time( timespan_t_min() ),time_to_tick( timespan_t::zero() ),
   name_str( n )
 {}
 
@@ -162,8 +162,8 @@ void dot_t::reset()
   added_ticks=0;
   ticking=0;
   added_seconds=timespan_t::zero();
-  ready=timespan_t::min();
-  miss_time=timespan_t::min();
+  ready=timespan_t_min();
+  miss_time=timespan_t_min();
 }
 
 // dot_t::schedule_tick =====================================================
