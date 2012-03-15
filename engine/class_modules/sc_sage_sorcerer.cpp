@@ -347,7 +347,7 @@ struct sage_sorcerer_spell_t : public sage_sorcerer_action_t
     if ( base_execute_time > timespan_t::zero )
       p -> buffs.presence_of_mind -> expire();
 
-    if ( dd.base_min > 0 || channeled )
+    if ( dd.base_min > 0 )
       p -> buffs.force_potency -> decrement();
   }
 
@@ -438,6 +438,13 @@ struct sage_sorcerer_spell_t : public sage_sorcerer_action_t
         p -> resource_gain( RESOURCE_HEALTH, hp, p -> gains.focused_insight );
       }
     }
+  }
+
+  virtual void last_tick( dot_t* d )
+  {
+    sage_sorcerer_action_t::last_tick( d );
+    if ( channeled )
+      p() -> buffs.force_potency -> decrement();
   }
 };
 
