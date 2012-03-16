@@ -3719,13 +3719,30 @@ struct rng_t
   virtual double real();
   virtual bool    roll( double chance );
   virtual double range( double min, double max );
-  timespan_t range( timespan_t min, timespan_t max );
   virtual double gauss( double mean, double stddev, const bool truncate_low_end = false );
-  timespan_t gauss( timespan_t mean, timespan_t stddev );
   double exgauss( double mean, double stddev, double nu );
-  timespan_t exgauss( timespan_t mean, timespan_t stddev, timespan_t nu );
   virtual void   seed( uint32_t start=time(NULL) );
   void   report( FILE* );
+
+  timespan_t exgauss( timespan_t mean, timespan_t stddev, timespan_t nu )
+  {
+    return TIMESPAN_FROM_NATIVE_VALUE( exgauss( TIMESPAN_TO_NATIVE_VALUE( mean ),
+                                                TIMESPAN_TO_NATIVE_VALUE( stddev ),
+                                                TIMESPAN_TO_NATIVE_VALUE( nu ) ) );
+  }
+
+  timespan_t range( timespan_t min, timespan_t max )
+  {
+    return TIMESPAN_FROM_NATIVE_VALUE( range( TIMESPAN_TO_NATIVE_VALUE( min ),
+                                              TIMESPAN_TO_NATIVE_VALUE( max ) ) );
+  }
+
+  timespan_t gauss( timespan_t mean, timespan_t stddev )
+  {
+    return TIMESPAN_FROM_NATIVE_VALUE( gauss( TIMESPAN_TO_NATIVE_VALUE( mean ),
+                                              TIMESPAN_TO_NATIVE_VALUE( stddev ) ) );
+  }
+
   static double stdnormal_cdf( double u );
   static double stdnormal_inv( double p );
 
