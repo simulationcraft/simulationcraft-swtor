@@ -115,7 +115,7 @@ struct sage_sorcerer_t : public player_t
     cooldown_t* telekinetic_wave;
   } cooldowns;
 
-  double psychic_projection_dd_chance;
+  int disable_double_dip;
 
   // Talents
   struct talents_t
@@ -187,7 +187,7 @@ struct sage_sorcerer_t : public player_t
 
   sage_sorcerer_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
     player_t( sim, pt == SITH_SORCERER ? SITH_SORCERER : JEDI_SAGE, name, ( r == RACE_NONE ) ? RACE_HUMAN : r ),
-    psychic_projection_dd_chance( 1.0 )
+    disable_double_dip( false )
   {
     if ( pt == SITH_SORCERER )
     {
@@ -601,12 +601,10 @@ struct telekinetic_throw_t : public sage_sorcerer_spell_t
   {
     sage_sorcerer_t* p = cast();
 
-    if ( p -> buffs.psychic_projection -> up()
-         || ( p -> buffs.psychic_projection_dd -> up() && p -> rngs.psychic_projection_dd -> roll ( p -> psychic_projection_dd_chance ) )
-         )
+    if ( p -> buffs.psychic_projection -> up() || p -> buffs.psychic_projection_dd -> up() )
     {
       is_buffed_by_psychic_projection = true;
-      if ( p -> bugs && p -> buffs.psychic_projection -> check() )
+      if ( p -> bugs && ! p -> disable_double_dip && p -> buffs.psychic_projection -> check() )
       {
         p -> buffs.psychic_projection_dd -> trigger();
       }
@@ -1943,8 +1941,7 @@ void sage_sorcerer_t::create_options()
 
   option_t sage_sorcerer_options[] =
   {
-    { "psychic_projection_dd_chance", OPT_FLT, &( psychic_projection_dd_chance ) },
-    { "lightning_barrage_dd_chance",  OPT_FLT, &( psychic_projection_dd_chance ) },
+    { "disable_double_dip", OPT_BOOL, &( disable_double_dip ) },
     { NULL, OPT_UNKNOWN, NULL }
   };
 
