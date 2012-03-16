@@ -576,7 +576,6 @@ struct rng_normalized_t : public rng_t
   virtual double real() { return base -> real(); }
   virtual double range( double min, double max ) { return ( min + max ) / 2.0; }
   virtual double gauss( double mean, double /* stddev */, bool /* truncate_low_end */ ) { return mean; }
-  virtual timespan_t gauss( timespan_t mean, timespan_t /* stddev */ ) { return mean; }
   virtual bool    roll( double chance ) = 0; // must be overridden
 };
 
@@ -635,10 +634,6 @@ struct rng_phase_shift_t : public rng_normalized_t
     expected_gauss += mean;
     actual_gauss += result;
     return result;
-  }
-  virtual timespan_t gauss( timespan_t mean, timespan_t stddev )
-  {
-    return TIMESPAN_FROM_NATIVE_VALUE( gauss( TIMESPAN_TO_NATIVE_VALUE( mean ), TIMESPAN_TO_NATIVE_VALUE( stddev ) ) );
   }
   virtual bool roll( double chance )
   {
@@ -768,10 +763,6 @@ struct rng_pre_fill_t : public rng_normalized_t
     expected_gauss += mean;
     actual_gauss += result;
     return result;
-  }
-  virtual timespan_t gauss( timespan_t mean, timespan_t stddev )
-  {
-    return TIMESPAN_FROM_NATIVE_VALUE( gauss( TIMESPAN_TO_NATIVE_VALUE( mean ), TIMESPAN_TO_NATIVE_VALUE( stddev ) ) );
   }
 };
 
@@ -988,11 +979,6 @@ struct rng_distance_simple_t : public rng_normalized_t
     expected_gauss += mean;
     actual_gauss += result;
     return result;
-  }
-
-  virtual timespan_t gauss( timespan_t mean, timespan_t stddev )
-  {
-    return TIMESPAN_FROM_NATIVE_VALUE( gauss( TIMESPAN_TO_NATIVE_VALUE( mean ), TIMESPAN_TO_NATIVE_VALUE( stddev ) ) );
   }
 };
 
