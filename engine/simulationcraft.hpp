@@ -1056,7 +1056,7 @@ public:
   static const char* resource_type_string      ( int type );
   static const char* result_type_string        ( int type );
   static const char* school_type_string        ( int type );
-  static const char* armor_type_string         ( player_type ptype, int slot_type );
+  static std::string armor_type_string         ( player_type ptype, int slot_type );
   static const char* slot_type_string          ( int type );
   static const char* stat_type_string          ( int type );
   static const char* stat_type_abbrev          ( int type );
@@ -2275,7 +2275,7 @@ struct item_t
   bool matching_type();
   const char* name() const;
   const char* slot_name() const;
-  const char* armor_type();
+  std::string armor_type();
   weapon_t* weapon() const;
   bool init();
   bool parse_options();

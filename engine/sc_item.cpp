@@ -127,7 +127,7 @@ const char* item_t::slot_name() const
 
 // item_t::slot_name ========================================================
 
-const char* item_t::armor_type()
+std::string item_t::armor_type()
 {
   return util_t::armor_type_string( player -> type, slot );
 }
@@ -213,7 +213,7 @@ void item_t::encode_options()
 
   if ( heroic() )                            { o += ",heroic=1";                                 }
   if ( lfr() )                               { o += ",lfr=1";                                    }
-  if ( armor_type() )                        { o += ",type=";    o += encoded_armor_type_str;    }
+  if ( ! armor_type().empty() )                { o += ",type=";    o += encoded_armor_type_str;    }
   if ( ! encoded_ilevel_str.empty()        ) { o += ",ilevel=";  o += encoded_ilevel_str;        }
   if ( ! encoded_quality_str.empty()       ) { o += ",quality="; o += encoded_quality_str;       }
   if ( ! encoded_stats_str.empty()         ) { o += ",stats=";   o += encoded_stats_str;         }

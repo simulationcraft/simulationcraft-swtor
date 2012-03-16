@@ -689,9 +689,9 @@ const char* util_t::slot_type_string( int slot )
 
 // util_t::armor_type_string ================================================
 
-const char* util_t::armor_type_string( player_type /* ptype */, int /* slot_type */ )
+std::string util_t::armor_type_string( player_type /* ptype */, int /* slot_type */ )
 {
-  return NULL;
+  return std::string();
 }
 
 // util_t::parse_slot_type ==================================================
