@@ -747,10 +747,10 @@ struct disturbance_t : public sage_sorcerer_spell_t
   {
     sage_sorcerer_spell_t::execute();
 
+    sage_sorcerer_t* p = cast();
+
     if ( tm )
     {
-      sage_sorcerer_t* p = cast();
-
       if ( p -> rngs.tm -> roll( p -> talents.telekinetic_momentum -> rank() * 0.10 ) )
       {
         tm -> execute();
@@ -869,6 +869,9 @@ struct mind_crush_t : public sage_sorcerer_spell_t
   {
     sage_sorcerer_spell_t::execute();
     dot_spell -> execute();
+
+    sage_sorcerer_t* p = cast();
+
     if ( p -> ptr )
       p -> buffs.presence_of_mind -> expire();
   }
