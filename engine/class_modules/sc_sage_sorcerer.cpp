@@ -757,6 +757,10 @@ struct disturbance_t : public sage_sorcerer_spell_t
         p -> buffs.tremors -> trigger( 1 );
       }
     }
+
+    // TESTME: Should PoM really affect the tm proc as implemented here?
+    if ( p -> ptr )
+      p -> buffs.presence_of_mind -> expire();
   }
 };
 
@@ -865,6 +869,8 @@ struct mind_crush_t : public sage_sorcerer_spell_t
   {
     sage_sorcerer_spell_t::execute();
     dot_spell -> execute();
+    if ( p -> ptr )
+      p -> buffs.presence_of_mind -> expire();
   }
 };
 
