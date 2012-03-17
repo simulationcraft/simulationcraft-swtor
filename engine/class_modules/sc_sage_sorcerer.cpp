@@ -332,7 +332,8 @@ struct sage_sorcerer_spell_t : public sage_sorcerer_action_t
 
     sage_sorcerer_t* p = cast();
 
-    if ( base_execute_time > timespan_t::zero && p -> buffs.presence_of_mind -> up() )
+    // 1.2 PTS: Presence of Mind now affects Disturbance and Mind Crush only.
+    if ( ! p -> ptr && base_execute_time > timespan_t::zero && p -> buffs.presence_of_mind -> up() )
       et = timespan_t::zero;
 
     return et;
@@ -344,7 +345,7 @@ struct sage_sorcerer_spell_t : public sage_sorcerer_action_t
 
     sage_sorcerer_t* p = cast();
 
-    if ( base_execute_time > timespan_t::zero )
+    if ( ! p -> ptr && base_execute_time > timespan_t::zero )
       p -> buffs.presence_of_mind -> expire();
 
     if ( dd.base_min > 0 )
@@ -357,7 +358,7 @@ struct sage_sorcerer_spell_t : public sage_sorcerer_action_t
 
     sage_sorcerer_t* p = cast();
 
-    if ( base_execute_time > timespan_t::zero && p -> buffs.presence_of_mind -> up() )
+    if ( ! p -> ptr && base_execute_time > timespan_t::zero && p -> buffs.presence_of_mind -> up() )
       dd.player_multiplier *= 1.20;
 
     if ( ( dd.base_min > 0 || channeled ) && p -> buffs.force_potency -> up() )
@@ -543,6 +544,10 @@ struct project_t : public sage_sorcerer_spell_t
         add_child( upheaval );
       }
     }
+
+    // 1.2 PTS: Empowered Throw now increases the damage dealt by Project,
+    // Telekinetic Throw, and Weaken Mind by 2% per point.
+    base_multiplier *= 1.0 + p -> talents.empowered_throw -> rank() * ( p -> ptr ? 0.02 : 0 );
   }
 
   virtual void execute()
@@ -592,9 +597,13 @@ struct telekinetic_throw_t : public sage_sorcerer_spell_t
     else
       cooldown -> duration = timespan_t::from_seconds( 6.0 );
 
-    base_crit += p -> talents.critical_kinesis -> rank() * 0.05;
+    // 1.2 PTS: Critical Kinesis now increases the critical chance of
+    // Telekinetic Throw and Disturbance by 3% per point.
+    base_crit += p -> talents.critical_kinesis -> rank() * ( p -> ptr ? 0.03 : 0.05 );
 
-    base_multiplier *= 1.0 + p -> talents.empowered_throw -> rank() * 0.04;
+    // 1.2 PTS: Empowered Throw now increases the damage dealt by Project,
+    // Telekinetic Throw, and Weaken Mind by 2% per point.
+    base_multiplier *= 1.0 + p -> talents.empowered_throw -> rank() * ( p -> ptr ? 0.02 : 0.04 );
   }
 
   virtual void execute()
@@ -678,7 +687,9 @@ struct disturbance_t : public sage_sorcerer_spell_t
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
 
-    base_crit += p -> talents.critical_kinesis -> rank() * 0.05;
+    // 1.2 PTS: Critical Kinesis now increases the critical chance of
+    // Telekinetic Throw and Disturbance by 3% per point.
+    base_crit += p -> talents.critical_kinesis -> rank() * ( p -> ptr ? 0.03 : 0.05 );
 
     if ( is_tm )
     {
@@ -693,6 +704,28 @@ struct disturbance_t : public sage_sorcerer_spell_t
       tm = new disturbance_t( p, n, options_str, true );
       add_child( tm );
     }
+  }
+
+  virtual timespan_t execute_time() const
+  {
+    sage_sorcerer_t* p = cast();
+
+    // 1.2 PTS: Presence of Mind now affects Disturbance and Mind Crush only.
+    if ( p -> ptr && p -> buffs.presence_of_mind -> up() )
+      return timespan_t::zero;
+    else
+      return sage_sorcerer_spell_t::execute_time();
+  }
+
+  virtual void player_buff() // override
+  {
+    sage_sorcerer_spell_t::player_buff();
+
+    sage_sorcerer_t* p = cast();
+
+    // 1.2 PTS: Presence of Mind now affects Disturbance and Mind Crush only.
+    if ( p -> ptr && p -> buffs.presence_of_mind -> up() )
+      dd.player_multiplier *= 1.20;
   }
 
   virtual void impact( player_t* t, int impact_result, double travel_dmg )
@@ -724,6 +757,10 @@ struct disturbance_t : public sage_sorcerer_spell_t
         p -> buffs.tremors -> trigger( 1 );
       }
     }
+
+    // TESTME: Should PoM really affect the tm proc as implemented here?
+    if ( p -> ptr )
+      p -> buffs.presence_of_mind -> expire();
   }
 };
 
@@ -731,8 +768,11 @@ struct mind_crush_t : public sage_sorcerer_spell_t
 {
   struct mind_crush_dot_t : public sage_sorcerer_spell_t
   {
+    bool is_buffed_by_presence_of_mind;
+
     mind_crush_dot_t( sage_sorcerer_t* p, const std::string& n ) :
-      sage_sorcerer_spell_t( n, p )
+      sage_sorcerer_spell_t( n, p ),
+      is_buffed_by_presence_of_mind( false )
     {
       rank_level_list = { 14, 19, 30, 41, 50 };
 
@@ -747,6 +787,16 @@ struct mind_crush_t : public sage_sorcerer_spell_t
       may_crit = false;
 
       base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
+    }
+
+    virtual void player_buff() // override
+    {
+      sage_sorcerer_spell_t::player_buff();
+
+      // 1.2 PTS: Mind Crush's periodic damage now benefits from the 20%
+      // damage bonus when it is used to consume the Presence of Mind buff.
+      if ( is_buffed_by_presence_of_mind )
+        td.player_multiplier *= 1.20;
     }
 
     virtual void target_debuff( player_t* t, int dmg_type )
@@ -788,10 +838,39 @@ struct mind_crush_t : public sage_sorcerer_spell_t
     add_child( dot_spell );
   }
 
+  virtual timespan_t execute_time() const
+  {
+    sage_sorcerer_t* p = cast();
+
+    // 1.2 PTS: Presence of Mind now affects Disturbance and Mind Crush only.
+    if ( p -> ptr && p -> buffs.presence_of_mind -> up() )
+      return timespan_t::zero;
+    else
+      return sage_sorcerer_spell_t::execute_time();
+  }
+
+  virtual void player_buff() // override
+  {
+    sage_sorcerer_spell_t::player_buff();
+
+    sage_sorcerer_t* p = cast();
+
+    // 1.2 PTS: Presence of Mind now affects Disturbance and Mind Crush only.
+    if ( p -> ptr )
+    {
+      bool p_o_m = p -> buffs.presence_of_mind -> up();
+      dot_spell -> is_buffed_by_presence_of_mind = p_o_m;
+      if( p_o_m )
+        dd.player_multiplier *= 1.20;
+    }
+  }
+
   virtual void execute()
   {
     sage_sorcerer_spell_t::execute();
     dot_spell -> execute();
+    if ( p -> ptr )
+      p -> buffs.presence_of_mind -> expire();
   }
 };
 
@@ -813,8 +892,15 @@ struct weaken_mind_t : public sage_sorcerer_spell_t
     range = 30.0;
     may_crit = false;
     crit_bonus += p -> talents.reverberation -> rank() * 0.1;
-    base_multiplier *= 1.0 + p -> talents.drain_thoughts -> rank() * 0.075;
-    influenced_by_inner_strength = false;
+
+    // PTS 1.2: "Inner Strength now correctly affects Weaken Mind"
+    influenced_by_inner_strength = p -> ptr;
+
+    // 1.2 PTS: Empowered Throw now increases the damage dealt by Project,
+    // Telekinetic Throw, and Weaken Mind by 2% per point.
+    // TESTME: Additive or multiplicative combination?
+    base_multiplier *= 1.0 + p -> talents.drain_thoughts -> rank() * 0.075 +
+        p -> talents.empowered_throw -> rank() * ( p -> ptr ? 0.02 : 0 );
   }
 
   virtual void tick( dot_t* d )
