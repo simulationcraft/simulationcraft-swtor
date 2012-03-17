@@ -301,7 +301,7 @@ player_t::player_t( sim_t*             s,
   // Resources
   health_per_endurance( 10 ),
   // Consumables
-  stim( STIM_NONE ),
+  stim( stim_t::none ),
   // Events
   executing( 0 ), channeling( 0 ), readying( 0 ), off_gcd( 0 ), in_combat( false ), action_queued( false ),
   cast_delay_reaction( timespan_t::zero ), cast_delay_occurred( timespan_t::zero ),
@@ -2084,7 +2084,8 @@ void player_t::reset()
   ranged_weapon.buff_value = 0;
   ranged_weapon.bonus_dmg  = 0;
 
-  stim            = STIM_NONE;
+  stim = stim_t::none;
+
   for ( int i=0; i < RESOURCE_MAX; i++ )
   {
     action_callback_t::reset( resource_gain_callbacks[ i ] );

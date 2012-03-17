@@ -396,12 +396,43 @@ enum stat_type
   STAT_MAX
 };
 
-enum stim_type
+template <typename T>
+struct is_countable_enum : public std::is_enum<T> {};
+
+template <typename T>
+inline typename std::enable_if<is_countable_enum<T>::value,T&>::type
+operator -- ( T& s )
+{ return s = static_cast<T>( static_cast<int>( s ) - 1 ); }
+
+template <typename T>
+inline typename std::enable_if<is_countable_enum<T>::value,T>::type
+operator -- ( T& s, int )
 {
-  STIM_NONE=0,
-  STIM_EXOTECH_RESOLVE,
-  STIM_RAKATA_RESOLVE,
-  STIM_MAX
+  T tmp = s;
+  --s;
+  return tmp;
+}
+
+template <typename T>
+inline typename std::enable_if<is_countable_enum<T>::value,T&>::type
+operator ++ ( T& s )
+{ return s = static_cast<T>( static_cast<int>( s ) + 1 ); }
+
+template <typename T>
+inline typename std::enable_if<is_countable_enum<T>::value,T>::type
+operator ++ ( T& s, int )
+{
+  T tmp = s;
+  ++s;
+  return tmp;
+}
+
+enum class stim_t
+{
+  none=0,
+  exotech_resolve,
+  rakata_resolve,
+  max
 };
 
 enum position_type { POSITION_NONE=0, POSITION_FRONT, POSITION_BACK, POSITION_RANGED_FRONT, POSITION_RANGED_BACK, POSITION_MAX };
@@ -1046,7 +1077,7 @@ public:
 
   static const char* attribute_type_string     ( int type );
   static const char* dmg_type_string           ( int type );
-  static const char* stim_type_string         ( int type );
+  static const char* stim_type_string          ( stim_t type );
   static const char* player_type_string        ( int type );
   static const char* pet_type_string           ( int type );
   static const char* position_type_string      ( int type );
@@ -1068,7 +1099,7 @@ public:
 
   static int parse_attribute_type              ( const std::string& name );
   static int parse_dmg_type                    ( const std::string& name );
-  static int parse_stim_type                  ( const std::string& name );
+  static stim_t parse_stim_type                ( const std::string& name );
   static player_type parse_player_type         ( const std::string& name );
   static pet_type_t parse_pet_type             ( const std::string& name );
   static int parse_profession_type             ( const std::string& name );
@@ -2490,7 +2521,7 @@ public:
   action_callback_t* dark_intent_cb;
 
   // Consumables
-  int stim;
+  stim_t stim;
 
   // Events
   action_t* executing;

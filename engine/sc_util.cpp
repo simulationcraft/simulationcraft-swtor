@@ -634,31 +634,35 @@ int util_t::parse_weapon_type( const std::string& name )
   return WEAPON_NONE;
 }
 
-// util_t::stim_type_string ================================================
+// util_t::stim_t_string ================================================
 
-const char* util_t::stim_type_string( int stim )
+const char* util_t::stim_type_string( stim_t stim )
 {
   switch ( stim )
   {
-  case STIM_NONE:               return "none";
-  case STIM_EXOTECH_RESOLVE:    return "exotech_resolve";
-  case STIM_RAKATA_RESOLVE:     return "rakata_resolve";
+  case stim_t::none:            return "none";
+  case stim_t::exotech_resolve: return "exotech_resolve";
+  case stim_t::rakata_resolve:  return "rakata_resolve";
   default:                      return "unknown";
   }
 }
 
-// util_t::parse_stim_type =================================================
+// util_t::parse_stim_t =================================================
 
-int util_t::parse_stim_type( const std::string& name )
+stim_t util_t::parse_stim_type( const std::string& name )
 {
-  for ( int i=0; i < STIM_MAX; i++ )
-    if ( util_t::str_compare_ci( name, util_t::stim_type_string( i ) ) )
-      return i;
+  stim_t i = stim_t::max;
 
-  return STIM_NONE;
+  while( --i > stim_t::none )
+  {
+    if ( util_t::str_compare_ci( name, util_t::stim_type_string( i ) ) )
+      break;
+  }
+
+  return i;
 }
 
-// util_t::slot_type_string =================================================
+// util_t::slot_type_string ================================================
 
 const char* util_t::slot_type_string( int slot )
 {
@@ -683,8 +687,8 @@ const char* util_t::slot_type_string( int slot )
   case SLOT_OFF_HAND:  return "off_hand";
   case SLOT_RANGED:    return "ranged";
   case SLOT_TABARD:    return "tabard";
+  default:             return "unknown";
   }
-  return "unknown";
 }
 
 // util_t::armor_type_string ================================================

@@ -6,18 +6,23 @@
 #include "simulationcraft.hpp"
 
 // ==========================================================================
-// Consumable
+// Consumables
 // ==========================================================================
 
+namespace { // ANONYMOUS ====================================================
 
-struct stim_t : public action_t
+struct use_stim_t : public action_t
 {
-  int type;
+  stim_t type;
   gain_t* gain;
 
-  stim_t( player_t* p, const std::string& options_str ) :
-    action_t( ACTION_USE, "stim", p ), type( STIM_NONE )
+  use_stim_t( player_t* p, const std::string& options_str ) :
+    action_t( ACTION_USE, "stim", p ), type( stim_t::none ),
+    gain( p -> get_gain( "stim" ) )
   {
+    trigger_gcd = timespan_t::zero;
+    harmful = false;
+
     std::string type_str;
 
     option_t options[] =
@@ -27,24 +32,21 @@ struct stim_t : public action_t
     };
     parse_options( options, options_str );
 
-    trigger_gcd = timespan_t::zero;
-    harmful = false;
-    for ( int i=0; i < STIM_MAX; i++ )
+    if ( type_str.empty() )
     {
-      if ( type_str == util_t::stim_type_string( i ) )
-      {
-        type = i;
-        break;
-      }
+      sim -> errorf( "Player %s must specify type of stim to use.\n",
+                     player -> name() );
+      sim -> cancel();
+      return;
     }
-    if ( type == STIM_NONE )
+
+    type = util_t::parse_stim_type( type_str );
+    if ( type == stim_t::none )
     {
-      sim -> errorf( "Player %s attempting to use sim of type '%s', which is not supported.\n",
+      sim -> errorf( "Player %s attempting to use stim of unknown type '%s'.\n",
                      player -> name(), type_str.c_str() );
       sim -> cancel();
     }
-    gain = p -> get_gain( "stim" );
-
   }
 
   virtual void execute()
@@ -54,23 +56,24 @@ struct stim_t : public action_t
     p -> stim = type;
     switch ( type )
     {
-    case STIM_EXOTECH_RESOLVE:
+    case stim_t::exotech_resolve:
       p -> stat_gain( STAT_WILLPOWER, 128, gain, this );
       p -> stat_gain( STAT_POWER, 52, gain, this );
       break;
 
-    case STIM_RAKATA_RESOLVE:
+    case stim_t::rakata_resolve:
       p -> stat_gain( STAT_WILLPOWER, 112, gain, this );
       p -> stat_gain( STAT_POWER, 46, gain, this );
       break;
 
-    default: assert( 0 );
+    default:
+      assert( 0 );
+      break;
     }
-
   }
 
   virtual bool ready()
-  { return ( player -> stim == STIM_NONE ); }
+  { return ( player -> stim == stim_t::none ); }
 };
 
 // ==========================================================================
@@ -111,11 +114,9 @@ struct power_potion_t : public action_t
       player -> buffs.power_potion -> trigger( 1, amount);
       cooldown -> duration += timespan_t::from_seconds( 5.0 );
       player -> buffs.power_potion -> buff_duration += timespan_t::from_seconds( 5.0 );
-
     }
 
     if ( sim -> log ) log_t::output( sim, "%s uses %s", player -> name(), name() );
-
 
     if ( player -> in_combat ) player -> potion_used = 1;
     update_ready();
@@ -130,16 +131,17 @@ struct power_potion_t : public action_t
   }
 };
 
-// ==========================================================================
-// consumable_t::create_action
-// ==========================================================================
+} // ANONYMOUS namespace ====================================================
+
+// consumable_t::create_action ==============================================
 
 action_t* consumable_t::create_action( player_t*          p,
                                        const std::string& name,
                                        const std::string& options_str )
 {
-  if ( name == "stim"                 ) return new                 stim_t( p, options_str );
-  if ( name == "power_potion"         ) return new         power_potion_t( p, options_str );
+  if ( name == "stim"            ) return new     use_stim_t( p, options_str );
+  if ( name == "power_potion" ||
+       name == "power_adrenal"   ) return new power_potion_t( p, options_str );
 
   return 0;
 }
