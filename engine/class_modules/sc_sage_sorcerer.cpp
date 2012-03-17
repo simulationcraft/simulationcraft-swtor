@@ -332,7 +332,8 @@ struct sage_sorcerer_spell_t : public sage_sorcerer_action_t
 
     sage_sorcerer_t* p = cast();
 
-    if ( base_execute_time > timespan_t::zero && p -> buffs.presence_of_mind -> up() )
+    // 1.2 PTS: Presence of Mind now affects Disturbance and Mind Crush only.
+    if ( ! p -> ptr && base_execute_time > timespan_t::zero && p -> buffs.presence_of_mind -> up() )
       et = timespan_t::zero;
 
     return et;
@@ -344,7 +345,7 @@ struct sage_sorcerer_spell_t : public sage_sorcerer_action_t
 
     sage_sorcerer_t* p = cast();
 
-    if ( base_execute_time > timespan_t::zero )
+    if ( ! p -> ptr && base_execute_time > timespan_t::zero )
       p -> buffs.presence_of_mind -> expire();
 
     if ( dd.base_min > 0 )
@@ -357,7 +358,7 @@ struct sage_sorcerer_spell_t : public sage_sorcerer_action_t
 
     sage_sorcerer_t* p = cast();
 
-    if ( base_execute_time > timespan_t::zero && p -> buffs.presence_of_mind -> up() )
+    if ( ! p -> ptr && base_execute_time > timespan_t::zero && p -> buffs.presence_of_mind -> up() )
       dd.player_multiplier *= 1.20;
 
     if ( ( dd.base_min > 0 || channeled ) && p -> buffs.force_potency -> up() )
@@ -705,6 +706,28 @@ struct disturbance_t : public sage_sorcerer_spell_t
     }
   }
 
+  virtual timespan_t execute_time() const
+  {
+    sage_sorcerer_t* p = cast();
+
+    // 1.2 PTS: Presence of Mind now affects Disturbance and Mind Crush only.
+    if ( p -> ptr && p -> buffs.presence_of_mind -> up() )
+      return timespan_t::zero;
+    else
+      return sage_sorcerer_spell_t::execute_time();
+  }
+
+  virtual void player_buff() // override
+  {
+    sage_sorcerer_spell_t::player_buff();
+
+    sage_sorcerer_t* p = cast();
+
+    // 1.2 PTS: Presence of Mind now affects Disturbance and Mind Crush only.
+    if ( p -> ptr && p -> buffs.presence_of_mind -> up() )
+      dd.player_multiplier *= 1.20;
+  }
+
   virtual void impact( player_t* t, int impact_result, double travel_dmg )
   {
     sage_sorcerer_spell_t::impact( t, impact_result, travel_dmg );
@@ -741,8 +764,11 @@ struct mind_crush_t : public sage_sorcerer_spell_t
 {
   struct mind_crush_dot_t : public sage_sorcerer_spell_t
   {
+    bool is_buffed_by_presence_of_mind;
+
     mind_crush_dot_t( sage_sorcerer_t* p, const std::string& n ) :
-      sage_sorcerer_spell_t( n, p )
+      sage_sorcerer_spell_t( n, p ),
+      is_buffed_by_presence_of_mind( false )
     {
       rank_level_list = { 14, 19, 30, 41, 50 };
 
@@ -757,6 +783,16 @@ struct mind_crush_t : public sage_sorcerer_spell_t
       may_crit = false;
 
       base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
+    }
+
+    virtual void player_buff() // override
+    {
+      sage_sorcerer_spell_t::player_buff();
+
+      // 1.2 PTS: Mind Crush's periodic damage now benefits from the 20%
+      // damage bonus when it is used to consume the Presence of Mind buff.
+      if ( is_buffed_by_presence_of_mind )
+        td.player_multiplier *= 1.20;
     }
 
     virtual void target_debuff( player_t* t, int dmg_type )
@@ -796,6 +832,33 @@ struct mind_crush_t : public sage_sorcerer_spell_t
     base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
 
     add_child( dot_spell );
+  }
+
+  virtual timespan_t execute_time() const
+  {
+    sage_sorcerer_t* p = cast();
+
+    // 1.2 PTS: Presence of Mind now affects Disturbance and Mind Crush only.
+    if ( p -> ptr && p -> buffs.presence_of_mind -> up() )
+      return timespan_t::zero;
+    else
+      return sage_sorcerer_spell_t::execute_time();
+  }
+
+  virtual void player_buff() // override
+  {
+    sage_sorcerer_spell_t::player_buff();
+
+    sage_sorcerer_t* p = cast();
+
+    // 1.2 PTS: Presence of Mind now affects Disturbance and Mind Crush only.
+    if ( p -> ptr )
+    {
+      bool p_o_m = p -> buffs.presence_of_mind -> up();
+      dot_spell -> is_buffed_by_presence_of_mind = p_o_m;
+      if( p_o_m )
+        dd.player_multiplier *= 1.20;
+    }
   }
 
   virtual void execute()
