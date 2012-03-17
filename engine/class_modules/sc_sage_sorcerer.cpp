@@ -814,7 +814,8 @@ struct weaken_mind_t : public sage_sorcerer_spell_t
     may_crit = false;
     crit_bonus += p -> talents.reverberation -> rank() * 0.1;
     base_multiplier *= 1.0 + p -> talents.drain_thoughts -> rank() * 0.075;
-    influenced_by_inner_strength = false;
+    // PTS 1.2: "Inner Strength now correctly affects Weaken Mind"
+    influenced_by_inner_strength = p -> ptr;
   }
 
   virtual void tick( dot_t* d )
