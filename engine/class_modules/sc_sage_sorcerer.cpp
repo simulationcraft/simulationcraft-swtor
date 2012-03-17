@@ -592,7 +592,9 @@ struct telekinetic_throw_t : public sage_sorcerer_spell_t
     else
       cooldown -> duration = timespan_t::from_seconds( 6.0 );
 
-    base_crit += p -> talents.critical_kinesis -> rank() * 0.05;
+    // 1.2 PTS: Critical Kinesis now increases the critical chance of
+    // Telekinetic Throw and Disturbance by 3% per point.
+    base_crit += p -> talents.critical_kinesis -> rank() * ( p -> ptr ? 0.03 : 0.05 );
 
     base_multiplier *= 1.0 + p -> talents.empowered_throw -> rank() * 0.04;
   }
@@ -678,7 +680,9 @@ struct disturbance_t : public sage_sorcerer_spell_t
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
 
-    base_crit += p -> talents.critical_kinesis -> rank() * 0.05;
+    // 1.2 PTS: Critical Kinesis now increases the critical chance of
+    // Telekinetic Throw and Disturbance by 3% per point.
+    base_crit += p -> talents.critical_kinesis -> rank() * ( p -> ptr ? 0.03 : 0.05 );
 
     if ( is_tm )
     {
