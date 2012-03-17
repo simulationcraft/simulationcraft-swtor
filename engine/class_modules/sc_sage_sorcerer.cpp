@@ -543,6 +543,10 @@ struct project_t : public sage_sorcerer_spell_t
         add_child( upheaval );
       }
     }
+
+    // 1.2 PTS: Empowered Throw now increases the damage dealt by Project,
+    // Telekinetic Throw, and Weaken Mind by 2% per point.
+    base_multiplier *= 1.0 + p -> talents.empowered_throw -> rank() * ( p -> ptr ? 0.02 : 0 );
   }
 
   virtual void execute()
@@ -596,7 +600,9 @@ struct telekinetic_throw_t : public sage_sorcerer_spell_t
     // Telekinetic Throw and Disturbance by 3% per point.
     base_crit += p -> talents.critical_kinesis -> rank() * ( p -> ptr ? 0.03 : 0.05 );
 
-    base_multiplier *= 1.0 + p -> talents.empowered_throw -> rank() * 0.04;
+    // 1.2 PTS: Empowered Throw now increases the damage dealt by Project,
+    // Telekinetic Throw, and Weaken Mind by 2% per point.
+    base_multiplier *= 1.0 + p -> talents.empowered_throw -> rank() * ( p -> ptr ? 0.02 : 0.04 );
   }
 
   virtual void execute()
@@ -817,9 +823,15 @@ struct weaken_mind_t : public sage_sorcerer_spell_t
     range = 30.0;
     may_crit = false;
     crit_bonus += p -> talents.reverberation -> rank() * 0.1;
-    base_multiplier *= 1.0 + p -> talents.drain_thoughts -> rank() * 0.075;
+
     // PTS 1.2: "Inner Strength now correctly affects Weaken Mind"
     influenced_by_inner_strength = p -> ptr;
+
+    // 1.2 PTS: Empowered Throw now increases the damage dealt by Project,
+    // Telekinetic Throw, and Weaken Mind by 2% per point.
+    // TESTME: Additive or multiplicative combination?
+    base_multiplier *= 1.0 + p -> talents.drain_thoughts -> rank() * 0.075 +
+        p -> talents.empowered_throw -> rank() * ( p -> ptr ? 0.02 : 0 );
   }
 
   virtual void tick( dot_t* d )
