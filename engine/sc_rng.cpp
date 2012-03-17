@@ -388,19 +388,84 @@ namespace { // ANONYMOUS ====================================================
 #define DSFMT_PCV2  UINT64_C(0x0000000000000001)
 #define DSFMT_IDSTR "dSFMT2-19937:117-19:ffafffffffb3f-ffdfffc90fffd"
 
+#if defined(__SSE2__)
+#  include <emmintrin.h>
 
+/** mask data for sse2 */
+static __m128i sse2_param_mask;
+/** 1 in 64bit for sse2 */
+static __m128i sse2_int_one;
+/** 2.0 double for sse2 */
+static __m128d sse2_double_two;
+/** -1.0 double for sse2 */
+static __m128d sse2_double_m_one;
+
+#define SSE2_SHUFF 0x1b
+
+/** 128-bit data structure */
+union w128_t {
+    __m128i si;
+    __m128d sd;
+    uint64_t u[2];
+    uint32_t u32[4];
+    double d[2];
+};
+
+#else  /* standard C */
 /** 128-bit data structure */
 union w128_t {
   uint64_t u[2];
   uint32_t u32[4];
   double d[2];
 };
+#endif
 
 /** the 128-bit internal state array */
 struct dsfmt_t {
     w128_t status[DSFMT_N + 1];
     int idx;
 };
+#if defined(__SSE2__)
+/**
+ * This function setup some constant variables for SSE2.
+ */
+static void setup_const(void) {
+    static int first = 1;
+    if (!first) {
+  return;
+    }
+    sse2_param_mask = _mm_set_epi32(DSFMT_MSK32_3, DSFMT_MSK32_4,
+            DSFMT_MSK32_1, DSFMT_MSK32_2);
+    sse2_int_one = _mm_set_epi32(0, 1, 0, 1);
+    sse2_double_two = _mm_set_pd(2.0, 2.0);
+    sse2_double_m_one = _mm_set_pd(-1.0, -1.0);
+    first = 0;
+}
+
+/**
+ * This function represents the recursion formula.
+ * @param r output 128-bit
+ * @param a a 128-bit part of the internal state array
+ * @param b a 128-bit part of the internal state array
+ * @param d a 128-bit part of the internal state array (I/O)
+ */
+inline static void do_recursion(w128_t *r, w128_t *a, w128_t *b, w128_t *u) {
+    __m128i v, w, x, y, z;
+
+    x = a->si;
+    z = _mm_slli_epi64(x, DSFMT_SL1);
+    y = _mm_shuffle_epi32(u->si, SSE2_SHUFF);
+    z = _mm_xor_si128(z, b->si);
+    y = _mm_xor_si128(y, z);
+
+    v = _mm_srli_epi64(y, DSFMT_SR);
+    w = _mm_and_si128(y, sse2_param_mask);
+    v = _mm_xor_si128(v, x);
+    v = _mm_xor_si128(v, w);
+    r->si = v;
+    u->si = y;
+}
+#else /* standard C */
 
 inline void do_recursion( w128_t* r, const w128_t* a, const w128_t* b, w128_t* lung )
 {
@@ -415,6 +480,7 @@ inline void do_recursion( w128_t* r, const w128_t* a, const w128_t* b, w128_t* l
     r->u[0] = (lung->u[0] >> DSFMT_SR) ^ (lung->u[0] & DSFMT_MSK1) ^ t0;
     r->u[1] = (lung->u[1] >> DSFMT_SR) ^ (lung->u[1] & DSFMT_MSK2) ^ t1;
 }
+#endif
 
 void dsfmt_gen_rand_all(dsfmt_t *dsfmt) {
     int i;
@@ -482,6 +548,7 @@ inline int idxof(int i) {
     return i;
 }
 
+
 /**
  * This function initializes the internal state array with a 32-bit
  * integer seed.
@@ -503,6 +570,10 @@ void dsfmt_chk_init_gen_rand(dsfmt_t *dsfmt, uint32_t seed) {
     initial_mask(dsfmt);
     period_certification(dsfmt);
     dsfmt->idx = DSFMT_N64;
+
+#if defined(__SSE2__)
+    setup_const();
+#endif
 }
 
 /**
@@ -550,7 +621,7 @@ rng_sfmt_t::rng_sfmt_t( const std::string& name, bool avg_range, bool avg_gauss 
 
 // rng_sfmt_t::real =========================================================
 
-inline double rng_sfmt_t::real()
+double rng_sfmt_t::real()
 {
   return dsfmt_genrand_close_open( &dsfmt_global_data ) - 1.0;
 }
