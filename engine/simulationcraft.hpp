@@ -92,7 +92,7 @@
 #endif
 
 #define SC_MAJOR_VERSION "115"
-#define SC_MINOR_VERSION "1"
+#define SC_MINOR_VERSION "2"
 #define SWTOR_VERSION_LIVE "1.1.5"
 #define SWTOR_VERSION_PTR "1.2.0"
 #define SC_USE_PTR ( 1 )
