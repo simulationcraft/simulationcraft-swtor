@@ -8,6 +8,8 @@ exists( build.conf ) {
   include( build.conf )
 }
 
+QMAKE_CXXFLAGS += $$OPTS
+
 QMAKE_CXXFLAGS_RELEASE += -DNDEBUG
 
 win32 {
@@ -29,7 +31,7 @@ macx {
 COMPILER_CHECK_CXX = $$replace(QMAKE_CXX,'.*g\\+\\+'.*,'g++')
 
 contains(COMPILER_CHECK_CXX,'g++') {
-  QMAKE_CXXFLAGS += -std=gnu++0x -ffast-math
+  QMAKE_CXXFLAGS += -std=c++0x -ffast-math
 }
 
 INCLUDEPATH += engine

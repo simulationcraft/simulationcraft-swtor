@@ -13,9 +13,9 @@
 
 OS         = WINDOWS
 
-CXX        = g++
+CXX        = g++ -std=c++0x
 CPP_FLAGS  = -Wall -Wextra -Woverloaded-virtual -I.
-OPTS       = -O3 -fomit-frame-pointer -ffast-math -std=gnu++0x
+OPTS       = -O3 -fomit-frame-pointer -ffast-math
 BITS       = 32
 
 -include ../build.conf
