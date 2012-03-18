@@ -3201,9 +3201,9 @@ void player_t::register_harmful_spell_callback( int64_t mask,
 void player_t::register_tick_damage_callback( int64_t mask,
                                               action_callback_t* cb )
 {
-  for ( int64_t i=0; i < SCHOOL_MAX; i++ )
+  for ( school_type i=SCHOOL_NONE; i < SCHOOL_MAX; ++i )
   {
-    if ( mask < 0 || ( mask & ( int64_t( 1 ) << i ) ) )
+    if ( mask < 0 || ( mask & bitmask( i ) ) != 0 )
     {
       tick_damage_callbacks[ i ].push_back( cb );
     }
@@ -3215,9 +3215,9 @@ void player_t::register_tick_damage_callback( int64_t mask,
 void player_t::register_direct_damage_callback( int64_t mask,
                                                 action_callback_t* cb )
 {
-  for ( int64_t i=0; i < SCHOOL_MAX; i++ )
+  for ( school_type i=SCHOOL_NONE; i < SCHOOL_MAX; i++ )
   {
-    if ( mask < 0 || ( mask & ( int64_t( 1 ) << i ) ) )
+    if ( mask < 0 || ( mask & bitmask( i ) ) != 0 )
     {
       direct_damage_callbacks[ i ].push_back( cb );
     }
@@ -3229,9 +3229,9 @@ void player_t::register_direct_damage_callback( int64_t mask,
 void player_t::register_tick_heal_callback( int64_t mask,
                                             action_callback_t* cb )
 {
-  for ( int64_t i=0; i < SCHOOL_MAX; i++ )
+  for ( school_type i = SCHOOL_NONE; i < SCHOOL_MAX; i++ )
   {
-    if ( mask < 0 || ( mask & ( int64_t( 1 ) << i ) ) )
+    if ( mask < 0 || ( mask & bitmask( i ) ) != 0 )
     {
       tick_heal_callbacks[ i ].push_back( cb );
     }
@@ -3243,9 +3243,9 @@ void player_t::register_tick_heal_callback( int64_t mask,
 void player_t::register_direct_heal_callback( int64_t mask,
                                               action_callback_t* cb )
 {
-  for ( int64_t i=0; i < SCHOOL_MAX; i++ )
+  for ( school_type i = SCHOOL_NONE; i < SCHOOL_MAX; i++ )
   {
-    if ( mask < 0 || ( mask & ( int64_t( 1 ) << i ) ) )
+    if ( mask < 0 || ( mask & bitmask( i ) ) != 0 )
     {
       direct_heal_callbacks[ i ].push_back( cb );
     }
