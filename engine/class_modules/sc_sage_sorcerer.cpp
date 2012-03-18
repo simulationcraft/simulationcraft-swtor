@@ -1789,7 +1789,7 @@ void sage_sorcerer_t::init_actions()
       if ( talents.presence_of_mind -> rank() )
         action_list_str += "/mind_crush,if=buff.presence_of_mind.react";
 
-      if ( talents.telekinetic_wave -> rank() && talents.presence_of_mind -> rank() )
+      if ( ! ptr && talents.telekinetic_wave -> rank() && talents.presence_of_mind -> rank() )
         action_list_str += "/telekinetic_wave,if=buff.presence_of_mind.react&force.pct>target.health.pct+0.07&cooldown.mind_crush.remains>4";
 
       if ( talents.sever_force -> rank() > 0 )
@@ -1858,7 +1858,7 @@ void sage_sorcerer_t::init_actions()
       if ( talents.presence_of_mind -> rank() )
         action_list_str += "/crushing_darkness,if=buff.wrath.react";
 
-      if ( talents.telekinetic_wave -> rank() && talents.presence_of_mind -> rank() )
+      if ( ! ptr && talents.telekinetic_wave -> rank() && talents.presence_of_mind -> rank() )
         action_list_str += "/chain_lightning,if=buff.wrath.react&force.pct>target.health.pct+0.07&cooldown.crushing_darkness.remains>4";
 
       if ( talents.sever_force -> rank() > 0 )
