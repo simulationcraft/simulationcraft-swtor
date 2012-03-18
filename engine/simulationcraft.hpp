@@ -269,13 +269,22 @@ public:
                  "Bit mask must fit in selected type." );
 };
 
+// bitmask(T) will only work if you specialize bitmask_traits<T> with
+// a member "type" that you want to use for the bitmasks. Protip: have a
+// member "XXX_MAX" in your enumeration and simply inherit bitmask_traits
+// from enum_bitmask_t to let it pick the mask type for you, e.g.,
+//   template<>
+//   struct bitmask_traits<some_type> :
+//     public enum_bitmask_t<SOME_TYPE_MAX> {};
 template <typename T>
 struct bitmask_traits {};
 
+// Build a bitmask with a single member s.
 template <typename T>
 constexpr typename bitmask_traits<T>::type bitmask( T s )
 { return static_cast<typename bitmask_traits<T>::type>( 1 ) << s; }
 
+// Build a bitmask with multiple members.
 template <typename T, typename ... Types>
 constexpr typename bitmask_traits<T>::type bitmask( T s, Types ... args )
 { return bitmask( s ) | bitmask( args... ); }
