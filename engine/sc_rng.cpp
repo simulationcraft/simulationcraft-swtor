@@ -586,12 +586,14 @@ public:
   virtual double real();
   virtual void seed( uint32_t start=rand() );
 
+#if defined(__SSE2__)
   // 32-bit libraries typically align malloc chunks to sizeof(double) == 8.
-  // This object needs to be aligned to sizeof(w128_t) == 16.
+  // This object needs to be aligned to sizeof(__m128d) == 16.
   static void* operator new( size_t size )
   { return _mm_malloc( size, alignof( dsfmt_t ) ); }
   static void operator delete( void* p )
   { return _mm_free( p ); }
+#endif
 };
 
 // rng_sfmt_t::rng_sfmt_t ===================================================
