@@ -4998,10 +4998,8 @@ bool player_t::create_profile( std::string& profile_str, int save_type, bool sav
 
   if ( save_type == SAVE_ALL || save_type == SAVE_GEAR )
   {
-    for ( int i=0; i < SLOT_MAX; i++ )
+    for ( item_t& item : items )
     {
-      item_t& item = items[ i ];
-
       if ( item.active() )
       {
         profile_str += item.slot_name();
@@ -5024,11 +5022,25 @@ bool player_t::create_profile( std::string& profile_str, int save_type, bool sav
         profile_str += "=" + util_t::to_string( value, 0 ) + term;
       }
     }
+
     profile_str += "# Set Bonuses" + term;
     for ( set_bonus_t* sb = set_bonus_list; sb; sb = sb -> next )
     {
-      if ( sb -> two_pc() )  profile_str += "# set_bonus=" + sb -> name + "_2pc" + term ;
-      if ( sb -> four_pc() ) profile_str += "# set_bonus=" + sb -> name + "_4pc" + term ;
+      std::string name = sb -> name + "_2pc" + term;
+      if ( sb -> force_enable_2pc )
+        profile_str += "set_bonus=" + name;
+      else if ( sb -> force_disable_2pc )
+        profile_str += "set_bonus=no_" + name;
+      else if ( sb -> two_pc() )
+        profile_str += "# set_bonus=" + name;
+
+      name = sb -> name + "_4pc" + term;
+      if ( sb -> force_enable_4pc )
+        profile_str += "set_bonus=" + name;
+      else if ( sb -> force_disable_4pc )
+        profile_str += "set_bonus=no_" + name;
+      else if ( sb -> four_pc() )
+        profile_str += "# set_bonus=" + name;
     }
 
     for ( int i=0; i < SLOT_MAX; i++ )
