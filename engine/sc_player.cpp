@@ -3555,7 +3555,7 @@ uptime_t* player_t::get_uptime( const std::string& name )
 
 // player_t::get_rng ========================================================
 
-rng_t* player_t::get_rng( const std::string& n, int type )
+rng_t* player_t::get_rng( const std::string& n, rng_type type )
 {
   assert( sim -> rng );
 
@@ -4089,13 +4089,13 @@ struct base_use_item_t : public action_t
       {
         trigger = unique_gear_t::register_cost_reduction_proc( e.trigger_type, e.trigger_mask, use_name, player,
                                                                e.school, e.max_stacks, e.discharge_amount,
-                                                               e.proc_chance, timespan_t::zero/*dur*/, timespan_t::zero/*cd*/, false, e.reverse, 0 );
+                                                               e.proc_chance, timespan_t::zero/*dur*/, timespan_t::zero/*cd*/, false, e.reverse );
       }
       else if ( e.stat )
       {
         trigger = unique_gear_t::register_stat_proc( e.trigger_type, e.trigger_mask, use_name, player,
                                                      e.stat, e.max_stacks, e.stat_amount,
-                                                     e.proc_chance, timespan_t::zero/*dur*/, timespan_t::zero/*cd*/, e.tick, e.reverse, 0 );
+                                                     e.proc_chance, timespan_t::zero/*dur*/, timespan_t::zero/*cd*/, e.tick, e.reverse );
       }
       else if ( e.school )
       {

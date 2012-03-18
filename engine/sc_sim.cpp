@@ -1753,7 +1753,7 @@ timespan_t sim_t::gauss( timespan_t mean,
 
 // sim_t::get_rng ===========================================================
 
-rng_t* sim_t::get_rng( const std::string& n, int type )
+rng_t* sim_t::get_rng( const std::string& n, rng_type type )
 {
   assert( rng );
 

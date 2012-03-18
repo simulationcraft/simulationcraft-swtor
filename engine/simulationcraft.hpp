@@ -140,7 +140,7 @@ struct rating_t;
 struct reforge_plot_t;
 struct reforge_plot_data_t;
 struct report_t;
-struct rng_t;
+class  rng_t;
 struct sample_data_t;
 struct scaling_t;
 struct sim_t;
@@ -1433,7 +1433,7 @@ struct buff_t
   buff_t* next;
   int current_stack, max_stack;
   int aura_id;
-  int rng_type;
+  rng_type rt;
   bool activated;
   bool reverse, constant, quiet, overridden;
   sample_data_t uptime_pct;
@@ -1444,12 +1444,12 @@ struct buff_t
   // Raid Aura
   buff_t( sim_t*, const std::string& name,
           int max_stack=1, timespan_t buff_duration=timespan_t::zero, timespan_t buff_cooldown=timespan_t::zero,
-          double chance=1.0, bool quiet=false, bool reverse=false, int rng_type=RNG_CYCLIC, int aura_id=0 );
+          double chance=1.0, bool quiet=false, bool reverse=false, rng_type=RNG_CYCLIC, int aura_id=0 );
 
   // Player Buff
   buff_t( actor_pair_t pair, const std::string& name,
           int max_stack=1, timespan_t buff_duration=timespan_t::zero, timespan_t buff_cooldown=timespan_t::zero,
-          double chance=1.0, bool quiet=false, bool reverse=false, int rng_type=RNG_CYCLIC, int aura_id=0, bool activated=true );
+          double chance=1.0, bool quiet=false, bool reverse=false, rng_type=RNG_CYCLIC, int aura_id=0, bool activated=true );
 
   // Use check() inside of ready() methods to prevent skewing of "benefit" calculations.
   // Use up() where the presence of the buff affects the action mechanics.
@@ -1506,7 +1506,7 @@ struct stat_buff_t : public buff_t
   stat_buff_t( player_t*, const std::string& name,
                int stat, double amount,
                int max_stack=1, timespan_t buff_duration=timespan_t::zero, timespan_t buff_cooldown=timespan_t::zero,
-               double chance=1.0, bool quiet=false, bool reverse=false, int rng_type=RNG_CYCLIC, int aura_id=0, bool activated=true );
+               double chance=1.0, bool quiet=false, bool reverse=false, rng_type=RNG_CYCLIC, int aura_id=0, bool activated=true );
 
   virtual void bump     ( int stacks=1, double value=-1.0 );
   virtual void decrement( int stacks=1, double value=-1.0 );
@@ -1522,7 +1522,7 @@ struct cost_reduction_buff_t : public buff_t
   cost_reduction_buff_t( player_t*, const std::string& name,
                          int school, double amount,
                          int max_stack=1, timespan_t buff_duration=timespan_t::zero, timespan_t buff_cooldown=timespan_t::zero,
-                         double chance=1.0, bool refreshes=false, bool quiet=false, bool reverse=false, int rng_type=RNG_CYCLIC, int aura_id=0, bool activated=true );
+                         double chance=1.0, bool refreshes=false, bool quiet=false, bool reverse=false, rng_type=RNG_CYCLIC, int aura_id=0, bool activated=true );
 
   virtual void bump     ( int stacks=1, double value=-1.0 );
   virtual void decrement( int stacks=1, double value=-1.0 );
@@ -1535,7 +1535,7 @@ struct debuff_t : public buff_t
   // Player De-Buff
   debuff_t( player_t*, const std::string& name,
             int max_stack=1, timespan_t buff_duration=timespan_t::zero, timespan_t buff_cooldown=timespan_t::zero,
-            double chance=1.0, bool quiet=false, bool reverse=false, int rng_type=RNG_CYCLIC, int aura_id=0 );
+            double chance=1.0, bool quiet=false, bool reverse=false, rng_type=RNG_CYCLIC, int aura_id=0 );
 
 };
 
@@ -1820,7 +1820,7 @@ public:
   double    gauss( double mean, double stddev );
   timespan_t gauss( timespan_t mean, timespan_t stddev );
   double    real() const;
-  rng_t*    get_rng( const std::string& name, int type=RNG_DEFAULT );
+  rng_t*    get_rng( const std::string& name, rng_type type=RNG_DEFAULT );
 
 
   // Timing Wheel Event Management
@@ -3087,7 +3087,7 @@ public:
   stats_t*    get_stats   ( const std::string& name, action_t* action=0 );
   benefit_t*  get_benefit ( const std::string& name );
   uptime_t*   get_uptime  ( const std::string& name );
-  rng_t*      get_rng     ( const std::string& name, int type=RNG_DEFAULT );
+  rng_t*      get_rng     ( const std::string& name, rng_type type=RNG_DEFAULT );
   set_bonus_t* get_set_bonus( const std::string& name, std::string filter,
                               slot_mask_t slot_filter=DEFAULT_SET_BONUS_SLOT_MASK );
   double      get_player_distance( const player_t* p ) const;
@@ -3681,22 +3681,22 @@ struct unique_gear_t
   static action_callback_t* register_stat_proc( int type, int64_t mask, const std::string& name, player_t*,
                                                 int stat, int max_stacks, double amount,
                                                 double proc_chance, timespan_t duration, timespan_t cooldown,
-                                                timespan_t tick=timespan_t::zero, bool reverse=false, int rng_type=RNG_DEFAULT );
+                                                timespan_t tick=timespan_t::zero, bool reverse=false, rng_type=RNG_DEFAULT );
 
   static action_callback_t* register_cost_reduction_proc( int type, int64_t mask, const std::string& name, player_t*,
                                                           int school, int max_stacks, double amount,
                                                           double proc_chance, timespan_t duration, timespan_t cooldown,
-                                                          bool refreshes=false, bool reverse=false, int rng_type=RNG_DEFAULT );
+                                                          bool refreshes=false, bool reverse=false, rng_type=RNG_DEFAULT );
 
   static action_callback_t* register_discharge_proc( int type, int64_t mask, const std::string& name, player_t*,
                                                      int max_stacks, const school_type school, double amount, double scaling,
                                                      double proc_chance, timespan_t cooldown, bool no_crits, bool no_buffs, bool no_debuffs,
-                                                     int rng_type=RNG_DEFAULT );
+                                                     rng_type=RNG_DEFAULT );
 
   static action_callback_t* register_chance_discharge_proc( int type, int64_t mask, const std::string& name, player_t*,
                                                             int max_stacks, const school_type school, double amount, double scaling,
                                                             double proc_chance, timespan_t cooldown, bool no_crits, bool no_buffs, bool no_debuffs,
-                                                            int rng_type=RNG_DEFAULT );
+                                                            rng_type=RNG_DEFAULT );
 
   static action_callback_t* register_stat_discharge_proc( int type, int64_t mask, const std::string& name, player_t*,
                                                           int stat, int max_stacks, double stat_amount,
@@ -3954,35 +3954,58 @@ struct log_t
 
 // Pseudo Random Number Generation ==========================================
 
-struct rng_t
+class rng_t
 {
+public:
   std::string name_str;
-  bool   gauss_pair_use;
-  double gauss_pair_value;
   double expected_roll,  actual_roll,  num_roll;
   double expected_range, actual_range, num_range;
   double expected_gauss, actual_gauss, num_gauss;
-  bool   average_range, average_gauss;
   rng_t* next;
 
+private:
+  double gauss_pair_value;
+  bool   gauss_pair_use;
+protected:
+  bool   average_range, average_gauss;
+
   rng_t( const std::string& n, bool avg_range=false, bool avg_gauss=false );
+
+public:
   virtual ~rng_t() {}
 
-  virtual int    type() const { return RNG_STANDARD; }
-  virtual double real();
+  virtual rng_type type() const = 0;
+  virtual double  real() = 0;
   virtual bool    roll( double chance );
   virtual double range( double min, double max );
-  timespan_t range( timespan_t min, timespan_t max );
   virtual double gauss( double mean, double stddev, const bool truncate_low_end = false );
-  timespan_t gauss( timespan_t mean, timespan_t stddev );
-  double exgauss( double mean, double stddev, double nu );
-  timespan_t exgauss( timespan_t mean, timespan_t stddev, timespan_t nu );
-  virtual void   seed( uint32_t start=time(NULL) );
+        double exgauss( double mean, double stddev, double nu );
+  virtual void    seed( uint32_t start = time( nullptr ) );
   void   report( FILE* );
+
+  timespan_t range( timespan_t min, timespan_t max )
+  {
+    return TIMESPAN_FROM_NATIVE_VALUE( range( TIMESPAN_TO_NATIVE_VALUE( min ),
+                                              TIMESPAN_TO_NATIVE_VALUE( max ) ) );
+  }
+
+  timespan_t gauss( timespan_t mean, timespan_t stddev )
+  {
+    return TIMESPAN_FROM_NATIVE_VALUE( gauss( TIMESPAN_TO_NATIVE_VALUE( mean ),
+                                              TIMESPAN_TO_NATIVE_VALUE( stddev ) ) );
+  }
+
+  timespan_t exgauss( timespan_t mean, timespan_t stddev, timespan_t nu )
+  {
+    return TIMESPAN_FROM_NATIVE_VALUE( exgauss( TIMESPAN_TO_NATIVE_VALUE( mean ),
+                                                TIMESPAN_TO_NATIVE_VALUE( stddev ),
+                                                TIMESPAN_TO_NATIVE_VALUE( nu ) ) );
+  }
+
   static double stdnormal_cdf( double u );
   static double stdnormal_inv( double p );
 
-  static rng_t* create( sim_t*, const std::string& name, int type=RNG_STANDARD );
+  static rng_t* create( sim_t*, const std::string& name, rng_type type=RNG_STANDARD );
 };
 
 // String utils =============================================================

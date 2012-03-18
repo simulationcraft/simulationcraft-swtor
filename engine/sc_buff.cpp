@@ -60,11 +60,11 @@ buff_t::buff_t( sim_t*             s,
                 double             ch,
                 bool               q,
                 bool               r,
-                int                rt,
+                rng_type           rt,
                 int                id ) :
   buff_duration( d ), buff_cooldown( cd ), default_chance( ch ),
   name_str( n ), sim( s ), player( 0 ), source( 0 ), initial_source( 0 ),
-  max_stack( ms ), aura_id( id ), rng_type( rt ),
+  max_stack( ms ), aura_id( id ), rt( rt ),
   activated( true ), reverse( r ), constant( false ), quiet( q ),
   uptime_pct()
 {
@@ -81,12 +81,12 @@ buff_t::buff_t( actor_pair_t       p,
                 double             ch,
                 bool               q,
                 bool               r,
-                int                rt,
+                rng_type           rt,
                 int                id,
                 bool               act ) :
   buff_duration( d ), buff_cooldown( cd ), default_chance( ch ),
   name_str( n ), sim( p.target -> sim ), player( p.target ), source( p.source ), initial_source( p.source ),
-  max_stack( ms ), aura_id( id ), rng_type( rt ),
+  max_stack( ms ), aura_id( id ), rt( rt ),
   activated( act ), reverse( r ), constant( false ), quiet( q ),
   uptime_pct()
 {
@@ -129,7 +129,7 @@ void buff_t::parse_options( va_list vap )
     }
     else if ( ! strcmp( parm, "rng" ) )
     {
-      rng_type = ( int ) va_arg( vap, int );
+      rt = ( rng_type ) va_arg( vap, int );
     }
   }
   va_end( vap );
@@ -187,13 +187,13 @@ void buff_t::init()
     cooldown = initial_source-> get_cooldown( "buff_" + name_str );
     if ( initial_source != player )
       name_str = name_str + ':' + initial_source->name_str;
-    rng = initial_source-> get_rng( name_str, rng_type );
+    rng = initial_source-> get_rng( name_str, rt );
     tail = &( player -> buff_list );
   }
   else
   {
     cooldown = sim -> get_cooldown( "buff_" + name_str );
-    rng = sim -> get_rng( name_str, rng_type );
+    rng = sim -> get_rng( name_str, rt );
     tail = &( sim -> buff_list );
   }
   cooldown -> duration = buff_cooldown;
@@ -878,10 +878,10 @@ stat_buff_t::stat_buff_t( player_t*          p,
                           double             ch,
                           bool               q,
                           bool               r,
-                          int                rng_type,
+                          rng_type           rt,
                           int                id,
                           bool               act ) :
-  buff_t( p, n, ms, d, cd, ch, q, r, rng_type, id, act ), amount( a ), stat( st )
+  buff_t( p, n, ms, d, cd, ch, q, r, rt, id, act ), amount( a ), stat( st )
 {
 }
 
@@ -953,10 +953,10 @@ cost_reduction_buff_t::cost_reduction_buff_t( player_t*          p,
                                               bool               re,
                                               bool               q,
                                               bool               r,
-                                              int                rng_type,
+                                              rng_type           rt,
                                               int                id,
                                               bool               act ) :
-  buff_t( p, n, ms, d, cd, ch, q, r, rng_type, id, act ), amount( a ), school( sch ), refreshes( re )
+  buff_t( p, n, ms, d, cd, ch, q, r, rt, id, act ), amount( a ), school( sch ), refreshes( re )
 {
 }
 
@@ -1042,8 +1042,8 @@ debuff_t::debuff_t( player_t*          p,
                     double             ch,
                     bool               q,
                     bool               r,
-                    int                rng_type,
+                    rng_type           rt,
                     int                id ) :
-  buff_t( p, n, ms, d, cd, ch, q, r, rng_type, id )
+  buff_t( p, n, ms, d, cd, ch, q, r, rt, id )
 {
 }
