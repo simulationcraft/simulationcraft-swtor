@@ -24,7 +24,7 @@ set_bonus_t::set_bonus_t( const std::string& n, const std::string& f, slot_mask_
 bool set_bonus_t::decode( const item_t& item ) const
 {
   if ( mask != 0 &&
-       ( mask & slot_mask( static_cast<slot_type>( item.slot ) ) ) == 0 )
+       ( mask & bitmask( static_cast<slot_type>( item.slot ) ) ) == 0 )
     return false;
 
   if ( ! item.name() )

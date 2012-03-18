@@ -193,33 +193,35 @@ public:
   void clear_debuffs();
 };
 
-// C++11 countable enumeration template =====
+// iterable enumeration template =====
 
-/* "enum class" is the C++11 feature here. An enum class doesn't inject the names of the enumerators into the declaring scope,
- * but keeps them scoped inside the enum itself so you must use a fully qualified name for them. e.g.,
- * enum class color { red, green, blue }; color c = color::red;
- *
- * The other unrelated issue is that enums in C++ implicitly convert to int but not from int.
- * (e.g., "for ( attribute_type i = ATTR_STRENGTH; a < ATTR_MAX; ++a )" won't compile).
+/*
+ * Enumeration types in C++ implicitly convert to int but not from int (e.g.,
+ * "for ( attribute_type i = ATTR_STRENGTH; i < ATTR_MAX; ++i )" won't compile).
  * This is why so much of the code uses int when it really means an enum type.
- * Providing the kind of operations we want to use for enums lets us tighten up our use of the type system and avoid accidentally
- * passing some other thing that converts to int when we really mean an enumeration type.
+ * Providing the kind of operations we want to use for enums lets us tighten up
+ * our use of the type system and avoid accidentally passing some other thing
+ * that converts to int when we really mean an enumeration type.
  *
- * The template functions tell the compiler it can perform prefix and postfix ++ and -- on any type by converting it to int and back
- * The magic with std::enable_if restricts those operations to types T for which the type trait "is_countable_enum<T>" is true.
- * The trait gives us a way to turn that functionality off for specific types by specializing is_countable_enum<T> as std::false_type.
+ * The template functions tell the compiler it can perform prefix and postfix
+ * operators ++ and -- on any type by converting it to int and back. The magic
+ * with std::enable_if<> restricts those operations to types T for which the
+ * type trait "is_iterable_enum<T>" is true. This trait gives us a way to
+ * selectively disable the functionality for specific types if needed by
+ * specializing is_iterable_enum<T> as std::false_type.
  */
 
+// All enumerations are iterable by default.
 template <typename T>
-struct is_countable_enum : public std::is_enum<T> {};
+struct is_iterable_enum : public std::is_enum<T> {};
 
 template <typename T>
-inline typename std::enable_if<is_countable_enum<T>::value,T&>::type
+inline typename std::enable_if<is_iterable_enum<T>::value,T&>::type
 operator -- ( T& s )
 { return s = static_cast<T>( static_cast<int>( s ) - 1 ); }
 
 template <typename T>
-inline typename std::enable_if<is_countable_enum<T>::value,T>::type
+inline typename std::enable_if<is_iterable_enum<T>::value,T>::type
 operator -- ( T& s, int )
 {
   T tmp = s;
@@ -228,12 +230,12 @@ operator -- ( T& s, int )
 }
 
 template <typename T>
-inline typename std::enable_if<is_countable_enum<T>::value,T&>::type
+inline typename std::enable_if<is_iterable_enum<T>::value,T&>::type
 operator ++ ( T& s )
 { return s = static_cast<T>( static_cast<int>( s ) + 1 ); }
 
 template <typename T>
-inline typename std::enable_if<is_countable_enum<T>::value,T>::type
+inline typename std::enable_if<is_iterable_enum<T>::value,T>::type
 operator ++ ( T& s, int )
 {
   T tmp = s;
@@ -241,17 +243,61 @@ operator ++ ( T& s, int )
   return tmp;
 }
 
+// Automagic bitmask building for enumerations ===
+
+/*
+ * We use a lot of sets of enumeration members implemented as
+ * bitmasks; enumeration member n is a member of the set iff
+ * bitmask & ( 1 << n ) != 0. These templates automate the
+ * process of choosing a type for the bitmask representing
+ * sets of a given enumeration type, and generating bitmasks
+ * from a given set of enumerators.
+ */
+
+// Select a type to use for storing bitmasks for values of an
+// enumeration strictly less than Max.
+template <int Max>
+class enum_bitmask_t
+{
+public:
+  typedef typename std::conditional<( Max <=  8 ), uint_fast8_t,
+          typename std::conditional<( Max <= 16 ), uint_fast16_t,
+          typename std::conditional<( Max <= 32 ), uint_fast32_t,
+                                    uint_fast64_t>::type>::type>::type type;
+
+  static_assert( Max <= std::numeric_limits<type>::digits,
+                 "Bit mask must fit in selected type." );
+};
+
+template <typename T>
+struct bitmask_traits {};
+
+template <typename T>
+constexpr typename bitmask_traits<T>::type bitmask( T s )
+{ return static_cast<typename bitmask_traits<T>::type>( 1 ) << s; }
+
+template <typename T, typename ... Types>
+constexpr typename bitmask_traits<T>::type bitmask( T s, Types ... args )
+{ return bitmask( s ) | bitmask( args... ); }
+
+
 // Enumerations =============================================================
 
 enum race_type
 {
   RACE_NONE=0,
+
   // Target Races
   RACE_BEAST, RACE_DRAGONKIN, RACE_GIANT, RACE_HUMANOID, RACE_DEMON, RACE_ELEMENTAL,
+
   // Player Races
-  RACE_CHISS, RACE_CYBORG, RACE_HUMAN, RACE_MIRALUKA, RACE_MIRIALAN, RACE_RATTATAKI, RACE_SITH_PUREBLOOD, RACE_TWILEK, RACE_ZABRAK,
+  RACE_CHISS, RACE_CYBORG, RACE_HUMAN, RACE_MIRALUKA, RACE_MIRIALAN, RACE_RATTATAKI,
+  RACE_SITH_PUREBLOOD, RACE_TWILEK, RACE_ZABRAK,
+
   RACE_MAX
 };
+template<> struct bitmask_traits<race_type> : public enum_bitmask_t<RACE_MAX> {};
+typedef bitmask_traits<race_type>::type race_mask_t;
 
 enum player_type
 {
@@ -313,12 +359,14 @@ enum result_type
   RESULT_BLOCK, RESULT_CRIT, RESULT_HIT,
   RESULT_MAX
 };
-
-#define RESULT_HIT_MASK  ( (1<<RESULT_BLOCK) | (1<<RESULT_CRIT) | (1<<RESULT_HIT) )
-#define RESULT_CRIT_MASK ( (1<<RESULT_CRIT) )
-#define RESULT_MISS_MASK ( (1<<RESULT_MISS) )
-#define RESULT_NONE_MASK ( (1<<RESULT_NONE) )
-#define RESULT_ALL_MASK  ( -1 )
+template<>
+struct bitmask_traits<result_type> : public enum_bitmask_t<RESULT_MAX> {};
+typedef bitmask_traits<result_type>::type result_mask_t;
+constexpr result_mask_t RESULT_HIT_MASK = bitmask( RESULT_BLOCK, RESULT_CRIT, RESULT_HIT );
+constexpr result_mask_t RESULT_CRIT_MASK = bitmask( RESULT_CRIT );
+constexpr result_mask_t RESULT_MISS_MASK = bitmask( RESULT_MISS );
+constexpr result_mask_t RESULT_NONE_MASK = bitmask( RESULT_NONE );
+constexpr result_mask_t RESULT_ALL_MASK = ~result_mask_t(0);
 
 enum proc_type
 {
@@ -350,9 +398,9 @@ enum school_type
 
   SCHOOL_MAX
 };
-
-#define SCHOOL_ALL_MASK ( ( 1 << SCHOOL_KINETIC ) | ( 1 << SCHOOL_ENERGY ) | \
-                          ( 1 << SCHOOL_INTERNAL ) | ( 1 << SCHOOL_ELEMENTAL ) )
+template <> struct bitmask_traits<school_type> : public enum_bitmask_t<SCHOOL_MAX> {};
+typedef bitmask_traits<school_type>::type school_mask_t;
+constexpr school_mask_t SCHOOL_ALL_MASK = ~school_mask_t( 0 );
 
 enum talent_tree_type
 {
@@ -413,18 +461,11 @@ enum slot_type
   SLOT_MAX       = 19
 };
 
-typedef uint_fast32_t slot_mask_t;
-static_assert( SLOT_MAX <= std::numeric_limits<slot_mask_t>::digits,
-               "slot masks won't fit in slot_mask_t." );
+template <>
+struct bitmask_traits<slot_type> : public enum_bitmask_t<SLOT_MAX> {};
+typedef bitmask_traits<slot_type>::type slot_mask_t;
 
-constexpr slot_mask_t slot_mask( slot_type s )
-{ return slot_mask_t( 1 ) << s; }
-
-template <typename ... Types>
-constexpr slot_mask_t slot_mask( slot_type s, Types ... args )
-{ return slot_mask( s ) | slot_mask( args... ); }
-
-constexpr slot_mask_t DEFAULT_SET_BONUS_SLOT_MASK = slot_mask( SLOT_HEAD, SLOT_CHEST, SLOT_HANDS, SLOT_LEGS, SLOT_FEET );
+constexpr slot_mask_t DEFAULT_SET_BONUS_SLOT_MASK = bitmask( SLOT_HEAD, SLOT_CHEST, SLOT_HANDS, SLOT_LEGS, SLOT_FEET );
 
 // Keep this in sync with enum attribute_type
 enum stat_type
@@ -443,6 +484,15 @@ enum stat_type
   STAT_DEFENSE_RATING, STAT_SHIELD_RATING, STAT_ABSORB_RATING,
   STAT_MAX
 };
+#define check(x) static_assert( static_cast<int>( STAT_##x ) == static_cast<int>( ATTR_##x ), \
+                                "stat_type and attribute_type must be kept in sync" )
+check( STRENGTH );
+check( AIM );
+check( CUNNING );
+check( WILLPOWER );
+check( ENDURANCE );
+check( PRESENCE );
+#undef check
 
 enum class stim_t
 {
@@ -557,7 +607,7 @@ enum rating_type
 
 // Type utilities and generic programming tools =============================
 template <typename T, std::size_t N>
-inline std::size_t sizeof_array( const T ( & )[N] )
+constexpr std::size_t sizeof_array( const T ( & )[N] )
 { return N; }
 
 class noncopyable
