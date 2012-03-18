@@ -127,11 +127,6 @@ static bool parse_set_bonus( sim_t* sim,
   std::string name = value.substr( first, cut_pt - first );
 
   set_bonus_t* sb = sim -> active_player -> find_set_bonus( name );
-
-  std::cerr << "parse_set_bonus(\"" << opt_name << "\", \"" << value << "\") = "
-            << ( disable ? "(disable) " : "" )
-            << '\"' << name << "\" = " << sb << std::endl;
-
   if ( ! sb )
     return false;
 
