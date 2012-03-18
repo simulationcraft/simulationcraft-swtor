@@ -193,19 +193,6 @@ public:
   void clear_debuffs();
 };
 
-// Slot Mask template ======
-
-typedef uint_fast32_t slot_mask_t;
-static_assert( SLOT_MAX <= std::numeric_limits<slot_mask_t>::digits,
-               "slot masks won't fit in slot_mask_t." );
-
-constexpr slot_mask_t slot_mask( slot_type s )
-{ return slot_mask_t( 1 ) << s; }
-
-template <typename ... Types>
-constexpr slot_mask_t slot_mask( slot_type s, Types ... args )
-{ return slot_mask( s ) | slot_mask( args... ); }
-
 // C++11 countable enumeration template =====
 
 /* "enum class" is the C++11 feature here. An enum class doesn't inject the names of the enumerators into the declaring scope,
@@ -425,6 +412,17 @@ enum slot_type
   SLOT_TABARD    = 18,
   SLOT_MAX       = 19
 };
+
+typedef uint_fast32_t slot_mask_t;
+static_assert( SLOT_MAX <= std::numeric_limits<slot_mask_t>::digits,
+               "slot masks won't fit in slot_mask_t." );
+
+constexpr slot_mask_t slot_mask( slot_type s )
+{ return slot_mask_t( 1 ) << s; }
+
+template <typename ... Types>
+constexpr slot_mask_t slot_mask( slot_type s, Types ... args )
+{ return slot_mask( s ) | slot_mask( args... ); }
 
 constexpr slot_mask_t DEFAULT_SET_BONUS_SLOT_MASK = slot_mask( SLOT_HEAD, SLOT_CHEST, SLOT_HANDS, SLOT_LEGS, SLOT_FEET );
 
