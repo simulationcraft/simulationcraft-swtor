@@ -6,6 +6,7 @@ set calculate_scale_factors=1
 set threads=4
 set center_scale_delta=1
 set statistics_level=3
+set ptr=0
 
 call :runsim Sage_Sorcerer_Raid
 call :runsim Sage_Sorcerer_Raid -HelterSkelter "fight_style=HelterSkelter"
@@ -18,6 +19,6 @@ goto :eof
 
 :runsim
 echo.%1%2
-call simc.exe %1.simc output=NUL: %3 statistics_level=%statistics_level% iterations=%iterations% calculate_scale_factors=%calculate_scale_factors% center_scale_delta=%center_scale_delta% threads=%threads% html=%1%2.html
+call simc.exe %1.simc output=NUL: %3 statistics_level=%statistics_level% ptr=%ptr% iterations=%iterations% calculate_scale_factors=%calculate_scale_factors% center_scale_delta=%center_scale_delta% threads=%threads% html=%1%2.html
 echo.
 goto :eof
