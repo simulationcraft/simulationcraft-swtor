@@ -193,6 +193,67 @@ public:
   void clear_debuffs();
 };
 
+// Slot Mask template ======
+
+typedef uint_fast32_t slot_mask_t;
+static_assert( SLOT_MAX <= std::numeric_limits<slot_mask_t>::digits,
+               "slot masks won't fit in slot_mask_t." );
+
+constexpr slot_mask_t slot_mask( slot_type s )
+{ return slot_mask_t( 1 ) << s; }
+
+template <typename ... Types>
+constexpr slot_mask_t slot_mask( slot_type s, Types ... args )
+{ return slot_mask( s ) | slot_mask( args... ); }
+
+// C++11 countable enumeration template =====
+
+/* "enum class" is the C++11 feature here. An enum class doesn't inject the names of the enumerators into the declaring scope,
+ * but keeps them scoped inside the enum itself so you must use a fully qualified name for them. e.g.,
+ * enum class color { red, green, blue }; color c = color::red;
+ *
+ * The other unrelated issue is that enums in C++ implicitly convert to int but not from int.
+ * (e.g., "for ( attribute_type i = ATTR_STRENGTH; a < ATTR_MAX; ++a )" won't compile).
+ * This is why so much of the code uses int when it really means an enum type.
+ * Providing the kind of operations we want to use for enums lets us tighten up our use of the type system and avoid accidentally
+ * passing some other thing that converts to int when we really mean an enumeration type.
+ *
+ * The template functions tell the compiler it can perform prefix and postfix ++ and -- on any type by converting it to int and back
+ * The magic with std::enable_if restricts those operations to types T for which the type trait "is_countable_enum<T>" is true.
+ * The trait gives us a way to turn that functionality off for specific types by specializing is_countable_enum<T> as std::false_type.
+ */
+
+template <typename T>
+struct is_countable_enum : public std::is_enum<T> {};
+
+template <typename T>
+inline typename std::enable_if<is_countable_enum<T>::value,T&>::type
+operator -- ( T& s )
+{ return s = static_cast<T>( static_cast<int>( s ) - 1 ); }
+
+template <typename T>
+inline typename std::enable_if<is_countable_enum<T>::value,T>::type
+operator -- ( T& s, int )
+{
+  T tmp = s;
+  --s;
+  return tmp;
+}
+
+template <typename T>
+inline typename std::enable_if<is_countable_enum<T>::value,T&>::type
+operator ++ ( T& s )
+{ return s = static_cast<T>( static_cast<int>( s ) + 1 ); }
+
+template <typename T>
+inline typename std::enable_if<is_countable_enum<T>::value,T>::type
+operator ++ ( T& s, int )
+{
+  T tmp = s;
+  ++s;
+  return tmp;
+}
+
 // Enumerations =============================================================
 
 enum race_type
@@ -365,17 +426,6 @@ enum slot_type
   SLOT_MAX       = 19
 };
 
-typedef uint_fast32_t slot_mask_t;
-static_assert( SLOT_MAX <= std::numeric_limits<slot_mask_t>::digits,
-               "slot masks won't fit in slot_mask_t." );
-
-constexpr slot_mask_t slot_mask( slot_type s )
-{ return slot_mask_t( 1 ) << s; }
-
-template <typename ... Types>
-constexpr slot_mask_t slot_mask( slot_type s, Types ... args )
-{ return slot_mask( s ) | slot_mask( args... ); }
-
 constexpr slot_mask_t DEFAULT_SET_BONUS_SLOT_MASK = slot_mask( SLOT_HEAD, SLOT_CHEST, SLOT_HANDS, SLOT_LEGS, SLOT_FEET );
 
 // Keep this in sync with enum attribute_type
@@ -395,37 +445,6 @@ enum stat_type
   STAT_DEFENSE_RATING, STAT_SHIELD_RATING, STAT_ABSORB_RATING,
   STAT_MAX
 };
-
-template <typename T>
-struct is_countable_enum : public std::is_enum<T> {};
-
-template <typename T>
-inline typename std::enable_if<is_countable_enum<T>::value,T&>::type
-operator -- ( T& s )
-{ return s = static_cast<T>( static_cast<int>( s ) - 1 ); }
-
-template <typename T>
-inline typename std::enable_if<is_countable_enum<T>::value,T>::type
-operator -- ( T& s, int )
-{
-  T tmp = s;
-  --s;
-  return tmp;
-}
-
-template <typename T>
-inline typename std::enable_if<is_countable_enum<T>::value,T&>::type
-operator ++ ( T& s )
-{ return s = static_cast<T>( static_cast<int>( s ) + 1 ); }
-
-template <typename T>
-inline typename std::enable_if<is_countable_enum<T>::value,T>::type
-operator ++ ( T& s, int )
-{
-  T tmp = s;
-  ++s;
-  return tmp;
-}
 
 enum class stim_t
 {
