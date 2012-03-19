@@ -18,7 +18,7 @@ actions+=/use_relics
 actions+=/weaken_mind,if=!ticking
 actions+=/force_in_balance,if=force>80
 actions+=/mind_crush,if=buff.presence_of_mind.react
-actions+=/telekinetic_wave,if=buff.presence_of_mind.react&force.pct>target.health.pct+0.07&cooldown.mind_crush.remains>4
+actions+=/telekinetic_wave,if=!ptr&buff.presence_of_mind.react&force.pct>target.health.pct+0.07&cooldown.mind_crush.remains>4
 actions+=/telekinetic_throw
 actions+=/project,moving=1,if=force>120
 head=rakata_force_masters_headgear,stats=44end_61willpower__29end_48willpower_37power__24end_37crit_51surge

@@ -1789,8 +1789,8 @@ void sage_sorcerer_t::init_actions()
       if ( talents.presence_of_mind -> rank() )
         action_list_str += "/mind_crush,if=buff.presence_of_mind.react";
 
-      if ( ! ptr && talents.telekinetic_wave -> rank() && talents.presence_of_mind -> rank() )
-        action_list_str += "/telekinetic_wave,if=buff.presence_of_mind.react&force.pct>target.health.pct+0.07&cooldown.mind_crush.remains>4";
+      if ( talents.telekinetic_wave -> rank() && talents.presence_of_mind -> rank() )
+        action_list_str += "/telekinetic_wave,if=!ptr&buff.presence_of_mind.react&force.pct>target.health.pct+0.07&cooldown.mind_crush.remains>4";
 
       if ( talents.sever_force -> rank() > 0 )
         action_list_str += "/sever_force,if=!ticking";
@@ -1823,6 +1823,7 @@ void sage_sorcerer_t::init_actions()
 
       action_list_str += "/mental_alacrity,moving=0";
       action_list_str += "/mind_crush";
+      action_list_str += "/telekinetic_throw,if=!ptr";
       action_list_str += "/disturbance";
       action_list_str += "/project,moving=1";
 
@@ -1858,8 +1859,8 @@ void sage_sorcerer_t::init_actions()
       if ( talents.presence_of_mind -> rank() )
         action_list_str += "/crushing_darkness,if=buff.wrath.react";
 
-      if ( ! ptr && talents.telekinetic_wave -> rank() && talents.presence_of_mind -> rank() )
-        action_list_str += "/chain_lightning,if=buff.wrath.react&force.pct>target.health.pct+0.07&cooldown.crushing_darkness.remains>4";
+      if ( talents.telekinetic_wave -> rank() && talents.presence_of_mind -> rank() )
+        action_list_str += "/chain_lightning,if=!ptr&buff.wrath.react&force.pct>target.health.pct+0.07&cooldown.crushing_darkness.remains>4";
 
       if ( talents.sever_force -> rank() > 0 )
         action_list_str += "/creeping_terror,if=!ticking";
@@ -1892,6 +1893,7 @@ void sage_sorcerer_t::init_actions()
 
       action_list_str += "/polarity_shift,moving=0";
       action_list_str += "/crushing_darkness";
+      action_list_str += "/force_lightning,if=!ptr";
       action_list_str += "/lightning_strike";
       action_list_str += "/shock,moving=1";
 
