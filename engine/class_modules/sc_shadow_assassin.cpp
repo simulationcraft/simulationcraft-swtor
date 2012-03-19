@@ -1358,7 +1358,7 @@ class shadow_assassin_action_callback_t : public action_callback_t
 {
 public:
   shadow_assassin_action_callback_t( shadow_assassin_t* player ) :
-    action_callback_t( player -> sim, player )
+    action_callback_t( player )
   {}
 
   shadow_assassin_t* cast() const

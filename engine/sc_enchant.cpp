@@ -560,7 +560,7 @@ struct weapon_stat_proc_callback_t : public action_callback_t
   bool all_damage;
 
   weapon_stat_proc_callback_t( player_t* p, weapon_t* w, buff_t* b, double ppm=0.0, bool all=false ) :
-    action_callback_t( p -> sim, p ), weapon( w ), buff( b ), PPM( ppm ), all_damage( all ) {}
+    action_callback_t( p ), weapon( w ), buff( b ), PPM( ppm ), all_damage( all ) {}
 
   virtual void trigger( action_t* a, void* /* call_data */ )
   {
@@ -588,7 +588,7 @@ struct weapon_discharge_proc_callback_t : public action_callback_t
   rng_t* rng;
 
   weapon_discharge_proc_callback_t( const std::string& n, player_t* p, weapon_t* w, int ms, const school_type school, double dmg, double fc, double ppm=0, timespan_t cd=timespan_t::zero, rng_type rt=RNG_DEFAULT ) :
-    action_callback_t( p -> sim, p ),
+    action_callback_t( p ),
     name_str( n ), weapon( w ), stacks( 0 ), max_stacks( ms ), fixed_chance( fc ), PPM( ppm )
   {
     if ( rt == RNG_DEFAULT ) rt = RNG_CYCLIC; // default is CYCLIC since discharge should not have duration

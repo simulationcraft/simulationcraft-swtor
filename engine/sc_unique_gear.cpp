@@ -18,8 +18,7 @@ struct stat_proc_callback_t : public action_callback_t
   stat_proc_callback_t( const std::string& n, player_t* p, int s, int max_stacks, double a,
                         double proc_chance, timespan_t duration, timespan_t cooldown,
                         timespan_t t=timespan_t::zero, bool reverse=false, rng_type rt=RNG_DEFAULT, bool activated=true ) :
-    action_callback_t( p -> sim, p ),
-    name_str( n ), stat( s ), amount( a ), tick( t )
+    action_callback_t( p ), name_str( n ), stat( s ), amount( a ), tick( t )
   {
     if ( max_stacks == 0 ) max_stacks = 1;
     if ( proc_chance == 0 ) proc_chance = 1;
@@ -67,7 +66,7 @@ struct stat_proc_callback_t : public action_callback_t
           }
         };
 
-        new ( sim ) tick_stack_t( sim, a -> player, this );
+        new ( listener -> sim ) tick_stack_t( listener -> sim, a -> player, this );
       }
     }
   }
@@ -85,8 +84,7 @@ struct cost_reduction_proc_callback_t : public action_callback_t
   cost_reduction_proc_callback_t( const std::string& n, player_t* p, int s, int max_stacks, double a,
                                   double proc_chance, timespan_t duration, timespan_t cooldown,
                                   bool refreshes=false, bool reverse=false, rng_type rt=RNG_DEFAULT, bool activated=true ) :
-    action_callback_t( p -> sim, p ),
-    name_str( n ), school( s ), amount( a )
+    action_callback_t( p ), name_str( n ), school( s ), amount( a )
   {
     if ( max_stacks == 0 ) max_stacks = 1;
     if ( proc_chance == 0 ) proc_chance = 1;
@@ -129,8 +127,8 @@ struct discharge_proc_callback_t : public action_callback_t
   discharge_proc_callback_t( const std::string& n, player_t* p, int ms,
                              const school_type school, double amount, double scaling,
                              double pc, timespan_t cd, bool no_crit, bool no_buffs, bool no_debuffs, rng_type rt=RNG_DEFAULT ) :
-    action_callback_t( p -> sim, p ),
-    name_str( n ), stacks( 0 ), max_stacks( ms ), proc_chance( pc ), cooldown( 0 ), discharge_action( 0 ), proc( 0 ), rng( 0 )
+    action_callback_t( p ), name_str( n ), stacks( 0 ), max_stacks( ms ),
+    proc_chance( pc ), cooldown( 0 ), discharge_action( 0 ), proc( 0 ), rng( 0 )
   {
     if ( rt == RNG_DEFAULT ) rt = RNG_DISTRIBUTED;
 
@@ -226,7 +224,7 @@ struct discharge_proc_callback_t : public action_callback_t
     else
     {
       stacks = 0;
-      if ( sim -> debug ) log_t::output( sim, "%s procs %s", a -> name(), discharge_action -> name() );
+      if ( listener -> sim -> debug ) log_t::output( listener -> sim, "%s procs %s", a -> name(), discharge_action -> name() );
       discharge_action -> execute();
       proc -> occur();
     }
@@ -248,8 +246,8 @@ struct chance_discharge_proc_callback_t : public action_callback_t
   chance_discharge_proc_callback_t( const std::string& n, player_t* p, int ms,
                                     const school_type school, double amount, double scaling,
                                     double pc, timespan_t cd, bool no_crit, bool no_buffs, bool no_debuffs, rng_type rt=RNG_DEFAULT ) :
-    action_callback_t( p -> sim, p ),
-    name_str( n ), stacks( 0 ), max_stacks( ms ), proc_chance( pc )
+    action_callback_t( p ), name_str( n ), stacks( 0 ), max_stacks( ms ),
+    proc_chance( pc )
   {
     if ( rt == RNG_DEFAULT ) rt = RNG_DISTRIBUTED;
 
@@ -365,7 +363,7 @@ struct stat_discharge_proc_callback_t : public action_callback_t
                                   int stat, int max_stacks, double stat_amount,
                                   const school_type school, double discharge_amount, double discharge_scaling,
                                   double proc_chance, timespan_t duration, timespan_t cooldown, bool no_crit, bool no_buffs, bool no_debuffs, bool activated=true ) :
-    action_callback_t( p -> sim, p ), name_str( n )
+    action_callback_t( p ), name_str( n )
   {
     if ( max_stacks == 0 ) max_stacks = 1;
     if ( proc_chance == 0 ) proc_chance = 1;
