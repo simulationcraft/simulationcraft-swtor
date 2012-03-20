@@ -267,9 +267,7 @@ struct sage_sorcerer_t : public player_t
   void trigger_tidal_force( double pc )
   {
     if ( talents.tidal_force -> rank() && buffs.tidal_force -> trigger( 1, 0, pc ) )
-    {
       cooldowns.telekinetic_wave -> reset();
-    }
   }
 
   virtual bool report_attack_type( action_t::policy_t policy )
@@ -739,8 +737,10 @@ struct disturbance_t : public sage_sorcerer_spell_t
 
       p -> buffs.concentration -> trigger();
 
-      // Does the TM version also proc Tidal Force?
-      p -> trigger_tidal_force( 0.3 );
+      // Does the TM version also proc Tidal Force? We'll assume that it does
+      // not for now.
+      if ( tm )
+        p -> trigger_tidal_force( 0.3 );
     }
   }
 
