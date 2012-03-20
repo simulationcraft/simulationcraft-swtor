@@ -126,6 +126,7 @@ struct effect_t;
 struct enemy_t;
 struct enchant_t;
 struct event_t;
+class  expr_t;
 struct gain_t;
 struct heal_t;
 struct item_t;
@@ -1571,7 +1572,7 @@ struct buff_t
 
   const char* name() { return name_str.c_str(); }
 
-  action_expr_t* create_expression( action_t*, const std::string& type );
+  expr_t* create_expression( const std::string& type );
 
   static buff_t* find(   buff_t*, const std::string& name );
   static buff_t* find(    sim_t*, const std::string& name );
@@ -1648,14 +1649,13 @@ enum token_type_t
   TOK_NUM,
   TOK_STR,
   TOK_ABS,
-  TOK_SPELL_LIST,
   TOK_FLOOR,
   TOK_CEIL
 };
 
 struct expr_token_t
 {
-  int type;
+  token_type_t type;
   std::string label;
 };
 
@@ -1675,38 +1675,95 @@ enum expr_data_type_t
 
 struct expression_t
 {
-  static int precedence( int token_type );
-  static int is_unary( int token_type );
-  static int is_binary( int token_type );
-  static int next_token( action_t* action, const std::string& expr_str, int& current_index, std::string& token_str, token_type_t prev_token );
-  static void parse_tokens( action_t* action, std::vector<expr_token_t>& tokens, const std::string& expr_str );
-  static void print_tokens( std::vector<expr_token_t>& tokens, sim_t* sim );
-  static void convert_to_unary( action_t* action, std::vector<expr_token_t>& tokens );
+  static int precedence( token_type_t );
+  static bool is_unary( token_type_t );
+  static bool is_binary( token_type_t );
+  static token_type_t next_token( action_t* action, const std::string& expr_str,
+                                  int& current_index, std::string& token_str, token_type_t prev_token );
+  static std::vector<expr_token_t> parse_tokens( action_t* action, const std::string& expr_str );
+  static void print_tokens( const std::vector<expr_token_t>& tokens, sim_t* sim );
+  static void convert_to_unary( std::vector<expr_token_t>& tokens );
   static bool convert_to_rpn( action_t* action, std::vector<expr_token_t>& tokens );
 };
 
-struct action_expr_t : public noncopyable
+struct expr_t : public noncopyable
 {
-  action_t* action;
   std::string name_str;
-
-  int result_type;
-  double result_num;
   std::string result_str;
+  double result_num;
 
-  action_expr_t( action_t* a, const std::string& n, int t=TOK_UNKNOWN ) :
-    action( a ), name_str( n ), result_type( t ), result_num( 0 ) {}
-  action_expr_t( action_t* a, const std::string& n, double constant_value ) :
-    action( a ), name_str( n ), result_type( TOK_NUM ), result_num( constant_value ) {}
-  action_expr_t( action_t* a, const std::string& n, std::string& constant_value ) :
-    action( a ), name_str( n ), result_type( TOK_STR ), result_str( constant_value ) {}
-  virtual ~action_expr_t() {}
-  virtual int evaluate() { return result_type; }
+  template <typename S>
+  expr_t( S&& n ) : name_str( std::forward<S>( n ) ) {}
+
+  virtual ~expr_t() {}
+
+  virtual token_type_t evaluate() = 0;
   virtual const char* name() { return name_str.c_str(); }
   bool success() { return ( evaluate() == TOK_NUM ) && ( result_num != 0 ); }
 
-  static action_expr_t* parse( action_t*, const std::string& expr_str );
+  static expr_t* parse( action_t*, const std::string& expr_str );
 };
+
+struct const_expr_t : public expr_t
+{
+  token_type_t result_type;
+
+  template <typename S>
+  const_expr_t( S&& n, double constant_value ) :
+    expr_t( std::forward<S>( n ) ), result_type( TOK_NUM )
+  { result_num = constant_value; }
+
+  template <typename S1, typename S2>
+  const_expr_t( S1&& n, S2&& constant_value,
+                typename std::enable_if<!std::is_arithmetic<typename std::decay<S2>::type>::value,void*>::type=nullptr) :
+    expr_t( std::forward<S1>( n ) ), result_type( TOK_STR )
+  { result_str = std::forward<S2>( constant_value ); }
+
+  virtual token_type_t evaluate() // override
+  { return result_type; }
+};
+
+template <typename F>
+struct num_expr_t : public expr_t
+{
+  F f;
+
+  template <typename S>
+  num_expr_t( S&& name, F f ) :
+    expr_t( std::forward<S>( name ) ), f( f ) {}
+
+  virtual token_type_t evaluate() // override
+  {
+    result_num = f();
+    return TOK_NUM;
+  }
+};
+
+template <typename F>
+struct str_expr_t : public expr_t
+{
+  F f;
+
+  template <typename S>
+  str_expr_t( S&& name, F f ) :
+    expr_t( std::forward<S>( name ) ), f( f ) {}
+
+  virtual token_type_t evaluate() // override
+  {
+    result_str = f();
+    return TOK_STR;
+  }
+};
+
+template <typename S, typename F>
+inline typename std::enable_if<std::is_arithmetic<typename std::result_of<F()>::type>::value,num_expr_t<F>*>::type
+make_expr( S&& name, F f )
+{ return new num_expr_t<F>( std::forward<S>( name ), f ); }
+
+template <typename S, typename F>
+inline typename std::enable_if<std::is_same<typename std::result_of<F()>::type,std::string>::value,str_expr_t<F>*>::type
+make_expr( S&& name, F f )
+{ return new str_expr_t<F>( std::forward<S>( name ), f ); }
 
 namespace thread_impl { // ===================================================
 
@@ -2029,7 +2086,7 @@ public:
   void      use_optimal_buffs_and_debuffs( int value );
   void      aura_gain( const char* name, int aura_id=0 );
   void      aura_loss( const char* name, int aura_id=0 );
-  action_expr_t* create_expression( action_t*, const std::string& name );
+  expr_t*   create_expression( action_t*, const std::string& name );
   int       errorf( const char* format, ... ) PRINTF_ATTRIBUTE( 2,3 );
 };
 
@@ -3040,7 +3097,7 @@ public:
 
   talent_t* find_talent( const std::string& name, int tree = TALENT_TAB_NONE ) const;
 
-  virtual action_expr_t* create_expression( action_t*, const std::string& name );
+  virtual expr_t* create_expression( action_t*, const std::string& name );
 
   virtual void create_options();
   virtual bool create_profile( std::string& profile_str, int save_type=SAVE_ALL, bool save_html=false );
@@ -3391,9 +3448,9 @@ struct action_t
   bool round_base_dmg;
 
   std::string if_expr_str;
-  std::unique_ptr<action_expr_t> if_expr;
+  std::unique_ptr<expr_t> if_expr;
   std::string interrupt_if_expr_str;
-  std::unique_ptr<action_expr_t> interrupt_if_expr;
+  std::unique_ptr<expr_t> interrupt_if_expr;
   std::string sync_str;
   action_t* sync_action;
   action_t* next;
@@ -3479,7 +3536,7 @@ public:
   virtual double total_dd_multiplier() const { return total_multiplier() * dd.base_multiplier * dd.player_multiplier * dd.target_multiplier; }
   virtual double total_td_multiplier() const { return total_multiplier() * td.base_multiplier * td.player_multiplier * td.target_multiplier; }
 
-  virtual action_expr_t* create_expression( const std::string& name );
+  virtual expr_t* create_expression( const std::string& name );
 
   virtual double ppm_proc_chance( double PPM ) const;
 
@@ -3634,7 +3691,7 @@ struct dot_t
 
   const char* name() { return name_str.c_str(); }
 
-  action_expr_t* create_expression( action_t* action, const std::string& name );
+  expr_t* create_expression( const std::string& name );
 };
 
 // Action Callback ==========================================================
