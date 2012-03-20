@@ -16,7 +16,7 @@ actions+=/telekinetic_throw,if=buff.psychic_projection_dd.up
 actions+=/power_potion
 actions+=/force_potency
 actions+=/use_relics
-actions+=/telekinetic_wave,if=buff.presence_of_mind.react|buff.tidal_force.react
+actions+=/telekinetic_wave,if=(!ptr&buff.presence_of_mind.react)|buff.tidal_force.react
 actions+=/weaken_mind,if=!ticking
 actions+=/telekinetic_throw,if=buff.psychic_projection.react
 actions+=/force_in_balance
