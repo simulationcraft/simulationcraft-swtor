@@ -1861,6 +1861,9 @@ void shadow_assassin_t::init_actions()
       if ( !talents.surging_charge->rank() )
         action_list_str += "/force_breach,if=!dot.force_technique.ticking";
 
+      if ( talents.induction->rank() )
+        action_list_str += "/project,if=buff.circling_shadows.stack=2";
+
       action_list_str += "/spinning_strike";
 
       if ( talents.creeping_terror->rank() )
@@ -1878,11 +1881,9 @@ void shadow_assassin_t::init_actions()
 
       if ( talents.unearthed_knowledge->rank() )
         action_list_str += "/project,if=buff.twin_disciplines.down";
-      if ( talents.induction->rank() )
-        action_list_str += "/project,if=buff.circling_shadows.stack=2";
 
       if ( talents.voltaic_slash->rank() )
-        action_list_str += "/clairvoyant_strike"; // TESTME: Does this need a cap threshold like thrash has?
+        action_list_str += "/clairvoyant_strike,if=force>45";
       else
       {
         action_list_str += "/double_strike,if=force>70";
@@ -1929,6 +1930,9 @@ void shadow_assassin_t::init_actions()
       if ( !talents.surging_charge->rank() )
         action_list_str += "/discharge,if=!dot.lightning_discharge.ticking";
 
+      if ( talents.induction->rank() )
+        action_list_str += "/shock,if=buff.induction.stack=2";
+
       action_list_str += "/assassinate";
 
       if ( talents.creeping_terror->rank() )
@@ -1946,11 +1950,9 @@ void shadow_assassin_t::init_actions()
 
       if ( talents.unearthed_knowledge->rank() )
         action_list_str += "/shock,if=buff.unearthed_knowledge.down";
-      if ( talents.induction->rank() )
-        action_list_str += "/shock,if=buff.induction.stack=2";
 
       if ( talents.voltaic_slash->rank() )
-        action_list_str += "/voltaic_slash"; // TESTME: Does this need a cap threshold like thrash has?
+        action_list_str += "/voltaic_slash,if=force>45";
       else
       {
         action_list_str += "/thrash,if=force>70";

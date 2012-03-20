@@ -18,11 +18,11 @@ actions+=/recklessness
 actions+=/blackout,if=buff.dark_embrace.down&force<90
 actions+=/force_cloak,if=buff.dark_embrace.down
 actions+=/overcharge_saber
+actions+=/shock,if=buff.induction.stack=2
 actions+=/assassinate
 actions+=/maul,if=buff.exploit_weakness.react
 actions+=/discharge,if=buff.static_charges.stack>0
-actions+=/shock,if=buff.induction.stack=2
-actions+=/voltaic_slash
+actions+=/voltaic_slash,if=force>45
 actions+=/saber_strike
 head=rakata_stalkers_headgear,stats=55end_51willpower__29end_48willpower_37power__24end_37power_51acc
 ear=columi_stalkers_chip__exceptional,stats=93end_80willpower_48acc_48power__28willpower
