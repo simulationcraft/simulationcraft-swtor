@@ -72,6 +72,7 @@ struct shadow_assassin_t : public player_t
     gain_t* darkswell;
     gain_t* calculating_mind;
     gain_t* rakata_stalker_2pc;
+    gain_t* blood_of_sith;
   } gains;
 
   // Procs
@@ -116,6 +117,7 @@ struct shadow_assassin_t : public player_t
     talent_t* thrashing_blades;
     talent_t* charge_mastery;
     talent_t* electric_execution;
+    talent_t* blood_of_sith;
 
     // Deception|Infiltration
     talent_t* insulation;
@@ -241,9 +243,7 @@ struct shadow_assassin_t : public player_t
   }
 
   virtual double force_healing_bonus_stats() const
-  {
-    return 0;
-  }
+  { return 0; }
 
   virtual bool report_attack_type( action_t::policy_t policy )
   {
@@ -1657,6 +1657,7 @@ void shadow_assassin_t::init_talents()
   talents.thrashing_blades      = find_talent( "Thrashing Blades" );
   talents.charge_mastery        = find_talent( "Charge Mastery" );
   talents.electric_execution    = find_talent( "Electric Execution" );
+  talents.blood_of_sith         = find_talent( "Blood of Sith" );
 
   // Deception|Infiltration
   talents.insulation            = find_talent( "Insulation" );
@@ -1782,6 +1783,7 @@ void shadow_assassin_t::init_gains()
   gains.parasitism         = get_gain( "parasitism"         );
   gains.calculating_mind   = get_gain( "calculating_mind"   );
   gains.rakata_stalker_2pc = get_gain( "rakata_stalker_2pc" );
+  gains.blood_of_sith      = get_gain( "blood_of_sith" );
 }
 
 // shadow_assassin_t::init_procs =======================================================
@@ -2024,9 +2026,16 @@ void shadow_assassin_t::regen( timespan_t periodicity )
 
   if ( buffs.dark_embrace->up() )
   {
-    double force_regen = periodicity.total_seconds() * force_regen_per_second() * buffs.dark_embrace->check() * talents.dark_embrace->rank()
-        * 0.25;
+    double force_regen = periodicity.total_seconds() * force_regen_per_second() *
+                         buffs.dark_embrace->check() * talents.dark_embrace->rank() * 0.25;
     resource_gain( RESOURCE_FORCE, force_regen, gains.dark_embrace );
+  }
+
+  if ( talents.blood_of_sith -> rank() )
+  {
+    double force_regen = periodicity.total_seconds() * force_regen_per_second() *
+                         talents.blood_of_sith -> rank() * 0.1;
+    resource_gain( RESOURCE_FORCE, force_regen, gains.blood_of_sith );
   }
 }
 
