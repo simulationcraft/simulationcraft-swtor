@@ -1706,19 +1706,19 @@ void sage_sorcerer_t::init_buffs()
   bool is_sage = ( type == JEDI_SAGE );
 
   buffs.concentration = new buff_t( this, is_sage ? "concentration" : "subversion", 3, timespan_t::from_seconds( 10.0 ), timespan_t::zero, 0.5 * talents.concentration -> rank() );
-  buffs.psychic_projection = new buff_t( this, is_sage ? "psychic_projection" : "lightning_barrage", 1, timespan_t::zero, timespan_t::from_seconds( 10.0 ), 0.5 * talents.psychic_projection -> rank() );
-  buffs.tidal_force = new buff_t( this, is_sage ? "tidal_force" : "lightning_storm", 1, timespan_t::zero, timespan_t::from_seconds( 10.0 ) );
+  buffs.psychic_projection = new buff_t( this, is_sage ? "psychic_projection" : "lightning_barrage", 1, timespan_t::from_seconds( 10 ), timespan_t::from_seconds( 10.0 ), 0.5 * talents.psychic_projection -> rank() );
+  buffs.tidal_force = new buff_t( this, is_sage ? "tidal_force" : "lightning_storm", 1, timespan_t::from_seconds( 30 ), timespan_t::from_seconds( 10.0 ) );
   buffs.telekinetic_effusion = new buff_t( this, is_sage ? "telekinetic_effusion" : "lightning_effusion", 2, timespan_t::from_seconds( 30 ), timespan_t::zero, 0.5 * talents.telekinetic_effusion -> rank() );
   buffs.tremors = new buff_t( this, is_sage ? "tremors" : "conduction", 3, timespan_t::from_seconds( 30.0 ) );
-  buffs.presence_of_mind = new buff_t( this, is_sage ? "presence_of_mind" : "wrath", 1, timespan_t::zero, timespan_t::zero, talents.presence_of_mind -> rank() * 0.3 );
+  buffs.presence_of_mind = new buff_t( this, is_sage ? "presence_of_mind" : "wrath", 1, timespan_t::from_seconds( 30 ), timespan_t::zero, talents.presence_of_mind -> rank() * 0.3 );
   buffs.force_suppression = new buff_t( this, is_sage ? "force_suppression" : "deathmark", 10, timespan_t::from_seconds( 30.0 ), timespan_t::zero, talents.force_suppression -> rank() );
   buffs.mental_alacrity = new buff_t( this, is_sage ? "mental_alacrity" : "polarity_shift", 1, timespan_t::from_seconds( 10.0 ) );
   buffs.force_potency = new buff_t( this, is_sage ? "force_potency" : "recklessness", 2, timespan_t::from_seconds( 20.0 ) );
   buffs.psychic_projection_dd = new buff_t( this, is_sage ? "psychic_projection_dd" : "lightning_barrage_dd", 1, timespan_t::from_seconds( 2.0 ), timespan_t::zero );
   buffs.rakata_force_masters_4pc = new buff_t( this, "rakata_force_masters_4pc", 1, timespan_t::from_seconds( 15.0 ), timespan_t::from_seconds( 20.0 ), set_bonus.rakata_force_masters -> four_pc() ? 0.10 : 0.0 );
   buffs.noble_sacrifice = new buff_t( this, "noble_sacrifice", 4, timespan_t::from_seconds( 10.0 ) );
-  buffs.resplendence = new buff_t( this, is_sage ? "resplendence" : "force_surge", 1 , timespan_t::zero, timespan_t::zero, talents.resplendence -> rank() / 2.0 );
-  buffs.conveyance = new buff_t( this, is_sage ? "conveyace" : "force_bending", 1, timespan_t::zero, timespan_t::zero, talents.conveyance -> rank() / 2.0 );
+  buffs.resplendence = new buff_t( this, is_sage ? "resplendence" : "force_surge", 1 , timespan_t::from_seconds( 10 ), timespan_t::zero, talents.resplendence -> rank() / 2.0 );
+  buffs.conveyance = new buff_t( this, is_sage ? "conveyace" : "force_bending", 1, timespan_t::from_seconds( 10 ), timespan_t::zero, talents.conveyance -> rank() / 2.0 );
 }
 
 // sage_sorcerer_t::init_gains =======================================================
