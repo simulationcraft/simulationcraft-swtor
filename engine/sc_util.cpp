@@ -279,35 +279,30 @@ const char* util_t::position_type_string( int type )
 
 // util_t::profession_type_string ===========================================
 
-const char* util_t::profession_type_string( int type )
+const char* util_t::profession_type_string( profession_type type )
 {
   switch ( type )
   {
-  case PROFESSION_NONE:     return "none";
-  case PROFESSION_BIOCHEM:  return "biochem";
+  case PROFESSION_NONE:          return "none";
+  case PROFESSION_ARMORMECH:     return "armormech";
+  case PROFESSION_ARMSTECH:      return "armstech";
+  case PROFESSION_ARTIFICE:      return "artifice";
+  case PROFESSION_BIOCHEM:       return "biochem";
+  case PROFESSION_CYBERTECH:     return "cybertech";
+  case PROFESSION_SYNTHWEAVING:  return "synthweaving";
+  default:                       return "unknown";
   }
-  return "unknown";
 }
 
 // util_t::parse_profession_type ============================================
 
-int util_t::parse_profession_type( const std::string& name )
+profession_type util_t::parse_profession_type( const std::string& name )
 {
-  for ( int i=0; i < PROFESSION_MAX; i++ )
+  for ( profession_type i = PROFESSION_NONE; i < PROFESSION_MAX; ++i )
     if ( util_t::str_compare_ci( name, util_t::profession_type_string( i ) ) )
       return i;
 
   return PROFESSION_UNKNOWN;
-}
-
-// util_t::translate_profession_id ==========================================
-
-profession_type util_t::translate_profession_id( int skill_id )
-{
-  switch ( skill_id )
-  {
-  }
-  return PROFESSION_NONE;
 }
 
 // util_t::player_type_string ===============================================

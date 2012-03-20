@@ -955,7 +955,7 @@ void player_t::init_professions()
       prof_value = 525;
     }
 
-    int prof_type = util_t::parse_profession_type( prof_name );
+    profession_type prof_type = util_t::parse_profession_type( prof_name );
 
     if ( prof_type == PROFESSION_NONE )
       continue;

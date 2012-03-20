@@ -517,7 +517,12 @@ enum profession_type
 {
   PROFESSION_NONE=0,
   PROFESSION_UNKNOWN,
+  PROFESSION_ARMORMECH,
+  PROFESSION_ARMSTECH,
+  PROFESSION_ARTIFICE,
   PROFESSION_BIOCHEM,
+  PROFESSION_CYBERTECH,
+  PROFESSION_SYNTHWEAVING,
   PROFESSION_MAX
 };
 
@@ -1157,7 +1162,7 @@ public:
   static const char* player_type_string        ( int type );
   static const char* pet_type_string           ( int type );
   static const char* position_type_string      ( int type );
-  static const char* profession_type_string    ( int type );
+  static const char* profession_type_string    ( profession_type type );
   static const char* race_type_string          ( int type );
   static const char* role_type_string          ( int type );
   static const char* resource_type_string      ( int type );
@@ -1178,7 +1183,7 @@ public:
   static stim_t parse_stim_type                ( const std::string& name );
   static player_type parse_player_type         ( const std::string& name );
   static pet_type_t parse_pet_type             ( const std::string& name );
-  static int parse_profession_type             ( const std::string& name );
+  static profession_type parse_profession_type ( const std::string& name );
   static position_type parse_position_type     ( const std::string& name );
   static race_type parse_race_type             ( const std::string& name );
   static role_type parse_role_type             ( const std::string& name );
@@ -1206,7 +1211,6 @@ public:
   static int translate_class_id( int cid );
   static int translate_class_str( const std::string& s );
   static race_type translate_race_id( int rid );
-  static profession_type translate_profession_id( int skill_id );
 
   static int string_split( std::vector<std::string>& results, const std::string& str, const char* delim, bool allow_quotes = false )
   { string_split_( results, str, delim, allow_quotes ); return static_cast<int>( results.size() ); }
