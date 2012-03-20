@@ -23,7 +23,7 @@ actions+=/discharge,if=!dot.lightning_discharge.ticking
 actions+=/assassinate
 actions+=/creeping_terror,if=!ticking
 actions+=/maul,if=buff.exploit_weakness.react
-actions+=/thrash,if=force>70-12*buff.dark_embrace.up
+actions+=/thrash,if=force>45
 actions+=/saber_strike
 head=rakata_stalkers_headgear,stats=55end_51willpower__29end_48willpower_37power__24end_37power_51acc
 ear=columi_stalkers_chip__exceptional,stats=93end_80willpower_48acc_48power__28willpower

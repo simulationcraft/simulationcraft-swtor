@@ -1885,13 +1885,10 @@ void shadow_assassin_t::init_actions()
         action_list_str += "/project,if=buff.twin_disciplines.down";
 
       if ( talents.voltaic_slash->rank() )
-        action_list_str += "/clairvoyant_strike,if=force>45";
+        action_list_str += "/clairvoyant_strike";
       else
-      {
-        action_list_str += "/double_strike,if=force>70";
-        if ( talents.dark_embrace->rank() )
-          action_list_str += "-12*buff.shadows_respite.up";
-      }
+        action_list_str += "/double_strike";
+      action_list_str += ",if=force>45";
 
       action_list_str += "/saber_strike";
     }
@@ -1954,13 +1951,10 @@ void shadow_assassin_t::init_actions()
         action_list_str += "/shock,if=buff.unearthed_knowledge.down";
 
       if ( talents.voltaic_slash->rank() )
-        action_list_str += "/voltaic_slash,if=force>45";
+        action_list_str += "/voltaic_slash";
       else
-      {
-        action_list_str += "/thrash,if=force>70";
-        if ( talents.dark_embrace->rank() )
-          action_list_str += "-12*buff.dark_embrace.up";
-      }
+        action_list_str += "/thrash";
+      action_list_str += ",if=force>45";
 
       action_list_str += "/saber_strike";
     }
