@@ -421,6 +421,7 @@ struct sage_sorcerer_spell_t : public sage_sorcerer_action_t
     sage_sorcerer_t* p = cast();
 
     p -> buffs.telekinetic_effusion -> up();
+    p -> buffs.telekinetic_effusion -> decrement();
   }
 
   virtual void tick( dot_t* d )
@@ -1221,6 +1222,7 @@ struct sage_sorcerer_heal_t : public heal_t
     heal_t::consume_resource();
 
     p() -> buffs.telekinetic_effusion -> up();
+    p() -> buffs.telekinetic_effusion -> decrement();
   }
 };
 
@@ -1488,6 +1490,7 @@ struct sage_sorcerer_absorb_t : public absorb_t
     absorb_t::consume_resource();
 
     p() -> buffs.telekinetic_effusion -> up();
+    p() -> buffs.telekinetic_effusion -> decrement();
   }
 };
 
@@ -1705,7 +1708,7 @@ void sage_sorcerer_t::init_buffs()
   buffs.concentration = new buff_t( this, is_sage ? "concentration" : "subversion", 3, timespan_t::from_seconds( 10.0 ), timespan_t::zero, 0.5 * talents.concentration -> rank() );
   buffs.psychic_projection = new buff_t( this, is_sage ? "psychic_projection" : "lightning_barrage", 1, timespan_t::zero, timespan_t::from_seconds( 10.0 ), 0.5 * talents.psychic_projection -> rank() );
   buffs.tidal_force = new buff_t( this, is_sage ? "tidal_force" : "lightning_storm", 1, timespan_t::zero, timespan_t::from_seconds( 10.0 ) );
-  buffs.telekinetic_effusion = new buff_t( this, is_sage ? "telekinetic_effusion" : "lightning_effusion", 2, timespan_t::zero, timespan_t::zero, 0.5 * talents.telekinetic_effusion -> rank() );
+  buffs.telekinetic_effusion = new buff_t( this, is_sage ? "telekinetic_effusion" : "lightning_effusion", 2, timespan_t::from_seconds( 30 ), timespan_t::zero, 0.5 * talents.telekinetic_effusion -> rank() );
   buffs.tremors = new buff_t( this, is_sage ? "tremors" : "conduction", 3, timespan_t::from_seconds( 30.0 ) );
   buffs.presence_of_mind = new buff_t( this, is_sage ? "presence_of_mind" : "wrath", 1, timespan_t::zero, timespan_t::zero, talents.presence_of_mind -> rank() * 0.3 );
   buffs.force_suppression = new buff_t( this, is_sage ? "force_suppression" : "deathmark", 10, timespan_t::from_seconds( 30.0 ), timespan_t::zero, talents.force_suppression -> rank() );
