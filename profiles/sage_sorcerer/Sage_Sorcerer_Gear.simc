@@ -4,6 +4,7 @@
 #         Item modifications are ordered Armoring__Modification__Enhancement
 #         or Hilt(w/Forcepower)__Color_Crystal__Modification__Enhancement.
 origin="http://swtor.askmrrobot.com/character/bf331e5d-8178-4ebc-8dfa-85035a30aae5"
+professions=artifice=400
 head=rakata_force_masters_headgear,stats=44end_61willpower__29end_48willpower_37power__24end_37crit_51surge
 ear=columi_force_masters_relay__exceptional,stats=80end_97willpower_41power_48alacrity__28willpower
 shirt=datacrons,stats=40str_40aim_40cunning_40willpower_40pre_40end
