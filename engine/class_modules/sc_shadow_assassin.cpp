@@ -1250,6 +1250,7 @@ struct saber_strike_t : public shadow_assassin_attack_t
     base_cost = 0;
     range = 4.0;
 
+    weapon = &( player->main_hand_weapon );
     weapon_multiplier = -.066;
     dd.power_mod = .33;
 

@@ -224,8 +224,8 @@ void action_t::init_action_t_()
   direct_dmg                     = 0.0;
   tick_dmg                       = 0.0;
   num_ticks                      = 0;
-  weapon                         = NULL;
-  weapon_multiplier              = 1.0;
+  weapon                         = nullptr;
+  weapon_multiplier              = std::numeric_limits<decltype(weapon_multiplier)>::lowest();
   weapon_power_mod               = 0.0;
   normalize_weapon_speed         = false;
   base_add_multiplier            = 1.0;
@@ -609,6 +609,7 @@ double action_t::calculate_direct_damage( int chain_target )
   dmg += base_dd_adder + player_dd_adder + target_dd_adder;
   dmg += dd.power_mod * total_power();
 
+  assert( ( weapon == nullptr ) == ( weapon_multiplier == std::numeric_limits<decltype( weapon_multiplier )>::lowest() ) );
   double weapon_dmg = 0;
   if ( weapon )
   {
