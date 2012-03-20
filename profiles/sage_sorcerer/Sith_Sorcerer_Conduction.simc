@@ -15,13 +15,14 @@ actions+=/force_lightning,if=buff.lightning_barrage_dd.up
 actions+=/power_potion
 actions+=/recklessness
 actions+=/use_relics
-actions+=/chain_lightning,if=buff.wrath.react|buff.lightning_storm.react
+actions+=/chain_lightning,if=(!ptr&buff.wrath.react)|buff.lightning_storm.react
 actions+=/affliction,if=!ticking
 actions+=/force_lightning,if=buff.lightning_barrage.react
 actions+=/death_field
 actions+=/crushing_darkness,if=buff.wrath.react
 actions+=/polarity_shift
-actions+=/lightning_strike
+actions+=/sequence,name=pewpew:lightning_strike:force_lightning:force_lightning:force_lightning:force_lightning:force_lightning:force_lightning:force_lightning
+actions+=/restart_sequence,name=pewpew
 actions+=/shock,moving=1
 head=rakata_force_masters_headgear,stats=44end_61willpower__29end_48willpower_37power__24end_37crit_51surge
 ear=columi_force_masters_relay__exceptional,stats=80end_97willpower_41power_48alacrity__28willpower

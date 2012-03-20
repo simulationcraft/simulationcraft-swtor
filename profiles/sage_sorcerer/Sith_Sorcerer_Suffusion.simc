@@ -17,7 +17,7 @@ actions+=/recklessness
 actions+=/use_relics
 actions+=/affliction,if=!ticking
 actions+=/death_field
-actions+=/chain_lightning,if=buff.wrath.react|buff.lightning_storm.react
+actions+=/chain_lightning,if=(!ptr&buff.wrath.react)|buff.lightning_storm.react
 actions+=/crushing_darkness,if=buff.wrath.react
 actions+=/force_lightning
 actions+=/shock,moving=1

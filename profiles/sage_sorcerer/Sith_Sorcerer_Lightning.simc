@@ -20,8 +20,8 @@ actions+=/force_lightning,if=buff.lightning_barrage.react
 actions+=/chain_lightning,if=buff.lightning_storm.react
 actions+=/polarity_shift,moving=0
 actions+=/crushing_darkness
-actions+=/force_lightning,if=!ptr
-actions+=/lightning_strike
+actions+=/sequence,name=pewpew:lightning_strike:force_lightning
+actions+=/restart_sequence,name=pewpew
 actions+=/shock,moving=1
 head=rakata_force_masters_headgear,stats=44end_61willpower__29end_48willpower_37power__24end_37crit_51surge
 ear=columi_force_masters_relay__exceptional,stats=80end_97willpower_41power_48alacrity__28willpower

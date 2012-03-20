@@ -45,6 +45,6 @@ actions+=/telekinetic_throw,if=buff.psychic_projection.react
 actions+=/force_in_balance
 actions+=/mind_crush,if=buff.presence_of_mind.react
 actions+=/mental_alacrity
-actions+=/disturbance
+actions+=/sequence,name=pewpew:disturbance:telekinetic_throw:telekinetic_throw:telekinetic_throw:telekinetic_throw:telekinetic_throw:telekinetic_throw:telekinetic_throw/restart_sequence,name=pewpew
 actions+=/project,moving=1
 save=Jedi_Sage_Momentum.simc

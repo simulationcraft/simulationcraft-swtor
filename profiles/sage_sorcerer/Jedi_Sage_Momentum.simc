@@ -21,7 +21,8 @@ actions+=/telekinetic_throw,if=buff.psychic_projection.react
 actions+=/force_in_balance
 actions+=/mind_crush,if=buff.presence_of_mind.react
 actions+=/mental_alacrity
-actions+=/disturbance
+actions+=/sequence,name=pewpew:disturbance:telekinetic_throw:telekinetic_throw:telekinetic_throw:telekinetic_throw:telekinetic_throw:telekinetic_throw:telekinetic_throw
+actions+=/restart_sequence,name=pewpew
 actions+=/project,moving=1
 head=rakata_force_masters_headgear,stats=44end_61willpower__29end_48willpower_37power__24end_37crit_51surge
 ear=columi_force_masters_relay__exceptional,stats=80end_97willpower_41power_48alacrity__28willpower

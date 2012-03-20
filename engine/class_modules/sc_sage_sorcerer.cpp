@@ -1826,8 +1826,7 @@ void sage_sorcerer_t::init_actions()
 
       action_list_str += "/mental_alacrity,moving=0";
       action_list_str += "/mind_crush";
-      action_list_str += "/telekinetic_throw,if=!ptr";
-      action_list_str += "/disturbance";
+      action_list_str += "/sequence,name=pewpew:disturbance:telekinetic_throw/restart_sequence,name=pewpew";
       action_list_str += "/project,moving=1";
 
       break;
@@ -1896,8 +1895,7 @@ void sage_sorcerer_t::init_actions()
 
       action_list_str += "/polarity_shift,moving=0";
       action_list_str += "/crushing_darkness";
-      action_list_str += "/force_lightning,if=!ptr";
-      action_list_str += "/lightning_strike";
+      action_list_str += "/sequence,name=pewpew:lightning_strike:force_lightning/restart_sequence,name=pewpew";
       action_list_str += "/shock,moving=1";
 
       break;
