@@ -4,6 +4,7 @@
 #         Item modifications are ordered Armoring__Modification__Enhancement
 #         or Hilt(w/Forcepower)__Color_Crystal__Modification__Enhancement.
 origin="http://swtor.askmrrobot.com/character/72bd51f8-fe33-461e-a0a8-ac4513000154"
+professions=synthweaving=400
 main_hand=blood_of_korriban,stats=612forcepower_44end_61willpower__41power__29end_48willpower_37power__24end_37power_51surge,weapon=doublebladedlightsaber_367min_551max
 off_hand=rakata_stalkers_power_generator,stats=85end_103willpower_612forcepower_77crit_51surge
 head=rakata_stalkers_headgear,stats=55end_51willpower__29end_48willpower_37power__24end_37power_51acc

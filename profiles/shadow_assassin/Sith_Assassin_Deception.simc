@@ -7,6 +7,7 @@ race=human
 position=back
 role=hybrid
 use_pre_potion=0
+professions=synthweaving=400
 talents=http://www.torhead.com/skill-calc#2000MZhGMRkhMrtzZcMc.1
 actions=stim,type=exotech_resolve
 actions+=/mark_of_power
