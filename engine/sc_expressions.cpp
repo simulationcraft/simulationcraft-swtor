@@ -46,16 +46,18 @@ public:
 // Unary Operators ==========================================================
 
 template <typename F>
-struct unary_t : public expr_t
+class unary_t : public expr_t
 {
+protected:
   const std::unique_ptr<expr_t> input;
   F f;
 
-  template <typename String, typename Pointer>
-  unary_t( String&& n, Pointer&& i, F&& f) :
+public:
+  template <typename String, typename Pointer, typename Function>
+  unary_t( String&& n, Pointer&& i, Function&& f) :
     expr_t( std::forward<String>( n ) ),
     input( std::forward<Pointer>( i ) ),
-    f( std::forward<F>( f ) )
+    f( std::forward<Function>( f ) )
   { assert( input ); }
 
   virtual token_type_t evaluate()
@@ -91,7 +93,7 @@ expr_t* select_unary( token_type_t op, Name&& name, Input&& input )
   case TOK_NOT:
     return make_unary( std::forward<Name>( name ),
                        std::forward<Input>( input ),
-                       []( double v ){ return v == 0; } );
+                       []( double v ){ return ! v; } );
   case TOK_ABS:
     return make_unary( std::forward<Name>( name ),
                        std::forward<Input>( input ),
@@ -113,19 +115,28 @@ expr_t* select_unary( token_type_t op, Name&& name, Input&& input )
 
 // Binary Operators =========================================================
 
-struct binary_t : public expr_t
+class binary_t : public expr_t
 {
+protected:
   const std::unique_ptr<expr_t> left, right;
-  int operation;
 
-  template <typename Name, typename Left, typename Right>
-  binary_t( Name&& n, int op, Left&& l, Right&& r ) :
-    expr_t( std::forward<Name>( n ) ),
-    left( std::forward<Left>( l ) ), right( std::forward<Right>( r ) ),
-    operation( op )
+  static bool bool_operand( const std::unique_ptr<expr_t>& operand )
   {
-    assert( left );
-    assert( right );
+    switch ( operand -> evaluate() )
+    {
+    case TOK_NUM:
+      return operand -> result_num != 0;
+    default:
+      return true;
+    }
+  }
+
+  void expect_left( token_type_t type )
+  {
+    if ( likely( left -> evaluate() == type ) ) return;
+
+    throw error_t( ( boost::format( "Invalid input type %1% for binary operator '%2%'" )
+                     % left -> name() % name() ).str(), this );
   }
 
   void expect_right( token_type_t type )
@@ -136,112 +147,163 @@ struct binary_t : public expr_t
                      % left -> name() % right -> name() % name() ).str(), this );
   }
 
-  virtual token_type_t evaluate() // override
+public:
+  template <typename Name, typename Left, typename Right>
+  binary_t( Name&& n, Left&& l, Right&& r ) :
+    expr_t( std::forward<Name>( n ) ),
+    left( std::forward<Left>( l ) ), right( std::forward<Right>( r ) )
   {
-    switch( left -> evaluate() )
-    {
-    case TOK_NUM:
-      switch ( operation )
-      {
-      case TOK_ADD:
-        expect_right( TOK_NUM );
-        result_num = left -> result_num + right -> result_num;
-        return TOK_NUM;
-
-      case TOK_SUB:
-        expect_right( TOK_NUM );
-        result_num = left -> result_num - right -> result_num;
-        return TOK_NUM;
-
-      case TOK_MULT:
-        expect_right( TOK_NUM );
-        result_num = left -> result_num * right -> result_num;
-        return TOK_NUM;
-
-      case TOK_DIV:
-        expect_right( TOK_NUM );
-        result_num = left -> result_num / right -> result_num;
-        return TOK_NUM;
-
-      case TOK_EQ:
-        expect_right( TOK_NUM );
-        result_num = ( left -> result_num == right -> result_num );
-        return TOK_NUM;
-
-      case TOK_NOTEQ:
-        expect_right( TOK_NUM );
-        result_num = ( left -> result_num != right -> result_num );
-        return TOK_NUM;
-
-      case TOK_LT:
-        expect_right( TOK_NUM );
-        result_num = ( left -> result_num < right -> result_num );
-        return TOK_NUM;
-
-      case TOK_LTEQ:
-        expect_right( TOK_NUM );
-        result_num = ( left -> result_num <= right -> result_num );
-        return TOK_NUM;
-
-      case TOK_GT:
-        expect_right( TOK_NUM );
-        result_num = ( left -> result_num > right -> result_num );
-        return TOK_NUM;
-
-      case TOK_GTEQ:
-        expect_right( TOK_NUM );
-        result_num = ( left -> result_num >= right -> result_num );
-        return TOK_NUM;
-
-      case TOK_AND:
-        if ( left -> result_num == 0 )
-          result_num = 0;
-        else
-        {
-          expect_right( TOK_NUM );
-          result_num = ( right -> result_num != 0 );
-        }
-        return TOK_NUM;
-
-      case TOK_OR:
-        if ( left -> result_num != 0 )
-          result_num = 1;
-        else
-        {
-          expect_right( TOK_NUM );
-          result_num = ( right -> result_num != 0 );
-        }
-        return TOK_NUM;
-
-      default:
-        assert( 0 );
-        return TOK_UNKNOWN;
-      }
-
-    case TOK_STR:
-      expect_right( TOK_STR );
-      switch ( operation )
-      {
-      case TOK_EQ:    result_num = ( left -> result_str == right -> result_str ); break;
-      case TOK_NOTEQ: result_num = ( left -> result_str != right -> result_str ); break;
-      case TOK_LT:    result_num = ( left -> result_str <  right -> result_str ); break;
-      case TOK_LTEQ:  result_num = ( left -> result_str <= right -> result_str ); break;
-      case TOK_GT:    result_num = ( left -> result_str >  right -> result_str ); break;
-      case TOK_GTEQ:  result_num = ( left -> result_str >= right -> result_str ); break;
-      default:
-        throw error_t( ( boost::format( "Invalid binary operator %1% for string expressions '%2%' and '%3%'" )
-                         % name() % left -> name() % right -> name() ).str(), this );
-      }
-      return TOK_NUM;
-
-    default:
-      assert( false );
-      return TOK_UNKNOWN;
-    }
-
-    return TOK_UNKNOWN;
+    assert( left );
+    assert( right );
   }
 };
+
+template <template <typename> class F>
+class binary_op_t : public binary_t
+{
+private:
+  static double f( double left, double right )
+  { return F<double>()( left, right ); }
+
+public:
+  template <typename Name, typename Left, typename Right>
+  binary_op_t( Name&& n, Left&& l, Right&& r ) :
+    binary_t( std::forward<Name>( n ), std::forward<Left>( l ), std::forward<Right>( r ) )
+  {}
+
+  virtual token_type_t evaluate() // override
+  {
+    expect_left( TOK_NUM );
+    expect_right( TOK_NUM );
+    result_num = f( left -> result_num, right -> result_num );
+    return TOK_NUM;
+  }
+};
+
+template <template <typename> class F>
+class binary_compare_t : public binary_t
+{
+private:
+  template <typename T>
+  static bool f( T a, T b )
+  { return F<T>()( a, b ); }
+
+public:
+  template <typename Name, typename Left, typename Right>
+  binary_compare_t( Name&& n, Left&& l, Right&& r ) :
+    binary_t( std::forward<Name>( n ), std::forward<Left>( l ), std::forward<Right>( r ) )
+  {}
+
+  virtual token_type_t evaluate() // override
+  {
+    token_type_t result_type = left -> evaluate();
+    expect_right( result_type );
+
+    switch( result_type )
+    {
+    case TOK_NUM:
+      result_num = f( left -> result_num, right -> result_num );
+      break;
+    case TOK_STR:
+      result_num = f( left -> result_str, right -> result_str );
+      break;
+    default:
+      throw error_t( ( boost::format( "Invalid operand type '%1%' for binary operator '%2%'" )
+                       % left -> name() %  name() ).str(), this );
+    }
+
+    return TOK_NUM;
+  }
+};
+
+class logical_and_t : public binary_t
+{
+public:
+  template <typename Name, typename Left, typename Right>
+  logical_and_t( Name&& n, Left&& l, Right&& r ) :
+    binary_t( std::forward<Name>( n ), std::forward<Left>( l ), std::forward<Right>( r ) )
+  {}
+
+  virtual token_type_t evaluate() // override
+  {
+    result_num = bool_operand( left ) && bool_operand( right );
+    return TOK_NUM;
+  }
+};
+
+class logical_or_t : public binary_t
+{
+public:
+  template <typename Name, typename Left, typename Right>
+  logical_or_t( Name&& n, Left&& l, Right&& r ) :
+    binary_t( std::forward<Name>( n ), std::forward<Left>( l ), std::forward<Right>( r ) )
+  {}
+
+  virtual token_type_t evaluate() // override
+  {
+    result_num = bool_operand( left ) || bool_operand( right );
+    return TOK_NUM;
+  }
+};
+
+template <typename Name, typename Left, typename Right>
+expr_t* select_binary( Name&& n, token_type_t operation, Left&& l, Right&& r )
+{
+  switch( operation )
+  {
+  case TOK_ADD:
+    return new binary_op_t<std::plus>( std::forward<Name>( n ),
+                                       std::forward<Left>( l ),
+                                       std::forward<Right>( r ) );
+  case TOK_SUB:
+    return new binary_op_t<std::minus>( std::forward<Name>( n ),
+                                        std::forward<Left>( l ),
+                                        std::forward<Right>( r ) );
+  case TOK_MULT:
+    return new binary_op_t<std::multiplies>( std::forward<Name>( n ),
+                                             std::forward<Left>( l ),
+                                             std::forward<Right>( r ) );
+  case TOK_DIV:
+    return new binary_op_t<std::divides>( std::forward<Name>( n ),
+                                          std::forward<Left>( l ),
+                                          std::forward<Right>( r ) );
+  case TOK_EQ:
+    return new binary_compare_t<std::equal_to>( std::forward<Name>( n ),
+                                                std::forward<Left>( l ),
+                                                std::forward<Right>( r ) );
+  case TOK_NOTEQ:
+    return new binary_compare_t<std::not_equal_to>( std::forward<Name>( n ),
+                                                    std::forward<Left>( l ),
+                                                    std::forward<Right>( r ) );
+  case TOK_LT:
+    return new binary_compare_t<std::less>( std::forward<Name>( n ),
+                                            std::forward<Left>( l ),
+                                            std::forward<Right>( r ) );
+  case TOK_LTEQ:
+    return new binary_compare_t<std::less_equal>( std::forward<Name>( n ),
+                                                  std::forward<Left>( l ),
+                                                  std::forward<Right>( r ) );
+  case TOK_GT:
+    return new binary_compare_t<std::greater>( std::forward<Name>( n ),
+                                               std::forward<Left>( l ),
+                                               std::forward<Right>( r ) );
+  case TOK_GTEQ:
+    return new binary_compare_t<std::greater_equal>( std::forward<Name>( n ),
+                                                     std::forward<Left>( l ),
+                                                     std::forward<Right>( r ) );
+  case TOK_AND:
+    return new logical_and_t( std::forward<Name>( n ),
+                              std::forward<Left>( l ),
+                              std::forward<Right>( r ));
+  case TOK_OR:
+    return new logical_or_t( std::forward<Name>( n ),
+                             std::forward<Left>( l ),
+                             std::forward<Right>( r ));
+  default:
+    assert( false );
+    return nullptr;
+  }
+}
 
 } // ANONYMOUS namespace ====================================================
 
@@ -595,8 +657,8 @@ static expr_t* build_expression_tree( action_t* action,
       std::unique_ptr<expr_t> left  = std::move( stack.back() ); stack.pop_back();
       if ( ! left || ! right )
         return nullptr;
-      stack.emplace_back( new binary_t( t.label, t.type,
-                                        std::move( left ), std::move( right ) ) );
+      stack.emplace_back( select_binary( t.label, t.type,
+                                         std::move( left ), std::move( right ) ) );
     }
 
     else
