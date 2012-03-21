@@ -62,7 +62,7 @@ public:
 
   virtual token_type_t evaluate()
   {
-    if ( input -> evaluate() == TOK_NUM )
+    if ( likely( input -> evaluate() == TOK_NUM ) )
     {
       result_num = f( input -> result_num );
       return TOK_NUM;
@@ -603,7 +603,7 @@ static expr_t* build_expression_tree( action_t* action,
     else if ( t.type == TOK_STR )
     {
       std::unique_ptr<expr_t> e( action -> create_expression( t.label ) );
-      if ( ! e )
+      if ( unlikely( ! e ) )
       {
         action -> sim -> errorf( "Player %s action %s : Unable to decode expression function '%s'\n",
                                  action -> player -> name(), action -> name(), t.label.c_str() );
@@ -615,8 +615,11 @@ static expr_t* build_expression_tree( action_t* action,
 
     else if ( expression_t::is_unary( t.type ) )
     {
-      if ( stack.size() < 1 )
+      if ( unlikely( stack.size() < 1 ) )
+      {
+        // FIXME: Report expression error and cancel the sim
         return nullptr;
+      }
       std::unique_ptr<expr_t> input = std::move( stack.back() ); stack.pop_back();
       assert( input );
       stack.emplace_back( select_unary( t.type, t.label, std::move( input ) ) );
@@ -624,24 +627,31 @@ static expr_t* build_expression_tree( action_t* action,
 
     else if ( expression_t::is_binary( t.type ) )
     {
-      if ( stack.size() < 2 )
+      if ( unlikely( stack.size() < 2 ) )
+      {
+        // FIXME: Report expression error and cancel the sim
         return nullptr;
+      }
       std::unique_ptr<expr_t> right = std::move( stack.back() ); stack.pop_back();
+      assert( right );
       std::unique_ptr<expr_t> left  = std::move( stack.back() ); stack.pop_back();
-      if ( ! left || ! right )
-        return nullptr;
+      assert( left );
       stack.emplace_back( select_binary( t.label, t.type,
                                          std::move( left ), std::move( right ) ) );
     }
 
     else
+    {
+      // FIXME: Report expression error and cancel the sim instead of asserting.
       assert( false );
+    }
   }
 
-  if ( stack.size() != 1 )
-    return nullptr;
+  if ( likely( stack.size() == 1 ) )
+    return stack.back().release();
 
-  return stack.back().release();
+  // FIXME: Report expression error and cancel the sim
+  return nullptr;
 }
 
 // expr_t::parse ============================================================
@@ -652,24 +662,24 @@ expr_t* expr_t::parse( action_t* action, const std::string& expr_str )
 
   std::vector<expr_token_t> tokens = expression_t::parse_tokens( action, expr_str );
 
-  if ( action -> sim -> debug ) expression_t::print_tokens( tokens, action -> sim );
+  if ( unlikely( action -> sim -> debug ) ) expression_t::print_tokens( tokens, action -> sim );
 
   expression_t::convert_to_unary( tokens );
 
-  if ( action -> sim -> debug ) expression_t::print_tokens( tokens, action -> sim );
+  if ( unlikely( action -> sim -> debug ) ) expression_t::print_tokens( tokens, action -> sim );
 
-  if ( ! expression_t::convert_to_rpn( tokens ) )
+  if ( unlikely( ! expression_t::convert_to_rpn( tokens ) ) )
   {
     action -> sim -> errorf( "%s-%s: Unable to convert %s into RPN\n", action -> player -> name(), action -> name(), expr_str.c_str() );
     action -> sim -> cancel();
     return 0;
   }
 
-  if ( action -> sim -> debug ) expression_t::print_tokens( tokens, action -> sim );
+  if ( unlikely( action -> sim -> debug ) ) expression_t::print_tokens( tokens, action -> sim );
 
   expr_t* e = build_expression_tree( action, tokens );
 
-  if ( ! e )
+  if ( unlikely( ! e ) )
   {
     action -> sim -> errorf( "%s-%s: Unable to build expression tree from %s\n", action -> player -> name(), action -> name(), expr_str.c_str() );
     action -> sim -> cancel();
