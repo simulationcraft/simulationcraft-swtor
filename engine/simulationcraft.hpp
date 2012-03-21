@@ -1758,7 +1758,7 @@ make_expr( S&& name, F f )
 { return make_unique<num_expr_t<F>>( std::forward<S>( name ), f ); }
 
 template <typename S, typename F>
-inline typename std::enable_if<std::is_same<typename std::result_of<F()>::type,std::string>::value,str_expr_t<F>*>::type
+inline typename std::enable_if<std::is_same<typename std::result_of<F()>::type,std::string>::value,expr_ptr>::type
 make_expr( S&& name, F f )
 { return make_unique<str_expr_t<F>>( std::forward<S>( name ), f ); }
 
@@ -2487,7 +2487,7 @@ struct set_bonus_t
   bool two_pc() const { return has_2pc; }
   bool four_pc() const { return has_4pc; }
 
-  //action_expr_t* create_expression( action_t*, const std::string& type );
+  //expr_ptr create_expression( action_t*, const std::string& type );
 
 private:
   bool decode( const item_t& item ) const;

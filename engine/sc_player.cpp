@@ -3971,7 +3971,7 @@ struct snapshot_stats_t : public action_t
 
 struct wait_fixed_t : public wait_action_base_t
 {
-  expr_t* time_expr;
+  expr_ptr time_expr;
   std::string wait_str;
 
   wait_fixed_t( player_t* player, const std::string& options_str ) :
@@ -4504,8 +4504,8 @@ talent_t* player_t::find_talent( const std::string& n,
 
 // player_t::create_expression ==============================================
 
-expr_t* player_t::create_expression( action_t* a,
-                                     const std::string& name_str )
+expr_ptr player_t::create_expression( action_t* a,
+                                      const std::string& name_str )
 {
   if ( name_str == "health_pct" )
   {

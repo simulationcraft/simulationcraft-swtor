@@ -1792,7 +1792,7 @@ double sim_t::iteration_adjust()
 
 // sim_t::create_expression =================================================
 
-expr_t* sim_t::create_expression( action_t* a, const std::string& name_str )
+expr_ptr sim_t::create_expression( action_t* a, const std::string& name_str )
 {
   assert( a -> sim == this );
 

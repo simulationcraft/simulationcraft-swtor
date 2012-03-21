@@ -241,9 +241,9 @@ public:
 template <typename Name, typename Left, typename Right>
 expr_ptr select_binary( Name&& n, token_type_t operation, Left&& l, Right&& r )
 {
-#define create( t ) ( new t( std::forward<Name>( n ), \
-                             std::forward<Left>( l ), \
-                             std::forward<Right>( r ) ) )
+#define create( t ) ( make_unique<t>( std::forward<Name>( n ), \
+                                      std::forward<Left>( l ), \
+                                      std::forward<Right>( r ) ) )
   switch( operation )
   {
   case TOK_ADD:
@@ -648,7 +648,7 @@ static expr_ptr build_expression_tree( action_t* action,
   }
 
   if ( likely( stack.size() == 1 ) )
-    return stack.back().release();
+    return std::move( stack.back() );
 
   // FIXME: Report expression error and cancel the sim
   return nullptr;
