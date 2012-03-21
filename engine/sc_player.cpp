@@ -3989,18 +3989,19 @@ struct wait_fixed_t : public wait_action_base_t
 
   virtual timespan_t execute_time() const
   {
-    int rtype = time_expr -> evaluate();
-    if ( rtype != TOK_NUM )
+    try
     {
-      sim -> errorf( "Invalid expression result type for wait time '%s' = %d.\n",
-                     wait_str.c_str(), rtype );
-      sim -> cancel();
-    }
-    else
-    {
-      timespan_t wait = timespan_t::from_seconds( time_expr -> result_num );
+      timespan_t wait = timespan_t::from_seconds( time_expr -> expect<double>() );
       if ( wait > timespan_t::zero ) return wait;
     }
+
+    catch ( expr_t::type_error )
+    {
+      sim -> errorf( "Invalid expression result for wait time '%s'\n",
+                     wait_str.c_str() );
+      sim -> cancel();
+    }
+
     return player -> available();
   }
 };

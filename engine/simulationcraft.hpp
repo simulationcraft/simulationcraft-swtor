@@ -1683,11 +1683,25 @@ struct expression_t
   static std::vector<expr_token_t> parse_tokens( action_t* action, const std::string& expr_str );
   static void print_tokens( const std::vector<expr_token_t>& tokens, sim_t* sim );
   static void convert_to_unary( std::vector<expr_token_t>& tokens );
-  static bool convert_to_rpn( action_t* action, std::vector<expr_token_t>& tokens );
+  static bool convert_to_rpn( std::vector<expr_token_t>& tokens );
 };
 
 struct expr_t : public noncopyable
 {
+  struct error_t : public std::exception
+  {
+    std::string message;
+    expr_t* expr;
+
+    template <typename S>
+    error_t( S&& s, expr_t* expr ) :
+      message( std::forward<S>( s ) ), expr( expr ) {}
+    virtual const char* what() const noexcept { return message.c_str(); }
+    virtual ~error_t() noexcept {}
+  };
+  struct type_error : public error_t
+  { type_error( expr_t* expr ) : error_t( "type_error", expr ) {} };
+
   std::string name_str;
   std::string result_str;
   double result_num;
@@ -1698,29 +1712,21 @@ struct expr_t : public noncopyable
   virtual ~expr_t() {}
 
   virtual token_type_t evaluate() = 0;
-  virtual const char* name() { return name_str.c_str(); }
+
+  const std::string& name() const { return name_str; }
   bool success() { return ( evaluate() == TOK_NUM ) && ( result_num != 0 ); }
 
+  template <typename T>
+  typename std::enable_if<std::is_arithmetic<T>::value,T>::type
+  expect()
+  { if ( evaluate() == TOK_NUM ) return static_cast<T>( result_num ); throw type_error( this ); }
+
+  template<typename T>
+  typename std::enable_if<std::is_same<std::string,T>::value,std::string>::type
+  expect()
+  { if ( evaluate() == TOK_STR ) return result_str; throw type_error( this ); }
+
   static expr_t* parse( action_t*, const std::string& expr_str );
-};
-
-struct const_expr_t : public expr_t
-{
-  token_type_t result_type;
-
-  template <typename S>
-  const_expr_t( S&& n, double constant_value ) :
-    expr_t( std::forward<S>( n ) ), result_type( TOK_NUM )
-  { result_num = constant_value; }
-
-  template <typename S1, typename S2>
-  const_expr_t( S1&& n, S2&& constant_value,
-                typename std::enable_if<!std::is_arithmetic<typename std::decay<S2>::type>::value,void*>::type=nullptr) :
-    expr_t( std::forward<S1>( n ) ), result_type( TOK_STR )
-  { result_str = std::forward<S2>( constant_value ); }
-
-  virtual token_type_t evaluate() // override
-  { return result_type; }
 };
 
 template <typename F>

@@ -4,23 +4,43 @@
 // ==========================================================================
 
 #include "simulationcraft.hpp"
+#include <boost/format.hpp>
 
-struct type_error : public std::exception
+namespace { // ANONYMOUS ====================================================
+
+// Constant Expressions =====================================================
+
+class const_expr_t : public expr_t
 {
-  expr_t* expr;
+private:
+  token_type_t result_type;
 
-  type_error( expr_t* expr ) : expr( expr ) { assert( false ); }
+public:
+  template <typename S>
+  const_expr_t( S&& n, token_type_t type ) :
+    expr_t( std::forward<S>( n ) ), result_type( type )
+  {}
+
+  virtual token_type_t evaluate() // override
+  { return result_type; }
 };
 
-struct op_expr_t : public expr_t
+class num_const_expr_t : public const_expr_t
 {
-  action_t* action;
-  int operation;
+public:
+  template <typename S>
+  num_const_expr_t( S&& n, double constant_value ) :
+    const_expr_t( std::forward<S>( n ), TOK_NUM )
+  { result_num = constant_value; }
+};
 
-  template <typename String>
-  op_expr_t( action_t* a, String&& n, int op ) :
-    expr_t( std::forward<String>( n ) ), action( a ), operation( op )
-  {}
+class str_const_expr_t : public const_expr_t
+{
+public:
+  template <typename S1, typename S2>
+  str_const_expr_t( S1&& n, S2&& constant_value ) :
+    const_expr_t( std::forward<S1>( n ), TOK_STR )
+  { result_str = std::forward<S2>( constant_value ); }
 };
 
 // Unary Operators ==========================================================
@@ -46,17 +66,13 @@ struct unary_t : public expr_t
       return TOK_NUM;
     }
 
-    throw type_error( this );
-#if 0
-    action -> sim -> errorf( "%s-%s: Unexpected input type (%s) for unary operator '%s'\n",
-                               action -> player -> name(), action -> name(), input -> name(), name() );
-    return TOK_UNKNOWN;
-#endif
+    throw error_t( ( boost::format( "Unexpected input type (%1%) for unary operator '%2%'" )
+                     % input -> name() % name() ).str(), this );
   }
 };
 
 template <typename Name, typename Input, typename F>
-unary_t<F>* make_unary( Name&& name, Input&& input, F&& f)
+inline unary_t<F>* make_unary( Name&& name, Input&& input, F&& f)
 { return new unary_t<F>( std::forward<Name>( name ), std::forward<Input>( input ), std::forward<F>( f ) ); }
 
 template <typename Name, typename Input>
@@ -97,14 +113,16 @@ expr_t* select_unary( token_type_t op, Name&& name, Input&& input )
 
 // Binary Operators =========================================================
 
-struct binary_t : public op_expr_t
+struct binary_t : public expr_t
 {
   const std::unique_ptr<expr_t> left, right;
+  int operation;
 
   template <typename Name, typename Left, typename Right>
-  binary_t( action_t* a, Name&& n, int op, Left&& l, Right&& r ) :
-    op_expr_t( a, std::forward<Name>( n ), op ),
-    left( std::forward<Left>( l ) ), right( std::forward<Right>( r ) )
+  binary_t( Name&& n, int op, Left&& l, Right&& r ) :
+    expr_t( std::forward<Name>( n ) ),
+    left( std::forward<Left>( l ) ), right( std::forward<Right>( r ) ),
+    operation( op )
   {
     assert( left );
     assert( right );
@@ -112,18 +130,13 @@ struct binary_t : public op_expr_t
 
   void expect_right( token_type_t type )
   {
-    if ( right -> evaluate() != type )
-    {
-      throw type_error( this );
-#if 0
-      action -> sim -> errorf( "%s-%s: Inconsistent input types (%s and %s) for binary operator '%s'\n",
-                               action -> player -> name(), action -> name(), left -> name(), right -> name(), name() );
-      action -> sim -> cancel();
-#endif
-    }
+    if ( likely( right -> evaluate() == type ) ) return;
+
+    throw error_t( ( boost::format( "Inconsistent input types (%1% and %2%) for binary operator '%3%'" )
+                     % left -> name() % right -> name() % name() ).str(), this );
   }
 
-  virtual token_type_t evaluate()
+  virtual token_type_t evaluate() // override
   {
     switch( left -> evaluate() )
     {
@@ -215,7 +228,9 @@ struct binary_t : public op_expr_t
       case TOK_LTEQ:  result_num = ( left -> result_str <= right -> result_str ); break;
       case TOK_GT:    result_num = ( left -> result_str >  right -> result_str ); break;
       case TOK_GTEQ:  result_num = ( left -> result_str >= right -> result_str ); break;
-      default: throw type_error( this );
+      default:
+        throw error_t( ( boost::format( "Invalid binary operator %1% for string expressions '%2%' and '%3%'" )
+                         % name() % left -> name() % right -> name() ).str(), this );
       }
       return TOK_NUM;
 
@@ -227,6 +242,8 @@ struct binary_t : public op_expr_t
     return TOK_UNKNOWN;
   }
 };
+
+} // ANONYMOUS namespace ====================================================
 
 // precedence ===============================================================
 
@@ -474,7 +491,7 @@ void expression_t::convert_to_unary( std::vector<expr_token_t>& tokens )
 
 // convert_to_rpn ===========================================================
 
-bool expression_t::convert_to_rpn( action_t* /* action */, std::vector<expr_token_t>& tokens )
+bool expression_t::convert_to_rpn( std::vector<expr_token_t>& tokens )
 {
   std::vector<expr_token_t> rpn, stack;
 
@@ -547,7 +564,7 @@ static expr_t* build_expression_tree( action_t* action,
   for ( expr_token_t& t : tokens )
   {
     if ( t.type == TOK_NUM )
-      stack.emplace_back( new const_expr_t( t.label, atof( t.label.c_str() ) ) );
+      stack.emplace_back( new num_const_expr_t( t.label, atof( t.label.c_str() ) ) );
 
     else if ( t.type == TOK_STR )
     {
@@ -578,7 +595,7 @@ static expr_t* build_expression_tree( action_t* action,
       std::unique_ptr<expr_t> left  = std::move( stack.back() ); stack.pop_back();
       if ( ! left || ! right )
         return nullptr;
-      stack.emplace_back( new binary_t( action, t.label, t.type,
+      stack.emplace_back( new binary_t( t.label, t.type,
                                         std::move( left ), std::move( right ) ) );
     }
 
@@ -606,7 +623,7 @@ expr_t* expr_t::parse( action_t* action, const std::string& expr_str )
 
   if ( action -> sim -> debug ) expression_t::print_tokens( tokens, action -> sim );
 
-  if ( ! expression_t::convert_to_rpn( action, tokens ) )
+  if ( ! expression_t::convert_to_rpn( tokens ) )
   {
     action -> sim -> errorf( "%s-%s: Unable to convert %s into RPN\n", action -> player -> name(), action -> name(), expr_str.c_str() );
     action -> sim -> cancel();
