@@ -607,6 +607,7 @@ static expr_t* build_expression_tree( action_t* action,
       {
         action -> sim -> errorf( "Player %s action %s : Unable to decode expression function '%s'\n",
                                  action -> player -> name(), action -> name(), t.label.c_str() );
+        action -> sim -> cancel();
         return nullptr;
       }
       stack.emplace_back( std::move( e ) );
