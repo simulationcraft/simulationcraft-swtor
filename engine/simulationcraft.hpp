@@ -111,7 +111,6 @@
 
 struct action_t;
 struct action_callback_t;
-struct action_expr_t;
 struct action_priority_list_t;
 struct alias_t;
 class attack_policy_interface_t;
@@ -127,6 +126,7 @@ struct enemy_t;
 struct enchant_t;
 struct event_t;
 class  expr_t;
+typedef std::unique_ptr<expr_t> expr_ptr;
 struct gain_t;
 struct heal_t;
 struct item_t;
@@ -654,6 +654,11 @@ public:
   void operator() ( T* t ) const
   { boost::checked_delete( t ); }
 };
+
+template <typename T, typename ... Args>
+std::unique_ptr<T>
+make_unique( Args&& ... args )
+{ return std::unique_ptr<T>( new T( std::forward<Args>( args )... ) ); }
 
 // Generic algorithms =======================================================
 
@@ -1572,7 +1577,7 @@ struct buff_t
 
   const char* name() { return name_str.c_str(); }
 
-  expr_t* create_expression( const std::string& type );
+  expr_ptr create_expression( const std::string& type );
 
   static buff_t* find(   buff_t*, const std::string& name );
   static buff_t* find(    sim_t*, const std::string& name );
@@ -1659,20 +1664,6 @@ struct expr_token_t
   std::string label;
 };
 
-enum expr_data_type_t
-{
-  DATA_SPELL = 0,
-  DATA_TALENT,
-  DATA_EFFECT,
-  DATA_TALENT_SPELL,
-  DATA_CLASS_SPELL,
-  DATA_RACIAL_SPELL,
-  DATA_MASTERY_SPELL,
-  DATA_SPECIALIZATION_SPELL,
-  DATA_GLYPH_SPELL,
-  DATA_SET_BONUS_SPELL
-};
-
 struct expression_t
 {
   static int precedence( token_type_t );
@@ -1726,7 +1717,7 @@ struct expr_t : public noncopyable
   expect()
   { if ( evaluate() == TOK_STR ) return result_str; throw type_error( this ); }
 
-  static expr_t* parse( action_t*, const std::string& expr_str );
+  static expr_ptr parse( action_t*, const std::string& expr_str );
 };
 
 template <typename F>
@@ -1762,14 +1753,14 @@ struct str_expr_t : public expr_t
 };
 
 template <typename S, typename F>
-inline typename std::enable_if<std::is_arithmetic<typename std::result_of<F()>::type>::value,num_expr_t<F>*>::type
+inline typename std::enable_if<std::is_arithmetic<typename std::result_of<F()>::type>::value,expr_ptr>::type
 make_expr( S&& name, F f )
-{ return new num_expr_t<F>( std::forward<S>( name ), f ); }
+{ return make_unique<num_expr_t<F>>( std::forward<S>( name ), f ); }
 
 template <typename S, typename F>
 inline typename std::enable_if<std::is_same<typename std::result_of<F()>::type,std::string>::value,str_expr_t<F>*>::type
 make_expr( S&& name, F f )
-{ return new str_expr_t<F>( std::forward<S>( name ), f ); }
+{ return make_unique<str_expr_t<F>>( std::forward<S>( name ), f ); }
 
 namespace thread_impl { // ===================================================
 
@@ -2092,7 +2083,7 @@ public:
   void      use_optimal_buffs_and_debuffs( int value );
   void      aura_gain( const char* name, int aura_id=0 );
   void      aura_loss( const char* name, int aura_id=0 );
-  expr_t*   create_expression( action_t*, const std::string& name );
+  expr_ptr  create_expression( action_t*, const std::string& name );
   int       errorf( const char* format, ... ) PRINTF_ATTRIBUTE( 2,3 );
 };
 
@@ -3103,7 +3094,7 @@ public:
 
   talent_t* find_talent( const std::string& name, int tree = TALENT_TAB_NONE ) const;
 
-  virtual expr_t* create_expression( action_t*, const std::string& name );
+  virtual expr_ptr create_expression( action_t*, const std::string& name );
 
   virtual void create_options();
   virtual bool create_profile( std::string& profile_str, int save_type=SAVE_ALL, bool save_html=false );
@@ -3454,9 +3445,9 @@ struct action_t
   bool round_base_dmg;
 
   std::string if_expr_str;
-  std::unique_ptr<expr_t> if_expr;
+  expr_ptr if_expr;
   std::string interrupt_if_expr_str;
-  std::unique_ptr<expr_t> interrupt_if_expr;
+  expr_ptr interrupt_if_expr;
   std::string sync_str;
   action_t* sync_action;
   action_t* next;
@@ -3542,7 +3533,7 @@ public:
   virtual double total_dd_multiplier() const { return total_multiplier() * dd.base_multiplier * dd.player_multiplier * dd.target_multiplier; }
   virtual double total_td_multiplier() const { return total_multiplier() * td.base_multiplier * td.player_multiplier * td.target_multiplier; }
 
-  virtual expr_t* create_expression( const std::string& name );
+  virtual expr_ptr create_expression( const std::string& name );
 
   virtual double ppm_proc_chance( double PPM ) const;
 
@@ -3697,7 +3688,7 @@ struct dot_t
 
   const char* name() { return name_str.c_str(); }
 
-  expr_t* create_expression( const std::string& name );
+  expr_ptr create_expression( const std::string& name );
 };
 
 // Action Callback ==========================================================

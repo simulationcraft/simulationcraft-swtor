@@ -1242,10 +1242,10 @@ void action_t::init()
   }
 
   if ( ! if_expr_str.empty() )
-    if_expr.reset( expr_t::parse( this, if_expr_str ) );
+    if_expr = expr_t::parse( this, if_expr_str );
 
   if ( ! interrupt_if_expr_str.empty() )
-    interrupt_if_expr.reset( expr_t::parse( this, interrupt_if_expr_str ) );
+    interrupt_if_expr = expr_t::parse( this, interrupt_if_expr_str );
 
   if ( sim -> travel_variance && travel_speed && player -> distance )
     rng_travel = player -> get_rng( name_str + "_travel", RNG_DISTRIBUTED );
@@ -1360,7 +1360,7 @@ void action_t::check_spec( int necessary_spec )
 
 // action_t::create_expression ==============================================
 
-expr_t* action_t::create_expression( const std::string& name_str )
+expr_ptr action_t::create_expression( const std::string& name_str )
 {
   if ( name_str == "ticking" )
     return make_expr( name_str, [this](){ return dot() -> ticking; } );

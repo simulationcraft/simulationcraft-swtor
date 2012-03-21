@@ -49,7 +49,7 @@ template <typename F>
 class unary_t : public expr_t
 {
 protected:
-  const std::unique_ptr<expr_t> input;
+  const expr_ptr input;
   F f;
 
 public:
@@ -74,11 +74,11 @@ public:
 };
 
 template <typename Name, typename Input, typename F>
-inline unary_t<F>* make_unary( Name&& name, Input&& input, F&& f)
-{ return new unary_t<F>( std::forward<Name>( name ), std::forward<Input>( input ), std::forward<F>( f ) ); }
+inline expr_ptr make_unary( Name&& name, Input&& input, F&& f)
+{ return make_unique<unary_t<F>>( std::forward<Name>( name ), std::forward<Input>( input ), std::forward<F>( f ) ); }
 
 template <typename Name, typename Input>
-expr_t* select_unary( token_type_t op, Name&& name, Input&& input )
+expr_ptr select_unary( token_type_t op, Name&& name, Input&& input )
 {
 #define create( lambda ) make_unary( std::forward<Name>( name ), \
                                      std::forward<Input>( input ), \
@@ -110,9 +110,9 @@ expr_t* select_unary( token_type_t op, Name&& name, Input&& input )
 class binary_t : public expr_t
 {
 protected:
-  const std::unique_ptr<expr_t> left, right;
+  const expr_ptr left, right;
 
-  static bool bool_operand( const std::unique_ptr<expr_t>& operand )
+  static bool bool_operand( const expr_ptr& operand )
   {
     switch ( operand -> evaluate() )
     {
@@ -239,7 +239,7 @@ public:
 };
 
 template <typename Name, typename Left, typename Right>
-expr_t* select_binary( Name&& n, token_type_t operation, Left&& l, Right&& r )
+expr_ptr select_binary( Name&& n, token_type_t operation, Left&& l, Right&& r )
 {
 #define create( t ) ( new t( std::forward<Name>( n ), \
                              std::forward<Left>( l ), \
@@ -590,19 +590,19 @@ bool expression_t::convert_to_rpn( std::vector<expr_token_t>& tokens )
 
 // build_expression_tree ====================================================
 
-static expr_t* build_expression_tree( action_t* action,
-                                      std::vector<expr_token_t>& tokens )
+static expr_ptr build_expression_tree( action_t* action,
+                                       std::vector<expr_token_t>& tokens )
 {
-  std::vector<std::unique_ptr<expr_t>> stack;
+  std::vector<expr_ptr> stack;
 
   for ( expr_token_t& t : tokens )
   {
     if ( t.type == TOK_NUM )
-      stack.emplace_back( new num_const_expr_t( t.label, atof( t.label.c_str() ) ) );
+      stack.emplace_back( make_unique<num_const_expr_t>( t.label, atof( t.label.c_str() ) ) );
 
     else if ( t.type == TOK_STR )
     {
-      std::unique_ptr<expr_t> e( action -> create_expression( t.label ) );
+      expr_ptr e = action -> create_expression( t.label );
       if ( unlikely( ! e ) )
       {
         action -> sim -> errorf( "Player %s action %s : Unable to decode expression function '%s'\n",
@@ -620,7 +620,7 @@ static expr_t* build_expression_tree( action_t* action,
         // FIXME: Report expression error and cancel the sim
         return nullptr;
       }
-      std::unique_ptr<expr_t> input = std::move( stack.back() ); stack.pop_back();
+      expr_ptr input = std::move( stack.back() ); stack.pop_back();
       assert( input );
       stack.emplace_back( select_unary( t.type, t.label, std::move( input ) ) );
     }
@@ -632,9 +632,9 @@ static expr_t* build_expression_tree( action_t* action,
         // FIXME: Report expression error and cancel the sim
         return nullptr;
       }
-      std::unique_ptr<expr_t> right = std::move( stack.back() ); stack.pop_back();
+      expr_ptr right = std::move( stack.back() ); stack.pop_back();
       assert( right );
-      std::unique_ptr<expr_t> left  = std::move( stack.back() ); stack.pop_back();
+      expr_ptr left  = std::move( stack.back() ); stack.pop_back();
       assert( left );
       stack.emplace_back( select_binary( t.label, t.type,
                                          std::move( left ), std::move( right ) ) );
@@ -656,7 +656,7 @@ static expr_t* build_expression_tree( action_t* action,
 
 // expr_t::parse ============================================================
 
-expr_t* expr_t::parse( action_t* action, const std::string& expr_str )
+expr_ptr expr_t::parse( action_t* action, const std::string& expr_str )
 {
   if ( expr_str.empty() ) return 0;
 
@@ -672,18 +672,16 @@ expr_t* expr_t::parse( action_t* action, const std::string& expr_str )
   {
     action -> sim -> errorf( "%s-%s: Unable to convert %s into RPN\n", action -> player -> name(), action -> name(), expr_str.c_str() );
     action -> sim -> cancel();
-    return 0;
+    return nullptr;
   }
 
   if ( unlikely( action -> sim -> debug ) ) expression_t::print_tokens( tokens, action -> sim );
 
-  expr_t* e = build_expression_tree( action, tokens );
-
+  expr_ptr e = build_expression_tree( action, tokens );
   if ( unlikely( ! e ) )
   {
     action -> sim -> errorf( "%s-%s: Unable to build expression tree from %s\n", action -> player -> name(), action -> name(), expr_str.c_str() );
     action -> sim -> cancel();
-    return 0;
   }
 
   return e;

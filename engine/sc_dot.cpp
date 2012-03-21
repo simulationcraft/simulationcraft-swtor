@@ -199,7 +199,7 @@ int dot_t::ticks()
 
 // dot_t::create_expression =================================================
 
-expr_t* dot_t::create_expression( const std::string& name )
+expr_ptr dot_t::create_expression( const std::string& name )
 {
   if ( name == "duration" )
     return make_expr( "dot_duration", [this]{ return action -> num_ticks * action -> tick_time().total_seconds(); } );

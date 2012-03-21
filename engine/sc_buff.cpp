@@ -764,7 +764,7 @@ buff_t* buff_t::find( buff_t* b, const std::string& name_str )
 
 // buff_t::create_expression ================================================
 
-expr_t* buff_t::create_expression( const std::string& type )
+expr_ptr buff_t::create_expression( const std::string& type )
 {
   if ( type == "remains" )
     return make_expr( "buff_" + type, [this]{ return remains().total_seconds(); } );
