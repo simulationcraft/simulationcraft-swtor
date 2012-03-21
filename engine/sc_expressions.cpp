@@ -80,37 +80,29 @@ inline unary_t<F>* make_unary( Name&& name, Input&& input, F&& f)
 template <typename Name, typename Input>
 expr_t* select_unary( token_type_t op, Name&& name, Input&& input )
 {
+#define create( lambda ) make_unary( std::forward<Name>( name ), \
+                                     std::forward<Input>( input ), \
+                                    ( lambda ) )
   switch( op )
   {
   case TOK_PLUS:
-    return make_unary( std::forward<Name>( name ),
-                       std::forward<Input>( input ),
-                       []( double v ){ return v; } );
+    return create( []( double v ){ return v; } );
   case TOK_MINUS:
-    return make_unary( std::forward<Name>( name ),
-                       std::forward<Input>( input ),
-                       []( double v ){ return -v; } );
+    return create( []( double v ){ return -v; } );
   case TOK_NOT:
-    return make_unary( std::forward<Name>( name ),
-                       std::forward<Input>( input ),
-                       []( double v ){ return ! v; } );
+    return create( []( double v ){ return ! v; } );
   case TOK_ABS:
-    return make_unary( std::forward<Name>( name ),
-                       std::forward<Input>( input ),
-                       []( double v ){ return std::fabs( v ); } );
+    return create( []( double v ){ return std::fabs( v ); } );
   case TOK_FLOOR:
-    return make_unary( std::forward<Name>( name ),
-                       std::forward<Input>( input ),
-                       []( double v ){ return std::floor( v ); } );
+    return create( []( double v ){ return std::floor( v ); } );
   case TOK_CEIL:
-    return make_unary( std::forward<Name>( name ),
-                       std::forward<Input>( input ),
-                       []( double v ){ return std::ceil( v ); } );
+    return create( []( double v ){ return std::ceil( v ); } );
   default:
     // FIXME: report invalid operation code.
     assert( false );
     return nullptr;
   }
+#undef create
 }
 
 // Binary Operators =========================================================
@@ -249,60 +241,40 @@ public:
 template <typename Name, typename Left, typename Right>
 expr_t* select_binary( Name&& n, token_type_t operation, Left&& l, Right&& r )
 {
+#define create( t ) ( new t( std::forward<Name>( n ), \
+                             std::forward<Left>( l ), \
+                             std::forward<Right>( r ) ) )
   switch( operation )
   {
   case TOK_ADD:
-    return new binary_op_t<std::plus>( std::forward<Name>( n ),
-                                       std::forward<Left>( l ),
-                                       std::forward<Right>( r ) );
+    return create( binary_op_t<std::plus> );
   case TOK_SUB:
-    return new binary_op_t<std::minus>( std::forward<Name>( n ),
-                                        std::forward<Left>( l ),
-                                        std::forward<Right>( r ) );
+    return create( binary_op_t<std::minus> );
   case TOK_MULT:
-    return new binary_op_t<std::multiplies>( std::forward<Name>( n ),
-                                             std::forward<Left>( l ),
-                                             std::forward<Right>( r ) );
+    return create( binary_op_t<std::multiplies> );
   case TOK_DIV:
-    return new binary_op_t<std::divides>( std::forward<Name>( n ),
-                                          std::forward<Left>( l ),
-                                          std::forward<Right>( r ) );
+    return create( binary_op_t<std::divides> );
   case TOK_EQ:
-    return new binary_compare_t<std::equal_to>( std::forward<Name>( n ),
-                                                std::forward<Left>( l ),
-                                                std::forward<Right>( r ) );
+    return create( binary_compare_t<std::equal_to> );
   case TOK_NOTEQ:
-    return new binary_compare_t<std::not_equal_to>( std::forward<Name>( n ),
-                                                    std::forward<Left>( l ),
-                                                    std::forward<Right>( r ) );
+    return create( binary_compare_t<std::not_equal_to> );
   case TOK_LT:
-    return new binary_compare_t<std::less>( std::forward<Name>( n ),
-                                            std::forward<Left>( l ),
-                                            std::forward<Right>( r ) );
+    return create( binary_compare_t<std::less> );
   case TOK_LTEQ:
-    return new binary_compare_t<std::less_equal>( std::forward<Name>( n ),
-                                                  std::forward<Left>( l ),
-                                                  std::forward<Right>( r ) );
+    return create( binary_compare_t<std::less_equal> );
   case TOK_GT:
-    return new binary_compare_t<std::greater>( std::forward<Name>( n ),
-                                               std::forward<Left>( l ),
-                                               std::forward<Right>( r ) );
+    return create( binary_compare_t<std::greater> );
   case TOK_GTEQ:
-    return new binary_compare_t<std::greater_equal>( std::forward<Name>( n ),
-                                                     std::forward<Left>( l ),
-                                                     std::forward<Right>( r ) );
+    return create( binary_compare_t<std::greater_equal> );
   case TOK_AND:
-    return new logical_and_t( std::forward<Name>( n ),
-                              std::forward<Left>( l ),
-                              std::forward<Right>( r ));
+    return create( logical_and_t );
   case TOK_OR:
-    return new logical_or_t( std::forward<Name>( n ),
-                             std::forward<Left>( l ),
-                             std::forward<Right>( r ));
+    return create( logical_or_t );
   default:
     assert( false );
     return nullptr;
   }
+#undef create
 }
 
 } // ANONYMOUS namespace ====================================================
