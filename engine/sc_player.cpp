@@ -1457,29 +1457,17 @@ double player_t::get_attribute( attribute_type a ) const
 // player_t::energy_regen_per_second() ======================================
 
 double player_t::energy_regen_per_second() const
-{
-  double r = base_energy_regen_per_second;
-
-  return r;
-}
+{ return base_energy_regen_per_second; }
 
 // player_t::ammo_regen_per_second() ========================================
 
 double player_t::ammo_regen_per_second() const
-{
-  double r = base_ammo_regen_per_second;
-
-  return r;
-}
+{ return base_ammo_regen_per_second; }
 
 // player_t::force_regen_per_second() =======================================
 
 double player_t::force_regen_per_second() const
-{
-  double r = base_force_regen_per_second;
-
-  return r;
-}
+{ return base_force_regen_per_second; }
 
 // player_t::composite_power() ==============================================
 
@@ -2427,7 +2415,7 @@ void player_t::regen( const timespan_t periodicity )
 
   else if ( resource_type == RESOURCE_FORCE )
   {
-    double force_regen = periodicity.total_seconds() * force_regen_per_second();
+    double force_regen = periodicity.total_seconds() * base_force_regen_per_second;
 
     resource_gain( RESOURCE_FORCE, force_regen, gains.force_regen );
   }

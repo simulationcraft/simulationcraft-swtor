@@ -206,6 +206,7 @@ struct shadow_assassin_t : public player_t
   virtual void      init_spells();
   virtual int       primary_resource() const;
   virtual int       primary_role() const;
+  virtual double    force_regen_per_second() const; // override
   virtual void      regen( timespan_t periodicity );
   virtual void      reset();
           void      create_talents();
@@ -251,8 +252,7 @@ struct shadow_assassin_t : public player_t
   }
 };
 
-namespace
-{ // ANONYMOUS NAMESPACE ==========================================
+namespace { // ANONYMOUS NAMESPACE ==========================================
 
 // ==========================================================================
 // Sith assassin Abilities
@@ -1353,7 +1353,7 @@ struct thrash_t : public shadow_assassin_attack_t
 
 // Action Callbacks ( Charge procs )
 
-// Lightning Charge | Force Technique ===========
+// Lightning Charge | Force Technique =======================================
 
 class shadow_assassin_action_callback_t : public action_callback_t
 {
@@ -1425,7 +1425,7 @@ struct lightning_charge_callback_t : public shadow_assassin_action_callback_t
   }
 };
 
-// Surging Charge | Shadow Technique ========================
+// Surging Charge | Shadow Technique ========================================
 
 struct surging_charge_callback_t : public shadow_assassin_action_callback_t
 {
@@ -1519,7 +1519,7 @@ struct surging_charge_callback_t : public shadow_assassin_action_callback_t
   }
 };
 
-// Dark Charge |  ===========
+// Dark Charge | Combat Technique ===========================================
 
 struct dark_charge_callback_t : public shadow_assassin_action_callback_t
 {
@@ -1648,7 +1648,7 @@ action_t* shadow_assassin_t::create_action( const std::string& name,
   return player_t::create_action( name, options_str );
 }
 
-// shadow_assassin_t::init_talents =====================================================
+// shadow_assassin_t::init_talents ==========================================
 
 void shadow_assassin_t::init_talents()
 {
@@ -1703,7 +1703,7 @@ void shadow_assassin_t::init_talents()
   talents.creeping_terror       = find_talent( "Creeping Terror" );
 }
 
-// shadow_assassin_t::init_base ========================================================
+// shadow_assassin_t::init_base =============================================
 
 void shadow_assassin_t::init_base()
 {
@@ -1716,7 +1716,7 @@ void shadow_assassin_t::init_base()
   resource_base[RESOURCE_FORCE] += 100 + talents.deceptive_power->rank() * 10;
 }
 
-// shadow_assassin_t::init_benefits =======================================================
+// shadow_assassin_t::init_benefits =========================================
 
 void shadow_assassin_t::init_benefits()
 {
@@ -1736,7 +1736,7 @@ void shadow_assassin_t::init_benefits()
   }
 }
 
-// shadow_assassin_t::init_buffs =======================================================
+// shadow_assassin_t::init_buffs ============================================
 
 void shadow_assassin_t::init_buffs()
 {
@@ -1964,7 +1964,7 @@ void shadow_assassin_t::init_actions()
   player_t::init_actions();
 }
 
-// shadow_assassin_t::init_spells ==================================================
+// shadow_assassin_t::init_spells ===========================================
 
 void shadow_assassin_t::init_spells()
 {
@@ -1986,14 +1986,12 @@ void shadow_assassin_t::init_spells()
   register_spell_callback( RESULT_HIT_MASK, new duplicity_callback_t( this ) );
 }
 
-// shadow_assassin_t::primary_resource ==================================================
+// shadow_assassin_t::primary_resource ======================================
 
 int shadow_assassin_t::primary_resource() const
-{
-  return RESOURCE_FORCE;
-}
+{ return RESOURCE_FORCE; }
 
-// shadow_assassin_t::primary_role ==================================================
+// shadow_assassin_t::primary_role ==========================================
 
 int shadow_assassin_t::primary_role() const
 {
@@ -2013,25 +2011,31 @@ int shadow_assassin_t::primary_role() const
   return ROLE_HYBRID;
 }
 
-// shadow_assassin_t::regen ==================================================
+// shadow_assassin_t::force_regen_per_second ================================
+
+double shadow_assassin_t::force_regen_per_second() const
+{
+  double m = talents.blood_of_sith -> rank() * 0.1;
+  if (  buffs.dark_embrace -> check() )
+    m += talents.dark_embrace -> rank() * 0.25;
+
+  return player_t::force_regen_per_second()
+      + base_force_regen_per_second * m;
+}
+
+// shadow_assassin_t::regen =================================================
 
 void shadow_assassin_t::regen( timespan_t periodicity )
 {
   player_t::regen( periodicity );
 
-  if ( buffs.dark_embrace->up() )
-  {
-    double force_regen = periodicity.total_seconds() * force_regen_per_second() *
-                         buffs.dark_embrace->check() * talents.dark_embrace->rank() * 0.25;
-    resource_gain( RESOURCE_FORCE, force_regen, gains.dark_embrace );
-  }
+  double force_regen = periodicity.total_seconds() * base_force_regen_per_second;
+
+  if ( buffs.dark_embrace -> up() )
+    resource_gain( RESOURCE_FORCE, force_regen * talents.dark_embrace -> rank() * 0.25, gains.dark_embrace );
 
   if ( talents.blood_of_sith -> rank() )
-  {
-    double force_regen = periodicity.total_seconds() * force_regen_per_second() *
-                         talents.blood_of_sith -> rank() * 0.1;
-    resource_gain( RESOURCE_FORCE, force_regen, gains.blood_of_sith );
-  }
+    resource_gain( RESOURCE_FORCE, force_regen * talents.blood_of_sith -> rank() * 0.1, gains.blood_of_sith );
 }
 
 // shadow_assassin_t::reset ===========================================================

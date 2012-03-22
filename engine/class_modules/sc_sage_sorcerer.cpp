@@ -235,6 +235,7 @@ struct sage_sorcerer_t : public player_t
   virtual int       primary_resource() const;
   virtual int       primary_role() const;
 
+  virtual double    force_regen_per_second() const; // override
   virtual void      regen( timespan_t periodicity );
 
   virtual double    force_bonus_multiplier() const;
@@ -1944,22 +1945,29 @@ int sage_sorcerer_t::primary_role() const
   }
 }
 
+// sage_sorcerer_t::force_regen_per_second =================================
+
+double sage_sorcerer_t::force_regen_per_second() const
+{
+  double regen = player_t::force_regen_per_second();
+  regen += base_force_regen_per_second * ( buffs.concentration -> check() * 0.10
+                                           - buffs.noble_sacrifice -> check() * 0.25 );
+  return regen;
+}
+
 // sage_sorcerer_t::regen ==================================================
 
 void sage_sorcerer_t::regen( timespan_t periodicity )
 {
   player_t::regen( periodicity );
 
+  double force_regen = periodicity.total_seconds() * base_force_regen_per_second;
+
   if ( buffs.concentration -> up() )
-  {
-    double force_regen = periodicity.total_seconds() * force_regen_per_second() * buffs.concentration -> check() * 0.10;
-    resource_gain( RESOURCE_FORCE, force_regen, gains.concentration );
-  }
+    resource_gain( RESOURCE_FORCE, force_regen * buffs.concentration -> check() * 0.10, gains.concentration );
+
   if ( buffs.noble_sacrifice -> up() )
-  {
-    double force_regen = periodicity.total_seconds() * force_regen_per_second() * buffs.noble_sacrifice -> check() * 0.25;
-    resource_loss( RESOURCE_FORCE, force_regen, gains.noble_sacrifice_power_regen_lost );
-  }
+    resource_loss( RESOURCE_FORCE, force_regen * buffs.noble_sacrifice -> check() * 0.25, gains.noble_sacrifice_power_regen_lost );
 }
 
 // sage_sorcerer_t::force_bonus_multiplier ================================
