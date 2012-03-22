@@ -993,7 +993,15 @@ void sim_t::combat( int iteration )
     else
     {
       if ( debug ) log_t::output( this, "Executing event: %s", e -> name );
-      e -> execute();
+      try
+      {
+        e -> execute();
+      }
+      catch ( cancel_t& err )
+      {
+        errorf( "%s\n", err.message.c_str() );
+        cancel();
+      }
     }
     delete e;
   }

@@ -3997,9 +3997,8 @@ struct wait_fixed_t : public wait_action_base_t
 
     catch ( expr_t::error_t& err )
     {
-      sim -> errorf( "Invalid expression result for wait time '%s': %s\n",
-                     wait_str.c_str(), err.message.c_str() );
-      sim -> cancel();
+      throw cancel_t( ( boost::format( "Invalid expression result for wait time '%s': %s" )
+                        % wait_str % err.message ).str() );
     }
 
     return player -> available();

@@ -51,6 +51,7 @@
 
 // Boost includes
 #include <boost/checked_delete.hpp>
+#include <boost/format.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext.hpp>
@@ -118,6 +119,7 @@ struct benefit_t;
 struct buff_t;
 struct buff_uptime_t;
 struct callback_t;
+struct cancel_t;
 struct companion_t;
 struct cooldown_t;
 struct dot_t;
@@ -1627,6 +1629,23 @@ struct debuff_t : public buff_t
 
 typedef struct buff_t aura_t;
 
+
+class cancel_t : public std::exception
+{
+public:
+  std::string message;
+
+  template <typename Message>
+  cancel_t( Message&& msg ) : message( std::forward<Message>( msg ) ) {}
+
+  cancel_t( cancel_t&& ) = default;
+  cancel_t( const cancel_t& ) = default;
+
+  virtual ~cancel_t() noexcept {}
+
+  virtual const char* what() const noexcept { return message.c_str(); }
+};
+
 // Expressions ==============================================================
 
 enum token_type_t
@@ -1680,16 +1699,13 @@ struct expression_t
 class expr_t : public noncopyable
 {
 public:
-  struct error_t : public std::exception
+  struct error_t : public cancel_t
   {
-    std::string message;
     expr_t* expr;
 
     template <typename S>
     error_t( S&& s, expr_t* expr ) :
-      message( std::forward<S>( s ) ), expr( expr ) {}
-    virtual const char* what() const noexcept { return message.c_str(); }
-    virtual ~error_t() noexcept {}
+      cancel_t( std::forward<S>( s ) ), expr( expr ) {}
   };
 
   std::string name_str;
