@@ -7,6 +7,39 @@
 
 namespace { // ANONYMOUS ====================================================
 
+enum token_type_t
+{
+  TOK_UNKNOWN=0,
+  TOK_PLUS,
+  TOK_MINUS,
+  TOK_MULT,
+  TOK_DIV,
+  TOK_ADD,
+  TOK_SUB,
+  TOK_AND,
+  TOK_OR,
+  TOK_NOT,
+  TOK_EQ,
+  TOK_NOTEQ,
+  TOK_LT,
+  TOK_LTEQ,
+  TOK_GT,
+  TOK_GTEQ,
+  TOK_LPAR,
+  TOK_RPAR,
+  TOK_NUM,
+  TOK_STR,
+  TOK_ABS,
+  TOK_FLOOR,
+  TOK_CEIL
+};
+
+struct expr_token_t
+{
+  token_type_t type;
+  std::string label;
+};
+
 // Constant Expressions =====================================================
 
 class const_expr_t : public expr_t
@@ -196,11 +229,9 @@ expr_ptr select_binary( Name&& n, token_type_t operation, Left&& l, Right&& r )
 #undef create
 }
 
-} // ANONYMOUS namespace ====================================================
-
 // precedence ===============================================================
 
-int expression_t::precedence( token_type_t expr_token_type )
+int precedence( token_type_t expr_token_type )
 {
   switch ( expr_token_type )
   {
@@ -228,8 +259,6 @@ int expression_t::precedence( token_type_t expr_token_type )
   case TOK_LTEQ:
   case TOK_GT:
   case TOK_GTEQ:
-  case TOK_IN:
-  case TOK_NOTIN:
     return 2;
 
   case TOK_AND:
@@ -244,7 +273,7 @@ int expression_t::precedence( token_type_t expr_token_type )
 
 // is_unary =================================================================
 
-bool expression_t::is_unary( token_type_t expr_token_type )
+bool is_unary( token_type_t expr_token_type )
 {
   switch ( expr_token_type )
   {
@@ -262,7 +291,7 @@ bool expression_t::is_unary( token_type_t expr_token_type )
 
 // is_binary ================================================================
 
-bool expression_t::is_binary( token_type_t expr_token_type )
+bool is_binary( token_type_t expr_token_type )
 {
   switch ( expr_token_type )
   {
@@ -278,8 +307,6 @@ bool expression_t::is_binary( token_type_t expr_token_type )
   case TOK_GTEQ:
   case TOK_AND:
   case TOK_OR:
-  case TOK_IN:
-  case TOK_NOTIN:
     return true;
   default:
     return false;
@@ -288,11 +315,11 @@ bool expression_t::is_binary( token_type_t expr_token_type )
 
 // next_token ===============================================================
 
-token_type_t expression_t::next_token( action_t* action,
-                                       const std::string& expr_str,
-                                       int& current_index,
-                                       std::string& token_str,
-                                       token_type_t prev_token )
+token_type_t next_token( action_t* action,
+                         const std::string& expr_str,
+                         int& current_index,
+                         std::string& token_str,
+                         token_type_t prev_token )
 {
   unsigned char c = expr_str[ current_index++ ];
 
@@ -318,15 +345,9 @@ token_type_t expression_t::next_token( action_t* action,
     if ( expr_str[ current_index ] == '|' ) current_index++;
     return TOK_OR;
   }
-  if ( c == '~' )
-  {
-    if ( expr_str[ current_index ] == '~' ) current_index++;
-    return TOK_IN;
-  }
   if ( c == '!' )
   {
     if ( expr_str[ current_index ] == '=' ) { current_index++; token_str += "="; return TOK_NOTEQ; }
-    if ( expr_str[ current_index ] == '~' ) { current_index++; token_str += "~"; return TOK_NOTIN; }
     return TOK_NOT;
   }
   if ( c == '=' )
@@ -391,15 +412,15 @@ token_type_t expression_t::next_token( action_t* action,
 // parse_tokens =============================================================
 
 std::vector<expr_token_t>
-expression_t::parse_tokens( action_t* action,
-                            const std::string& expr_str )
+parse_tokens( action_t* action, const std::string& expr_str )
 {
   std::vector<expr_token_t> tokens;
   expr_token_t token;
   int current_index=0;
   token_type_t t = TOK_UNKNOWN;
 
-  while ( ( token.type = next_token( action, expr_str, current_index, token.label, t ) ) != TOK_UNKNOWN )
+  while ( ( token.type = next_token( action, expr_str, current_index,
+                                     token.label, t ) ) != TOK_UNKNOWN )
   {
     t = token.type;
     tokens.push_back( token );
@@ -410,7 +431,7 @@ expression_t::parse_tokens( action_t* action,
 
 // print_tokens =============================================================
 
-void expression_t::print_tokens( const std::vector<expr_token_t>& tokens, sim_t* sim )
+void print_tokens( const std::vector<expr_token_t>& tokens, sim_t* sim )
 {
   log_t::output( sim, "tokens:\n" );
   for ( auto& t : tokens )
@@ -419,7 +440,7 @@ void expression_t::print_tokens( const std::vector<expr_token_t>& tokens, sim_t*
 
 // convert_to_unary =========================================================
 
-void expression_t::convert_to_unary( std::vector<expr_token_t>& tokens )
+void convert_to_unary( std::vector<expr_token_t>& tokens )
 {
   size_t num_tokens = tokens.size();
   for ( size_t i=0; i < num_tokens; i++ )
@@ -444,7 +465,7 @@ void expression_t::convert_to_unary( std::vector<expr_token_t>& tokens )
 
 // convert_to_rpn ===========================================================
 
-bool expression_t::convert_to_rpn( std::vector<expr_token_t>& tokens )
+bool convert_to_rpn( std::vector<expr_token_t>& tokens )
 {
   std::vector<expr_token_t> rpn, stack;
 
@@ -532,7 +553,7 @@ static expr_ptr build_expression_tree( action_t* action,
       stack.emplace_back( std::move( e ) );
     }
 
-    else if ( expression_t::is_unary( t.type ) )
+    else if ( is_unary( t.type ) )
     {
       if ( unlikely( stack.size() < 1 ) )
       {
@@ -544,7 +565,7 @@ static expr_ptr build_expression_tree( action_t* action,
       stack.emplace_back( select_unary( t.type, t.label, std::move( input ) ) );
     }
 
-    else if ( expression_t::is_binary( t.type ) )
+    else if ( is_binary( t.type ) )
     {
       if ( unlikely( stack.size() < 2 ) )
       {
@@ -573,28 +594,30 @@ static expr_ptr build_expression_tree( action_t* action,
   return nullptr;
 }
 
+} // ANONYMOUS namespace ====================================================
+
 // expr_t::parse ============================================================
 
 expr_ptr expr_t::parse( action_t* action, const std::string& expr_str )
 {
   if ( expr_str.empty() ) return 0;
 
-  std::vector<expr_token_t> tokens = expression_t::parse_tokens( action, expr_str );
+  std::vector<expr_token_t> tokens = parse_tokens( action, expr_str );
 
-  if ( unlikely( action -> sim -> debug ) ) expression_t::print_tokens( tokens, action -> sim );
+  if ( unlikely( action -> sim -> debug ) ) print_tokens( tokens, action -> sim );
 
-  expression_t::convert_to_unary( tokens );
+  convert_to_unary( tokens );
 
-  if ( unlikely( action -> sim -> debug ) ) expression_t::print_tokens( tokens, action -> sim );
+  if ( unlikely( action -> sim -> debug ) ) print_tokens( tokens, action -> sim );
 
-  if ( unlikely( ! expression_t::convert_to_rpn( tokens ) ) )
+  if ( unlikely( ! convert_to_rpn( tokens ) ) )
   {
     action -> sim -> errorf( "%s-%s: Unable to convert %s into RPN\n", action -> player -> name(), action -> name(), expr_str.c_str() );
     action -> sim -> cancel();
     return nullptr;
   }
 
-  if ( unlikely( action -> sim -> debug ) ) expression_t::print_tokens( tokens, action -> sim );
+  if ( unlikely( action -> sim -> debug ) ) print_tokens( tokens, action -> sim );
 
   expr_ptr e = build_expression_tree( action, tokens );
   if ( unlikely( ! e ) )

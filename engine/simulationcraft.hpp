@@ -1650,54 +1650,6 @@ public:
 
 // Expressions ==============================================================
 
-enum token_type_t
-{
-  TOK_UNKNOWN=0,
-  TOK_PLUS,
-  TOK_MINUS,
-  TOK_MULT,
-  TOK_DIV,
-  TOK_ADD,
-  TOK_SUB,
-  TOK_AND,
-  TOK_OR,
-  TOK_NOT,
-  TOK_EQ,
-  TOK_NOTEQ,
-  TOK_LT,
-  TOK_LTEQ,
-  TOK_GT,
-  TOK_GTEQ,
-  TOK_LPAR,
-  TOK_RPAR,
-  TOK_IN,
-  TOK_NOTIN,
-  TOK_NUM,
-  TOK_STR,
-  TOK_ABS,
-  TOK_FLOOR,
-  TOK_CEIL
-};
-
-struct expr_token_t
-{
-  token_type_t type;
-  std::string label;
-};
-
-struct expression_t
-{
-  static int precedence( token_type_t );
-  static bool is_unary( token_type_t );
-  static bool is_binary( token_type_t );
-  static token_type_t next_token( action_t* action, const std::string& expr_str,
-                                  int& current_index, std::string& token_str, token_type_t prev_token );
-  static std::vector<expr_token_t> parse_tokens( action_t* action, const std::string& expr_str );
-  static void print_tokens( const std::vector<expr_token_t>& tokens, sim_t* sim );
-  static void convert_to_unary( std::vector<expr_token_t>& tokens );
-  static bool convert_to_rpn( std::vector<expr_token_t>& tokens );
-};
-
 class expr_t : public noncopyable
 {
 public:
