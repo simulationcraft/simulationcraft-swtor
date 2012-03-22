@@ -237,13 +237,6 @@ void action_t::init_action_t_()
   time_to_execute                = timespan_t::zero;
   time_to_travel                 = timespan_t::zero;
   travel_speed                   = 0.0;
-  bloodlust_active               = 0;
-  max_alacrity                   = 0.0;
-  alacrity_gain_percentage       = 0.0;
-  min_current_time               = timespan_t::zero;
-  max_current_time               = timespan_t::zero;
-  min_health_percentage          = 0.0;
-  max_health_percentage          = 0.0;
   moving                         = -1;
   vulnerable                     = 0;
   invulnerable                   = 0;
@@ -311,11 +304,6 @@ void action_t::parse_options( option_t*          options,
 {
   option_t base_options[] =
   {
-    { "bloodlust",              OPT_BOOL,   &bloodlust_active      },
-    { "alacrity<",              OPT_FLT,    &max_alacrity             },
-    { "alacrity_gain_percentage>", OPT_FLT, &alacrity_gain_percentage },
-    { "health_percentage<",     OPT_FLT,    &max_health_percentage },
-    { "health_percentage>",     OPT_FLT,    &min_health_percentage },
     { "if",                     OPT_STRING, &if_expr_str           },
     { "interrupt_if",           OPT_STRING, &interrupt_if_expr_str },
     { "interrupt",              OPT_BOOL,   &interrupt             },
@@ -324,8 +312,6 @@ void action_t::parse_options( option_t*          options,
     { "flying",                 OPT_BOOL,   &flying                },
     { "moving",                 OPT_BOOL,   &moving                },
     { "sync",                   OPT_STRING, &sync_str              },
-    { "time<",                  OPT_TIMESPAN, &max_current_time    },
-    { "time>",                  OPT_TIMESPAN, &min_current_time    },
     { "travel_speed",           OPT_FLT,    &travel_speed          },
     { "vulnerable",             OPT_BOOL,   &vulnerable            },
     { "wait_on_ready",          OPT_BOOL,   &wait_on_ready         },
@@ -1132,18 +1118,6 @@ bool action_t::ready()
   if ( if_expr && ! if_expr -> success() )
     return false;
 
-  if ( min_current_time > timespan_t::zero )
-    if ( sim -> current_time < min_current_time )
-      return false;
-
-  if ( max_current_time > timespan_t::zero )
-    if ( sim -> current_time > max_current_time )
-      return false;
-
-  if ( max_alacrity > 0 )
-    if ( ( ( 1.0 / alacrity() ) - 1.0 ) > max_alacrity ) // FIXME: SWTOR
-      return false;
-
   if ( sync_action && ! sync_action -> ready() )
     return false;
 
@@ -1176,14 +1150,6 @@ bool action_t::ready()
 
   if ( flying )
     if ( ! t -> debuffs.flying -> check() )
-      return false;
-
-  if ( min_health_percentage > 0 )
-    if ( t -> health_percentage() < min_health_percentage )
-      return false;
-
-  if ( max_health_percentage > 0 )
-    if ( t -> health_percentage() > max_health_percentage )
       return false;
 
   return true;

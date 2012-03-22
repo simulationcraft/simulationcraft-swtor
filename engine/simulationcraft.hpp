@@ -3412,11 +3412,6 @@ struct action_t
   event_t* travel_event;
   timespan_t time_to_execute, time_to_travel;
   double travel_speed;
-  int bloodlust_active;
-  double max_alacrity;
-  double alacrity_gain_percentage;
-  timespan_t min_current_time, max_current_time;
-  double min_health_percentage, max_health_percentage;
   int moving, vulnerable, invulnerable, wait_on_ready, interrupt, not_flying, flying;
   bool round_base_dmg;
 
