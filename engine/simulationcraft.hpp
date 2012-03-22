@@ -1730,10 +1730,13 @@ struct fn_expr_t : public expr_t
   { return f(); }
 };
 
-template <typename S, typename F>
-inline expr_ptr
-make_expr( S&& name, F&& f )
-{ return make_unique<fn_expr_t<F>>( std::forward<S>( name ), std::forward<F>( f ) ); }
+template <typename Name, typename Function>
+inline std::unique_ptr<fn_expr_t<typename std::remove_reference<Function>::type>>
+make_expr( Name&& name, Function&& f )
+{
+  typedef fn_expr_t<typename std::remove_reference<Function>::type> t;
+  return make_unique<t>( std::forward<Name>( name ), std::forward<Function>( f ) );
+}
 
 namespace thread_impl { // ===================================================
 
