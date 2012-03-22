@@ -1133,7 +1133,7 @@ bool action_t::ready()
       return false;
 
   if ( moving != -1 )
-    if ( moving != ( player -> is_moving() ? 1 : 0 ) )
+    if ( ( moving != 0 ) != player -> is_moving() )
       return false;
 
   if ( vulnerable )
@@ -1161,13 +1161,10 @@ void action_t::init()
 {
   if ( initialized ) return;
 
-  std::string buffer;
-  for ( int i=0; i < RESULT_MAX; i++ )
+  for ( result_type i=RESULT_NONE; i < RESULT_MAX; ++i )
   {
-    buffer  = name();
-    buffer += "_";
-    buffer += util_t::result_type_string( i );
-    rng[ i ] = player -> get_rng( buffer, ( ( i == RESULT_CRIT ) ? RNG_DISTRIBUTED : RNG_CYCLIC ) );
+    rng[ i ] = player -> get_rng( std::string( name() ) + '_' + util_t::result_type_string( i ),
+                                  ( ( i == RESULT_CRIT ) ? RNG_DISTRIBUTED : RNG_CYCLIC ) );
   }
 
   if ( ! rank_level )
@@ -1177,12 +1174,18 @@ void action_t::init()
     else
     {
       assert( boost::is_sorted( rank_level_list ) );
-      for ( unsigned i = 0 ; i < rank_level_list.size() && player -> level >= rank_level_list[ i ]; ++i )
-        rank_level = rank_level_list[ i ];
+      for ( int rl : rank_level_list )
+      {
+        if ( player -> level < rl ) break;
+        rank_level = rl;
+      }
     }
   }
 
-  double standard_rank_amount = ( type == ACTION_HEAL || type == ACTION_ABSORB ) ? rating_t::standardhealth_healing( rank_level ) : rating_t::standardhealth_damage( rank_level );
+  double standard_rank_amount =
+      ( type == ACTION_HEAL || type == ACTION_ABSORB ) ?
+        rating_t::standardhealth_healing( rank_level ) :
+        rating_t::standardhealth_damage( rank_level );
 
   if ( dd.standardhealthpercentmin > 0 )
     dd.base_min = dd.standardhealthpercentmin * standard_rank_amount;
