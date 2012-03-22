@@ -1129,19 +1129,8 @@ bool action_t::ready()
   if ( ! player -> resource_available( resource, cost() ) )
     return false;
 
-  if ( if_expr )
-  {
-    try
-    {
-      if ( ! if_expr -> success() )
-        return false;
-    }
-    catch ( expr_t::error_t& e )
-    {
-      throw cancel_t( ( boost::format( "%1%:%2%: %3%" )
-                        % player -> name() % name() % e.message ).str() );
-    }
-  }
+  if ( if_expr && ! if_expr -> success() )
+    return false;
 
   if ( min_current_time > timespan_t::zero )
     if ( sim -> current_time < min_current_time )

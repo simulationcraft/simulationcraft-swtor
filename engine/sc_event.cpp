@@ -285,20 +285,10 @@ void dot_tick_event_t::execute()
 
   if ( dot -> action -> channeled && ( dot -> ticks() > 0 ) )
   {
-    if ( auto& expr = dot -> action -> interrupt_if_expr )
-    {
-      try
-      {
-        if ( expr -> success() )
-          dot -> current_tick = dot -> num_ticks;
-      }
-      catch ( expr_t::error_t& e )
-      {
-        throw cancel_t( ( boost::format( "%s:%s: %s" ) % player -> name()
-                          % dot -> action -> name() % e.message ).str() );
-      }
-    }
-    if ( dot -> action -> interrupt )
+    auto& expr = dot -> action -> interrupt_if_expr;
+    if ( expr && expr -> success() )
+      dot -> current_tick = dot -> num_ticks;
+    else if ( dot -> action -> interrupt )
     {
       // Interrupt if any higher priority action is ready.
       for ( action_t* a = dot -> action -> player -> action_list; a != dot -> action; a = a -> next )

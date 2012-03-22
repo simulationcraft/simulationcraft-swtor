@@ -1699,15 +1699,6 @@ struct expression_t
 class expr_t : public noncopyable
 {
 public:
-  struct error_t : public cancel_t
-  {
-    expr_t* expr;
-
-    template <typename S>
-    error_t( S&& s, expr_t* expr ) :
-      cancel_t( std::forward<S>( s ) ), expr( expr ) {}
-  };
-
   std::string name_str;
 
   template <typename S>

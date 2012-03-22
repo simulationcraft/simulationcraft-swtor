@@ -3989,19 +3989,11 @@ struct wait_fixed_t : public wait_action_base_t
 
   virtual timespan_t execute_time() const
   {
-    try
-    {
-      timespan_t wait = timespan_t::from_seconds( time_expr -> evaluate() );
-      if ( wait > timespan_t::zero ) return wait;
-    }
-
-    catch ( expr_t::error_t& err )
-    {
-      throw cancel_t( ( boost::format( "Invalid expression result for wait time '%s': %s" )
-                        % wait_str % err.message ).str() );
-    }
-
-    return player -> available();
+    timespan_t wait = timespan_t::from_seconds( time_expr -> evaluate() );
+    if ( wait > timespan_t::zero )
+      return wait;
+    else
+      return player -> available();
   }
 };
 
