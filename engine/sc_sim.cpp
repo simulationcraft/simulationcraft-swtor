@@ -1106,98 +1106,106 @@ void sim_t::combat_end()
 
 bool sim_t::init()
 {
-  if ( seed == 0 ) seed = ( int ) time( NULL );
-
-  if ( ! parent ) srand( seed );
-
-  rng = rng_t::create( this, "global", RNG_MERSENNE_TWISTER );
-
-  deterministic_rng = rng_t::create( this, "global_deterministic", RNG_MERSENNE_TWISTER );
-  deterministic_rng -> seed( 31459 + thread_index );
-
-  if ( scaling -> smooth_scale_factors &&
-       scaling -> scale_stat != STAT_NONE )
+  try
   {
-    smooth_rng = true;
-    average_range = true;
-    deterministic_roll = true;
-  }
+    if ( seed == 0 ) seed = ( int ) time( NULL );
 
-  default_rng_ = ( deterministic_roll ? deterministic_rng : rng );
+    if ( ! parent ) srand( seed );
 
-  // Timing wheel depth defaults to about 17 minutes with a granularity of 32 buckets per second.
-  // This makes wheel_size = 32K and it's fully used.
-  if ( wheel_seconds     <  600 ) wheel_seconds     = 1024; // 2^10  Min of 600 to ensure no wrap-around bugs with Water Shield
-  if ( wheel_granularity <=   0 ) wheel_granularity = 32;   // 2^5
+    rng = rng_t::create( this, "global", RNG_MERSENNE_TWISTER );
 
-  wheel_size = ( uint32_t ) ( wheel_seconds * wheel_granularity );
+    deterministic_rng = rng_t::create( this, "global_deterministic", RNG_MERSENNE_TWISTER );
+    deterministic_rng -> seed( 31459 + thread_index );
 
-  // Round up the wheel depth to the nearest power of 2 to enable a fast "mod" operation.
-  for ( wheel_mask = 2; wheel_mask < wheel_size; wheel_mask *= 2 ) { continue; }
-  wheel_size = wheel_mask;
-  wheel_mask--;
-
-  // The timing wheel represents an array of event lists: Each time slice has an event list.
-  delete[] timing_wheel;
-  timing_wheel = new event_t*[wheel_size];
-  std::fill( timing_wheel, timing_wheel + wheel_size, nullptr );
-
-
-  if (   queue_lag_stddev == timespan_t::zero )   queue_lag_stddev =   queue_lag * 0.25;
-  if (     gcd_lag_stddev == timespan_t::zero )     gcd_lag_stddev =     gcd_lag * 0.25;
-  if ( channel_lag_stddev == timespan_t::zero ) channel_lag_stddev = channel_lag * 0.25;
-  if ( world_lag_stddev    < timespan_t::zero ) world_lag_stddev   =   world_lag * 0.1;
-
-  // Find Already defined target, otherwise create a new one.
-  if ( debug )
-    log_t::output( this, "Creating Enemys." );
-
-  if ( target_list )
-  {
-    target = target_list;
-  }
-  else if ( ! main_target_str.empty() )
-  {
-    player_t* p = find_player( main_target_str );
-    if ( p )
-      target = p;
-  }
-  else
-    target = player_t::create( this, "enemy", "Fluffy_Pillow" );
-
-
-  if ( max_player_level < 0 )
-  {
-    for ( player_t* p = player_list; p; p = p -> next )
+    if ( scaling -> smooth_scale_factors &&
+         scaling -> scale_stat != STAT_NONE )
     {
-      if ( p -> is_enemy() || p -> is_add() )
-        continue;
-      if ( max_player_level < p -> level )
-        max_player_level = p -> level;
+      smooth_rng = true;
+      average_range = true;
+      deterministic_roll = true;
     }
-  }
 
-  if ( ! player_t::init( this ) ) return false;
+    default_rng_ = ( deterministic_roll ? deterministic_rng : rng );
 
-  // Target overrides 2
-  for ( player_t* t = target_list; t; t = t -> next )
-  {
-    if ( ! target_race.empty() )
+    // Timing wheel depth defaults to about 17 minutes with a granularity of 32 buckets per second.
+    // This makes wheel_size = 32K and it's fully used.
+    if ( wheel_seconds     <  600 ) wheel_seconds     = 1024; // 2^10  Min of 600 to ensure no wrap-around bugs with Water Shield
+    if ( wheel_granularity <=   0 ) wheel_granularity = 32;   // 2^5
+
+    wheel_size = ( uint32_t ) ( wheel_seconds * wheel_granularity );
+
+    // Round up the wheel depth to the nearest power of 2 to enable a fast "mod" operation.
+    for ( wheel_mask = 2; wheel_mask < wheel_size; wheel_mask *= 2 ) { continue; }
+    wheel_size = wheel_mask;
+    wheel_mask--;
+
+    // The timing wheel represents an array of event lists: Each time slice has an event list.
+    delete[] timing_wheel;
+    timing_wheel = new event_t*[wheel_size];
+    std::fill( timing_wheel, timing_wheel + wheel_size, nullptr );
+
+
+    if (   queue_lag_stddev == timespan_t::zero )   queue_lag_stddev =   queue_lag * 0.25;
+    if (     gcd_lag_stddev == timespan_t::zero )     gcd_lag_stddev =     gcd_lag * 0.25;
+    if ( channel_lag_stddev == timespan_t::zero ) channel_lag_stddev = channel_lag * 0.25;
+    if ( world_lag_stddev    < timespan_t::zero ) world_lag_stddev   =   world_lag * 0.1;
+
+    // Find Already defined target, otherwise create a new one.
+    if ( debug )
+      log_t::output( this, "Creating Enemys." );
+
+    if ( target_list )
     {
-      t -> race = util_t::parse_race_type( target_race );
-      t -> race_str = util_t::race_type_string( t -> race );
+      target = target_list;
     }
+    else if ( ! main_target_str.empty() )
+    {
+      player_t* p = find_player( main_target_str );
+      if ( p )
+        target = p;
+    }
+    else
+      target = player_t::create( this, "enemy", "Fluffy_Pillow" );
+
+
+    if ( max_player_level < 0 )
+    {
+      for ( player_t* p = player_list; p; p = p -> next )
+      {
+        if ( p -> is_enemy() || p -> is_add() )
+          continue;
+        if ( max_player_level < p -> level )
+          max_player_level = p -> level;
+      }
+    }
+
+    if ( ! player_t::init( this ) ) return false;
+
+    // Target overrides 2
+    for ( player_t* t = target_list; t; t = t -> next )
+    {
+      if ( ! target_race.empty() )
+      {
+        t -> race = util_t::parse_race_type( target_race );
+        t -> race_str = util_t::race_type_string( t -> race );
+      }
+    }
+
+    raid_event_t::init( this );
+
+    if ( report_precision < 0 ) report_precision = 3;
+
+    raid_dps.reserve( iterations );
+    total_dmg.reserve( iterations );
+    raid_hps.reserve( iterations );
+    total_heal.reserve( iterations );
+    simulation_length.reserve( iterations );
   }
-
-  raid_event_t::init( this );
-
-  if ( report_precision < 0 ) report_precision = 3;
-
-  raid_dps.reserve( iterations );
-  total_dmg.reserve( iterations );
-  raid_hps.reserve( iterations );
-  total_heal.reserve( iterations );
-  simulation_length.reserve( iterations );
+  catch ( cancel_t& c )
+  {
+    errorf( "%s\n", c.message.c_str() );
+    cancel();
+  }
 
   return canceled ? false : true;
 }
@@ -2190,13 +2198,13 @@ int sim_t::main( int argc, char** argv )
     }
     if ( abs( vary_combat_length ) >= 1.0 )
     {
-      util_t::fprintf( output_file, "\n |vary_combat_length| >= 1.0, overriding to 0.0.\n" );
-      vary_combat_length = 0.0;
+      util_t::fprintf( output_file, "|vary_combat_length| >= 1.0.\n" );
+      exit( 0 );
     }
     if ( confidence <= 0.0 || confidence >= 1.0 )
     {
-      util_t::fprintf( output_file, "\nInvalid confidence, reseting to 0.95.\n" );
-      confidence = 0.95;
+      util_t::fprintf( output_file, "Invalid confidence: %f.\n", confidence );
+      exit( 0 );
     }
 
     util_t::fprintf( output_file,
