@@ -764,102 +764,33 @@ buff_t* buff_t::find( buff_t* b, const std::string& name_str )
 
 // buff_t::create_expression ================================================
 
-action_expr_t* buff_t::create_expression( action_t* action,
-                                          const std::string& type )
+expr_ptr buff_t::create_expression( const std::string& type )
 {
   if ( type == "remains" )
-  {
-    struct buff_remains_expr_t : public action_expr_t
-    {
-      buff_t* buff;
-      buff_remains_expr_t( action_t* a, buff_t* b ) : action_expr_t( a, "buff_remains", TOK_NUM ), buff( b ) {}
-      virtual int evaluate() { result_num = buff -> remains().total_seconds(); return TOK_NUM; }
-    };
-    return new buff_remains_expr_t( action, this );
-  }
-  else if ( type == "cooldown_remains" )
-  {
-    struct buff_cooldown_remains_expr_t : public action_expr_t
-    {
-      buff_t* buff;
-      buff_cooldown_remains_expr_t( action_t* a, buff_t* b ) : action_expr_t( a, "buff_cooldown_remains", TOK_NUM ), buff( b ) {}
-      virtual int evaluate() { result_num = buff -> cooldown -> remains().total_seconds(); return TOK_NUM; }
-    };
-    return new buff_cooldown_remains_expr_t( action, this );
-  }
-  else if ( type == "up" )
-  {
-    struct buff_up_expr_t : public action_expr_t
-    {
-      buff_t* buff;
-      buff_up_expr_t( action_t* a, buff_t* b ) : action_expr_t( a, "buff_up", TOK_NUM ), buff( b ) {}
-      virtual int evaluate() { result_num = ( buff -> check() > 0 ) ? 1.0 : 0.0; return TOK_NUM; }
-    };
-    return new buff_up_expr_t( action, this );
-  }
-  else if ( type == "down" )
-  {
-    struct buff_down_expr_t : public action_expr_t
-    {
-      buff_t* buff;
-      buff_down_expr_t( action_t* a, buff_t* b ) : action_expr_t( a, "buff_down", TOK_NUM ), buff( b ) {}
-      virtual int evaluate() { result_num = ( buff -> check() <= 0 ) ? 1.0 : 0.0; return TOK_NUM; }
-    };
-    return new buff_down_expr_t( action, this );
-  }
-  else if ( type == "stack" )
-  {
-    struct buff_stack_expr_t : public action_expr_t
-    {
-      buff_t* buff;
-      buff_stack_expr_t( action_t* a, buff_t* b ) : action_expr_t( a, "buff_stack", TOK_NUM ), buff( b ) {}
-      virtual int evaluate() { result_num = buff -> check(); return TOK_NUM; }
-    };
-    return new buff_stack_expr_t( action, this );
-  }
-  else if ( type == "value" )
-  {
-    struct buff_value_expr_t : public action_expr_t
-    {
-      buff_t* buff;
-      buff_value_expr_t( action_t* a, buff_t* b ) : action_expr_t( a, "buff_value", TOK_NUM ), buff( b ) {}
-      virtual int evaluate() { result_num = buff -> value(); return TOK_NUM; }
-    };
-    return new buff_value_expr_t( action, this );
-  }
-  else if ( type == "react" )
-  {
-    struct buff_react_expr_t : public action_expr_t
-    {
-      buff_t* buff;
-      buff_react_expr_t( action_t* a, buff_t* b ) : action_expr_t( a, "buff_react", TOK_NUM ), buff( b ) {}
-      virtual int evaluate() { result_num = buff -> stack_react(); return TOK_NUM; }
-    };
-    return new buff_react_expr_t( action, this );
-  }
-  else if ( type == "cooldown_react" )
-  {
-    struct buff_cooldown_react_expr_t : public action_expr_t
-    {
-      buff_t* buff;
-      buff_cooldown_react_expr_t( action_t* a, buff_t* b ) : action_expr_t( a, "buff_cooldown_react", TOK_NUM ), buff( b ) {}
-      virtual int evaluate()
-      {
-        if ( buff -> check() && ! buff -> may_react() )
-        {
-          result_num = 0;
-        }
-        else
-        {
-          result_num = buff -> cooldown -> remains().total_seconds();
-        }
-        return TOK_NUM;
-      }
-    };
-    return new buff_cooldown_react_expr_t( action, this );
-  }
+    return make_expr( "buff_" + type, [this]{ return remains().total_seconds(); } );
 
-  return 0;
+  if ( type == "cooldown_remains" )
+    return make_expr( "buff_" + type, [this]{ return cooldown -> remains().total_seconds(); } );
+
+  if ( type == "up" )
+    return make_expr( "buff_" + type, [this]{ return check() > 0; } );
+
+  if ( type == "down" )
+    return make_expr( "buff_" + type, [this]{ return check() <= 0; } );
+
+  if ( type == "stack" )
+    return make_expr( "buff_" + type, [this]{ return check(); });
+
+  if ( type == "value" )
+    return make_expr( "buff_" + type, [this]{ return value(); });
+
+  if ( type == "react" )
+    return make_expr( "buff_" + type, [this]{ return stack_react(); });
+
+  if ( type == "cooldown_react" )
+    return make_expr( "buff_" + type, [this]{ return ( check() && ! may_react() ) ? 0.0 : cooldown -> remains().total_seconds(); });
+
+  return nullptr;
 }
 
 // ==========================================================================

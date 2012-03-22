@@ -301,12 +301,12 @@ bool parse_talents( player_t& p, const std::string& encoded_talent_data )
     }
   }
 
-  catch ( bad_encoding )
+  catch ( bad_encoding& )
   {
     return false;
   }
 
-  catch ( std::out_of_range )
+  catch ( std::out_of_range& )
   {
     return false;
   }

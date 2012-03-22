@@ -287,9 +287,7 @@ void dot_tick_event_t::execute()
   {
     auto& expr = dot -> action -> interrupt_if_expr;
     if ( expr && expr -> success() )
-    {
       dot -> current_tick = dot -> num_ticks;
-    }
     else if ( dot -> action -> interrupt )
     {
       // Interrupt if any higher priority action is ready.
