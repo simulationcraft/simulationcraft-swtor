@@ -4483,14 +4483,35 @@ talent_t* player_t::find_talent( const std::string& n,
 
 // player_t::create_expression ==============================================
 
+namespace {
+expr_ptr deprecate_expression( player_t* p, action_t* a, const std::string& old_name, const std::string& new_name )
+{
+  p -> sim -> errorf( "Use of \"%s\" in action expressions is deprecated: use \"%s\" instead.\n",
+                      old_name.c_str(), new_name.c_str() );
+  return p -> create_expression( a, new_name );
+}
+}
+
 expr_ptr player_t::create_expression( action_t* a,
                                       const std::string& name_str )
 {
   if ( name_str == "health_pct" )
-  {
-    sim -> errorf( "Use of \"health_pct\" in action expressions is deprecated: use \"health.pct\" instead.\n" );
-    return create_expression( a, "health.pct" );
-  }
+    return deprecate_expression( this, a, name_str, "health.pct" );
+
+  if ( name_str == "energy_regen" )
+    return deprecate_expression( this, a, name_str, "energy.regen" );
+
+  if ( name_str == "ammo_regen" )
+    return deprecate_expression( this, a, name_str, "ammo.regen" );
+
+  if ( name_str == "time_to_max_energy" )
+    return deprecate_expression( this, a, name_str, "energy.time_to_max" );
+
+  if ( name_str == "time_to_max_ammo" )
+    return deprecate_expression( this, a, name_str, "ammo.time_to_max" );
+
+  if ( name_str == "time_to_max_force" )
+    return deprecate_expression( this, a, name_str, "force.time_to_max" );
 
   resource_type rt = static_cast<resource_type>( util_t::parse_resource_type( name_str ) );
   if ( rt != RESOURCE_NONE )
@@ -4508,32 +4529,8 @@ expr_ptr player_t::create_expression( action_t* a,
   if ( name_str == "alacrity" )
     return make_expr( name_str, [this]{ return alacrity(); } );
 
-  if ( name_str == "energy_regen" )
-    return make_expr( name_str, [this]{ return energy_regen_per_second(); } );
-
-  if ( name_str == "ammo_regen" )
-    return make_expr( name_str, [this]{ return ammo_regen_per_second(); } );
-
   if ( name_str == "time_to_die" )
     return make_expr( name_str, [this]{ return time_to_die().total_seconds(); } );
-
-  if ( name_str == "time_to_max_energy" )
-    return make_expr( name_str, [this]{
-      return ( resource_max[ RESOURCE_ENERGY ] - resource_current[ RESOURCE_ENERGY ] )
-             / energy_regen_per_second();
-      } );
-
-  if ( name_str == "time_to_max_ammo" )
-    return make_expr( name_str, [this]{
-      return ( resource_max[ RESOURCE_AMMO ] - resource_current[ RESOURCE_AMMO ] )
-             / energy_regen_per_second();
-      } );
-
-  if ( name_str == "time_to_max_force" )
-    return make_expr( name_str, [this]{
-      return ( resource_max[ RESOURCE_AMMO ] - resource_current[ RESOURCE_AMMO ] )
-             / energy_regen_per_second();
-      } );
 
   if ( name_str == "ptr" )
     return make_expr( name_str, [this]{ return ptr; } );
@@ -4554,7 +4551,7 @@ expr_ptr player_t::create_expression( action_t* a,
     if ( splits[ 1 ] == "deficit" )
       return make_expr( name_str, [this,rt]{ return resource_max[ rt ] - resource_current[ rt ]; } );
 
-    if ( splits[ 1 ] == "pct" || splits[ 1 ] == "percent" )
+    else if ( splits[ 1 ] == "pct" || splits[ 1 ] == "percent" )
     {
       if ( rt == RESOURCE_HEALTH )
         return make_expr( name_str, [this]{ return health_percentage() / 100.0; } );
@@ -4562,11 +4559,34 @@ expr_ptr player_t::create_expression( action_t* a,
         return make_expr( name_str, [this,rt]{ return resource_current[ rt ] / resource_max[ rt ]; } );
     }
 
-    if ( splits[ 1 ] == "max" )
+    else if ( splits[ 1 ] == "max" )
       return make_expr( name_str, [this,rt]{ return resource_max[ rt ]; } );
+
+    else if ( splits[ 1 ] == "regen" )
+    {
+      if ( rt == RESOURCE_FORCE )
+        return make_expr( name_str, [this]{ return force_regen_per_second(); } );
+      if ( rt == RESOURCE_ENERGY )
+        return make_expr( name_str, [this]{ return energy_regen_per_second(); } );
+      if ( rt == RESOURCE_AMMO )
+        return make_expr( name_str, [this]{ return ammo_regen_per_second(); } );
+    }
+
+    else if ( splits[ 1 ] == "time_to_max" )
+    {
+      if ( rt == RESOURCE_FORCE )
+        return make_expr( name_str, [this]{ return ( resource_max[ RESOURCE_FORCE ] - resource_current[ RESOURCE_FORCE ] )
+                                                   / force_regen_per_second(); } );
+      if ( rt == RESOURCE_ENERGY )
+        return make_expr( name_str, [this]{ return ( resource_max[ RESOURCE_ENERGY ] - resource_current[ RESOURCE_ENERGY ] )
+                                                   / energy_regen_per_second(); } );
+      if ( rt == RESOURCE_AMMO )
+        return make_expr( name_str, [this]{ return ( resource_max[ RESOURCE_AMMO ] - resource_current[ RESOURCE_AMMO ] )
+                                                   / ammo_regen_per_second(); } );
+    }
   }
 
-  if ( splits[ 0 ] == "pet" )
+  else if ( splits[ 0 ] == "pet" )
   {
     pet_t* pet = find_pet( splits[ 1 ] );
     if ( pet )
@@ -4645,6 +4665,7 @@ expr_ptr player_t::create_expression( action_t* a,
       }
     }
   }
+
   else if ( num_splits == 3 )
   {
     if ( splits[ 0 ] == "buff" || splits[ 0 ] == "debuff" || splits[ 0 ] == "aura" )
