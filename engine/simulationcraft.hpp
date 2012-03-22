@@ -1677,8 +1677,9 @@ struct expression_t
   static bool convert_to_rpn( std::vector<expr_token_t>& tokens );
 };
 
-struct expr_t : public noncopyable
+class expr_t : public noncopyable
 {
+public:
   struct error_t : public std::exception
   {
     std::string message;
@@ -1690,8 +1691,6 @@ struct expr_t : public noncopyable
     virtual const char* what() const noexcept { return message.c_str(); }
     virtual ~error_t() noexcept {}
   };
-  struct type_error : public error_t
-  { type_error( expr_t* expr ) : error_t( "type_error", expr ) {} };
 
   std::string name_str;
   std::string result_str;
@@ -1707,17 +1706,24 @@ struct expr_t : public noncopyable
   const std::string& name() const { return name_str; }
   bool success() { return ( evaluate() == TOK_NUM ) && ( result_num != 0 ); }
 
-  template <typename T>
-  typename std::enable_if<std::is_arithmetic<T>::value,T>::type
-  expect()
-  { if ( evaluate() == TOK_NUM ) return static_cast<T>( result_num ); throw type_error( this ); }
+  double expect_number()
+  {
+    if ( likely( evaluate() == TOK_NUM ) )
+      return result_num;
+    throw error_t( type_error_message( TOK_NUM ), this );
+  }
 
-  template<typename T>
-  typename std::enable_if<std::is_same<std::string,T>::value,std::string>::type
-  expect()
-  { if ( evaluate() == TOK_STR ) return result_str; throw type_error( this ); }
+  std::string expect_string()
+  {
+    if ( likely( evaluate() == TOK_STR ) )
+      return result_str;
+    throw error_t( type_error_message( TOK_STR ), this );
+  }
 
   static expr_ptr parse( action_t*, const std::string& expr_str );
+
+private:
+  std::string type_error_message( token_type_t expected );
 };
 
 template <typename F>

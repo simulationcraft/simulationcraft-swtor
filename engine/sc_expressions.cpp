@@ -279,6 +279,31 @@ expr_ptr select_binary( Name&& n, token_type_t operation, Left&& l, Right&& r )
 
 } // ANONYMOUS namespace ====================================================
 
+// expr_t::type_error_message ===============================================
+
+std::string expr_t::type_error_message( token_type_t expected )
+{
+  boost::format fmt( "Unexpected result type evaluating expression '%s',"
+                     " expected %s" );
+  fmt % name();
+
+  switch( expected )
+  {
+  case TOK_NUM:
+    fmt % "number";
+    break;
+  case TOK_STR:
+    fmt % "string";
+    break;
+  default:
+    assert( false );
+    break;
+  }
+
+  return fmt.str();
+}
+
+
 // precedence ===============================================================
 
 int expression_t::precedence( token_type_t expr_token_type )

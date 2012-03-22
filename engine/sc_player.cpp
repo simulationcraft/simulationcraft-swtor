@@ -3991,14 +3991,14 @@ struct wait_fixed_t : public wait_action_base_t
   {
     try
     {
-      timespan_t wait = timespan_t::from_seconds( time_expr -> expect<double>() );
+      timespan_t wait = timespan_t::from_seconds( time_expr -> expect_number() );
       if ( wait > timespan_t::zero ) return wait;
     }
 
-    catch ( expr_t::type_error )
+    catch ( expr_t::error_t& err )
     {
-      sim -> errorf( "Invalid expression result for wait time '%s'\n",
-                     wait_str.c_str() );
+      sim -> errorf( "Invalid expression result for wait time '%s': %s\n",
+                     wait_str.c_str(), err.message.c_str() );
       sim -> cancel();
     }
 
