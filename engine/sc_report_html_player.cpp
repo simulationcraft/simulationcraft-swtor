@@ -195,9 +195,6 @@ static void print_html_sample_data( FILE* file, player_t* p, sample_data_t& data
 
 }
 
-// print_html_action_damage =================================================
-
-namespace {
 template <typename Range>
 double mean_damage( const Range& results )
 {
@@ -215,7 +212,8 @@ double mean_damage( const Range& results )
 
   return mean;
 }
-}
+
+// print_html_action_damage =================================================
 
 static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j )
 {
