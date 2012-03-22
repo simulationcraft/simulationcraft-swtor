@@ -12,34 +12,16 @@ namespace { // ANONYMOUS ====================================================
 class const_expr_t : public expr_t
 {
 private:
-  token_type_t result_type;
+  double value;
 
 public:
   template <typename S>
-  const_expr_t( S&& n, token_type_t type ) :
-    expr_t( std::forward<S>( n ) ), result_type( type )
+  const_expr_t( S&& n, double v ) :
+    expr_t( std::forward<S>( n ) ), value( v )
   {}
 
-  virtual token_type_t evaluate() // override
-  { return result_type; }
-};
-
-class num_const_expr_t : public const_expr_t
-{
-public:
-  template <typename S>
-  num_const_expr_t( S&& n, double constant_value ) :
-    const_expr_t( std::forward<S>( n ), TOK_NUM )
-  { result_num = constant_value; }
-};
-
-class str_const_expr_t : public const_expr_t
-{
-public:
-  template <typename S1, typename S2>
-  str_const_expr_t( S1&& n, S2&& constant_value ) :
-    const_expr_t( std::forward<S1>( n ), TOK_STR )
-  { result_str = std::forward<S2>( constant_value ); }
+  virtual double evaluate() // override
+  { return value; }
 };
 
 // Unary Operators ==========================================================
@@ -53,23 +35,14 @@ protected:
 
 public:
   template <typename String, typename Pointer, typename Function>
-  unary_t( String&& n, Pointer&& i, Function&& f) :
+  unary_t( String&& n, Pointer&& i, Function&& f ) :
     expr_t( std::forward<String>( n ) ),
     input( std::forward<Pointer>( i ) ),
     f( std::forward<Function>( f ) )
   { assert( input ); }
 
-  virtual token_type_t evaluate()
-  {
-    if ( likely( input -> evaluate() == TOK_NUM ) )
-    {
-      result_num = f( input -> result_num );
-      return TOK_NUM;
-    }
-
-    throw error_t( ( boost::format( "Unexpected input type (%1%) for unary operator '%2%'" )
-                     % input -> name() % name() ).str(), this );
-  }
+  virtual double evaluate() // override
+  { return f( input -> evaluate() ); }
 };
 
 template <typename Name, typename Input, typename F>
@@ -112,31 +85,7 @@ protected:
   const expr_ptr left, right;
 
   static bool bool_operand( const expr_ptr& operand )
-  {
-    switch ( operand -> evaluate() )
-    {
-    case TOK_NUM:
-      return operand -> result_num != 0;
-    default:
-      return true;
-    }
-  }
-
-  void expect_left( token_type_t type )
-  {
-    if ( likely( left -> evaluate() == type ) ) return;
-
-    throw error_t( ( boost::format( "Invalid input type %1% for binary operator '%2%'" )
-                     % left -> name() % name() ).str(), this );
-  }
-
-  void expect_right( token_type_t type )
-  {
-    if ( likely( right -> evaluate() == type ) ) return;
-
-    throw error_t( ( boost::format( "Inconsistent input types (%1% and %2%) for binary operator '%3%'" )
-                     % left -> name() % right -> name() % name() ).str(), this );
-  }
+  { return operand -> evaluate() != 0; }
 
 public:
   template <typename Name, typename Left, typename Right>
@@ -162,13 +111,8 @@ public:
     binary_t( std::forward<Name>( n ), std::forward<Left>( l ), std::forward<Right>( r ) )
   {}
 
-  virtual token_type_t evaluate() // override
-  {
-    expect_left( TOK_NUM );
-    expect_right( TOK_NUM );
-    result_num = f( left -> result_num, right -> result_num );
-    return TOK_NUM;
-  }
+  virtual double evaluate() // override
+  { return f( left -> evaluate(), right -> evaluate() ); }
 };
 
 template <template <typename> class F>
@@ -185,26 +129,8 @@ public:
     binary_t( std::forward<Name>( n ), std::forward<Left>( l ), std::forward<Right>( r ) )
   {}
 
-  virtual token_type_t evaluate() // override
-  {
-    token_type_t result_type = left -> evaluate();
-    expect_right( result_type );
-
-    switch( result_type )
-    {
-    case TOK_NUM:
-      result_num = f( left -> result_num, right -> result_num );
-      break;
-    case TOK_STR:
-      result_num = f( left -> result_str, right -> result_str );
-      break;
-    default:
-      throw error_t( ( boost::format( "Invalid operand type '%1%' for binary operator '%2%'" )
-                       % left -> name() %  name() ).str(), this );
-    }
-
-    return TOK_NUM;
-  }
+  virtual double evaluate() // override
+  { return f( left -> evaluate(), right -> evaluate() ); }
 };
 
 class logical_and_t : public binary_t
@@ -215,11 +141,8 @@ public:
     binary_t( std::forward<Name>( n ), std::forward<Left>( l ), std::forward<Right>( r ) )
   {}
 
-  virtual token_type_t evaluate() // override
-  {
-    result_num = bool_operand( left ) && bool_operand( right );
-    return TOK_NUM;
-  }
+  virtual double evaluate() // override
+  { return bool_operand( left ) && bool_operand( right ); }
 };
 
 class logical_or_t : public binary_t
@@ -230,11 +153,8 @@ public:
     binary_t( std::forward<Name>( n ), std::forward<Left>( l ), std::forward<Right>( r ) )
   {}
 
-  virtual token_type_t evaluate() // override
-  {
-    result_num = bool_operand( left ) || bool_operand( right );
-    return TOK_NUM;
-  }
+  virtual double evaluate() // override
+  { return bool_operand( left ) || bool_operand( right ); }
 };
 
 template <typename Name, typename Left, typename Right>
@@ -277,31 +197,6 @@ expr_ptr select_binary( Name&& n, token_type_t operation, Left&& l, Right&& r )
 }
 
 } // ANONYMOUS namespace ====================================================
-
-// expr_t::type_error_message ===============================================
-
-std::string expr_t::type_error_message( token_type_t expected )
-{
-  boost::format fmt( "Unexpected result type evaluating expression '%s',"
-                     " expected %s" );
-  fmt % name();
-
-  switch( expected )
-  {
-  case TOK_NUM:
-    fmt % "number";
-    break;
-  case TOK_STR:
-    fmt % "string";
-    break;
-  default:
-    assert( false );
-    break;
-  }
-
-  return fmt.str();
-}
-
 
 // precedence ===============================================================
 
@@ -622,7 +517,7 @@ static expr_ptr build_expression_tree( action_t* action,
   for ( expr_token_t& t : tokens )
   {
     if ( t.type == TOK_NUM )
-      stack.emplace_back( make_unique<num_const_expr_t>( t.label, atof( t.label.c_str() ) ) );
+      stack.emplace_back( make_unique<const_expr_t>( t.label, atof( t.label.c_str() ) ) );
 
     else if ( t.type == TOK_STR )
     {

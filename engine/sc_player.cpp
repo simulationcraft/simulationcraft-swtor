@@ -3991,7 +3991,7 @@ struct wait_fixed_t : public wait_action_base_t
   {
     try
     {
-      timespan_t wait = timespan_t::from_seconds( time_expr -> expect_number() );
+      timespan_t wait = timespan_t::from_seconds( time_expr -> evaluate() );
       if ( wait > timespan_t::zero ) return wait;
     }
 

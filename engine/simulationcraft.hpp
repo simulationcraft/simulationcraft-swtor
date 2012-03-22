@@ -1709,80 +1709,37 @@ public:
   };
 
   std::string name_str;
-  std::string result_str;
-  double result_num;
 
   template <typename S>
   expr_t( S&& n ) : name_str( std::forward<S>( n ) ) {}
 
   virtual ~expr_t() {}
 
-  virtual token_type_t evaluate() = 0;
+  virtual double evaluate() = 0;
 
   const std::string& name() const { return name_str; }
-  bool success() { return ( evaluate() == TOK_NUM ) && ( result_num != 0 ); }
-
-  double expect_number()
-  {
-    if ( likely( evaluate() == TOK_NUM ) )
-      return result_num;
-    throw error_t( type_error_message( TOK_NUM ), this );
-  }
-
-  std::string expect_string()
-  {
-    if ( likely( evaluate() == TOK_STR ) )
-      return result_str;
-    throw error_t( type_error_message( TOK_STR ), this );
-  }
+  bool success() { return evaluate() != 0; }
 
   static expr_ptr parse( action_t*, const std::string& expr_str );
-
-private:
-  std::string type_error_message( token_type_t expected );
 };
 
 template <typename F>
-struct num_expr_t : public expr_t
+struct fn_expr_t : public expr_t
 {
   F f;
 
   template <typename S>
-  num_expr_t( S&& name, F f ) :
+  fn_expr_t( S&& name, F f ) :
     expr_t( std::forward<S>( name ) ), f( f ) {}
 
-  virtual token_type_t evaluate() // override
-  {
-    result_num = f();
-    return TOK_NUM;
-  }
-};
-
-template <typename F>
-struct str_expr_t : public expr_t
-{
-  F f;
-
-  template <typename S>
-  str_expr_t( S&& name, F f ) :
-    expr_t( std::forward<S>( name ) ), f( f ) {}
-
-  virtual token_type_t evaluate() // override
-  {
-    result_str = f();
-    return TOK_STR;
-  }
+  virtual double evaluate() // override
+  { return f(); }
 };
 
 template <typename S, typename F>
-inline typename std::enable_if<std::is_arithmetic<typename std::result_of<F()>::type>::value,expr_ptr>::type
+inline expr_ptr
 make_expr( S&& name, F f )
-{ return make_unique<num_expr_t<F>>( std::forward<S>( name ), f ); }
-
-template <typename S, typename F>
-inline typename std::enable_if<std::is_same<typename std::result_of<F()>::type,std::string>::value,expr_ptr>::type
-make_expr( S&& name, F f )
-{ return make_unique<str_expr_t<F>>( std::forward<S>( name ), f ); }
+{ return make_unique<fn_expr_t<F>>( std::forward<S>( name ), f ); }
 
 namespace thread_impl { // ===================================================
 
