@@ -657,6 +657,8 @@ public:
   { boost::checked_delete( t ); }
 };
 
+// Allocate an object and stick it in a unique_ptr all at once. Analagous
+// to std::make_shared<T>().
 template <typename T, typename ... Args>
 std::unique_ptr<T>
 make_unique( Args&& ... args )
@@ -1719,9 +1721,10 @@ struct fn_expr_t : public expr_t
 {
   F f;
 
-  template <typename S>
-  fn_expr_t( S&& name, F f ) :
-    expr_t( std::forward<S>( name ) ), f( f ) {}
+  template <typename Name, typename Function>
+  fn_expr_t( Name&& name, Function&& f_ ) :
+    expr_t( std::forward<Name>( name ) ),
+    f( std::forward<Function>( f_ ) ) {}
 
   virtual double evaluate() // override
   { return f(); }
@@ -1729,8 +1732,8 @@ struct fn_expr_t : public expr_t
 
 template <typename S, typename F>
 inline expr_ptr
-make_expr( S&& name, F f )
-{ return make_unique<fn_expr_t<F>>( std::forward<S>( name ), f ); }
+make_expr( S&& name, F&& f )
+{ return make_unique<fn_expr_t<F>>( std::forward<S>( name ), std::forward<F>( f ) ); }
 
 namespace thread_impl { // ===================================================
 
