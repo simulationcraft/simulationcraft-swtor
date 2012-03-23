@@ -1369,7 +1369,7 @@ void sim_t::analyze_player( player_t* p )
 
 
   // Resources & Gains ======================================================
-  for ( int i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
+  for ( resource_type i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
   {
     int num_buckets = ( int ) p -> timeline_resource[i].size();
 
@@ -1381,7 +1381,7 @@ void sim_t::analyze_player( player_t* p )
     }
   }
 
-  for ( int i=0; i < RESOURCE_MAX; i++ )
+  for ( resource_type i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
   {
     p -> resource_lost  [ i ] /= iterations;
     p -> resource_gained[ i ] /= iterations;
@@ -1436,7 +1436,7 @@ void sim_t::analyze_player( player_t* p )
   std::string encoded_name;
   http_t::format( encoded_name, p -> name_str );
 
-  for ( int i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
+  for ( resource_type i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
   {
     chart_t::timeline        ( p -> timeline_resource_chart[i],      p,
                                p -> timeline_resource[i],

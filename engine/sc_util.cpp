@@ -469,7 +469,7 @@ int util_t::parse_result_type( const std::string& name )
 
 // util_t::resource_type_string =============================================
 
-const char* util_t::resource_type_string( int type )
+const char* util_t::resource_type_string( resource_type type )
 {
   switch ( type )
   {
@@ -480,15 +480,15 @@ const char* util_t::resource_type_string( int type )
   case RESOURCE_ENERGY:       return "energy";
   case RESOURCE_AMMO:         return "ammo";
   case RESOURCE_FORCE:        return "force";
+  default:                    return "unknown";
   }
-  return "unknown";
 }
 
 // util_t::parse_resource_type ==============================================
 
-int util_t::parse_resource_type( const std::string& name )
+resource_type util_t::parse_resource_type( const std::string& name )
 {
-  for ( int i=0; i < RESOURCE_MAX; i++ )
+  for ( resource_type i=RESOURCE_NONE; i < RESOURCE_MAX; ++i )
     if ( util_t::str_compare_ci( name, util_t::resource_type_string( i ) ) )
       return i;
 

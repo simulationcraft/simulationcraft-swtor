@@ -904,7 +904,7 @@ void player_t::init_resources( bool force )
   if ( sim -> debug ) log_t::output( sim, "Initializing resources for player (%s)", name() );
   // The first 20pts of intellect/stamina only provide 1pt of mana/health.
 
-  for ( int i=0; i < RESOURCE_MAX; i++ )
+  for ( resource_type i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
   {
     if ( force || resource_initial[ i ] == 0 )
     {
@@ -928,7 +928,7 @@ void player_t::init_resources( bool force )
     size *= 2;
     size += 3; // Buffer against rounding.
 
-    for ( int i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
+    for ( resource_type i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
       timeline_resource[i].assign( size, 0 );
   }
 }
@@ -1943,7 +1943,7 @@ void player_t::merge( player_t& other )
 
   deaths.merge( other.deaths );
 
-  for ( int i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
+  for ( resource_type i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
   {
     int num_buckets = ( int ) std::min(       timeline_resource[i].size(),
                                         other.timeline_resource[i].size() );
@@ -2069,18 +2069,18 @@ void player_t::reset()
 
   stim = stim_t::none;
 
-  for ( int i=0; i < RESOURCE_MAX; i++ )
+  for ( resource_type i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
   {
     action_callback_t::reset( resource_gain_callbacks[ i ] );
     action_callback_t::reset( resource_loss_callbacks[ i ] );
   }
-  for ( int i=0; i < RESULT_MAX; i++ )
+  for ( result_type i = RESULT_NONE; i < RESULT_MAX; i++ )
   {
     action_callback_t::reset( attack_callbacks[ i ] );
     action_callback_t::reset( spell_callbacks [ i ] );
     action_callback_t::reset( tick_callbacks  [ i ] );
   }
-  for ( int i=0; i < SCHOOL_MAX; i++ )
+  for ( school_type i = SCHOOL_NONE; i < SCHOOL_MAX; i++ )
   {
     action_callback_t::reset( tick_damage_callbacks  [ i ] );
     action_callback_t::reset( direct_damage_callbacks[ i ] );
@@ -2404,45 +2404,49 @@ action_t* player_t::execute_action()
 
 void player_t::regen( const timespan_t periodicity )
 {
-  int resource_type = primary_resource();
+  const resource_type r = primary_resource();
+  double base = 0;
+  gain_t* gain = nullptr;
 
-  if ( resource_type == RESOURCE_ENERGY )
+  switch( r )
   {
-    double energy_regen = periodicity.total_seconds() * energy_regen_per_second();
+  case RESOURCE_ENERGY:
+    base = base_energy_regen_per_second;
+    gain = gains.energy_regen;
+    break;
 
-    resource_gain( RESOURCE_ENERGY, energy_regen, gains.energy_regen );
+  case RESOURCE_FORCE:
+    base = base_force_regen_per_second;
+    gain = gains.force_regen;
+    break;
+
+  case RESOURCE_AMMO:
+    base = base_ammo_regen_per_second;
+    gain = gains.ammo_regen;
+    break;
+
+  default:
+    break;
   }
 
-  else if ( resource_type == RESOURCE_FORCE )
+  if ( gain && base )
+    resource_gain( r, base * periodicity.total_seconds(), gain );
+
+  const unsigned index = static_cast<unsigned>( sim -> current_time.total_seconds() );
+
+  for ( resource_type i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
   {
-    double force_regen = periodicity.total_seconds() * base_force_regen_per_second;
-
-    resource_gain( RESOURCE_FORCE, force_regen, gains.force_regen );
-  }
-
-  else if ( resource_type == RESOURCE_AMMO )
-  {
-    double ammo_regen = periodicity.total_seconds() * ammo_regen_per_second();
-
-    resource_gain( RESOURCE_AMMO, ammo_regen, gains.ammo_regen );
-  }
-
-  int index = (int) ( sim -> current_time.total_seconds() );
-
-  for ( int i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
-  {
-    if ( resource_max[ i ] == 0 ) continue;
-
-    timeline_resource[ i ][ index ] += resource_current[ i ] * periodicity.total_seconds();
+    if ( resource_max[ i ] != 0 )
+      timeline_resource[ i ][ index ] += resource_current[ i ] * periodicity.total_seconds();
   }
 }
 
 // player_t::resource_loss ==================================================
 
-double player_t::resource_loss( int       resource,
-                                double    amount,
-                                gain_t*   source,
-                                action_t* action )
+double player_t::resource_loss( resource_type resource,
+                                double        amount,
+                                gain_t*       source,
+                                action_t*     action )
 {
   if ( amount == 0 )
     return 0;
@@ -2489,10 +2493,10 @@ double player_t::resource_loss( int       resource,
 
 // player_t::resource_gain ==================================================
 
-double player_t::resource_gain( int       resource,
-                                double    amount,
-                                gain_t*   source,
-                                action_t* action )
+double player_t::resource_gain( resource_type resource,
+                                double        amount,
+                                gain_t*       source,
+                                action_t*     action )
 {
   if ( sleeping )
     return 0;
@@ -2791,19 +2795,19 @@ void player_t::stat_loss( int       stat,
   case STAT_MAX_ENERGY:
   case STAT_MAX_AMMO:
   {
-    int r = ( ( stat == STAT_MAX_HEALTH ) ? RESOURCE_HEALTH :
-              ( stat == STAT_MAX_MANA   ) ? RESOURCE_MANA   :
-              ( stat == STAT_MAX_RAGE   ) ? RESOURCE_RAGE   :
-              ( stat == STAT_MAX_ENERGY ) ? RESOURCE_ENERGY : RESOURCE_AMMO );
+    resource_type r = ( stat == STAT_MAX_HEALTH ? RESOURCE_HEALTH :
+                      ( stat == STAT_MAX_MANA   ? RESOURCE_MANA   :
+                      ( stat == STAT_MAX_RAGE   ? RESOURCE_RAGE   :
+                      ( stat == STAT_MAX_ENERGY ? RESOURCE_ENERGY : RESOURCE_AMMO ))));
     recalculate_resource_max( r );
     double delta = resource_current[ r ] - resource_max[ r ];
     if ( delta > 0 ) resource_loss( r, delta, 0, action );
   }
   break;
 
-  case STAT_POWER:             stats.power             -= amount; power                     -= amount; break;
-  case STAT_FORCE_POWER:       stats.force_power       -= amount; force_power               -= amount; break;
-  case STAT_TECH_POWER:        stats.tech_power        -= amount; tech_power                -= amount; break;
+  case STAT_POWER:       stats.power       -= amount; power       -= amount; break;
+  case STAT_FORCE_POWER: stats.force_power -= amount; force_power -= amount; break;
+  case STAT_TECH_POWER:  stats.tech_power  -= amount; tech_power  -= amount; break;
 
   case STAT_ACCURACY_RATING:
     stats.accuracy_rating -= amount;
@@ -4612,15 +4616,13 @@ expr_ptr player_t::create_expression( action_t* a,
     if ( pet_t* pet = dynamic_cast<pet_t*>( this ) )
     {
       if ( pet -> owner )
-      {
         return pet -> owner -> create_expression( a, name_str.substr( 6 ) );
-      }
     }
   }
 
   else if ( splits[ 0 ] == "temporary_bonus" )
   {
-    int stat = util_t::parse_stat_type( splits[ 1 ] );
+    stat_type stat = util_t::parse_stat_type( splits[ 1 ] );
 
     if ( stat != STAT_NONE )
     {
@@ -4723,16 +4725,17 @@ expr_ptr player_t::create_expression( action_t* a,
       }
     }
   }
-  else if ( num_splits == 2 )
+
+  else if ( splits[ 0 ] == "set_bonus" )
   {
-    if ( splits[ 0 ] == "set_bonus" )
+    if ( num_splits == 2 )
     {
       if ( set_bonus_t* sb = find_set_bonus( splits[ 1 ] ) )
         return make_expr( name_str, [sb]{ return sb -> count; } );
     }
   }
 
-  if ( num_splits >= 2 && splits[ 0 ] == "target" )
+  else if ( num_splits >= 2 && splits[ 0 ] == "target" )
     return target -> create_expression( a, join( splits.begin() + 1, splits.end(), '.' ) );
 
   return sim -> create_expression( a, name_str );

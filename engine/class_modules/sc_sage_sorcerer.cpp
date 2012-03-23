@@ -232,7 +232,7 @@ struct sage_sorcerer_t : public player_t
     scales_with[ STAT_FORCE_POWER ] = true;
   }
 
-  virtual int       primary_resource() const;
+  virtual resource_type primary_resource() const;
   virtual int       primary_role() const;
 
   virtual double    force_regen_per_second() const; // override
@@ -1176,8 +1176,8 @@ struct sage_sorcerer_heal_t : public heal_t
 {
   bool influenced_by_inner_strength;
 
-  sage_sorcerer_heal_t( const std::string& n, sage_sorcerer_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
-    heal_t( n.c_str(), p, force_heal_policy, r, s ),
+  sage_sorcerer_heal_t( const std::string& n, sage_sorcerer_t* p, const school_type s=SCHOOL_KINETIC ) :
+    heal_t( n.c_str(), p, force_heal_policy, RESOURCE_FORCE, s ),
     influenced_by_inner_strength( true )
   {
     may_crit   = true;
@@ -1230,7 +1230,7 @@ struct sage_sorcerer_heal_t : public heal_t
 struct deliverance_t : public sage_sorcerer_heal_t
 {
   deliverance_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
-    sage_sorcerer_heal_t( n, p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+    sage_sorcerer_heal_t( n, p, SCHOOL_INTERNAL )
   {
     parse_options( 0, options_str );
 
@@ -1267,7 +1267,7 @@ struct deliverance_t : public sage_sorcerer_heal_t
 struct benevolence_t : public sage_sorcerer_heal_t
 {
   benevolence_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
-    sage_sorcerer_heal_t( n, p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+    sage_sorcerer_heal_t( n, p, SCHOOL_INTERNAL )
   {
     parse_options( 0, options_str );
 
@@ -1312,7 +1312,7 @@ struct benevolence_t : public sage_sorcerer_heal_t
 struct healing_trance_t : public sage_sorcerer_heal_t
 {
   healing_trance_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
-    sage_sorcerer_heal_t( n, p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+    sage_sorcerer_heal_t( n, p, SCHOOL_INTERNAL )
   {
     parse_options( 0, options_str );
 
@@ -1361,7 +1361,7 @@ struct healing_trance_t : public sage_sorcerer_heal_t
 struct rejuvenate_t : public sage_sorcerer_heal_t
 {
   rejuvenate_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
-    sage_sorcerer_heal_t( n, p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+    sage_sorcerer_heal_t( n, p, SCHOOL_INTERNAL )
   {
     parse_options( 0, options_str );
 
@@ -1385,9 +1385,6 @@ struct rejuvenate_t : public sage_sorcerer_heal_t
   {
     sage_sorcerer_heal_t::execute();
 
-    // FIXME: check assumption
-    // Assuming conveyance is only trigger once on rejuvenate execution, not on tick
-
     p() -> buffs.conveyance -> trigger();
   }
 };
@@ -1397,7 +1394,7 @@ struct salvation_t : public sage_sorcerer_heal_t
   struct salvation_tick_spell_t : public sage_sorcerer_heal_t
   {
     salvation_tick_spell_t( sage_sorcerer_t* p, const std::string& n ) :
-      sage_sorcerer_heal_t( n + "tick_spell", p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+      sage_sorcerer_heal_t( n + "tick_spell", p, SCHOOL_INTERNAL )
     {
       dd.standardhealthpercentmin = dd.standardhealthpercentmax = .019;
       dd.power_mod = 0.376;
@@ -1417,7 +1414,7 @@ struct salvation_t : public sage_sorcerer_heal_t
   salvation_tick_spell_t* tick_spell;
 
   salvation_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
-    sage_sorcerer_heal_t( n, p, RESOURCE_FORCE, SCHOOL_INTERNAL ),
+    sage_sorcerer_heal_t( n, p, SCHOOL_INTERNAL ),
     tick_spell( 0 )
   {
     parse_options( 0, options_str );
@@ -1473,10 +1470,9 @@ struct salvation_t : public sage_sorcerer_heal_t
 
 struct sage_sorcerer_absorb_t : public absorb_t
 {
-  sage_sorcerer_absorb_t( const std::string& n, sage_sorcerer_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
-    absorb_t( n.c_str(), p, force_heal_policy, r, s )
-  {
-  }
+  sage_sorcerer_absorb_t( const std::string& n, sage_sorcerer_t* p, const school_type s=SCHOOL_KINETIC ) :
+    absorb_t( n.c_str(), p, force_heal_policy, RESOURCE_FORCE, s )
+  {}
 
   sage_sorcerer_targetdata_t* targetdata() const
   { return static_cast<sage_sorcerer_targetdata_t*>( action_t::targetdata() ); }
@@ -1498,7 +1494,7 @@ struct sage_sorcerer_absorb_t : public absorb_t
 struct force_armor_t : public sage_sorcerer_absorb_t
 {
   force_armor_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
-    sage_sorcerer_absorb_t( n, p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+    sage_sorcerer_absorb_t( n, p, SCHOOL_INTERNAL )
   {
     parse_options( 0, options_str );
 
@@ -1922,10 +1918,8 @@ void sage_sorcerer_t::init_actions()
 
 // sage_sorcerer_t::primary_resource ==================================================
 
-int sage_sorcerer_t::primary_resource() const
-{
-  return RESOURCE_FORCE;
-}
+resource_type sage_sorcerer_t::primary_resource() const
+{ return RESOURCE_FORCE; }
 
 // sage_sorcerer_t::primary_role ==================================================
 
@@ -1959,8 +1953,6 @@ double sage_sorcerer_t::force_regen_per_second() const
 
 void sage_sorcerer_t::regen( timespan_t periodicity )
 {
-  player_t::regen( periodicity );
-
   double force_regen = periodicity.total_seconds() * base_force_regen_per_second;
 
   if ( buffs.concentration -> up() )
@@ -1968,6 +1960,8 @@ void sage_sorcerer_t::regen( timespan_t periodicity )
 
   if ( buffs.noble_sacrifice -> up() )
     resource_loss( RESOURCE_FORCE, force_regen * buffs.noble_sacrifice -> check() * 0.25, gains.noble_sacrifice_power_regen_lost );
+
+  player_t::regen( periodicity );
 }
 
 // sage_sorcerer_t::force_bonus_multiplier ================================

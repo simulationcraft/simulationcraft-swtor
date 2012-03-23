@@ -18,7 +18,7 @@
 // heal_t::heal_t ===========================================================
 
 heal_t::heal_t( const char* n, player_t* p, policy_t policy,
-                int r, const school_type s ) :
+                resource_type r, school_type s ) :
     action_t( ACTION_HEAL, n, p, policy, r, s )
 {
   if ( ! target || target -> is_enemy() || target -> is_add() )
@@ -184,7 +184,7 @@ std::vector<player_t*> heal_t::available_targets() const
 // absorb_t::absorb_t =======================
 
 absorb_t::absorb_t( const char* n, player_t* p, policy_t policy,
-                    int r, const school_type s ) :
+                    resource_type r, school_type s ) :
   action_t( ACTION_ABSORB, n, p, policy, r, s )
 {
   if ( ! target || target -> is_enemy() || target -> is_add() )

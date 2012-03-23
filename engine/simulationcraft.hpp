@@ -1176,7 +1176,7 @@ public:
   static const char* profession_type_string    ( profession_type type );
   static const char* race_type_string          ( int type );
   static const char* role_type_string          ( int type );
-  static const char* resource_type_string      ( int type );
+  static const char* resource_type_string      ( resource_type type );
   static const char* result_type_string        ( int type );
   static const char* school_type_string        ( int type );
   static std::string armor_type_string         ( player_type ptype, int slot_type );
@@ -1198,7 +1198,7 @@ public:
   static position_type parse_position_type     ( const std::string& name );
   static race_type parse_race_type             ( const std::string& name );
   static role_type parse_role_type             ( const std::string& name );
-  static int parse_resource_type               ( const std::string& name );
+  static resource_type parse_resource_type     ( const std::string& name );
   static int parse_result_type                 ( const std::string& name );
   static school_type parse_school_type         ( const std::string& name );
   static int parse_slot_type                   ( const std::string& name );
@@ -2969,11 +2969,11 @@ public:
   std::string print_action_map( int iterations, int precision ) const;
 
   virtual void   regen( timespan_t periodicity=timespan_t::from_seconds( 0.25 ) );
-          double resource_gain( int resource, double amount, gain_t* g=0, action_t* a=0 );
-          double resource_loss( int resource, double amount, gain_t* g=0, action_t* a=0 );
+          double resource_gain( resource_type resource, double amount, gain_t* g=0, action_t* a=0 );
+          double resource_loss( resource_type resource, double amount, gain_t* g=0, action_t* a=0 );
   virtual void   recalculate_resource_max( int resource );
   virtual bool   resource_available( int resource, double cost ) const;
-  virtual int    primary_resource() const { return RESOURCE_NONE; }
+  virtual resource_type primary_resource() const { return RESOURCE_NONE; }
   virtual int    primary_role() const;
   virtual int    primary_tree() const;
   int            primary_tab() const;
@@ -3222,7 +3222,7 @@ struct stats_t
   bool quiet;
   bool background;
 
-  int resource;
+  resource_type resource;
   double resource_consumed, resource_portion;
   double frequency, num_executes, num_ticks;
   double num_direct_results, num_tick_results;
@@ -3305,14 +3305,15 @@ struct action_t
   static const policy_t tech_heal_policy;
 
   sim_t* const sim;
-  const int type;
+  const action_type type;
   std::string name_str;
   player_t* const player;
   player_t* target;
   uint32_t id;
   policy_t attack_policy;
   school_type school;
-  int resource, result, aoe;
+  resource_type resource;
+  int result, aoe;
   bool dual, callbacks, channeled, background, sequence, use_off_gcd;
   bool direct_tick, repeating, harmful, proc, item_proc, proc_ignores_slot, discharge_proc, auto_cast, initialized;
   bool may_crit, tick_may_crit, tick_zero, hasted_ticks;
@@ -3394,8 +3395,8 @@ private:
   void init_action_t_();
 
 public:
-  action_t( int type, const char* name, player_t* p=0, policy_t policy=default_policy,
-            int r=RESOURCE_NONE, const school_type s=SCHOOL_NONE );
+  action_t( action_type type, const char* name, player_t* p=0, policy_t policy=default_policy,
+            resource_type r=RESOURCE_NONE, school_type s=SCHOOL_NONE );
   virtual ~action_t();
 
   //void parse_data();
@@ -3496,7 +3497,7 @@ public:
 
 struct attack_t : public action_t
 {
-  attack_t( const char* n=0, player_t* p=0, int r=RESOURCE_NONE, school_type s=SCHOOL_KINETIC ) :
+  attack_t( const char* n=0, player_t* p=0, resource_type r=RESOURCE_NONE, school_type s=SCHOOL_KINETIC ) :
     action_t( ACTION_ATTACK, n, p, melee_policy, r, s )
   {}
 };
@@ -3508,7 +3509,7 @@ struct heal_t : public action_t
   bool group_only;
 
   heal_t( const char* n=0, player_t* p=0, policy_t policy=default_policy,
-          int r=RESOURCE_NONE, school_type s=SCHOOL_NONE );
+          resource_type r=RESOURCE_NONE, school_type s=SCHOOL_NONE );
 
   virtual void player_buff();
   virtual void execute();
@@ -3526,7 +3527,7 @@ struct heal_t : public action_t
 struct absorb_t : public action_t
 {
   absorb_t( const char* n=0, player_t* p=0, policy_t policy=default_policy,
-            int r=RESOURCE_NONE, const school_type s=SCHOOL_NONE );
+            resource_type r=RESOURCE_NONE, school_type s=SCHOOL_NONE );
 
   virtual void player_buff();
   virtual void execute();

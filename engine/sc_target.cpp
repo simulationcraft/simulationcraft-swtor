@@ -50,14 +50,10 @@ struct enemy_t : public player_t
 // target_t::primary_role ===================================================
 
   virtual int primary_role() const
-  {
-    return ROLE_TANK;
-  }
+  { return ROLE_TANK; }
 
-  virtual int primary_resource() const
-  {
-    return RESOURCE_NONE;
-  }
+  virtual resource_type primary_resource() const
+  { return RESOURCE_NONE; }
 
   virtual action_t* create_action( const std::string& name, const std::string& options_str );
   virtual void init();
@@ -98,10 +94,8 @@ struct enemy_add_t : public pet_t
     pet_t::init_actions();
   }
 
-  virtual int primary_resource() const
-  {
-    return RESOURCE_HEALTH;
-  }
+  virtual resource_type primary_resource() const
+  { return RESOURCE_HEALTH; }
 
   virtual action_t* create_action( const std::string& name, const std::string& options_str );
 };

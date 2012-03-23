@@ -280,12 +280,12 @@ void action_t::init_action_t_()
   rank_level = 0;
 }
 
-action_t::action_t( int               ty,
-                    const char*       n,
-                    player_t*         p,
-                    const policy_t    policy,
-                    int               r,
-                    const school_type s ) :
+action_t::action_t( action_type    ty,
+                    const char*    n,
+                    player_t*      p,
+                    const policy_t policy,
+                    resource_type  r,
+                    school_type    s ) :
   sim( p -> sim ), type( ty ), name_str( n ),
   player( p ), target( p -> target ), attack_policy( policy ),
   school( s ), resource( r )

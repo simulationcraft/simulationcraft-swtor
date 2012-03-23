@@ -204,7 +204,7 @@ struct shadow_assassin_t : public player_t
   virtual void      init_rng();
   virtual void      init_actions();
   virtual void      init_spells();
-  virtual int       primary_resource() const;
+  virtual resource_type primary_resource() const;
   virtual int       primary_role() const;
   virtual double    force_regen_per_second() const; // override
   virtual void      regen( timespan_t periodicity );
@@ -1988,7 +1988,7 @@ void shadow_assassin_t::init_spells()
 
 // shadow_assassin_t::primary_resource ======================================
 
-int shadow_assassin_t::primary_resource() const
+resource_type shadow_assassin_t::primary_resource() const
 { return RESOURCE_FORCE; }
 
 // shadow_assassin_t::primary_role ==========================================
@@ -2027,8 +2027,6 @@ double shadow_assassin_t::force_regen_per_second() const
 
 void shadow_assassin_t::regen( timespan_t periodicity )
 {
-  player_t::regen( periodicity );
-
   double force_regen = periodicity.total_seconds() * base_force_regen_per_second;
 
   if ( buffs.dark_embrace -> up() )
@@ -2036,9 +2034,11 @@ void shadow_assassin_t::regen( timespan_t periodicity )
 
   if ( talents.blood_of_sith -> rank() )
     resource_gain( RESOURCE_FORCE, force_regen * talents.blood_of_sith -> rank() * 0.1, gains.blood_of_sith );
+
+  player_t::regen( periodicity );
 }
 
-// shadow_assassin_t::reset ===========================================================
+// shadow_assassin_t::reset =================================================
 
 void shadow_assassin_t::reset()
 {
@@ -2048,7 +2048,7 @@ void shadow_assassin_t::reset()
   stealth_tag = false;
 }
 
-// shadow_assassin_t::create_talents ==================================================
+// shadow_assassin_t::create_talents ========================================
 
 void shadow_assassin_t::create_talents()
 {

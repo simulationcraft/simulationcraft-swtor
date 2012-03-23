@@ -1685,7 +1685,7 @@ static void print_html_player_resources( FILE* file, player_t* p )
 
   fprintf( file,
            "\t\t\t\t\t\t<div class=\"charts charts-left\">\n" );
-  for ( i = RESOURCE_NONE; i < RESOURCE_MAX; ++i )
+  for ( resource_type i = RESOURCE_NONE; i < RESOURCE_MAX; ++i )
   {
     double total_gain=0;
     for ( gain_t* g = p -> gain_list; g; g = g -> next )
@@ -1696,7 +1696,7 @@ static void print_html_player_resources( FILE* file, player_t* p )
 
     if ( total_gain > 0 )
     {
-      chart_t::gains( p -> gains_chart, p, ( resource_type ) i );
+      chart_t::gains( p -> gains_chart, p, i );
       if ( ! p -> gains_chart.empty() )
       {
         fprintf( file,
@@ -1711,7 +1711,7 @@ static void print_html_player_resources( FILE* file, player_t* p )
 
   fprintf( file,
            "\t\t\t\t\t\t<div class=\"charts\">\n" );
-  for ( int j = RESOURCE_NONE + 1; j < RESOURCE_MAX; j++ )
+  for ( resource_type j = RESOURCE_NONE; ++j < RESOURCE_MAX; )
   {
     if ( p -> resource_max[ j ] > 0 && ! p -> timeline_resource_chart[ j ].empty() )
     {
