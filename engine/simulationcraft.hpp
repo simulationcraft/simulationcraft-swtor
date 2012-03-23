@@ -1947,7 +1947,6 @@ public:
   std::vector<player_t*> players_by_hps;
   std::vector<player_t*> players_by_name;
   std::vector<player_t*> targets_by_name;
-  std::vector<std::string> id_dictionary;
   std::vector<std::string> dps_charts, hps_charts, gear_charts, dpet_charts;
   std::string downtime_chart;
   std::vector<timespan_t> iteration_timeline;
