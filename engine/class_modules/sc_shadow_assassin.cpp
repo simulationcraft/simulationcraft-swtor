@@ -69,22 +69,13 @@ struct shadow_assassin_t : public player_t
   // Procs
   struct procs_t
   {
-    proc_t* exploitive_strikes;
     proc_t* raze;
-    proc_t* exploit_weakness;
-    proc_t* lightning_charge;
-    proc_t* surging_charge;
   } procs;
 
   // RNGs
   struct rngs_t
   {
     rng_t* chain_shock;
-    rng_t* raze;
-    rng_t* exploitive_strikes;
-    rng_t* lightning_charge;
-    rng_t* surging_charge;
-    rng_t* static_charges;
   } rngs;
 
   // Benefits
@@ -282,11 +273,14 @@ struct shadow_assassin_attack_t : public shadow_assassin_action_t
       shadow_assassin_t* p = cast();
       shadow_assassin_t::targetdata_t* td = targetdata();
 
-      if ( p->talents.raze->rank() > 0 && td->dot_lightning_charge.ticking )
+      // Would it makes more sense to move this into the lightning charge callback?
+      if ( p->talents.raze->rank() > 0 && td->dot_lightning_charge.ticking && ! p -> buffs.raze->check() )
       {
-        p->buffs.raze->trigger();
-        if ( p->buffs.raze->up() )
+        if ( p->buffs.raze->trigger() )
+        {
+          p->procs.raze->occur();
           p->cooldowns.crushing_darkness->reset();
+        }
       }
 
     }
@@ -927,7 +921,6 @@ struct dark_charge_t : public apply_charge_t
 
 struct low_slash_t : public shadow_assassin_attack_t
 {
-
   low_slash_t( shadow_assassin_t* p, const std::string& options_str ) :
       shadow_assassin_attack_t( "low_slash", p, SCHOOL_KINETIC )
   {
@@ -1543,7 +1536,7 @@ struct dark_charge_callback_t : public shadow_assassin_action_callback_t
   dark_charge_callback_t( shadow_assassin_t* p ) :
     shadow_assassin_action_callback_t( p )
   {
-    const char* name = p->type == SITH_ASSASSIN ? "dark_charge" : "force_technique";
+    const char* name = p->type == SITH_ASSASSIN ? "dark_charge" : "combat_technique";
     rng_dark_charge = p->get_rng( name );
     dark_charge_damage_proc = new dark_charge_spell_t( p, name );
   }
@@ -1789,11 +1782,7 @@ void shadow_assassin_t::init_procs()
 {
   player_t::init_procs();
 
-  procs.exploitive_strikes  = get_proc( "exploitive_strikes" );
-  procs.exploit_weakness    = get_proc( "exploit_weakness"   );
-  procs.raze                = get_proc( "raze"               );
-  procs.lightning_charge    = get_proc( "lightning_charge"   );
-  procs.surging_charge      = get_proc( "surging_charge"     );
+  procs.raze = get_proc( "raze" );
 }
 
 // shadow_assassin_t::init_rng =========================================================
@@ -1802,12 +1791,7 @@ void shadow_assassin_t::init_rng()
 {
   player_t::init_rng();
 
-  rngs.chain_shock        = get_rng( "chain_shock"         );
-  rngs.raze               = get_rng( "raze"                );
-  rngs.exploitive_strikes = get_rng( "exploitive_strikes " );
-  rngs.lightning_charge   = get_rng( "lightning_charge"    );
-  rngs.surging_charge     = get_rng( "surging_charge"      );
-  rngs.static_charges     = get_rng( "static_charges"      );
+  rngs.chain_shock = get_rng( "chain_shock" );
 }
 
 // shadow_assassin_t::init_actions =====================================================
