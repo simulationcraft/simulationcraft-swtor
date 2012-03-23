@@ -4,13 +4,17 @@
 // ==========================================================================
 
 #include "../simulationcraft.hpp"
+#include "cons_inq.hpp"
 
-struct sage_sorcerer_targetdata_t : public targetdata_t
+// ==========================================================================
+// Jedi Sage
+// ==========================================================================
+
+namespace { // ANONYMOUS NAMESPACE ==========================================
+
+struct sage_sorcerer_targetdata_t : public cons_inq::targetdata_t
 {
-  dot_t dot_telekinetic_throw;
-  dot_t dot_mind_crush;
   dot_t dot_weaken_mind;
-  dot_t dot_sever_force;
 
   dot_t dot_healing_trance;
   dot_t dot_salvation;
@@ -18,27 +22,13 @@ struct sage_sorcerer_targetdata_t : public targetdata_t
 
   sage_sorcerer_targetdata_t( player_t& source, player_t& target )
     : targetdata_t( source, target ),
-      dot_telekinetic_throw( "telekinetic_throw", &source ),
-      dot_mind_crush( "mind_crush", &source ),
       dot_weaken_mind( "weaken_mind", &source ),
-      dot_sever_force( "sever_force", &source ),
       dot_healing_trance( "healing_trance", &source ),
       dot_salvation( "salvation", &source ),
-      dot_rejuvenate( "rejuvenate", &source)
+      dot_rejuvenate( "rejuvenate", &source )
   {
-    add( dot_telekinetic_throw );
-    alias( dot_telekinetic_throw, "force_lightning" );
-
-    add( dot_mind_crush );
-    alias( dot_mind_crush, "mind_crush_dot" );
-    alias( dot_mind_crush, "crushing_darkness" );
-    alias( dot_mind_crush, "crushing_darkness_dot" );
-
     add( dot_weaken_mind );
     alias( dot_weaken_mind, "affliction" );
-
-    add( dot_sever_force );
-    alias( dot_sever_force, "creeping_terror" );
 
     add( dot_healing_trance );
     alias( dot_healing_trance, "innervate" );
@@ -50,10 +40,6 @@ struct sage_sorcerer_targetdata_t : public targetdata_t
     alias( dot_rejuvenate, "resurgence" );
   }
 };
-
-// ==========================================================================
-// Jedi Sage
-// ==========================================================================
 
 struct sage_sorcerer_t : public player_t
 {
@@ -278,8 +264,6 @@ struct sage_sorcerer_t : public player_t
            ( primary_role() == ROLE_HEAL && policy == action_t::force_heal_policy );
   }
 };
-
-namespace { // ANONYMOUS NAMESPACE ==========================================
 
 class sage_sorcerer_action_t : public action_t
 {

@@ -4,38 +4,29 @@
 // ==========================================================================
 
 #include "../simulationcraft.hpp"
+#include "cons_inq.hpp"
+
+// ==========================================================================
+// Jedi Shadow | Sith Assassin
+// ==========================================================================
+
+namespace { // ANONYMOUS NAMESPACE ==========================================
 
 enum charge_type_t
 {
   CHARGE_NONE = 0, LIGHTNING_CHARGE, SURGING_CHARGE, DARK_CHARGE
 };
 
-// ==========================================================================
-// Jedi Shadow | Sith Assassin
-// ==========================================================================
-
 struct shadow_assassin_t : public player_t
 {
-  struct targetdata_t: public ::targetdata_t
+  struct targetdata_t: public cons_inq::targetdata_t
   {
-    dot_t dot_crushing_darkness;
-    dot_t dot_creeping_terror;
     dot_t dot_lightning_charge;
 
     targetdata_t( shadow_assassin_t& source, player_t& target ) :
-      ::targetdata_t( source, target ),
-      dot_crushing_darkness( "crushing_darkness", &source ),
-      dot_creeping_terror( "creeping_terror", &source ),
+      cons_inq::targetdata_t( source, target ),
       dot_lightning_charge( "lightning_charge", &source )
     {
-      add( dot_crushing_darkness );
-      alias( dot_crushing_darkness, "crushing_darkness_dot" );
-      alias( dot_crushing_darkness, "mind_crush" );
-      alias( dot_crushing_darkness, "mind_crush_dot" );
-
-      add( dot_creeping_terror );
-      alias( dot_creeping_terror, "sever_force" );
-
       add( dot_lightning_charge );
       alias( dot_lightning_charge, "lightning_discharge" );
       alias( dot_lightning_charge, "force_technique" );
@@ -252,8 +243,6 @@ struct shadow_assassin_t : public player_t
   }
 };
 
-namespace { // ANONYMOUS NAMESPACE ==========================================
-
 // ==========================================================================
 // Sith assassin Abilities
 // ==========================================================================
@@ -355,7 +344,7 @@ struct shadow_assassin_spell_t : public shadow_assassin_action_t
 
     shadow_assassin_t* p = cast();
 
-    if ( dd.base_min > 0 && p->buffs.recklessness->up() )
+    if ( ( dd.base_min > 0 || channeled ) && p->buffs.recklessness->up() )
       player_crit += 0.60;
   }
 
@@ -402,6 +391,13 @@ struct shadow_assassin_spell_t : public shadow_assassin_action_t
     {
       p->buffs.exploitive_strikes->trigger();
     }
+  }
+
+  virtual void last_tick( dot_t* d )
+  {
+    shadow_assassin_action_t::last_tick( d );
+    if ( channeled )
+      p() -> buffs.recklessness -> decrement();
   }
 };
 
@@ -528,7 +524,7 @@ struct force_lightning_t : public shadow_assassin_spell_t
   force_lightning_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
       shadow_assassin_spell_t( n, p )
   {
-    rank_level_list = { 2, 5, 8, 11, 14, 19, 27, 39, 50};
+    rank_level_list = { 2, 5, 8, 11, 14, 19, 27, 39, 50 };
 
     parse_options( 0, options_str );
 
@@ -537,7 +533,7 @@ struct force_lightning_t : public shadow_assassin_spell_t
 
     base_cost = 30.0;
     if ( player -> set_bonus.rakata_force_masters -> two_pc() )
-    base_cost -= 2.0;
+      base_cost -= 2.0;
     range = 10.0;
     num_ticks = 3;
     base_tick_time = timespan_t::from_seconds( 1.0 );
@@ -557,7 +553,7 @@ struct crushing_darkness_t : public shadow_assassin_spell_t
     crushing_darkness_dot_t( shadow_assassin_t* p, const std::string& n ) :
         shadow_assassin_spell_t( n, p, SCHOOL_KINETIC )
     {
-      rank_level_list = { 14, 19, 30, 41, 50};
+      rank_level_list = { 14, 19, 30, 41, 50 };
 
       td.standardhealthpercentmin = td.standardhealthpercentmax = .0295;
       td.power_mod = 0.295;
