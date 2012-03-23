@@ -51,7 +51,6 @@
 #include <vector>
 
 // Boost includes
-#include <boost/checked_delete.hpp>
 #include <boost/format.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
@@ -155,16 +154,6 @@ struct unique_gear_t;
 struct uptime_t;
 struct weapon_t;
 struct xml_node_t;
-
-// Advanced Classes
-struct commando_mercenary_t;
-struct gunslinger_sniper_t;
-struct juggernaut_guardian_t;
-struct sentinel_marauder_t;
-struct sage_sorcerer_t;
-struct scoundrel_operative_t;
-struct shadow_assassin_t;
-struct vanguard_powertech_t;
 
 typedef const attack_policy_interface_t* attack_policy_t;
 
@@ -650,14 +639,6 @@ private:
   nonmoveable& operator = ( nonmoveable&& ) = delete;
 };
 
-class delete_disposer_t
-{
-public:
-  template <typename T>
-  void operator() ( T* t ) const
-  { boost::checked_delete( t ); }
-};
-
 // Allocate an object and stick it in a unique_ptr all at once. Analagous
 // to std::make_shared<T>().
 template <typename T, typename ... Args>
@@ -667,8 +648,8 @@ make_unique( Args&& ... args )
 
 // Generic algorithms =======================================================
 
-template <typename I, typename D=delete_disposer_t>
-void dispose( I first, I last, D disposer=D() )
+template <typename I, typename D>
+void dispose( I first, I last, D disposer )
 {
   while ( first != last )
   {
@@ -678,15 +659,30 @@ void dispose( I first, I last, D disposer=D() )
   }
 }
 
-template <typename Range, typename D=delete_disposer_t>
-inline auto dispose( Range&& r, D disposer=D() ) -> decltype( std::forward<Range>( r ) )
+template <typename I>
+inline void dispose( I first, I last )
+{
+  typedef typename std::remove_reference<decltype(*first)>::type value_type;
+  dispose( first, last, std::default_delete<value_type>() );
+}
+
+template <typename Range, typename D>
+inline auto dispose( Range&& r, D disposer )
+  -> decltype( std::forward<Range>( r ) )
 {
   dispose( std::begin( r ), std::end( r ), disposer );
   return std::forward<Range>( r );
 }
 
-template <typename T, typename D=delete_disposer_t>
-void dispose_list( T* t, D disposer=D() )
+template <typename Range>
+inline auto dispose( Range&& r ) -> decltype( std::forward<Range>( r ) )
+{
+  typedef typename std::remove_reference<decltype( **std::begin( r ) )>::type value_type;
+  return dispose( std::forward<Range>( r ), std::default_delete<value_type>() );
+}
+
+template <typename T, typename D>
+void dispose_list( T* t, D disposer )
 {
   while ( t )
   {
@@ -695,6 +691,10 @@ void dispose_list( T* t, D disposer=D() )
     disposer( tmp );
   }
 }
+
+template <typename T>
+inline void dispose_list( T* t )
+{ dispose_list( t, std::default_delete<T>() ); }
 
 template <unsigned HW, typename Fwd, typename Out>
 void sliding_window_average( Fwd first, Fwd last, Out out )
@@ -2153,9 +2153,9 @@ public:
   // T must be implicitly convertible to event_t* --
   // basically, a pointer to a type derived from event_t.
   template <typename T> static void cancel( T& e )
-  { if ( e ) { cancel_( e ); e = 0; } }
+  { if ( e ) { cancel_( e ); e = nullptr; } }
   template <typename T> static void early( T& e )
-  { if ( e ) { early_( e ); e = 0; } }
+  { if ( e ) { early_( e ); e = nullptr; } }
 
   // Simple free-list memory manager.
   static void* operator new( std::size_t size, sim_t* sim )
