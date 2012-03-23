@@ -25,6 +25,7 @@
 #endif
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cctype>
 #include <cfloat>
@@ -541,12 +542,12 @@ enum rng_type
   RNG_DISTRIBUTED,   // Normalized variable/distributed values should be returned
 
   // Specifies a particular RNG desired
-  RNG_STANDARD,          // Creates RNG using srand() and rand()
   RNG_MERSENNE_TWISTER,  // Creates RNG using Double precision SIMD-oriented Fast Mersenne Twister (dSFMT)
   RNG_PHASE_SHIFT,       // Simplistic cycle-based RNG, unsuitable for overlapping procs
   RNG_DISTANCE_SIMPLE,   // Simple normalized proc-separation RNG, suitable for fixed proc chance
   RNG_DISTANCE_BANDS,    // Complex normalized proc-separation RNG, suitable for varying proc chance
   RNG_PRE_FILL,          // Deterministic number of procs with random distribution
+
   RNG_MAX
 };
 
@@ -4008,43 +4009,52 @@ class rng_t
 {
 public:
   std::string name_str;
-  double expected_roll,  actual_roll,  num_roll;
-  double expected_range, actual_range, num_range;
-  double expected_gauss, actual_gauss, num_gauss;
+  double expected_roll,  actual_roll;
+  double expected_range, actual_range;
+  double expected_gauss, actual_gauss;
   rng_t* next;
 
 private:
   double gauss_pair_value;
   bool   gauss_pair_use;
-protected:
-  bool   average_range, average_gauss;
 
-  rng_t( const std::string& n, bool avg_range=false, bool avg_gauss=false );
+protected:
+  unsigned num_roll, num_range, num_gauss;
+
+  rng_t( const std::string& n );
+
+  virtual rng_type type_() const = 0;
+  virtual double   real_() = 0;
+  virtual bool     roll_( double chance );
+  virtual double  range_( double min, double max );
+  virtual double  gauss_( double mean, double stddev, const bool truncate_low_end );
+  virtual void     seed_( uint32_t start );
 
 public:
   virtual ~rng_t() {}
 
-  virtual rng_type type() const = 0;
-  virtual double  real() = 0;
-  virtual bool    roll( double chance );
-  virtual double range( double min, double max );
-  virtual double gauss( double mean, double stddev, const bool truncate_low_end = false );
-        double exgauss( double mean, double stddev, double nu );
-  virtual void    seed( uint32_t start = time( nullptr ) );
-  void   report( FILE* );
+  rng_type type() const { return type_(); }
+  void seed( uint32_t start = time( nullptr ) ) { seed_( start ); }
+  void report( FILE* );
 
+  double real() { return real_(); }
+  bool roll( double chance );
+
+  double     range( double min, double max );
   timespan_t range( timespan_t min, timespan_t max )
   {
     return TIMESPAN_FROM_NATIVE_VALUE( range( TIMESPAN_TO_NATIVE_VALUE( min ),
                                               TIMESPAN_TO_NATIVE_VALUE( max ) ) );
   }
 
+  double     gauss( double mean, double stddev, const bool truncate_low_end = false );
   timespan_t gauss( timespan_t mean, timespan_t stddev )
   {
     return TIMESPAN_FROM_NATIVE_VALUE( gauss( TIMESPAN_TO_NATIVE_VALUE( mean ),
                                               TIMESPAN_TO_NATIVE_VALUE( stddev ) ) );
   }
 
+  double     exgauss( double mean, double stddev, double nu );
   timespan_t exgauss( timespan_t mean, timespan_t stddev, timespan_t nu )
   {
     return TIMESPAN_FROM_NATIVE_VALUE( exgauss( TIMESPAN_TO_NATIVE_VALUE( mean ),
@@ -4055,7 +4065,7 @@ public:
   static double stdnormal_cdf( double u );
   static double stdnormal_inv( double p );
 
-  static rng_t* create( sim_t*, const std::string& name, rng_type type=RNG_STANDARD );
+  static rng_t* create( sim_t*, const std::string& name, rng_type type );
 };
 
 // String utils =============================================================
