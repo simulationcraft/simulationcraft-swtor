@@ -608,8 +608,7 @@ struct rng_phase_shift_t : public rng_normalized_t
 
   static_assert( size > 0, "size must be positive" );
 
-  double range_distribution[size];
-  double gauss_distribution[size];
+  std::array<double,size> range_distribution, gauss_distribution;
   int range_index, gauss_index;
 
   rng_phase_shift_t( const std::string& name, rng_t* b ) :
@@ -630,8 +629,8 @@ struct rng_phase_shift_t : public rng_normalized_t
       int last_last_fib = last_fib;
       last_fib = fib;
       fib += last_last_fib;
-      gauss_distribution[ i*2   ] = 1.0 * fib / size ;
-      gauss_distribution[ i*2+1 ] = -( 1.0 * fib / size );
+      gauss_distribution[ i*2   ] = fib * ( 1.0 / size );
+      gauss_distribution[ i*2+1 ] = fib * ( -1.0 / size );
     }
     gauss_index = real() * size;
 
@@ -666,7 +665,7 @@ struct rng_pre_fill_t : public rng_phase_shift_t
 {
   static const int size = rng_phase_shift_t::size;
 
-  double roll_distribution[size];
+  std::array<double,size> roll_distribution;
   int roll_index;
 
   rng_pre_fill_t( const std::string& name, rng_t* b ) :
@@ -943,7 +942,8 @@ struct rng_distance_bands_t : public rng_distance_simple_t
   rng_distance_bands_t( const std::string& name, rng_t* b ) :
     rng_distance_simple_t( name, b )
   {
-    for ( size_t i=0; i < size; i++ ) roll_bands[ i ].actual = real() - 0.5;
+    for ( size_t i=0; i < size; i++ )
+      roll_bands[ i ].actual = real() - 0.5;
   }
 
   virtual rng_type type_() const { return RNG_DISTANCE_BANDS; }
