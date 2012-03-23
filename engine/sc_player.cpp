@@ -293,8 +293,6 @@ player_t::player_t( sim_t*             s,
 
   base_DR( 0 ),
 
-  // Resources
-  health_per_endurance( 10 ),
   // Consumables
   stim( stim_t::none ),
   // Events
@@ -385,7 +383,6 @@ player_t::player_t( sim_t*             s,
 
   main_hand_weapon.slot = SLOT_MAIN_HAND;
   off_hand_weapon.slot = SLOT_OFF_HAND;
-  ranged_weapon.slot = SLOT_RANGED;
 
   if ( ! sim -> active_files.empty() ) origin_str = sim -> active_files.top();
 
@@ -614,7 +611,6 @@ void player_t::init()
   init_defense();
   init_weapon( &main_hand_weapon );
   init_weapon( &off_hand_weapon );
-  init_weapon( &ranged_weapon );
   init_professions_bonus();
   init_unique_gear();
   init_enchant();
@@ -1405,12 +1401,6 @@ void player_t::init_scaling()
           main_hand_weapon.min_dmg += v;
           main_hand_weapon.max_dmg += v;
         }
-        if ( ranged_weapon.damage > 0 )
-        {
-          ranged_weapon.damage     += v;
-          ranged_weapon.min_dmg    += v;
-          ranged_weapon.max_dmg    += v;
-        }
         break;
 
       case STAT_WEAPON_OFFHAND_DMG:
@@ -2060,10 +2050,6 @@ void player_t::reset()
   off_hand_weapon.buff_value = 0;
   off_hand_weapon.bonus_dmg  = 0;
 
-  ranged_weapon.buff_type  = 0;
-  ranged_weapon.buff_value = 0;
-  ranged_weapon.bonus_dmg  = 0;
-
   stim = stim_t::none;
 
   for ( resource_type i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
@@ -2082,8 +2068,6 @@ void player_t::reset()
     action_callback_t::reset( tick_damage_callbacks  [ i ] );
     action_callback_t::reset( direct_damage_callbacks[ i ] );
   }
-
-  replenishment_targets.clear();
 
   init_resources( true );
 

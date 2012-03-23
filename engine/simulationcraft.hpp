@@ -2570,21 +2570,14 @@ public:
   // Weapons
   weapon_t main_hand_weapon;
   weapon_t off_hand_weapon;
-  weapon_t ranged_weapon;
 
   // Resources
   double resource_base   [ RESOURCE_MAX ];
   double resource_initial[ RESOURCE_MAX ];
   double resource_max    [ RESOURCE_MAX ];
   double resource_current[ RESOURCE_MAX ];
-  double health_per_endurance;
+  static constexpr double health_per_endurance = 10;
   uptime_t* primary_resource_cap;
-
-  // Replenishment
-  std::vector<player_t*> replenishment_targets;
-
-  // Callbacks
-  action_callback_t* dark_intent_cb;
 
   // Consumables
   stim_t stim;
