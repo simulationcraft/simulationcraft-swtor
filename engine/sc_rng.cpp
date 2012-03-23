@@ -752,6 +752,7 @@ public:
 
   distribution_t() :
     actual( 0 ), expected( 0 ),
+    chances(), values(), counts(),
     last( size-1 ), total_count( 0 )
   {}
 
