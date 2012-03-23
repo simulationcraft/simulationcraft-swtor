@@ -663,8 +663,6 @@ struct rng_phase_shift_t : public rng_normalized_t
 
 struct rng_pre_fill_t : public rng_phase_shift_t
 {
-  static const int size = rng_phase_shift_t::size;
-
   std::array<double,size> roll_distribution;
   int roll_index;
 
@@ -741,22 +739,21 @@ struct rng_pre_fill_t : public rng_phase_shift_t
 // Distribution
 // ==========================================================================
 
-struct distribution_t
+template <size_t size>
+class distribution_t
 {
+  static_assert( size > 0, "Size must be positive." );
+
+public:
   double actual, expected;
-  std::vector<double> chances, values;
-  std::vector<int> counts;
+  std::array<double,size> chances, values;
+  std::array<int,size> counts;
   int last, total_count;
 
-  distribution_t( unsigned int size ) :
+  distribution_t() :
     actual( 0 ), expected( 0 ),
-    chances( size ), values( size ), counts( size ),
     last( size-1 ), total_count( 0 )
-  {
-    assert( size > 0 );
-  }
-
-  virtual ~distribution_t() {}
+  {}
 
   virtual int next_bucket()
   {
@@ -787,18 +784,17 @@ struct distribution_t
     return best_bucket;
   }
 
-  virtual double next_value()
+  double next_value()
   {
     return values[ next_bucket() ];
   }
 
-  virtual void verify( rng_t* rng )
+  void verify( rng_t* rng )
   {
-    util_t::printf( "distribution_t::verify:\n" );
-    double sum=0;
-    for ( int i=0; i <= last; i++ ) sum += chances[ i ];
-    util_t::printf( "\tsum: %f\n", sum );
-    std::vector<int> rng_counts( chances.size() );
+    util_t::printf( "distribution_t::verify:\n\tsum: %f\n",
+                    std::accumulate( &chances[ 0 ], &chances[ last + 1 ], double( 0 ) ) );
+
+    std::array<int,size> rng_counts;
     for ( int i=0; i < total_count; i++ )
     {
       double p = rng -> real();
@@ -819,18 +815,18 @@ struct distribution_t
 // Range Distribution
 // ==========================================================================
 
-struct range_distribution_t : public distribution_t
+struct range_distribution_t : public distribution_t<10>
 {
-  range_distribution_t() : distribution_t( 10 )
+  range_distribution_t() : distribution_t()
   {
     for ( int i=0; i < 10; i++ )
     {
-      chances[ i ] = 0.10;
-      values [ i ] = i * 0.10 + 0.05;
+      chances[ i ] = 0.1;
+      values [ i ] = 0.1 * i + 0.05;
     }
   }
 
-  virtual int next_bucket()
+  virtual int next_bucket() // override
   {
     expected += 0.50;
     return distribution_t::next_bucket();
@@ -841,9 +837,9 @@ struct range_distribution_t : public distribution_t
 // Gauss Distribution
 // ==========================================================================
 
-struct gauss_distribution_t : public distribution_t
+struct gauss_distribution_t : public distribution_t<9>
 {
-  gauss_distribution_t() : distribution_t( 9 )
+  gauss_distribution_t() : distribution_t()
   {
     chances[ 0 ] = 0.025;  values[ 0 ] = -2.5;
     chances[ 1 ] = 0.050;  values[ 1 ] = -2.0;
@@ -861,15 +857,17 @@ struct gauss_distribution_t : public distribution_t
 // Roll Distribution
 // ==========================================================================
 
-struct roll_distribution_t : public distribution_t
+struct roll_distribution_t : public distribution_t<200>
 {
   int distance;
   int num_rolls;
   double avg_fill;
 
-  roll_distribution_t() : distribution_t( 200 ), distance( 0 ), num_rolls( 0 ), avg_fill( 0 ) {}
+  roll_distribution_t() :
+    distribution_t(), distance( 0 ), num_rolls( 0 ), avg_fill( 0 )
+  {}
 
-  virtual void fill()
+  void fill()
   {
     double avg_expected = expected / num_rolls;
     if ( avg_fill > 0 && fabs( avg_expected - avg_fill ) < 0.01 ) return;
@@ -886,7 +884,7 @@ struct roll_distribution_t : public distribution_t
     avg_fill = avg_expected;
   }
 
-  virtual int reach( double chance )
+  int reach( double chance )
   {
     num_rolls++;
     expected += chance;
@@ -895,7 +893,7 @@ struct roll_distribution_t : public distribution_t
       fill();
       distance = next_bucket();
     }
-    return ( distance == 0 ) ? 1 : 0;
+    return ( distance == 0 );
   }
 };
 
