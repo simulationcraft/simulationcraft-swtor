@@ -617,6 +617,10 @@ template <typename T, std::size_t N>
 constexpr std::size_t sizeof_array( const T ( & )[N] )
 { return N; }
 
+template <typename T, std::size_t N>
+constexpr std::size_t sizeof_array( const std::array<T,N>& )
+{ return N; }
+
 class noncopyable
 {
 public:
@@ -2665,9 +2669,10 @@ public:
   benefit_t* benefit_list;
   uptime_t* uptime_list;
   set_bonus_t* set_bonus_list;
-  std::vector<double> dps_plot_data[ STAT_MAX ];
-  std::vector<std::vector<reforge_plot_data_t> > reforge_plot_data;
-  std::vector<std::vector<double> > timeline_resource;
+
+  std::array<std::vector<double>,STAT_MAX> dps_plot_data;
+  std::vector<std::vector<reforge_plot_data_t>> reforge_plot_data;
+  std::array<std::vector<double>,RESOURCE_MAX> timeline_resource;
 
   // Damage
   double iteration_dmg, iteration_dmg_taken;
@@ -2693,7 +2698,7 @@ public:
 
   std::string action_sequence;
   std::string action_dpet_chart, action_dmg_chart, time_spent_chart, gains_chart;
-  std::vector<std::string> timeline_resource_chart;
+  std::array<std::string,RESOURCE_MAX> timeline_resource_chart;
   std::string timeline_dps_chart, timeline_resource_health_chart;
   std::string distribution_dps_chart, scaling_dps_chart, scale_factors_chart;
   std::string reforge_dps_chart, dps_error_chart, distribution_deaths_chart;

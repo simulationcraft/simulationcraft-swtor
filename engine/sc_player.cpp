@@ -902,7 +902,6 @@ void player_t::init_enchant()
 void player_t::init_resources( bool force )
 {
   if ( sim -> debug ) log_t::output( sim, "Initializing resources for player (%s)", name() );
-  // The first 20pts of intellect/stamina only provide 1pt of mana/health.
 
   for ( resource_type i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
   {
@@ -918,18 +917,16 @@ void player_t::init_resources( bool force )
     resource_current[ i ] = resource_max[ i ] = resource_initial[ i ];
   }
 
-  if ( timeline_resource.empty() )
+  if ( timeline_resource[ 0 ].empty() )
   {
-    timeline_resource.resize( RESOURCE_MAX );
-    timeline_resource_chart.resize( RESOURCE_MAX );
-
-    int size = ( int ) ( sim -> max_time.total_seconds() * ( 1.0 + sim -> vary_combat_length ) );
+    int size = static_cast<int>( sim -> max_time.total_seconds() *
+                                 ( 1.0 + sim -> vary_combat_length ) );
     if ( size <= 0 ) size = 600; // Default to 10 minutes
     size *= 2;
     size += 3; // Buffer against rounding.
 
-    for ( resource_type i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
-      timeline_resource[i].assign( size, 0 );
+    for ( auto& i : timeline_resource )
+      i.assign( size, 0 );
   }
 }
 
