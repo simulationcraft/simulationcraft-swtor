@@ -474,6 +474,8 @@ SimulationCraftWindow::SimulationCraftWindow( QWidget *parent )
 
   setAcceptDrops( true );
 
+  importTab->setCurrentIndex( TAB_MR_ROBOT );
+
   loadHistory();
 }
 
@@ -734,6 +736,7 @@ void SimulationCraftWindow::createImportTab()
 
   // Commenting out until it is more fleshed out.
   // createCustomTab();
+
 }
 
 void SimulationCraftWindow::createBestInSlotTab()
