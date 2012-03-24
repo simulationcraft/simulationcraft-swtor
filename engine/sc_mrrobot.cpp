@@ -476,7 +476,7 @@ player_t* download_player( sim_t*             sim,
   js_t::get_value( p -> server_str, profile, "Server" );
   js_t::get_value( p -> region_str, profile, "Region" );
 
-  p -> origin_str = url;
+  p -> origin_str = "http://swtor.askmrrobot.com/character/" + id;
 
   if ( parse_profession( profile, "CraftingCrewSkill", p -> professions_str ) )
     p -> professions_str += "/";
