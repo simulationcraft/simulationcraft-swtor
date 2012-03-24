@@ -1126,20 +1126,15 @@ void ImportThread::importMrRobot()
 
 
   }
-
-  // tmp debug
-      if ( player )
-        fprintf( sim->output_file, "MrRobot import sucess!\n" );
-      else
-        fprintf( sim->output_file, "MrRobot import no sucess!\n" );
 }
 
 void ImportThread::run()
 {
   cache::advance_era();
+
   switch ( tab )
   {
-  case TAB_MR_ROBOT: importMrRobot(); assert( 0 ); break;
+  case TAB_MR_ROBOT: importMrRobot(); break;
   default: assert( 0 ); break;
   }
 
@@ -1566,7 +1561,12 @@ void SimulationCraftWindow::mainButtonClicked( bool /* checked */ )
   case TAB_OVERRIDES: startSim(); break;
   case TAB_HELP:      startSim(); break;
   case TAB_SITE:      startSim(); break;
-  case TAB_IMPORT:    startSim(); break;
+  case TAB_IMPORT:
+    switch ( importTab->currentIndex() )
+    {
+    case TAB_MR_ROBOT: startImport( TAB_MR_ROBOT, cmdLine->text() ); break;
+    }
+    break;
   case TAB_LOG: saveLog(); break;
   case TAB_RESULTS: saveResults(); break;
   }

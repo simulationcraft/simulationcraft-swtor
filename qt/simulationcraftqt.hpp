@@ -25,8 +25,8 @@ enum master_tabs {
 
 enum import_tabs {
   TAB_BIS,
-  TAB_HISTORY,
   TAB_MR_ROBOT,
+  TAB_HISTORY,
   TAB_CUSTOM,
 };
 
