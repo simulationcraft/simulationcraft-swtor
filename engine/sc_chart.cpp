@@ -1290,7 +1290,7 @@ std::string color_temperature_gradient( double n, double min, double range )
   const unsigned red = static_cast<unsigned char>( floor( 255.0 * ( n - min ) / range ) );
   const unsigned blue = 255 - red;
 
-  util_t::snprintf( buffer, sizeof( buffer ), "%.2X00%.2X", red, blue );
+  snprintf( buffer, sizeof( buffer ), "%.2X00%.2X", red, blue );
   return buffer;
 }
 

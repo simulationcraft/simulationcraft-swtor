@@ -1280,12 +1280,20 @@ public:
   static std::string& format_name( std::string& s )
   { format_name_( s ); return s; }
 
-  static int snprintf( char* buf, size_t size, const char* fmt, ... ) PRINTF_ATTRIBUTE( 3,4 );
+  static int schkprintf( const char* file, const char* fn, int line,
+                         char* buf, size_t size, const char* fmt, ... ) PRINTF_ATTRIBUTE( 6,7 );
 
   template <typename T, std::size_t N>
   static std::vector<T> array_to_vector( const T (&array)[N] )
   { return std::vector<T>( array, array + N ); }
 };
+
+#ifndef NDEBUG
+#define snprintf( buf, size, fmt, ... ) \
+  ( util_t::schkprintf( __FILE__, __FUNCTION__, __LINE__, \
+                       ( buf ), ( size ), ( fmt ), ## __VA_ARGS__ ) )
+#endif
+
 
 // Spell information struct, holding static functions to output spell data in a human readable form
 

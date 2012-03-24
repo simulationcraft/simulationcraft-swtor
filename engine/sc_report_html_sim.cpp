@@ -489,9 +489,9 @@ static void print_html_raid_imagemap( FILE* file, sim_t* sim, int num, bool dps 
   fprintf( file, "];\n" );
 
   char imgid[32];
-  util_t::snprintf( imgid, sizeof( imgid ), "%sIMG%d", ( dps ) ? "DPS" : "HPS", num );
+  snprintf( imgid, sizeof( imgid ), "%sIMG%d", ( dps ? "DPS" : "HPS" ), num );
   char mapid[32];
-  util_t::snprintf( mapid, sizeof( mapid ), "%sMAP%d", ( dps ) ? "DPS" : "HPS", num );
+  snprintf( mapid, sizeof( mapid ), "%sMAP%d", ( dps ? "DPS" : "HPS" ), num );
 
   fprintf( file,
            "\t\t\tu = document.getElementById('%s').src;\n"
