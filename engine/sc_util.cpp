@@ -1636,7 +1636,7 @@ void util_t::format_name_( std::string& name )
     else if ( std::isalpha( c ) )
       c = std::tolower( c );
 
-    else if ( c == ' ' )
+    else if ( c == ' ' || c == '-' )
       c = '_';
 
     else if ( ( c == '_' || c == '+' ) && i == 0 )
