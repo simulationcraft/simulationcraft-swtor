@@ -116,7 +116,7 @@ bool parse_items( player_t* p, js_node_t* items )
     js_node_t* item = nodes[ i ];
 
     std::string slot_name;
-    if ( ! js_t::get_value( slot_name, item, "CharacterSlot" ) )
+    if ( ! js_t::get_value( slot_name, item, "Slot" ) )
     {
       // FIXME: Report weirdness.
       continue;
@@ -144,32 +144,30 @@ bool parse_items( player_t* p, js_node_t* items )
       // FIXME: Do something.
     }
 
-    js_node_t* stats = js_t::get_child( item, "Stats" );
+    js_node_t* stats = js_t::get_node( item, "Stats" );
     if ( ! stats )
     {
       // FIXME: Report weirdness.
       continue;
     }
 
-    std::vector<js_node_t*> stat_nodes;
-    js_t::get_children( stat_nodes, stats );
-
     item_encoding << ",stats=";
-
-    for ( size_t j = 0; j < stat_nodes.size(); ++j )
+    int i = 0;
+    for ( stat_type j = stat_type::STAT_NONE; j < stat_type::STAT_MAX; ++j )
     {
-      std::string stat_name;
       int stat_value;
-      if ( ! js_t::get_value( stat_name, stat_nodes[ j ], "Stat" ) ||
-           ! js_t::get_value( stat_value, stat_nodes[ j ], "Value" ) )
+      std::string stat_name = util_t::stat_type_string( j );
+      stat_name[ 0 ] = ::toupper( stat_name[ 0 ] );
+
+      if ( ! js_t::get_value( stat_value, stats, stat_name ) )
       {
-        // FIXME: Report weirdness.
         continue;
       }
 
-      if ( j )
+      if ( i )
         item_encoding << '_';
-      item_encoding << stat_value << stat_name;
+      item_encoding << stat_value << util_t::stat_type_string( j );
+      i++;
     }
 
     p -> items[ slot ].options_str = item_encoding.str();
@@ -490,7 +488,7 @@ player_t* download_player( sim_t*             sim,
   if ( ! parse_skills( p, profile ) )
     return 0;
 
-  if ( ! parse_items( p, js_t::get_child( profile, "Gear" ) ) )
+  if ( ! parse_items( p, js_t::get_child( profile, "GearSet" ) ) )
     return 0;
 
   if ( js_node_t* datacrons = js_t::get_child( profile, "Datacrons" ) )

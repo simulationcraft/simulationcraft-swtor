@@ -721,7 +721,7 @@ void SimulationCraftWindow::createImportTab()
     cookieJar->load();
     mrRobotBuilderView = new SimulationCraftWebView( this );
     mrRobotBuilderView->page()->networkAccessManager()->setCookieJar( cookieJar );
-    mrRobotBuilderView->setUrl( QUrl( "http://swtor.askmrrobot.com/character" ) );
+    mrRobotBuilderView->setUrl( QUrl( "http://swtor.askmrrobot.com/character/search" ) );
     importTab->addTab( mrRobotBuilderView, "Mr. Robot" );
   }
 
