@@ -25,6 +25,7 @@
 #endif
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cctype>
 #include <cfloat>
@@ -50,7 +51,7 @@
 #include <vector>
 
 // Boost includes
-#include <boost/checked_delete.hpp>
+#include <boost/format.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
 #include <boost/range/algorithm_ext.hpp>
@@ -92,7 +93,7 @@
 #endif
 
 #define SC_MAJOR_VERSION "115"
-#define SC_MINOR_VERSION "2"
+#define SC_MINOR_VERSION "3"
 #define SWTOR_VERSION_LIVE "1.1.5"
 #define SWTOR_VERSION_PTR "1.2.0"
 #define SC_USE_PTR ( 1 )
@@ -111,7 +112,6 @@
 
 struct action_t;
 struct action_callback_t;
-struct action_expr_t;
 struct action_priority_list_t;
 struct alias_t;
 class attack_policy_interface_t;
@@ -119,6 +119,7 @@ struct benefit_t;
 struct buff_t;
 struct buff_uptime_t;
 struct callback_t;
+struct cancel_t;
 struct companion_t;
 struct cooldown_t;
 struct dot_t;
@@ -126,6 +127,8 @@ struct effect_t;
 struct enemy_t;
 struct enchant_t;
 struct event_t;
+class  expr_t;
+typedef std::unique_ptr<expr_t> expr_ptr;
 struct gain_t;
 struct heal_t;
 struct item_t;
@@ -140,7 +143,7 @@ struct rating_t;
 struct reforge_plot_t;
 struct reforge_plot_data_t;
 struct report_t;
-struct rng_t;
+class  rng_t;
 struct sample_data_t;
 struct scaling_t;
 struct sim_t;
@@ -151,16 +154,6 @@ struct unique_gear_t;
 struct uptime_t;
 struct weapon_t;
 struct xml_node_t;
-
-// Advanced Classes
-struct commando_mercenary_t;
-struct gunslinger_sniper_t;
-struct juggernaut_guardian_t;
-struct sentinel_marauder_t;
-struct sage_sorcerer_t;
-struct scoundrel_operative_t;
-struct shadow_assassin_t;
-struct vanguard_powertech_t;
 
 typedef const attack_policy_interface_t* attack_policy_t;
 
@@ -193,33 +186,35 @@ public:
   void clear_debuffs();
 };
 
-// C++11 countable enumeration template =====
+// iterable enumeration template =====
 
-/* "enum class" is the C++11 feature here. An enum class doesn't inject the names of the enumerators into the declaring scope,
- * but keeps them scoped inside the enum itself so you must use a fully qualified name for them. e.g.,
- * enum class color { red, green, blue }; color c = color::red;
- *
- * The other unrelated issue is that enums in C++ implicitly convert to int but not from int.
- * (e.g., "for ( attribute_type i = ATTR_STRENGTH; a < ATTR_MAX; ++a )" won't compile).
+/*
+ * Enumeration types in C++ implicitly convert to int but not from int (e.g.,
+ * "for ( attribute_type i = ATTR_STRENGTH; i < ATTR_MAX; ++i )" won't compile).
  * This is why so much of the code uses int when it really means an enum type.
- * Providing the kind of operations we want to use for enums lets us tighten up our use of the type system and avoid accidentally
- * passing some other thing that converts to int when we really mean an enumeration type.
+ * Providing the kind of operations we want to use for enums lets us tighten up
+ * our use of the type system and avoid accidentally passing some other thing
+ * that converts to int when we really mean an enumeration type.
  *
- * The template functions tell the compiler it can perform prefix and postfix ++ and -- on any type by converting it to int and back
- * The magic with std::enable_if restricts those operations to types T for which the type trait "is_countable_enum<T>" is true.
- * The trait gives us a way to turn that functionality off for specific types by specializing is_countable_enum<T> as std::false_type.
+ * The template functions tell the compiler it can perform prefix and postfix
+ * operators ++ and -- on any type by converting it to int and back. The magic
+ * with std::enable_if<> restricts those operations to types T for which the
+ * type trait "is_iterable_enum<T>" is true. This trait gives us a way to
+ * selectively disable the functionality for specific types if needed by
+ * specializing is_iterable_enum<T> as std::false_type.
  */
 
+// All enumerations are iterable by default.
 template <typename T>
-struct is_countable_enum : public std::is_enum<T> {};
+struct is_iterable_enum : public std::is_enum<T> {};
 
 template <typename T>
-inline typename std::enable_if<is_countable_enum<T>::value,T&>::type
+inline typename std::enable_if<is_iterable_enum<T>::value,T&>::type
 operator -- ( T& s )
 { return s = static_cast<T>( static_cast<int>( s ) - 1 ); }
 
 template <typename T>
-inline typename std::enable_if<is_countable_enum<T>::value,T>::type
+inline typename std::enable_if<is_iterable_enum<T>::value,T>::type
 operator -- ( T& s, int )
 {
   T tmp = s;
@@ -228,12 +223,12 @@ operator -- ( T& s, int )
 }
 
 template <typename T>
-inline typename std::enable_if<is_countable_enum<T>::value,T&>::type
+inline typename std::enable_if<is_iterable_enum<T>::value,T&>::type
 operator ++ ( T& s )
 { return s = static_cast<T>( static_cast<int>( s ) + 1 ); }
 
 template <typename T>
-inline typename std::enable_if<is_countable_enum<T>::value,T>::type
+inline typename std::enable_if<is_iterable_enum<T>::value,T>::type
 operator ++ ( T& s, int )
 {
   T tmp = s;
@@ -241,17 +236,70 @@ operator ++ ( T& s, int )
   return tmp;
 }
 
+// Automagic bitmask building for enumerations ===
+
+/*
+ * We use a lot of sets of enumeration members implemented as
+ * bitmasks; enumeration member n is a member of the set iff
+ * bitmask & ( 1 << n ) != 0. These templates automate the
+ * process of choosing a type for the bitmask representing
+ * sets of a given enumeration type, and generating bitmasks
+ * from a given set of enumerators.
+ */
+
+// Select a type to use for storing bitmasks for values of an
+// enumeration strictly less than Max.
+template <int Max>
+class enum_bitmask_t
+{
+public:
+  typedef typename std::conditional<( Max <=  8 ), uint_fast8_t,
+          typename std::conditional<( Max <= 16 ), uint_fast16_t,
+          typename std::conditional<( Max <= 32 ), uint_fast32_t,
+                                    uint_fast64_t>::type>::type>::type type;
+
+  static_assert( Max <= std::numeric_limits<type>::digits,
+                 "Bit mask must fit in selected type." );
+};
+
+// bitmask(T) will only work if you specialize bitmask_traits<T> with
+// a member "type" that you want to use for the bitmasks. Protip: have a
+// member "XXX_MAX" in your enumeration and simply inherit bitmask_traits
+// from enum_bitmask_t to let it pick the mask type for you, e.g.,
+//   template<>
+//   struct bitmask_traits<some_type> :
+//     public enum_bitmask_t<SOME_TYPE_MAX> {};
+template <typename T>
+struct bitmask_traits {};
+
+// Build a bitmask with a single member s.
+template <typename T>
+constexpr typename bitmask_traits<T>::type bitmask( T s )
+{ return static_cast<typename bitmask_traits<T>::type>( 1 ) << s; }
+
+// Build a bitmask with multiple members.
+template <typename T, typename ... Types>
+constexpr typename bitmask_traits<T>::type bitmask( T s, Types ... args )
+{ return bitmask( s ) | bitmask( args... ); }
+
+
 // Enumerations =============================================================
 
 enum race_type
 {
   RACE_NONE=0,
+
   // Target Races
   RACE_BEAST, RACE_DRAGONKIN, RACE_GIANT, RACE_HUMANOID, RACE_DEMON, RACE_ELEMENTAL,
+
   // Player Races
-  RACE_CHISS, RACE_CYBORG, RACE_HUMAN, RACE_MIRALUKA, RACE_MIRIALAN, RACE_RATTATAKI, RACE_SITH_PUREBLOOD, RACE_TWILEK, RACE_ZABRAK,
+  RACE_CHISS, RACE_CYBORG, RACE_HUMAN, RACE_MIRALUKA, RACE_MIRIALAN, RACE_RATTATAKI,
+  RACE_SITH_PUREBLOOD, RACE_TWILEK, RACE_ZABRAK,
+
   RACE_MAX
 };
+template<> struct bitmask_traits<race_type> : public enum_bitmask_t<RACE_MAX> {};
+typedef bitmask_traits<race_type>::type race_mask_t;
 
 enum player_type
 {
@@ -313,12 +361,14 @@ enum result_type
   RESULT_BLOCK, RESULT_CRIT, RESULT_HIT,
   RESULT_MAX
 };
-
-#define RESULT_HIT_MASK  ( (1<<RESULT_BLOCK) | (1<<RESULT_CRIT) | (1<<RESULT_HIT) )
-#define RESULT_CRIT_MASK ( (1<<RESULT_CRIT) )
-#define RESULT_MISS_MASK ( (1<<RESULT_MISS) )
-#define RESULT_NONE_MASK ( (1<<RESULT_NONE) )
-#define RESULT_ALL_MASK  ( -1 )
+template<>
+struct bitmask_traits<result_type> : public enum_bitmask_t<RESULT_MAX> {};
+typedef bitmask_traits<result_type>::type result_mask_t;
+constexpr result_mask_t RESULT_HIT_MASK = bitmask( RESULT_BLOCK, RESULT_CRIT, RESULT_HIT );
+constexpr result_mask_t RESULT_CRIT_MASK = bitmask( RESULT_CRIT );
+constexpr result_mask_t RESULT_MISS_MASK = bitmask( RESULT_MISS );
+constexpr result_mask_t RESULT_NONE_MASK = bitmask( RESULT_NONE );
+constexpr result_mask_t RESULT_ALL_MASK = ~result_mask_t(0);
 
 enum proc_type
 {
@@ -350,9 +400,9 @@ enum school_type
 
   SCHOOL_MAX
 };
-
-#define SCHOOL_ALL_MASK ( ( 1 << SCHOOL_KINETIC ) | ( 1 << SCHOOL_ENERGY ) | \
-                          ( 1 << SCHOOL_INTERNAL ) | ( 1 << SCHOOL_ELEMENTAL ) )
+template <> struct bitmask_traits<school_type> : public enum_bitmask_t<SCHOOL_MAX> {};
+typedef bitmask_traits<school_type>::type school_mask_t;
+constexpr school_mask_t SCHOOL_ALL_MASK = ~school_mask_t( 0 );
 
 enum talent_tree_type
 {
@@ -413,18 +463,11 @@ enum slot_type
   SLOT_MAX       = 19
 };
 
-typedef uint_fast32_t slot_mask_t;
-static_assert( SLOT_MAX <= std::numeric_limits<slot_mask_t>::digits,
-               "slot masks won't fit in slot_mask_t." );
+template <>
+struct bitmask_traits<slot_type> : public enum_bitmask_t<SLOT_MAX> {};
+typedef bitmask_traits<slot_type>::type slot_mask_t;
 
-constexpr slot_mask_t slot_mask( slot_type s )
-{ return slot_mask_t( 1 ) << s; }
-
-template <typename ... Types>
-constexpr slot_mask_t slot_mask( slot_type s, Types ... args )
-{ return slot_mask( s ) | slot_mask( args... ); }
-
-constexpr slot_mask_t DEFAULT_SET_BONUS_SLOT_MASK = slot_mask( SLOT_HEAD, SLOT_CHEST, SLOT_HANDS, SLOT_LEGS, SLOT_FEET );
+constexpr slot_mask_t DEFAULT_SET_BONUS_SLOT_MASK = bitmask( SLOT_HEAD, SLOT_CHEST, SLOT_HANDS, SLOT_LEGS, SLOT_FEET );
 
 // Keep this in sync with enum attribute_type
 enum stat_type
@@ -443,6 +486,15 @@ enum stat_type
   STAT_DEFENSE_RATING, STAT_SHIELD_RATING, STAT_ABSORB_RATING,
   STAT_MAX
 };
+#define check(x) static_assert( static_cast<int>( STAT_##x ) == static_cast<int>( ATTR_##x ), \
+                                "stat_type and attribute_type must be kept in sync" )
+check( STRENGTH );
+check( AIM );
+check( CUNNING );
+check( WILLPOWER );
+check( ENDURANCE );
+check( PRESENCE );
+#undef check
 
 enum class stim_t
 {
@@ -458,7 +510,12 @@ enum profession_type
 {
   PROFESSION_NONE=0,
   PROFESSION_UNKNOWN,
+  PROFESSION_ARMORMECH,
+  PROFESSION_ARMSTECH,
+  PROFESSION_ARTIFICE,
   PROFESSION_BIOCHEM,
+  PROFESSION_CYBERTECH,
+  PROFESSION_SYNTHWEAVING,
   PROFESSION_MAX
 };
 
@@ -474,12 +531,12 @@ enum rng_type
   RNG_DISTRIBUTED,   // Normalized variable/distributed values should be returned
 
   // Specifies a particular RNG desired
-  RNG_STANDARD,          // Creates RNG using srand() and rand()
   RNG_MERSENNE_TWISTER,  // Creates RNG using Double precision SIMD-oriented Fast Mersenne Twister (dSFMT)
   RNG_PHASE_SHIFT,       // Simplistic cycle-based RNG, unsuitable for overlapping procs
   RNG_DISTANCE_SIMPLE,   // Simple normalized proc-separation RNG, suitable for fixed proc chance
   RNG_DISTANCE_BANDS,    // Complex normalized proc-separation RNG, suitable for varying proc chance
   RNG_PRE_FILL,          // Deterministic number of procs with random distribution
+
   RNG_MAX
 };
 
@@ -557,7 +614,11 @@ enum rating_type
 
 // Type utilities and generic programming tools =============================
 template <typename T, std::size_t N>
-inline std::size_t sizeof_array( const T ( & )[N] )
+constexpr std::size_t sizeof_array( const T ( & )[N] )
+{ return N; }
+
+template <typename T, std::size_t N>
+constexpr std::size_t sizeof_array( const std::array<T,N>& )
 { return N; }
 
 class noncopyable
@@ -582,18 +643,17 @@ private:
   nonmoveable& operator = ( nonmoveable&& ) = delete;
 };
 
-class delete_disposer_t
-{
-public:
-  template <typename T>
-  void operator() ( T* t ) const
-  { boost::checked_delete( t ); }
-};
+// Allocate an object and stick it in a unique_ptr all at once. Analagous
+// to std::make_shared<T>().
+template <typename T, typename ... Args>
+std::unique_ptr<T>
+make_unique( Args&& ... args )
+{ return std::unique_ptr<T>( new T( std::forward<Args>( args )... ) ); }
 
 // Generic algorithms =======================================================
 
-template <typename I, typename D=delete_disposer_t>
-void dispose( I first, I last, D disposer=D() )
+template <typename I, typename D>
+void dispose( I first, I last, D disposer )
 {
   while ( first != last )
   {
@@ -603,15 +663,30 @@ void dispose( I first, I last, D disposer=D() )
   }
 }
 
-template <typename Range, typename D=delete_disposer_t>
-inline auto dispose( Range&& r, D disposer=D() ) -> decltype( std::forward<Range>( r ) )
+template <typename I>
+inline void dispose( I first, I last )
+{
+  typedef typename std::remove_reference<decltype(*first)>::type value_type;
+  dispose( first, last, std::default_delete<value_type>() );
+}
+
+template <typename Range, typename D>
+inline auto dispose( Range&& r, D disposer )
+  -> decltype( std::forward<Range>( r ) )
 {
   dispose( std::begin( r ), std::end( r ), disposer );
   return std::forward<Range>( r );
 }
 
-template <typename T, typename D=delete_disposer_t>
-void dispose_list( T* t, D disposer=D() )
+template <typename Range>
+inline auto dispose( Range&& r ) -> decltype( std::forward<Range>( r ) )
+{
+  typedef typename std::remove_reference<decltype( **std::begin( r ) )>::type value_type;
+  return dispose( std::forward<Range>( r ), std::default_delete<value_type>() );
+}
+
+template <typename T, typename D>
+void dispose_list( T* t, D disposer )
 {
   while ( t )
   {
@@ -620,6 +695,10 @@ void dispose_list( T* t, D disposer=D() )
     disposer( tmp );
   }
 }
+
+template <typename T>
+inline void dispose_list( T* t )
+{ dispose_list( t, std::default_delete<T>() ); }
 
 template <unsigned HW, typename Fwd, typename Out>
 void sliding_window_average( Fwd first, Fwd last, Out out )
@@ -1098,10 +1177,10 @@ public:
   static const char* player_type_string        ( int type );
   static const char* pet_type_string           ( int type );
   static const char* position_type_string      ( int type );
-  static const char* profession_type_string    ( int type );
+  static const char* profession_type_string    ( profession_type type );
   static const char* race_type_string          ( int type );
   static const char* role_type_string          ( int type );
-  static const char* resource_type_string      ( int type );
+  static const char* resource_type_string      ( resource_type type );
   static const char* result_type_string        ( int type );
   static const char* school_type_string        ( int type );
   static std::string armor_type_string         ( player_type ptype, int slot_type );
@@ -1119,11 +1198,11 @@ public:
   static stim_t parse_stim_type                ( const std::string& name );
   static player_type parse_player_type         ( const std::string& name );
   static pet_type_t parse_pet_type             ( const std::string& name );
-  static int parse_profession_type             ( const std::string& name );
+  static profession_type parse_profession_type ( const std::string& name );
   static position_type parse_position_type     ( const std::string& name );
   static race_type parse_race_type             ( const std::string& name );
   static role_type parse_role_type             ( const std::string& name );
-  static int parse_resource_type               ( const std::string& name );
+  static resource_type parse_resource_type     ( const std::string& name );
   static int parse_result_type                 ( const std::string& name );
   static school_type parse_school_type         ( const std::string& name );
   static int parse_slot_type                   ( const std::string& name );
@@ -1147,7 +1226,6 @@ public:
   static int translate_class_id( int cid );
   static int translate_class_str( const std::string& s );
   static race_type translate_race_id( int rid );
-  static profession_type translate_profession_id( int skill_id );
 
   static int string_split( std::vector<std::string>& results, const std::string& str, const char* delim, bool allow_quotes = false )
   { string_split_( results, str, delim, allow_quotes ); return static_cast<int>( results.size() ); }
@@ -1450,7 +1528,7 @@ struct buff_t
   buff_t* next;
   int current_stack, max_stack;
   int aura_id;
-  int rng_type;
+  rng_type rt;
   bool activated;
   bool reverse, constant, quiet, overridden;
   sample_data_t uptime_pct;
@@ -1461,12 +1539,12 @@ struct buff_t
   // Raid Aura
   buff_t( sim_t*, const std::string& name,
           int max_stack=1, timespan_t buff_duration=timespan_t::zero, timespan_t buff_cooldown=timespan_t::zero,
-          double chance=1.0, bool quiet=false, bool reverse=false, int rng_type=RNG_CYCLIC, int aura_id=0 );
+          double chance=1.0, bool quiet=false, bool reverse=false, rng_type=RNG_CYCLIC, int aura_id=0 );
 
   // Player Buff
   buff_t( actor_pair_t pair, const std::string& name,
           int max_stack=1, timespan_t buff_duration=timespan_t::zero, timespan_t buff_cooldown=timespan_t::zero,
-          double chance=1.0, bool quiet=false, bool reverse=false, int rng_type=RNG_CYCLIC, int aura_id=0, bool activated=true );
+          double chance=1.0, bool quiet=false, bool reverse=false, rng_type=RNG_CYCLIC, int aura_id=0, bool activated=true );
 
   // Use check() inside of ready() methods to prevent skewing of "benefit" calculations.
   // Use up() where the presence of the buff affects the action mechanics.
@@ -1508,7 +1586,7 @@ struct buff_t
 
   const char* name() { return name_str.c_str(); }
 
-  action_expr_t* create_expression( action_t*, const std::string& type );
+  expr_ptr create_expression( const std::string& type );
 
   static buff_t* find(   buff_t*, const std::string& name );
   static buff_t* find(    sim_t*, const std::string& name );
@@ -1523,7 +1601,7 @@ struct stat_buff_t : public buff_t
   stat_buff_t( player_t*, const std::string& name,
                int stat, double amount,
                int max_stack=1, timespan_t buff_duration=timespan_t::zero, timespan_t buff_cooldown=timespan_t::zero,
-               double chance=1.0, bool quiet=false, bool reverse=false, int rng_type=RNG_CYCLIC, int aura_id=0, bool activated=true );
+               double chance=1.0, bool quiet=false, bool reverse=false, rng_type=RNG_CYCLIC, int aura_id=0, bool activated=true );
 
   virtual void bump     ( int stacks=1, double value=-1.0 );
   virtual void decrement( int stacks=1, double value=-1.0 );
@@ -1539,7 +1617,7 @@ struct cost_reduction_buff_t : public buff_t
   cost_reduction_buff_t( player_t*, const std::string& name,
                          int school, double amount,
                          int max_stack=1, timespan_t buff_duration=timespan_t::zero, timespan_t buff_cooldown=timespan_t::zero,
-                         double chance=1.0, bool refreshes=false, bool quiet=false, bool reverse=false, int rng_type=RNG_CYCLIC, int aura_id=0, bool activated=true );
+                         double chance=1.0, bool refreshes=false, bool quiet=false, bool reverse=false, rng_type=RNG_CYCLIC, int aura_id=0, bool activated=true );
 
   virtual void bump     ( int stacks=1, double value=-1.0 );
   virtual void decrement( int stacks=1, double value=-1.0 );
@@ -1552,98 +1630,70 @@ struct debuff_t : public buff_t
   // Player De-Buff
   debuff_t( player_t*, const std::string& name,
             int max_stack=1, timespan_t buff_duration=timespan_t::zero, timespan_t buff_cooldown=timespan_t::zero,
-            double chance=1.0, bool quiet=false, bool reverse=false, int rng_type=RNG_CYCLIC, int aura_id=0 );
+            double chance=1.0, bool quiet=false, bool reverse=false, rng_type=RNG_CYCLIC, int aura_id=0 );
 
 };
 
 typedef struct buff_t aura_t;
 
+
+class cancel_t : public std::exception
+{
+public:
+  std::string message;
+
+  template <typename Message>
+  cancel_t( Message&& msg ) : message( std::forward<Message>( msg ) ) {}
+
+  cancel_t( cancel_t&& ) = default;
+  cancel_t( const cancel_t& ) = default;
+
+  virtual ~cancel_t() noexcept {}
+
+  virtual const char* what() const noexcept { return message.c_str(); }
+};
+
 // Expressions ==============================================================
 
-enum token_type_t
+class expr_t : public noncopyable
 {
-  TOK_UNKNOWN=0,
-  TOK_PLUS,
-  TOK_MINUS,
-  TOK_MULT,
-  TOK_DIV,
-  TOK_ADD,
-  TOK_SUB,
-  TOK_AND,
-  TOK_OR,
-  TOK_NOT,
-  TOK_EQ,
-  TOK_NOTEQ,
-  TOK_LT,
-  TOK_LTEQ,
-  TOK_GT,
-  TOK_GTEQ,
-  TOK_LPAR,
-  TOK_RPAR,
-  TOK_IN,
-  TOK_NOTIN,
-  TOK_NUM,
-  TOK_STR,
-  TOK_ABS,
-  TOK_SPELL_LIST,
-  TOK_FLOOR,
-  TOK_CEIL
-};
-
-struct expr_token_t
-{
-  int type;
-  std::string label;
-};
-
-enum expr_data_type_t
-{
-  DATA_SPELL = 0,
-  DATA_TALENT,
-  DATA_EFFECT,
-  DATA_TALENT_SPELL,
-  DATA_CLASS_SPELL,
-  DATA_RACIAL_SPELL,
-  DATA_MASTERY_SPELL,
-  DATA_SPECIALIZATION_SPELL,
-  DATA_GLYPH_SPELL,
-  DATA_SET_BONUS_SPELL
-};
-
-struct expression_t
-{
-  static int precedence( int token_type );
-  static int is_unary( int token_type );
-  static int is_binary( int token_type );
-  static int next_token( action_t* action, const std::string& expr_str, int& current_index, std::string& token_str, token_type_t prev_token );
-  static void parse_tokens( action_t* action, std::vector<expr_token_t>& tokens, const std::string& expr_str );
-  static void print_tokens( std::vector<expr_token_t>& tokens, sim_t* sim );
-  static void convert_to_unary( action_t* action, std::vector<expr_token_t>& tokens );
-  static bool convert_to_rpn( action_t* action, std::vector<expr_token_t>& tokens );
-};
-
-struct action_expr_t : public noncopyable
-{
-  action_t* action;
+public:
   std::string name_str;
 
-  int result_type;
-  double result_num;
-  std::string result_str;
+  template <typename S>
+  expr_t( S&& n ) : name_str( std::forward<S>( n ) ) {}
 
-  action_expr_t( action_t* a, const std::string& n, int t=TOK_UNKNOWN ) :
-    action( a ), name_str( n ), result_type( t ), result_num( 0 ) {}
-  action_expr_t( action_t* a, const std::string& n, double constant_value ) :
-    action( a ), name_str( n ), result_type( TOK_NUM ), result_num( constant_value ) {}
-  action_expr_t( action_t* a, const std::string& n, std::string& constant_value ) :
-    action( a ), name_str( n ), result_type( TOK_STR ), result_str( constant_value ) {}
-  virtual ~action_expr_t() {}
-  virtual int evaluate() { return result_type; }
-  virtual const char* name() { return name_str.c_str(); }
-  bool success() { return ( evaluate() == TOK_NUM ) && ( result_num != 0 ); }
+  virtual ~expr_t() {}
 
-  static action_expr_t* parse( action_t*, const std::string& expr_str );
+  virtual double evaluate() = 0;
+
+  const std::string& name() const { return name_str; }
+  bool success() { return evaluate() != 0; }
+
+  static expr_ptr parse( action_t*, const std::string& expr_str );
 };
+
+template <typename F>
+struct fn_expr_t : public expr_t
+{
+  F f;
+
+  template <typename Name, typename Function>
+  fn_expr_t( Name&& name, Function&& f_ ) :
+    expr_t( std::forward<Name>( name ) ),
+    f( std::forward<Function>( f_ ) ) {}
+
+  virtual double evaluate() // override
+  { return f(); }
+};
+
+template <typename Name, typename Function>
+inline std::unique_ptr<fn_expr_t<typename std::remove_reference<Function>::type>>
+make_expr( Name&& name, Function&& f )
+{
+  typedef fn_expr_t<typename std::remove_reference<Function>::type> t;
+  return make_unique<t>( std::forward<Name>( name ), std::forward<Function>( f ) );
+}
 
 namespace thread_impl { // ===================================================
 
@@ -1837,7 +1887,7 @@ public:
   double    gauss( double mean, double stddev );
   timespan_t gauss( timespan_t mean, timespan_t stddev );
   double    real() const;
-  rng_t*    get_rng( const std::string& name, int type=RNG_DEFAULT );
+  rng_t*    get_rng( const std::string& name, rng_type type=RNG_DEFAULT );
 
 
   // Timing Wheel Event Management
@@ -1897,7 +1947,6 @@ public:
   std::vector<player_t*> players_by_hps;
   std::vector<player_t*> players_by_name;
   std::vector<player_t*> targets_by_name;
-  std::vector<std::string> id_dictionary;
   std::vector<std::string> dps_charts, hps_charts, gear_charts, dpet_charts;
   std::string downtime_chart;
   std::vector<timespan_t> iteration_timeline;
@@ -1966,7 +2015,7 @@ public:
   void      use_optimal_buffs_and_debuffs( int value );
   void      aura_gain( const char* name, int aura_id=0 );
   void      aura_loss( const char* name, int aura_id=0 );
-  action_expr_t* create_expression( action_t*, const std::string& name );
+  expr_ptr  create_expression( action_t*, const std::string& name );
   int       errorf( const char* format, ... ) PRINTF_ATTRIBUTE( 2,3 );
 };
 
@@ -2107,9 +2156,9 @@ public:
   // T must be implicitly convertible to event_t* --
   // basically, a pointer to a type derived from event_t.
   template <typename T> static void cancel( T& e )
-  { if ( e ) { cancel_( e ); e = 0; } }
+  { if ( e ) { cancel_( e ); e = nullptr; } }
   template <typename T> static void early( T& e )
-  { if ( e ) { early_( e ); e = 0; } }
+  { if ( e ) { early_( e ); e = nullptr; } }
 
   // Simple free-list memory manager.
   static void* operator new( std::size_t size, sim_t* sim )
@@ -2370,7 +2419,7 @@ struct set_bonus_t
   bool two_pc() const { return has_2pc; }
   bool four_pc() const { return has_4pc; }
 
-  //action_expr_t* create_expression( action_t*, const std::string& type );
+  //expr_ptr create_expression( action_t*, const std::string& type );
 
 private:
   bool decode( const item_t& item ) const;
@@ -2619,9 +2668,10 @@ public:
   benefit_t* benefit_list;
   uptime_t* uptime_list;
   set_bonus_t* set_bonus_list;
-  std::vector<double> dps_plot_data[ STAT_MAX ];
-  std::vector<std::vector<reforge_plot_data_t> > reforge_plot_data;
-  std::vector<std::vector<double> > timeline_resource;
+
+  std::array<std::vector<double>,STAT_MAX> dps_plot_data;
+  std::vector<std::vector<reforge_plot_data_t>> reforge_plot_data;
+  std::array<std::vector<double>,RESOURCE_MAX> timeline_resource;
 
   // Damage
   double iteration_dmg, iteration_dmg_taken;
@@ -2647,7 +2697,7 @@ public:
 
   std::string action_sequence;
   std::string action_dpet_chart, action_dmg_chart, time_spent_chart, gains_chart;
-  std::vector<std::string> timeline_resource_chart;
+  std::array<std::string,RESOURCE_MAX> timeline_resource_chart;
   std::string timeline_dps_chart, timeline_resource_health_chart;
   std::string distribution_dps_chart, scaling_dps_chart, scale_factors_chart;
   std::string reforge_dps_chart, dps_error_chart, distribution_deaths_chart;
@@ -2923,11 +2973,11 @@ public:
   std::string print_action_map( int iterations, int precision ) const;
 
   virtual void   regen( timespan_t periodicity=timespan_t::from_seconds( 0.25 ) );
-          double resource_gain( int resource, double amount, gain_t* g=0, action_t* a=0 );
-          double resource_loss( int resource, double amount, gain_t* g=0, action_t* a=0 );
+          double resource_gain( resource_type resource, double amount, gain_t* g=0, action_t* a=0 );
+          double resource_loss( resource_type resource, double amount, gain_t* g=0, action_t* a=0 );
   virtual void   recalculate_resource_max( int resource );
   virtual bool   resource_available( int resource, double cost ) const;
-  virtual int    primary_resource() const { return RESOURCE_NONE; }
+  virtual resource_type primary_resource() const { return RESOURCE_NONE; }
   virtual int    primary_role() const;
   virtual int    primary_tree() const;
   int            primary_tab() const;
@@ -2977,7 +3027,7 @@ public:
 
   talent_t* find_talent( const std::string& name, int tree = TALENT_TAB_NONE ) const;
 
-  virtual action_expr_t* create_expression( action_t*, const std::string& name );
+  virtual expr_ptr create_expression( action_t*, const std::string& name );
 
   virtual void create_options();
   virtual bool create_profile( std::string& profile_str, int save_type=SAVE_ALL, bool save_html=false );
@@ -3104,7 +3154,7 @@ public:
   stats_t*    get_stats   ( const std::string& name, action_t* action=0 );
   benefit_t*  get_benefit ( const std::string& name );
   uptime_t*   get_uptime  ( const std::string& name );
-  rng_t*      get_rng     ( const std::string& name, int type=RNG_DEFAULT );
+  rng_t*      get_rng     ( const std::string& name, rng_type type=RNG_DEFAULT );
   set_bonus_t* get_set_bonus( const std::string& name, std::string filter,
                               slot_mask_t slot_filter=DEFAULT_SET_BONUS_SLOT_MASK );
   double      get_player_distance( const player_t* p ) const;
@@ -3176,7 +3226,7 @@ struct stats_t
   bool quiet;
   bool background;
 
-  int resource;
+  resource_type resource;
   double resource_consumed, resource_portion;
   double frequency, num_executes, num_ticks;
   double num_direct_results, num_tick_results;
@@ -3259,14 +3309,15 @@ struct action_t
   static const policy_t tech_heal_policy;
 
   sim_t* const sim;
-  const int type;
+  const action_type type;
   std::string name_str;
   player_t* const player;
   player_t* target;
   uint32_t id;
   policy_t attack_policy;
   school_type school;
-  int resource, result, aoe;
+  resource_type resource;
+  int result, aoe;
   bool dual, callbacks, channeled, background, sequence, use_off_gcd;
   bool direct_tick, repeating, harmful, proc, item_proc, proc_ignores_slot, discharge_proc, auto_cast, initialized;
   bool may_crit, tick_may_crit, tick_zero, hasted_ticks;
@@ -3319,18 +3370,13 @@ struct action_t
   event_t* travel_event;
   timespan_t time_to_execute, time_to_travel;
   double travel_speed;
-  int bloodlust_active;
-  double max_alacrity;
-  double alacrity_gain_percentage;
-  timespan_t min_current_time, max_current_time;
-  double min_health_percentage, max_health_percentage;
   int moving, vulnerable, invulnerable, wait_on_ready, interrupt, not_flying, flying;
   bool round_base_dmg;
 
   std::string if_expr_str;
-  std::unique_ptr<action_expr_t> if_expr;
+  expr_ptr if_expr;
   std::string interrupt_if_expr_str;
-  std::unique_ptr<action_expr_t> interrupt_if_expr;
+  expr_ptr interrupt_if_expr;
   std::string sync_str;
   action_t* sync_action;
   action_t* next;
@@ -3353,8 +3399,8 @@ private:
   void init_action_t_();
 
 public:
-  action_t( int type, const char* name, player_t* p=0, policy_t policy=default_policy,
-            int r=RESOURCE_NONE, const school_type s=SCHOOL_NONE );
+  action_t( action_type type, const char* name, player_t* p=0, policy_t policy=default_policy,
+            resource_type r=RESOURCE_NONE, school_type s=SCHOOL_NONE );
   virtual ~action_t();
 
   //void parse_data();
@@ -3416,7 +3462,7 @@ public:
   virtual double total_dd_multiplier() const { return total_multiplier() * dd.base_multiplier * dd.player_multiplier * dd.target_multiplier; }
   virtual double total_td_multiplier() const { return total_multiplier() * td.base_multiplier * td.player_multiplier * td.target_multiplier; }
 
-  virtual action_expr_t* create_expression( const std::string& name );
+  virtual expr_ptr create_expression( const std::string& name );
 
   virtual double ppm_proc_chance( double PPM ) const;
 
@@ -3455,7 +3501,7 @@ public:
 
 struct attack_t : public action_t
 {
-  attack_t( const char* n=0, player_t* p=0, int r=RESOURCE_NONE, school_type s=SCHOOL_KINETIC ) :
+  attack_t( const char* n=0, player_t* p=0, resource_type r=RESOURCE_NONE, school_type s=SCHOOL_KINETIC ) :
     action_t( ACTION_ATTACK, n, p, melee_policy, r, s )
   {}
 };
@@ -3467,7 +3513,7 @@ struct heal_t : public action_t
   bool group_only;
 
   heal_t( const char* n=0, player_t* p=0, policy_t policy=default_policy,
-          int r=RESOURCE_NONE, school_type s=SCHOOL_NONE );
+          resource_type r=RESOURCE_NONE, school_type s=SCHOOL_NONE );
 
   virtual void player_buff();
   virtual void execute();
@@ -3485,7 +3531,7 @@ struct heal_t : public action_t
 struct absorb_t : public action_t
 {
   absorb_t( const char* n=0, player_t* p=0, policy_t policy=default_policy,
-            int r=RESOURCE_NONE, const school_type s=SCHOOL_NONE );
+            resource_type r=RESOURCE_NONE, school_type s=SCHOOL_NONE );
 
   virtual void player_buff();
   virtual void execute();
@@ -3571,27 +3617,24 @@ struct dot_t
 
   const char* name() { return name_str.c_str(); }
 
-  action_expr_t* create_expression( action_t* action, const std::string& name );
+  expr_ptr create_expression( const std::string& name );
 };
 
 // Action Callback ==========================================================
 
 struct action_callback_t
 {
-  sim_t* sim;
-  player_t* listener;
+  player_t* const listener;
   bool active;
   bool allow_self_procs;
   bool allow_item_procs;
   bool allow_procs;
 
-  action_callback_t( sim_t* s, player_t* l, bool ap=false, bool aip=false, bool asp=false ) :
-    sim( s ), listener( l ), active( true ), allow_self_procs( asp ), allow_item_procs( aip ), allow_procs( ap )
+  action_callback_t( player_t* l, bool ap=false, bool aip=false, bool asp=false ) :
+    listener( l ), active( true ), allow_self_procs( asp ), allow_item_procs( aip ), allow_procs( ap )
   {
-    if ( l )
-    {
-      l -> all_callbacks.push_back( this );
-    }
+    assert( l );
+    l -> all_callbacks.push_back( this );
   }
   virtual ~action_callback_t() {}
   virtual void trigger( action_t*, void* call_data=0 ) = 0;
@@ -3599,30 +3642,26 @@ struct action_callback_t
   virtual void activate() { active=true; }
   virtual void deactivate() { active=false; }
 
-  static void trigger( std::vector<action_callback_t*>& v, action_t* a, void* call_data=0 )
+  static void trigger( const std::vector<action_callback_t*>& v, action_t* a, void* call_data=0 )
   {
     if ( a && ! a -> player -> in_combat ) return;
 
-    std::size_t size = v.size();
-    for ( std::size_t i=0; i < size; i++ )
+    for ( action_callback_t& cb : v | boost::adaptors::indirected )
     {
-      action_callback_t* cb = v[ i ];
-      if ( cb -> active )
+      if ( cb.active )
       {
-        if ( ! cb -> allow_item_procs && a && a -> item_proc ) return;
-        if ( ! cb -> allow_procs && a && a -> proc ) return;
-        cb -> trigger( a, call_data );
+        if ( ! cb.allow_item_procs && a && a -> item_proc ) continue;
+        if ( ! cb.allow_procs && a && a -> proc ) continue;
+
+        cb.trigger( a, call_data );
       }
     }
   }
 
-  static void reset( std::vector<action_callback_t*>& v )
+  static void reset( const std::vector<action_callback_t*>& v )
   {
-    std::size_t size = v.size();
-    for ( std::size_t i=0; i < size; i++ )
-    {
-      v[ i ] -> reset();
-    }
+    for ( action_callback_t& cb : v | boost::adaptors::indirected )
+      cb.reset();
   }
 };
 
@@ -3698,22 +3737,22 @@ struct unique_gear_t
   static action_callback_t* register_stat_proc( int type, int64_t mask, const std::string& name, player_t*,
                                                 int stat, int max_stacks, double amount,
                                                 double proc_chance, timespan_t duration, timespan_t cooldown,
-                                                timespan_t tick=timespan_t::zero, bool reverse=false, int rng_type=RNG_DEFAULT );
+                                                timespan_t tick=timespan_t::zero, bool reverse=false, rng_type=RNG_DEFAULT );
 
   static action_callback_t* register_cost_reduction_proc( int type, int64_t mask, const std::string& name, player_t*,
                                                           int school, int max_stacks, double amount,
                                                           double proc_chance, timespan_t duration, timespan_t cooldown,
-                                                          bool refreshes=false, bool reverse=false, int rng_type=RNG_DEFAULT );
+                                                          bool refreshes=false, bool reverse=false, rng_type=RNG_DEFAULT );
 
   static action_callback_t* register_discharge_proc( int type, int64_t mask, const std::string& name, player_t*,
                                                      int max_stacks, const school_type school, double amount, double scaling,
                                                      double proc_chance, timespan_t cooldown, bool no_crits, bool no_buffs, bool no_debuffs,
-                                                     int rng_type=RNG_DEFAULT );
+                                                     rng_type=RNG_DEFAULT );
 
   static action_callback_t* register_chance_discharge_proc( int type, int64_t mask, const std::string& name, player_t*,
                                                             int max_stacks, const school_type school, double amount, double scaling,
                                                             double proc_chance, timespan_t cooldown, bool no_crits, bool no_buffs, bool no_debuffs,
-                                                            int rng_type=RNG_DEFAULT );
+                                                            rng_type=RNG_DEFAULT );
 
   static action_callback_t* register_stat_discharge_proc( int type, int64_t mask, const std::string& name, player_t*,
                                                           int stat, int max_stacks, double stat_amount,
@@ -3971,35 +4010,67 @@ struct log_t
 
 // Pseudo Random Number Generation ==========================================
 
-struct rng_t
+class rng_t
 {
+public:
   std::string name_str;
-  bool   gauss_pair_use;
-  double gauss_pair_value;
-  double expected_roll,  actual_roll,  num_roll;
-  double expected_range, actual_range, num_range;
-  double expected_gauss, actual_gauss, num_gauss;
-  bool   average_range, average_gauss;
+  double expected_roll,  actual_roll;
+  double expected_range, actual_range;
+  double expected_gauss, actual_gauss;
   rng_t* next;
 
-  rng_t( const std::string& n, bool avg_range=false, bool avg_gauss=false );
+private:
+  double gauss_pair_value;
+  bool   gauss_pair_use;
+
+protected:
+  unsigned num_roll, num_range, num_gauss;
+
+  rng_t( const std::string& n );
+
+  virtual rng_type type_() const = 0;
+  virtual double   real_() = 0;
+  virtual bool     roll_( double chance );
+  virtual double  range_( double min, double max );
+  virtual double  gauss_( double mean, double stddev, const bool truncate_low_end );
+  virtual void     seed_( uint32_t start );
+
+public:
   virtual ~rng_t() {}
 
-  virtual int    type() const { return RNG_STANDARD; }
-  virtual double real();
-  virtual bool    roll( double chance );
-  virtual double range( double min, double max );
-  timespan_t range( timespan_t min, timespan_t max );
-  virtual double gauss( double mean, double stddev, const bool truncate_low_end = false );
-  timespan_t gauss( timespan_t mean, timespan_t stddev );
-  double exgauss( double mean, double stddev, double nu );
-  timespan_t exgauss( timespan_t mean, timespan_t stddev, timespan_t nu );
-  virtual void   seed( uint32_t start=time(NULL) );
-  void   report( FILE* );
+  rng_type type() const { return type_(); }
+  void seed( uint32_t start = time( nullptr ) ) { seed_( start ); }
+  void report( FILE* );
+
+  double real() { return real_(); }
+  bool roll( double chance );
+
+  double     range( double min, double max );
+  timespan_t range( timespan_t min, timespan_t max )
+  {
+    return TIMESPAN_FROM_NATIVE_VALUE( range( TIMESPAN_TO_NATIVE_VALUE( min ),
+                                              TIMESPAN_TO_NATIVE_VALUE( max ) ) );
+  }
+
+  double     gauss( double mean, double stddev, const bool truncate_low_end = false );
+  timespan_t gauss( timespan_t mean, timespan_t stddev )
+  {
+    return TIMESPAN_FROM_NATIVE_VALUE( gauss( TIMESPAN_TO_NATIVE_VALUE( mean ),
+                                              TIMESPAN_TO_NATIVE_VALUE( stddev ) ) );
+  }
+
+  double     exgauss( double mean, double stddev, double nu );
+  timespan_t exgauss( timespan_t mean, timespan_t stddev, timespan_t nu )
+  {
+    return TIMESPAN_FROM_NATIVE_VALUE( exgauss( TIMESPAN_TO_NATIVE_VALUE( mean ),
+                                                TIMESPAN_TO_NATIVE_VALUE( stddev ),
+                                                TIMESPAN_TO_NATIVE_VALUE( nu ) ) );
+  }
+
   static double stdnormal_cdf( double u );
   static double stdnormal_inv( double p );
 
-  static rng_t* create( sim_t*, const std::string& name, int type=RNG_STANDARD );
+  static rng_t* create( sim_t*, const std::string& name, rng_type type );
 };
 
 // String utils =============================================================

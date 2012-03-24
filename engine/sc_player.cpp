@@ -127,11 +127,6 @@ static bool parse_set_bonus( sim_t* sim,
   std::string name = value.substr( first, cut_pt - first );
 
   set_bonus_t* sb = sim -> active_player -> find_set_bonus( name );
-
-  std::cerr << "parse_set_bonus(\"" << opt_name << "\", \"" << value << "\") = "
-            << ( disable ? "(disable) " : "" )
-            << '\"' << name << "\" = " << sb << std::endl;
-
   if ( ! sb )
     return false;
 
@@ -907,9 +902,8 @@ void player_t::init_enchant()
 void player_t::init_resources( bool force )
 {
   if ( sim -> debug ) log_t::output( sim, "Initializing resources for player (%s)", name() );
-  // The first 20pts of intellect/stamina only provide 1pt of mana/health.
 
-  for ( int i=0; i < RESOURCE_MAX; i++ )
+  for ( resource_type i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
   {
     if ( force || resource_initial[ i ] == 0 )
     {
@@ -923,18 +917,16 @@ void player_t::init_resources( bool force )
     resource_current[ i ] = resource_max[ i ] = resource_initial[ i ];
   }
 
-  if ( timeline_resource.empty() )
+  if ( timeline_resource[ 0 ].empty() )
   {
-    timeline_resource.resize( RESOURCE_MAX );
-    timeline_resource_chart.resize( RESOURCE_MAX );
-
-    int size = ( int ) ( sim -> max_time.total_seconds() * ( 1.0 + sim -> vary_combat_length ) );
+    int size = static_cast<int>( sim -> max_time.total_seconds() *
+                                 ( 1.0 + sim -> vary_combat_length ) );
     if ( size <= 0 ) size = 600; // Default to 10 minutes
     size *= 2;
     size += 3; // Buffer against rounding.
 
-    for ( int i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
-      timeline_resource[i].assign( size, 0 );
+    for ( auto& i : timeline_resource )
+      i.assign( size, 0 );
   }
 }
 
@@ -960,7 +952,7 @@ void player_t::init_professions()
       prof_value = 525;
     }
 
-    int prof_type = util_t::parse_profession_type( prof_name );
+    profession_type prof_type = util_t::parse_profession_type( prof_name );
 
     if ( prof_type == PROFESSION_NONE )
       continue;
@@ -1462,29 +1454,17 @@ double player_t::get_attribute( attribute_type a ) const
 // player_t::energy_regen_per_second() ======================================
 
 double player_t::energy_regen_per_second() const
-{
-  double r = base_energy_regen_per_second;
-
-  return r;
-}
+{ return base_energy_regen_per_second; }
 
 // player_t::ammo_regen_per_second() ========================================
 
 double player_t::ammo_regen_per_second() const
-{
-  double r = base_ammo_regen_per_second;
-
-  return r;
-}
+{ return base_ammo_regen_per_second; }
 
 // player_t::force_regen_per_second() =======================================
 
 double player_t::force_regen_per_second() const
-{
-  double r = base_force_regen_per_second;
-
-  return r;
-}
+{ return base_force_regen_per_second; }
 
 // player_t::composite_power() ==============================================
 
@@ -1960,7 +1940,7 @@ void player_t::merge( player_t& other )
 
   deaths.merge( other.deaths );
 
-  for ( int i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
+  for ( resource_type i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
   {
     int num_buckets = ( int ) std::min(       timeline_resource[i].size(),
                                         other.timeline_resource[i].size() );
@@ -2086,18 +2066,18 @@ void player_t::reset()
 
   stim = stim_t::none;
 
-  for ( int i=0; i < RESOURCE_MAX; i++ )
+  for ( resource_type i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
   {
     action_callback_t::reset( resource_gain_callbacks[ i ] );
     action_callback_t::reset( resource_loss_callbacks[ i ] );
   }
-  for ( int i=0; i < RESULT_MAX; i++ )
+  for ( result_type i = RESULT_NONE; i < RESULT_MAX; i++ )
   {
     action_callback_t::reset( attack_callbacks[ i ] );
     action_callback_t::reset( spell_callbacks [ i ] );
     action_callback_t::reset( tick_callbacks  [ i ] );
   }
-  for ( int i=0; i < SCHOOL_MAX; i++ )
+  for ( school_type i = SCHOOL_NONE; i < SCHOOL_MAX; i++ )
   {
     action_callback_t::reset( tick_damage_callbacks  [ i ] );
     action_callback_t::reset( direct_damage_callbacks[ i ] );
@@ -2421,45 +2401,49 @@ action_t* player_t::execute_action()
 
 void player_t::regen( const timespan_t periodicity )
 {
-  int resource_type = primary_resource();
+  const resource_type r = primary_resource();
+  double base = 0;
+  gain_t* gain = nullptr;
 
-  if ( resource_type == RESOURCE_ENERGY )
+  switch( r )
   {
-    double energy_regen = periodicity.total_seconds() * energy_regen_per_second();
+  case RESOURCE_ENERGY:
+    base = base_energy_regen_per_second;
+    gain = gains.energy_regen;
+    break;
 
-    resource_gain( RESOURCE_ENERGY, energy_regen, gains.energy_regen );
+  case RESOURCE_FORCE:
+    base = base_force_regen_per_second;
+    gain = gains.force_regen;
+    break;
+
+  case RESOURCE_AMMO:
+    base = base_ammo_regen_per_second;
+    gain = gains.ammo_regen;
+    break;
+
+  default:
+    break;
   }
 
-  else if ( resource_type == RESOURCE_FORCE )
+  if ( gain && base )
+    resource_gain( r, base * periodicity.total_seconds(), gain );
+
+  const unsigned index = static_cast<unsigned>( sim -> current_time.total_seconds() );
+
+  for ( resource_type i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
   {
-    double force_regen = periodicity.total_seconds() * force_regen_per_second();
-
-    resource_gain( RESOURCE_FORCE, force_regen, gains.force_regen );
-  }
-
-  else if ( resource_type == RESOURCE_AMMO )
-  {
-    double ammo_regen = periodicity.total_seconds() * ammo_regen_per_second();
-
-    resource_gain( RESOURCE_AMMO, ammo_regen, gains.ammo_regen );
-  }
-
-  int index = (int) ( sim -> current_time.total_seconds() );
-
-  for ( int i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
-  {
-    if ( resource_max[ i ] == 0 ) continue;
-
-    timeline_resource[ i ][ index ] += resource_current[ i ] * periodicity.total_seconds();
+    if ( resource_max[ i ] != 0 )
+      timeline_resource[ i ][ index ] += resource_current[ i ] * periodicity.total_seconds();
   }
 }
 
 // player_t::resource_loss ==================================================
 
-double player_t::resource_loss( int       resource,
-                                double    amount,
-                                gain_t*   source,
-                                action_t* action )
+double player_t::resource_loss( resource_type resource,
+                                double        amount,
+                                gain_t*       source,
+                                action_t*     action )
 {
   if ( amount == 0 )
     return 0;
@@ -2506,10 +2490,10 @@ double player_t::resource_loss( int       resource,
 
 // player_t::resource_gain ==================================================
 
-double player_t::resource_gain( int       resource,
-                                double    amount,
-                                gain_t*   source,
-                                action_t* action )
+double player_t::resource_gain( resource_type resource,
+                                double        amount,
+                                gain_t*       source,
+                                action_t*     action )
 {
   if ( sleeping )
     return 0;
@@ -2808,19 +2792,19 @@ void player_t::stat_loss( int       stat,
   case STAT_MAX_ENERGY:
   case STAT_MAX_AMMO:
   {
-    int r = ( ( stat == STAT_MAX_HEALTH ) ? RESOURCE_HEALTH :
-              ( stat == STAT_MAX_MANA   ) ? RESOURCE_MANA   :
-              ( stat == STAT_MAX_RAGE   ) ? RESOURCE_RAGE   :
-              ( stat == STAT_MAX_ENERGY ) ? RESOURCE_ENERGY : RESOURCE_AMMO );
+    resource_type r = ( stat == STAT_MAX_HEALTH ? RESOURCE_HEALTH :
+                      ( stat == STAT_MAX_MANA   ? RESOURCE_MANA   :
+                      ( stat == STAT_MAX_RAGE   ? RESOURCE_RAGE   :
+                      ( stat == STAT_MAX_ENERGY ? RESOURCE_ENERGY : RESOURCE_AMMO ))));
     recalculate_resource_max( r );
     double delta = resource_current[ r ] - resource_max[ r ];
     if ( delta > 0 ) resource_loss( r, delta, 0, action );
   }
   break;
 
-  case STAT_POWER:             stats.power             -= amount; power                     -= amount; break;
-  case STAT_FORCE_POWER:       stats.force_power       -= amount; force_power               -= amount; break;
-  case STAT_TECH_POWER:        stats.tech_power        -= amount; tech_power                -= amount; break;
+  case STAT_POWER:       stats.power       -= amount; power       -= amount; break;
+  case STAT_FORCE_POWER: stats.force_power -= amount; force_power -= amount; break;
+  case STAT_TECH_POWER:  stats.tech_power  -= amount; tech_power  -= amount; break;
 
   case STAT_ACCURACY_RATING:
     stats.accuracy_rating -= amount;
@@ -3201,9 +3185,9 @@ void player_t::register_harmful_spell_callback( int64_t mask,
 void player_t::register_tick_damage_callback( int64_t mask,
                                               action_callback_t* cb )
 {
-  for ( int64_t i=0; i < SCHOOL_MAX; i++ )
+  for ( school_type i=SCHOOL_NONE; i < SCHOOL_MAX; ++i )
   {
-    if ( mask < 0 || ( mask & ( int64_t( 1 ) << i ) ) )
+    if ( mask < 0 || ( mask & bitmask( i ) ) != 0 )
     {
       tick_damage_callbacks[ i ].push_back( cb );
     }
@@ -3215,9 +3199,9 @@ void player_t::register_tick_damage_callback( int64_t mask,
 void player_t::register_direct_damage_callback( int64_t mask,
                                                 action_callback_t* cb )
 {
-  for ( int64_t i=0; i < SCHOOL_MAX; i++ )
+  for ( school_type i=SCHOOL_NONE; i < SCHOOL_MAX; i++ )
   {
-    if ( mask < 0 || ( mask & ( int64_t( 1 ) << i ) ) )
+    if ( mask < 0 || ( mask & bitmask( i ) ) != 0 )
     {
       direct_damage_callbacks[ i ].push_back( cb );
     }
@@ -3229,9 +3213,9 @@ void player_t::register_direct_damage_callback( int64_t mask,
 void player_t::register_tick_heal_callback( int64_t mask,
                                             action_callback_t* cb )
 {
-  for ( int64_t i=0; i < SCHOOL_MAX; i++ )
+  for ( school_type i = SCHOOL_NONE; i < SCHOOL_MAX; i++ )
   {
-    if ( mask < 0 || ( mask & ( int64_t( 1 ) << i ) ) )
+    if ( mask < 0 || ( mask & bitmask( i ) ) != 0 )
     {
       tick_heal_callbacks[ i ].push_back( cb );
     }
@@ -3243,9 +3227,9 @@ void player_t::register_tick_heal_callback( int64_t mask,
 void player_t::register_direct_heal_callback( int64_t mask,
                                               action_callback_t* cb )
 {
-  for ( int64_t i=0; i < SCHOOL_MAX; i++ )
+  for ( school_type i = SCHOOL_NONE; i < SCHOOL_MAX; i++ )
   {
-    if ( mask < 0 || ( mask & ( int64_t( 1 ) << i ) ) )
+    if ( mask < 0 || ( mask & bitmask( i ) ) != 0 )
     {
       direct_heal_callbacks[ i ].push_back( cb );
     }
@@ -3555,7 +3539,7 @@ uptime_t* player_t::get_uptime( const std::string& name )
 
 // player_t::get_rng ========================================================
 
-rng_t* player_t::get_rng( const std::string& n, int type )
+rng_t* player_t::get_rng( const std::string& n, rng_type type )
 {
   assert( sim -> rng );
 
@@ -3976,32 +3960,29 @@ struct snapshot_stats_t : public action_t
 
 struct wait_fixed_t : public wait_action_base_t
 {
-  action_expr_t* time_expr;
+  expr_ptr time_expr;
+  std::string wait_str;
 
   wait_fixed_t( player_t* player, const std::string& options_str ) :
-    wait_action_base_t( player, "wait" )
+    wait_action_base_t( player, "wait" ), wait_str( "1.0" )
   {
-    std::string sec_str = "1.0";
-
     option_t options[] =
     {
-      { "sec", OPT_STRING, &sec_str },
+      { "sec", OPT_STRING, &wait_str },
       { NULL,  OPT_UNKNOWN, NULL }
     };
     parse_options( options, options_str );
 
-    time_expr = action_expr_t::parse( this, sec_str );
+    time_expr = expr_t::parse( this, wait_str );
   }
 
   virtual timespan_t execute_time() const
   {
-    int result = time_expr -> evaluate();
-    assert( result == TOK_NUM ); ( void )result;
-    timespan_t wait = timespan_t::from_seconds( time_expr -> result_num );
-
-    if ( wait <= timespan_t::zero ) wait = player -> available();
-
-    return wait;
+    timespan_t wait = timespan_t::from_seconds( time_expr -> evaluate() );
+    if ( wait > timespan_t::zero )
+      return wait;
+    else
+      return player -> available();
   }
 };
 
@@ -4089,13 +4070,13 @@ struct base_use_item_t : public action_t
       {
         trigger = unique_gear_t::register_cost_reduction_proc( e.trigger_type, e.trigger_mask, use_name, player,
                                                                e.school, e.max_stacks, e.discharge_amount,
-                                                               e.proc_chance, timespan_t::zero/*dur*/, timespan_t::zero/*cd*/, false, e.reverse, 0 );
+                                                               e.proc_chance, timespan_t::zero/*dur*/, timespan_t::zero/*cd*/, false, e.reverse );
       }
       else if ( e.stat )
       {
         trigger = unique_gear_t::register_stat_proc( e.trigger_type, e.trigger_mask, use_name, player,
                                                      e.stat, e.max_stacks, e.stat_amount,
-                                                     e.proc_chance, timespan_t::zero/*dur*/, timespan_t::zero/*cd*/, e.tick, e.reverse, 0 );
+                                                     e.proc_chance, timespan_t::zero/*dur*/, timespan_t::zero/*cd*/, e.tick, e.reverse );
       }
       else if ( e.school )
       {
@@ -4503,176 +4484,65 @@ talent_t* player_t::find_talent( const std::string& n,
 
 // player_t::create_expression ==============================================
 
-action_expr_t* player_t::create_expression( action_t* a,
-                                            const std::string& name_str )
+namespace {
+expr_ptr deprecate_expression( player_t* p, action_t* a, const std::string& old_name, const std::string& new_name )
+{
+  p -> sim -> errorf( "Use of \"%s\" in action expressions is deprecated: use \"%s\" instead.\n",
+                      old_name.c_str(), new_name.c_str() );
+  return p -> create_expression( a, new_name );
+}
+}
+
+expr_ptr player_t::create_expression( action_t* a,
+                                      const std::string& name_str )
 {
   if ( name_str == "health_pct" )
-  {
-    sim -> errorf( "Use of \"health_pct\" in action expressions is deprecated: use \"health.pct\" instead.\n" );
-    return create_expression( a, "health.pct" );
-  }
+    return deprecate_expression( this, a, name_str, "health.pct" );
 
-  struct player_expr_t : public action_expr_t
-  {
-    player_t* player;
+  if ( name_str == "energy_regen" )
+    return deprecate_expression( this, a, name_str, "energy.regen" );
 
-    player_expr_t( action_t* a, const std::string& n, player_t* p ) :
-      action_expr_t( a, n, TOK_NUM ), player( p )
-    {}
-  };
+  if ( name_str == "ammo_regen" )
+    return deprecate_expression( this, a, name_str, "ammo.regen" );
 
-  struct resource_expr_t : public player_expr_t
-  {
-    resource_type rt;
+  if ( name_str == "time_to_max_energy" )
+    return deprecate_expression( this, a, name_str, "energy.time_to_max" );
 
-    resource_expr_t( action_t* a, const std::string& n, player_t* p, resource_type r ) :
-      player_expr_t( a, n, p ), rt( r )
-    {}
+  if ( name_str == "time_to_max_ammo" )
+    return deprecate_expression( this, a, name_str, "ammo.time_to_max" );
 
-    virtual int evaluate()
-    {
-      result_num = player -> resource_current[ rt ];
-      return TOK_NUM;
-    }
-  };
+  if ( name_str == "time_to_max_force" )
+    return deprecate_expression( this, a, name_str, "force.time_to_max" );
 
   resource_type rt = static_cast<resource_type>( util_t::parse_resource_type( name_str ) );
   if ( rt != RESOURCE_NONE )
-    return new resource_expr_t( a, name_str, this, rt );
+    return make_expr( name_str, [this,rt]{ return resource_current[ rt ]; } );
 
   if ( name_str == "level" )
-  {
-    struct level_expr_t : public player_expr_t
-    {
-      level_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "level", p ) {}
-      virtual int evaluate() { result_num = player -> level; return TOK_NUM; }
-    };
-    return new level_expr_t( a, this );
-  }
+    return make_expr( name_str, [this]{ return level; } );
+
   if ( name_str == "multiplier" )
-  {
-    struct multiplier_expr_t : public player_expr_t
-    {
-      multiplier_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "multiplier", p ) {}
-      virtual int evaluate() { result_num = player -> composite_player_multiplier( action -> school, action ); return TOK_NUM; }
-    };
-    return new multiplier_expr_t( a, this );
-  }
+    return make_expr( name_str, [this,a]{ return composite_player_multiplier( a -> school, a ); } );
+
   if ( name_str == "in_combat" )
-  {
-    struct in_combat_expr_t : public player_expr_t
-    {
-      in_combat_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "in_combat", p ) {}
-      virtual int evaluate() { result_num = ( player -> in_combat ? 1 : 0 ); return TOK_NUM; }
-    };
-    return new in_combat_expr_t( a, this );
-  }
+    return make_expr( name_str, [this]{ return in_combat != 0; } );
+
   if ( name_str == "alacrity" )
-  {
-    struct alacrity_expr_t : public player_expr_t
-    {
-      alacrity_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "alacrity", p ) {}
-      virtual int evaluate() { result_num = player -> alacrity(); return TOK_NUM; }
-    };
-    return new alacrity_expr_t( a, this );
-  }
-  if ( name_str == "energy_regen" )
-  {
-    struct energy_regen_expr_t : public player_expr_t
-    {
-      energy_regen_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "energy_regen", p ) {}
-      virtual int evaluate() { result_num = player -> energy_regen_per_second(); return TOK_NUM; }
-    };
-    return new energy_regen_expr_t( a, this );
-  }
-  if ( name_str == "ammo_regen" )
-  {
-    struct ammo_regen_expr_t : public player_expr_t
-    {
-      ammo_regen_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "ammo_regen", p ) {}
-      virtual int evaluate() { result_num = player -> ammo_regen_per_second(); return TOK_NUM; }
-    };
-    return new ammo_regen_expr_t( a, this );
-  }
+    return make_expr( name_str, [this]{ return alacrity(); } );
+
   if ( name_str == "time_to_die" )
-  {
-    struct time_to_die_expr_t : public player_expr_t
-    {
-      time_to_die_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "target_time_to_die", p ) {}
-      virtual int evaluate() { result_num = player -> time_to_die().total_seconds();  return TOK_NUM; }
-    };
-    return new time_to_die_expr_t( a, this );
-  }
-  if ( name_str == "time_to_max_energy" )
-  {
-    struct time_to_max_energy_expr_t : public player_expr_t
-    {
-      time_to_max_energy_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "time_to_max_energy", p ) {}
-      virtual int evaluate()
-      {
-        result_num = ( player -> resource_max[ RESOURCE_ENERGY ] -
-                       player -> resource_current[ RESOURCE_ENERGY ] ) /
-                     player -> energy_regen_per_second(); return TOK_NUM;
-      }
-    };
-    return new time_to_max_energy_expr_t( a, this );
-  }
-  if ( name_str == "time_to_max_ammo" )
-  {
-    struct time_to_max_ammo_expr_t : public player_expr_t
-    {
-      time_to_max_ammo_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "time_to_max_ammo", p ) {}
-      virtual int evaluate()
-      {
-        result_num = ( player -> resource_max[ RESOURCE_AMMO ] -
-                       player -> resource_current[ RESOURCE_AMMO ] ) /
-                     player -> ammo_regen_per_second(); return TOK_NUM;
-      }
-    };
-    return new time_to_max_ammo_expr_t( a, this );
-  }
-  if ( name_str == "time_to_max_force" )
-  {
-    struct time_to_max_force_expr_t : public player_expr_t
-    {
-      time_to_max_force_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "time_to_max_force", p ) {}
-      virtual int evaluate()
-      {
-        result_num = ( player -> resource_max[ RESOURCE_FORCE ] -
-                       player -> resource_current[ RESOURCE_FORCE ] ) /
-                     player -> force_regen_per_second(); return TOK_NUM;
-      }
-    };
-    return new time_to_max_force_expr_t( a, this );
-  }
+    return make_expr( name_str, [this]{ return time_to_die().total_seconds(); } );
+
   if ( name_str == "ptr" )
-  {
-    struct ptr_expr_t : public player_expr_t
-    {
-      ptr_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "ptr", p ) {}
-      virtual int evaluate() { result_num = player -> ptr ? 1 : 0; return TOK_NUM; }
-    };
-    return new ptr_expr_t( a, this );
-  }
+    return make_expr( name_str, [this]{ return ptr; } );
+
   if ( name_str == "position_front" )
-  {
-    struct position_front_expr_t : public player_expr_t
-    {
-      position_front_expr_t( action_t* a, player_t* p ) :
-        player_expr_t( a, "position_front", p ) {}
-      virtual int evaluate() { result_num = ( player -> position == POSITION_FRONT || player -> position == POSITION_RANGED_FRONT ) ? 1 : 0; return TOK_NUM; }
-    };
-    return new position_front_expr_t( a, this );
-  }
+    return make_expr( name_str, [this]{ return position == POSITION_FRONT ||
+                                               position == POSITION_RANGED_FRONT; } );
+
   if ( name_str == "position_back" )
-  {
-    struct position_back_expr_t : public player_expr_t
-    {
-      position_back_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "position_back", p ) {}
-      virtual int evaluate() { result_num = ( player -> position == POSITION_BACK || player -> position == POSITION_RANGED_BACK ) ? 1 : 0; return TOK_NUM; }
-    };
-    return new position_back_expr_t( a, this );
-  }
+    return make_expr( name_str, [this]{ return position == POSITION_BACK ||
+                                               position == POSITION_RANGED_BACK; } );
 
   std::vector<std::string> splits;
   int num_splits = util_t::string_split( splits, name_str, "." );
@@ -4680,85 +4550,61 @@ action_expr_t* player_t::create_expression( action_t* a,
   if ( num_splits == 2 && ( rt = static_cast<resource_type>( util_t::parse_resource_type( splits[ 0 ] ) ) ) != RESOURCE_NONE )
   {
     if ( splits[ 1 ] == "deficit" )
+      return make_expr( name_str, [this,rt]{ return resource_max[ rt ] - resource_current[ rt ]; } );
+
+    else if ( splits[ 1 ] == "pct" || splits[ 1 ] == "percent" )
     {
-      struct resource_deficit_expr_t : public resource_expr_t
-      {
-        resource_deficit_expr_t( action_t* a, const std::string& n, player_t* p, resource_type r ) :
-          resource_expr_t( a, n, p, r ) {}
-        virtual int evaluate()
-        {
-          result_num = player -> resource_max[ rt ] - player -> resource_current[ rt ];
-          return TOK_NUM;
-        }
-      };
-      return new resource_deficit_expr_t( a, name_str, this, rt );
+      if ( rt == RESOURCE_HEALTH )
+        return make_expr( name_str, [this]{ return health_percentage() / 100.0; } );
+      else
+        return make_expr( name_str, [this,rt]{ return resource_current[ rt ] / resource_max[ rt ]; } );
     }
 
-    if ( splits[ 1 ] == "pct" || splits[ 1 ] == "percent" )
+    else if ( splits[ 1 ] == "max" )
+      return make_expr( name_str, [this,rt]{ return resource_max[ rt ]; } );
+
+    else if ( splits[ 1 ] == "regen" )
     {
-      struct resource_pct_expr_t : public resource_expr_t
-      {
-        resource_pct_expr_t( action_t* a, const std::string& n, player_t* p, resource_type r ) :
-          resource_expr_t( a, n, p, r ) {}
-        virtual int evaluate()
-        {
-          if ( rt == RESOURCE_HEALTH )
-            result_num = player -> health_percentage() / 100.0;
-          else
-            result_num = player -> resource_current[ rt ] / action -> player -> resource_max[ rt ];
-          return TOK_NUM;
-        }
-      };
-      return new resource_pct_expr_t( a, name_str, this, rt );
+      if ( rt == RESOURCE_FORCE )
+        return make_expr( name_str, [this]{ return force_regen_per_second(); } );
+      if ( rt == RESOURCE_ENERGY )
+        return make_expr( name_str, [this]{ return energy_regen_per_second(); } );
+      if ( rt == RESOURCE_AMMO )
+        return make_expr( name_str, [this]{ return ammo_regen_per_second(); } );
     }
 
-    if ( splits[ 1 ] == "max" )
+    else if ( splits[ 1 ] == "time_to_max" )
     {
-      struct resource_max_expr_t : public resource_expr_t
-      {
-        resource_max_expr_t( action_t* a, const std::string& n, player_t* p, resource_type r ) :
-          resource_expr_t( a, n, p, r ) {}
-        virtual int evaluate() { result_num = player -> resource_max[ rt ]; return TOK_NUM; }
-      };
-      return new resource_max_expr_t( a, name_str, this, rt );
+      if ( rt == RESOURCE_FORCE )
+        return make_expr( name_str, [this]{ return ( resource_max[ RESOURCE_FORCE ] - resource_current[ RESOURCE_FORCE ] )
+                                                   / force_regen_per_second(); } );
+      if ( rt == RESOURCE_ENERGY )
+        return make_expr( name_str, [this]{ return ( resource_max[ RESOURCE_ENERGY ] - resource_current[ RESOURCE_ENERGY ] )
+                                                   / energy_regen_per_second(); } );
+      if ( rt == RESOURCE_AMMO )
+        return make_expr( name_str, [this]{ return ( resource_max[ RESOURCE_AMMO ] - resource_current[ RESOURCE_AMMO ] )
+                                                   / ammo_regen_per_second(); } );
     }
   }
 
-  if ( splits[ 0 ] == "pet" )
+  else if ( splits[ 0 ] == "pet" )
   {
     pet_t* pet = find_pet( splits[ 1 ] );
     if ( pet )
     {
-      struct pet_expr_t : public action_expr_t
-      {
-        pet_t* pet;
-        pet_expr_t( action_t* a, const std::string& n, pet_t* p ) :
-          action_expr_t( a, n, TOK_NUM ), pet( p )
-        {}
-      };
-
       if ( splits[ 2 ] == "active" )
-      {
-        struct pet_active_expr_t : public pet_expr_t
-        {
-          pet_active_expr_t( action_t* a, pet_t* p ) : pet_expr_t( a, "pet_active", p ) {}
-          virtual int evaluate() { result_num = ( pet -> sleeping ) ? 0 : 1; return TOK_NUM; }
-        };
-        return new pet_active_expr_t( a, pet );
-      }
+        return make_expr( name_str, [pet]{ return ! pet -> sleeping; } );
       else if ( splits[ 2 ] == "remains" )
-      {
-        struct pet_remains_expr_t : public pet_expr_t
-        {
-          pet_remains_expr_t( action_t* a, pet_t* p ) : pet_expr_t( a, "pet_remains", p ) {}
-          virtual int evaluate() { result_num = ( pet -> expiration && pet -> expiration-> remains() > timespan_t::zero ) ? pet -> expiration -> remains().total_seconds() : 0; return TOK_NUM; }
-        };
-        return new pet_remains_expr_t( a, pet );
-      }
+        return make_expr( name_str, [pet]() -> double
+          {
+            event_t* e = pet -> expiration;
+            if ( e && e -> remains() > timespan_t::zero )
+              return e -> remains().total_seconds();
+            else
+              return 0;
+          } );
       else
-      {
-        return pet -> create_expression( a, name_str.substr( splits[ 1 ].length() + std::strlen( "pet" ) + 2 ) );
-      }
+        return pet -> create_expression( a, join( splits.begin() + 2, splits.end(), '.' ) );
     }
   }
 
@@ -4767,70 +4613,58 @@ action_expr_t* player_t::create_expression( action_t* a,
     if ( pet_t* pet = dynamic_cast<pet_t*>( this ) )
     {
       if ( pet -> owner )
-      {
         return pet -> owner -> create_expression( a, name_str.substr( 6 ) );
-      }
     }
   }
 
   else if ( splits[ 0 ] == "temporary_bonus" )
   {
-    int stat = util_t::parse_stat_type( splits[ 1 ] );
+    stat_type stat = util_t::parse_stat_type( splits[ 1 ] );
 
     if ( stat != STAT_NONE )
     {
-      double* p_stat = 0;
-      int attr = -1;
-
       switch ( stat )
       {
-        case STAT_STRENGTH:         p_stat = &( temporary.attribute[ ATTR_STRENGTH  ] ); attr = ATTR_STRENGTH;  break;
-        case STAT_AIM:              p_stat = &( temporary.attribute[ ATTR_AIM       ] ); attr = ATTR_AIM;       break;
-        case STAT_CUNNING:          p_stat = &( temporary.attribute[ ATTR_CUNNING   ] ); attr = ATTR_CUNNING;   break;
-        case STAT_WILLPOWER:        p_stat = &( temporary.attribute[ ATTR_WILLPOWER ] ); attr = ATTR_WILLPOWER; break;
-        case STAT_ENDURANCE:        p_stat = &( temporary.attribute[ ATTR_ENDURANCE ] ); attr = ATTR_ENDURANCE; break;
-        case STAT_PRESENCE:         p_stat = &( temporary.attribute[ ATTR_PRESENCE  ] ); attr = ATTR_PRESENCE;  break;
-        case STAT_EXPERTISE_RATING: p_stat = &( temporary.expertise_rating            ); break;
-        case STAT_ACCURACY_RATING:  p_stat = &( temporary.accuracy_rating             ); break;
-        case STAT_CRIT_RATING:      p_stat = &( temporary.crit_rating                 ); break;
-        case STAT_ALACRITY_RATING:  p_stat = &( temporary.alacrity_rating             ); break;
-        case STAT_ARMOR:            p_stat = &( temporary.armor                       ); break;
-        case STAT_POWER:            p_stat = &( temporary.power                       ); break;
-        case STAT_FORCE_POWER:      p_stat = &( temporary.force_power                 ); break;
-        case STAT_TECH_POWER:       p_stat = &( temporary.tech_power                  ); break;
-        case STAT_SURGE_RATING:     p_stat = &( temporary.surge_rating                ); break;
-        case STAT_DEFENSE_RATING:   p_stat = &( temporary.defense_rating              ); break;
-        case STAT_SHIELD_RATING:    p_stat = &( temporary.shield_rating               ); break;
-        case STAT_ABSORB_RATING:    p_stat = &( temporary.absorb_rating               ); break;
+        case STAT_STRENGTH:
+        case STAT_AIM:
+        case STAT_CUNNING:
+        case STAT_WILLPOWER:
+        case STAT_ENDURANCE:
+        case STAT_PRESENCE:
+          // Relies on STAT_XXX == ATTR_XXX
+          return make_expr( name_str, [this,stat]{
+              return temporary.attribute[ stat ] * composite_attribute_multiplier( stat );
+            } );
+        case STAT_EXPERTISE_RATING:
+          return make_expr( name_str, [this]{ return temporary.expertise_rating; } );
+        case STAT_ACCURACY_RATING:
+          return make_expr( name_str, [this]{ return temporary.accuracy_rating; } );
+        case STAT_CRIT_RATING:
+          return make_expr( name_str, [this]{ return temporary.crit_rating; } );
+        case STAT_ALACRITY_RATING:
+          return make_expr( name_str, [this]{ return temporary.alacrity_rating; } );
+        case STAT_ARMOR:
+          return make_expr( name_str, [this]{ return temporary.armor; } );
+        case STAT_POWER:
+          return make_expr( name_str, [this]{ return temporary.power; } );
+        case STAT_FORCE_POWER:
+          return make_expr( name_str, [this]{ return temporary.force_power; } );
+        case STAT_TECH_POWER:
+          return make_expr( name_str, [this]{ return temporary.tech_power; } );
+        case STAT_SURGE_RATING:
+          return make_expr( name_str, [this]{ return temporary.surge_rating; } );
+        case STAT_DEFENSE_RATING:
+          return make_expr( name_str, [this]{ return temporary.defense_rating; } );
+        case STAT_SHIELD_RATING:
+          return make_expr( name_str, [this]{ return temporary.shield_rating; } );
+        case STAT_ABSORB_RATING:
+          return make_expr( name_str, [this]{ return temporary.absorb_rating; } );
 
-        default: assert( 0 ); break;
-      }
-
-      if ( p_stat )
-      {
-        struct temporary_stat_expr_t : public player_expr_t
-        {
-          int attr;
-          int stat_type;
-          double& stat;
-
-          temporary_stat_expr_t( action_t* a, player_t* p, double* p_stat, int stat_type, int attr ) :
-            player_expr_t( a, "temporary_stat", p ), attr( attr ), stat_type( stat_type ), stat( *p_stat ) {}
-
-          virtual int evaluate()
-          {
-            result_num = stat;
-            if ( attr != -1 )
-              result_num *= player -> composite_attribute_multiplier( attr );
-
-            return TOK_NUM;
-          }
-        };
-
-        return new temporary_stat_expr_t( a, this, p_stat, stat, attr );
+        default: break;
       }
     }
   }
+
   else if ( num_splits == 3 )
   {
     if ( splits[ 0 ] == "buff" || splits[ 0 ] == "debuff" || splits[ 0 ] == "aura" )
@@ -4839,25 +4673,17 @@ action_expr_t* player_t::create_expression( action_t* a,
       if ( ! buff ) buff = buff_t::find( this, splits[ 1 ] );
       if ( ! buff ) buff = buff_t::find( sim, splits[ 1 ] );
       if ( ! buff ) return 0;
-      return buff -> create_expression( a, splits[ 2 ] );
+      return buff -> create_expression( splits[ 2 ] );
     }
     else if ( splits[ 0 ] == "cooldown" )
     {
       cooldown_t* cooldown = get_cooldown( splits[ 1 ] );
       if ( splits[ 2 ] == "remains" )
-      {
-        struct cooldown_remains_expr_t : public action_expr_t
-        {
-          cooldown_t* cooldown;
-          cooldown_remains_expr_t( action_t* a, cooldown_t* c ) : action_expr_t( a, "cooldown_remains", TOK_NUM ), cooldown( c ) {}
-          virtual int evaluate() { result_num = cooldown -> remains().total_seconds(); return TOK_NUM; }
-        };
-        return new cooldown_remains_expr_t( a, cooldown );
-      }
+        return make_expr( name_str, [cooldown]{ return cooldown -> remains().total_seconds(); } );
     }
     else if ( splits[ 0 ] == "dot" )
     {
-      dot_t* dot = 0;
+      dot_t* dot = nullptr;
       for ( targetdata_t* p : sourcedata )
       {
         if ( p && ( dot = p -> get_dot( splits[ 1 ] ) ) )
@@ -4866,64 +4692,47 @@ action_expr_t* player_t::create_expression( action_t* a,
       if ( ! dot )
         dot = get_dot( splits[ 1 ] );
       if ( ! dot )
-        return 0;
-      return dot -> create_expression( a, splits[ 2 ] );
+        return nullptr;
+      return dot -> create_expression( splits[ 2 ] );
     }
     else if ( splits[ 0 ] == "action" )
     {
-      std::vector<action_t*> in_flight_list;
-      for ( action_t* action = action_list; action; action = action -> next )
+      if ( splits[ 2 ] == "in_flight" )
       {
-        if ( action -> name_str == splits[ 1 ] )
+        std::vector<action_t*> in_flight_list;
+        for ( action_t* action = action_list; action; action = action -> next )
         {
-          if ( splits[ 2 ] == "in_flight" )
-          {
+          if ( action -> name_str == splits[ 1 ] )
             in_flight_list.push_back( action );
-          }
-          else
-          {
-            return action -> create_expression( splits[ 2 ] );
-          }
+        }
+        if ( ! in_flight_list.empty() )
+        {
+          return make_expr( name_str, [in_flight_list]() -> bool
+            {
+              for ( action_t& a : in_flight_list | boost::adaptors::indirected )
+                if ( a.travel_event ) return true;
+              return false;
+            } );
         }
       }
-      if ( in_flight_list.size() > 0 )
+      else
       {
-        struct in_flight_multi_expr_t : public action_expr_t
-        {
-          std::vector<action_t*> action_list;
-
-          in_flight_multi_expr_t( action_t* a, std::vector<action_t*>&& al ) :
-            action_expr_t( a, "in_flight", TOK_NUM ),
-            action_list( std::move( al ) )
-          {}
-
-          virtual int evaluate()
-          {
-            result_num = false;
-            for ( action_t* a : action_list )
-            {
-              if ( a -> travel_event != NULL )
-              {
-                result_num = true;
-                break;
-              }
-            }
-            return TOK_NUM;
-          }
-        };
-        return new in_flight_multi_expr_t( a, std::move( in_flight_list ) );
+        if ( action_t* action = find_action( splits[ 1 ] ) )
+          return action -> create_expression( splits[ 2 ] );
       }
     }
   }
-  /*else if ( num_splits == 2 )
-  {
-    if ( splits[ 0 ] == "set_bonus" )
-    {
-      return this -> set_bonus.create_expression( a, splits[ 1 ] );
-    }
-  }*/
 
-  if ( num_splits >= 2 && splits[ 0 ] == "target" )
+  else if ( splits[ 0 ] == "set_bonus" )
+  {
+    if ( num_splits == 2 )
+    {
+      if ( set_bonus_t* sb = find_set_bonus( splits[ 1 ] ) )
+        return make_expr( name_str, [sb]{ return sb -> count; } );
+    }
+  }
+
+  else if ( num_splits >= 2 && splits[ 0 ] == "target" )
     return target -> create_expression( a, join( splits.begin() + 1, splits.end(), '.' ) );
 
   return sim -> create_expression( a, name_str );
@@ -4998,10 +4807,8 @@ bool player_t::create_profile( std::string& profile_str, int save_type, bool sav
 
   if ( save_type == SAVE_ALL || save_type == SAVE_GEAR )
   {
-    for ( int i=0; i < SLOT_MAX; i++ )
+    for ( item_t& item : items )
     {
-      item_t& item = items[ i ];
-
       if ( item.active() )
       {
         profile_str += item.slot_name();
@@ -5024,11 +4831,25 @@ bool player_t::create_profile( std::string& profile_str, int save_type, bool sav
         profile_str += "=" + util_t::to_string( value, 0 ) + term;
       }
     }
+
     profile_str += "# Set Bonuses" + term;
     for ( set_bonus_t* sb = set_bonus_list; sb; sb = sb -> next )
     {
-      if ( sb -> two_pc() )  profile_str += "# set_bonus=" + sb -> name + "_2pc" + term ;
-      if ( sb -> four_pc() ) profile_str += "# set_bonus=" + sb -> name + "_4pc" + term ;
+      std::string name = sb -> name + "_2pc" + term;
+      if ( sb -> force_enable_2pc )
+        profile_str += "set_bonus=" + name;
+      else if ( sb -> force_disable_2pc )
+        profile_str += "set_bonus=no_" + name;
+      else if ( sb -> two_pc() )
+        profile_str += "# set_bonus=" + name;
+
+      name = sb -> name + "_4pc" + term;
+      if ( sb -> force_enable_4pc )
+        profile_str += "set_bonus=" + name;
+      else if ( sb -> force_disable_4pc )
+        profile_str += "set_bonus=no_" + name;
+      else if ( sb -> four_pc() )
+        profile_str += "# set_bonus=" + name;
     }
 
     for ( int i=0; i < SLOT_MAX; i++ )

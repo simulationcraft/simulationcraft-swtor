@@ -829,25 +829,25 @@ bool item_t::decode_special( special_effect_t& effect,
     {
       effect.trigger_str  = t.full;
       effect.trigger_type = PROC_DAMAGE;
-      effect.trigger_mask = ( int64_t( 1 ) << SCHOOL_KINETIC );
+      effect.trigger_mask = bitmask( SCHOOL_KINETIC );
     }
     else if ( t.full == "onenergydamage" )
     {
       effect.trigger_str  = t.full;
       effect.trigger_type = PROC_DAMAGE;
-      effect.trigger_mask = ( int64_t( 1 ) << SCHOOL_ENERGY );
+      effect.trigger_mask = bitmask( SCHOOL_ENERGY );
     }
     else if ( t.full == "oninternaldamage" )
     {
       effect.trigger_str  = t.full;
       effect.trigger_type = PROC_DAMAGE;
-      effect.trigger_mask = ( int64_t( 1 ) << SCHOOL_INTERNAL );
+      effect.trigger_mask = bitmask( SCHOOL_INTERNAL );
     }
     else if ( t.full == "onelementaldamage" )
     {
       effect.trigger_str  = t.full;
       effect.trigger_type = PROC_DAMAGE;
-      effect.trigger_mask = ( int64_t( 1 ) << SCHOOL_ELEMENTAL );
+      effect.trigger_mask = bitmask( SCHOOL_ELEMENTAL );
     }
     else if ( t.full == "ontick" )
     {

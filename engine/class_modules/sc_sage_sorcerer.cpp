@@ -4,13 +4,17 @@
 // ==========================================================================
 
 #include "../simulationcraft.hpp"
+#include "cons_inq.hpp"
 
-struct sage_sorcerer_targetdata_t : public targetdata_t
+// ==========================================================================
+// Jedi Sage
+// ==========================================================================
+
+namespace { // ANONYMOUS NAMESPACE ==========================================
+
+struct sage_sorcerer_targetdata_t : public cons_inq::targetdata_t
 {
-  dot_t dot_telekinetic_throw;
-  dot_t dot_mind_crush;
   dot_t dot_weaken_mind;
-  dot_t dot_sever_force;
 
   dot_t dot_healing_trance;
   dot_t dot_salvation;
@@ -18,27 +22,13 @@ struct sage_sorcerer_targetdata_t : public targetdata_t
 
   sage_sorcerer_targetdata_t( player_t& source, player_t& target )
     : targetdata_t( source, target ),
-      dot_telekinetic_throw( "telekinetic_throw", &source ),
-      dot_mind_crush( "mind_crush", &source ),
       dot_weaken_mind( "weaken_mind", &source ),
-      dot_sever_force( "sever_force", &source ),
       dot_healing_trance( "healing_trance", &source ),
       dot_salvation( "salvation", &source ),
-      dot_rejuvenate( "rejuvenate", &source)
+      dot_rejuvenate( "rejuvenate", &source )
   {
-    add( dot_telekinetic_throw );
-    alias( dot_telekinetic_throw, "force_lightning" );
-
-    add( dot_mind_crush );
-    alias( dot_mind_crush, "mind_crush_dot" );
-    alias( dot_mind_crush, "crushing_darkness" );
-    alias( dot_mind_crush, "crushing_darkness_dot" );
-
     add( dot_weaken_mind );
     alias( dot_weaken_mind, "affliction" );
-
-    add( dot_sever_force );
-    alias( dot_sever_force, "creeping_terror" );
 
     add( dot_healing_trance );
     alias( dot_healing_trance, "innervate" );
@@ -50,10 +40,6 @@ struct sage_sorcerer_targetdata_t : public targetdata_t
     alias( dot_rejuvenate, "resurgence" );
   }
 };
-
-// ==========================================================================
-// Jedi Sage
-// ==========================================================================
 
 struct sage_sorcerer_t : public player_t
 {
@@ -232,9 +218,10 @@ struct sage_sorcerer_t : public player_t
     scales_with[ STAT_FORCE_POWER ] = true;
   }
 
-  virtual int       primary_resource() const;
+  virtual resource_type primary_resource() const;
   virtual int       primary_role() const;
 
+  virtual double    force_regen_per_second() const; // override
   virtual void      regen( timespan_t periodicity );
 
   virtual double    force_bonus_multiplier() const;
@@ -267,9 +254,7 @@ struct sage_sorcerer_t : public player_t
   void trigger_tidal_force( double pc )
   {
     if ( talents.tidal_force -> rank() && buffs.tidal_force -> trigger( 1, 0, pc ) )
-    {
       cooldowns.telekinetic_wave -> reset();
-    }
   }
 
   virtual bool report_attack_type( action_t::policy_t policy )
@@ -279,8 +264,6 @@ struct sage_sorcerer_t : public player_t
            ( primary_role() == ROLE_HEAL && policy == action_t::force_heal_policy );
   }
 };
-
-namespace { // ANONYMOUS NAMESPACE ==========================================
 
 class sage_sorcerer_action_t : public action_t
 {
@@ -421,6 +404,7 @@ struct sage_sorcerer_spell_t : public sage_sorcerer_action_t
     sage_sorcerer_t* p = cast();
 
     p -> buffs.telekinetic_effusion -> up();
+    p -> buffs.telekinetic_effusion -> decrement();
   }
 
   virtual void tick( dot_t* d )
@@ -738,8 +722,10 @@ struct disturbance_t : public sage_sorcerer_spell_t
 
       p -> buffs.concentration -> trigger();
 
-      // Does the TM version also proc Tidal Force?
-      p -> trigger_tidal_force( 0.3 );
+      // Does the TM version also proc Tidal Force? We'll assume that it does
+      // not for now.
+      if ( tm )
+        p -> trigger_tidal_force( 0.3 );
     }
   }
 
@@ -1174,8 +1160,8 @@ struct sage_sorcerer_heal_t : public heal_t
 {
   bool influenced_by_inner_strength;
 
-  sage_sorcerer_heal_t( const std::string& n, sage_sorcerer_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
-    heal_t( n.c_str(), p, force_heal_policy, r, s ),
+  sage_sorcerer_heal_t( const std::string& n, sage_sorcerer_t* p, const school_type s=SCHOOL_KINETIC ) :
+    heal_t( n.c_str(), p, force_heal_policy, RESOURCE_FORCE, s ),
     influenced_by_inner_strength( true )
   {
     may_crit   = true;
@@ -1221,13 +1207,14 @@ struct sage_sorcerer_heal_t : public heal_t
     heal_t::consume_resource();
 
     p() -> buffs.telekinetic_effusion -> up();
+    p() -> buffs.telekinetic_effusion -> decrement();
   }
 };
 
 struct deliverance_t : public sage_sorcerer_heal_t
 {
   deliverance_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
-    sage_sorcerer_heal_t( n, p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+    sage_sorcerer_heal_t( n, p, SCHOOL_INTERNAL )
   {
     parse_options( 0, options_str );
 
@@ -1264,7 +1251,7 @@ struct deliverance_t : public sage_sorcerer_heal_t
 struct benevolence_t : public sage_sorcerer_heal_t
 {
   benevolence_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
-    sage_sorcerer_heal_t( n, p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+    sage_sorcerer_heal_t( n, p, SCHOOL_INTERNAL )
   {
     parse_options( 0, options_str );
 
@@ -1309,7 +1296,7 @@ struct benevolence_t : public sage_sorcerer_heal_t
 struct healing_trance_t : public sage_sorcerer_heal_t
 {
   healing_trance_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
-    sage_sorcerer_heal_t( n, p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+    sage_sorcerer_heal_t( n, p, SCHOOL_INTERNAL )
   {
     parse_options( 0, options_str );
 
@@ -1358,7 +1345,7 @@ struct healing_trance_t : public sage_sorcerer_heal_t
 struct rejuvenate_t : public sage_sorcerer_heal_t
 {
   rejuvenate_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
-    sage_sorcerer_heal_t( n, p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+    sage_sorcerer_heal_t( n, p, SCHOOL_INTERNAL )
   {
     parse_options( 0, options_str );
 
@@ -1382,9 +1369,6 @@ struct rejuvenate_t : public sage_sorcerer_heal_t
   {
     sage_sorcerer_heal_t::execute();
 
-    // FIXME: check assumption
-    // Assuming conveyance is only trigger once on rejuvenate execution, not on tick
-
     p() -> buffs.conveyance -> trigger();
   }
 };
@@ -1394,7 +1378,7 @@ struct salvation_t : public sage_sorcerer_heal_t
   struct salvation_tick_spell_t : public sage_sorcerer_heal_t
   {
     salvation_tick_spell_t( sage_sorcerer_t* p, const std::string& n ) :
-      sage_sorcerer_heal_t( n + "tick_spell", p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+      sage_sorcerer_heal_t( n + "tick_spell", p, SCHOOL_INTERNAL )
     {
       dd.standardhealthpercentmin = dd.standardhealthpercentmax = .019;
       dd.power_mod = 0.376;
@@ -1414,7 +1398,7 @@ struct salvation_t : public sage_sorcerer_heal_t
   salvation_tick_spell_t* tick_spell;
 
   salvation_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
-    sage_sorcerer_heal_t( n, p, RESOURCE_FORCE, SCHOOL_INTERNAL ),
+    sage_sorcerer_heal_t( n, p, SCHOOL_INTERNAL ),
     tick_spell( 0 )
   {
     parse_options( 0, options_str );
@@ -1470,10 +1454,9 @@ struct salvation_t : public sage_sorcerer_heal_t
 
 struct sage_sorcerer_absorb_t : public absorb_t
 {
-  sage_sorcerer_absorb_t( const std::string& n, sage_sorcerer_t* p, int r=RESOURCE_NONE, const school_type s=SCHOOL_KINETIC ) :
-    absorb_t( n.c_str(), p, force_heal_policy, r, s )
-  {
-  }
+  sage_sorcerer_absorb_t( const std::string& n, sage_sorcerer_t* p, const school_type s=SCHOOL_KINETIC ) :
+    absorb_t( n.c_str(), p, force_heal_policy, RESOURCE_FORCE, s )
+  {}
 
   sage_sorcerer_targetdata_t* targetdata() const
   { return static_cast<sage_sorcerer_targetdata_t*>( action_t::targetdata() ); }
@@ -1488,13 +1471,14 @@ struct sage_sorcerer_absorb_t : public absorb_t
     absorb_t::consume_resource();
 
     p() -> buffs.telekinetic_effusion -> up();
+    p() -> buffs.telekinetic_effusion -> decrement();
   }
 };
 
 struct force_armor_t : public sage_sorcerer_absorb_t
 {
   force_armor_t( sage_sorcerer_t* p, const std::string& n, const std::string& options_str ) :
-    sage_sorcerer_absorb_t( n, p, RESOURCE_FORCE, SCHOOL_INTERNAL )
+    sage_sorcerer_absorb_t( n, p, SCHOOL_INTERNAL )
   {
     parse_options( 0, options_str );
 
@@ -1703,19 +1687,19 @@ void sage_sorcerer_t::init_buffs()
   bool is_sage = ( type == JEDI_SAGE );
 
   buffs.concentration = new buff_t( this, is_sage ? "concentration" : "subversion", 3, timespan_t::from_seconds( 10.0 ), timespan_t::zero, 0.5 * talents.concentration -> rank() );
-  buffs.psychic_projection = new buff_t( this, is_sage ? "psychic_projection" : "lightning_barrage", 1, timespan_t::zero, timespan_t::from_seconds( 10.0 ), 0.5 * talents.psychic_projection -> rank() );
-  buffs.tidal_force = new buff_t( this, is_sage ? "tidal_force" : "lightning_storm", 1, timespan_t::zero, timespan_t::from_seconds( 10.0 ) );
-  buffs.telekinetic_effusion = new buff_t( this, is_sage ? "telekinetic_effusion" : "lightning_effusion", 2, timespan_t::zero, timespan_t::zero, 0.5 * talents.telekinetic_effusion -> rank() );
+  buffs.psychic_projection = new buff_t( this, is_sage ? "psychic_projection" : "lightning_barrage", 1, timespan_t::from_seconds( 10 ), timespan_t::from_seconds( 10.0 ), 0.5 * talents.psychic_projection -> rank() );
+  buffs.tidal_force = new buff_t( this, is_sage ? "tidal_force" : "lightning_storm", 1, timespan_t::from_seconds( 30 ), timespan_t::from_seconds( 10.0 ) );
+  buffs.telekinetic_effusion = new buff_t( this, is_sage ? "telekinetic_effusion" : "lightning_effusion", 2, timespan_t::from_seconds( 30 ), timespan_t::zero, 0.5 * talents.telekinetic_effusion -> rank() );
   buffs.tremors = new buff_t( this, is_sage ? "tremors" : "conduction", 3, timespan_t::from_seconds( 30.0 ) );
-  buffs.presence_of_mind = new buff_t( this, is_sage ? "presence_of_mind" : "wrath", 1, timespan_t::zero, timespan_t::zero, talents.presence_of_mind -> rank() * 0.3 );
+  buffs.presence_of_mind = new buff_t( this, is_sage ? "presence_of_mind" : "wrath", 1, timespan_t::from_seconds( 30 ), timespan_t::zero, talents.presence_of_mind -> rank() * 0.3 );
   buffs.force_suppression = new buff_t( this, is_sage ? "force_suppression" : "deathmark", 10, timespan_t::from_seconds( 30.0 ), timespan_t::zero, talents.force_suppression -> rank() );
   buffs.mental_alacrity = new buff_t( this, is_sage ? "mental_alacrity" : "polarity_shift", 1, timespan_t::from_seconds( 10.0 ) );
   buffs.force_potency = new buff_t( this, is_sage ? "force_potency" : "recklessness", 2, timespan_t::from_seconds( 20.0 ) );
   buffs.psychic_projection_dd = new buff_t( this, is_sage ? "psychic_projection_dd" : "lightning_barrage_dd", 1, timespan_t::from_seconds( 2.0 ), timespan_t::zero );
   buffs.rakata_force_masters_4pc = new buff_t( this, "rakata_force_masters_4pc", 1, timespan_t::from_seconds( 15.0 ), timespan_t::from_seconds( 20.0 ), set_bonus.rakata_force_masters -> four_pc() ? 0.10 : 0.0 );
   buffs.noble_sacrifice = new buff_t( this, "noble_sacrifice", 4, timespan_t::from_seconds( 10.0 ) );
-  buffs.resplendence = new buff_t( this, is_sage ? "resplendence" : "force_surge", 1 , timespan_t::zero, timespan_t::zero, talents.resplendence -> rank() / 2.0 );
-  buffs.conveyance = new buff_t( this, is_sage ? "conveyace" : "force_bending", 1, timespan_t::zero, timespan_t::zero, talents.conveyance -> rank() / 2.0 );
+  buffs.resplendence = new buff_t( this, is_sage ? "resplendence" : "force_surge", 1 , timespan_t::from_seconds( 10 ), timespan_t::zero, talents.resplendence -> rank() / 2.0 );
+  buffs.conveyance = new buff_t( this, is_sage ? "conveyace" : "force_bending", 1, timespan_t::from_seconds( 10 ), timespan_t::zero, talents.conveyance -> rank() / 2.0 );
 }
 
 // sage_sorcerer_t::init_gains =======================================================
@@ -1789,8 +1773,8 @@ void sage_sorcerer_t::init_actions()
       if ( talents.presence_of_mind -> rank() )
         action_list_str += "/mind_crush,if=buff.presence_of_mind.react";
 
-      if ( ! ptr && talents.telekinetic_wave -> rank() && talents.presence_of_mind -> rank() )
-        action_list_str += "/telekinetic_wave,if=buff.presence_of_mind.react&force.pct>target.health.pct+0.07&cooldown.mind_crush.remains>4";
+      if ( talents.telekinetic_wave -> rank() && talents.presence_of_mind -> rank() )
+        action_list_str += "/telekinetic_wave,if=!ptr&buff.presence_of_mind.react&force.pct>target.health.pct+0.07&cooldown.mind_crush.remains>4";
 
       if ( talents.sever_force -> rank() > 0 )
         action_list_str += "/sever_force,if=!ticking";
@@ -1823,7 +1807,7 @@ void sage_sorcerer_t::init_actions()
 
       action_list_str += "/mental_alacrity,moving=0";
       action_list_str += "/mind_crush";
-      action_list_str += "/disturbance";
+      action_list_str += "/sequence,name=pewpew:disturbance:telekinetic_throw/restart_sequence,name=pewpew";
       action_list_str += "/project,moving=1";
 
       break;
@@ -1858,8 +1842,8 @@ void sage_sorcerer_t::init_actions()
       if ( talents.presence_of_mind -> rank() )
         action_list_str += "/crushing_darkness,if=buff.wrath.react";
 
-      if ( ! ptr && talents.telekinetic_wave -> rank() && talents.presence_of_mind -> rank() )
-        action_list_str += "/chain_lightning,if=buff.wrath.react&force.pct>target.health.pct+0.07&cooldown.crushing_darkness.remains>4";
+      if ( talents.telekinetic_wave -> rank() && talents.presence_of_mind -> rank() )
+        action_list_str += "/chain_lightning,if=!ptr&buff.wrath.react&force.pct>target.health.pct+0.07&cooldown.crushing_darkness.remains>4";
 
       if ( talents.sever_force -> rank() > 0 )
         action_list_str += "/creeping_terror,if=!ticking";
@@ -1892,7 +1876,7 @@ void sage_sorcerer_t::init_actions()
 
       action_list_str += "/polarity_shift,moving=0";
       action_list_str += "/crushing_darkness";
-      action_list_str += "/lightning_strike";
+      action_list_str += "/sequence,name=pewpew:lightning_strike:force_lightning/restart_sequence,name=pewpew";
       action_list_str += "/shock,moving=1";
 
       break;
@@ -1918,10 +1902,8 @@ void sage_sorcerer_t::init_actions()
 
 // sage_sorcerer_t::primary_resource ==================================================
 
-int sage_sorcerer_t::primary_resource() const
-{
-  return RESOURCE_FORCE;
-}
+resource_type sage_sorcerer_t::primary_resource() const
+{ return RESOURCE_FORCE; }
 
 // sage_sorcerer_t::primary_role ==================================================
 
@@ -1941,22 +1923,29 @@ int sage_sorcerer_t::primary_role() const
   }
 }
 
+// sage_sorcerer_t::force_regen_per_second =================================
+
+double sage_sorcerer_t::force_regen_per_second() const
+{
+  double regen = player_t::force_regen_per_second();
+  regen += base_force_regen_per_second * ( buffs.concentration -> check() * 0.10
+                                           - buffs.noble_sacrifice -> check() * 0.25 );
+  return regen;
+}
+
 // sage_sorcerer_t::regen ==================================================
 
 void sage_sorcerer_t::regen( timespan_t periodicity )
 {
-  player_t::regen( periodicity );
+  double force_regen = periodicity.total_seconds() * base_force_regen_per_second;
 
   if ( buffs.concentration -> up() )
-  {
-    double force_regen = periodicity.total_seconds() * force_regen_per_second() * buffs.concentration -> check() * 0.10;
-    resource_gain( RESOURCE_FORCE, force_regen, gains.concentration );
-  }
+    resource_gain( RESOURCE_FORCE, force_regen * buffs.concentration -> check() * 0.10, gains.concentration );
+
   if ( buffs.noble_sacrifice -> up() )
-  {
-    double force_regen = periodicity.total_seconds() * force_regen_per_second() * buffs.noble_sacrifice -> check() * 0.25;
-    resource_loss( RESOURCE_FORCE, force_regen, gains.noble_sacrifice_power_regen_lost );
-  }
+    resource_loss( RESOURCE_FORCE, force_regen * buffs.noble_sacrifice -> check() * 0.25, gains.noble_sacrifice_power_regen_lost );
+
+  player_t::regen( periodicity );
 }
 
 // sage_sorcerer_t::force_bonus_multiplier ================================

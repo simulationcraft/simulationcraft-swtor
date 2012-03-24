@@ -24,7 +24,7 @@ actions+=/force_potency
 actions+=/use_relics
 actions+=/weaken_mind,if=!ticking
 actions+=/force_in_balance
-actions+=/telekinetic_wave,if=buff.presence_of_mind.react|buff.tidal_force.react
+actions+=/telekinetic_wave,if=(!ptr&buff.presence_of_mind.react)|buff.tidal_force.react
 actions+=/mind_crush,if=buff.presence_of_mind.react
 actions+=/telekinetic_throw
 actions+=/project,moving=1
@@ -39,12 +39,12 @@ actions+=/telekinetic_throw,if=buff.psychic_projection_dd.up
 actions+=/power_potion
 actions+=/force_potency
 actions+=/use_relics
-actions+=/telekinetic_wave,if=buff.presence_of_mind.react|buff.tidal_force.react
+actions+=/telekinetic_wave,if=(!ptr&buff.presence_of_mind.react)|buff.tidal_force.react
 actions+=/weaken_mind,if=!ticking
 actions+=/telekinetic_throw,if=buff.psychic_projection.react
 actions+=/force_in_balance
 actions+=/mind_crush,if=buff.presence_of_mind.react
 actions+=/mental_alacrity
-actions+=/disturbance
+actions+=/sequence,name=pewpew:disturbance:telekinetic_throw:telekinetic_throw:telekinetic_throw:telekinetic_throw:telekinetic_throw:telekinetic_throw:telekinetic_throw/restart_sequence,name=pewpew
 actions+=/project,moving=1
 save=Jedi_Sage_Momentum.simc

@@ -162,7 +162,7 @@ bool parse_talents( player_t& p, const std::string& talent_string )
       }
     }
 
-    catch ( base36_t::bad_char bc )
+    catch ( base36_t::bad_char& bc )
     {
       p.sim -> errorf( "Player %s has malformed wowhead talent string. Translation for '%c' unknown.\n",
                        p.name(), bc.c );

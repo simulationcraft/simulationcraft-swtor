@@ -1,0 +1,59 @@
+#!./simc 
+
+jedi_shadow=Jedi_Shadow_Balance
+origin="http://swtor.askmrrobot.com/character/72bd51f8-fe33-461e-a0a8-ac4513000154"
+level=50
+race=human
+position=back
+role=hybrid
+use_pre_potion=0
+professions=synthweaving=400
+talents=http://www.torhead.com/skill-calc#601McZhMZfrbRrRkMfz.1
+actions=stim,type=exotech_resolve
+actions+=/force_valor
+actions+=/force_technique
+actions+=/snapshot_stats
+actions+=/stealth
+actions+=/power_potion
+actions+=/force_potency
+actions+=/force_cloak,if=buff.shadows_respite.down
+actions+=/battle_readiness
+actions+=/force_in_balance
+actions+=/mind_crush,if=buff.force_strike.react
+actions+=/force_breach,if=!dot.force_technique.ticking
+actions+=/spinning_strike
+actions+=/sever_force,if=!ticking
+actions+=/shadow_strike,if=buff.find_weakness.react
+actions+=/double_strike,if=force>45
+actions+=/saber_strike
+head=rakata_stalkers_headgear,stats=55end_51willpower__29end_48willpower_37power__24end_37power_51acc
+ear=columi_stalkers_chip__exceptional,stats=93end_80willpower_48acc_48power__28willpower
+shirt=datacrons,stats=40str_40aim_40cunning_40willpower_40pre_40end
+chest=rakata_stalkers_robe,stats=44end_61willpower__29end_48willpower_37power__24end_37power_51surge
+waist=rakata_stalkers_waistwrap__exceptional,stats=71end_103willpower_11crit__28willpower
+legs=rakata_stalkers_legwraps,stats=55end_51willpower__29end_48willpower_37power__24end_37power_51surge
+feet=rakata_stalkers_boots,stats=44end_61willpower__29end_38willpower_37power__24end_37power_51acc
+wrists=rakata_stalkers_bracers__exceptional,stats=74end_85willpower_37power__28willpower
+hands=exotech_stalkers_handwraps__exceptional,stats=41end_57willpower__29end_48willpower_37power__24end_37power_51acc__28willpower
+implant1=columi_stalkers_implant__exceptional,stats=80end_97willpower_48acc_41crit__28willpower
+implant2=columi_stalkers_implant__exceptional,stats=80end_97willpower_48acc_41crit__28willpower
+relic1=plasma_burst_device,stats=77end,equip=ondamage_168elemental_30%_4.5cd
+relic2=matrix_cube_m7r3,stats=50end_58willpower_24crit
+main_hand=blood_of_korriban,stats=612forcepower_44end_61willpower__41power__29end_48willpower_37power__24end_37power_51surge,weapon=doublebladedlightsaber_367min_551max
+off_hand=rakata_stalkers_power_generator,stats=85end_103willpower_612forcepower_77crit_51surge
+# Gear Summary
+# gear_strength=40
+# gear_aim=40
+# gear_cunning=40
+# gear_willpower=1451
+# gear_endurance=1251
+# gear_presence=40
+# gear_accuracy_rating=297
+# gear_crit_rating=194
+# gear_power=570
+# gear_forcepower=1224
+# gear_surge_rating=204
+# Set Bonuses
+# set_bonus=rakata_stalkers_2pc
+# set_bonus=rakata_stalkers_4pc
+# main_hand=blood_of_korriban,weapon=doublebladedlightsaber_367min_551max

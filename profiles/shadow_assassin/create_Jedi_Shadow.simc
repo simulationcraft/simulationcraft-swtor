@@ -1,0 +1,14 @@
+jedi_shadow=Jedi_Shadow_Balance
+level=50
+talents=http://www.torhead.com/skill-calc#601McZhMZfrbRrRkMfz.1
+position=back
+Shadow_Assassin_Gear.simc
+save=Jedi_Shadow_Balance.simc
+
+copy=Jedi_Shadow_Infiltration,Jedi_Shadow_Balance
+talents=http://www.torhead.com/skill-calc#6010MZhGMRkhMrtzZcMc.1
+save=Jedi_Shadow_Infiltration.simc
+
+copy=Jedi_Shadow_One,Jedi_Shadow_Balance
+talents=http://www.torhead.com/skill-calc#601RIMs00cZZfMfRr0kM.1
+save=Jedi_Shadow_One.simc
