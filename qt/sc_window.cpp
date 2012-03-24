@@ -12,7 +12,7 @@
 #include <CoreFoundation/CoreFoundation.h>
 #endif
 
-static const bool ENABLE_MRROBOT_TAB = false;
+static const bool ENABLE_MRROBOT_TAB = true;
 
 // ==========================================================================
 // Utilities
@@ -1105,106 +1105,43 @@ void SimulationCraftWindow::deleteSim()
 // ==========================================================================
 // Import
 // ==========================================================================
-#if 0
-void ImportThread::importBattleNet()
+void ImportThread::importMrRobot()
 {
-  QString region, server, character;
+  QString id;
   QUrl qurl = url;
 
-  {
-    QStringList parts = qurl.host().split( '.' );
+  QStringList parts = qurl.path().split( '/' );
+  id = parts[ parts.size() - 1 ];
 
-    if ( parts.size() )
-    {
-      if ( parts[ parts.size() - 1 ].length() == 2 )
-        region = parts[ parts.size() - 1 ];
-      else
-      {
-        for ( QStringList::size_type i = 0; i < parts.size(); ++i )
-        {
-          if ( parts[ i ].length() == 2 )
-          {
-            region = parts[ i ];
-            break;
-          }
-        }
-      }
-    }
-  }
-
+  if ( id.isEmpty() )
   {
-    QStringList parts = qurl.path().split( '/' );
-    for ( QStringList::size_type i = 0, n = parts.size(); i + 2 < n; ++i )
-    {
-      if ( parts[ i ] == "character" )
-      {
-        server = parts[ i + 1 ];
-        character = parts[ i + 2 ];
-        break;
-      }
-    }
-  }
-
-  if ( false )
-  {
-    QStringList tokens = url.split( QRegExp( "[?&=:/.]" ), QString::SkipEmptyParts );
-    int count = tokens.count();
-    for ( int i=0; i < count-1; i++ )
-    {
-      QString& t = tokens[ i ];
-      if ( t == "http" )
-      {
-        region = tokens[ ++i ];
-      }
-      else if ( t == "r" ) // old armory
-      {
-        server = tokens[ ++i ];
-      }
-      else if ( t == "n" ) // old armory
-      {
-        character = tokens[ ++i ];
-      }
-      else if ( t == "character" && ( i<count-2 ) ) // new battle.net
-      {
-        server    = tokens[ ++i ];
-        character = tokens[ ++i ];
-      }
-    }
-  }
-
-  if ( region.isEmpty() || server.isEmpty() || character.isEmpty() )
-  {
-    fprintf( sim->output_file, "Unable to determine Server and Character information!\n" );
+    fprintf( sim->output_file, "Unable to determine Profile ID!\n" );
   }
   else
   {
     // Windows 7 64bit somehow cannot handle straight toStdString() conversion, so
     // do it in a silly way as a workaround for now.
-    std::string talents = mainWindow->armorySpecChoice->currentText().toUtf8().constData(),
-                cpp_s   = server.toUtf8().constData(),
-                cpp_c   = character.toUtf8().constData(),
-                cpp_r   = region.toUtf8().constData();
-    player = bcp_api::download_player( sim, cpp_r, cpp_s, cpp_c, talents );
+    std::string mrrobot_id  = id.toUtf8().constData();
+    player = mrrobot::download_player( sim, mrrobot_id );
 
-    if ( false )
-    {
-      if ( cpp_r == "cn" )
-        player = armory_t::download_player( sim, cpp_r, cpp_s, cpp_c, talents );
-      else
-        player = battle_net_t::download_player( sim, cpp_r, cpp_s, cpp_c, talents );
-    }
+
   }
+
+  // tmp debug
+      if ( player )
+        fprintf( sim->output_file, "MrRobot import sucess!\n" );
+      else
+        fprintf( sim->output_file, "MrRobot import no sucess!\n" );
 }
-#endif
 
 void ImportThread::run()
 {
   cache::advance_era();
-  /*switch ( tab )
+  switch ( tab )
   {
-  case TAB_BATTLE_NET: importBattleNet(); break;
-  default: assert( 0 );
-  }*/
+  case TAB_MR_ROBOT: importMrRobot(); assert( 0 ); break;
+  default: assert( 0 ); break;
+  }
 
   if ( player )
   {

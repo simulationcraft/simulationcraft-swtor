@@ -383,7 +383,7 @@ public:
   QString profile;
   player_t* player;
 
-  //void importBattleNet();
+  void importMrRobot();
 
   void start( sim_t* s, int t, const QString& u ) { sim=s; tab=t; url=u; profile.clear(); player=0; QThread::start(); }
   virtual void run();
