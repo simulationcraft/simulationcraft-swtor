@@ -2525,7 +2525,6 @@ public:
   double get_alacrity_rating() const { return alacrity_rating_; }
 
 
-public:
   // Attributes
   attribute_type primary_attribute, secondary_attribute;
   double attribute                   [ ATTRIBUTE_MAX ];
