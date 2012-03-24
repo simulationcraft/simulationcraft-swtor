@@ -414,77 +414,10 @@ player_t* download_player( sim_t*             sim,
   sim -> current_name = id;
   sim -> current_slot = 0;
 
-  std::string url = "http://swtor.askmrrobot.com/api/character/" + id;
+  std::string url = "http://swtor.askmrrobot.com/api/character/v1/" + id;
   std::string result;
-  if ( id == "test" )
-  {
-    result =
-        "{\n"
-        "        \"ProfileId\":\"9674b96a-d94a-47c8-b268-17e65c432915\",\n"
-        "        \"ProfileName\":\"Yellowsix of Juyo (US)\",\n"
-        "        \"LastUpdated\":\"2012-03-05T21:27:35\",\n"
-        "        \"Region\":\"US\",\n"
-        "        \"Server\":\"Juyo\",\n"
-        "        \"Name\":\"Yellowsix\",\n"
-        "        \"Guild\":\"GH-AMR\",\n"
-        "        \"Faction\":\"Empire\",\n"
-        "        \"AdvancedClass\":\"Sorcerer\",\n"
-        "        \"Level\":45,\n"
-        "        \"Gender\":\"Female\",\n"
-        "        \"Race\":\"Chiss\",\n"
-        "        \"Alignment\":\"Neutral\",\n"
-        "        \"SocialLevel\":\"None\",\n"
-        "        \"ValorRank\":0,\n"
-        "        \"CraftingCrewSkill\":\"None\",\n"
-        "        \"CrewSkill2\":\"Biochem\",\n"
-        "        \"CrewSkill3\":\"None\",\n"
-        "        \"SkillString\":\"0000000000000000000-00000000000000000000-000000000000000000\",\n"
-        "        \"Gear\":[\n"
-        "          {\n"
-        "            \"CharacterSlot\":\"Chest\",\n"
-        "            \"Id\":\"30045\",\n"
-        "            \"VariantId\":0,\n"
-        "            \"Mods\":[\n"
-        "              {\n"
-        "                \"Slot\":\"Mod\",\n"
-        "                \"Id\":\"5890\",\n"
-        "                \"Name\":\"Advanced Deflecting Mod 25B\",\n"
-        "                \"Stats\":[\n"
-        "                  {\"Stat\":\"Aim\",\"Value\":61},\n"
-        "                  {\"Stat\":\"Endurance\",\"Value\":37},\n"
-        "                  {\"Stat\":\"Defense\",\"Value\":11}\n"
-        "                ]\n"
-        "              },\n"
-        "              {\n"
-        "                \"Slot\":\"Enhancement\",\n"
-        "                \"Id\":\"9207\",\n"
-        "                \"Name\":\"Advanced Astute Enhancement 25\",\n"
-        "                \"Stats\":[\n"
-        "                  {\"Stat\":\"Endurance\",\"Value\":40},\n"
-        "                  {\"Stat\":\"Accuracy\",\"Value\":51},\n"
-        "                  {\"Stat\":\"Defense\",\"Value\":20}\n"
-        "                ]\n"
-        "              }\n"
-        "            ],\n"
-        "            \"Name\":\"Battlemaster Supercommando's Body Armor\",\n"
-        "            \"ArmorType\":\"Heavy\",\n"
-        "            \"WeaponType\":null,\n"
-        "            \"ShieldType\":null,\n"
-        "            \"Stats\":[\n"
-        "             {\"Stat\":\"Aim\",\"Value\":94},\n"
-        "              {\"Stat\":\"Endurance\",\"Value\":108},\n"
-        "              {\"Stat\":\"Expertise\",\"Value\":50},\n"
-        "              {\"Stat\":\"Accuracy\",\"Value\":51},\n"
-        "              {\"Stat\":\"Defense\",\"Value\":31}\n"
-        "            ],\n"
-        "            \"ItemSetId\":null\n"
-        "          }\n"
-        "        ],\n"
-        "        \"Datacrons\":[]\n"
-        "      }";
-  }
 
-  else if ( ! http_t::get( result, url, caching ) )
+  if ( ! http_t::get( result, url, caching ) )
   {
     sim -> errorf( "Unable to download player from '%s'\n", url.c_str() );
     return 0;
