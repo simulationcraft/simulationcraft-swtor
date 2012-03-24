@@ -1416,7 +1416,7 @@ struct gear_stats_t : public internal::gear_stats_t
   void   set_stat( int stat, double value );
   double get_stat( int stat ) const;
   void   print( FILE* );
-  static double stat_mod( int stat );
+  static double stat_mod( int /* stat */ ) { return 1.0; }
 };
 
 
