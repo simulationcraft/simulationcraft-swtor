@@ -659,7 +659,7 @@ stim_t util_t::parse_stim_type( const std::string& name )
 
 // util_t::slot_type_string ================================================
 
-const char* util_t::slot_type_string( int slot )
+const char* util_t::slot_type_string( slot_type slot )
 {
   switch ( slot )
   {
@@ -695,13 +695,13 @@ std::string util_t::armor_type_string( player_type /* ptype */, int /* slot_type
 
 // util_t::parse_slot_type ==================================================
 
-int util_t::parse_slot_type( const std::string& name )
+slot_type util_t::parse_slot_type( const std::string& name )
 {
-  for ( int i=0; i < SLOT_MAX; i++ )
+  for ( slot_type i = SLOT_MIN; i < SLOT_MAX; i++ )
     if ( util_t::str_compare_ci( name, util_t::slot_type_string( i ) ) )
       return i;
 
-  return SLOT_NONE;
+  return SLOT_INVALID;
 }
 
 // util_t::stat_type_string =================================================

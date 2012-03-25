@@ -98,7 +98,7 @@ slot_type translate_slot_name( const std::string& name )
       return static_cast<slot_type>( i );
   }
 
-  return SLOT_NONE;
+  return SLOT_INVALID;
 }
 
 // parse_items ==============================================================
@@ -119,7 +119,7 @@ bool parse_items( player_t* p, js_node_t* items )
     }
 
     slot_type slot = translate_slot_name( slot_name );
-    if ( slot == SLOT_NONE )
+    if ( slot == SLOT_INVALID )
     {
       // FIXME: Report weirdness.
       continue;

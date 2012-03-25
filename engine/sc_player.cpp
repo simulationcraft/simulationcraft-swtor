@@ -374,7 +374,7 @@ player_t::player_t( sim_t*             s,
   boost::fill( over_cap, 0 );
 
   items.resize( SLOT_MAX );
-  for ( slot_type i = SLOT_NONE; i < SLOT_MAX; i++ )
+  for ( slot_type i = SLOT_MIN; i < SLOT_MAX; i++ )
   {
     items[ i ].slot = i;
     items[ i ].sim = sim;
@@ -4244,7 +4244,7 @@ struct use_slot_t : public base_use_item_t
     }
 
     int slot = util_t::parse_slot_type( slot_name );
-    if ( slot == SLOT_NONE )
+    if ( slot == SLOT_INVALID )
     {
       if ( ! quiet )
         sim -> errorf( "Player %s has 'use_slot' action with invalid slot name '%s'.\n", player -> name(), slot_name.c_str() );

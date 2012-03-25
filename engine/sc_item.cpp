@@ -54,7 +54,7 @@ static int parse_tokens( std::vector<token_t>& tokens,
 // item_t::item_t ===========================================================
 
 item_t::item_t( player_t* p, const std::string& o ) :
-  sim( p -> sim ), player( p ), slot( SLOT_NONE ), quality( QUALITY_NONE ),
+  sim( p -> sim ), player( p ), slot( SLOT_INVALID ), quality( QUALITY_NONE ),
   ilevel( 0 ), unique( false ), unique_enchant( false ), unique_addon( false ),
   is_heroic( false ), is_lfr( false ), is_ptr( p -> ptr ),
   is_matching_type( false ), is_reforged( false ), reforged_from( STAT_NONE ),
@@ -65,7 +65,7 @@ item_t::item_t( player_t* p, const std::string& o ) :
 
 bool item_t::active() const
 {
-  if ( slot == SLOT_NONE ) return false;
+  if ( slot == SLOT_INVALID ) return false;
   if ( ! encoded_name_str.empty() ) return true;
   return false;
 }
@@ -74,7 +74,7 @@ bool item_t::active() const
 
 bool item_t::heroic() const
 {
-  if ( slot == SLOT_NONE ) return false;
+  if ( slot == SLOT_INVALID ) return false;
   return is_heroic;
 }
 
@@ -82,7 +82,7 @@ bool item_t::heroic() const
 
 bool item_t::lfr() const
 {
-  if ( slot == SLOT_NONE ) return false;
+  if ( slot == SLOT_INVALID ) return false;
   return is_lfr;
 }
 
@@ -97,7 +97,7 @@ bool item_t::ptr() const
 
 bool item_t::matching_type()
 {
-  if ( slot == SLOT_NONE ) return false;
+  if ( slot == SLOT_INVALID ) return false;
   return is_matching_type;
 }
 
@@ -105,7 +105,7 @@ bool item_t::matching_type()
 
 bool item_t::reforged() const
 {
-  if ( slot == SLOT_NONE ) return false;
+  if ( slot == SLOT_INVALID ) return false;
   return is_reforged;
 }
 

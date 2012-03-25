@@ -427,7 +427,6 @@ enum talent_tab_type
 
 enum weapon_type
 {
-
   WEAPON_NONE=0,
   WEAPON_LIGHTSABER, WEAPON_VIBROKNIFE, WEAPON_TECHBLADE, WEAPON_VIBROSWORD,
   WEAPON_1H,
@@ -440,28 +439,31 @@ enum weapon_type
 
 enum slot_type
 {
-  SLOT_NONE      = -1,
-  SLOT_HEAD      = 0,
-  SLOT_EAR       = 1,
-  SLOT_SHOULDERS = 2,
-  SLOT_SHIRT     = 3,
-  SLOT_CHEST     = 4,
-  SLOT_WAIST     = 5,
-  SLOT_LEGS      = 6,
-  SLOT_FEET      = 7,
-  SLOT_WRISTS    = 8,
-  SLOT_HANDS     = 9,
-  SLOT_IMPLANT_1 = 10,
-  SLOT_IMPLANT_2 = 11,
-  SLOT_RELIC_1   = 12,
-  SLOT_RELIC_2   = 13,
-  SLOT_BACK      = 14,
-  SLOT_MAIN_HAND = 15,
-  SLOT_OFF_HAND  = 16,
-  SLOT_RANGED    = 17,
-  SLOT_TABARD    = 18,
-  SLOT_MAX       = 19
+  SLOT_HEAD,
+  SLOT_EAR,
+  SLOT_SHOULDERS,
+  SLOT_SHIRT,
+  SLOT_CHEST,
+  SLOT_WAIST,
+  SLOT_LEGS,
+  SLOT_FEET,
+  SLOT_WRISTS,
+  SLOT_HANDS,
+  SLOT_IMPLANT_1,
+  SLOT_IMPLANT_2,
+  SLOT_RELIC_1,
+  SLOT_RELIC_2,
+  SLOT_BACK,
+  SLOT_MAIN_HAND,
+  SLOT_OFF_HAND,
+  SLOT_RANGED,
+  SLOT_TABARD,
+  SLOT_MAX,
+  SLOT_MIN = 0,
+  SLOT_INVALID = -1
 };
+static_assert( SLOT_MIN == slot_type(0) && SLOT_MIN < SLOT_MAX,
+               "Iteration and use as array require some structure for slot_type." );
 
 template <>
 struct bitmask_traits<slot_type> : public enum_bitmask_t<SLOT_MAX> {};
@@ -1199,7 +1201,7 @@ public:
   static const char* result_type_string        ( int type );
   static const char* school_type_string        ( int type );
   static std::string armor_type_string         ( player_type ptype, int slot_type );
-  static const char* slot_type_string          ( int type );
+  static const char* slot_type_string          ( slot_type type );
   static const char* stat_type_string          ( int type );
   static const char* stat_type_abbrev          ( int type );
   static const char* stat_type_wowhead         ( int type );
@@ -1220,7 +1222,7 @@ public:
   static resource_type parse_resource_type     ( const std::string& name );
   static int parse_result_type                 ( const std::string& name );
   static school_type parse_school_type         ( const std::string& name );
-  static int parse_slot_type                   ( const std::string& name );
+  static slot_type parse_slot_type             ( const std::string& name );
   static stat_type parse_stat_type             ( const std::string& name );
   static stat_type parse_reforge_type          ( const std::string& name );
   static int parse_talent_tree                 ( const std::string& name );
@@ -2288,7 +2290,7 @@ struct weapon_t
 
   weapon_t( int t=WEAPON_NONE, double d=0, school_type s=SCHOOL_KINETIC ) :
     type( t ), school( s ), damage( d ), min_dmg( d ), max_dmg( d ),
-    slot( SLOT_NONE ), buff_type( 0 ), buff_value( 0 ), bonus_dmg( 0 )
+    slot( SLOT_INVALID ), buff_type( 0 ), buff_value( 0 ), bonus_dmg( 0 )
   {}
 };
 
@@ -2387,7 +2389,7 @@ struct item_t
   } use, equip, enchant, addon;
 
   item_t() :
-    sim( 0 ), player( 0 ), slot( SLOT_NONE ), quality( QUALITY_NONE ), ilevel( 0 ),
+    sim( 0 ), player( 0 ), slot( SLOT_INVALID ), quality( QUALITY_NONE ), ilevel( 0 ),
     unique( false ), unique_enchant( false ), unique_addon( false ), is_heroic( false ),
     is_lfr( false ), is_ptr( false ), is_matching_type( false ), is_reforged( false ) {}
   item_t( player_t*, const std::string& options_str );
