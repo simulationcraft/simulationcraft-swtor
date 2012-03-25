@@ -4085,10 +4085,35 @@ public:
 
 // String utils =============================================================
 
-template <typename Fwd, typename Delim>
-std::string join( Fwd first, Fwd last, Delim d )
+template <typename Fwd, typename T, typename Out>
+Fwd copy_until( Fwd first, Fwd last, T t, Out out )
 {
-  std::string result;
+  while ( first != last && *first != t )
+    *out++ = *first++;
+  return first;
+}
+
+template <typename Range, typename T>
+std::vector<Range> split( const Range& s, T delim )
+{
+  std::vector<Range> results;
+  auto pos = std::begin( s ), end = std::end( s );
+  while( pos != end )
+  {
+    Range tmp;
+    pos = copy_until( pos, end, delim, std::back_inserter( tmp ) );
+    if ( tmp.size() )
+      results.push_back( std::move( tmp ) );
+    if ( pos != end )
+      ++pos;
+  }
+  return results;
+}
+
+template <typename Result=std::string, typename Fwd, typename Delim>
+Result join( Fwd first, Fwd last, Delim d )
+{
+  Result result;
 
   if ( first != last )
     result += *first++;
@@ -4102,9 +4127,13 @@ std::string join( Fwd first, Fwd last, Delim d )
   return result;
 }
 
-template <typename Range, typename Delim>
-inline std::string join( Range&& r, Delim d )
-{ return join( std::begin( r ), std::end( r ), d ); }
+template <typename Result=std::string, typename Range, typename Delim>
+inline Result join( Range&& r, Delim&& d )
+{
+  return join<Result>( std::begin( std::forward<Range>( r ) ),
+                       std::end( std::forward<Range>( r ) ),
+                       std::forward<Delim>( d ) );
+}
 
 std::string tolower( const std::string& src );
 #if 0 // UNUSED
