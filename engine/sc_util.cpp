@@ -852,24 +852,6 @@ stat_type util_t::parse_stat_type( const std::string& name )
   return STAT_NONE;
 }
 
-// util_t::parse_reforge_type ===============================================
-
-stat_type util_t::parse_reforge_type( const std::string& name )
-{
-  stat_type s = util_t::parse_stat_type( name );
-
-  switch ( s )
-  {
-  case STAT_EXPERTISE_RATING:
-  case STAT_ACCURACY_RATING:
-  case STAT_CRIT_RATING:
-  case STAT_ALACRITY_RATING:
-    return s;
-  default:
-    return STAT_NONE;
-  }
-}
-
 // util_t::parse_origin =====================================================
 
 bool util_t::parse_origin( std::string& region_str,

@@ -1223,7 +1223,6 @@ public:
   static school_type parse_school_type         ( const std::string& name );
   static slot_type parse_slot_type             ( const std::string& name );
   static stat_type parse_stat_type             ( const std::string& name );
-  static stat_type parse_reforge_type          ( const std::string& name );
   static int parse_talent_tree                 ( const std::string& name );
   static weapon_type parse_weapon_type         ( const std::string& name );
 
@@ -2302,9 +2301,7 @@ struct item_t
   slot_type slot;
   quality_type quality;
   int ilevel;
-  bool unique, unique_enchant, unique_addon, is_heroic, is_lfr, is_ptr, is_reforged;
-  stat_type reforged_from;
-  stat_type reforged_to;
+  bool unique, unique_enchant, unique_addon, is_heroic, is_lfr, is_ptr;
 
   // Option Data
   std::string option_name_str;
@@ -2318,7 +2315,6 @@ struct item_t
   std::string option_heroic_str;
   std::string option_lfr_str;
   std::string option_armor_type_str;
-  std::string option_reforge_str;
   std::string option_random_suffix_str;
   std::string option_ilevel_str;
   std::string option_quality_str;
@@ -2335,7 +2331,6 @@ struct item_t
   std::string armory_heroic_str;
   std::string armory_lfr_str;
   std::string armory_armor_type_str;
-  std::string armory_reforge_str;
   std::string armory_ilevel_str;
   std::string armory_quality_str;
   std::string armory_random_suffix_str;
@@ -2352,7 +2347,6 @@ struct item_t
   std::string encoded_heroic_str;
   std::string encoded_lfr_str;
   std::string encoded_armor_type_str;
-  std::string encoded_reforge_str;
   std::string encoded_ilevel_str;
   std::string encoded_quality_str;
   std::string encoded_random_suffix_str;
@@ -2390,13 +2384,12 @@ struct item_t
   item_t() :
     sim( 0 ), player( 0 ), slot( SLOT_INVALID ), quality( QUALITY_NONE ), ilevel( 0 ),
     unique( false ), unique_enchant( false ), unique_addon( false ), is_heroic( false ),
-    is_lfr( false ), is_ptr( false ), is_reforged( false ) {}
+    is_lfr( false ), is_ptr( false ) {}
   item_t( player_t*, const std::string& options_str );
   bool active() const;
   bool heroic() const;
   bool lfr() const;
   bool ptr() const;
-  bool reforged() const;
   bool matching_type();
   const char* name() const;
   const char* slot_name() const { return util_t::slot_type_string( slot ); }
@@ -2411,7 +2404,6 @@ struct item_t
   bool decode_weapon();
   bool decode_heroic();
   bool decode_lfr();
-  bool decode_reforge();
   bool decode_ilevel();
   bool decode_quality();
 

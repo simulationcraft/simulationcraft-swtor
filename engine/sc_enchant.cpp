@@ -849,26 +849,6 @@ bool enchant_t::download_addon( item_t&            item,
   return false;
 }
 
-// enchant_t::download_reforge ==============================================
-
-bool enchant_t::download_reforge( item_t&            item,
-                                  const std::string& reforge_id )
-{
-  item.armory_reforge_str.clear();
-
-  if ( reforge_id.empty() || reforge_id == "0" )
-    return true;
-
-  std::string description;
-  if ( get_reforge_encoding( description, item.armory_reforge_str, reforge_id ) )
-  {
-    util_t::format_name( item.armory_reforge_str );
-    return true;
-  }
-
-  return false;
-}
-
 // enchant_t::download_rsuffix ==============================================
 
 bool enchant_t::download_rsuffix( item_t&            item,

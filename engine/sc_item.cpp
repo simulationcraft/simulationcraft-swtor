@@ -57,7 +57,6 @@ item_t::item_t( player_t* p, const std::string& o ) :
   sim( p -> sim ), player( p ), slot( SLOT_INVALID ), quality( QUALITY_NONE ),
   ilevel( 0 ), unique( false ), unique_enchant( false ), unique_addon( false ),
   is_heroic( false ), is_lfr( false ), is_ptr( p -> ptr ),
-  is_reforged( false ), reforged_from( STAT_NONE ), reforged_to( STAT_NONE ),
   options_str( o )
 {}
 
@@ -91,14 +90,6 @@ bool item_t::lfr() const
 bool item_t::ptr() const
 {
   return is_ptr;
-}
-
-// item_t::reforged =========================================================
-
-bool item_t::reforged() const
-{
-  if ( slot == SLOT_INVALID ) return false;
-  return is_reforged;
 }
 
 // item_t::name =============================================================
@@ -151,7 +142,6 @@ bool item_t::parse_options()
     { "heroic",  OPT_STRING, &option_heroic_str        },
     { "lfr",     OPT_STRING, &option_lfr_str           },
     { "type",    OPT_STRING, &option_armor_type_str    },
-    { "reforge", OPT_STRING, &option_reforge_str       },
     { "suffix",  OPT_STRING, &option_random_suffix_str },
     { "ilevel",  OPT_STRING, &option_ilevel_str        },
     { "quality", OPT_STRING, &option_quality_str       },
@@ -173,7 +163,6 @@ bool item_t::parse_options()
   util_t::tolower( option_heroic_str        );
   util_t::tolower( option_lfr_str           );
   util_t::tolower( option_armor_type_str    );
-  util_t::tolower( option_reforge_str       );
   util_t::tolower( option_random_suffix_str );
   util_t::tolower( option_ilevel_str        );
   util_t::tolower( option_quality_str       );
@@ -197,7 +186,6 @@ void item_t::encode_options()
   if ( ! encoded_ilevel_str.empty()        ) { o += ",ilevel=";  o += encoded_ilevel_str;        }
   if ( ! encoded_quality_str.empty()       ) { o += ",quality="; o += encoded_quality_str;       }
   if ( ! encoded_stats_str.empty()         ) { o += ",stats=";   o += encoded_stats_str;         }
-  if ( ! encoded_reforge_str.empty()       ) { o += ",reforge="; o += encoded_reforge_str;       }
   if ( ! encoded_enchant_str.empty()       ) { o += ",enchant="; o += encoded_enchant_str;       }
   if ( ! encoded_addon_str.empty()         ) { o += ",addon=";   o += encoded_addon_str;         }
   if ( ! encoded_equip_str.empty()         ) { o += ",equip=";   o += encoded_equip_str;         }
@@ -237,7 +225,6 @@ bool item_t::init()
   {
     id_str                    = armory_id_str;
     encoded_stats_str         = armory_stats_str;
-    encoded_reforge_str       = armory_reforge_str;
     encoded_enchant_str       = armory_enchant_str;
     encoded_addon_str         = armory_addon_str;
     encoded_weapon_str        = armory_weapon_str;
@@ -271,7 +258,6 @@ bool item_t::init()
   unique_gear_t::get_use_encoding  ( encoded_use_str,   encoded_name_str, heroic(), lfr(), player -> ptr, id_str );
 
   if ( ! option_stats_str.empty()   ) encoded_stats_str   = option_stats_str;
-  if ( ! option_reforge_str.empty() ) encoded_reforge_str = option_reforge_str;
   if ( ! option_enchant_str.empty() ) encoded_enchant_str = option_enchant_str;
   if ( ! option_addon_str.empty()   ) encoded_addon_str   = option_addon_str;
   if ( ! option_weapon_str.empty()  ) encoded_weapon_str  = option_weapon_str;
@@ -285,7 +271,6 @@ bool item_t::init()
 #if 0
   if ( ! decode_random_suffix() ) return false;
 #endif
-  if ( ! decode_reforge()       ) return false;
 
   if ( ! option_equip_str.empty() ) encoded_equip_str = option_equip_str;
   if ( ! option_use_str.empty()   ) encoded_use_str   = option_use_str;
@@ -383,58 +368,6 @@ bool item_t::decode_stats()
     }
   }
 
-  return true;
-}
-
-// item_t::decode_reforge ===================================================
-
-bool item_t::decode_reforge()
-{
-  is_reforged = false;
-
-  if ( encoded_reforge_str == "none" ) return true;
-
-  std::vector<token_t> tokens;
-  int num_tokens = parse_tokens( tokens, encoded_reforge_str );
-
-  if ( num_tokens <= 0 )
-    return true;
-
-  if ( num_tokens != 2 )
-  {
-    sim -> errorf( "Player %s has unknown 'reforge=' '%s' at slot %s\n", player -> name(), encoded_reforge_str.c_str(), slot_name() );
-    return false;
-  }
-
-  stat_type s1 = util_t::parse_reforge_type( tokens[ 0 ].name );
-  stat_type s2 = util_t::parse_reforge_type( tokens[ 1 ].name );
-  if ( ( s1 == STAT_NONE ) || ( s2 == STAT_NONE ) )
-  {
-    sim -> errorf( "Player %s has unknown 'reforge=' '%s' at slot %s\n",
-                   player -> name(), encoded_reforge_str.c_str(), slot_name() );
-    return false;
-  }
-  if ( base_stats.get_stat( s1 ) <= 0.0 )
-  {
-    sim -> errorf( "Player %s with 'reforge=' '%s' at slot %s does not have source stat on item.\n",
-                   player -> name(), encoded_reforge_str.c_str(), slot_name() );
-    return false;
-  }
-  if ( base_stats.get_stat( s2 ) > 0.0 )
-  {
-    sim -> errorf( "Player %s with 'reforge=' '%s' at slot %s already has target stat on item.\n",
-                   player -> name(), encoded_reforge_str.c_str(), slot_name() );
-    return false;
-  }
-
-  reforged_from = s1;
-  reforged_to   = s2;
-
-  double amount = floor( base_stats.get_stat( reforged_from ) * 0.4 );
-  stats.add_stat( reforged_from, -amount );
-  stats.add_stat( reforged_to,    amount );
-
-  is_reforged   = true;
   return true;
 }
 
