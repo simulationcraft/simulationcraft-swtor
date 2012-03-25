@@ -670,31 +670,29 @@ void player_t::init_items()
 
   if ( sim -> debug ) log_t::output( sim, "Initializing items for player (%s)", name() );
 
-  std::vector<std::string> splits;
-  int num_splits = util_t::string_split( splits, items_str, "/" );
-  int num_ilvl_items = 0;
-  for ( int i=0; i < num_splits; i++ )
+  for ( auto& s : split( items_str, '/' ) )
   {
-    if ( find_item( splits[ i ] ) )
-    {
-      sim -> errorf( "Player %s has multiple %s equipped.\n", name(), splits[ i ].c_str() );
-    }
-    items.push_back( item_t( this, splits[ i ] ) );
+    if ( find_item( s ) )
+      sim -> errorf( "Player %s has multiple %s equipped.\n", name(), s.c_str() );
+
+    items.push_back( item_t( this, std::move( s ) ) );
   }
 
   gear_stats_t item_stats;
+  int num_ilvl_items = 0;
+  avg_ilvl = 0;
 
-  int num_items = ( int ) items.size();
-  for ( int i=0; i < num_items; i++ )
+  for ( size_t i = 0, num_items = items.size(); i < num_items; ++i )
   {
-    // If the item has been specified in options we want to start from scratch, forgetting about lingering stuff from profile copy
-    if ( items[ i ].options_str != "" )
-    {
-      items[ i ] = item_t( this, items[ i ].options_str );
-      items[ i ].slot = static_cast<slot_type>( i );
-    }
-
     item_t& item = items[ i ];
+
+    // If the item has been specified in options we want to start from scratch,
+    // forgetting about lingering stuff from profile copy
+    if ( ! item.options_str.empty() )
+    {
+      item = item_t( this, item.options_str );
+      item.slot = static_cast<slot_type>( i );
+    }
 
     if ( ! item.init() )
     {
@@ -706,24 +704,20 @@ void player_t::init_items()
     if ( item.slot != SLOT_SHIRT && item.slot != SLOT_TABARD && item.active() )
     {
       avg_ilvl += item.ilevel;
-      num_ilvl_items++;
+      ++num_ilvl_items;
     }
 
-    for ( int j=0; j < STAT_MAX; j++ )
-    {
+    for ( stat_type j = STAT_NONE; j < STAT_MAX; ++j )
       item_stats.add_stat( j, item.stats.get_stat( j ) );
-    }
   }
 
   if ( num_ilvl_items > 1 )
     avg_ilvl /= num_ilvl_items;
 
-  for ( int i=0; i < STAT_MAX; i++ )
+  for ( stat_type i = STAT_NONE; i < STAT_MAX; ++i )
   {
     if ( gear.get_stat( i ) == 0 )
-    {
       gear.set_stat( i, item_stats.get_stat( i ) );
-    }
   }
 
   if ( sim -> debug )
@@ -733,9 +727,7 @@ void player_t::init_items()
   }
 
   for ( set_bonus_t* sb = set_bonus_list; sb; sb = sb -> next )
-  {
     sb -> init( *this );
-  }
 }
 
 // player_t::init_core ======================================================
@@ -753,8 +745,6 @@ void player_t::init_core()
   initial_crit_rating     = initial_stats.crit_rating;
   initial_accuracy_rating = initial_stats.accuracy_rating;
   initial_surge_rating    = initial_stats.surge_rating;
-
-
 
   for ( int i=0; i < ATTRIBUTE_MAX; i++ )
   {
