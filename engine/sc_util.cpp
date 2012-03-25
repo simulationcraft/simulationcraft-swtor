@@ -1611,11 +1611,9 @@ bool str_to_float( std::string src, double& dest )
 
 int base36_t::decode( char c ) const
 {
-  for( unsigned i = 0; i < 36; ++i)
-  {
-    if ( encoding[ i ] == c )
-      return i;
-  }
+  auto p = boost::find( encoding, c );
+  if ( p != std::end( encoding ) )
+    return p - std::begin( encoding );
 
   throw bad_char( c );
 }
