@@ -469,6 +469,20 @@ typedef bitmask_traits<slot_type>::type slot_mask_t;
 
 constexpr slot_mask_t DEFAULT_SET_BONUS_SLOT_MASK = bitmask( SLOT_HEAD, SLOT_CHEST, SLOT_HANDS, SLOT_LEGS, SLOT_FEET );
 
+enum quality_type
+{
+  QUALITY_NONE=0,
+  QUALITY_CHEAP,
+  QUALITY_STANDARD,
+  QUALITY_PREMIUM,
+  QUALITY_PROTOTYPE,
+  QUALITY_CUSTOM,
+  QUALITY_ARTIFACT,
+  QUALITY_LEGENDARY,
+  QUALITY_LEGACY,
+  QUALITY_MAX
+};
+
 // Keep this in sync with enum attribute_type
 enum stat_type
 {
@@ -1178,6 +1192,7 @@ public:
   static const char* pet_type_string           ( int type );
   static const char* position_type_string      ( int type );
   static const char* profession_type_string    ( profession_type type );
+  static const char* quality_type_string       ( quality_type type );
   static const char* race_type_string          ( int type );
   static const char* role_type_string          ( int type );
   static const char* resource_type_string      ( resource_type type );
@@ -1190,8 +1205,7 @@ public:
   static const char* stat_type_wowhead         ( int type );
   static int         talent_tree               ( int tree, player_type ptype );
   static const char* talent_tree_string        ( int tree, bool armory_format = true );
-  static const char* weapon_type_string        ( int type );
-  static const char* item_quality_string       ( int item_quality );
+  static const char* weapon_type_string        ( weapon_type type );
 
   static int parse_attribute_type              ( const std::string& name );
   static int parse_dmg_type                    ( const std::string& name );
@@ -1200,6 +1214,7 @@ public:
   static pet_type_t parse_pet_type             ( const std::string& name );
   static profession_type parse_profession_type ( const std::string& name );
   static position_type parse_position_type     ( const std::string& name );
+  static quality_type parse_quality_type       ( const std::string& name );
   static race_type parse_race_type             ( const std::string& name );
   static role_type parse_role_type             ( const std::string& name );
   static resource_type parse_resource_type     ( const std::string& name );
@@ -1209,8 +1224,7 @@ public:
   static stat_type parse_stat_type             ( const std::string& name );
   static stat_type parse_reforge_type          ( const std::string& name );
   static int parse_talent_tree                 ( const std::string& name );
-  static int parse_weapon_type                 ( const std::string& name );
-  static int parse_item_quality                ( const std::string& quality );
+  static weapon_type parse_weapon_type         ( const std::string& name );
 
   static bool parse_origin( std::string& region, std::string& server, std::string& name, const std::string& origin );
 
@@ -2284,7 +2298,9 @@ struct item_t
 {
   sim_t* sim;
   player_t* player;
-  int slot, quality, ilevel;
+  slot_type slot;
+  quality_type quality;
+  int ilevel;
   bool unique, unique_enchant, unique_addon, is_heroic, is_lfr, is_ptr, is_matching_type, is_reforged;
   stat_type reforged_from;
   stat_type reforged_to;
@@ -2364,13 +2380,16 @@ struct item_t
       trigger_type( 0 ), trigger_mask( 0 ), stat( 0 ), school( SCHOOL_NONE ),
       max_stacks( 0 ), stat_amount( 0 ), discharge_amount( 0 ), discharge_scaling( 0 ),
       proc_chance( 0 ), duration( timespan_t::zero ), cooldown( timespan_t::zero ),
-      tick( timespan_t::zero ), cost_reduction( false ), no_crit( false ), no_player_benefits( false ), no_debuffs( false ),
-      no_refresh( false ), chance_to_discharge( false ), reverse( false ) {}
+      tick( timespan_t::zero ), cost_reduction( false ), no_crit( false ),
+      no_player_benefits( false ), no_debuffs( false ), no_refresh( false ),
+      chance_to_discharge( false ), reverse( false ) {}
     bool active() { return stat || school; }
   } use, equip, enchant, addon;
 
-  item_t() : sim( 0 ), player( 0 ), slot( SLOT_NONE ), quality( 0 ), ilevel( 0 ), unique( false ), unique_enchant( false ),
-    unique_addon( false ), is_heroic( false ), is_lfr( false ), is_ptr( false ), is_matching_type( false ), is_reforged( false ) {}
+  item_t() :
+    sim( 0 ), player( 0 ), slot( SLOT_NONE ), quality( QUALITY_NONE ), ilevel( 0 ),
+    unique( false ), unique_enchant( false ), unique_addon( false ), is_heroic( false ),
+    is_lfr( false ), is_ptr( false ), is_matching_type( false ), is_reforged( false ) {}
   item_t( player_t*, const std::string& options_str );
   bool active() const;
   bool heroic() const;

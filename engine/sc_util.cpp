@@ -598,38 +598,38 @@ int util_t::parse_talent_tree( const std::string& name )
 
 // util_t::weapon_type_string ===============================================
 
-const char* util_t::weapon_type_string( int weapon )
+const char* util_t::weapon_type_string( weapon_type weapon )
 {
   switch ( weapon )
   {
-  case WEAPON_LIGHTSABER:                 return "lightsaber";
-  case WEAPON_VIBROKNIFE:                 return "vibroknife";
-  case WEAPON_TECHBLADE:                  return "techblade";
-  case WEAPON_VIBROSWORD:                 return "vibrosword";
-  case WEAPON_DOUBLE_BLADED_LIGHTSABER:   return "doublebladedlightsaber";
-  case WEAPON_ELECTROSTAFF:               return "electrostaf";
-  case WEAPON_TECHSTAFF:                  return "techstaff";
-  case WEAPON_ASSAULT_CANON:              return "assault_canon";
-  case WEAPON_BLASTER_PISTOL:             return "blaster_pistol";
-  case WEAPON_BLASTER_RIFLE:              return "blaster_rifle";
-  case WEAPON_SCATTERGUN:                 return "scattergun";
-  case WEAPON_SNIPER_RIFLE:               return "sniperrifle";
+  case WEAPON_LIGHTSABER:               return "lightsaber";
+  case WEAPON_VIBROKNIFE:               return "vibroknife";
+  case WEAPON_TECHBLADE:                return "techblade";
+  case WEAPON_VIBROSWORD:               return "vibrosword";
+  case WEAPON_DOUBLE_BLADED_LIGHTSABER: return "doublebladedlightsaber";
+  case WEAPON_ELECTROSTAFF:             return "electrostaf";
+  case WEAPON_TECHSTAFF:                return "techstaff";
+  case WEAPON_ASSAULT_CANON:            return "assault_canon";
+  case WEAPON_BLASTER_PISTOL:           return "blaster_pistol";
+  case WEAPON_BLASTER_RIFLE:            return "blaster_rifle";
+  case WEAPON_SCATTERGUN:               return "scattergun";
+  case WEAPON_SNIPER_RIFLE:             return "sniperrifle";
+  default:                              return "unknown";
   }
-  return "unknown";
 }
 
 // util_t::parse_weapon_type ================================================
 
-int util_t::parse_weapon_type( const std::string& name )
+weapon_type util_t::parse_weapon_type( const std::string& name )
 {
-  for ( int i=0; i < WEAPON_MAX; i++ )
+  for ( weapon_type i = WEAPON_NONE; i < WEAPON_MAX; ++i )
     if ( util_t::str_compare_ci( name, util_t::weapon_type_string( i ) ) )
       return i;
 
   return WEAPON_NONE;
 }
 
-// util_t::stim_t_string ================================================
+// util_t::stim_type_string =================================================
 
 const char* util_t::stim_type_string( stim_t stim )
 {
@@ -1011,32 +1011,33 @@ race_type util_t::translate_race_id( int /* rid */ )
   return RACE_NONE;
 }
 
-// util_t::item_quality_string ==============================================
+// util_t::quality_type_string ==============================================
 
-const char* util_t::item_quality_string( int quality )
+const char* util_t::quality_type_string( quality_type quality )
 {
   switch ( quality )
   {
-  case 1:   return "common";
-  case 2:   return "uncommon";
-  case 3:   return "rare";
-  case 4:   return "epic";
-  case 5:   return "legendary";
-  default:  return "poor";
+  case QUALITY_NONE:      return "none";
+  case QUALITY_CHEAP:     return "cheap";
+  case QUALITY_STANDARD:  return "standard";
+  case QUALITY_PREMIUM:   return "premium";
+  case QUALITY_PROTOTYPE: return "prototype";
+  case QUALITY_CUSTOM:    return "custom";
+  case QUALITY_ARTIFACT:  return "artifact";
+  case QUALITY_LEGENDARY: return "legendary";
+  case QUALITY_LEGACY:    return "legacy";
+  default:                return "unknown";
   }
 }
 
-// util_t::parse_item_quality ===============================================
+// util_t::parse_quality_type ===============================================
 
-int util_t::parse_item_quality( const std::string& quality )
+quality_type util_t::parse_quality_type( const std::string& quality )
 {
-  int i = 6;
-
-  while ( --i > 0 )
-    if ( str_compare_ci( quality, item_quality_string( i ) ) )
-      break;
-
-  return i;
+  for ( quality_type i = QUALITY_NONE; i < QUALITY_MAX; ++i )
+    if ( str_compare_ci( quality, quality_type_string( i ) ) )
+      return i;
+  return QUALITY_NONE;
 }
 
 // util_t::string_split =====================================================

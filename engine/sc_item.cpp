@@ -54,12 +54,12 @@ static int parse_tokens( std::vector<token_t>& tokens,
 // item_t::item_t ===========================================================
 
 item_t::item_t( player_t* p, const std::string& o ) :
-  sim( p -> sim ), player( p ), slot( SLOT_NONE ), quality( 0 ), ilevel( 0 ), unique( false ), unique_enchant( false ),
-  unique_addon( false ), is_heroic( false ), is_lfr( false ), is_ptr( p -> ptr ),
-  is_matching_type( false ), is_reforged( false ), reforged_from( STAT_NONE ), reforged_to( STAT_NONE ),
-  options_str( o )
-{
-}
+  sim( p -> sim ), player( p ), slot( SLOT_NONE ), quality( QUALITY_NONE ),
+  ilevel( 0 ), unique( false ), unique_enchant( false ), unique_addon( false ),
+  is_heroic( false ), is_lfr( false ), is_ptr( p -> ptr ),
+  is_matching_type( false ), is_reforged( false ), reforged_from( STAT_NONE ),
+  reforged_to( STAT_NONE ), options_str( o )
+{}
 
 // item_t::active ===========================================================
 
@@ -212,7 +212,7 @@ void item_t::encode_options()
 
   if ( heroic() )                            { o += ",heroic=1";                                 }
   if ( lfr() )                               { o += ",lfr=1";                                    }
-  if ( ! armor_type().empty() )                { o += ",type=";    o += encoded_armor_type_str;    }
+  if ( ! armor_type().empty() )              { o += ",type=";    o += encoded_armor_type_str;    }
   if ( ! encoded_ilevel_str.empty()        ) { o += ",ilevel=";  o += encoded_ilevel_str;        }
   if ( ! encoded_quality_str.empty()       ) { o += ",quality="; o += encoded_quality_str;       }
   if ( ! encoded_stats_str.empty()         ) { o += ",stats=";   o += encoded_stats_str;         }
@@ -366,7 +366,7 @@ bool item_t::decode_ilevel()
 bool item_t::decode_quality()
 {
   if ( ! encoded_quality_str.empty() )
-    quality = util_t::parse_item_quality( encoded_quality_str );
+    quality = util_t::parse_quality_type( encoded_quality_str );
   return true;
 }
 

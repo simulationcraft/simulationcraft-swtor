@@ -374,7 +374,7 @@ player_t::player_t( sim_t*             s,
   boost::fill( over_cap, 0 );
 
   items.resize( SLOT_MAX );
-  for ( int i=0; i < SLOT_MAX; i++ )
+  for ( slot_type i = SLOT_NONE; i < SLOT_MAX; i++ )
   {
     items[ i ].slot = i;
     items[ i ].sim = sim;
@@ -691,7 +691,7 @@ void player_t::init_items()
     if ( items[ i ].options_str != "" )
     {
       items[ i ] = item_t( this, items[ i ].options_str );
-      items[ i ].slot = i;
+      items[ i ].slot = static_cast<slot_type>( i );
     }
 
     item_t& item = items[ i ];
