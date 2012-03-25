@@ -7,47 +7,53 @@
 
 struct js_node_t
 {
-  std::string name_str;
+  std::string name;
   std::string value;
   std::vector<js_node_t*> children;
-  js_node_t() {}
-  js_node_t( const std::string& n ) : name_str( n ) {}
-  const char* name() { return name_str.c_str(); }
+
+  js_node_t() = default;
+  js_node_t( const js_node_t& ) = default;
+  js_node_t( js_node_t&& ) = default;
+
+  template <typename Name>
+  js_node_t( Name&& n ) :
+    name( std::forward<Name>( n ) )
+  {}
+
+  ~js_node_t() { dispose( children ); }
 };
 
 namespace { // ANONYMOUS NAMESPACE ==========================================
 
 // is_white_space ===========================================================
 
-static bool is_white_space( char c )
-{
-  return( c == ' '  ||
-          c == '\t' ||
-          c == '\n' ||
-          c == '\r' );
-}
+inline bool is_white_space( char c )
+{ return std::isspace( c ); }
 
 // is_token_char ============================================================
 
-static bool is_token_char( char c )
+inline bool is_token_char( char c )
 {
-  if ( isalpha( c ) ) return true;
-  if ( isdigit( c ) ) return true;
-  if ( c == '-' ) return true;
-  if ( c == '+' ) return true;
-  if ( c == '_' ) return true;
-  if ( c == '.' ) return true;
-  if ( c == '$' ) return true;
-  return false;
+  switch( c )
+  {
+  case '-':
+  case '+':
+  case '_':
+  case '.':
+  case '$':
+    return true;
+  default:
+    return std::isalpha( c ) || std::isdigit( c );
+  }
 }
 
 // parse_token ==============================================================
 
-static char parse_token( std::string&            token_str,
-                         const std::string&      input,
-                         std::string::size_type& index )
+char parse_token( std::string&            token_str,
+                  const std::string&      input,
+                  std::string::size_type& index )
 {
-  token_str = "";
+  token_str.clear();
 
   while ( is_white_space( input[ index ] ) ) index++;
 
@@ -90,6 +96,7 @@ static char parse_token( std::string&            token_str,
     token_str += c;
     while ( is_token_char( input[ index ] ) ) token_str += input[ index++ ];
     if ( token_str == "new" ) return 'N';
+    if ( token_str == "null" ) return 'U';
     return 'S';
   }
 
@@ -98,12 +105,12 @@ static char parse_token( std::string&            token_str,
 
 // parse_value ==============================================================
 
-static void parse_value( sim_t*                  sim,
-                         js_node_t*              node,
-                         char                    token_type,
-                         std::string&            token_str,
-                         const std::string&      input,
-                         std::string::size_type& index )
+void parse_value( sim_t*                  sim,
+                  js_node_t*              node,
+                  char                    token_type,
+                  std::string&            token_str,
+                  const std::string&      input,
+                  std::string::size_type& index )
 {
   if ( token_type == '{' )
   {
@@ -113,7 +120,8 @@ static void parse_value( sim_t*                  sim,
       if ( token_type == '}' ) break;
       if ( token_type != 'S' )
       {
-        sim -> errorf( "Unexpected token '%c' (%s) at index %d (%s)\n", token_type, token_str.c_str(), ( int ) index, node -> name() );
+        sim -> errorf( "Unexpected token '%c' (%s) at index %d (%s)\n",
+                       token_type, token_str.c_str(), ( int ) index, node -> name.c_str() );
         sim -> cancel();
         return;
       }
@@ -123,7 +131,8 @@ static void parse_value( sim_t*                  sim,
       token_type = parse_token( token_str, input, index );
       if ( token_type != ':' )
       {
-        sim -> errorf( "Unexpected token '%c' at index %d (%s)\n", token_type, ( int ) index, node -> name() );
+        sim -> errorf( "Unexpected token '%c' at index %d (%s)\n",
+                       token_type, ( int ) index, node -> name.c_str() );
         sim -> cancel();
         return;
       }
@@ -139,7 +148,8 @@ static void parse_value( sim_t*                  sim,
       if ( token_type == ',' ) continue;
       if ( token_type == '}' ) break;
 
-      sim -> errorf( "Unexpected token '%c' at index %d (%s)\n", token_type, ( int ) index, node -> name() );
+      sim -> errorf( "Unexpected token '%c' at index %d (%s)\n",
+                     token_type, ( int ) index, node -> name.c_str() );
       sim -> cancel();
       return;
     }
@@ -165,7 +175,8 @@ static void parse_value( sim_t*                  sim,
       if ( token_type == ',' ) continue;
       if ( token_type == ']' ) break;
 
-      sim -> errorf( "Unexpected token '%c' at index %d (%s)\n", token_type, ( int ) index, node -> name() );
+      sim -> errorf( "Unexpected token '%c' at index %d (%s)\n",
+                     token_type, ( int ) index, node -> name.c_str() );
       sim -> cancel();
       return;
     }
@@ -175,7 +186,8 @@ static void parse_value( sim_t*                  sim,
     token_type = parse_token( token_str, input, index );
     if ( token_type != 'S' )
     {
-      sim -> errorf( "Unexpected token '%c' at index %d (%s)\n", token_type, ( int ) index, node -> name() );
+      sim -> errorf( "Unexpected token '%c' at index %d (%s)\n",
+                     token_type, ( int ) index, node -> name.c_str() );
       sim -> cancel();
       return;
     }
@@ -184,7 +196,8 @@ static void parse_value( sim_t*                  sim,
     token_type = parse_token( token_str, input, index );
     if ( token_type != '(' )
     {
-      sim -> errorf( "Unexpected token '%c' at index %d (%s)\n", token_type, ( int ) index, node -> name() );
+      sim -> errorf( "Unexpected token '%c' at index %d (%s)\n",
+                     token_type, ( int ) index, node -> name.c_str() );
       sim -> cancel();
       return;
     }
@@ -206,7 +219,8 @@ static void parse_value( sim_t*                  sim,
       if ( token_type == ',' ) continue;
       if ( token_type == ')' ) break;
 
-      sim -> errorf( "Unexpected token '%c' at index %d (%s)\n", token_type, ( int ) index, node -> name() );
+      sim -> errorf( "Unexpected token '%c' at index %d (%s)\n"
+                     , token_type, ( int ) index, node -> name.c_str() );
       sim -> cancel();
       return;
     }
@@ -228,28 +242,39 @@ static void parse_value( sim_t*                  sim,
     else
       index = start;
   }
+  else if ( token_type == 'U' )
+  {
+    node -> value.clear();
+  }
   else
   {
-    sim -> errorf( "Unexpected token '%c' at index %d (%s)\n", token_type, ( int ) index, node -> name() );
+    sim -> errorf( "Unexpected token '%c' at index %d (%s)\n"
+                   , token_type, ( int ) index, node -> name.c_str() );
     sim -> cancel();
   }
 }
 
 // split_path ===============================================================
 
-static js_node_t* split_path( js_node_t*         node,
-                              const std::string& path )
+const js_node_t* split_path( const js_node_t*   node,
+                             const std::string& path )
 {
   std::vector<std::string> splits;
-  int num_splits = util_t::string_split( splits, path, "/" );
+  util_t::string_split( splits, path, "/" );
 
-  for ( int i=0; i < num_splits; i++ )
+  for ( std::string& component : splits )
   {
-    node = js_t::get_child( node, splits[ i ] );
-    if ( ! node ) return 0;
+    node = js_t::get_child( node, component );
+    if ( ! node ) return nullptr;
   }
 
   return node;
+}
+
+inline js_node_t* split_path( js_node_t*   node,
+                              const std::string& path )
+{
+  return const_cast<js_node_t*>( split_path( const_cast<const js_node_t*>( node ), path ) );
 }
 
 } // ANONYMOUS NAMESPACE ====================================================
@@ -285,34 +310,30 @@ js_node_t* js_t::create( sim_t* sim, FILE* input )
 
 // js_t::get_child ==========================================================
 
-js_node_t* js_t::get_child( js_node_t*         root,
-                            const std::string& name_str )
+const js_node_t* js_t::get_child( const js_node_t*   root,
+                                  const std::string& name )
 {
-  int num_children = ( int ) root -> children.size();
-  for ( int i=0; i < num_children; i++ )
-  {
-    js_node_t* node = root -> children[ i ];
-    if ( name_str == node -> name() ) return node;
-  }
+  for ( const js_node_t* node : root -> children )
+    if ( name == node -> name )
+      return node;
 
-  return 0;
+  return nullptr;
 }
 
 // js_t::get_children =======================================================
 
-int js_t::get_children( std::vector<js_node_t*>& nodes,
-                        js_node_t*               root )
+const std::vector<js_node_t*>& js_t::children( const js_node_t* root )
 {
-  nodes = root -> children;
-  return ( int ) nodes.size();
+  assert( root );
+  return root -> children;
 }
 
 // js_t::get_node ===========================================================
 
-js_node_t* js_t::get_node( js_node_t*         root,
-                           const std::string& path )
+const js_node_t* js_t::get_node( const js_node_t*   root,
+                                 const std::string& path )
 {
-  if ( path.empty() || path == root -> name() )
+  if ( path.empty() || path == root -> name )
     return root;
 
   return split_path( root, path );
@@ -321,10 +342,10 @@ js_node_t* js_t::get_node( js_node_t*         root,
 // js_t::get_value ==========================================================
 
 bool js_t::get_value( std::string&       value,
-                      js_node_t*         root,
+                      const js_node_t*   root,
                       const std::string& path )
 {
-  js_node_t* node = split_path( root, path );
+  const js_node_t* node = split_path( root, path );
   if ( ! node ) return false;
   if ( node -> value.empty() ) return false;
   value = node -> value;
@@ -334,10 +355,10 @@ bool js_t::get_value( std::string&       value,
 // js_t::get_value ==========================================================
 
 bool js_t::get_value( int&               value,
-                      js_node_t*         root,
+                      const js_node_t*   root,
                       const std::string& path )
 {
-  js_node_t* node = split_path( root, path );
+  const js_node_t* node = split_path( root, path );
   if ( ! node ) return false;
   if ( node -> value.empty() ) return false;
   value = atoi( node -> value.c_str() );
@@ -347,10 +368,10 @@ bool js_t::get_value( int&               value,
 // js_t::get_value ==========================================================
 
 bool js_t::get_value( double&            value,
-                      js_node_t*         root,
+                      const js_node_t*   root,
                       const std::string& path )
 {
-  js_node_t* node = split_path( root, path );
+  const js_node_t* node = split_path( root, path );
   if ( ! node ) return false;
   if ( node -> value.empty() ) return false;
   value = atof( node -> value.c_str() );
@@ -360,10 +381,10 @@ bool js_t::get_value( double&            value,
 // js_t::get_value ==========================================================
 
 int js_t::get_value( std::vector<std::string>& value,
-                     js_node_t*               root,
-                     const std::string&       path )
+                     const js_node_t*          root,
+                     const std::string&        path )
 {
-  js_node_t* node = split_path( root, path );
+  const js_node_t* node = split_path( root, path );
   if ( ! node ) return 0;
   if ( node -> children.empty() ) return 0;
   size_t size = node -> children.size();
@@ -377,36 +398,26 @@ int js_t::get_value( std::vector<std::string>& value,
 
 // js_t::get_name ===========================================================
 
-const char* js_t::get_name( js_node_t* node )
-{
-  if ( node -> name_str.empty() )
-    return 0;
-
-  return node -> name();
-}
+const std::string& js_t::get_name( const js_node_t* node )
+{ return node -> name; }
 
 // js_t::print ==============================================================
 
-void js_t::print( js_node_t* root,
-                  FILE*      file,
-                  int        spacing )
+void js_t::print( const js_node_t* root,
+                  FILE*            file,
+                  int              spacing )
 {
   if ( ! root ) return;
 
   if ( ! file ) file = stdout;
 
-  util_t::fprintf( file, "%*s%s", spacing, "", root -> name() );
+  util_t::fprintf( file, "%*s%s", spacing, "", root -> name.c_str() );
 
   if ( ! root -> value.empty() )
-  {
     util_t::fprintf( file, " : '%s'", root -> value.c_str() );
-  }
   util_t::fprintf( file, "\n" );
 
-  int num_children = ( int ) root -> children.size();
-  for ( int i=0; i < num_children; i++ )
-  {
-    print( root -> children[ i ], file, spacing+2 );
-  }
+  for ( js_node_t* child : root -> children )
+    print( child, file, spacing + 2 );
 }
 

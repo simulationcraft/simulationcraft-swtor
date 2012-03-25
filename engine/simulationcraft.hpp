@@ -4209,17 +4209,23 @@ struct xml_t
 
 struct js_t
 {
-  static js_node_t* get_child( js_node_t* root, const std::string& name );
-  static js_node_t* get_node ( js_node_t* root, const std::string& path );
-  static int  get_children( std::vector<js_node_t*>&, js_node_t* root );
-  static int  get_value( std::vector<std::string>& value, js_node_t* root, const std::string& path = std::string() );
-  static bool get_value( std::string& value, js_node_t* root, const std::string& path = std::string() );
-  static bool get_value( int&         value, js_node_t* root, const std::string& path = std::string() );
-  static bool get_value( double&      value, js_node_t* root, const std::string& path = std::string() );
+  static const js_node_t* get_child( const js_node_t* root, const std::string& name );
+  static const js_node_t* get_node ( const js_node_t* root, const std::string& path );
+  static const std::vector<js_node_t*>& children( const js_node_t* root );
+  static int  get_value( std::vector<std::string>& value, const js_node_t* root, const std::string& path = std::string() );
+  static bool get_value( std::string& value, const js_node_t* root, const std::string& path = std::string() );
+  static bool get_value( int&         value, const js_node_t* root, const std::string& path = std::string() );
+  static bool get_value( double&      value, const js_node_t* root, const std::string& path = std::string() );
   static js_node_t* create( sim_t* sim, const std::string& input );
   static js_node_t* create( sim_t* sim, FILE* input );
-  static void print( js_node_t* root, FILE* f=0, int spacing=0 );
-  static const char* get_name( js_node_t* root );
+  static void print( const js_node_t* root, FILE* f=0, int spacing=0 );
+  static const std::string& get_name( const js_node_t* root );
+
+  static js_node_t* get_child( js_node_t* root, const std::string& name )
+  { return const_cast<js_node_t*>( get_child( const_cast<const js_node_t*>( root ), name ) ); }
+
+  static js_node_t* get_node ( js_node_t* root, const std::string& path )
+  { return const_cast<js_node_t*>( get_node( const_cast<const js_node_t*>( root ), path ) ); }
 };
 
 

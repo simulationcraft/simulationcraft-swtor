@@ -107,13 +107,9 @@ bool parse_items( player_t* p, js_node_t* items )
 {
   if ( !items ) return true;
 
-  std::vector<js_node_t*> nodes;
-  js_t::get_children( nodes, items );
-
-  for ( unsigned i = 0; i < nodes.size(); ++i )
+  for ( js_node_t* item : js_t::children( items ) )
   {
     std::stringstream item_encoding;
-    js_node_t* item = nodes[ i ];
 
     std::string slot_name;
     if ( ! js_t::get_value( slot_name, item, "Slot" ) )
@@ -493,12 +489,10 @@ player_t* download_player( sim_t*             sim,
 
   if ( js_node_t* datacrons = js_t::get_child( profile, "Datacrons" ) )
   {
-    std::vector<js_node_t*> datacron_list;
-    js_t::get_children( datacron_list, datacrons );
-
-    for ( size_t i = 0; i < datacron_list.size(); ++i )
+    for ( js_node_t * node : js_t::children( datacrons ) )
     {
       // FIXME: Do something.
+      ( void )node;
     }
   }
 
