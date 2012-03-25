@@ -10,6 +10,9 @@ namespace mrrobot { // ======================================================
 
 namespace { // ANONYMOUS ====================================================
 
+const bool USE_TEST_API = true;
+const bool DEBUG_ITEMS = false;
+
 // Encoding used by askmrrobot's talent builder.
 const base36_t::encoding_t talent_encoding =
 {
@@ -23,73 +26,73 @@ const base36_t::encoding_t talent_encoding =
 
 const base36_t decoder( talent_encoding );
 
-const bool DEBUG_ITEMS = false;
-
-bool parse_profession ( js_node_t* profile, const std::string& path, std::string& player_profession_string )
+void parse_profession( js_node_t* profile,
+                       const std::string& path,
+                       std::string& player_profession_string )
 {
   std::string crafting_skill;
   if ( js_t::get_value( crafting_skill, profile, path ) )
   {
     util_t::format_name( crafting_skill );
+    if ( ! player_profession_string.empty() )
+      player_profession_string += '/';
     player_profession_string += crafting_skill;
-    return true;
   }
-  return false;
 }
 // parse_skills =============================================================
 
-bool parse_skills( player_t* p, js_node_t* profile )
+void parse_skill_tree( std::vector<talent_t*>& tree, std::string& s )
+{
+  for ( unsigned i = 0; i < s.size() && i < tree.size(); ++i )
+  {
+    signed char c = s[ s.size() - i - 1 ] - '0';
+
+    if ( unlikely( c < 0 || c > 5 ) )
+    {
+      // FIXME: Report something.
+      continue;
+    }
+
+    tree[ i ] -> set_rank( c );
+  }
+}
+
+void parse_skills( player_t* p, js_node_t* profile )
 {
   std::string skill_string;
   if ( !js_t::get_value( skill_string, profile, "SkillString" ) )
-  {
-    p -> sim -> errorf( "Player '%s' has no skills.\n", p -> name() );
-    return false;
-  }
+    return;
 
-  std::vector<std::string> tree_strings;
-  util_t::string_split( tree_strings, skill_string, "-" );
+  std::vector<std::string> tree_strings = split( skill_string, '-' );
 
-  for ( unsigned tree = 0; tree < MAX_TALENT_TREES && tree < tree_strings.size(); ++tree )
-  {
-    for ( unsigned i = 0; i < tree_strings[ tree ].length() && i < p -> talent_trees[ tree ].size(); ++i )
-    {
-      signed char c = tree_strings[ tree ][ i ] - '0';
+  unsigned max = std::min( static_cast<unsigned>( MAX_TALENT_TREES ),
+                           tree_strings.size() );
 
-      if ( unlikely( c < 0 || c > 5 ) )
-      {
-        // FIXME: Report something.
-        continue;
-      }
-
-      p -> talent_trees[ tree ][ i ] -> set_rank( c );
-    }
-  }
-
-  return true;
+  for ( unsigned tree = 0; tree < max; ++tree )
+    parse_skill_tree( p -> talent_trees[ tree ], tree_strings[ tree ] );
 }
 
 slot_type translate_slot_name( const std::string& name )
 {
   static const char* const slot_map[] =
   {
-    "head",
-    "ear",
-    0,
-    0,
-    "chest",
-    "waist",
-    "legs",
-    "feet",
-    "wrist",
-    "hands",
-    "implant1",
-    "implant2",
-    "relic1",
-    "relic2",
-    0,
-    "mainhand",
-    "offhand",
+    "Helm",
+    "Ears",
+    nullptr,
+    nullptr,
+    "Chest",
+    "Belt",
+    "Leg",
+    "Feet",
+    "Wrist",
+    "Glove",
+    "Implant1",
+    "Implant2",
+    "Relic1",
+    "Relic2",
+    nullptr,
+    "MainHand",
+    "OffHand",
   };
 
   for ( unsigned i = 0; i < sizeof_array( slot_map ); ++i )
@@ -101,23 +104,86 @@ slot_type translate_slot_name( const std::string& name )
   return SLOT_INVALID;
 }
 
+// decode_weapon_type =======================================================
+
+weapon_type decode_weapon_type( const std::string& s )
+{
+  static const struct {
+    const char* name;
+    weapon_type type;
+  } weapon_map[] = {
+  };
+
+  weapon_type wt = util_t::parse_weapon_type( s );
+  if ( wt != WEAPON_NONE )
+    return wt;
+
+  for ( auto const& i : weapon_map )
+    if ( util_t::str_compare_ci( s, i.name ) )
+      return i.type;
+
+  return WEAPON_NONE;
+}
+
+// decode_stats =============================================================
+
+std::string decode_stats( js_node_t* node )
+{
+  static const struct {
+    const char* name;
+    const char* abbrv;
+  } stat_mapping[] = {
+    { "Armor", "armor" },
+    { "MinDamage", "min" },
+    { "MaxDamage", "max" },
+    { "Endurance", "endurance" },
+    { "Strength", "strength" },
+    { "Aim", "aim" },
+    { "Cunning", "cunning" },
+    { "Will", "willpower" },
+    { "Presence", "presence" },
+    { "Expertise", "expertise" },
+    { "Power", "power" },
+    { "ForcePower", "forcepower" },
+    { "TechPower", "techpower" },
+    { "Defense", "defense" },
+    { "Shielding", "shield" },
+    { "Absorb", "absorb" },
+    { "Accuracy", "accuracy" },
+    { "Crit", "crit" },
+    { "Surge", "surge" },
+    { "Alacrity", "alacrity" },
+  };
+
+  std::stringstream ss;
+  bool first = true;
+
+  for ( auto const& i : stat_mapping )
+  {
+    int value;
+    if ( ! js_t::get_value( value, node, i.name ) )
+      continue;
+    if ( first )
+      first = false;
+    else
+      ss << '_';
+    ss << value << i.abbrv;
+  }
+
+  return ss.str();
+}
+
 // parse_items ==============================================================
 
-bool parse_items( player_t* p, js_node_t* items )
+void parse_items( player_t* p, js_node_t* items )
 {
-  if ( !items ) return true;
+  if ( !items ) return;
 
   for ( js_node_t* item : js_t::children( items ) )
   {
     std::stringstream item_encoding;
 
-    std::string slot_name;
-    if ( ! js_t::get_value( slot_name, item, "Slot" ) )
-    {
-      // FIXME: Report weirdness.
-      continue;
-    }
-
+    std::string slot_name = js_t::get_name( item );
     slot_type slot = translate_slot_name( slot_name );
     if ( slot == SLOT_INVALID )
     {
@@ -131,45 +197,40 @@ bool parse_items( player_t* p, js_node_t* items )
       // FIXME: Report weirdness.
       continue;
     }
-    util_t::format_name( name );
-    item_encoding << name;
+    item_encoding << util_t::format_name( name );
+
+#if 0
+    int id;
+    if ( js_t::get_value( level, item, "Id" ) )
+      item_encoding << ",id=" << id;
+#endif
+
+    int level;
+    if ( js_t::get_value( level, item, "ItemLevel" ) )
+      item_encoding << ",ilevel=" << level;
+
+    std::string quality;
+    if ( js_t::get_value( quality, item, "Quality" ) )
+      item_encoding << ",quality=" << util_t::format_name( quality );
 
     std::string weapon_type_str;
+    weapon_type wt = WEAPON_NONE;
     if ( js_t::get_value( weapon_type_str, item, "WeaponType" ) )
     {
-      // FIXME: Do something.
+      wt = decode_weapon_type( weapon_type_str );
+      if ( wt != WEAPON_NONE )
+        item_encoding << ",weapon=" << util_t::weapon_type_string( wt );
     }
 
-    js_node_t* stats = js_t::get_node( item, "Stats" );
-    if ( ! stats )
+    if ( js_node_t* stats = js_t::get_child( item, "Stats" ) )
     {
-      // FIXME: Report weirdness.
-      continue;
-    }
-
-    item_encoding << ",stats=";
-    int i = 0;
-    for ( stat_type j = stat_type::STAT_NONE; j < stat_type::STAT_MAX; ++j )
-    {
-      int stat_value;
-      std::string stat_name = util_t::stat_type_string( j );
-      stat_name[ 0 ] = ::toupper( stat_name[ 0 ] );
-
-      if ( ! js_t::get_value( stat_value, stats, stat_name ) )
-      {
-        continue;
-      }
-
-      if ( i )
-        item_encoding << '_';
-      item_encoding << stat_value << util_t::stat_type_string( j );
-      i++;
+      std::string s = decode_stats( stats );
+      if ( ! s.empty() )
+        item_encoding << ",stats=" << s;
     }
 
     p -> items[ slot ].options_str = item_encoding.str();
   }
-
-  return true;
 }
 
 #if 0
@@ -401,20 +462,24 @@ player_t* download_player( sim_t*             sim,
     catch( std::runtime_error& )
     {
       sim -> errorf( "'%s' is not a valid Mr. Robot profile identifier.\n", id.c_str() );
-      return 0;
+      return nullptr;
     }
   }
 
   sim -> current_name = id;
   sim -> current_slot = 0;
 
-  std::string url = "http://swtor.askmrrobot.com/api/character/v1/" + id;
+  std::string url = "http://swtor.askmrrobot.com/api/";
+  if ( USE_TEST_API ) url += "test/";
+  url += "character/v1/";
+  url += id;
+
   std::string result;
 
   if ( ! http_t::get( result, url, caching ) )
   {
     sim -> errorf( "Unable to download player from '%s'\n", url.c_str() );
-    return 0;
+    return nullptr;
   }
 
   // if ( sim -> debug ) util_t::fprintf( sim -> output_file, "%s\n%s\n", url.c_str(), result.c_str() );
@@ -422,15 +487,16 @@ player_t* download_player( sim_t*             sim,
   if ( ! profile )
   {
     sim -> errorf( "Unable to parse player profile from '%s'\n", url.c_str() );
-    return 0;
+    return nullptr;
   }
   if ( sim -> debug ) js_t::print( profile, sim -> output_file );
 
   std::string name;
-  if ( ! js_t::get_value( name, profile, "Name"  ) )
+  if ( ! js_t::get_value( name, profile, "Name" ) &&
+       ! js_t::get_value( name, profile, "ProfileName" ) )
   {
     sim -> errorf( "Unable to extract player name from '%s'.\n", url.c_str() );
-    return 0;
+    return nullptr;
   }
   if ( ! name.empty() )
     sim -> current_name = name;
@@ -439,24 +505,21 @@ player_t* download_player( sim_t*             sim,
   if ( ! js_t::get_value( level, profile, "Level"  ) )
   {
     sim -> errorf( "Unable to extract player level from '%s'.\n", url.c_str() );
-    return 0;
+    return nullptr;
   }
 
   std::string class_name;
   if ( ! js_t::get_value( class_name, profile, "AdvancedClass" ) )
   {
     sim -> errorf( "Unable to extract player class from '%s'.\n", url.c_str() );
-    return 0;
+    return nullptr;
   }
   canonical_class_name( class_name );
 
   std::string race_name;
-  if ( ! js_t::get_value( race_name, profile, "Race" ) )
-  {
-    sim -> errorf( "Unable to extract player race from '%s'.\n", url.c_str() );
-    return 0;
-  }
-  race_type race = util_t::parse_race_type( race_name );
+  race_type race = RACE_NONE;
+  if ( js_t::get_value( race_name, profile, "Race" ) )
+    race = util_t::parse_race_type( race_name );
 
   player_t* p = player_t::create( sim, class_name, name, race );
   sim -> active_player = p;
@@ -464,7 +527,7 @@ player_t* download_player( sim_t*             sim,
   {
     sim -> errorf( "Unable to build player with class '%s' and name '%s' from '%s'.\n",
                    class_name.c_str(), name.c_str(), url.c_str() );
-    return 0;
+    return nullptr;
   }
 
   p -> level = level;
@@ -474,22 +537,20 @@ player_t* download_player( sim_t*             sim,
 
   p -> origin_str = "http://swtor.askmrrobot.com/character/" + id;
 
-  if ( parse_profession( profile, "CraftingCrewSkill", p -> professions_str ) )
-    p -> professions_str += "/";
-  if ( parse_profession( profile, "CrewSkill2",        p -> professions_str ) )
-    p -> professions_str += "/";
-  parse_profession( profile, "CrewSkill3",        p -> professions_str );
+  parse_profession( profile, "CraftingCrewSkill", p -> professions_str );
+  if ( false )
+  {
+    parse_profession( profile, "CrewSkill2",      p -> professions_str );
+    parse_profession( profile, "CrewSkill3",      p -> professions_str );
+  }
 
+  parse_skills( p, profile );
 
-  if ( ! parse_skills( p, profile ) )
-    return 0;
-
-  if ( ! parse_items( p, js_t::get_child( profile, "GearSet" ) ) )
-    return 0;
+  parse_items( p, js_t::get_child( profile, "GearSet" ) );
 
   if ( js_node_t* datacrons = js_t::get_child( profile, "Datacrons" ) )
   {
-    for ( js_node_t * node : js_t::children( datacrons ) )
+    for ( js_node_t* node : js_t::children( datacrons ) )
     {
       // FIXME: Do something.
       ( void )node;
