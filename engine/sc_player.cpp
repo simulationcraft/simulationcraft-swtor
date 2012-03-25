@@ -4732,11 +4732,9 @@ bool player_t::create_profile( std::string& profile_str, int save_type, bool sav
 
   if ( save_type == SAVE_ALL )
   {
-    std::string pname = name_str;
-
     profile_str += util_t::player_type_string( type );
-    profile_str += "=" + util_t::format_text( pname, sim -> input_is_utf8 ) + term;
-    profile_str += "origin=\"" + origin_str + "\"" + term;
+    profile_str += "=\"" + name_str + '"' + term;
+    profile_str += "origin=\"" + origin_str + '"' + term;
     profile_str += "level=" + util_t::to_string( level ) + term;
     profile_str += "race=" + race_str + term;
     profile_str += "position=" + position_str + term;
@@ -4879,14 +4877,12 @@ bool player_t::create_json_profile( std::string& profile_str, int save_type, boo
   profile_str += "\t\t{" + term;
   if ( save_type == SAVE_ALL )
   {
-    std::string pname = name_str;
-
     profile_str += "\t\t\t\"Class\" : \"";
     profile_str += util_t::player_type_string( type );
     profile_str += "\"," + term;
-    profile_str += "\t\t\t\"Name\" : " + util_t::format_text( pname, sim -> input_is_utf8 ) + "\"," + term;
-    profile_str += "\t\t\t\"Origin\" : " + origin_str + "\"" + term;
-    profile_str += "\t\t\t\"Level\"" + util_t::to_string( level ) + "\"," + term;
+    profile_str += "\t\t\t\"Name\" : \"" + name_str + "\"," + term;
+    profile_str += "\t\t\t\"Origin\" : \"" + origin_str + "\"" + term;
+    profile_str += "\t\t\t\"Level\" : " + util_t::to_string( level ) + ',' + term;
     profile_str += "\t\t\t\"Race\" : \"" + race_str + "\"," + term;
 
     if ( professions_str.size() > 0 )
