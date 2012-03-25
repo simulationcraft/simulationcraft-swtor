@@ -686,13 +686,6 @@ const char* util_t::slot_type_string( slot_type slot )
   }
 }
 
-// util_t::armor_type_string ================================================
-
-std::string util_t::armor_type_string( player_type /* ptype */, int /* slot_type */ )
-{
-  return std::string();
-}
-
 // util_t::parse_slot_type ==================================================
 
 slot_type util_t::parse_slot_type( const std::string& name )

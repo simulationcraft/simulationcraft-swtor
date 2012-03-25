@@ -1200,7 +1200,6 @@ public:
   static const char* resource_type_string      ( resource_type type );
   static const char* result_type_string        ( int type );
   static const char* school_type_string        ( int type );
-  static std::string armor_type_string         ( player_type ptype, int slot_type );
   static const char* slot_type_string          ( slot_type type );
   static const char* stat_type_string          ( int type );
   static const char* stat_type_abbrev          ( int type );
@@ -2303,7 +2302,7 @@ struct item_t
   slot_type slot;
   quality_type quality;
   int ilevel;
-  bool unique, unique_enchant, unique_addon, is_heroic, is_lfr, is_ptr, is_matching_type, is_reforged;
+  bool unique, unique_enchant, unique_addon, is_heroic, is_lfr, is_ptr, is_reforged;
   stat_type reforged_from;
   stat_type reforged_to;
 
@@ -2391,7 +2390,7 @@ struct item_t
   item_t() :
     sim( 0 ), player( 0 ), slot( SLOT_INVALID ), quality( QUALITY_NONE ), ilevel( 0 ),
     unique( false ), unique_enchant( false ), unique_addon( false ), is_heroic( false ),
-    is_lfr( false ), is_ptr( false ), is_matching_type( false ), is_reforged( false ) {}
+    is_lfr( false ), is_ptr( false ), is_reforged( false ) {}
   item_t( player_t*, const std::string& options_str );
   bool active() const;
   bool heroic() const;
@@ -2400,8 +2399,7 @@ struct item_t
   bool reforged() const;
   bool matching_type();
   const char* name() const;
-  const char* slot_name() const;
-  std::string armor_type();
+  const char* slot_name() const { return util_t::slot_type_string( slot ); }
   weapon_t* weapon() const;
   bool init();
   bool parse_options();
@@ -2413,7 +2411,6 @@ struct item_t
   bool decode_weapon();
   bool decode_heroic();
   bool decode_lfr();
-  bool decode_armor_type();
   bool decode_reforge();
   bool decode_ilevel();
   bool decode_quality();

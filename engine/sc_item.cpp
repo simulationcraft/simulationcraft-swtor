@@ -57,8 +57,8 @@ item_t::item_t( player_t* p, const std::string& o ) :
   sim( p -> sim ), player( p ), slot( SLOT_INVALID ), quality( QUALITY_NONE ),
   ilevel( 0 ), unique( false ), unique_enchant( false ), unique_addon( false ),
   is_heroic( false ), is_lfr( false ), is_ptr( p -> ptr ),
-  is_matching_type( false ), is_reforged( false ), reforged_from( STAT_NONE ),
-  reforged_to( STAT_NONE ), options_str( o )
+  is_reforged( false ), reforged_from( STAT_NONE ), reforged_to( STAT_NONE ),
+  options_str( o )
 {}
 
 // item_t::active ===========================================================
@@ -93,14 +93,6 @@ bool item_t::ptr() const
   return is_ptr;
 }
 
-// item_t::matching_type ====================================================
-
-bool item_t::matching_type()
-{
-  if ( slot == SLOT_INVALID ) return false;
-  return is_matching_type;
-}
-
 // item_t::reforged =========================================================
 
 bool item_t::reforged() const
@@ -118,27 +110,16 @@ const char* item_t::name() const
   return "inactive";
 }
 
-// item_t::slot_name ========================================================
-
-const char* item_t::slot_name() const
-{
-  return util_t::slot_type_string( slot );
-}
-
-// item_t::slot_name ========================================================
-
-std::string item_t::armor_type()
-{
-  return util_t::armor_type_string( player -> type, slot );
-}
-
 // item_t::weapon ===========================================================
 
 weapon_t* item_t::weapon() const
 {
-  if ( slot == SLOT_MAIN_HAND ) return &( player -> main_hand_weapon );
-  if ( slot == SLOT_OFF_HAND  ) return &( player ->  off_hand_weapon );
-  return 0;
+  switch( slot )
+  {
+  case SLOT_MAIN_HAND: return &( player -> main_hand_weapon );
+  case SLOT_OFF_HAND:  return &( player ->  off_hand_weapon );
+  default:             return nullptr;
+  }
 }
 
 // item_t::parse_options ====================================================
@@ -148,7 +129,7 @@ bool item_t::parse_options()
   if ( options_str.empty() ) return true;
 
   option_name_str = options_str;
-  std::string remainder = "";
+  std::string remainder;
 
   std::string::size_type cut_pt = options_str.find( ',' );
 
@@ -212,7 +193,7 @@ void item_t::encode_options()
 
   if ( heroic() )                            { o += ",heroic=1";                                 }
   if ( lfr() )                               { o += ",lfr=1";                                    }
-  if ( ! armor_type().empty() )              { o += ",type=";    o += encoded_armor_type_str;    }
+  if ( ! encoded_armor_type_str.empty() )    { o += ",type=";    o += encoded_armor_type_str;    }
   if ( ! encoded_ilevel_str.empty()        ) { o += ",ilevel=";  o += encoded_ilevel_str;        }
   if ( ! encoded_quality_str.empty()       ) { o += ",quality="; o += encoded_quality_str;       }
   if ( ! encoded_stats_str.empty()         ) { o += ",stats=";   o += encoded_stats_str;         }
@@ -278,8 +259,6 @@ bool item_t::init()
 
   if ( ! option_armor_type_str.empty() ) encoded_armor_type_str = option_armor_type_str;
 
-  if ( ! decode_armor_type() ) return false;
-
   if ( ! option_ilevel_str.empty() ) encoded_ilevel_str = option_ilevel_str;
 
   if ( ! decode_ilevel() ) return false;
@@ -333,15 +312,6 @@ bool item_t::decode_heroic()
 bool item_t::decode_lfr()
 {
   is_lfr = ! ( encoded_lfr_str.empty() || ( encoded_lfr_str == "0" ) || ( encoded_lfr_str == "no" ) );
-
-  return true;
-}
-
-// item_t::decode_armor_type ================================================
-
-bool item_t::decode_armor_type()
-{
-  is_matching_type = false;
 
   return true;
 }
