@@ -233,26 +233,141 @@ void parse_items( player_t* p, js_node_t* items )
   }
 }
 
-#if 0
-// parse_profession =========================================================
+// parse_datacrons ==========================================================
 
-void parse_profession( std::string& professions_str, js_node_t* profile, int index )
+void parse_datacrons( player_t* p, js_node_t* datacrons )
 {
-  std::string key = "professions/primary/" + util_t::to_string( index );
-  if ( js_node_t* profession = js_t::get_node( profile, key ) )
+  static const struct datacron_stats
   {
     int id;
-    std::string rank;
-    if ( js_t::get_value( id, profession, "id" ) && js_t::get_value( rank, profession, "rank" ) )
+    attribute_type stat;
+    int amount;
+  } all_datacrons[] = {
+    { 0, ATTR_AIM, 4 },
+    { 1, ATTR_PRESENCE, 3 },
+    { 2, ATTR_WILLPOWER, 3 },
+    { 3, ATTR_STRENGTH, 4 },
+    { 4, ATTR_ENDURANCE, 3 },
+    { 5, ATTR_STRENGTH, 2 },
+    { 6, ATTR_AIM, 2 },
+    { 7, ATTR_WILLPOWER, 2 },
+    { 8, ATTR_CUNNING, 2 },
+    { 10, ATTR_AIM, 4 },
+    { 11, ATTR_CUNNING, 4 },
+    { 12, ATTR_PRESENCE, 4 },
+    { 13, ATTR_ENDURANCE, 3 },
+    { 14, ATTR_WILLPOWER, 4 },
+    { 15, ATTR_WILLPOWER, 4 },
+    { 16, ATTR_ENDURANCE, 4 },
+    { 17, ATTR_PRESENCE, 4 },
+    { 18, ATTR_AIM, 4 },
+    { 20, ATTR_STRENGTH, 4 },
+    { 21, ATTR_WILLPOWER, 4 },
+    { 23, ATTR_PRESENCE, 4 },
+    { 24, ATTR_AIM, 4 },
+    { 25, ATTR_CUNNING, 4 },
+    { 27, ATTR_WILLPOWER, 4 },
+    { 28, ATTR_PRESENCE, 2 },
+    { 30, ATTR_STRENGTH, 2 },
+    { 31, ATTR_ENDURANCE, 2 },
+    { 32, ATTR_CUNNING, 2 },
+    { 33, ATTR_STRENGTH, 2 },
+    { 34, ATTR_PRESENCE, 2 },
+    { 35, ATTR_CUNNING, 2 },
+    { 37, ATTR_ENDURANCE, 2 },
+    { 38, ATTR_PRESENCE, 4 },
+    { 40, ATTR_ENDURANCE, 4 },
+    { 41, ATTR_CUNNING, 4 },
+    { 42, ATTR_STRENGTH, 4 },
+    { 43, ATTR_AIM, 2 },
+    { 45, ATTR_PRESENCE, 2 },
+    { 46, ATTR_AIM, 4 },
+    { 47, ATTR_ENDURANCE, 4 },
+    { 49, ATTR_WILLPOWER, 4 },
+    { 51, ATTR_WILLPOWER, 2 },
+    { 52, ATTR_ENDURANCE, 2 },
+    { 54, ATTR_AIM, 3 },
+    { 55, ATTR_PRESENCE, 3 },
+    { 56, ATTR_CUNNING, 3 },
+    { 57, ATTR_STRENGTH, 3 },
+    { 59, ATTR_AIM, 3 },
+    { 60, ATTR_PRESENCE, 3 },
+    { 61, ATTR_STRENGTH, 3 },
+    { 63, ATTR_PRESENCE, 2 },
+    { 64, ATTR_AIM, 2 },
+    { 65, ATTR_CUNNING, 4 },
+    { 66, ATTR_ENDURANCE, 4 },
+    { 67, ATTR_STRENGTH, 4 },
+    { 68, ATTR_STRENGTH, 2 },
+    { 69, ATTR_PRESENCE, 4 },
+    { 70, ATTR_AIM, 2 },
+    { 71, ATTR_ENDURANCE, 3 },
+    { 72, ATTR_CUNNING, 2 },
+    { 73, ATTR_AIM, 4 },
+    { 74, ATTR_WILLPOWER, 2 },
+    { 76, ATTR_WILLPOWER, 4 },
+    { 77, ATTR_CUNNING, 4 },
+    { 78, ATTR_CUNNING, 3 },
+    { 79, ATTR_WILLPOWER, 3 },
+    { 80, ATTR_AIM, 3 },
+    { 82, ATTR_STRENGTH, 3 },
+    { 83, ATTR_CUNNING, 3 },
+    { 84, ATTR_ENDURANCE, 2 },
+    { 85, ATTR_WILLPOWER, 2 },
+    { 87, ATTR_WILLPOWER, 4 },
+    { 88, ATTR_PRESENCE, 4 },
+    { 89, ATTR_ENDURANCE, 4 },
+    { 90, ATTR_STRENGTH, 4 },
+    { 91, ATTR_CUNNING, 4 },
+    { 92, ATTRIBUTE_NONE, 10 },
+    { 93, ATTRIBUTE_NONE, 10 },
+  };
+
+  if ( ! datacrons ) return;
+
+  std::array<int,ATTRIBUTE_MAX> attributes;
+  boost::fill( attributes, 0 );
+
+  for ( js_node_t* node : js_t::children( datacrons ) )
+  {
+    int id;
+    if ( js_t::get_value( id, node ) )
     {
-      if ( professions_str.length() > 0 )
-        professions_str += '/';
-      professions_str += util_t::profession_type_string( util_t::translate_profession_id( id ) );
-      professions_str += '=' + rank;
+      for ( auto const& d : all_datacrons )
+      {
+        if ( d.id == id )
+        {
+          if ( d.stat == ATTRIBUTE_NONE )
+          {
+            for ( attribute_type i = ATTRIBUTE_NONE; ++i < ATTRIBUTE_MAX; )
+              attributes[i] += d.amount;
+          }
+          else
+            attributes[ d.stat ] += d.amount;
+          break;
+        }
+      }
     }
   }
+
+  bool first = true;
+  std::stringstream ss;
+  ss << "datacrons,stats=";
+  for ( attribute_type i = ATTRIBUTE_NONE; ++i < ATTRIBUTE_MAX; )
+  {
+    if ( ! attributes[ i ] ) continue;
+    if ( first )
+      first = false;
+    else
+      ss << '_';
+    ss << attributes[ i ] << util_t::attribute_type_string( i );
+  }
+
+  if ( ! first )
+    p -> items[ SLOT_SHIRT ].options_str = ss.str();
 }
 
+#if 0
 struct item_info_t : public item_data_t
 {
   std::string name_str, icon_str;
@@ -548,14 +663,7 @@ player_t* download_player( sim_t*             sim,
 
   parse_items( p, js_t::get_child( profile, "GearSet" ) );
 
-  if ( js_node_t* datacrons = js_t::get_child( profile, "Datacrons" ) )
-  {
-    for ( js_node_t* node : js_t::children( datacrons ) )
-    {
-      // FIXME: Do something.
-      ( void )node;
-    }
-  }
+  parse_datacrons( p, js_t::get_child( profile, "Datacrons" ) );
 
   return p;
 }
