@@ -1951,10 +1951,6 @@ public:
 
   cooldown_t* cooldown_list;
 
-  // Replenishment
-  int replenishment_targets;
-  std::vector<player_t*> replenishment_candidates;
-
   // Reporting
   report_t*  report;
   scaling_t* scaling;
@@ -3049,8 +3045,6 @@ public:
   virtual void      create_pets() { }
   virtual pet_t*    create_pet( const std::string& /* name*/,  const std::string& /* type */ = std::string() ) { return 0; }
   virtual pet_t*    find_pet  ( const std::string& name );
-
-  virtual void trigger_replenishment();
 
   virtual void armory_extensions( const std::string& /* region */, const std::string& /* server */, const std::string& /* character */,
                                   cache::behavior_t /* behavior */=cache::players() )

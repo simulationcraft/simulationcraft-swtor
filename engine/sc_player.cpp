@@ -4378,11 +4378,6 @@ pet_t* player_t::find_pet( const std::string& pet_name )
   return 0;
 }
 
-// player_t::trigger_replenishment ==========================================
-
-void player_t::trigger_replenishment()
-{}
-
 // player_t::parse_talent_trees =============================================
 
 bool player_t::parse_talent_trees( const int encoding[ MAX_TALENT_SLOTS ] )
