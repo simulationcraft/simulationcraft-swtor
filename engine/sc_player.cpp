@@ -758,24 +758,21 @@ void player_t::init_core()
 
 void player_t::init_position()
 {
-  if ( sim -> debug ) log_t::output( sim, "Initializing position for player (%s)", name() );
+  if ( sim -> debug )
+    log_t::output( sim, "Initializing position for player (%s)", name() );
 
-  if ( position_str.empty() )
-  {
-    position_str = util_t::position_type_string( position );
-  }
-  else
-  {
+  if ( ! position_str.empty() )
     position = util_t::parse_position_type( position_str );
-  }
 
   // default to back when we have an invalid position
   if ( position == POSITION_NONE )
   {
-    sim -> errorf( "Player %s has an invalid position of %s, defaulting to back.\n", name(), position_str.c_str() );
+    sim -> errorf( "Player %s has an invalid position of '%s', defaulting to back.\n",
+                   name(), position_str.c_str() );
     position = POSITION_BACK;
-    position_str = util_t::position_type_string( position );
   }
+
+  position_str = util_t::position_type_string( position );
 }
 
 // player_t::init_race ======================================================
