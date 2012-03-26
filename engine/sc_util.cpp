@@ -1273,6 +1273,24 @@ void util_t::schkprintf_report( const char* file, const char* function,
   abort();
 }
 
+#if !defined(__GNUC__)
+// util_t::schkprintf =======================================================
+
+int util_t::schkprintf( const char* file, const char* function, int line,
+                        char* buf, size_t size, const char* fmt, ... )
+{
+  va_list args;
+  va_start( args, fmt );
+  int rval = vsnprintf( buf, size, fmt, args );
+  va_end( args );
+
+  if ( unlikely( rval >= static_cast<int>( size ) ) )
+    schkprintf_report( file, function, line, size, rval );
+
+  return rval;
+}
+#endif // !defined(__GNUC__)
+
 // util_t::str_to_utf8_ =====================================================
 
 void util_t::str_to_utf8_( std::string& str )

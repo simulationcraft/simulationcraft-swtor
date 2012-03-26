@@ -102,6 +102,7 @@
 #ifndef M_PI
 #define M_PI ( 3.14159265358979323846 )
 #endif
+#define SC_SNPRINTF_DEBUGGING (!defined(NDEBUG))
 
 #define MAX_PLAYERS_PER_CHART 20
 
@@ -1299,11 +1300,11 @@ public:
   static void schkprintf_report( const char* file, const char* function, int line,
                                  size_t size, int rval ) __attribute__((noreturn));
   static int schkprintf( const char* file, const char* function, int line, char* buf,
-                         size_t size, const char* fmt, ... ) PRINTF_ATTRIBUTE( 6, 7 );
+                         size_t size, const char* fmt, ... );
 };
 
-#ifdef __GNUC__
-#ifndef NDEBUG
+#if SC_SNPRINTF_DEBUGGING
+#if defined(__GNUC__)
 #define snprintf( buf, size, ... ) \
   ({ \
     size_t _size = ( size ); \
@@ -1312,28 +1313,12 @@ public:
       util_t::schkprintf_report( __FILE__, __PRETTY_FUNCTION__, __LINE__, _size, _rval ); \
     _rval; \
   })
-#endif
-#else // ! __GNUC__
-inline int util_t::schkprintf( const char* file, const char* function, int line,
-                               char* buf, size_t size, const char* fmt, ... )
-{
-  va_list args;
-  va_start( args, fmt );
-  int rval = vsnprintf( buf, size, fmt, args );
-  va_end( args );
-
-  if ( unlikely( rval >= static_cast<int>( size ) ) )
-    schkprintf_report( file, function, line, size, rval );
-
-  return rval;
-}
-
-#ifndef NDEBUG
+#else // ! defined(__GNUC__)
 #define snprintf( buf, size, ... ) \
   ( util_t::schkprintf( __FILE__, __FUNCTION__, __LINE__, \
                        ( buf ), ( size ), __VA_ARGS__ ) )
-#endif
-#endif // ! __GNUC__
+#endif // defined(__GNUC__)
+#endif // SC_SNPRINTF_DEBUGGING
 
 // Spell information struct, holding static functions to output spell data in a human readable form
 
