@@ -603,13 +603,14 @@ const char* util_t::weapon_type_string( weapon_type weapon )
   switch ( weapon )
   {
   case WEAPON_LIGHTSABER:               return "lightsaber";
+  case WEAPON_TRAININGSABER:            return "trainingsaber";
   case WEAPON_VIBROKNIFE:               return "vibroknife";
   case WEAPON_TECHBLADE:                return "techblade";
   case WEAPON_VIBROSWORD:               return "vibrosword";
   case WEAPON_DOUBLE_BLADED_LIGHTSABER: return "doublebladedlightsaber";
-  case WEAPON_ELECTROSTAFF:             return "electrostaf";
+  case WEAPON_ELECTROSTAFF:             return "electrostaff";
   case WEAPON_TECHSTAFF:                return "techstaff";
-  case WEAPON_ASSAULT_CANON:            return "assault_canon";
+  case WEAPON_ASSAULT_CANNON:           return "assault_canon";
   case WEAPON_BLASTER_PISTOL:           return "blaster_pistol";
   case WEAPON_BLASTER_RIFLE:            return "blaster_rifle";
   case WEAPON_SCATTERGUN:               return "scattergun";

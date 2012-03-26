@@ -74,32 +74,29 @@ void parse_skills( player_t* p, js_node_t* profile )
 
 slot_type translate_slot_name( const std::string& name )
 {
-  static const char* const slot_map[] =
-  {
-    "Helm",
-    "Ears",
-    nullptr,
-    nullptr,
-    "Chest",
-    "Belt",
-    "Leg",
-    "Feet",
-    "Wrist",
-    "Glove",
-    "Implant1",
-    "Implant2",
-    "Relic1",
-    "Relic2",
-    nullptr,
-    "MainHand",
-    "OffHand",
+  static const struct {
+    const char* name;
+    slot_type slot;
+  } slot_map[] = {
+    { "Helm",     SLOT_HEAD },
+    { "Ears",     SLOT_EAR },
+    { "Chest",    SLOT_CHEST },
+    { "Belt",     SLOT_WAIST },
+    { "Leg",      SLOT_LEGS },
+    { "Feet",     SLOT_FEET },
+    { "Wrist",    SLOT_WRISTS },
+    { "Glove",    SLOT_HANDS },
+    { "Implant1", SLOT_IMPLANT_1 },
+    { "Implant2", SLOT_IMPLANT_2 },
+    { "Relic1",   SLOT_RELIC_1 },
+    { "Relic2",   SLOT_RELIC_2 },
+    { "MainHand", SLOT_MAIN_HAND },
+    { "OffHand",  SLOT_OFF_HAND  },
   };
 
-  for ( unsigned i = 0; i < sizeof_array( slot_map ); ++i )
-  {
-    if ( slot_map[ i ] && util_t::str_compare_ci( name, slot_map[ i ] ) )
-      return static_cast<slot_type>( i );
-  }
+  for ( auto const& i : slot_map )
+    if ( util_t::str_compare_ci( name, i.name ) )
+      return i.slot;
 
   return SLOT_INVALID;
 }
@@ -112,11 +109,20 @@ weapon_type decode_weapon_type( const std::string& s )
     const char* name;
     weapon_type type;
   } weapon_map[] = {
+    { "LightSaber", WEAPON_LIGHTSABER },
+    { "Pistol", WEAPON_BLASTER_PISTOL },
+    { "PoleSaber", WEAPON_DOUBLE_BLADED_LIGHTSABER },
+    { "BlasterRifle", WEAPON_BLASTER_RIFLE },
+    { "VibroKnife", WEAPON_VIBROKNIFE },
+    { "VibroSword", WEAPON_VIBROSWORD },
+    { "TrainingSaber", WEAPON_TRAININGSABER },
+    { "ScatterGun", WEAPON_SCATTERGUN },
+    { "AssaultCannon", WEAPON_ASSAULT_CANNON },
+    { "SniperRifle", WEAPON_SNIPER_RIFLE },
+    { "ElectroStaff", WEAPON_ELECTROSTAFF },
+    { "TechBlade", WEAPON_TECHBLADE },
+    { "TechStaff", WEAPON_TECHSTAFF },
   };
-
-  weapon_type wt = util_t::parse_weapon_type( s );
-  if ( wt != WEAPON_NONE )
-    return wt;
 
   for ( auto const& i : weapon_map )
     if ( util_t::str_compare_ci( s, i.name ) )
@@ -134,8 +140,11 @@ std::string decode_stats( js_node_t* node )
     const char* abbrv;
   } stat_mapping[] = {
     { "Armor", "armor" },
+#if 0
+    // These are handled specially for weapons in Simc.
     { "MinDamage", "min" },
     { "MaxDamage", "max" },
+#endif
     { "Endurance", "endurance" },
     { "Strength", "strength" },
     { "Aim", "aim" },
@@ -213,13 +222,25 @@ void parse_items( player_t* p, js_node_t* items )
     if ( js_t::get_value( quality, item, "Quality" ) )
       item_encoding << ",quality=" << util_t::format_name( quality );
 
-    std::string weapon_type_str;
-    weapon_type wt = WEAPON_NONE;
-    if ( js_t::get_value( weapon_type_str, item, "WeaponType" ) )
+    if ( slot == SLOT_MAIN_HAND || slot == SLOT_OFF_HAND )
     {
-      wt = decode_weapon_type( weapon_type_str );
-      if ( wt != WEAPON_NONE )
-        item_encoding << ",weapon=" << util_t::weapon_type_string( wt );
+      std::string weapon_type_str;
+      weapon_type wt = WEAPON_NONE;
+      if ( js_t::get_value( weapon_type_str, item, "WeaponType" ) )
+      {
+        wt = decode_weapon_type( weapon_type_str );
+        if ( wt != WEAPON_NONE )
+        {
+          item_encoding << ",weapon=" << util_t::weapon_type_string( wt );
+          int value;
+          js_node_t* dmg = js_t::get_node( item, "Stats/MinDamage" );
+          if ( dmg && js_t::get_value( value, dmg ) )
+            item_encoding << '_' << value << "min";
+          dmg = js_t::get_node( item, "Stats/MaxDamage" );
+          if ( dmg && js_t::get_value( value, dmg ) )
+            item_encoding << '_' << value << "max";
+        }
+      }
     }
 
     if ( js_node_t* stats = js_t::get_child( item, "Stats" ) )
