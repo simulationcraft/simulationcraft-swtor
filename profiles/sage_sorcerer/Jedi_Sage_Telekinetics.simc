@@ -1,6 +1,6 @@
 #!./simc 
 
-jedi_sage=Jedi_Sage_Telekinetics
+jedi_sage="Jedi_Sage_Telekinetics"
 origin="http://swtor.askmrrobot.com/character/bf331e5d-8178-4ebc-8dfa-85035a30aae5"
 level=50
 race=human

@@ -1,8 +1,7 @@
-sith_sorcerer=Sith_Sorcerer_Madness
-level=50
+mrrobot=bf331e5d-8178-4ebc-8dfa-85035a30aae5
+name=Sith_Sorcerer_Madness
 talents=http://www.torhead.com/skill-calc#201hZbcMZfrfRs0krcz.1
 position=ranged_front
-Sage_Sorcerer_Gear.simc
 save=Sith_Sorcerer_Madness.simc
 
 copy=Sith_Sorcerer_Lightning,Sith_Sorcerer_Madness

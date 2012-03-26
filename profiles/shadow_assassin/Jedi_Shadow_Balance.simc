@@ -1,6 +1,6 @@
 #!./simc 
 
-jedi_shadow=Jedi_Shadow_Balance
+jedi_shadow="Jedi_Shadow_Balance"
 origin="http://swtor.askmrrobot.com/character/72bd51f8-fe33-461e-a0a8-ac4513000154"
 level=50
 race=human
