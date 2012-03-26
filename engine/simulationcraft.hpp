@@ -1176,6 +1176,7 @@ private:
   static void replace_all_( std::string&, const char* from, char to );
   static void replace_all_( std::string&, char from, const char* to );
   static int vfprintf_helper( FILE *stream, const char *format, va_list fmtargs );
+  static void format_name_( std::string& s );
 
 public:
   static double talent_rank( int num, int max, double increment );
@@ -1288,26 +1289,51 @@ public:
 
   static std::string& tolower( std::string& str ) { tolower_( str ); return str; }
 
-private:
-  static void format_name_( std::string& s );
-public:
   static std::string& format_name( std::string& s )
   { format_name_( s ); return s; }
-
-  static int schkprintf( const char* file, const char* fn, int line,
-                         char* buf, size_t size, const char* fmt, ... ) PRINTF_ATTRIBUTE( 6,7 );
 
   template <typename T, std::size_t N>
   static std::vector<T> array_to_vector( const T (&array)[N] )
   { return std::vector<T>( array, array + N ); }
+
+  static void schkprintf_report( const char* file, const char* function, int line,
+                                 size_t size, int rval ) __attribute__((noreturn));
+  static int schkprintf( const char* file, const char* function, int line, char* buf,
+                         size_t size, const char* fmt, ... ) PRINTF_ATTRIBUTE( 6, 7 );
 };
 
+#ifdef __GNUC__
 #ifndef NDEBUG
-#define snprintf( buf, size, fmt, ... ) \
-  ( util_t::schkprintf( __FILE__, __FUNCTION__, __LINE__, \
-                       ( buf ), ( size ), ( fmt ), ## __VA_ARGS__ ) )
+#define snprintf( buf, size, ... ) \
+  ({ \
+    size_t _size = ( size ); \
+    int _rval = snprintf( ( buf ), _size, __VA_ARGS__ ); \
+    if ( unlikely( _rval >= static_cast<int>( _size ) ) ) \
+      util_t::schkprintf_report( __FILE__, __PRETTY_FUNCTION__, __LINE__, _size, _rval ); \
+    _rval; \
+  })
 #endif
+#else // ! __GNUC__
+inline int util_t::schkprintf( const char* file, const char* function, int line,
+                               char* buf, size_t size, const char* fmt, ... )
+{
+  va_list args;
+  va_start( args, fmt );
+  int rval = vsnprintf( buf, size, fmt, args );
+  va_end( args );
 
+  if ( unlikely( rval >= static_cast<int>( size ) ) )
+    schkprintf_report( file, function, line, size, rval );
+
+  return rval;
+}
+
+#ifndef NDEBUG
+#define snprintf( buf, size, ... ) \
+  ( util_t::schkprintf( __FILE__, __FUNCTION__, __LINE__, \
+                       ( buf ), ( size ), __VA_ARGS__ ) )
+#endif
+#endif // ! __GNUC__
 
 // Spell information struct, holding static functions to output spell data in a human readable form
 

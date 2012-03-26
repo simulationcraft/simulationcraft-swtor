@@ -1260,29 +1260,17 @@ int util_t::printf( const char *format,  ... )
   return retcode;
 }
 
-#ifndef NDEBUG
-// util_t::schkprintf =======================================================
+// util_t::schkprintf_report ================================================
 
-int util_t::schkprintf( const char* file, const char* fn, int line,
-                        char* buf, size_t size, const char* fmt, ... )
+void util_t::schkprintf_report( const char* file, const char* function,
+                                int line, size_t size, int rval )
 {
-  va_list ap;
-  va_start( ap, fmt );
-  int rval = vsnprintf( buf, size, fmt, ap );
-  va_end( ap );
-
-  if ( rval >= 0 && static_cast<size_t>( rval ) >= size )
-  {
-    std::cerr << "schkprintf: buffer too small (" << rval << ">="
-              << size << ") at file \"" << file << "\" line "
-              << line << ", in function \"" << fn << '"'
-              << std::endl;
-    abort();
-  }
-
-  return rval;
+  std::cerr << "schkprintf: buffer too small (" << rval << ">="
+            << size << ") at file \"" << file << "\" line "
+            << line << ", in function \"" << function << '"'
+            << std::endl;
+  abort();
 }
-#endif // NDEBUG
 
 // util_t::str_to_utf8_ =====================================================
 
