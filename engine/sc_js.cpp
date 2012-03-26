@@ -259,10 +259,7 @@ void parse_value( sim_t*                  sim,
 const js_node_t* split_path( const js_node_t*   node,
                              const std::string& path )
 {
-  std::vector<std::string> splits;
-  util_t::string_split( splits, path, "/" );
-
-  for ( std::string& component : splits )
+  for ( std::string& component : split( path, '/' ) )
   {
     node = js_t::get_child( node, component );
     if ( ! node ) return nullptr;
@@ -341,60 +338,71 @@ const js_node_t* js_t::get_node( const js_node_t*   root,
 
 // js_t::get_value ==========================================================
 
-bool js_t::get_value( std::string&       value,
-                      const js_node_t*   root,
-                      const std::string& path )
+bool js_t::get_value( int&             value,
+                      const js_node_t* node )
 {
-  const js_node_t* node = split_path( root, path );
-  if ( ! node ) return false;
-  if ( node -> value.empty() ) return false;
-  value = node -> value;
-  return true;
-}
-
-// js_t::get_value ==========================================================
-
-bool js_t::get_value( int&               value,
-                      const js_node_t*   root,
-                      const std::string& path )
-{
-  const js_node_t* node = split_path( root, path );
   if ( ! node ) return false;
   if ( node -> value.empty() ) return false;
   value = atoi( node -> value.c_str() );
   return true;
 }
 
-// js_t::get_value ==========================================================
-
-bool js_t::get_value( double&            value,
+bool js_t::get_value( int&               value,
                       const js_node_t*   root,
                       const std::string& path )
+{ return get_value( value, split_path( root, path ) ); }
+
+// js_t::get_value ==========================================================
+
+bool js_t::get_value( double&          value,
+                      const js_node_t* node )
 {
-  const js_node_t* node = split_path( root, path );
   if ( ! node ) return false;
   if ( node -> value.empty() ) return false;
   value = atof( node -> value.c_str() );
   return true;
 }
 
+bool js_t::get_value( double&            value,
+                      const js_node_t*   root,
+                      const std::string& path )
+{ return get_value( value, split_path( root, path ) ); }
+
 // js_t::get_value ==========================================================
+
+bool js_t::get_value( std::string&     value,
+                      const js_node_t* node )
+{
+  if ( ! node ) return false;
+  if ( node -> value.empty() ) return false;
+  value = node -> value;
+  return true;
+}
+bool js_t::get_value( std::string&       value,
+                      const js_node_t*   root,
+                      const std::string& path )
+{ return get_value( value, split_path( root, path ) ); }
+
+// js_t::get_value ==========================================================
+
+int js_t::get_value( std::vector<std::string>& value,
+                     const js_node_t*          node )
+{
+  if ( ! node ) return 0;
+  if ( node -> children.empty() ) return 0;
+
+  size_t size = node -> children.size();
+  value.resize( size );
+  for ( size_t i=0; i < size; i++ )
+    value[ i ] = node -> children[ i ] -> value;
+
+  return static_cast<int>( size );
+}
 
 int js_t::get_value( std::vector<std::string>& value,
                      const js_node_t*          root,
                      const std::string&        path )
-{
-  const js_node_t* node = split_path( root, path );
-  if ( ! node ) return 0;
-  if ( node -> children.empty() ) return 0;
-  size_t size = node -> children.size();
-  value.resize( size );
-  for ( size_t i=0; i < size; i++ )
-  {
-    value[ i ] = node -> children[ i ] -> value;
-  }
-  return static_cast<int>( size );
-}
+{ return get_value( value, split_path( root, path ) ); }
 
 // js_t::get_name ===========================================================
 
