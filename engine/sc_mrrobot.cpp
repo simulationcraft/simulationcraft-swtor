@@ -10,8 +10,7 @@ namespace mrrobot { // ======================================================
 
 namespace { // ANONYMOUS ====================================================
 
-const bool USE_TEST_API = true;
-const bool DEBUG_ITEMS = false;
+const bool USE_TEST_API = false;
 
 // Encoding used by askmrrobot's talent builder.
 const base36_t::encoding_t talent_encoding =
@@ -109,19 +108,19 @@ weapon_type decode_weapon_type( const std::string& s )
     const char* name;
     weapon_type type;
   } weapon_map[] = {
-    { "LightSaber", WEAPON_LIGHTSABER },
-    { "Pistol", WEAPON_BLASTER_PISTOL },
-    { "PoleSaber", WEAPON_DOUBLE_BLADED_LIGHTSABER },
-    { "BlasterRifle", WEAPON_BLASTER_RIFLE },
-    { "VibroKnife", WEAPON_VIBROKNIFE },
-    { "VibroSword", WEAPON_VIBROSWORD },
+    { "LightSaber",    WEAPON_LIGHTSABER },
+    { "Pistol",        WEAPON_BLASTER_PISTOL },
+    { "PoleSaber",     WEAPON_DOUBLE_BLADED_LIGHTSABER },
+    { "BlasterRifle",  WEAPON_BLASTER_RIFLE },
+    { "VibroKnife",    WEAPON_VIBROKNIFE },
+    { "VibroSword",    WEAPON_VIBROSWORD },
     { "TrainingSaber", WEAPON_TRAININGSABER },
-    { "ScatterGun", WEAPON_SCATTERGUN },
+    { "ScatterGun",    WEAPON_SCATTERGUN },
     { "AssaultCannon", WEAPON_ASSAULT_CANNON },
-    { "SniperRifle", WEAPON_SNIPER_RIFLE },
-    { "ElectroStaff", WEAPON_ELECTROSTAFF },
-    { "TechBlade", WEAPON_TECHBLADE },
-    { "TechStaff", WEAPON_TECHSTAFF },
+    { "SniperRifle",   WEAPON_SNIPER_RIFLE },
+    { "ElectroStaff",  WEAPON_ELECTROSTAFF },
+    { "TechBlade",     WEAPON_TECHBLADE },
+    { "TechStaff",     WEAPON_TECHSTAFF },
   };
 
   for ( auto const& i : weapon_map )
@@ -139,29 +138,29 @@ std::string decode_stats( js_node_t* node )
     const char* name;
     const char* abbrv;
   } stat_mapping[] = {
-    { "Armor", "armor" },
+    { "Armor",      "armor" },
 #if 0
     // These are handled specially for weapons in Simc.
-    { "MinDamage", "min" },
-    { "MaxDamage", "max" },
+    { "MinDamage",  "min" },
+    { "MaxDamage",  "max" },
 #endif
-    { "Endurance", "endurance" },
-    { "Strength", "strength" },
-    { "Aim", "aim" },
-    { "Cunning", "cunning" },
-    { "Will", "willpower" },
-    { "Presence", "presence" },
-    { "Expertise", "expertise" },
-    { "Power", "power" },
+    { "Endurance",  "endurance" },
+    { "Strength",   "strength" },
+    { "Aim",        "aim" },
+    { "Cunning",    "cunning" },
+    { "Will",       "willpower" },
+    { "Presence",   "presence" },
+    { "Expertise",  "expertise" },
+    { "Power",      "power" },
     { "ForcePower", "forcepower" },
-    { "TechPower", "techpower" },
-    { "Defense", "defense" },
-    { "Shielding", "shield" },
-    { "Absorb", "absorb" },
-    { "Accuracy", "accuracy" },
-    { "Crit", "crit" },
-    { "Surge", "surge" },
-    { "Alacrity", "alacrity" },
+    { "TechPower",  "techpower" },
+    { "Defense",    "defense" },
+    { "Shielding",  "shield" },
+    { "Absorb",     "absorb" },
+    { "Accuracy",   "accuracy" },
+    { "Crit",       "crit" },
+    { "Surge",      "surge" },
+    { "Alacrity",   "alacrity" },
   };
 
   std::stringstream ss;
@@ -607,8 +606,7 @@ player_t* download_player( sim_t*             sim,
 
   std::string url = "http://swtor.askmrrobot.com/api/";
   if ( USE_TEST_API ) url += "test/";
-  url += "character/v1/";
-  url += id;
+  url += "character/v1/" + id;
 
   std::string result;
 
