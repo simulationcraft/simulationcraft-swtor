@@ -564,7 +564,6 @@ enum save_type
   SAVE_GEAR,
   SAVE_TALENTS,
   SAVE_ACTIONS,
-  SAVE_MAX
 };
 
 // Data Access ==============================================================
@@ -3047,8 +3046,11 @@ public:
   virtual expr_ptr create_expression( action_t*, const std::string& name );
 
   virtual void create_options();
-  virtual bool create_profile( std::string& profile_str, int save_type=SAVE_ALL, bool save_html=false );
-  virtual bool create_json_profile( std::string&, int =SAVE_ALL, bool =false );
+  void create_profile( std::ostream& os, save_type=SAVE_ALL );
+  void create_json_profile( std::ostream& os, save_type=SAVE_ALL );
+
+  std::string create_profile( save_type st=SAVE_ALL )
+  { std::ostringstream ss; create_profile( ss, st ); return ss.str(); }
 
   virtual void copy_from( const player_t& source );
 
@@ -3056,10 +3058,6 @@ public:
   virtual void      create_pets() { }
   virtual pet_t*    create_pet( const std::string& /* name*/,  const std::string& /* type */ = std::string() ) { return 0; }
   virtual pet_t*    find_pet  ( const std::string& name );
-
-  virtual void armory_extensions( const std::string& /* region */, const std::string& /* server */, const std::string& /* character */,
-                                  cache::behavior_t /* behavior */=cache::players() )
-  {}
 
   // Class-Specific Methods
 
@@ -3973,8 +3971,7 @@ struct proc_t
 
 struct report_t
 {
-  static void encode_html( std::string& buffer );
-  static std::string encode_html( const char* str );
+  static std::string encode_html( std::string buffer );
   //static void print_spell_query( sim_t* );
   static void print_profiles( sim_t* );
   static void print_json_profiles( sim_t* );

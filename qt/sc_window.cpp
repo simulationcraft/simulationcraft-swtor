@@ -1146,12 +1146,9 @@ void ImportThread::run()
     player -> role = util_t::parse_role_type( mainWindow->defaultRoleChoice->currentText().toUtf8().constData() );
 
     if ( sim->init() )
-    {
-      std::string buffer="";
-      player->create_profile( buffer );
-      profile = QString::fromUtf8( buffer.c_str() );
-    }
-    else player = 0;
+      profile = QString::fromUtf8( player->create_profile().c_str() );
+    else
+      player = 0;
   }
 }
 

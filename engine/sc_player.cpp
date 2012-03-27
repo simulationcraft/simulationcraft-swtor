@@ -4706,267 +4706,196 @@ expr_ptr player_t::create_expression( action_t* a,
 
 // player_t::create_profile =================================================
 
-bool player_t::create_profile( std::string& profile_str, int save_type, bool save_html )
+void player_t::create_profile( std::ostream& os, save_type savetype )
 {
-  std::string term;
-
-  if ( save_html )
-    term = "<br>\n";
-  else
-    term = "\n";
-
-  if ( save_type == SAVE_ALL )
-  {
-    profile_str += "#!./simc " + term + term;
-  }
+  if ( savetype == SAVE_ALL )
+    os << "#!./simc\n\n";
 
   if ( ! comment_str.empty() )
+    os << "# " << comment_str << '\n';
+
+  if ( savetype == SAVE_ALL )
   {
-    profile_str += "# " + comment_str + term;
+    os << util_t::player_type_string( type ) << "=\"" << name_str << "\"\n"
+          "origin=\"" << origin_str << "\"\n"
+          "level=" << level << "\n"
+          "race=" << race_str << "\n"
+          "position=" << position_str << "\n"
+          "role=" << util_t::role_type_string( primary_role() ) << "\n"
+          "use_pre_potion=" << use_pre_potion << '\n';
+
+    if ( ! professions_str.empty() )
+      os << "professions=" << professions_str << '\n';
   }
 
-  if ( save_type == SAVE_ALL )
-  {
-    profile_str += util_t::player_type_string( type );
-    profile_str += "=\"" + name_str + '"' + term;
-    profile_str += "origin=\"" + origin_str + '"' + term;
-    profile_str += "level=" + util_t::to_string( level ) + term;
-    profile_str += "race=" + race_str + term;
-    profile_str += "position=" + position_str + term;
-    profile_str += "role=";
-    profile_str += util_t::role_type_string( primary_role() ) + term;
-    profile_str += "use_pre_potion=" + util_t::to_string( use_pre_potion ) + term;
-
-    if ( professions_str.size() > 0 )
-    {
-      profile_str += "professions=" + professions_str + term;
-    };
-  }
-
-  if ( save_type == SAVE_ALL || save_type == SAVE_TALENTS )
+  if ( savetype == SAVE_ALL || savetype == SAVE_TALENTS )
   {
     talents_str = torhead::encode_talents( *this );
     if ( ! talents_str.empty() )
-      profile_str += "talents=" + talents_str + term;
+      os << "talents=" << talents_str << '\n';
   }
 
-  if ( save_type == SAVE_ALL || save_type == SAVE_ACTIONS )
+  if ( ( savetype == SAVE_ALL || savetype == SAVE_ACTIONS )
+       && ! action_list_str.empty() )
   {
-    if ( ! action_list_str.empty() )
+    bool first = true;
+    for ( action_t* a = action_list; a; a = a -> next )
     {
-      int i = 0;
-      for ( action_t* a = action_list; a; a = a -> next )
+      if ( ! a -> signature_str.empty() )
       {
-        if ( a -> signature_str.empty() ) continue;
-        profile_str += "actions";
-        profile_str += i ? "+=/" : "=";
-        std::string encoded_action = a -> signature_str;
-        if ( save_html )
-          report_t::encode_html( encoded_action );
-        profile_str += encoded_action + term;
-        i++;
+        os << "actions" <<  ( first ? "=" : "+=/" )
+           << a -> signature_str << '\n';
+        first = false;
       }
     }
   }
 
-  if ( save_type == SAVE_ALL || save_type == SAVE_GEAR )
+  if ( savetype == SAVE_ALL || savetype == SAVE_GEAR )
   {
     for ( item_t& item : items )
     {
       if ( item.active() )
-      {
-        profile_str += item.slot_name();
-        profile_str += "=" + item.options_str + term;
-      }
-    }
-    if ( ! items_str.empty() )
-    {
-      profile_str += "items=" + items_str + term;
+        os << item.slot_name() << '=' << item.options_str << '\n';
     }
 
-    profile_str += "# Gear Summary" + term;
-    for ( int i=0; i < STAT_MAX; i++ )
+    if ( ! items_str.empty() )
+      os << "items=" << items_str << '\n';
+
+    os << "# Gear Summary\n";
+    for ( stat_type i = STAT_NONE; i < STAT_MAX; ++i )
     {
       double value = initial_stats.get_stat( i );
       if ( value != 0 )
-      {
-        profile_str += "# gear_";
-        profile_str += util_t::stat_type_string( i );
-        profile_str += "=" + util_t::to_string( value, 0 ) + term;
-      }
+        os << "# gear_" << util_t::stat_type_string( i )
+           << '=' << value << '\n';
     }
 
-    profile_str += "# Set Bonuses" + term;
+    os << "# Set Bonuses\n";
     for ( set_bonus_t* sb = set_bonus_list; sb; sb = sb -> next )
     {
-      std::string name = sb -> name + "_2pc" + term;
+      std::string name = sb -> name + "_2pc\n";
       if ( sb -> force_enable_2pc )
-        profile_str += "set_bonus=" + name;
+        os << "set_bonus=" << name;
       else if ( sb -> force_disable_2pc )
-        profile_str += "set_bonus=no_" + name;
+        os << "set_bonus=no_" << name;
       else if ( sb -> two_pc() )
-        profile_str += "# set_bonus=" + name;
+        os << "# set_bonus=" << name;
 
-      name = sb -> name + "_4pc" + term;
+      name = sb -> name + "_4pc\n";
       if ( sb -> force_enable_4pc )
-        profile_str += "set_bonus=" + name;
+        os << "set_bonus=" << name;
       else if ( sb -> force_disable_4pc )
-        profile_str += "set_bonus=no_" + name;
+        os << "set_bonus=no_" << name;
       else if ( sb -> four_pc() )
-        profile_str += "# set_bonus=" + name;
+        os << "# set_bonus=" << name;
     }
 
-    for ( int i=0; i < SLOT_MAX; i++ )
+    for ( item_t& item : items )
     {
-      item_t& item = items[ i ];
       if ( ! item.active() ) continue;
       if ( item.unique || item.unique_enchant || item.unique_addon || ! item.encoded_weapon_str.empty() )
       {
-        profile_str += "# ";
-        profile_str += item.slot_name();
-        profile_str += "=";
-        profile_str += item.name();
-        if ( item.heroic() ) profile_str += ",heroic=1";
-        if ( ! item.encoded_weapon_str.empty() ) profile_str += ",weapon=" + item.encoded_weapon_str;
-        if ( item.unique_enchant ) profile_str += ",enchant=" + item.encoded_enchant_str;
-        if ( item.unique_addon   ) profile_str += ",addon="   + item.encoded_addon_str;
-        profile_str += term;
+        os << "# " << item.slot_name() << '=' << item.name();
+        if ( item.heroic() ) os << ",heroic=1";
+        if ( ! item.encoded_weapon_str.empty() ) os << ",weapon=" << item.encoded_weapon_str;
+        if ( item.unique_enchant ) os << ",enchant=" << item.encoded_enchant_str;
+        if ( item.unique_addon   ) os << ",addon=" << item.encoded_addon_str;
+        os << '\n';
       }
     }
 
-    if ( enchant.attribute[ ATTR_STRENGTH  ] != 0 )  profile_str += "enchant_strength="         + util_t::to_string( enchant.attribute[ ATTR_STRENGTH  ] ) + term;
-    if ( enchant.attribute[ ATTR_AIM       ] != 0 )  profile_str += "enchant_aim="              + util_t::to_string( enchant.attribute[ ATTR_AIM       ] ) + term;
-    if ( enchant.attribute[ ATTR_CUNNING   ] != 0 )  profile_str += "enchant_cunning="          + util_t::to_string( enchant.attribute[ ATTR_CUNNING   ] ) + term;
-    if ( enchant.attribute[ ATTR_WILLPOWER ] != 0 )  profile_str += "enchant_willpower="        + util_t::to_string( enchant.attribute[ ATTR_WILLPOWER ] ) + term;
-    if ( enchant.attribute[ ATTR_ENDURANCE ] != 0 )  profile_str += "enchant_endurance="        + util_t::to_string( enchant.attribute[ ATTR_ENDURANCE ] ) + term;
-    if ( enchant.attribute[ ATTR_PRESENCE  ] != 0 )  profile_str += "enchant_presence="         + util_t::to_string( enchant.attribute[ ATTR_PRESENCE  ] ) + term;
-    if ( enchant.power                       != 0 )  profile_str += "enchant_power="            + util_t::to_string( enchant.power ) + term;
-    if ( enchant.force_power                 != 0 )  profile_str += "enchant_force_power="      + util_t::to_string( enchant.force_power ) + term;
-    if ( enchant.tech_power                  != 0 )  profile_str += "enchant_tech_power="       + util_t::to_string( enchant.tech_power ) + term;
-    if ( enchant.expertise_rating            != 0 )  profile_str += "enchant_expertise_rating=" + util_t::to_string( enchant.expertise_rating ) + term;
-    if ( enchant.armor                       != 0 )  profile_str += "enchant_armor="            + util_t::to_string( enchant.armor ) + term;
-    if ( enchant.alacrity_rating             != 0 )  profile_str += "enchant_alacrity_rating="  + util_t::to_string( enchant.alacrity_rating ) + term;
-    if ( enchant.accuracy_rating             != 0 )  profile_str += "enchant_accuracy_rating="  + util_t::to_string( enchant.accuracy_rating ) + term;
-    if ( enchant.crit_rating                 != 0 )  profile_str += "enchant_crit_rating="      + util_t::to_string( enchant.crit_rating ) + term;
-    if ( enchant.resource[ RESOURCE_HEALTH ] != 0 )  profile_str += "enchant_health="           + util_t::to_string( enchant.resource[ RESOURCE_HEALTH ] ) + term;
-    if ( enchant.resource[ RESOURCE_MANA   ] != 0 )  profile_str += "enchant_mana="             + util_t::to_string( enchant.resource[ RESOURCE_MANA   ] ) + term;
-    if ( enchant.resource[ RESOURCE_RAGE   ] != 0 )  profile_str += "enchant_rage="             + util_t::to_string( enchant.resource[ RESOURCE_RAGE   ] ) + term;
-    if ( enchant.resource[ RESOURCE_ENERGY ] != 0 )  profile_str += "enchant_energy="           + util_t::to_string( enchant.resource[ RESOURCE_ENERGY ] ) + term;
-    if ( enchant.resource[ RESOURCE_AMMO   ] != 0 )  profile_str += "enchant_ammo="             + util_t::to_string( enchant.resource[ RESOURCE_AMMO   ] ) + term;
-}
-
-  return true;
-}
-
-bool player_t::create_json_profile( std::string& profile_str, int save_type, bool save_html )
-{
-  std::string term = "\n";
-
-  profile_str += "{" + term;
-
-  profile_str += "\t\"Character\" : " + term;
-  profile_str += "\t{" + term;
-
-  // Basic Character Definitions
-  profile_str += "\t\t\"Definitions\" : " + term;
-  profile_str += "\t\t{" + term;
-  if ( save_type == SAVE_ALL )
-  {
-    profile_str += "\t\t\t\"Class\" : \"";
-    profile_str += util_t::player_type_string( type );
-    profile_str += "\"," + term;
-    profile_str += "\t\t\t\"Name\" : \"" + name_str + "\"," + term;
-    profile_str += "\t\t\t\"Origin\" : \"" + origin_str + "\"" + term;
-    profile_str += "\t\t\t\"Level\" : " + util_t::to_string( level ) + ',' + term;
-    profile_str += "\t\t\t\"Race\" : \"" + race_str + "\"," + term;
-
-    if ( professions_str.size() > 0 )
-    {
-      profile_str += "\t\t\t\"Professions\" : \"" + professions_str + "\"," + term;
-    };
+    if ( enchant.attribute[ ATTR_STRENGTH  ] != 0 )  os << "enchant_strength="         << enchant.attribute[ ATTR_STRENGTH  ] << '\n';
+    if ( enchant.attribute[ ATTR_AIM       ] != 0 )  os << "enchant_aim="              << enchant.attribute[ ATTR_AIM       ] << '\n';
+    if ( enchant.attribute[ ATTR_CUNNING   ] != 0 )  os << "enchant_cunning="          << enchant.attribute[ ATTR_CUNNING   ] << '\n';
+    if ( enchant.attribute[ ATTR_WILLPOWER ] != 0 )  os << "enchant_willpower="        << enchant.attribute[ ATTR_WILLPOWER ] << '\n';
+    if ( enchant.attribute[ ATTR_ENDURANCE ] != 0 )  os << "enchant_endurance="        << enchant.attribute[ ATTR_ENDURANCE ] << '\n';
+    if ( enchant.attribute[ ATTR_PRESENCE  ] != 0 )  os << "enchant_presence="         << enchant.attribute[ ATTR_PRESENCE  ] << '\n';
+    if ( enchant.power                       != 0 )  os << "enchant_power="            << enchant.power << '\n';
+    if ( enchant.force_power                 != 0 )  os << "enchant_force_power="      << enchant.force_power << '\n';
+    if ( enchant.tech_power                  != 0 )  os << "enchant_tech_power="       << enchant.tech_power << '\n';
+    if ( enchant.expertise_rating            != 0 )  os << "enchant_expertise_rating=" << enchant.expertise_rating << '\n';
+    if ( enchant.armor                       != 0 )  os << "enchant_armor="            << enchant.armor << '\n';
+    if ( enchant.alacrity_rating             != 0 )  os << "enchant_alacrity_rating="  << enchant.alacrity_rating << '\n';
+    if ( enchant.accuracy_rating             != 0 )  os << "enchant_accuracy_rating="  << enchant.accuracy_rating << '\n';
+    if ( enchant.crit_rating                 != 0 )  os << "enchant_crit_rating="      << enchant.crit_rating << '\n';
+    if ( enchant.resource[ RESOURCE_HEALTH ] != 0 )  os << "enchant_health="           << enchant.resource[ RESOURCE_HEALTH ] << '\n';
+    if ( enchant.resource[ RESOURCE_MANA   ] != 0 )  os << "enchant_mana="             << enchant.resource[ RESOURCE_MANA   ] << '\n';
+    if ( enchant.resource[ RESOURCE_RAGE   ] != 0 )  os << "enchant_rage="             << enchant.resource[ RESOURCE_RAGE   ] << '\n';
+    if ( enchant.resource[ RESOURCE_ENERGY ] != 0 )  os << "enchant_energy="           << enchant.resource[ RESOURCE_ENERGY ] << '\n';
+    if ( enchant.resource[ RESOURCE_AMMO   ] != 0 )  os << "enchant_ammo="             << enchant.resource[ RESOURCE_AMMO   ] << '\n';
   }
-  profile_str += "\t\t}," + term;
+}
 
-  // Talents
-  profile_str += "\t\t\"Talents\" : " + term;
-  profile_str += "\t\t{" + term;
+void player_t::create_json_profile( std::ostream& os, save_type savetype )
+{
+  os << "{\n";
+  if ( savetype == SAVE_ALL )
+  {
+    os << "\t\"Class\" : \"" << util_t::player_type_string( type ) << "\",\n"
+          "\t\"Name\" : \"" << name_str << "\",\n"
+          "\t\"Origin\" : \"" << origin_str << "\"\n"
+          "\t\"Level\" : " << level << ",\n"
+          "\t\"Race\" : \"" << race_str << "\",\n";
+
+    if ( ! professions_str.empty() )
+      os << "\t\"Professions\" : \"" << professions_str << "\",\n";
+  }
+
   talents_str = torhead::encode_talents( *this );
   if ( ! talents_str.empty() )
-    profile_str += "\t\t\ttalents=" + talents_str + term;
-  profile_str += "\t\t}," + term;
+    os << "\t\"Talents\" : \"" << talents_str << "\",\n";
 
-  // Gear
-  profile_str += "\t\t\"Gear\" : " + term;
-  profile_str += "\t\t{" + term;
+  os << "\t\"Gear\" : {\n";
+  for ( item_t& item : items )
+  {
+    if ( item.active() )
+      os << "\t\t\"" << item.slot_name() << "\" : \"" + item.options_str + "\",\n";
+  }
+  os << "\t},\n";
 
-    for ( int i=0; i < SLOT_MAX; i++ )
-    {
-      item_t& item = items[ i ];
+  os << "\t\"Position\" : \"" << position_str << "\",\n"
+        "\t\"Role\" : \"" << util_t::role_type_string( primary_role() ) << "\",\n"
+        "\t\"Use_pre_potion\" : " << use_pre_potion << ",\n";
 
-      if ( item.active() )
-      {
-        profile_str += "\t\t\t\"";
-        profile_str += item.slot_name();
-        profile_str += "\" : \"" + item.options_str + "\"," + term;
-      }
-    }
-  profile_str += "\t\t}" + term;
+  os << "\t\"Actions\" : [\n";
+  for ( action_t* a = action_list; a; a = a -> next )
+  {
+    if ( ! a -> signature_str.empty() )
+      os << "\t\t\"" << a -> signature_str << "\",\n";
+  }
+  os << "\t],\n";
 
+  os << "\t\"Gear Summary\" : {\n";
+  for ( stat_type i = STAT_NONE; i < STAT_MAX; ++i )
+  {
+    double value = initial_stats.get_stat( i );
+    if ( value )
+      os << "\t\t\"" << util_t::stat_type_string( i ) << "\" : " << value << ",\n";
+  }
+  os << "\t},\n";
 
-    profile_str += "\t}," + term;
+  os << "\t\"Set Bonuses\" : [\n";
+  for ( set_bonus_t* sb = set_bonus_list; sb; sb = sb -> next )
+  {
+    std::string name = sb -> name + "_2pc";
+    if ( sb -> force_enable_2pc )
+      os << "\t\t\"" << name << "\",\n";
+    else if ( sb -> force_disable_2pc )
+      os << "\t\t\"no_" << name << "\",\n";
+    else if ( sb -> two_pc() )
+      os << "\t\t\"#" << name << "\",\n";
 
-    profile_str += "\t\"SimulationCraft\" : " + term;
-    profile_str += "\t{" + term;
-    profile_str += "\t\t\"Position\" : \"" + position_str + "\"," + term;
-    profile_str += "\t\t\"Role\" : \"";
-    profile_str += util_t::role_type_string( primary_role() );
-    profile_str += "\"," + term;
-    profile_str += "\t\t\"Use_pre_potion\" : \"" + util_t::to_string( use_pre_potion ) + "\"," + term;
+    name = sb -> name + "_4pc";
+    if ( sb -> force_enable_4pc )
+      os << "\t\t\"" << name << "\",\n";
+    else if ( sb -> force_disable_4pc )
+      os << "\t\t\"no_" << name << "\",\n";
+    else if ( sb -> four_pc() )
+      os << "\t\t\"#" << name << "\",\n";
+  }
+  os << "\t],\n";
 
-    // Action Priority List
-    profile_str += "\t\t\"ActionPriorityList\" : \"" + term;
-    profile_str += "\t\t\t";
-      if ( ! action_list_str.empty() )
-      {
-        int i = 0;
-        for ( action_t* a = action_list; a; a = a -> next )
-        {
-          if ( a -> signature_str.empty() ) continue;
-          std::string encoded_action = a -> signature_str;
-          if ( save_html )
-            report_t::encode_html( encoded_action );
-          profile_str += encoded_action;
-          profile_str += i ? "/" : "";
-          i++;
-        }
-      }
-    profile_str += term + "\t\t\"," + term;
-
-    // Gear Summary
-    profile_str += "\t\t\"Gear Summary\" : \"" + term;
-    for ( int i=0; i < STAT_MAX; i++ )
-    {
-      double value = initial_stats.get_stat( i );
-      if ( value != 0 )
-      {
-        profile_str += "\t\t\tgear_";
-        profile_str += util_t::stat_type_string( i );
-        profile_str += "=" + util_t::to_string( value, 0 ) + term;
-      }
-    }
-    profile_str += "\t\t\t# Set Bonuses" + term;
-    for ( set_bonus_t* sb = set_bonus_list; sb; sb = sb -> next )
-    {
-      if ( sb -> two_pc() )  profile_str += "\t\t\tset_bonus=" + sb -> name + "_2pc" + term ;
-      if ( sb -> four_pc() ) profile_str += "\t\t\tset_bonus=" + sb -> name + "_4pc" + term ;
-    }
-    profile_str += "\t\t\"," + term;
-
-  profile_str += "\t}" + term;
-
-  profile_str += "}";
-
-  return true;
+  os << "}";
 }
 
 // player_t::copy_from ======================================================

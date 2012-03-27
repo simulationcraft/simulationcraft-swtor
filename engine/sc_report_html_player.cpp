@@ -770,13 +770,39 @@ static void print_html_gear ( FILE* file, player_t* a )
 
 // print_html_profile =======================================================
 
-static void print_html_profile ( FILE* file, player_t* a )
+std::string text_to_html( const std::string& text )
+{
+  std::string html;
+
+  for ( auto p = text.begin(), e = text.end(); p != e; ++p )
+  {
+    switch( *p )
+    {
+    case '&':
+      html += "&amp;";
+      break;
+    case '<':
+      html += "&lt;";
+      break;
+    case '>':
+      html += "&gt;";
+      break;
+    case '\n':
+      html += "<br>\n";
+      break;
+    default:
+      html += *p;
+      break;
+    }
+  }
+
+  return html;
+}
+
+static void print_html_profile( FILE* file, player_t* a )
 {
   if ( a -> fight_length.mean > 0 )
   {
-    std::string profile_str;
-    a -> create_profile( profile_str, SAVE_ALL, true );
-
     fprintf( file,
              "\t\t\t\t\t\t<div class=\"player-section profile\">\n"
              "\t\t\t\t\t\t\t<h3 class=\"toggle\">Profile</h3>\n"
@@ -786,14 +812,14 @@ static void print_html_profile ( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t</div>\n"
              "\t\t\t\t\t\t\t</div>\n"
              "\t\t\t\t\t\t</div>\n",
-             profile_str.c_str() );
+             text_to_html( a -> create_profile( SAVE_ALL ) ).c_str() );
   }
 }
 
 
 // print_html_stats =========================================================
 
-static void print_html_stats ( FILE* file, player_t* a )
+static void print_html_stats( FILE* file, player_t* a )
 {
   std::string n = a -> name();
   util_t::format_text( n, true );
@@ -1437,13 +1463,12 @@ static void print_html_player_action_priority_list( FILE* file, sim_t* sim, play
       fprintf( file, " class=\"odd\"" );
     }
     fprintf( file, ">\n" );
-    std::string enc_action = a -> signature_str; report_t::encode_html( enc_action );
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t\t<th class=\"right\">%c</th>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"left\">%s</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
              a -> marker,
-             enc_action.c_str() );
+             report_t::encode_html( a -> signature_str ).c_str() );
     i++;
   }
   fprintf( file,
@@ -2250,19 +2275,17 @@ static void print_html_player_results_spec_gear( FILE* file, sim_t* sim, player_
     {
       std::string enc_url = p -> origin_str;
       util_t::urldecode( enc_url );
-      report_t::encode_html( enc_url );
       fprintf( file,
                "\t\t\t\t\t\t\t<tr class=\"left\">\n"
                "\t\t\t\t\t\t\t\t<th><a href=\"#help-origin\" class=\"help\">Origin</a></th>\n"
                "\t\t\t\t\t\t\t\t<td><a href=\"%s\" class=\"ext\">%s</a></td>\n"
                "\t\t\t\t\t\t\t</tr>\n",
                p -> origin_str.c_str(),
-               enc_url.c_str() );
+               report_t::encode_html( enc_url ).c_str() );
     }
     if ( ! p -> talents_str.empty() )
     {
-      std::string enc_url = p -> talents_str;
-      report_t::encode_html( enc_url );
+      std::string enc_url = report_t::encode_html( p -> talents_str );
       fprintf( file,
                "\t\t\t\t\t\t\t<tr class=\"left\">\n"
                "\t\t\t\t\t\t\t\t<th>Talents</th>\n"
