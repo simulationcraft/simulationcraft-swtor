@@ -1104,10 +1104,8 @@ RandomSuffixDataModel::randomSuffixStatsStr( const random_suffix_data_t& suffix 
 
       if ( stat == STAT_NONE ) continue;
 
-      std::string stat_str = util_t::stat_type_abbrev( stat );
-      char statbuf[32];
-      snprintf( statbuf, sizeof( statbuf ), "+%d%s", static_cast< int >( stat_amount ), stat_str.c_str() );
-      stat_list.push_back( statbuf );
+      stat_list.push_back( ( boost::format( "+%d%s" ) % static_cast<int>( stat_amount )
+                             % util_t::stat_type_abbrev( stat ) ).str() );
     }
   }
 

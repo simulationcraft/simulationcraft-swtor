@@ -1512,13 +1512,12 @@ static void print_html_player_statistics( FILE* file, player_t* p )
 
 // Statistics & Data Analysis
 
-  fprintf( file,
-           "\t\t\t\t\t<div class=\"player-section gains\">\n"
-           "\t\t\t\t\t\t<h3 class=\"toggle\">Statistics & Data Analysis</h3>\n"
-           "\t\t\t\t\t\t<div class=\"toggle-content hide\">\n"
-           "\t\t\t\t\t\t\t<table  class=\"sc\">\n"
-           "\t\t\t\t\t\t\t\t<tr>\n"
-           "\t\t\t\t\t\t\t\t<td>\n" );
+  fputs( "\t\t\t\t\t<div class=\"player-section gains\">\n"
+         "\t\t\t\t\t\t<h3 class=\"toggle\">Statistics & Data Analysis</h3>\n"
+         "\t\t\t\t\t\t<div class=\"toggle-content hide\">\n"
+         "\t\t\t\t\t\t\t<table  class=\"sc\">\n"
+         "\t\t\t\t\t\t\t\t<tr>\n"
+         "\t\t\t\t\t\t\t\t<td>\n", file );
 
   print_html_sample_data( file, p, p -> fight_length, "Fight Length" );
 
@@ -1540,23 +1539,14 @@ static void print_html_player_statistics( FILE* file, player_t* p )
 
   print_html_sample_data( file, p, p -> executed_foreground_actions, "#Executed Foreground Actions" );
 
-  std::string dps_error_str                    = "";
-
-  char buffer[ 1024 ];
-
   if ( ! p -> dps_error_chart.empty() )
-  {
-    snprintf( buffer, sizeof( buffer ), "<img src=\"%s\" alt=\"DPS Error Chart\" />\n", p -> dps_error_chart.c_str() );
-    dps_error_str = buffer;
-  }
-  fprintf( file,
-           "%s\n"
-           "\t\t\t\t\t\t\t</td>\n"
-           "\t\t\t\t\t\t\t</tr>\n"
-           "\t\t\t\t\t\t\t</table>\n"
-           "\t\t\t\t\t\t\t</div>\n"
-           "\t\t\t\t\t\t</div>\n",
-           dps_error_str.c_str() );
+    fprintf( file, "<img src=\"%s\" alt=\"DPS Error Chart\" />\n", p -> dps_error_chart.c_str() );
+
+  fputs( "\t\t\t\t\t\t\t</td>\n"
+         "\t\t\t\t\t\t\t</tr>\n"
+         "\t\t\t\t\t\t\t</table>\n"
+         "\t\t\t\t\t\t\t</div>\n"
+         "\t\t\t\t\t\t</div>\n", file );
 }
 
 // print_html_player_resources ==============================================

@@ -163,10 +163,7 @@ void parse_value( sim_t*                  sim,
       token_type = parse_token( token_str, input, index );
       if ( token_type == ']' ) break;
 
-      char buffer[ 64 ];
-      snprintf( buffer, sizeof( buffer ), "%d", ++array_index );
-
-      js_node_t* child = new js_node_t( buffer );
+      js_node_t* child = new js_node_t( ( boost::format( "%d" ) % ++array_index ).str() );
       node -> children.push_back( child );
 
       parse_value( sim, child, token_type, token_str, input, index );

@@ -444,14 +444,12 @@ bool item_t::decode_random_suffix()
       // Make absolutely sure we do not add stats twice
       if ( base_stats.get_stat( stat ) == 0 )
       {
-        base_stats.add_stat( stat, static_cast< int >( stat_amount ) );
-        stats.add_stat( stat, static_cast< int >( stat_amount ) );
+        base_stats.add_stat( stat, static_cast<int>( stat_amount ) );
+        stats.add_stat( stat, static_cast<int>( stat_amount ) );
 
         std::string stat_str = util_t::stat_type_abbrev( stat );
-        stat_str = tolower( stat_str );
-        char statbuf[32];
-        snprintf( statbuf, sizeof( statbuf ), "%d%s", static_cast< int >( stat_amount ), stat_str.c_str() );
-        stat_list.push_back( statbuf );
+        stat_list.push_back( ( boost::format( "%d%s" ) % static_cast<int>( stat_amount )
+                               % stat_str ).str() );
 
         if ( sim -> debug )
           log_t::output( sim, "random_suffix: stat=%d (%s) stat_amount=%f", stat, stat_str.c_str(), stat_amount );

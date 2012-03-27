@@ -657,22 +657,14 @@ void buff_t::aura_gain()
 {
   if ( sim -> log )
   {
-    char an[ 128 ];
-    const char* s = name();
+    std::string s = name();
     if ( max_stack >= 0 )
-    {
-      snprintf( an, sizeof( an ), "%s_%d", s, current_stack );
-      s = an;
-    }
+      s += ( boost::format( "_%d" ) % current_stack ).str();
 
     if ( player )
-    {
-      player -> aura_gain( s, current_value );
-    }
+      player -> aura_gain( s.c_str(), current_value );
     else
-    {
-      sim -> aura_gain( s, aura_id );
-    }
+      sim -> aura_gain( s.c_str(), aura_id );
   }
 }
 

@@ -467,12 +467,7 @@ pet_t* enemy_t::create_pet( const std::string& add_name, const std::string& /* p
 void enemy_t::create_pets()
 {
   for ( int i=0; i < sim -> target_adds; i++ )
-  {
-    char buffer[ 1024 ];
-    snprintf( buffer, sizeof( buffer ), "add_%i", i );
-
-    create_pet( buffer );
-  }
+    create_pet( ( boost::format( "add_%d" ) % i ).str() );
 }
 
 // enemy_t::find_add ========================================================

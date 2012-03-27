@@ -488,10 +488,8 @@ static void print_html_raid_imagemap( FILE* file, sim_t* sim, int num, bool dps 
   }
   fprintf( file, "];\n" );
 
-  char imgid[32];
-  snprintf( imgid, sizeof( imgid ), "%sIMG%d", ( dps ? "DPS" : "HPS" ), num );
-  char mapid[32];
-  snprintf( mapid, sizeof( mapid ), "%sMAP%d", ( dps ? "DPS" : "HPS" ), num );
+  std::string imgid = ( boost::format( "%sIMG%d" ) % ( dps ? "DPS" : "HPS" ) % num ).str();
+  std::string mapid = ( boost::format( "%sMAP%d" ) % ( dps ? "DPS" : "HPS" ) % num ).str();
 
   fprintf( file,
            "\t\t\tu = document.getElementById('%s').src;\n"
@@ -504,7 +502,7 @@ static void print_html_raid_imagemap( FILE* file, sim_t* sim, int num, bool dps 
            "\t\t\t\t\topen_anchor(target);\n"
            "\t\t\t\t});\n"
            "\t\t\t});\n\n",
-           imgid, mapid, imgid, mapid, mapid );
+           imgid.c_str(), mapid.c_str(), imgid.c_str(), mapid.c_str(), mapid.c_str() );
 }
 
 static void print_html_raid_imagemaps( FILE*  file, sim_t* sim )

@@ -1157,9 +1157,10 @@ void util_t::replace_all_( std::string& s, char from, const char* to )
 
 std::string util_t::to_string( double f, int precision )
 {
-  char buffer[ 64 ];
-  snprintf( buffer, sizeof( buffer ), "%.*f", precision, f );
-  return std::string( buffer );
+  std::ostringstream ss;
+  ss.precision( precision );
+  ss << f;
+  return ss.str();
 }
 
 // util_t::to_string ========================================================
@@ -1336,11 +1337,7 @@ void util_t::urlencode_( std::string& str )
     unsigned char c = str[ i ];
 
     if ( c > 0x7F || c == ' ' || c == '\'' )
-    {
-      char enc_str[4];
-      snprintf( enc_str, sizeof( enc_str ), "%%%02X", c );
-      temp += enc_str;
-    }
+      temp += ( boost::format( "%%%02X" ) % c ).str();
     else if ( c == '+' )
       temp += "%20";
     else if ( c < 0x20 )
