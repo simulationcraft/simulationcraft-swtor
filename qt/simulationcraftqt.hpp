@@ -24,8 +24,8 @@ enum master_tabs {
 };
 
 enum import_tabs {
-  TAB_BIS,
   TAB_MR_ROBOT,
+  TAB_BIS,
   TAB_HISTORY,
   TAB_CUSTOM,
 };

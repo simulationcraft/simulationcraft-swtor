@@ -12,8 +12,6 @@
 #include <CoreFoundation/CoreFoundation.h>
 #endif
 
-static const bool ENABLE_MRROBOT_TAB = true;
-
 // ==========================================================================
 // Utilities
 // ==========================================================================
@@ -715,17 +713,14 @@ void SimulationCraftWindow::createImportTab()
   importTab = new QTabWidget();
   mainTab->addTab( importTab, "Import" );
 
-  createBestInSlotTab();
+  cookieJar = new PersistentCookieJar( "simcqt.cookies" );
+  cookieJar->load();
+  mrRobotBuilderView = new SimulationCraftWebView( this );
+  mrRobotBuilderView->page()->networkAccessManager()->setCookieJar( cookieJar );
+  mrRobotBuilderView->setUrl( QUrl( "http://swtor.askmrrobot.com/character/search" ) );
+  importTab->addTab( mrRobotBuilderView, "Mr. Robot" );
 
-  if ( ENABLE_MRROBOT_TAB )
-  {
-    cookieJar = new PersistentCookieJar( "simcqt.cookies" );
-    cookieJar->load();
-    mrRobotBuilderView = new SimulationCraftWebView( this );
-    mrRobotBuilderView->page()->networkAccessManager()->setCookieJar( cookieJar );
-    mrRobotBuilderView->setUrl( QUrl( "http://swtor.askmrrobot.com/character/search" ) );
-    importTab->addTab( mrRobotBuilderView, "Mr. Robot" );
-  }
+  createBestInSlotTab();
 
   historyList = new QListWidget();
   historyList->setSortingEnabled( true );
@@ -1110,11 +1105,8 @@ void SimulationCraftWindow::deleteSim()
 // ==========================================================================
 void ImportThread::importMrRobot()
 {
-  QString id;
-  QUrl qurl = url;
-
-  QStringList parts = qurl.path().split( '/' );
-  id = parts[ parts.size() - 1 ];
+  QStringList parts = QUrl( url ).path().split( '/' );
+  QString id = parts[ parts.size() - 1 ];
 
   if ( id.isEmpty() )
   {
@@ -1124,10 +1116,7 @@ void ImportThread::importMrRobot()
   {
     // Windows 7 64bit somehow cannot handle straight toStdString() conversion, so
     // do it in a silly way as a workaround for now.
-    std::string mrrobot_id  = id.toUtf8().constData();
-    player = mrrobot::download_player( sim, mrrobot_id );
-
-
+    player = mrrobot::download_player( sim, id.toUtf8().constData() );
   }
 }
 
