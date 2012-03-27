@@ -1,8 +1,7 @@
-jedi_shadow=Jedi_Shadow_Balance
-level=50
+mrrobot=72bd51f8-fe33-461e-a0a8-ac4513000154|jedi_shadow
+name=Jedi_Shadow_Balance
 talents=http://www.torhead.com/skill-calc#601McZhMZfrbRrRkMfz.1
 position=back
-Shadow_Assassin_Gear.simc
 save=Jedi_Shadow_Balance.simc
 
 copy=Jedi_Shadow_Infiltration,Jedi_Shadow_Balance

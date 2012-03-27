@@ -1,8 +1,7 @@
-jedi_sage=Jedi_Sage_Balance
-level=50
+mrrobot=bf331e5d-8178-4ebc-8dfa-85035a30aae5|jedi_sage
+name=Jedi_Sage_Balance
 talents=http://www.torhead.com/skill-calc#600hZbcMZcMfRsMkrfz.1
 position=ranged_front
-Sage_Sorcerer_Gear.simc
 save=Jedi_Sage_Balance.simc
 
 copy=Jedi_Sage_Telekinetics,Jedi_Sage_Balance
