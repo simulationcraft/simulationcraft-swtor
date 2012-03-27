@@ -584,19 +584,26 @@ void canonical_race_name( std::string& name )
 // mrrobot::download_player =================================================
 
 player_t* download_player( sim_t*             sim,
-                           const std::string& id,
+                           const std::string& key,
                            cache::behavior_t  caching )
 {
-  if ( id != "test")
+  const auto parts = split( key, '|' );
+  const std::string& id = parts[0];
+
+  // Check form validity of the provided profile id before even starting to access the profile
+  try { boost::uuids::string_generator()( id ); }
+  catch( std::runtime_error& )
   {
-    // Check form validity of the provided profile id before even starting to access the profile
-    try
+    sim -> errorf( "'%s' is not a valid Mr. Robot profile identifier.\n", id.c_str() );
+    return nullptr;
+  }
+
+  if ( parts.size() > 1 )
+  {
+    player_type pt = util_t::translate_class_str( parts[ 1 ] );
+    if ( pt == PLAYER_NONE )
     {
-      boost::uuids::string_generator()( id );
-    }
-    catch( std::runtime_error& )
-    {
-      sim -> errorf( "'%s' is not a valid Mr. Robot profile identifier.\n", id.c_str() );
+      sim -> errorf( "'%s' is not a valid advanced class.\n", parts[ 1 ].c_str() );
       return nullptr;
     }
   }
@@ -643,7 +650,9 @@ player_t* download_player( sim_t*             sim,
   }
 
   std::string class_name;
-  if ( ! js_t::get_value( class_name, profile, "AdvancedClass" ) )
+  if ( parts.size() > 1 )
+    class_name = parts[ 1 ];
+  else if ( ! js_t::get_value( class_name, profile, "AdvancedClass" ) )
   {
     sim -> errorf( "Unable to extract player class from '%s'.\n", url.c_str() );
     return nullptr;

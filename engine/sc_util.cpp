@@ -307,7 +307,7 @@ profession_type util_t::parse_profession_type( const std::string& name )
 
 // util_t::player_type_string ===============================================
 
-const char* util_t::player_type_string( int type )
+const char* util_t::player_type_string( player_type type )
 {
   switch ( type )
   {
@@ -341,7 +341,7 @@ const char* util_t::player_type_string( int type )
 
 // util_t::translate_class_str ==============================================
 
-int util_t::translate_class_str( const std::string& s )
+player_type util_t::translate_class_str( const std::string& s )
 {
   std::string fmt_s( s );
   util_t::format_name( fmt_s );
@@ -364,16 +364,16 @@ int util_t::translate_class_str( const std::string& s )
   else if ( fmt_s == "operative"                                ) return IA_OPERATIVE;
   else if ( fmt_s == "sniper"                                   ) return IA_SNIPER;
 
-  else                                                        return PLAYER_NONE;
+  else                                                            return PLAYER_NONE;
 }
 
 // util_t::parse_player_type ================================================
 
 player_type util_t::parse_player_type( const std::string& name )
 {
-  for ( int i=( int ) PLAYER_NONE; i < ( int ) PLAYER_MAX; i++ )
+  for ( player_type i = PLAYER_NONE; i < PLAYER_MAX; ++i )
     if ( util_t::str_compare_ci( name, util_t::player_type_string( i ) ) )
-      return ( player_type ) i;
+      return i;
 
   return PLAYER_NONE;
 }
@@ -899,92 +899,6 @@ bool util_t::parse_origin( std::string& region_str,
   if (   name_str.empty() ) return false;
 
   return true;
-}
-
-// util_t::class_id_mask ====================================================
-
-int util_t::class_id_mask( int type )
-{
-  int cid = class_id( type );
-  if ( cid <= 0 ) return 0;
-  return 1 << ( cid - 1 );
-}
-
-// util_t::class_id =========================================================
-
-int util_t::class_id( int /* type */ )
-{
-  return 0;
-}
-
-// util_t::race_id ==========================================================
-
-unsigned util_t::race_id( int /* r */ )
-{
-  return 0;
-}
-
-// util_t::race_mask ========================================================
-
-unsigned util_t::race_mask( int r )
-{
-  uint32_t id = race_id( r );
-
-  if ( id > 0 )
-    return ( 1 << ( id - 1 ) );
-
-  return 0x00;
-}
-
-// util_t::pet_class_type ===================================================
-
-player_type util_t::pet_class_type( int /* c */ )
-{
-  return PLAYER_PET;
-}
-
-// util_t::pet_mask =========================================================
-
-unsigned util_t::pet_mask( int /* p */ )
-{
-  return 0x0;
-}
-
-// util_t::pet_id ===========================================================
-
-unsigned util_t::pet_id( int p )
-{
-  uint32_t mask = pet_mask( p );
-
-  switch ( mask )
-  {
-  case 0x1: return 1;
-  case 0x2: return 2;
-  case 0x4: return 3;
-  }
-
-  return 0;
-}
-
-// util_t::class_id_string ==================================================
-
-const char* util_t::class_id_string( int /* type */ )
-{
-  return "0";
-}
-
-// util_t::translate_class_id ===============================================
-
-int util_t::translate_class_id( int /* cid */ )
-{
-  return PLAYER_NONE;
-}
-
-// util_t::translate_race_id ================================================
-
-race_type util_t::translate_race_id( int /* rid */ )
-{
-  return RACE_NONE;
 }
 
 // util_t::quality_type_string ==============================================

@@ -1188,59 +1188,48 @@ public:
   static double ability_rank( int player_level, double ability_value, int ability_level, ... );
   static int    ability_rank( int player_level, int    ability_value, int ability_level, ... );
 
-  static const char* attribute_type_string     ( int type );
-  static const char* dmg_type_string           ( int type );
-  static const char* stim_type_string          ( stim_t type );
-  static const char* player_type_string        ( int type );
-  static const char* pet_type_string           ( int type );
-  static const char* position_type_string      ( int type );
-  static const char* profession_type_string    ( profession_type type );
-  static const char* quality_type_string       ( quality_type type );
-  static const char* race_type_string          ( int type );
-  static const char* role_type_string          ( int type );
-  static const char* resource_type_string      ( resource_type type );
-  static const char* result_type_string        ( int type );
-  static const char* school_type_string        ( int type );
-  static const char* slot_type_string          ( slot_type type );
-  static const char* stat_type_string          ( int type );
-  static const char* stat_type_abbrev          ( int type );
-  static const char* stat_type_wowhead         ( int type );
-  static int         talent_tree               ( int tree, player_type ptype );
-  static const char* talent_tree_string        ( int tree, bool armory_format = true );
-  static const char* weapon_type_string        ( weapon_type type );
+  static const char* attribute_type_string ( int type );
+  static const char* dmg_type_string       ( int type );
+  static const char* stim_type_string      ( stim_t type );
+  static const char* player_type_string    ( player_type type );
+  static const char* pet_type_string       ( int type );
+  static const char* position_type_string  ( int type );
+  static const char* profession_type_string( profession_type type );
+  static const char* quality_type_string   ( quality_type type );
+  static const char* race_type_string      ( int type );
+  static const char* role_type_string      ( int type );
+  static const char* resource_type_string  ( resource_type type );
+  static const char* result_type_string    ( int type );
+  static const char* school_type_string    ( int type );
+  static const char* slot_type_string      ( slot_type type );
+  static const char* stat_type_string      ( int type );
+  static const char* stat_type_abbrev      ( int type );
+  static const char* stat_type_wowhead     ( int type );
+  static int         talent_tree           ( int tree, player_type ptype );
+  static const char* talent_tree_string    ( int tree, bool armory_format = true );
+  static const char* weapon_type_string    ( weapon_type type );
 
-  static int parse_attribute_type              ( const std::string& name );
-  static int parse_dmg_type                    ( const std::string& name );
-  static stim_t parse_stim_type                ( const std::string& name );
-  static player_type parse_player_type         ( const std::string& name );
-  static pet_type_t parse_pet_type             ( const std::string& name );
-  static profession_type parse_profession_type ( const std::string& name );
-  static position_type parse_position_type     ( const std::string& name );
-  static quality_type parse_quality_type       ( const std::string& name );
-  static race_type parse_race_type             ( const std::string& name );
-  static role_type parse_role_type             ( const std::string& name );
-  static resource_type parse_resource_type     ( const std::string& name );
-  static int parse_result_type                 ( const std::string& name );
-  static school_type parse_school_type         ( const std::string& name );
-  static slot_type parse_slot_type             ( const std::string& name );
-  static stat_type parse_stat_type             ( const std::string& name );
-  static int parse_talent_tree                 ( const std::string& name );
-  static weapon_type parse_weapon_type         ( const std::string& name );
+  static int parse_attribute_type             ( const std::string& name );
+  static int parse_dmg_type                   ( const std::string& name );
+  static stim_t parse_stim_type               ( const std::string& name );
+  static player_type parse_player_type        ( const std::string& name );
+  static pet_type_t parse_pet_type            ( const std::string& name );
+  static profession_type parse_profession_type( const std::string& name );
+  static position_type parse_position_type    ( const std::string& name );
+  static quality_type parse_quality_type      ( const std::string& name );
+  static race_type parse_race_type            ( const std::string& name );
+  static role_type parse_role_type            ( const std::string& name );
+  static resource_type parse_resource_type    ( const std::string& name );
+  static int parse_result_type                ( const std::string& name );
+  static school_type parse_school_type        ( const std::string& name );
+  static slot_type parse_slot_type            ( const std::string& name );
+  static stat_type parse_stat_type            ( const std::string& name );
+  static int parse_talent_tree                ( const std::string& name );
+  static weapon_type parse_weapon_type        ( const std::string& name );
 
   static bool parse_origin( std::string& region, std::string& server, std::string& name, const std::string& origin );
 
-  static int class_id_mask( int type );
-  static int class_id( int type );
-  static unsigned race_mask( int type );
-  static unsigned race_id( int type );
-  static unsigned pet_mask( int type );
-  static unsigned pet_id( int type );
-  static player_type pet_class_type( int type );
-
-  static const char* class_id_string( int type );
-  static int translate_class_id( int cid );
-  static int translate_class_str( const std::string& s );
-  static race_type translate_race_id( int rid );
+  static player_type translate_class_str( const std::string& s );
 
   static int string_split( std::vector<std::string>& results, const std::string& str, const char* delim, bool allow_quotes = false )
   { string_split_( results, str, delim, allow_quotes ); return static_cast<int>( results.size() ); }

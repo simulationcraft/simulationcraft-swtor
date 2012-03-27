@@ -815,7 +815,7 @@ void SimulationCraftWindow::createBestInSlotTab()
       profile = QDir::toNativeSeparators( profile );
       profile += profileList[ i ];
 
-      for ( int pt = PLAYER_NONE; pt < PLAYER_MAX; ++pt )
+      for ( player_type pt = PLAYER_NONE; pt < PLAYER_MAX; ++pt )
       {
         if ( profile.contains( util_t::player_type_string( pt ), Qt::CaseInsensitive ) )
         {
