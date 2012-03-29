@@ -621,7 +621,7 @@ sim_t::sim_t( sim_t* p, int index ) :
   raid_dps(), total_dmg(), raid_hps(), total_heal(), simulation_length( false ),
   report_progress( 1 ),
   path_str( "." ), output_file( stdout ),
-  armory_throttle( 5 ), current_throttle( 5 ), debug_exp( 0 ),
+  debug_exp( 0 ),
   // Report
   report_precision( 4 ),report_pets_separately( 0 ), report_targets( 1 ), report_details( 1 ),
   report_rng( 0 ), hosted_html( 0 ), print_styles( false ), report_overheal( 0 ),
@@ -1929,7 +1929,6 @@ void sim_t::create_options()
     { "seed",                             OPT_INT,    &( seed                                     ) },
     { "wheel_granularity",                OPT_FLT,    &( wheel_granularity                        ) },
     { "wheel_seconds",                    OPT_INT,    &( wheel_seconds                            ) },
-    { "armory_throttle",                  OPT_INT,    &( armory_throttle                          ) },
     { "reference_player",                 OPT_STRING, &( reference_player_str                     ) },
     { "raid_events",                      OPT_STRING, &( raid_events_str                          ) },
     { "raid_events+",                     OPT_APPEND, &( raid_events_str                          ) },
@@ -2174,8 +2173,6 @@ int sim_t::main( int argc, char** argv )
   }
 
   if ( canceled ) return 0;
-
-  current_throttle = armory_throttle;
 
   util_t::fprintf( output_file, "\nSimulationCraft %s-%s for Star Wars: The Old Republic %s %s \n",
                    SC_MAJOR_VERSION, SC_MINOR_VERSION, ptr ? SWTOR_VERSION_PTR : SWTOR_VERSION_LIVE, ( ptr ? "PTR" : "Live" ) );
