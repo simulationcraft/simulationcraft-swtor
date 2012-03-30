@@ -8,7 +8,7 @@ position=back
 role=hybrid
 use_pre_potion=0
 professions=synthweaving
-talents=http://www.torhead.com/skill-calc#6010MZhGMRkhMrtzZcMc.1
+talents=http://www.torhead.com/skill-calc#6010MZhGMRkhMrtzZf0c.1
 actions=stim,type=exotech_resolve
 actions+=/force_valor
 actions+=/shadow_technique
