@@ -187,7 +187,7 @@ public:
   void clear_debuffs();
 };
 
-// iterable enumeration template =====
+// iterable enumeration templates ===========================================
 
 /*
  * Enumeration types in C++ implicitly convert to int but not from int (e.g.,

@@ -781,7 +781,6 @@ struct discharge_t: public shadow_assassin_spell_t
 
       background = true;
 
-      base_multiplier *= 1 + p->talents.crackling_charge->rank() * 0.08;
       player_multiplier += p->buffs.static_charges->stack() * 0.06;
       crit_bonus += p->talents.crackling_blasts->rank() * 0.10;
     }
