@@ -1072,8 +1072,7 @@ void util_t::replace_all_( std::string& s, char from, const char* to )
 std::string util_t::to_string( double f, int precision )
 {
   std::ostringstream ss;
-  ss.precision( precision );
-  ss << f;
+  ss << std::fixed << std::setprecision( precision ) << f;
   return ss.str();
 }
 
