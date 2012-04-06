@@ -94,7 +94,7 @@ struct vanguard_powertech_t : public player_t
     virtual void      init_rng();
     virtual void      init_actions();
     virtual resource_type primary_resource() const;
-    virtual int       primary_role() const;
+    virtual role_type primary_role() const;
             void      create_talents();
 
     virtual void init_scaling()
@@ -300,7 +300,7 @@ resource_type vanguard_powertech_t::primary_resource() const
 
 // vanguard_powertech_t::primary_role ==================================================
 
-int vanguard_powertech_t::primary_role() const
+role_type vanguard_powertech_t::primary_role() const
 {
     switch ( player_t::primary_role() )
     {

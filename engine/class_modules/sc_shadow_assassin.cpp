@@ -187,7 +187,7 @@ struct shadow_assassin_t : public player_t
   virtual void      init_actions();
   virtual void      init_spells();
   virtual resource_type primary_resource() const;
-  virtual int       primary_role() const;
+  virtual role_type primary_role() const;
   virtual double    force_regen_per_second() const; // override
   virtual void      regen( timespan_t periodicity );
   virtual void      reset();
@@ -264,7 +264,7 @@ struct shadow_assassin_attack_t : public shadow_assassin_action_t
     may_crit = true;
   }
 
-  virtual void impact( player_t* t, int impact_result, double travel_dmg )
+  virtual void impact( player_t* t, result_type impact_result, double travel_dmg )
   {
     action_t::impact( t, impact_result, travel_dmg );
 
@@ -305,7 +305,7 @@ struct shadow_assassin_attack_t : public shadow_assassin_action_t
 
 struct shadow_assassin_spell_t : public shadow_assassin_action_t
 {
-  shadow_assassin_spell_t( const std::string& n, shadow_assassin_t* p, const school_type s = SCHOOL_ENERGY ) :
+  shadow_assassin_spell_t( const std::string& n, shadow_assassin_t* p, school_type s = SCHOOL_ENERGY ) :
     shadow_assassin_action_t( n, p, force_policy, RESOURCE_FORCE, s )
   {
     may_crit = true;
@@ -342,7 +342,7 @@ struct shadow_assassin_spell_t : public shadow_assassin_action_t
       player_crit += 0.60;
   }
 
-  virtual void target_debuff( player_t* t, int dmg_type )
+  virtual void target_debuff( player_t* t, dmg_type dmg_type )
   {
     action_t::target_debuff( t, dmg_type );
 
@@ -375,7 +375,7 @@ struct shadow_assassin_spell_t : public shadow_assassin_action_t
     }
   }
 
-  virtual void impact( player_t* t, int impact_result, double travel_dmg )
+  virtual void impact( player_t* t, result_type impact_result, double travel_dmg )
   {
     action_t::impact( t, impact_result, travel_dmg );
 
@@ -559,7 +559,7 @@ struct crushing_darkness_t : public shadow_assassin_spell_t
       may_crit = false;
     }
 
-    virtual void target_debuff( player_t* t, int dmg_type )
+    virtual void target_debuff( player_t* t, dmg_type dmg_type )
     {
       shadow_assassin_spell_t::target_debuff( t, dmg_type );
 
@@ -700,7 +700,7 @@ struct creeping_terror_t : public shadow_assassin_spell_t
     tick_zero = true;
   }
 
-  virtual void target_debuff( player_t* t, int dmg_type )
+  virtual void target_debuff( player_t* t, dmg_type dmg_type )
   {
     shadow_assassin_spell_t::target_debuff( t, dmg_type );
 
@@ -757,7 +757,7 @@ struct discharge_t: public shadow_assassin_spell_t
       crit_bonus += p->talents.crackling_blasts->rank() * 0.10;
     }
 
-    virtual void target_debuff( player_t* t, int dmg_type )
+    virtual void target_debuff( player_t* t, dmg_type dmg_type )
     {
       shadow_assassin_spell_t::target_debuff( t, dmg_type );
 
@@ -1972,7 +1972,7 @@ resource_type shadow_assassin_t::primary_resource() const
 
 // shadow_assassin_t::primary_role ==========================================
 
-int shadow_assassin_t::primary_role() const
+role_type shadow_assassin_t::primary_role() const
 {
   switch ( player_t::primary_role() )
   {

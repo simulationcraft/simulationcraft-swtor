@@ -286,7 +286,7 @@ void print_xml_player( sim_t * sim, xml_writer_t & writer, player_t * p, player_
   writer.begin_tag( "class" );
   writer.print_attribute( "type", util_t::player_type_string( p->type ) );
   if ( p -> is_pet() )
-    writer.print_attribute( "subtype", util_t::pet_type_string( p -> cast_pet() -> pet_type ) );
+    writer.print_attribute( "subtype", util_t::pet_type_string( p -> cast_pet() -> pettype ) );
   writer.end_tag(); // </class>
   writer.print_tag( "talent_tree", util_t::talent_tree_string( p -> primary_tree() ) );
   writer.print_tag( "primary_role", util_t::role_type_string( p -> primary_role() ) );
@@ -460,7 +460,7 @@ void print_xml_player_actions( xml_writer_t & writer, player_t* p )
         writer.begin_tag( "direct_results" );
         writer.print_attribute( "count", util_t::to_string( s -> num_direct_results ) );
 
-        for ( int i=RESULT_MAX-1; i >= RESULT_NONE; i-- )
+        for ( result_type i = RESULT_MAX; --i >= RESULT_NONE; )
         {
           if ( s -> direct_results[ i ].count.mean )
           {
@@ -489,7 +489,7 @@ void print_xml_player_actions( xml_writer_t & writer, player_t* p )
         writer.print_attribute( "count", util_t::to_string( s -> num_tick_results ) );
         writer.print_attribute( "ticks", util_t::to_string( s -> num_ticks ) );
 
-        for ( int i=RESULT_MAX-1; i >= RESULT_NONE; i-- )
+        for ( result_type i = RESULT_MAX; --i >= RESULT_NONE; )
         {
           if ( s -> tick_results[ i ].count.mean )
           {
@@ -669,7 +669,7 @@ void print_xml_player_scale_factors( xml_writer_t & writer, player_t * p )
 
   writer.begin_tag( "weights" );
 
-  for ( int i=0; i < STAT_MAX; i++ )
+  for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
   {
     if ( p -> scales_with[ i ] )
     {
@@ -766,7 +766,7 @@ void print_xml_player_dps_plots( xml_writer_t & writer, player_t * p )
   writer.print_attribute( "max", util_t::to_string( max, 1 ) );
   writer.print_attribute( "points", util_t::to_string( points ) );
 
-  for ( int i=0; i < STAT_MAX; i++ )
+  for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
   {
     std::vector<double>& pd = p -> dps_plot_data[ i ];
 

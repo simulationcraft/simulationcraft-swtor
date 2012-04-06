@@ -794,7 +794,7 @@ expr_ptr buff_t::create_expression( const std::string& type )
 
 stat_buff_t::stat_buff_t( player_t*          p,
                           const std::string& n,
-                          int                st,
+                          stat_type          st,
                           double             a,
                           int                ms,
                           timespan_t         d,
@@ -868,7 +868,7 @@ void stat_buff_t::expire()
 
 cost_reduction_buff_t::cost_reduction_buff_t( player_t*          p,
                                               const std::string& n,
-                                              int                sch,
+                                              school_type        sch,
                                               double             a,
                                               int                ms,
                                               timespan_t         d,

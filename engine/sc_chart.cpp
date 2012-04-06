@@ -326,7 +326,7 @@ int chart_t::raid_gear( std::vector<std::string>& images,
 
   std::vector<double> data_points[ STAT_MAX ];
 
-  for ( int i=0; i < STAT_MAX; i++ )
+  for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
   {
     for ( int j=0; j < num_players; j++ )
     {
@@ -341,7 +341,7 @@ int chart_t::raid_gear( std::vector<std::string>& images,
   for ( int i=0; i < num_players; i++ )
   {
     double total=0;
-    for ( int j=0; j < STAT_MAX; j++ )
+    for ( stat_type j = STAT_NONE; j < STAT_MAX; j++ )
     {
       if ( ! stat_color( j ) ) continue;
       total += data_points[ j ][ i ];
@@ -424,7 +424,7 @@ int chart_t::raid_gear( std::vector<std::string>& images,
     s += "&amp;";
     s += "chdl=";
     first = true;
-    for ( int i=0; i < STAT_MAX; i++ )
+    for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
     {
       if ( ! stat_color( i ) ) continue;
       if ( ! first ) s += "|";
@@ -454,7 +454,7 @@ int chart_t::raid_gear( std::vector<std::string>& images,
 
     images.push_back( s );
 
-    for ( int i=0; i < STAT_MAX; i++ )
+    for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
     {
       std::vector<double>& c = data_points[ i ];
       c.erase( c.begin(), c.begin() + num_players );
@@ -1065,7 +1065,7 @@ struct compare_scale_factors
 {
   const gear_stats_t& scale_factors;
   compare_scale_factors( const gear_stats_t& s ) : scale_factors( s ) {}
-  bool operator()( int l, int r ) const
+  bool operator()( stat_type l, stat_type r ) const
   {
     return scale_factors.get_stat( l ) >
     scale_factors.get_stat( r );
@@ -1075,17 +1075,16 @@ struct compare_scale_factors
 const char* chart_t::scale_factors( std::string& s,
                                     player_t* p, const std::string& scale_factors_name, const gear_stats_t& scale_factors, const gear_stats_t& scale_factors_error )
 {
-  std::vector<int> scaling_stats;
+  std::vector<stat_type> scaling_stats;
 
-  for ( int i=0; i < ( int ) sizeof_array( p -> scales_with ); ++i )
+  for ( stat_type i = STAT_NONE; i < STAT_MAX; ++i )
   {
     if ( p -> scales_with[ i ] && scale_factors.get_stat( i ) > 0 )
       scaling_stats.push_back( i );
   }
 
-  assert( scaling_stats.size() <= static_cast<std::size_t>( std::numeric_limits<int>::max() ) );
-  int num_scaling_stats = static_cast<int>( scaling_stats.size() );
-  if ( num_scaling_stats == 0 ) return 0;
+  int num_scaling_stats = scaling_stats.size();
+  if ( ! num_scaling_stats ) return 0;
 
   boost::sort( scaling_stats, compare_scale_factors( scale_factors ) );
 
@@ -1226,7 +1225,7 @@ const char* chart_t::scaling_dps( std::string& s,
   s += "&amp;";
   s += "chdl=";
   first = true;
-  for ( int i=0; i < STAT_MAX; i++ )
+  for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
   {
     if ( ! stat_color( i ) ) continue;
     size_t size = p -> dps_plot_data[ i ].size();
@@ -1243,7 +1242,7 @@ const char* chart_t::scaling_dps( std::string& s,
   }
   s += "chco=";
   first = true;
-  for ( int i=0; i < STAT_MAX; i++ )
+  for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
   {
     if ( ! stat_color( i ) ) continue;
     size_t size = p -> dps_plot_data[ i ].size();
@@ -1329,7 +1328,7 @@ const char* chart_t::reforge_dps( std::string& s,
   {
     int range = p -> sim -> reforge_plot -> reforge_plot_amount;
     int num_points = ( int ) pd.size();
-    const std::vector<int>& stat_indices = p -> sim -> reforge_plot -> reforge_plot_stat_indices;
+    const auto& stat_indices = p -> sim -> reforge_plot -> reforge_plot_stat_indices;
     const reforge_plot_data_t& baseline = pd[ num_points / 2 ][ 2 ];
     double min_delta = baseline.value - ( min_dps - baseline.error / 2 );
     double max_delta = ( max_dps + baseline.error / 2 ) - baseline.value;
@@ -1547,7 +1546,7 @@ const char* chart_t::reforge_dps( std::string& s,
     }
     s += "\n";
     s += "<input type='hidden' name='chem' value='";
-    const std::vector<int>& stat_indices = p -> sim -> reforge_plot -> reforge_plot_stat_indices;
+    const auto& stat_indices = p -> sim -> reforge_plot -> reforge_plot_stat_indices;
     s += "y;s=text_outline;d=FF9473,18,l,000000,_,";
     snprintf( buffer, sizeof( buffer ), "%s", util_t::stat_type_string( stat_indices[ 0 ] ) );
     s += buffer;
@@ -1738,7 +1737,7 @@ const char* chart_t::gear_weights_wowhead( std::string& s,
   std::string    id_string = "";
   std::string value_string = "";
 
-  for ( int i=0; i < STAT_MAX; i++ )
+  for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
   {
     double value = p -> scaling.get_stat( i );
     if ( value == 0 ) continue;
@@ -1751,6 +1750,7 @@ const char* chart_t::gear_weights_wowhead( std::string& s,
     case STAT_CRIT_RATING:              id = 96;  break;
     case STAT_ALACRITY_RATING:          id = 103; break;
     case STAT_ARMOR:                    id = 41;  break;
+    default: break;
     }
 
     if ( id )
@@ -1807,7 +1807,7 @@ const char* chart_t::gear_weights_wowreforge( std::string& s,
   s += "-";
   s += util_t::talent_tree_string( p -> primary_tree() );
 
-  for ( int i=0; i < STAT_MAX; i++ )
+  for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
   {
     double value = p -> scaling.get_stat( i );
     if ( value == 0 ) continue;
@@ -1827,7 +1827,7 @@ struct compare_stat_scale_factors
 {
   player_t* player;
   compare_stat_scale_factors( player_t* p ) : player( p ) {}
-  bool operator()( int l, int r ) const
+  bool operator()( stat_type l, stat_type r ) const
   {
     return( player -> scaling.get_stat( l ) >
             player -> scaling.get_stat( r ) );
@@ -1838,8 +1838,8 @@ const char* chart_t::gear_weights_pawn( std::string& s,
                                         player_t*    p,
                                         bool accuracy_expertise )
 {
-  std::vector<int> stats;
-  for ( int i=0; i < STAT_MAX; i++ ) stats.push_back( i );
+  std::array<stat_type,STAT_MAX> stats;
+  boost::iota( stats, STAT_NONE );
   boost::sort( stats, compare_stat_scale_factors( p ) );
 
   char buffer[ 1024 ];
@@ -1852,9 +1852,9 @@ const char* chart_t::gear_weights_pawn( std::string& s,
   double maxR = 0;
   double maxY = 0;
 
-  for ( int i=0; i < STAT_MAX; i++ )
+  for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
   {
-    int stat = stats[ i ];
+    stat_type stat = stats[ i ];
 
     double value = p -> scaling.get_stat( stat );
     if ( value == 0 ) continue;
@@ -1872,6 +1872,7 @@ const char* chart_t::gear_weights_pawn( std::string& s,
     case STAT_CRIT_RATING:              name = "CritRating";       if ( value*20 > maxY ) maxY = value*20; break;
     case STAT_ALACRITY_RATING:          name = "AlacrityRating";   if ( value*20 > maxY ) maxY = value*20; break;
     case STAT_ARMOR:                    name = "Armor";            break;
+    default: break;
     }
 
     if ( name )
@@ -1957,7 +1958,7 @@ const char* chart_t::dps_error( std::string& s,
 
 // chart_t::resource_color ==============================================
 
-const char* chart_t::resource_color( int type )
+const char* chart_t::resource_color( resource_type type )
 {
   switch ( type )
   {

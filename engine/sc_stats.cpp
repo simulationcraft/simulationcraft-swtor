@@ -70,10 +70,10 @@ void stats_t::reset()
 
 // stats_t::add_result ======================================================
 
-void stats_t::add_result( double act_amount,
-                          double tot_amount,
-                          int    dmg_type,
-                          int    result )
+void stats_t::add_result( double      act_amount,
+                          double      tot_amount,
+                          dmg_type    dmg_type,
+                          result_type result )
 {
   iteration_actual_amount += act_amount;
   iteration_total_amount += tot_amount;

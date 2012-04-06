@@ -338,7 +338,7 @@ bool item_t::decode_stats()
   {
     token_t& t = tokens[ i ];
 
-    int s = util_t::parse_stat_type( t.name );
+    stat_type s = util_t::parse_stat_type( t.name );
 
     if ( s != STAT_NONE )
     {
@@ -549,12 +549,10 @@ bool item_t::decode_enchant()
   for ( int i=0; i < num_tokens; i++ )
   {
     token_t& t = tokens[ i ];
-    int s;
 
-    if ( ( s = util_t::parse_stat_type( t.name ) ) != STAT_NONE )
-    {
+    stat_type s = util_t::parse_stat_type( t.name );
+    if ( s != STAT_NONE )
       stats.add_stat( s, t.value );
-    }
     else
     {
       sim -> errorf( "Player %s has unknown 'enchant=' token '%s' at slot %s\n", player -> name(), t.full.c_str(), slot_name() );
@@ -599,12 +597,10 @@ bool item_t::decode_addon()
   for ( int i=0; i < num_tokens; i++ )
   {
     token_t& t = tokens[ i ];
-    int s;
+    stat_type s = util_t::parse_stat_type( t.name );
 
-    if ( ( s = util_t::parse_stat_type( t.name ) ) != STAT_NONE )
-    {
+    if ( s != STAT_NONE )
       stats.add_stat( s, t.value );
-    }
     else
     {
       sim -> errorf( "Player %s has unknown 'addon=' token '%s' at slot %s\n", player -> name(), t.full.c_str(), slot_name() );
@@ -628,7 +624,7 @@ bool item_t::decode_special( special_effect_t& effect,
   for ( int i=0; i < num_tokens; i++ )
   {
     token_t& t = tokens[ i ];
-    int s;
+    stat_type s;
     school_type sc;
 
     if ( ( s = util_t::parse_stat_type( t.name ) ) != STAT_NONE )
@@ -900,7 +896,7 @@ bool item_t::decode_weapon()
   for ( int i=0; i < num_tokens; i++ )
   {
     token_t& t = tokens[ i ];
-    int type;
+    weapon_type type;
     school_type school;
 
     if ( ( type = util_t::parse_weapon_type( t.name ) ) != WEAPON_NONE )

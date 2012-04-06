@@ -11,8 +11,8 @@
 
 // gear_stats_t::add_stat ===================================================
 
-void gear_stats_t::add_stat( int    stat,
-                             double value )
+void gear_stats_t::add_stat( stat_type stat,
+                             double    value )
 {
   switch ( stat )
   {
@@ -39,7 +39,6 @@ void gear_stats_t::add_stat( int    stat,
     break;
 
   case STAT_EXPERTISE_RATING:  expertise_rating  += value; break;
-  case STAT_EXPERTISE_RATING2: expertise_rating2 += value; break;
 
   case STAT_ACCURACY_RATING:      accuracy_rating      += value; break;
   case STAT_ACCURACY_RATING2:     accuracy_rating2     += value; break;
@@ -61,7 +60,9 @@ void gear_stats_t::add_stat( int    stat,
   case STAT_SHIELD_RATING:  shield_rating  += value; break;
   case STAT_ABSORB_RATING:  absorb_rating  += value; break;
 
-  case STAT_MAX: for ( int i=0; i < ATTRIBUTE_MAX; i++ ) { attribute[ i ] += value; }
+  case STAT_ALL:
+    for ( attribute_type i = ATTRIBUTE_NONE; i < ATTRIBUTE_MAX; i++ )
+    { attribute[ i ] += value; }
     break;
 
   default: assert( 0 );
@@ -70,8 +71,8 @@ void gear_stats_t::add_stat( int    stat,
 
 // gear_stats_t::set_stat ===================================================
 
-void gear_stats_t::set_stat( int    stat,
-                             double value )
+void gear_stats_t::set_stat( stat_type stat,
+                             double    value )
 {
   switch ( stat )
   {
@@ -98,7 +99,6 @@ void gear_stats_t::set_stat( int    stat,
     break;
 
   case STAT_EXPERTISE_RATING:  expertise_rating  = value; break;
-  case STAT_EXPERTISE_RATING2: expertise_rating2 = value; break;
 
   case STAT_ACCURACY_RATING:      accuracy_rating      = value; break;
   case STAT_ACCURACY_RATING2:     accuracy_rating2     = value; break;
@@ -120,7 +120,9 @@ void gear_stats_t::set_stat( int    stat,
   case STAT_SHIELD_RATING:  shield_rating  = value; break;
   case STAT_ABSORB_RATING:  absorb_rating  = value; break;
 
-  case STAT_MAX: for ( int i=0; i < ATTRIBUTE_MAX; i++ ) { attribute[ i ] = value; }
+  case STAT_ALL:
+    for ( attribute_type i = ATTRIBUTE_NONE; i < ATTRIBUTE_MAX; i++ )
+    { attribute[ i ] = value; }
     break;
 
   default: assert( 0 );
@@ -129,11 +131,18 @@ void gear_stats_t::set_stat( int    stat,
 
 // gear_stats_t::get_stat ===================================================
 
-double gear_stats_t::get_stat( int stat ) const
+double gear_stats_t::get_stat( stat_type stat ) const
 {
   switch ( stat )
   {
-  case STAT_NONE: return 0;
+  case STAT_NONE:
+  case STAT_MAX_HEALTH:
+  case STAT_MAX_MANA:
+  case STAT_MAX_RAGE:
+  case STAT_MAX_ENERGY:
+  case STAT_MAX_AMMO:
+  case STAT_ALL:
+    return 0;
 
   case STAT_STRENGTH:  return attribute[ ATTR_STRENGTH  ];
   case STAT_AIM:       return attribute[ ATTR_AIM       ];
@@ -148,15 +157,9 @@ double gear_stats_t::get_stat( int stat ) const
   case STAT_ENERGY: return resource[ RESOURCE_ENERGY ];
   case STAT_AMMO:   return resource[ RESOURCE_AMMO   ];
 
-  case STAT_MAX_HEALTH:
-  case STAT_MAX_MANA:
-  case STAT_MAX_RAGE:
-  case STAT_MAX_ENERGY:
-  case STAT_MAX_AMMO:
     return 0;
 
   case STAT_EXPERTISE_RATING:  return expertise_rating;
-  case STAT_EXPERTISE_RATING2: return expertise_rating2;
 
   case STAT_ACCURACY_RATING:  return accuracy_rating;
   case STAT_ACCURACY_RATING2: return accuracy_rating2;
@@ -178,16 +181,15 @@ double gear_stats_t::get_stat( int stat ) const
   case STAT_SHIELD_RATING:  return shield_rating;
   case STAT_ABSORB_RATING:  return absorb_rating;
 
-  default: assert( 0 );
+  default: assert( false ); return 0;
   }
-  return 0;
 }
 
 // gear_stats_t::print ======================================================
 
 void gear_stats_t::print( FILE* file )
 {
-  for ( int i=0; i < STAT_MAX; i++ )
+  for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
   {
     double value = get_stat( i );
 

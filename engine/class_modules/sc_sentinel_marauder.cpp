@@ -94,7 +94,7 @@ struct sentinel_marauder_t : public player_t
     virtual void      init_rng();
     virtual void      init_actions();
     virtual resource_type primary_resource() const;
-    virtual int       primary_role() const;
+    virtual role_type primary_role() const;
             void      create_talents();
 
     virtual void init_scaling()
@@ -298,7 +298,7 @@ resource_type sentinel_marauder_t::primary_resource() const
 
 // sentinel_marauder_t::primary_role ==================================================
 
-int sentinel_marauder_t::primary_role() const
+role_type sentinel_marauder_t::primary_role() const
 {
     switch ( player_t::primary_role() )
     {

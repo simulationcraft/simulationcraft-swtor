@@ -134,10 +134,10 @@ void option_t::save( FILE* file )
 
 void option_t::add( std::vector<option_t>& options,
                     const                  char* name,
-                    int                    type,
+                    option_type            type,
                     void*                  address )
 {
-  int size = ( int ) options.size();
+  size_t size = options.size();
   options.resize( size+1 );
   options[ size ].name = name;
   options[ size ].type = type;

@@ -34,7 +34,8 @@ pet_t::pet_t( sim_t*             s,
               player_t*          o,
               const std::string& n,
               bool               g ) :
-              player_t( s, g ? PLAYER_GUARDIAN : PLAYER_PET, n ), owner( o ), next_pet( 0 ), summoned( false ), pet_type( PET_NONE )
+  player_t( s, g ? PLAYER_GUARDIAN : PLAYER_PET, n ), owner( o ),
+  next_pet( 0 ), summoned( false ), pettype( PET_NONE )
 
 {
   init_pet_t_();
@@ -43,9 +44,10 @@ pet_t::pet_t( sim_t*             s,
 pet_t::pet_t( sim_t*             s,
               player_t*          o,
               const std::string& n,
-              pet_type_t         pt,
+              pet_type           pt,
               player_type        type) :
-  player_t( s, type, n ), owner( o ), next_pet( 0 ), summoned( false ), pet_type( pt )
+  player_t( s, type, n ), owner( o ), next_pet( 0 ), summoned( false ),
+  pettype( pt )
 {
   init_pet_t_();
 }
@@ -162,11 +164,11 @@ void pet_t::dismiss()
 
 // pet_t::assess_damage =====================================================
 
-double pet_t::assess_damage( double            amount,
-                             const school_type school,
-                             int               dmg_type,
-                             int               result,
-                             action_t*         action )
+double pet_t::assess_damage( double      amount,
+                             school_type school,
+                             dmg_type    dmg_type,
+                             result_type result,
+                             action_t*   action )
 {
   if ( ! action || action -> aoe )
     amount *= 0.10;
@@ -190,7 +192,7 @@ void pet_t::combat_begin()
 companion_t::companion_t( sim_t*             s,
                           player_t*          o,
                           const std::string& n,
-                          pet_type_t         pt ) :
+                          pet_type         pt ) :
   pet_t( s, o, n, pt, PLAYER_COMPANION )
 {
 }

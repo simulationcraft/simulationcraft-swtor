@@ -193,35 +193,35 @@ int vsnprintf_simc( char* buf, size_t size, const char* fmt, va_list ap )
 
 // util_t::role_type_string =================================================
 
-const char* util_t::role_type_string( int role )
+const char* util_t::role_type_string( role_type role )
 {
   switch ( role )
   {
-  case ROLE_ATTACK:    return "attack";
-  case ROLE_SPELL:     return "spell";
-  case ROLE_HYBRID:    return "hybrid";
-  case ROLE_DPS:       return "dps";
-  case ROLE_TANK:      return "tank";
-  case ROLE_HEAL:      return "heal";
-  case ROLE_NONE:      return "auto";
+  case ROLE_ATTACK: return "attack";
+  case ROLE_SPELL:  return "spell";
+  case ROLE_HYBRID: return "hybrid";
+  case ROLE_DPS:    return "dps";
+  case ROLE_TANK:   return "tank";
+  case ROLE_HEAL:   return "heal";
+  case ROLE_NONE:   return "auto";
+  default:          return "unknown";
   }
-  return "unknown";
 }
 
 // util_t::parse_role_type ==================================================
 
 role_type util_t::parse_role_type( const std::string& name )
 {
-  for ( int i=( int ) ROLE_NONE; i < ( int )ROLE_MAX; i++ )
+  for ( role_type i = ROLE_NONE; i < ROLE_MAX; i++ )
     if ( util_t::str_compare_ci( name, util_t::role_type_string( i ) ) )
-      return ( role_type ) i;
+      return i;
 
   return ROLE_HYBRID;
 }
 
 // util_t::race_type_string =================================================
 
-const char* util_t::race_type_string( int type )
+const char* util_t::race_type_string( race_type type )
 {
   switch ( type )
   {
@@ -235,17 +235,17 @@ const char* util_t::race_type_string( int type )
   case RACE_SITH_PUREBLOOD: return "sith_pureblood";
   case RACE_TWILEK:         return "twilek";
   case RACE_ZABRAK:         return "zabrak";
+  default:                  return "unknown";
   }
-  return "unknown";
 }
 
 // util_t::parse_race_type ==================================================
 
 race_type util_t::parse_race_type( const std::string& name )
 {
-  for ( int i=( int ) RACE_NONE; i < ( int )RACE_MAX; i++ )
+  for ( race_type i = RACE_NONE; i < RACE_MAX; i++ )
     if ( util_t::str_compare_ci( name, util_t::race_type_string( i ) ) )
-      return ( race_type ) i;
+      return i;
 
   return RACE_NONE;
 }
@@ -254,16 +254,16 @@ race_type util_t::parse_race_type( const std::string& name )
 
 position_type util_t::parse_position_type( const std::string& name )
 {
-  for ( int i = ( int ) POSITION_NONE; i < ( int ) POSITION_MAX; i++ )
+  for ( position_type i = POSITION_NONE; i < POSITION_MAX; i++ )
     if ( util_t::str_compare_ci( name, util_t::position_type_string( i ) ) )
-      return ( position_type ) i;
+      return i;
 
   return POSITION_NONE;
 }
 
 // util_t::position_type_string =============================================
 
-const char* util_t::position_type_string( int type )
+const char* util_t::position_type_string( position_type type )
 {
   switch ( type )
   {
@@ -272,9 +272,8 @@ const char* util_t::position_type_string( int type )
   case POSITION_FRONT:        return "front";
   case POSITION_RANGED_BACK:  return "ranged_back";
   case POSITION_RANGED_FRONT: return "ranged_front";
+  default:                    return "unknown";
   }
-
-  return "unknown";
 }
 
 // util_t::profession_type_string ===========================================
@@ -380,30 +379,30 @@ player_type util_t::parse_player_type( const std::string& name )
 
 // util_t::pet_type_string ==================================================
 
-const char* util_t::pet_type_string( int type )
+const char* util_t::pet_type_string( pet_type type )
 {
   switch ( type )
   {
-  case PET_NONE:                return "none";
-  case PET_ENEMY:               return "pet_enemy";
+  case PET_NONE:  return "none";
+  case PET_ENEMY: return "pet_enemy";
+  default:        return "unknown";
   }
-  return "unknown";
 }
 
 // util_t::parse_pet_type ===================================================
 
-pet_type_t util_t::parse_pet_type( const std::string& name )
+pet_type util_t::parse_pet_type( const std::string& name )
 {
-  for ( int i=( int )PET_NONE; i < ( int )PET_MAX; i++ )
+  for ( pet_type i= PET_NONE; i < PET_MAX; i++ )
     if ( util_t::str_compare_ci( name, util_t::pet_type_string( i ) ) )
-      return ( pet_type_t )i;
+      return i;
 
   return PET_NONE;
 }
 
 // util_t::attribute_type_string ============================================
 
-const char* util_t::attribute_type_string( int type )
+const char* util_t::attribute_type_string( attribute_type type )
 {
   switch ( type )
   {
@@ -419,9 +418,9 @@ const char* util_t::attribute_type_string( int type )
 
 // util_t::parse_attribute_type =============================================
 
-int util_t::parse_attribute_type( const std::string& name )
+attribute_type util_t::parse_attribute_type( const std::string& name )
 {
-  for ( int i=0; i < ATTRIBUTE_MAX; i++ )
+  for ( attribute_type i = ATTRIBUTE_NONE; i < ATTRIBUTE_MAX; i++ )
     if ( util_t::str_compare_ci( name, util_t::attribute_type_string( i ) ) )
       return i;
 
@@ -430,37 +429,40 @@ int util_t::parse_attribute_type( const std::string& name )
 
 // util_t::dmg_type_string ==================================================
 
-const char* util_t::dmg_type_string( int type )
+const char* util_t::dmg_type_string( dmg_type type )
 {
   switch ( type )
   {
-  case DMG_DIRECT:    return "hit";
-  case DMG_OVER_TIME: return "tick";
+  case ABSORB:         return "absorb";
+  case DMG_DIRECT:     return "hit";
+  case DMG_OVER_TIME:  return "tick";
+  case HEAL_DIRECT:    return "heal";
+  case HEAL_OVER_TIME: return "hot";
+  default:             return "unknown";
   }
-  return "unknown";
 }
 
 // util_t::result_type_string ===============================================
 
-const char* util_t::result_type_string( int type )
+const char* util_t::result_type_string( result_type type )
 {
   switch ( type )
   {
-  case RESULT_NONE:   return "none";
-  case RESULT_MISS:   return "miss";
-  case RESULT_AVOID:  return "avoid";
-  case RESULT_BLOCK:  return "block";
-  case RESULT_CRIT:   return "crit";
-  case RESULT_HIT:    return "hit";
+  case RESULT_NONE:  return "none";
+  case RESULT_MISS:  return "miss";
+  case RESULT_AVOID: return "avoid";
+  case RESULT_BLOCK: return "block";
+  case RESULT_CRIT:  return "crit";
+  case RESULT_HIT:   return "hit";
+  default:           return "unknown";
   }
-  return "unknown";
 }
 
 // util_t::parse_result_type ================================================
 
-int util_t::parse_result_type( const std::string& name )
+result_type util_t::parse_result_type( const std::string& name )
 {
-  for ( int i=0; i < RESULT_MAX; i++ )
+  for ( result_type i = RESULT_NONE; i < RESULT_MAX; i++ )
     if ( util_t::str_compare_ci( name, util_t::result_type_string( i ) ) )
       return i;
 
@@ -473,14 +475,14 @@ const char* util_t::resource_type_string( resource_type type )
 {
   switch ( type )
   {
-  case RESOURCE_NONE:         return "none";
-  case RESOURCE_HEALTH:       return "health";
-  case RESOURCE_MANA:         return "mana";
-  case RESOURCE_RAGE:         return "rage";
-  case RESOURCE_ENERGY:       return "energy";
-  case RESOURCE_AMMO:         return "ammo";
-  case RESOURCE_FORCE:        return "force";
-  default:                    return "unknown";
+  case RESOURCE_NONE:   return "none";
+  case RESOURCE_HEALTH: return "health";
+  case RESOURCE_MANA:   return "mana";
+  case RESOURCE_RAGE:   return "rage";
+  case RESOURCE_ENERGY: return "energy";
+  case RESOURCE_AMMO:   return "ammo";
+  case RESOURCE_FORCE:  return "force";
+  default:              return "unknown";
   }
 }
 
@@ -497,49 +499,51 @@ resource_type util_t::parse_resource_type( const std::string& name )
 
 // util_t::school_type_string ===============================================
 
-const char* util_t::school_type_string( int school )
+const char* util_t::school_type_string( school_type school )
 {
   switch ( school )
   {
-  case SCHOOL_KINETIC:          return "kinetic";
-  case SCHOOL_INTERNAL:         return "internal";
-  case SCHOOL_ELEMENTAL:        return "elemental";
-  case SCHOOL_ENERGY:           return "energy";
+  case SCHOOL_KINETIC:   return "kinetic";
+  case SCHOOL_INTERNAL:  return "internal";
+  case SCHOOL_ELEMENTAL: return "elemental";
+  case SCHOOL_ENERGY:    return "energy";
+  default:               return "unknown";
   }
-  return "unknown";
 }
 
 // util_t::parse_school_type ================================================
 
 school_type util_t::parse_school_type( const std::string& name )
 {
-  for ( int i=SCHOOL_NONE; i < SCHOOL_MAX; i++ )
+  for ( school_type i = SCHOOL_NONE; i < SCHOOL_MAX; i++ )
     if ( util_t::str_compare_ci( name, util_t::school_type_string( i ) ) )
-      return ( school_type )( i );
+      return i;
 
   return SCHOOL_NONE;
 }
 
 // util_t::talent_tree ======================================================
 
-int util_t::talent_tree( int tree, player_type ptype )
+talent_tree_type util_t::talent_tree( talent_tab_type tree, player_type ptype )
 {
   switch ( ptype )
   {
     case JEDI_SAGE:
       switch ( tree )
       {
-      case JEDI_SAGE_SEER:            return TREE_SEER;
-      case JEDI_SAGE_TELEKINETICS:    return TREE_TELEKINETICS;
-      case JEDI_SAGE_BALANCE:         return TREE_BALANCE;
+      case JEDI_SAGE_SEER:           return TREE_SEER;
+      case JEDI_SAGE_TELEKINETICS:   return TREE_TELEKINETICS;
+      case JEDI_SAGE_BALANCE:        return TREE_BALANCE;
+      default: break;
       }
     break;
     case SITH_SORCERER:
       switch ( tree )
       {
-      case SITH_SORCERER_CORRUPTION:  return TREE_CORRUPTION;
-      case SITH_SORCERER_LIGHTNING:   return TREE_LIGHTNING;
-      case SITH_SORCERER_MADNESS:     return TREE_MADNESS;
+      case SITH_SORCERER_CORRUPTION: return TREE_CORRUPTION;
+      case SITH_SORCERER_LIGHTNING:  return TREE_LIGHTNING;
+      case SITH_SORCERER_MADNESS:    return TREE_MADNESS;
+      default: break;
       }
     break;
     default:
@@ -551,21 +555,27 @@ int util_t::talent_tree( int tree, player_type ptype )
 
 // util_t::talent_tree_string ===============================================
 
-const char* util_t::talent_tree_string( int tree, bool armory_format )
+const char* util_t::talent_tree_string( talent_tree_type tree, bool armory_format )
 {
   if ( armory_format )
   {
     switch ( tree )
     {
     // JEDI_SAGE
-    case TREE_SEER:         return "seer";
-    case TREE_TELEKINETICS: return "telekinetics";
-    case TREE_BALANCE:      return "balance";
+    case TREE_SEER:           return "seer";
+    case TREE_TELEKINETICS:   return "telekinetics";
+    case TREE_BALANCE:        return "balance";
     // SITH_SORCERER
-    case TREE_CORRUPTION:   return "corruption";
-    case TREE_LIGHTNING:    return "lightning";
-    case TREE_MADNESS:      return "madness";
-    default: return "Unknown";
+    case TREE_CORRUPTION:     return "corruption";
+    case TREE_LIGHTNING:      return "lightning";
+    case TREE_MADNESS:        return "madness";
+    // JEDI_SHADOW
+    case TREE_KINETIC_COMBAT: return "kinetic_combat";
+    case TREE_INFILTRATION:   return "infiltration";
+    // SITH_ASSASSIN
+    case TREE_DARKNESS:       return "darkness";
+    case TREE_DECEPTION:      return "deception";
+    default:                  return "unknown";
     }
   }
   else
@@ -573,23 +583,29 @@ const char* util_t::talent_tree_string( int tree, bool armory_format )
     switch ( tree )
     {
     // JEDI_SAGE
-    case TREE_SEER:         return "Seer";
-    case TREE_TELEKINETICS: return "Telekinetics";
-    case TREE_BALANCE:      return "Balance";
+    case TREE_SEER:           return "Seer";
+    case TREE_TELEKINETICS:   return "Telekinetics";
+    case TREE_BALANCE:        return "Balance";
     // SITH_SORCERER
-    case TREE_CORRUPTION:   return "Corruption";
-    case TREE_LIGHTNING:    return "Lightning";
-    case TREE_MADNESS:      return "Madness";
-    default: return "Unknown";
+    case TREE_CORRUPTION:     return "Corruption";
+    case TREE_LIGHTNING:      return "Lightning";
+    case TREE_MADNESS:        return "Madness";
+    // JEDI_SHADOW
+    case TREE_KINETIC_COMBAT: return "KineticCombat";
+    case TREE_INFILTRATION:   return "Infiltration";
+    // SITH_ASSASSIN
+    case TREE_DARKNESS:       return "Darkness";
+    case TREE_DECEPTION:      return "Deception";
+    default:                  return "Unknown";
     }
   }
 }
 
 // util_t::parse_talent_tree ================================================
 
-int util_t::parse_talent_tree( const std::string& name )
+talent_tree_type util_t::parse_talent_tree( const std::string& name )
 {
-  for ( int i=0; i < TALENT_TREE_MAX; i++ )
+  for ( talent_tree_type i = TREE_NONE; i < TALENT_TREE_MAX; i++ )
     if ( util_t::str_compare_ci( name, util_t::talent_tree_string( i ) ) )
       return i;
 
@@ -632,30 +648,26 @@ weapon_type util_t::parse_weapon_type( const std::string& name )
 
 // util_t::stim_type_string =================================================
 
-const char* util_t::stim_type_string( stim_t stim )
+const char* util_t::stim_type_string( stim_type stim )
 {
   switch ( stim )
   {
-  case stim_t::none:            return "none";
-  case stim_t::exotech_resolve: return "exotech_resolve";
-  case stim_t::rakata_resolve:  return "rakata_resolve";
-  default:                      return "unknown";
+  case stim_type::none:            return "none";
+  case stim_type::exotech_resolve: return "exotech_resolve";
+  case stim_type::rakata_resolve:  return "rakata_resolve";
+  default:                         return "unknown";
   }
 }
 
 // util_t::parse_stim_t =================================================
 
-stim_t util_t::parse_stim_type( const std::string& name )
+stim_type util_t::parse_stim_type( const std::string& name )
 {
-  stim_t i = stim_t::max;
-
-  while( --i > stim_t::none )
-  {
+  for( stim_type i = stim_type::none; ++i < stim_type::max; )
     if ( util_t::str_compare_ci( name, util_t::stim_type_string( i ) ) )
-      break;
-  }
+      return i;
 
-  return i;
+  return stim_type::none;
 }
 
 // util_t::slot_type_string ================================================
@@ -700,7 +712,7 @@ slot_type util_t::parse_slot_type( const std::string& name )
 
 // util_t::stat_type_string =================================================
 
-const char* util_t::stat_type_string( int stat )
+const char* util_t::stat_type_string( stat_type stat )
 {
   switch ( stat )
   {
@@ -713,10 +725,14 @@ const char* util_t::stat_type_string( int stat )
 
   case STAT_HEALTH: return "health";
   case STAT_MANA:   return "mana";
-  case STAT_MAX_MANA: return "maximum_mana";
   case STAT_RAGE:   return "rage";
   case STAT_ENERGY: return "energy";
   case STAT_AMMO:  return "ammo";
+  case STAT_MAX_HEALTH: return "maximum_health";
+  case STAT_MAX_MANA: return "maximum_mana";
+  case STAT_MAX_RAGE:   return "maximum_rage";
+  case STAT_MAX_ENERGY: return "maximum_energy";
+  case STAT_MAX_AMMO:  return "maximum_ammo";
 
   case STAT_EXPERTISE_RATING:         return "expertise";
 
@@ -739,14 +755,15 @@ const char* util_t::stat_type_string( int stat )
   case STAT_FORCE_POWER: return "forcepower";
   case STAT_TECH_POWER: return "techpower";
 
-  case STAT_MAX: return "all";
+  case STAT_ALL: return "all";
+
+  default: return "unknown";
   }
-  return "unknown";
 }
 
 // util_t::stat_type_abbrev =================================================
 
-const char* util_t::stat_type_abbrev( int stat )
+const char* util_t::stat_type_abbrev( stat_type stat )
 {
   switch ( stat )
   {
@@ -762,9 +779,13 @@ const char* util_t::stat_type_abbrev( int stat )
   case STAT_RAGE:   return "Rage";
   case STAT_ENERGY: return "Energy";
   case STAT_AMMO:   return "Ammo";
+  case STAT_MAX_HEALTH: return "MaxHealth";
+  case STAT_MAX_MANA:   return "MaxMana";
+  case STAT_MAX_RAGE:   return "MaxRage";
+  case STAT_MAX_ENERGY: return "MaxEnergy";
+  case STAT_MAX_AMMO:   return "MaxAmmo";
 
   case STAT_EXPERTISE_RATING:  return "Exp";
-  case STAT_EXPERTISE_RATING2: return "InvExp";
 
   case STAT_ACCURACY_RATING:      return "Acc";
   case STAT_ACCURACY_RATING2:     return "InvAcc";
@@ -785,14 +806,15 @@ const char* util_t::stat_type_abbrev( int stat )
   case STAT_FORCE_POWER: return "Force_Power";
   case STAT_TECH_POWER: return "Tech_Power";
 
-  case STAT_MAX: return "All";
+  case STAT_ALL: return "All";
+
+  default: return "unknown";
   }
-  return "unknown";
 }
 
 // util_t::stat_type_wowhead ================================================
 
-const char* util_t::stat_type_wowhead( int stat )
+const char* util_t::stat_type_wowhead( stat_type stat )
 {
   switch ( stat )
   {
@@ -821,26 +843,27 @@ const char* util_t::stat_type_wowhead( int stat )
   case STAT_ARMOR:             return "armor";
   case STAT_BONUS_ARMOR:       return "__armor"; // FIXME! Does wowhead distinguish "bonus" armor?
 
-  case STAT_MAX: return "__all";
+  case STAT_ALL: return "__all";
+
+  default: return "unknown";
   }
-  return "unknown";
 }
 
 // util_t::parse_stat_type ==================================================
 
 stat_type util_t::parse_stat_type( const std::string& name )
 {
-  for ( int i=0; i <= STAT_MAX; i++ )
+  for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
     if ( util_t::str_compare_ci( name, util_t::stat_type_string( i ) ) )
-      return ( stat_type ) i;
+      return i;
 
-  for ( int i=0; i <= STAT_MAX; i++ )
+  for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
     if ( util_t::str_compare_ci( name, util_t::stat_type_abbrev( i ) ) )
-      return ( stat_type ) i;
+      return i;
 
-  for ( int i=0; i <= STAT_MAX; i++ )
+  for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
     if ( util_t::str_compare_ci( name, util_t::stat_type_wowhead( i ) ) )
-      return ( stat_type ) i;
+      return i;
 
   if ( name == "rgdcritstrkrtng" ) return STAT_CRIT_RATING;
 

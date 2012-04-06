@@ -49,7 +49,7 @@ struct enemy_t : public player_t
 
 // target_t::primary_role ===================================================
 
-  virtual int primary_role() const
+  virtual role_type primary_role() const
   { return ROLE_TANK; }
 
   virtual resource_type primary_resource() const
@@ -78,7 +78,7 @@ struct enemy_t : public player_t
 
 struct enemy_add_t : public pet_t
 {
-  enemy_add_t( sim_t* s, player_t* o, const std::string& n, pet_type_t pt = PET_ENEMY ) :
+  enemy_add_t( sim_t* s, player_t* o, const std::string& n, pet_type pt = PET_ENEMY ) :
     pet_t( s, o, n, pt, ENEMY_ADD )
   {
     create_options();

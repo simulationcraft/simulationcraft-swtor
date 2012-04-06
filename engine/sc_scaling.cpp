@@ -74,7 +74,7 @@ struct compare_scale_factors
 {
   const player_t* player;
   compare_scale_factors( const player_t* p ) : player( p ) {}
-  bool operator()( int l, int r ) const
+  bool operator()( stat_type l, stat_type r ) const
   {
     return( player -> scaling.get_stat( l ) >
             player -> scaling.get_stat( r ) );
@@ -102,7 +102,7 @@ scaling_t::scaling_t( sim_t* s ) :
   normalize_scale_factors( 0 ),
   smooth_scale_factors( 0 ),
   debug_scale_factors( 0 ),
-  current_scaling_stat( 0 ),
+  current_scaling_stat( STAT_NONE ),
   num_scaling_stats( 0 ),
   remaining_scaling_stats( 0 ),
   scale_alacrity_iterations( 1.0 ),
@@ -151,7 +151,7 @@ void scaling_t::init_deltas()
 {
   assert ( scale_delta_multiplier != 0 );
 
-  for ( int i=ATTRIBUTE_NONE+1; i < ATTRIBUTE_MAX; i++ )
+  for ( attribute_type i = ATTRIBUTE_NONE; ++i < ATTRIBUTE_MAX; )
   {
     if ( stats.attribute[ i ] == 0 ) stats.attribute[ i ] = scale_delta_multiplier * ( smooth_scale_factors ? 15 : 30 );
   }
@@ -167,11 +167,6 @@ void scaling_t::init_deltas()
   {
     stats.expertise_rating =  scale_delta_multiplier * ( smooth_scale_factors ? -15 :  -30 );
     if ( positive_scale_delta ) stats.expertise_rating *= -1;
-  }
-  if ( stats.expertise_rating2 == 0 )
-  {
-    stats.expertise_rating2 =  scale_delta_multiplier * ( smooth_scale_factors ? 15 :  30 );
-    if ( positive_scale_delta ) stats.expertise_rating2 *= -1;
   }
 
   if ( stats.accuracy_rating == 0 )
@@ -210,7 +205,7 @@ void scaling_t::analyze_stats()
   if ( num_players == 0 ) return;
 
   remaining_scaling_stats = 0;
-  for ( int i=0; i < STAT_MAX; i++ )
+  for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
     if ( is_scaling_stat( sim, i ) && ( stats.get_stat( i ) != 0 ) )
       remaining_scaling_stats++;
   num_scaling_stats = remaining_scaling_stats;
@@ -227,11 +222,12 @@ void scaling_t::analyze_stats()
     }
 
     baseline_sim = new sim_t( sim );
-    baseline_sim -> scaling -> scale_stat = STAT_MAX-1;
+    baseline_sim -> scaling -> scale_stat = STAT_MAX;
+    --baseline_sim -> scaling -> scale_stat;
     baseline_sim -> execute();
   }
 
-  for ( int i=0; i < STAT_MAX; i++ )
+  for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
   {
     if ( sim -> canceled ) break;
 
@@ -353,7 +349,7 @@ void scaling_t::analyze_stats()
 
 // scaling_t::analyze_ability_stats ===================================================
 
-void scaling_t::analyze_ability_stats( int stat, double delta, player_t* p, player_t* ref_p, player_t* delta_p )
+void scaling_t::analyze_ability_stats( stat_type stat, double delta, player_t* p, player_t* ref_p, player_t* delta_p )
 {
   if ( p -> sim -> statistics_level < 3 )
     return;
@@ -471,7 +467,7 @@ void scaling_t::normalize()
 
     if ( divisor == 0 ) continue;
 
-    for ( int i=0; i < STAT_MAX; i++ )
+    for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
     {
       if ( ! p -> scales_with[ i ] ) continue;
 
@@ -503,7 +499,7 @@ void scaling_t::analyze()
     chart_t::scale_factors( p -> scale_factors_chart, p, p -> name_str, p -> scaling, p -> scaling_error );
 
     // Sort scaling results
-    for ( int i=0; i < STAT_MAX; i++ )
+    for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
     {
       if ( p -> scales_with[ i ] )
       {
@@ -569,7 +565,7 @@ bool scaling_t::has_scale_factors()
 {
   if ( ! calculate_scale_factors ) return false;
 
-  for ( int i=0; i < STAT_MAX; i++ )
+  for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
   {
     if ( stats.get_stat( i ) != 0 )
     {

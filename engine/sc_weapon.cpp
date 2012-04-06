@@ -11,7 +11,7 @@
 
 // weapon_t::group ==========================================================
 
-int weapon_t::group() const
+weapon_type weapon_t::group() const
 {
   switch ( type )
   {
@@ -34,6 +34,8 @@ int weapon_t::group() const
   case WEAPON_SCATTERGUN:
   case WEAPON_SNIPER_RIFLE:
     return WEAPON_RANGED;
+
+  default:
+    return WEAPON_NONE;
   }
-  return WEAPON_NONE;
 }

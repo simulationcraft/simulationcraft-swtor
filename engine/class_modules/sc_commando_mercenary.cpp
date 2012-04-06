@@ -94,7 +94,7 @@ struct commando_mercenary_t : public player_t
     virtual void      init_rng();
     virtual void      init_actions();
     virtual resource_type primary_resource() const;
-    virtual int       primary_role() const;
+    virtual role_type primary_role() const;
 
     virtual void init_scaling()
     {
@@ -298,21 +298,20 @@ resource_type commando_mercenary_t::primary_resource() const
 
 // commando_mercenary_t::primary_role ==================================================
 
-int commando_mercenary_t::primary_role() const
+role_type commando_mercenary_t::primary_role() const
 {
-    switch ( player_t::primary_role() )
-    {
-    case ROLE_TANK:
-        return ROLE_TANK;
-    case ROLE_DPS:
-    case ROLE_HYBRID:
-        return ROLE_HYBRID;
-    default:
-
-        break;
-    }
-
+  switch ( player_t::primary_role() )
+  {
+  case ROLE_TANK:
+    return ROLE_TANK;
+  case ROLE_DPS:
+  case ROLE_HYBRID:
     return ROLE_HYBRID;
+  default:
+    break;
+  }
+
+  return ROLE_HYBRID;
 }
 
 // commando_mercenary_t::create_talents ==================================================
@@ -344,11 +343,8 @@ player_t* player_t::create_mercenary( sim_t* sim, const std::string& name, race_
 
 void player_t::commando_mercenary_init( sim_t* sim )
 {
-  for ( unsigned int i = 0; i < sim -> actor_list.size(); i++ )
-  {
-    player_t* p = sim -> actor_list[i];
+  for ( player_t* p : sim -> actor_list )
     p -> buffs.fortification_hunters_boon = new buff_t( p, "fortification_hunters_boon", 1 );
-  }
 }
 
 // player_t::commando_mercenary_combat_begin ===================================

@@ -13,11 +13,11 @@ namespace { // ANONYMOUS ====================================================
 
 struct use_stim_t : public action_t
 {
-  stim_t type;
+  stim_type type;
   gain_t* gain;
 
   use_stim_t( player_t* p, const std::string& options_str ) :
-    action_t( ACTION_USE, "stim", p ), type( stim_t::none ),
+    action_t( ACTION_USE, "stim", p ), type( stim_type::none ),
     gain( p -> get_gain( "stim" ) )
   {
     trigger_gcd = timespan_t::zero();
@@ -41,7 +41,7 @@ struct use_stim_t : public action_t
     }
 
     type = util_t::parse_stim_type( type_str );
-    if ( type == stim_t::none )
+    if ( type == stim_type::none )
     {
       sim -> errorf( "Player %s attempting to use stim of unknown type '%s'.\n",
                      player -> name(), type_str.c_str() );
@@ -56,12 +56,12 @@ struct use_stim_t : public action_t
     p -> stim = type;
     switch ( type )
     {
-    case stim_t::exotech_resolve:
+    case stim_type::exotech_resolve:
       p -> stat_gain( STAT_WILLPOWER, 128, gain, this );
       p -> stat_gain( STAT_POWER, 52, gain, this );
       break;
 
-    case stim_t::rakata_resolve:
+    case stim_type::rakata_resolve:
       p -> stat_gain( STAT_WILLPOWER, 112, gain, this );
       p -> stat_gain( STAT_POWER, 46, gain, this );
       break;
@@ -73,7 +73,7 @@ struct use_stim_t : public action_t
   }
 
   virtual bool ready()
-  { return ( player -> stim == stim_t::none ); }
+  { return ( player -> stim == stim_type::none ); }
 };
 
 // ==========================================================================

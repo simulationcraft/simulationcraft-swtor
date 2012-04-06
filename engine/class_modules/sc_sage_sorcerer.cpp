@@ -219,7 +219,7 @@ struct sage_sorcerer_t : public player_t
   }
 
   virtual resource_type primary_resource() const;
-  virtual int       primary_role() const;
+  virtual role_type primary_role() const;
 
   virtual double    force_regen_per_second() const; // override
   virtual void      regen( timespan_t periodicity );
@@ -234,13 +234,17 @@ struct sage_sorcerer_t : public player_t
   virtual double force_healing_crit_chance() const
   { return player_t::force_healing_crit_chance() + talents.penetrating_light -> rank() * 0.01 + talents.serenity -> rank() * 0.01; }
 
-  virtual double    composite_player_heal_multiplier( const school_type school ) const
+  virtual double    composite_player_heal_multiplier( school_type school ) const
   { return player_t::composite_player_heal_multiplier( school ) + talents.wisdom -> rank() * 0.01; }
 
   double school_damage_reduction( school_type school ) const
   { return player_t::school_damage_reduction( school ) + talents.serenity -> rank() * 0.01; }
 
-  player_t::heal_info_t assess_heal( double amount,  const school_type school,int  dmg_type, int result, action_t* action )
+  heal_info_t assess_heal( double      amount,
+                           school_type school,
+                           dmg_type    dmg_type,
+                           result_type result,
+                           action_t*   action )
   {
     amount *= 1.0 + talents.pain_bearer -> rank() * 0.04;
 
@@ -348,7 +352,7 @@ struct sage_sorcerer_spell_t : public sage_sorcerer_action_t
       player_crit += 0.60;
   }
 
-  virtual void target_debuff( player_t* t, int dmg_type )
+  virtual void target_debuff( player_t* t, dmg_type dmg_type )
   {
     action_t::target_debuff( t, dmg_type );
 
@@ -362,7 +366,7 @@ struct sage_sorcerer_spell_t : public sage_sorcerer_action_t
         td.target_multiplier *= 1.20;
   }
 
-  virtual void assess_damage( player_t* t, double dmg_amount, int dmg_type, int dmg_result )
+  virtual void assess_damage( player_t* t, double dmg_amount, dmg_type dmg_type, result_type dmg_result )
   {
     action_t::assess_damage( t, dmg_amount, dmg_type, dmg_result );
 
@@ -712,7 +716,7 @@ struct disturbance_t : public sage_sorcerer_spell_t
       dd.player_multiplier *= 1.20;
   }
 
-  virtual void impact( player_t* t, int impact_result, double travel_dmg )
+  virtual void impact( player_t* t, result_type impact_result, double travel_dmg )
   {
     sage_sorcerer_spell_t::impact( t, impact_result, travel_dmg );
 
@@ -785,7 +789,7 @@ struct mind_crush_t : public sage_sorcerer_spell_t
         td.player_multiplier *= 1.20;
     }
 
-    virtual void target_debuff( player_t* t, int dmg_type )
+    virtual void target_debuff( player_t* t, dmg_type dmg_type )
     {
       sage_sorcerer_spell_t::target_debuff( t, dmg_type );
 
@@ -906,7 +910,7 @@ struct weaken_mind_t : public sage_sorcerer_spell_t
     p -> buffs.rakata_force_masters_4pc -> trigger();
   }
 
-  virtual void target_debuff( player_t* t, int dmg_type )
+  virtual void target_debuff( player_t* t, dmg_type dmg_type )
   {
     sage_sorcerer_spell_t::target_debuff( t, dmg_type );
 
@@ -941,7 +945,7 @@ struct turbulence_t : public sage_sorcerer_spell_t
     cooldown -> duration = from_seconds( 9.0 );
   }
 
-  virtual void target_debuff( player_t *t, int dmg_type )
+  virtual void target_debuff( player_t *t, dmg_type dmg_type )
   {
     sage_sorcerer_spell_t::target_debuff( t, dmg_type );
 
@@ -1015,7 +1019,7 @@ struct sever_force_t : public sage_sorcerer_spell_t
     influenced_by_inner_strength = false;
   }
 
-  virtual void target_debuff( player_t* t, int dmg_type )
+  virtual void target_debuff( player_t* t, dmg_type dmg_type )
   {
     sage_sorcerer_spell_t::target_debuff( t, dmg_type );
 
@@ -1907,7 +1911,7 @@ resource_type sage_sorcerer_t::primary_resource() const
 
 // sage_sorcerer_t::primary_role ==================================================
 
-int sage_sorcerer_t::primary_role() const
+role_type sage_sorcerer_t::primary_role() const
 {
   switch ( player_t::primary_role() )
   {

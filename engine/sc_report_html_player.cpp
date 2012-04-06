@@ -367,7 +367,7 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
           fprintf( file,
                    "\t\t\t\t\t\t\t<tr>\n"
                    "\t\t\t\t\t\t\t\t<th><a href=\"#help-scale-factors\" class=\"help\">?</a></th>\n" );
-          for ( int i=0; i < STAT_MAX; i++ )
+          for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
             if ( p -> scales_with[ i ] )
             {
               fprintf( file,
@@ -386,7 +386,7 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
           fprintf( file,
                    "\t\t\t\t\t\t\t<tr>\n"
                    "\t\t\t\t\t\t\t\t<th class=\"left\">Scale Factors</th>\n" );
-          for ( int i=0; i < STAT_MAX; i++ )
+          for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
             if ( p -> scales_with[ i ] )
               fprintf( file,
                        "\t\t\t\t\t\t\t\t<td>%.*f</td>\n",
@@ -397,7 +397,7 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
           fprintf( file,
                    "\t\t\t\t\t\t\t<tr>\n"
                    "\t\t\t\t\t\t\t\t<th class=\"left\">Scale Deltas</th>\n" );
-          for ( int i=0; i < STAT_MAX; i++ )
+          for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
             if ( p -> scales_with[ i ] )
               fprintf( file,
                        "\t\t\t\t\t\t\t\t<td>%.0f</td>\n",
@@ -407,7 +407,7 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
           fprintf( file,
                    "\t\t\t\t\t\t\t<tr>\n"
                    "\t\t\t\t\t\t\t\t<th class=\"left\">Error</th>\n" );
-          for ( int i=0; i < STAT_MAX; i++ )
+          for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
             if ( p -> scales_with[ i ] )
               fprintf( file,
                        "\t\t\t\t\t\t\t\t<td>%.*f</td>\n",
@@ -454,7 +454,7 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
                 "\t\t\t\t\t\t\t\t\t\t\t<th class=\"small\">Total Amount</th>\n"
                 "\t\t\t\t\t\t\t\t\t\t\t<th class=\"small\">Overkill %%</th>\n"
                 "\t\t\t\t\t\t\t\t\t\t</tr>\n" );
-      for ( int i=RESULT_MAX-1; i >= RESULT_NONE; i-- )
+      for ( result_type i = RESULT_MAX; --i >= RESULT_NONE; )
       {
         if ( s -> direct_results[ i ].count.mean )
         {
@@ -514,7 +514,7 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
                 "\t\t\t\t\t\t\t\t\t\t\t<th class=\"small\">Total Amount</th>\n"
                 "\t\t\t\t\t\t\t\t\t\t\t<th class=\"small\">Overkill %%</th>\n"
                 "\t\t\t\t\t\t\t\t\t\t</tr>\n" );
-      for ( int i=RESULT_MAX-1; i >= RESULT_NONE; i-- )
+      for ( result_type i = RESULT_MAX; --i >= RESULT_NONE; )
       {
         if ( s -> tick_results[ i ].count.mean )
         {
@@ -1297,7 +1297,7 @@ static void print_html_player_scale_factors( FILE* file, sim_t* sim, player_t* p
       fprintf( file,
                "\t\t\t\t\t\t\t<tr>\n"
                "\t\t\t\t\t\t\t\t<th><a href=\"#help-scale-factors\" class=\"help\">?</a></th>\n" );
-      for ( int i=0; i < STAT_MAX; i++ )
+      for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
         if ( p -> scales_with[ i ] )
         {
           fprintf( file,
@@ -1316,7 +1316,7 @@ static void print_html_player_scale_factors( FILE* file, sim_t* sim, player_t* p
       fprintf( file,
                "\t\t\t\t\t\t\t<tr>\n"
                "\t\t\t\t\t\t\t\t<th class=\"left\">Scale Factors</th>\n" );
-      for ( int i=0; i < STAT_MAX; i++ )
+      for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
         if ( p -> scales_with[ i ] )
           fprintf( file,
                    "\t\t\t\t\t\t\t\t<td>%.*f</td>\n",
@@ -1332,7 +1332,7 @@ static void print_html_player_scale_factors( FILE* file, sim_t* sim, player_t* p
       fprintf( file,
                "\t\t\t\t\t\t\t<tr>\n"
                "\t\t\t\t\t\t\t\t<th class=\"left\">Normalized</th>\n" );
-      for ( int i=0; i < STAT_MAX; i++ )
+      for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
         if ( p -> scales_with[ i ] )
           fprintf( file,
                    "\t\t\t\t\t\t\t\t<td>%.*f</td>\n",
@@ -1343,7 +1343,7 @@ static void print_html_player_scale_factors( FILE* file, sim_t* sim, player_t* p
       fprintf( file,
                "\t\t\t\t\t\t\t<tr>\n"
                "\t\t\t\t\t\t\t\t<th class=\"left\">Scale Deltas</th>\n" );
-      for ( int i=0; i < STAT_MAX; i++ )
+      for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
         if ( p -> scales_with[ i ] )
           fprintf( file,
                    "\t\t\t\t\t\t\t\t<td>%.0f</td>\n",
@@ -1356,7 +1356,7 @@ static void print_html_player_scale_factors( FILE* file, sim_t* sim, player_t* p
       fprintf( file,
                "\t\t\t\t\t\t\t<tr>\n"
                "\t\t\t\t\t\t\t\t<th class=\"left\">Error</th>\n" );
-      for ( int i=0; i < STAT_MAX; i++ )
+      for ( stat_type i = STAT_NONE; i < STAT_MAX; i++ )
         if ( p -> scales_with[ i ] )
           fprintf( file,
                    "\t\t\t\t\t\t\t\t<td>%.*f</td>\n",
@@ -2138,7 +2138,7 @@ static void print_html_player_description( FILE* file, sim_t* sim, player_t* p, 
            "\t\t\t\t\t<li><b>Race:</b> %s</li>\n"
            "\t\t\t\t\t<li><b>Class:</b> %s</li>\n",
            p -> race_str.c_str(),
-           p -> is_pet() ? util_t::pet_type_string( p -> cast_pet() -> pet_type ) :util_t::player_type_string( p -> type )
+           p -> is_pet() ? util_t::pet_type_string( p -> cast_pet() -> pettype ) :util_t::player_type_string( p -> type )
          );
 
   if ( p -> primary_tree() != TREE_NONE )

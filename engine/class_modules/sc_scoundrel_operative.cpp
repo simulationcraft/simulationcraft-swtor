@@ -94,7 +94,7 @@ struct scoundrel_operative_t : public player_t
     virtual void      init_rng();
     virtual void      init_actions();
     virtual resource_type primary_resource() const;
-    virtual int       primary_role() const;
+    virtual role_type primary_role() const;
             void      create_talents();
 
     virtual void init_scaling()
@@ -297,7 +297,7 @@ resource_type scoundrel_operative_t::primary_resource() const
 
 // scoundrel_operative_t::primary_role ==================================================
 
-int scoundrel_operative_t::primary_role() const
+role_type scoundrel_operative_t::primary_role() const
 {
     switch ( player_t::primary_role() )
     {

@@ -297,7 +297,7 @@ player_t::player_t( sim_t*             s,
   base_DR( 0 ),
 
   // Consumables
-  stim( stim_t::none ),
+  stim( stim_type::none ),
   // Events
   executing( 0 ), channeling( 0 ), readying( 0 ), off_gcd( 0 ), in_combat( false ), action_queued( false ),
   cast_delay_reaction( timespan_t::zero() ), cast_delay_occurred( timespan_t::zero() ),
@@ -1380,7 +1380,7 @@ void player_t::init_scaling()
       case STAT_SHIELD_RATING:   initial_shield_rating   += v; break;
       case STAT_ABSORB_RATING:   initial_absorb_rating   += v; break;
 
-      case STAT_ACCURACY_RATING:      initial_accuracy_rating += v; break;
+      case STAT_ACCURACY_RATING: initial_accuracy_rating += v; break;
       case STAT_CRIT_RATING:     initial_crit_rating     += v; break;
       case STAT_ALACRITY_RATING: initial_alacrity_rating += v; break;
 
@@ -1405,7 +1405,7 @@ void player_t::init_scaling()
       case STAT_ARMOR:          initial_armor       += v; break;
       case STAT_BONUS_ARMOR:    initial_bonus_armor += v; break;
 
-      case STAT_MAX: break;
+      case STAT_ALL: break;
 
       default: assert( 0 );
       }
@@ -1513,7 +1513,7 @@ double player_t::elemental_damage_reduction() const
 
 // player_t::composite_attribute_multiplier =================================
 
-double player_t::composite_attribute_multiplier( int attr ) const
+double player_t::composite_attribute_multiplier( attribute_type attr ) const
 {
   double m = attribute_multiplier[ attr ];
 
@@ -2040,7 +2040,7 @@ void player_t::reset()
   off_hand_weapon.buff_value = 0;
   off_hand_weapon.bonus_dmg  = 0;
 
-  stim = stim_t::none;
+  stim = stim_type::none;
 
   for ( resource_type i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
   {
@@ -2514,20 +2514,18 @@ double player_t::resource_gain( resource_type resource,
 
 // player_t::resource_available =============================================
 
-bool player_t::resource_available( int    resource,
-                                   double cost ) const
+bool player_t::resource_available( resource_type resource,
+                                   double        cost ) const
 {
   if ( resource == RESOURCE_NONE || cost <= 0 || infinite_resource[ resource ] == 1 )
-  {
     return true;
-  }
 
   return resource_current[ resource ] >= cost;
 }
 
 // player_t::recalculate_resource_max =======================================
 
-void player_t::recalculate_resource_max( int resource )
+void player_t::recalculate_resource_max( resource_type resource )
 {
   // The first 20pts of intellect/stamina only provide 1pt of mana/health.
 
@@ -2551,29 +2549,23 @@ void player_t::recalculate_resource_max( int resource )
 
 // player_t::primary_tab ====================================================
 
-int player_t::primary_tab() const
+talent_tab_type player_t::primary_tab() const
 {
-  int spec = TALENT_TAB_NONE;
-  int max_points = 0;
+  int best = 0;
 
-  for ( int i=0; i < MAX_TALENT_TREES; i++ )
+  for ( int i=1; i < MAX_TALENT_TREES; i++ )
   {
-    if ( talent_tab_points[ i ] > max_points )
-    {
-      spec = i;
-      max_points = talent_tab_points[ i ];
-    }
+    if ( talent_tab_points[ i ] > talent_tab_points[ best ] )
+      best = i;
   }
 
-  return spec;
+  return static_cast<talent_tab_type>( best );
 }
 
 // player_t::primary_role ===================================================
 
-int player_t::primary_role() const
-{
-  return role;
-}
+role_type player_t::primary_role() const
+{ return role; }
 
 // player_t::primary_tree_name ==============================================
 
@@ -2584,7 +2576,7 @@ const char* player_t::primary_tree_name() const
 
 // player_t::primary_tree ===================================================
 
-int player_t::primary_tree() const
+talent_tree_type player_t::primary_tree() const
 {
   if ( specialization == TALENT_TAB_NONE )
     return TREE_NONE;
@@ -2594,7 +2586,7 @@ int player_t::primary_tree() const
 
 // player_t::normalize_by ===================================================
 
-int player_t::normalize_by() const
+stat_type player_t::normalize_by() const
 {
   if ( sim -> normalized_stat != STAT_NONE )
     return sim -> normalized_stat;
@@ -2639,7 +2631,7 @@ timespan_t player_t::total_reaction_time() const
 
 // player_t::stat_gain ======================================================
 
-void player_t::stat_gain( int       stat,
+void player_t::stat_gain( stat_type stat,
                           double    amount,
                           gain_t*   gain,
                           action_t* action,
@@ -2659,7 +2651,14 @@ void player_t::stat_gain( int       stat,
   case STAT_ENDURANCE: stats.attribute[ ATTR_ENDURANCE ] += amount; attribute[ ATTR_ENDURANCE ] += amount; temporary.attribute[ ATTR_ENDURANCE ] += temp_value * amount; recalculate_resource_max( RESOURCE_HEALTH ); break;
   case STAT_PRESENCE:  stats.attribute[ ATTR_PRESENCE  ] += amount; attribute[ ATTR_PRESENCE  ] += amount; temporary.attribute[ ATTR_PRESENCE  ] += temp_value * amount; break;
 
-  case STAT_MAX: for ( int i=0; i < ATTRIBUTE_MAX; i++ ) { stats.attribute[ i ] += amount; temporary.attribute[ i ] += temp_value * amount; attribute[ i ] += amount; } break;
+  case STAT_ALL:
+    for ( attribute_type i = ATTRIBUTE_NONE; i < ATTRIBUTE_MAX; i++ )
+    {
+      stats.attribute[ i ] += amount;
+      temporary.attribute[ i ] += temp_value * amount;
+      attribute[ i ] += amount;
+    }
+    break;
 
   case STAT_HEALTH: resource_gain( RESOURCE_HEALTH, amount, gain, action ); break;
   case STAT_MANA:   resource_gain( RESOURCE_MANA,   amount, gain, action ); break;
@@ -2733,7 +2732,7 @@ void player_t::stat_gain( int       stat,
 
 // player_t::stat_loss ======================================================
 
-void player_t::stat_loss( int       stat,
+void player_t::stat_loss( stat_type stat,
                           double    amount,
                           action_t* action,
                           bool      temporary_buff )
@@ -2752,7 +2751,14 @@ void player_t::stat_loss( int       stat,
   case STAT_ENDURANCE: stats.attribute[ ATTR_ENDURANCE ] -= amount; temporary.attribute[ ATTR_ENDURANCE ] -= temp_value * amount; attribute[ ATTR_ENDURANCE ] -= amount; stat_loss( STAT_MAX_HEALTH, floor( amount * composite_attribute_multiplier( ATTR_ENDURANCE ) ) * health_per_endurance, action ); break;
   case STAT_PRESENCE:  stats.attribute[ ATTR_PRESENCE  ] -= amount; temporary.attribute[ ATTR_PRESENCE  ] -= temp_value * amount; attribute[ ATTR_PRESENCE  ] -= amount; break;
 
-  case STAT_MAX: for ( int i=0; i < ATTRIBUTE_MAX; i++ ) { stats.attribute[ i ] -= amount; temporary.attribute[ i ] -= temp_value * amount; attribute[ i ] -= amount; } break;
+  case STAT_ALL:
+    for ( attribute_type i = ATTRIBUTE_NONE; i < ATTRIBUTE_MAX; i++ )
+    {
+      stats.attribute[ i ] -= amount;
+      temporary.attribute[ i ] -= temp_value * amount;
+      attribute[ i ] -= amount;
+    }
+    break;
 
   case STAT_HEALTH: resource_loss( RESOURCE_HEALTH, amount, 0, action ); break;
   case STAT_MANA:   resource_loss( RESOURCE_MANA,   amount, 0, action ); break;
@@ -2836,10 +2842,10 @@ void player_t::stat_loss( int       stat,
 
 // player_t::cost_reduction_gain ============================================
 
-void player_t::cost_reduction_gain( int       school,
-                                    double    amount,
-                                    gain_t*   /* gain */,
-                                    action_t* /* action */ )
+void player_t::cost_reduction_gain( school_type school,
+                                    double      amount,
+                                    gain_t*,
+                                    action_t* )
 {
   if ( amount <= 0 ) return;
 
@@ -2850,9 +2856,9 @@ void player_t::cost_reduction_gain( int       school,
 
 // player_t::cost_reduction_loss ============================================
 
-void player_t::cost_reduction_loss( int       school,
-                                    double    amount,
-                                    action_t* /* action */ )
+void player_t::cost_reduction_loss( school_type school,
+                                    double      amount,
+                                    action_t* )
 {
   if ( amount <= 0 ) return;
 
@@ -2863,11 +2869,11 @@ void player_t::cost_reduction_loss( int       school,
 
 // player_t::assess_damage ==================================================
 
-double player_t::assess_damage( double            amount,
-                                const school_type school,
-                                int               dmg_type,
-                                int               result,
-                                action_t*         action )
+double player_t::assess_damage( double      amount,
+                                school_type school,
+                                dmg_type    dmg_type,
+                                result_type result,
+                                action_t*   action )
 {
   double mitigated_amount = target_mitigation( amount, school, dmg_type, result, action );
 
@@ -2966,11 +2972,11 @@ void player_t::recalculate_absorb_from_rating()
 
 // player_t::target_mitigation ==============================================
 
-double player_t::target_mitigation( double            amount,
-                                    const school_type school,
-                                    int               /* dmg_type */,
-                                    int               result,
-                                    action_t*         action )
+double player_t::target_mitigation( double      amount,
+                                    school_type school,
+                                    dmg_type,
+                                    result_type result,
+                                    action_t*   action )
 {
   if ( amount <= 0 )
     return 0;
@@ -3015,11 +3021,11 @@ double player_t::target_mitigation( double            amount,
 
 // player_t::assess_heal ====================================================
 
-player_t::heal_info_t player_t::assess_heal(  double            amount,
-                                              const school_type /* school */,
-                                              int               /* dmg_type */,
-                                              int               /* result */,
-                                              action_t*         action )
+player_t::heal_info_t player_t::assess_heal( double      amount,
+                                             school_type,
+                                             dmg_type,
+                                             result_type,
+                                             action_t*   action )
 {
   heal_info_t heal;
 
@@ -3069,7 +3075,7 @@ void player_t::register_callbacks()
 
 // player_t::register_resource_gain_callback ================================
 
-void player_t::register_resource_gain_callback( int resource,
+void player_t::register_resource_gain_callback( resource_type      resource,
                                                 action_callback_t* cb )
 {
   resource_gain_callbacks[ resource ].push_back( cb );
@@ -3077,7 +3083,7 @@ void player_t::register_resource_gain_callback( int resource,
 
 // player_t::register_resource_loss_callback ================================
 
-void player_t::register_resource_loss_callback( int resource,
+void player_t::register_resource_loss_callback( resource_type      resource,
                                                 action_callback_t* cb )
 {
   resource_loss_callbacks[ resource ].push_back( cb );
@@ -3088,7 +3094,7 @@ void player_t::register_resource_loss_callback( int resource,
 void player_t::register_attack_callback( int64_t mask,
                                          action_callback_t* cb )
 {
-  for ( int64_t i=0; i < RESULT_MAX; i++ )
+  for ( result_type i = RESULT_NONE; i < RESULT_MAX; i++ )
   {
     if ( ( i > 0 && mask < 0 ) || ( mask & ( int64_t( 1 ) << i ) ) )
     {
@@ -3102,7 +3108,7 @@ void player_t::register_attack_callback( int64_t mask,
 void player_t::register_spell_callback( int64_t mask,
                                         action_callback_t* cb )
 {
-  for ( int64_t i=0; i < RESULT_MAX; i++ )
+  for ( result_type i = RESULT_NONE; i < RESULT_MAX; i++ )
   {
     if ( ( i > 0 && mask < 0 ) || ( mask & ( int64_t( 1 ) << i ) ) )
     {
@@ -3117,7 +3123,7 @@ void player_t::register_spell_callback( int64_t mask,
 void player_t::register_tick_callback( int64_t mask,
                                        action_callback_t* cb )
 {
-  for ( int64_t i=0; i < RESULT_MAX; i++ )
+  for ( result_type i = RESULT_NONE; i < RESULT_MAX; i++ )
   {
     if ( ( i > 0 && mask < 0 ) || ( mask & ( int64_t( 1 ) << i ) ) )
     {
@@ -3131,7 +3137,7 @@ void player_t::register_tick_callback( int64_t mask,
 void player_t::register_heal_callback( int64_t mask,
                                        action_callback_t* cb )
 {
-  for ( int64_t i=0; i < RESULT_MAX; i++ )
+  for ( result_type i = RESULT_NONE; i < RESULT_MAX; i++ )
   {
     if ( ( i > 0 && mask < 0 ) || ( mask & ( int64_t( 1 ) << i ) ) )
     {
@@ -3145,7 +3151,7 @@ void player_t::register_heal_callback( int64_t mask,
 void player_t::register_harmful_spell_callback( int64_t mask,
                                                 action_callback_t* cb )
 {
-  for ( int64_t i=0; i < RESULT_MAX; i++ )
+  for ( result_type i = RESULT_NONE; i < RESULT_MAX; i++ )
   {
     if ( ( i > 0 && mask < 0 ) || ( mask & ( int64_t( 1 ) << i ) ) )
     {
@@ -4434,7 +4440,7 @@ bool player_t::parse_talents_armory( const std::string& talent_string )
 // player_t::find_talent ====================================================
 
 talent_t* player_t::find_talent( const std::string& n,
-                                 int tree ) const
+                                 talent_tab_type tree ) const
 {
   for ( int i=0; i < MAX_TALENT_TREES; i++ )
   {
@@ -4608,7 +4614,8 @@ expr_ptr player_t::create_expression( action_t* a,
         case STAT_PRESENCE:
           // Relies on STAT_XXX == ATTR_XXX
           return make_expr( name_str, [this,stat]{
-              return temporary.attribute[ stat ] * composite_attribute_multiplier( stat );
+              attribute_type attr = static_cast<attribute_type>( stat );
+              return temporary.attribute[ attr ] * composite_attribute_multiplier( attr );
             } );
         case STAT_EXPERTISE_RATING:
           return make_expr( name_str, [this]{ return temporary.expertise_rating; } );

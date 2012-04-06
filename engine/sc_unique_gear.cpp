@@ -10,12 +10,12 @@
 struct stat_proc_callback_t : public action_callback_t
 {
   std::string name_str;
-  int stat;
+  stat_type stat;
   double amount;
   timespan_t tick;
   stat_buff_t* buff;
 
-  stat_proc_callback_t( const std::string& n, player_t* p, int s, int max_stacks, double a,
+  stat_proc_callback_t( const std::string& n, player_t* p, stat_type s, int max_stacks, double a,
                         double proc_chance, timespan_t duration, timespan_t cooldown,
                         timespan_t t=timespan_t::zero(), bool reverse=false, rng_type rt=RNG_DEFAULT, bool activated=true ) :
     action_callback_t( p ), name_str( n ), stat( s ), amount( a ), tick( t )
@@ -77,11 +77,11 @@ struct stat_proc_callback_t : public action_callback_t
 struct cost_reduction_proc_callback_t : public action_callback_t
 {
   std::string name_str;
-  int school;
+  school_type school;
   double amount;
   cost_reduction_buff_t* buff;
 
-  cost_reduction_proc_callback_t( const std::string& n, player_t* p, int s, int max_stacks, double a,
+  cost_reduction_proc_callback_t( const std::string& n, player_t* p, school_type s, int max_stacks, double a,
                                   double proc_chance, timespan_t duration, timespan_t cooldown,
                                   bool refreshes=false, bool reverse=false, rng_type rt=RNG_DEFAULT, bool activated=true ) :
     action_callback_t( p ), name_str( n ), school( s ), amount( a )
@@ -360,7 +360,7 @@ struct stat_discharge_proc_callback_t : public action_callback_t
   action_t* discharge_action;
 
   stat_discharge_proc_callback_t( const std::string& n, player_t* p,
-                                  int stat, int max_stacks, double stat_amount,
+                                  stat_type stat, int max_stacks, double stat_amount,
                                   const school_type school, double discharge_amount, double discharge_scaling,
                                   double proc_chance, timespan_t duration, timespan_t cooldown, bool no_crit, bool no_buffs, bool no_debuffs, bool activated=true ) :
     action_callback_t( p ), name_str( n )
@@ -485,7 +485,7 @@ action_callback_t* unique_gear_t::register_stat_proc( int                type,
                                                       int64_t            mask,
                                                       const std::string& name,
                                                       player_t*          player,
-                                                      int                stat,
+                                                      stat_type          stat,
                                                       int                max_stacks,
                                                       double             amount,
                                                       double             proc_chance,
@@ -547,7 +547,7 @@ action_callback_t* unique_gear_t::register_cost_reduction_proc( int             
                                                                 int64_t            mask,
                                                                 const std::string& name,
                                                                 player_t*          player,
-                                                                int                school,
+                                                                school_type        school,
                                                                 int                max_stacks,
                                                                 double             amount,
                                                                 double             proc_chance,
@@ -747,10 +747,10 @@ action_callback_t* unique_gear_t::register_stat_discharge_proc( int             
                                                                 int64_t            mask,
                                                                 const std::string& name,
                                                                 player_t*          player,
+                                                                stat_type          stat,
                                                                 int                max_stacks,
-                                                                int                stat,
                                                                 double             stat_amount,
-                                                                const school_type  school,
+                                                                school_type        school,
                                                                 double             min_dmg,
                                                                 double             max_dmg,
                                                                 double             proc_chance,
@@ -872,7 +872,7 @@ action_callback_t* unique_gear_t::register_stat_discharge_proc( item_t& i,
   const char* name = e.name_str.empty() ? i.name() : e.name_str.c_str();
 
   return register_stat_discharge_proc( e.trigger_type, e.trigger_mask, name, i.player,
-                                       e.max_stacks, e.stat, e.stat_amount,
+                                       e.stat, e.max_stacks, e.stat_amount,
                                        e.school, e.discharge_amount, e.discharge_scaling,
                                        e.proc_chance, e.duration, e.cooldown, e.no_crit, e.no_player_benefits, e.no_debuffs );
 }

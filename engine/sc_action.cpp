@@ -280,12 +280,12 @@ void action_t::init_action_t_()
   rank_level = 0;
 }
 
-action_t::action_t( action_type    ty,
-                    const char*    n,
-                    player_t*      p,
-                    const policy_t policy,
-                    resource_type  r,
-                    school_type    s ) :
+action_t::action_t( action_type        ty,
+                    const std::string& n,
+                    player_t*          p,
+                    const policy_t     policy,
+                    resource_type      r,
+                    school_type        s ) :
   sim( p -> sim ), type( ty ), name_str( n ),
   player( p ), target( p -> target ), attack_policy( policy ),
   school( s ), resource( r )
@@ -318,7 +318,7 @@ void action_t::parse_options( option_t*          options,
     { "target",                 OPT_STRING, &target_str            },
     { "label",                  OPT_STRING, &label_str             },
     { "use_off_gcd",            OPT_BOOL,   &use_off_gcd           },
-    { NULL,                     0,          NULL                   }
+    { NULL,                     OPT_NONE,   NULL                   }
   };
 
   std::vector<option_t> merged_options;
@@ -443,7 +443,7 @@ void action_t::player_buff()
 
 // action_t::target_debuff ==================================================
 
-void action_t::target_debuff( player_t* t, int /* dmg_type */ )
+void action_t::target_debuff( player_t* t, dmg_type )
 {
   target_avoidance     = attack_policy -> avoidance( *t );
   target_shield        = attack_policy -> shield_chance( *t );
@@ -468,7 +468,7 @@ void action_t::target_debuff( player_t* t, int /* dmg_type */ )
 
 // action_t::result_is_hit ==================================================
 
-bool action_t::result_is_hit( int r )
+bool action_t::result_is_hit( result_type r )
 {
   return( r == RESULT_HIT        ||
           r == RESULT_CRIT       ||
@@ -478,7 +478,7 @@ bool action_t::result_is_hit( int r )
 
 // action_t::result_is_miss =================================================
 
-bool action_t::result_is_miss( int r )
+bool action_t::result_is_miss( result_type r )
 { return ( r == RESULT_MISS || r == RESULT_AVOID ); }
 
 // action_t::armor ==========================================================
@@ -835,7 +835,7 @@ void action_t::last_tick( dot_t* d )
 
 // action_t::impact =========================================================
 
-void action_t::impact( player_t* t, int impact_result, double travel_dmg=0 )
+void action_t::impact( player_t* t, result_type impact_result, double travel_dmg=0 )
 {
   assess_damage( t, travel_dmg, type == ACTION_HEAL ? HEAL_DIRECT : DMG_DIRECT, impact_result );
 
@@ -897,10 +897,10 @@ void action_t::impact( player_t* t, int impact_result, double travel_dmg=0 )
 
 // action_t::assess_damage ==================================================
 
-void action_t::assess_damage( player_t* t,
-                              double dmg_amount,
-                              int    dmg_type,
-                              int    dmg_result )
+void action_t::assess_damage( player_t*   t,
+                              double      dmg_amount,
+                              dmg_type    dmg_type,
+                              result_type dmg_result )
 {
   double dmg_adjusted = t -> assess_damage( dmg_amount, school, dmg_type, dmg_result, this );
   double actual_amount = t -> infinite_resource[ RESOURCE_HEALTH ] ? dmg_adjusted : std::min( dmg_adjusted, t -> resource_current[ RESOURCE_HEALTH ] );
@@ -943,10 +943,10 @@ void action_t::assess_damage( player_t* t,
 
 // action_t::additional_damage ==============================================
 
-void action_t::additional_damage( player_t* t,
-                                  double dmg_amount,
-                                  int    dmg_type,
-                                  int    dmg_result )
+void action_t::additional_damage( player_t*   t,
+                                  double      dmg_amount,
+                                  dmg_type    dmg_type,
+                                  result_type dmg_result )
 {
   dmg_amount /= target_multiplier; // FIXME! Weak lip-service to the fact that the adds probably will not be properly debuffed.
   double dmg_adjusted = t -> assess_damage( dmg_amount, school, dmg_type, dmg_result, this );
@@ -975,9 +975,7 @@ timespan_t action_t::execute_time() const
 void action_t::schedule_execute()
 {
   if ( sim -> log )
-  {
     log_t::output( sim, "%s schedules execute for %s", player -> name(), name() );
-  }
 
   time_to_execute = execute_time();
 
@@ -1300,7 +1298,7 @@ void action_t::check_talent( int talent_rank )
 
 // action_t::check_race =====================================================
 
-void action_t::check_race( int race )
+void action_t::check_race( race_type race )
 {
   if ( player -> race != race )
   {
@@ -1312,7 +1310,7 @@ void action_t::check_race( int race )
 
 // action_t::check_spec =====================================================
 
-void action_t::check_spec( int necessary_spec )
+void action_t::check_spec( talent_tree_type necessary_spec )
 {
   if ( player -> primary_tree() != necessary_spec )
   {
