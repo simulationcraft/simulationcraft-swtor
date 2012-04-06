@@ -718,10 +718,7 @@ void player_t::init_items()
     avg_ilvl /= num_ilvl_items;
 
   for ( stat_type i = STAT_NONE; i < STAT_MAX; ++i )
-  {
-    if ( gear.get_stat( i ) == 0 )
-      gear.set_stat( i, item_stats.get_stat( i ) );
-  }
+    gear.add_stat( i, item_stats.get_stat( i ) );
 
   if ( sim -> debug )
   {
