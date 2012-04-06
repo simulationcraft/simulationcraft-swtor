@@ -62,7 +62,7 @@ public:
 template <typename F>
 class unary_t : public expr_t
 {
-protected:
+private:
   const expr_ptr input;
   F f;
 

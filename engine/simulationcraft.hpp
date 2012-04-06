@@ -1679,9 +1679,9 @@ public:
 
 class expr_t : public noncopyable
 {
-public:
   std::string name_str;
 
+public:
   template <typename S>
   expr_t( S&& n ) : name_str( std::forward<S>( n ) ) {}
 
@@ -1696,10 +1696,11 @@ public:
 };
 
 template <typename F>
-struct fn_expr_t : public expr_t
+class fn_expr_t : public expr_t
 {
   F f;
 
+public:
   template <typename Name, typename Function>
   fn_expr_t( Name&& name, Function&& f_ ) :
     expr_t( std::forward<Name>( name ) ),
