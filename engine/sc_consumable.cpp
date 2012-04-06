@@ -20,7 +20,7 @@ struct use_stim_t : public action_t
     action_t( ACTION_USE, "stim", p ), type( stim_t::none ),
     gain( p -> get_gain( "stim" ) )
   {
-    trigger_gcd = timespan_t::zero;
+    trigger_gcd = timespan_t::zero();
     harmful = false;
 
     std::string type_str;
@@ -95,10 +95,10 @@ struct power_potion_t : public action_t
     };
     parse_options( options, options_str );
 
-    trigger_gcd = timespan_t::zero;
+    trigger_gcd = timespan_t::zero();
     harmful = false;
     cooldown = p -> get_cooldown( "potion" );
-    cooldown -> duration = timespan_t::from_seconds( 180.0 );
+    cooldown -> duration = from_seconds( 180.0 );
   }
 
   virtual void execute()
@@ -109,11 +109,11 @@ struct power_potion_t : public action_t
     }
     else
     {
-      cooldown -> duration -= timespan_t::from_seconds( 5.0 );
-      player -> buffs.power_potion -> buff_duration -= timespan_t::from_seconds( 5.0 );
+      cooldown -> duration -= from_seconds( 5.0 );
+      player -> buffs.power_potion -> buff_duration -= from_seconds( 5.0 );
       player -> buffs.power_potion -> trigger( 1, amount);
-      cooldown -> duration += timespan_t::from_seconds( 5.0 );
-      player -> buffs.power_potion -> buff_duration += timespan_t::from_seconds( 5.0 );
+      cooldown -> duration += from_seconds( 5.0 );
+      player -> buffs.power_potion -> buff_duration += from_seconds( 5.0 );
     }
 
     if ( sim -> log ) log_t::output( sim, "%s uses %s", player -> name(), name() );

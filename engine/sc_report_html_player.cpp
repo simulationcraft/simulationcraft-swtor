@@ -287,7 +287,7 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
            s -> tick_results[ RESULT_CRIT ].pct,
            s -> tick_results[ RESULT_MISS ].pct +
            s -> tick_results[ RESULT_AVOID ].pct,
-           100 * s -> total_tick_time.total_seconds() / s -> player -> fight_length.mean );
+           100 * to_seconds( s -> total_tick_time ) / s -> player -> fight_length.mean );
 
   if ( p -> sim -> report_details )
   {
@@ -616,11 +616,11 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
                 util_t::resource_type_string( a -> resource ),
                 a -> range,
                 a -> travel_speed,
-                a -> trigger_gcd.total_seconds(),
-                a -> min_gcd.total_seconds(),
+                to_seconds( a -> trigger_gcd ),
+                to_seconds( a -> min_gcd ),
                 a -> base_cost,
-                a -> cooldown -> duration.total_seconds(),
-                a -> base_execute_time.total_seconds(),
+                to_seconds( a -> cooldown -> duration ),
+                to_seconds( a -> base_execute_time ),
                 a -> base_crit,
                 a -> base_accuracy,
                 a -> target ? a -> target -> name() : "",
@@ -669,7 +669,7 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
                   a -> td.base_min,
                   a -> td.base_max,
                   a -> num_ticks,
-                  a -> base_tick_time.total_seconds(),
+                  to_seconds( a -> base_tick_time ),
                   a -> hasted_ticks?"true":"false",
                   a -> dot_behavior==DOT_REFRESH?"DOT_REFRESH":a -> dot_behavior==DOT_CLIP?"DOT_CLIP":"DOT_WAIT" );
       }
@@ -1916,7 +1916,7 @@ static void print_html_player_buffs( FILE* file, player_t* p )
     if ( ! b -> quiet && b -> start_count && ! b -> constant )
       dynamic_buffs.push_back( b );
 
-  std::sort( dynamic_buffs.begin(), dynamic_buffs.end(), buff_comp );
+  boost::sort( dynamic_buffs, buff_comp );
 
   for ( i=0; i < ( int ) dynamic_buffs.size(); i++ )
   {
@@ -1975,8 +1975,8 @@ static void print_html_player_buffs( FILE* file, player_t* p )
                "\t\t\t\t\t\t\t\t</td>\n",
                b -> cooldown -> name_str.c_str(),
                b -> max_stack,
-               b -> buff_duration.total_seconds(),
-               b -> cooldown -> duration.total_seconds(),
+               to_seconds( b -> buff_duration ),
+               to_seconds( b -> cooldown -> duration ),
                b -> default_chance * 100 );
 
       fprintf( file,
@@ -2021,10 +2021,9 @@ static void print_html_player_buffs( FILE* file, player_t* p )
       if ( ! b -> quiet && b -> start_count && b -> constant )
         constant_buffs.push_back( b );
 
-    std::sort( constant_buffs.begin(), constant_buffs.end(), buff_comp );
+    boost::sort( constant_buffs, buff_comp );
 
-    for ( std::vector< buff_t* >::const_iterator b = constant_buffs.begin();
-          b < constant_buffs.end(); b++ )
+    for ( auto const& b : constant_buffs | boost::adaptors::indirected )
     {
       fprintf( file,
                "\t\t\t\t\t\t\t<tr" );
@@ -2038,7 +2037,7 @@ static void print_html_player_buffs( FILE* file, player_t* p )
         fprintf( file,
                  "\t\t\t\t\t\t\t\t\t<td class=\"left\"><a href=\"#\" class=\"toggle-details\">%s</a></td>\n"
                  "\t\t\t\t\t\t\t\t</tr>\n",
-                 ( *b ) -> name() );
+                 b.name() );
 
 
         fprintf( file,
@@ -2054,17 +2053,17 @@ static void print_html_player_buffs( FILE* file, player_t* p )
                  "\t\t\t\t\t\t\t\t\t\t</ul>\n"
                  "\t\t\t\t\t\t\t\t\t</td>\n"
                  "\t\t\t\t\t\t\t\t</tr>\n",
-                 ( *b ) -> cooldown -> name_str.c_str(),
-                 ( *b ) -> max_stack,
-                 ( *b ) -> buff_duration.total_seconds(),
-                 ( *b ) -> cooldown -> duration.total_seconds(),
-                 ( *b ) -> default_chance * 100 );
+                 b.cooldown -> name_str.c_str(),
+                 b.max_stack,
+                 to_seconds( b.buff_duration ),
+                 to_seconds( b.cooldown -> duration ),
+                 b.default_chance * 100 );
       }
       else
         fprintf( file,
                  "\t\t\t\t\t\t\t\t\t<td class=\"left\">%s</td>\n"
                  "\t\t\t\t\t\t\t\t</tr>\n",
-                 ( *b ) -> name() );
+                 b.name() );
 
       i++;
     }

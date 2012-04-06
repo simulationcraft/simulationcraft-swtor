@@ -398,8 +398,8 @@ void scaling_t::analyze_lag()
   }
 
   delta_sim = new sim_t( sim );
-  delta_sim ->     gcd_lag += timespan_t::from_seconds( 0.100 );
-  delta_sim -> channel_lag += timespan_t::from_seconds( 0.200 );
+  delta_sim ->     gcd_lag += from_seconds( 0.100 );
+  delta_sim -> channel_lag += from_seconds( 0.200 );
   delta_sim -> scaling -> scale_stat = STAT_MAX;
   delta_sim -> execute();
 
@@ -410,7 +410,7 @@ void scaling_t::analyze_lag()
     player_t* delta_p = delta_sim -> find_player( p -> name() );
 
     // Calculate DPS difference per millisecond of lag
-    double divisor = ( delta_sim -> gcd_lag - ref_sim -> gcd_lag ).total_millis();
+    double divisor = to_millis( delta_sim -> gcd_lag - ref_sim -> gcd_lag );
 
     double delta_score = scale_over_function( delta_sim, delta_p );
     double   ref_score = scale_over_function(   ref_sim,   ref_p );

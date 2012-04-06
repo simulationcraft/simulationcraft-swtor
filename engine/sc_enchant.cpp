@@ -587,7 +587,7 @@ struct weapon_discharge_proc_callback_t : public action_callback_t
   proc_t* proc;
   rng_t* rng;
 
-  weapon_discharge_proc_callback_t( const std::string& n, player_t* p, weapon_t* w, int ms, const school_type school, double dmg, double fc, double ppm=0, timespan_t cd=timespan_t::zero, rng_type rt=RNG_DEFAULT ) :
+  weapon_discharge_proc_callback_t( const std::string& n, player_t* p, weapon_t* w, int ms, const school_type school, double dmg, double fc, double ppm=0, timespan_t cd=timespan_t::zero(), rng_type rt=RNG_DEFAULT ) :
     action_callback_t( p ),
     name_str( n ), weapon( w ), stacks( 0 ), max_stacks( ms ), fixed_chance( fc ), PPM( ppm )
   {
@@ -598,7 +598,7 @@ struct weapon_discharge_proc_callback_t : public action_callback_t
       discharge_spell_t( const char* n, player_t* p, double dmg, const school_type s ) :
         action_t( ACTION_ATTACK, n, p, force_policy, RESOURCE_NONE, s )
       {
-        trigger_gcd = timespan_t::zero;
+        trigger_gcd = timespan_t::zero();
         dd.base_min = dd.base_max = dmg;
         may_crit = true;
         background  = true;
@@ -625,7 +625,7 @@ struct weapon_discharge_proc_callback_t : public action_callback_t
     if ( a -> proc ) return;
     if ( weapon && a -> weapon != weapon ) return;
 
-    if ( cooldown -> remains() > timespan_t::zero )
+    if ( cooldown -> remains() > timespan_t::zero() )
       return;
 
     double chance = fixed_chance;

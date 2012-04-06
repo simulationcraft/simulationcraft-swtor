@@ -496,7 +496,7 @@ static bool parse_fight_style( sim_t*             sim,
   else if ( util_t::str_compare_ci( value, "Ultraxion" ) )
   {
     sim -> fight_style = "Ultraxion";
-    sim -> max_time    = timespan_t::from_seconds( 366.0 );
+    sim -> max_time    = from_seconds( 366.0 );
     sim -> fixed_time  = 1;
     sim -> vary_combat_length = 0.0;
     sim -> raid_events_str =  "flying,first=0,duration=500,cooldown=500";
@@ -522,9 +522,9 @@ static bool parse_fight_style( sim_t*             sim,
   {
     sim -> fight_style = "LightMovement";
     sim -> raid_events_str = "/movement,players_only=1,first=";
-    sim -> raid_events_str += util_t::to_string( int( sim -> max_time.total_seconds() * 0.1 ) );
+    sim -> raid_events_str += util_t::to_string( to_seconds<int>( sim -> max_time * 0.1 ) );
     sim -> raid_events_str += ",cooldown=85,duration=7,last=";
-    sim -> raid_events_str += util_t::to_string( int( sim -> max_time.total_seconds() * 0.8 ) );
+    sim -> raid_events_str += util_t::to_string( to_seconds<int>( sim -> max_time * 0.8 ) );
   }
   else if ( util_t::str_compare_ci( value, "HeavyMovement" ) )
   {
@@ -589,16 +589,16 @@ sim_t::sim_t( sim_t* p, int index ) :
   parent( p ),
   target_list( 0 ), player_list( 0 ), active_player( 0 ), num_players( 0 ), num_enemies( 0 ), num_targetdata_ids( 0 ), max_player_level( -1 ), canceled( 0 ),
 
-  queue_lag( timespan_t::from_seconds( 0.037 ) ), queue_lag_stddev( timespan_t::zero ),
-  gcd_lag( timespan_t::from_seconds( 0.150 ) ), gcd_lag_stddev( timespan_t::zero ),
-  channel_lag( timespan_t::from_seconds( 0.200 ) ), channel_lag_stddev( timespan_t::zero ),
-  queue_gcd_reduction( timespan_t::from_seconds( 0.032 ) ), strict_gcd_queue( 0 ),
+  queue_lag( from_seconds( 0.037 ) ), queue_lag_stddev( timespan_t::zero() ),
+  gcd_lag( from_seconds( 0.150 ) ), gcd_lag_stddev( timespan_t::zero() ),
+  channel_lag( from_seconds( 0.200 ) ), channel_lag_stddev( timespan_t::zero() ),
+  queue_gcd_reduction( from_seconds( 0.032 ) ), strict_gcd_queue( 0 ),
   confidence( 0.95 ), confidence_estimator( 1.96 ),
-  world_lag( timespan_t::from_seconds( 0.1 ) ), world_lag_stddev( timespan_t::min ),
-  travel_variance( 0 ), default_skill( 1.0 ), reaction_time( timespan_t::from_seconds( 0.5 ) ),
-  regen_periodicity( timespan_t::from_seconds( 1.0 ) ), // observed by philoptik@gmail.com 03/03/2012 according to ingame tooltip
-  current_time( timespan_t::zero ), max_time( timespan_t::from_seconds( 300 ) ), expected_time( timespan_t::zero ), vary_combat_length( 0.2 ),
-  last_event( timespan_t::zero ), fixed_time( 0 ),
+  world_lag( from_seconds( 0.1 ) ), world_lag_stddev( timespan_t_min() ),
+  travel_variance( 0 ), default_skill( 1.0 ), reaction_time( from_seconds( 0.5 ) ),
+  regen_periodicity( from_seconds( 1.0 ) ), // observed by philoptik@gmail.com 03/03/2012 according to ingame tooltip
+  current_time( timespan_t::zero() ), max_time( from_seconds( 300 ) ), expected_time( timespan_t::zero() ), vary_combat_length( 0.2 ),
+  last_event( timespan_t::zero() ), fixed_time( 0 ),
   events_remaining( 0 ), max_events_remaining( 0 ),
   events_processed( 0 ), total_events_processed( 0 ),
   seed( 0 ), id( 0 ), iterations( 1000 ), current_iteration( -1 ), current_slot( -1 ),
@@ -614,10 +614,10 @@ sim_t::sim_t( sim_t* p, int index ) :
   rng( 0 ), deterministic_rng( 0 ), smooth_rng( false ), average_range( true ), average_gauss( false ),
   timing_wheel( 0 ), wheel_seconds( 0 ), wheel_size( 0 ), wheel_mask( 0 ), timing_slice( 0 ), wheel_granularity( 0.0 ),
   fight_style( "Patchwerk" ), overrides( overrides_t() ), auras( auras_t() ),
-  buff_list( 0 ), aura_delay( timespan_t::from_seconds( 0.5 ) ), default_aura_delay( timespan_t::from_seconds( 0.3 ) ),
-  default_aura_delay_stddev( timespan_t::from_seconds( 0.05 ) ),
+  buff_list( 0 ), aura_delay( from_seconds( 0.5 ) ), default_aura_delay( from_seconds( 0.3 ) ),
+  default_aura_delay_stddev( from_seconds( 0.05 ) ),
   cooldown_list( 0 ),
-  elapsed_cpu( timespan_t::zero ), iteration_dmg( 0 ), iteration_heal( 0 ),
+  elapsed_cpu( timespan_t::zero() ), iteration_dmg( 0 ), iteration_heal( 0 ),
   raid_dps(), total_dmg(), raid_hps(), total_heal(), simulation_length( false ),
   report_progress( 1 ),
   path_str( "." ), output_file( stdout ),
@@ -748,13 +748,13 @@ sim_t::~sim_t()
 void sim_t::add_event( event_t* e,
                        timespan_t delta_time )
 {
-  if ( delta_time < timespan_t::zero )
-    delta_time = timespan_t::zero;
+  if ( delta_time < timespan_t::zero() )
+    delta_time = timespan_t::zero();
 
   e -> time = current_time + delta_time;
   e -> id   = ++id;
 
-  if ( unlikely( ! ( delta_time.total_seconds() <= wheel_seconds ) ) )
+  if ( unlikely( ! ( to_seconds<int>( delta_time ) <= wheel_seconds ) ) )
   {
     errorf( "sim_t::add_event assertion error! delta_time > wheel_seconds, event %s from %s.\n", e -> name, e -> player ? e -> player -> name() : "no-one" );
     assert( 0 );
@@ -762,7 +762,7 @@ void sim_t::add_event( event_t* e,
 
   if ( e -> time > last_event ) last_event = e -> time;
 
-  uint32_t slice = ( uint32_t ) ( e -> time.total_seconds() * wheel_granularity ) & wheel_mask;
+  uint32_t slice = to_seconds<uint32_t>( e -> time * wheel_granularity ) & wheel_mask;
 
   event_t** prev = &( timing_wheel[ slice ] );
 
@@ -777,7 +777,7 @@ void sim_t::add_event( event_t* e,
 
   if ( debug )
   {
-    log_t::output( this, "Add Event: %s %.2f %d", e -> name, e -> time.total_seconds(), e -> id );
+    log_t::output( this, "Add Event: %s %.2f %d", e -> name, to_seconds( e -> time ), e -> id );
     if ( e -> player ) log_t::output( this, "Actor %s has %d scheduled events", e -> player -> name(), e -> player -> events );
   }
 }
@@ -790,7 +790,7 @@ void sim_t::reschedule_event( event_t* e )
 
   add_event( e, ( e -> reschedule_time - current_time ) );
 
-  e -> reschedule_time = timespan_t::zero;
+  e -> reschedule_time = timespan_t::zero();
 }
 
 // sim_t::next_event ========================================================
@@ -864,7 +864,7 @@ void sim_t::cancel_events( player_t* p )
 
   if ( debug ) log_t::output( this, "Canceling events for player %s, events to cancel %d", p -> name(), p -> events );
 
-  int end_slice = ( uint32_t ) ( last_event.total_seconds() * wheel_granularity ) & wheel_mask;
+  int end_slice = to_seconds<uint32_t>( last_event * wheel_granularity ) & wheel_mask;
 
   // Loop only partial wheel, [current_time..last_event], as that's the range where there
   // are events for actors in the sim
@@ -950,7 +950,7 @@ void sim_t::combat( int iteration )
       // The first iteration is always time-limited since we do not yet have inferred health
       if ( current_time > expected_time )
       {
-        if ( debug ) log_t::output( this, "Reached expected_time=%.2f, ending simulation", expected_time.total_seconds() );
+        if ( debug ) log_t::output( this, "Reached expected_time=%.2f, ending simulation", to_seconds( expected_time ) );
         // Set this last event as canceled, so asserts dont fire when odd things happen at the
         // tail-end of the simulation iteration
         e -> canceled = 1;
@@ -960,7 +960,7 @@ void sim_t::combat( int iteration )
     }
     else
     {
-      if ( expected_time > timespan_t::zero && current_time > ( expected_time * 2.0 ) )
+      if ( expected_time > timespan_t::zero() && current_time > ( expected_time * 2.0 ) )
       {
         if ( debug ) log_t::output( this, "Target proving tough to kill, ending simulation" );
         // Set this last event as canceled, so asserts dont fire when odd things happen at the
@@ -1016,8 +1016,8 @@ void sim_t::reset()
   if ( debug ) log_t::output( this, "Resetting Simulator" );
   expected_time = max_time * ( 1.0 + vary_combat_length * iteration_adjust() );
   id = 0;
-  current_time = timespan_t::zero;
-  last_event = timespan_t::zero;
+  current_time = timespan_t::zero();
+  last_event = timespan_t::zero();
   for ( buff_t* b = buff_list; b; b = b -> next )
   {
     b -> reset();
@@ -1069,7 +1069,7 @@ void sim_t::combat_end()
   if ( debug ) log_t::output( this, "Combat End" );
 
   iteration_timeline.push_back( current_time );
-  simulation_length.add( current_time.total_seconds() );
+  simulation_length.add( to_seconds( current_time ) );
 
   total_events_processed += events_processed;
 
@@ -1095,9 +1095,9 @@ void sim_t::combat_end()
   }
 
   total_dmg.add( iteration_dmg );
-  raid_dps.add( current_time != timespan_t::zero ? iteration_dmg / current_time.total_seconds() : 0 );
+  raid_dps.add( current_time != timespan_t::zero() ? iteration_dmg / to_seconds( current_time ) : 0 );
   total_heal.add( iteration_heal );
-  raid_hps.add( current_time != timespan_t::zero ? iteration_heal / current_time.total_seconds() : 0 );
+  raid_hps.add( current_time != timespan_t::zero() ? iteration_heal / to_seconds( current_time ) : 0 );
 
   flush_events();
 }
@@ -1145,10 +1145,10 @@ bool sim_t::init()
     std::fill( timing_wheel, timing_wheel + wheel_size, nullptr );
 
 
-    if (   queue_lag_stddev == timespan_t::zero )   queue_lag_stddev =   queue_lag * 0.25;
-    if (     gcd_lag_stddev == timespan_t::zero )     gcd_lag_stddev =     gcd_lag * 0.25;
-    if ( channel_lag_stddev == timespan_t::zero ) channel_lag_stddev = channel_lag * 0.25;
-    if ( world_lag_stddev    < timespan_t::zero ) world_lag_stddev   =   world_lag * 0.1;
+    if (   queue_lag_stddev == timespan_t::zero() )   queue_lag_stddev =   queue_lag * 0.25;
+    if (     gcd_lag_stddev == timespan_t::zero() )     gcd_lag_stddev =     gcd_lag * 0.25;
+    if ( channel_lag_stddev == timespan_t::zero() ) channel_lag_stddev = channel_lag * 0.25;
+    if ( world_lag_stddev    < timespan_t::zero() ) world_lag_stddev   =   world_lag * 0.1;
 
     // Find Already defined target, otherwise create a new one.
     if ( debug )
@@ -1491,7 +1491,7 @@ void sim_t::analyze()
   size_t num_timelines = iteration_timeline.size();
   for ( size_t i=0; i < num_timelines; i++ )
   {
-    int last = ( int ) floor( iteration_timeline[ i ].total_seconds() );
+    int last = to_seconds<int>( iteration_timeline[ i ] );
     size_t num_buckets = divisor_timeline.size();
     if ( 1 + last > ( int ) num_buckets ) divisor_timeline.resize( 1 + last, 0 );
     for ( int j=0; j <= last; j++ ) divisor_timeline[ j ] += 1;
@@ -1639,14 +1639,16 @@ void sim_t::partition()
 
 bool sim_t::execute()
 {
-  int64_t start_time = util_t::milliseconds();
+  typedef std::chrono::high_resolution_clock clock;
+
+  clock::time_point start_time = clock::now();
 
   partition();
   if ( ! iterate() ) return false;
   merge();
   analyze();
 
-  elapsed_cpu = timespan_t::from_millis( ( util_t::milliseconds() - start_time ) );
+  elapsed_cpu = std::chrono::duration_cast<timespan_t>( clock::now() - start_time );
 
   return true;
 }
@@ -1734,8 +1736,8 @@ void sim_t::aura_loss( const char* aura_name , int /* aura_id */ )
 
 bool sim_t::time_to_think( timespan_t proc_time )
 {
-  if ( proc_time == timespan_t::zero ) return false;
-  if ( proc_time < timespan_t::zero ) return true;
+  if ( proc_time == timespan_t::zero() ) return false;
+  if ( proc_time < timespan_t::zero() ) return true;
   return current_time - proc_time > reaction_time;
 }
 
@@ -1813,7 +1815,7 @@ expr_ptr sim_t::create_expression( action_t* a, const std::string& name_str )
   assert( a -> sim == this );
 
   if ( name_str == "time" )
-    return make_expr( name_str, [this]{ return current_time.total_seconds(); } );
+    return make_expr( name_str, [this]{ return to_seconds( current_time ); } );
 
   if ( name_str == "enemies" )
     return make_expr( name_str, [this]{ return num_enemies; } );
@@ -2187,7 +2189,7 @@ int sim_t::main( int argc, char** argv )
   }
   else
   {
-    if ( max_time <= timespan_t::zero )
+    if ( max_time <= timespan_t::zero() )
     {
       util_t::fprintf( output_file, "simulationcraft: One of -max_time or -target_health must be specified.\n" );
       exit( 0 );
@@ -2205,7 +2207,7 @@ int sim_t::main( int argc, char** argv )
 
     util_t::fprintf( output_file,
                      "\nSimulating... ( iterations=%d, max_time=%.0f, vary_combat_length=%0.2f, optimal_raid=%d, fight_style=%s )\n",
-                     iterations, max_time.total_seconds(), vary_combat_length, optimal_raid, fight_style.c_str() );
+                     iterations, to_seconds( max_time ), vary_combat_length, optimal_raid, fight_style.c_str() );
     fflush( output_file );
 
     util_t::fprintf( stdout, "\nGenerating baseline... \n" ); fflush( stdout );

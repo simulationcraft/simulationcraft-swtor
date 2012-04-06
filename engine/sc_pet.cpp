@@ -105,7 +105,8 @@ void pet_t::summon( timespan_t duration )
 {
   if ( sim -> log )
   {
-    log_t::output( sim, "%s summons %s. for %.2fs", owner -> name(), name(), duration.total_seconds() );
+    log_t::output( sim, "%s summons %s. for %.2fs", owner -> name(), name(),
+                   to_seconds( duration ) );
   }
 
   distance = owner -> distance;
@@ -121,7 +122,7 @@ void pet_t::summon( timespan_t duration )
     expiration = 0;
   }
 
-  if ( duration > timespan_t::zero )
+  if ( duration > timespan_t::zero() )
   {
     struct expiration_t : public event_t
     {

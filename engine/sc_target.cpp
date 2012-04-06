@@ -19,7 +19,7 @@ struct enemy_t : public player_t
     player_t( s, ENEMY, n, r ),
     fixed_health( 0 ), initial_health( 0 ),
     fixed_health_percentage( 0 ), initial_health_percentage( 100.0 ),
-    waiting_time( timespan_t::from_seconds( 1.0 ) )
+    waiting_time( from_seconds( 1.0 ) )
 
   {
     player_t** last = &( sim -> target_list );
@@ -125,8 +125,8 @@ struct melee_attack_t : public action_t
     if ( aoe_tanks == 1 )
       aoe = -1;
     dd.base_max = dd.base_min;
-    if ( trigger_gcd <= timespan_t::zero )
-      trigger_gcd = timespan_t::from_seconds( 3.0 );
+    if ( trigger_gcd <= timespan_t::zero() )
+      trigger_gcd = from_seconds( 3.0 );
 
     may_crit    = true;
     base_cost   = 0;
@@ -156,7 +156,7 @@ struct spell_nuke_t : public action_t
   spell_nuke_t( player_t* p, const std::string& options_str ) :
     action_t( ACTION_ATTACK, "spell_nuke", p, force_policy, RESOURCE_NONE, SCHOOL_INTERNAL )
   {
-    base_execute_time = timespan_t::from_seconds( 3.0 );
+    base_execute_time = from_seconds( 3.0 );
     dd.base_min = 4000;
 
     cooldown = player -> get_cooldown( name_str + "_" + target -> name() );
@@ -173,8 +173,8 @@ struct spell_nuke_t : public action_t
     parse_options( options, options_str );
 
     dd.base_max = dd.base_min;
-    if ( base_execute_time < timespan_t::zero )
-      base_execute_time = timespan_t::from_seconds( 1.0 );
+    if ( base_execute_time < timespan_t::zero() )
+      base_execute_time = from_seconds( 1.0 );
 
     stats = player -> get_stats( name_str + "_" + target -> name(), this );
     stats -> school = school;
@@ -209,7 +209,7 @@ struct spell_aoe_t : public action_t
   spell_aoe_t( player_t* p, const std::string& options_str ) :
     action_t( ACTION_ATTACK, "spell_aoe", p, force_policy, RESOURCE_NONE, SCHOOL_ELEMENTAL )
   {
-    base_execute_time = timespan_t::from_seconds( 3.0 );
+    base_execute_time = from_seconds( 3.0 );
     dd.base_min = 50000;
 
     cooldown = player -> get_cooldown( name_str + "_" + target -> name() );
@@ -224,8 +224,8 @@ struct spell_aoe_t : public action_t
     parse_options( options, options_str );
 
     dd.base_max = dd.base_min;
-    if ( base_execute_time < timespan_t::from_seconds( 0.01 ) )
-      base_execute_time = timespan_t::from_seconds( 3.0 );
+    if ( base_execute_time < from_seconds( 0.01 ) )
+      base_execute_time = from_seconds( 3.0 );
 
     stats = player -> get_stats( name_str + "_" + target -> name(), this );
     stats -> school = school;
@@ -263,7 +263,7 @@ struct summon_add_t : public action_t
 
   summon_add_t( player_t* player, const std::string& options_str ) :
     action_t( ACTION_OTHER, "summon_add", player ),
-    summoning_duration( timespan_t::zero ), pet( 0 )
+    summoning_duration( timespan_t::zero() ), pet( 0 )
   {
     option_t options[] =
     {
@@ -285,7 +285,7 @@ struct summon_add_t : public action_t
 
     harmful = false;
 
-    trigger_gcd = timespan_t::from_seconds( 1.5 );
+    trigger_gcd = from_seconds( 1.5 );
   }
 
   virtual void execute()
@@ -340,9 +340,8 @@ void enemy_t::init()
 
 void enemy_t::init_base()
 {
-  waiting_time = timespan_t::from_seconds( std::min( ( int ) floor( sim -> max_time.total_seconds() ), sim -> wheel_seconds ) );
-  if ( waiting_time < timespan_t::from_seconds( 1.0 ) )
-    waiting_time = timespan_t::from_seconds( 1.0 );
+  waiting_time = std::min( from_seconds( std::min( to_seconds<int>( sim -> max_time ), sim -> wheel_seconds ) ),
+                           from_seconds( 1.0 ) );
 
   if ( initial_armor <= 0 )
   {
@@ -427,7 +426,7 @@ void enemy_t::init_actions()
     if ( action -> name_str == "snapshot_stats" ) continue;
     if ( action -> name_str.find( "auto_attack" ) != std::string::npos )
       continue;
-    waiting_time = timespan_t::from_seconds( 1.0 );
+    waiting_time = from_seconds( 1.0 );
     break;
   }
 }
@@ -489,7 +488,7 @@ double enemy_t::health_percentage() const
 
   if ( resource_base[ RESOURCE_HEALTH ] == 0 ) // first iteration
   {
-    timespan_t remainder = std::max( timespan_t::zero, ( sim -> expected_time - sim -> current_time ) );
+    timespan_t remainder = std::max( timespan_t::zero(), ( sim -> expected_time - sim -> current_time ) );
 
     return ( remainder / sim -> expected_time ) * ( initial_health_percentage - sim -> target_death_pct ) + sim ->  target_death_pct;
   }
@@ -501,7 +500,7 @@ double enemy_t::health_percentage() const
 
 void enemy_t::recalculate_health()
 {
-  if ( sim -> expected_time <= timespan_t::zero || fixed_health > 0 ) return;
+  if ( sim -> expected_time <= timespan_t::zero() || fixed_health > 0 ) return;
 
   if ( initial_health == 0 ) // first iteration
   {

@@ -17,7 +17,7 @@ struct stat_proc_callback_t : public action_callback_t
 
   stat_proc_callback_t( const std::string& n, player_t* p, int s, int max_stacks, double a,
                         double proc_chance, timespan_t duration, timespan_t cooldown,
-                        timespan_t t=timespan_t::zero, bool reverse=false, rng_type rt=RNG_DEFAULT, bool activated=true ) :
+                        timespan_t t=timespan_t::zero(), bool reverse=false, rng_type rt=RNG_DEFAULT, bool activated=true ) :
     action_callback_t( p ), name_str( n ), stat( s ), amount( a ), tick( t )
   {
     if ( max_stacks == 0 ) max_stacks = 1;
@@ -44,7 +44,7 @@ struct stat_proc_callback_t : public action_callback_t
   {
     if ( buff -> trigger( a ) )
     {
-      if ( tick > timespan_t::zero ) // The buff stacks over time.
+      if ( tick > timespan_t::zero() ) // The buff stacks over time.
       {
         struct tick_stack_t : public event_t
         {
@@ -140,7 +140,7 @@ struct discharge_proc_callback_t : public action_callback_t
         may_crit = ! no_crit;
         discharge_proc = true;
         item_proc = true;
-        trigger_gcd = timespan_t::zero;
+        trigger_gcd = timespan_t::zero();
         dd.base_min = dd.base_max = amount;
         dd.power_mod = scaling;
         background  = true;
@@ -158,7 +158,7 @@ struct discharge_proc_callback_t : public action_callback_t
         may_crit = ! no_crit;
         discharge_proc = true;
         item_proc = true;
-        trigger_gcd = timespan_t::zero;
+        trigger_gcd = timespan_t::zero();
         dd.base_min = amount;
         dd.base_max = amount;
         dd.power_mod = scaling;
@@ -171,7 +171,7 @@ struct discharge_proc_callback_t : public action_callback_t
 
     if ( amount > 0 )
     {
-      cooldown = p -> get_cooldown( "damage_discharge_" + util_t::to_string( cd.total_seconds() ) + "cd" );
+      cooldown = p -> get_cooldown( "damage_discharge_" + util_t::to_string( cd ) + "cd" );
       discharge_action = new discharge_spell_t( name_str.c_str(), p, amount, scaling, school, no_crit, no_buffs, no_debuffs );
     }
     else
@@ -192,7 +192,7 @@ struct discharge_proc_callback_t : public action_callback_t
 
   virtual void trigger( action_t* a, void* /* call_data */ )
   {
-    if ( cooldown -> remains() != timespan_t::zero )
+    if ( cooldown -> remains() != timespan_t::zero() )
       return;
 
     if ( ! allow_self_procs && ( a == discharge_action ) ) return;
@@ -259,7 +259,7 @@ struct chance_discharge_proc_callback_t : public action_callback_t
         may_crit = ! no_crit;
         discharge_proc = true;
         item_proc = true;
-        trigger_gcd = timespan_t::zero;
+        trigger_gcd = timespan_t::zero();
         dd.base_min = amount;
         dd.base_max = amount;
         dd.power_mod = scaling;
@@ -278,7 +278,7 @@ struct chance_discharge_proc_callback_t : public action_callback_t
         may_crit = ! no_crit;
         discharge_proc = true;
         item_proc = true;
-        trigger_gcd = timespan_t::zero;
+        trigger_gcd = timespan_t::zero();
         dd.base_min = amount;
         dd.base_max = amount;
         dd.power_mod = scaling;
@@ -291,7 +291,7 @@ struct chance_discharge_proc_callback_t : public action_callback_t
 
     if ( amount > 0 )
     {
-      cooldown = p -> get_cooldown( "damage_discharge_" + util_t::to_string( cd.total_seconds() ) + "cd" );
+      cooldown = p -> get_cooldown( "damage_discharge_" + util_t::to_string( cd ) + "cd" );
       discharge_action = new discharge_spell_t( name_str.c_str(), p, amount, scaling, school, no_crit, no_buffs, no_debuffs );
     }
     else
@@ -313,7 +313,7 @@ struct chance_discharge_proc_callback_t : public action_callback_t
   virtual void trigger( action_t* a, void* /* call_data */ )
   {
     /* Always adds a stack if not on cooldown. The proc chance is the chance to discharge */
-    if ( cooldown -> remains() > timespan_t::zero )
+    if ( cooldown -> remains() > timespan_t::zero() )
       return;
 
     if ( ! allow_self_procs && ( a == discharge_action ) ) return;
@@ -379,7 +379,7 @@ struct stat_discharge_proc_callback_t : public action_callback_t
         may_crit = ! no_crit;
         discharge_proc = true;
         item_proc = true;
-        trigger_gcd = timespan_t::zero;
+        trigger_gcd = timespan_t::zero();
         dd.base_min = amount;
         dd.base_max = amount;
         dd.power_mod = scaling;
@@ -400,7 +400,7 @@ struct stat_discharge_proc_callback_t : public action_callback_t
         may_crit = ! no_crit;
         discharge_proc = true;
         item_proc = true;
-        trigger_gcd = timespan_t::zero;
+        trigger_gcd = timespan_t::zero();
         dd.base_min = amount;
         dd.base_max = amount;
         dd.power_mod = scaling;
