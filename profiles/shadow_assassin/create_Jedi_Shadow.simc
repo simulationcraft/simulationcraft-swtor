@@ -1,0 +1,13 @@
+mrrobot=72bd51f8-fe33-461e-a0a8-ac4513000154|jedi_shadow
+name=Jedi_Shadow_Balance
+talents=http://www.torhead.com/skill-calc#601McZhMZfrbRrRkMfz.1
+position=back
+save=Jedi_Shadow_Balance.simc
+
+copy=Jedi_Shadow_Infiltration,Jedi_Shadow_Balance
+talents=http://www.torhead.com/skill-calc#6010MZhGMRkhMrtzZf0c.1
+save=Jedi_Shadow_Infiltration.simc
+
+copy=Jedi_Shadow_One,Jedi_Shadow_Balance
+talents=http://www.torhead.com/skill-calc#601RIMs00cZZfMfRr0kM.1
+save=Jedi_Shadow_One.simc

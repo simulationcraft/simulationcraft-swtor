@@ -10,6 +10,8 @@ namespace mrrobot { // ======================================================
 
 namespace { // ANONYMOUS ====================================================
 
+const bool USE_TEST_API = false;
+
 // Encoding used by askmrrobot's talent builder.
 const base36_t::encoding_t talent_encoding =
 {
@@ -23,107 +25,175 @@ const base36_t::encoding_t talent_encoding =
 
 const base36_t decoder( talent_encoding );
 
-const bool DEBUG_ITEMS = false;
-
-bool parse_profession ( js_node_t* profile, const std::string& path, std::string& player_profession_string )
+void parse_profession( js_node_t* profile,
+                       const std::string& path,
+                       std::string& player_profession_string )
 {
   std::string crafting_skill;
   if ( js_t::get_value( crafting_skill, profile, path ) )
   {
     util_t::format_name( crafting_skill );
+    if ( ! player_profession_string.empty() )
+      player_profession_string += '/';
     player_profession_string += crafting_skill;
-    return true;
   }
-  return false;
 }
 // parse_skills =============================================================
 
-bool parse_skills( player_t* p, js_node_t* profile )
+void parse_skill_tree( std::vector<talent_t*>& tree, std::string& s )
+{
+  for ( unsigned i = 0; i < s.size() && i < tree.size(); ++i )
+  {
+    signed char c = s[ s.size() - i - 1 ] - '0';
+
+    if ( unlikely( c < 0 || c > 5 ) )
+    {
+      // FIXME: Report something.
+      continue;
+    }
+
+    tree[ i ] -> set_rank( c );
+  }
+}
+
+void parse_skills( player_t* p, js_node_t* profile )
 {
   std::string skill_string;
   if ( !js_t::get_value( skill_string, profile, "SkillString" ) )
-  {
-    p -> sim -> errorf( "Player '%s' has no skills.\n", p -> name() );
-    return false;
-  }
+    return;
 
-  std::vector<std::string> tree_strings;
-  util_t::string_split( tree_strings, skill_string, "-" );
+  std::vector<std::string> tree_strings = split( skill_string, '-' );
 
-  for ( unsigned tree = 0; tree < MAX_TALENT_TREES && tree < tree_strings.size(); ++tree )
-  {
-    for ( unsigned i = 0; i < tree_strings[ tree ].length() && i < p -> talent_trees[ tree ].size(); ++i )
-    {
-      signed char c = tree_strings[ tree ][ i ] - '0';
+  unsigned max = std::min( static_cast<unsigned>( MAX_TALENT_TREES ),
+                           tree_strings.size() );
 
-      if ( unlikely( c < 0 || c > 5 ) )
-      {
-        // FIXME: Report something.
-        continue;
-      }
-
-      p -> talent_trees[ tree ][ i ] -> set_rank( c );
-    }
-  }
-
-  return true;
+  for ( unsigned tree = 0; tree < max; ++tree )
+    parse_skill_tree( p -> talent_trees[ tree ], tree_strings[ tree ] );
 }
 
 slot_type translate_slot_name( const std::string& name )
 {
-  static const char* const slot_map[] =
-  {
-    "head",
-    "ear",
-    0,
-    0,
-    "chest",
-    "waist",
-    "legs",
-    "feet",
-    "wrist",
-    "hands",
-    "implant1",
-    "implant2",
-    "relic1",
-    "relic2",
-    0,
-    "mainhand",
-    "offhand",
+  static const struct {
+    const char* name;
+    slot_type slot;
+  } slot_map[] = {
+    { "Helm",     SLOT_HEAD },
+    { "Ears",     SLOT_EAR },
+    { "Chest",    SLOT_CHEST },
+    { "Belt",     SLOT_WAIST },
+    { "Leg",      SLOT_LEGS },
+    { "Feet",     SLOT_FEET },
+    { "Wrist",    SLOT_WRISTS },
+    { "Glove",    SLOT_HANDS },
+    { "Implant1", SLOT_IMPLANT_1 },
+    { "Implant2", SLOT_IMPLANT_2 },
+    { "Relic1",   SLOT_RELIC_1 },
+    { "Relic2",   SLOT_RELIC_2 },
+    { "MainHand", SLOT_MAIN_HAND },
+    { "OffHand",  SLOT_OFF_HAND  },
   };
 
-  for ( unsigned i = 0; i < sizeof_array( slot_map ); ++i )
+  for ( auto const& i : slot_map )
+    if ( util_t::str_compare_ci( name, i.name ) )
+      return i.slot;
+
+  return SLOT_INVALID;
+}
+
+// decode_weapon_type =======================================================
+
+weapon_type decode_weapon_type( const std::string& s )
+{
+  static const struct {
+    const char* name;
+    weapon_type type;
+  } weapon_map[] = {
+    { "LightSaber",    WEAPON_LIGHTSABER },
+    { "Pistol",        WEAPON_BLASTER_PISTOL },
+    { "PoleSaber",     WEAPON_DOUBLE_BLADED_LIGHTSABER },
+    { "BlasterRifle",  WEAPON_BLASTER_RIFLE },
+    { "VibroKnife",    WEAPON_VIBROKNIFE },
+    { "VibroSword",    WEAPON_VIBROSWORD },
+    { "TrainingSaber", WEAPON_TRAININGSABER },
+    { "ScatterGun",    WEAPON_SCATTERGUN },
+    { "AssaultCannon", WEAPON_ASSAULT_CANNON },
+    { "SniperRifle",   WEAPON_SNIPER_RIFLE },
+    { "ElectroStaff",  WEAPON_ELECTROSTAFF },
+    { "TechBlade",     WEAPON_TECHBLADE },
+    { "TechStaff",     WEAPON_TECHSTAFF },
+  };
+
+  for ( auto const& i : weapon_map )
+    if ( util_t::str_compare_ci( s, i.name ) )
+      return i.type;
+
+  return WEAPON_NONE;
+}
+
+// decode_stats =============================================================
+
+std::string decode_stats( js_node_t* node )
+{
+  static const struct {
+    const char* name;
+    const char* abbrv;
+  } stat_mapping[] = {
+    { "Armor",      "armor" },
+#if 0
+    // These are handled specially for weapons in Simc.
+    { "MinDamage",  "min" },
+    { "MaxDamage",  "max" },
+#endif
+    { "Endurance",  "endurance" },
+    { "Strength",   "strength" },
+    { "Aim",        "aim" },
+    { "Cunning",    "cunning" },
+    { "Will",       "willpower" },
+    { "Presence",   "presence" },
+    { "Expertise",  "expertise" },
+    { "Power",      "power" },
+    { "ForcePower", "forcepower" },
+    { "TechPower",  "techpower" },
+    { "Defense",    "defense" },
+    { "Shielding",  "shield" },
+    { "Absorb",     "absorb" },
+    { "Accuracy",   "accuracy" },
+    { "Crit",       "crit" },
+    { "Surge",      "surge" },
+    { "Alacrity",   "alacrity" },
+  };
+
+  std::stringstream ss;
+  bool first = true;
+
+  for ( auto const& i : stat_mapping )
   {
-    if ( slot_map[ i ] && util_t::str_compare_ci( name, slot_map[ i ] ) )
-      return static_cast<slot_type>( i );
+    int value;
+    if ( ! js_t::get_value( value, node, i.name ) )
+      continue;
+    if ( first )
+      first = false;
+    else
+      ss << '_';
+    ss << value << i.abbrv;
   }
 
-  return SLOT_NONE;
+  return ss.str();
 }
 
 // parse_items ==============================================================
 
-bool parse_items( player_t* p, js_node_t* items )
+void parse_items( player_t* p, js_node_t* items )
 {
-  if ( !items ) return true;
+  if ( !items ) return;
 
-  std::vector<js_node_t*> nodes;
-  js_t::get_children( nodes, items );
-
-  for ( unsigned i = 0; i < nodes.size(); ++i )
+  for ( js_node_t* item : js_t::children( items ) )
   {
     std::stringstream item_encoding;
-    js_node_t* item = nodes[ i ];
 
-    std::string slot_name;
-    if ( ! js_t::get_value( slot_name, item, "CharacterSlot" ) )
-    {
-      // FIXME: Report weirdness.
-      continue;
-    }
-
+    std::string slot_name = js_t::get_name( item );
     slot_type slot = translate_slot_name( slot_name );
-    if ( slot == SLOT_NONE )
+    if ( slot == SLOT_INVALID )
     {
       // FIXME: Report weirdness.
       continue;
@@ -135,69 +205,189 @@ bool parse_items( player_t* p, js_node_t* items )
       // FIXME: Report weirdness.
       continue;
     }
-    util_t::format_name( name );
-    item_encoding << name;
+    item_encoding << util_t::format_name( name );
 
-    std::string weapon_type_str;
-    if ( js_t::get_value( weapon_type_str, item, "WeaponType" ) )
+#if 0
+    int id;
+    if ( js_t::get_value( level, item, "Id" ) )
+      item_encoding << ",id=" << id;
+#endif
+
+    int level;
+    if ( js_t::get_value( level, item, "ItemLevel" ) )
+      item_encoding << ",ilevel=" << level;
+
+    std::string quality;
+    if ( js_t::get_value( quality, item, "Quality" ) )
+      item_encoding << ",quality=" << util_t::format_name( quality );
+
+    if ( slot == SLOT_MAIN_HAND || slot == SLOT_OFF_HAND )
     {
-      // FIXME: Do something.
-    }
-
-    js_node_t* stats = js_t::get_child( item, "Stats" );
-    if ( ! stats )
-    {
-      // FIXME: Report weirdness.
-      continue;
-    }
-
-    std::vector<js_node_t*> stat_nodes;
-    js_t::get_children( stat_nodes, stats );
-
-    item_encoding << ",stats=";
-
-    for ( size_t j = 0; j < stat_nodes.size(); ++j )
-    {
-      std::string stat_name;
-      int stat_value;
-      if ( ! js_t::get_value( stat_name, stat_nodes[ j ], "Stat" ) ||
-           ! js_t::get_value( stat_value, stat_nodes[ j ], "Value" ) )
+      std::string weapon_type_str;
+      weapon_type wt = WEAPON_NONE;
+      if ( js_t::get_value( weapon_type_str, item, "WeaponType" ) )
       {
-        // FIXME: Report weirdness.
-        continue;
+        wt = decode_weapon_type( weapon_type_str );
+        if ( wt != WEAPON_NONE )
+        {
+          item_encoding << ",weapon=" << util_t::weapon_type_string( wt );
+          int value;
+          js_node_t* dmg = js_t::get_node( item, "Stats/MinDamage" );
+          if ( dmg && js_t::get_value( value, dmg ) )
+            item_encoding << '_' << value << "min";
+          dmg = js_t::get_node( item, "Stats/MaxDamage" );
+          if ( dmg && js_t::get_value( value, dmg ) )
+            item_encoding << '_' << value << "max";
+        }
       }
+    }
 
-      if ( j )
-        item_encoding << '_';
-      item_encoding << stat_value << stat_name;
+    if ( js_node_t* stats = js_t::get_child( item, "Stats" ) )
+    {
+      std::string s = decode_stats( stats );
+      if ( ! s.empty() )
+        item_encoding << ",stats=" << s;
     }
 
     p -> items[ slot ].options_str = item_encoding.str();
   }
+}
 
-  return true;
+// parse_datacrons ==========================================================
+
+void parse_datacrons( player_t* p, js_node_t* datacrons )
+{
+  static const struct datacron_stats
+  {
+    int id;
+    attribute_type stat;
+    int amount;
+  } all_datacrons[] = {
+    { 0, ATTR_AIM, 4 },
+    { 1, ATTR_PRESENCE, 3 },
+    { 2, ATTR_WILLPOWER, 3 },
+    { 3, ATTR_STRENGTH, 4 },
+    { 4, ATTR_ENDURANCE, 3 },
+    { 5, ATTR_STRENGTH, 2 },
+    { 6, ATTR_AIM, 2 },
+    { 7, ATTR_WILLPOWER, 2 },
+    { 8, ATTR_CUNNING, 2 },
+    { 10, ATTR_AIM, 4 },
+    { 11, ATTR_CUNNING, 4 },
+    { 12, ATTR_PRESENCE, 4 },
+    { 13, ATTR_ENDURANCE, 3 },
+    { 14, ATTR_WILLPOWER, 4 },
+    { 15, ATTR_WILLPOWER, 4 },
+    { 16, ATTR_ENDURANCE, 4 },
+    { 17, ATTR_PRESENCE, 4 },
+    { 18, ATTR_AIM, 4 },
+    { 20, ATTR_STRENGTH, 4 },
+    { 21, ATTR_WILLPOWER, 4 },
+    { 23, ATTR_PRESENCE, 4 },
+    { 24, ATTR_AIM, 4 },
+    { 25, ATTR_CUNNING, 4 },
+    { 27, ATTR_WILLPOWER, 4 },
+    { 28, ATTR_PRESENCE, 2 },
+    { 30, ATTR_STRENGTH, 2 },
+    { 31, ATTR_ENDURANCE, 2 },
+    { 32, ATTR_CUNNING, 2 },
+    { 33, ATTR_STRENGTH, 2 },
+    { 34, ATTR_PRESENCE, 2 },
+    { 35, ATTR_CUNNING, 2 },
+    { 37, ATTR_ENDURANCE, 2 },
+    { 38, ATTR_PRESENCE, 4 },
+    { 40, ATTR_ENDURANCE, 4 },
+    { 41, ATTR_CUNNING, 4 },
+    { 42, ATTR_STRENGTH, 4 },
+    { 43, ATTR_AIM, 2 },
+    { 45, ATTR_PRESENCE, 2 },
+    { 46, ATTR_AIM, 4 },
+    { 47, ATTR_ENDURANCE, 4 },
+    { 49, ATTR_WILLPOWER, 4 },
+    { 51, ATTR_WILLPOWER, 2 },
+    { 52, ATTR_ENDURANCE, 2 },
+    { 54, ATTR_AIM, 3 },
+    { 55, ATTR_PRESENCE, 3 },
+    { 56, ATTR_CUNNING, 3 },
+    { 57, ATTR_STRENGTH, 3 },
+    { 59, ATTR_AIM, 3 },
+    { 60, ATTR_PRESENCE, 3 },
+    { 61, ATTR_STRENGTH, 3 },
+    { 63, ATTR_PRESENCE, 2 },
+    { 64, ATTR_AIM, 2 },
+    { 65, ATTR_CUNNING, 4 },
+    { 66, ATTR_ENDURANCE, 4 },
+    { 67, ATTR_STRENGTH, 4 },
+    { 68, ATTR_STRENGTH, 2 },
+    { 69, ATTR_PRESENCE, 4 },
+    { 70, ATTR_AIM, 2 },
+    { 71, ATTR_ENDURANCE, 3 },
+    { 72, ATTR_CUNNING, 2 },
+    { 73, ATTR_AIM, 4 },
+    { 74, ATTR_WILLPOWER, 2 },
+    { 76, ATTR_WILLPOWER, 4 },
+    { 77, ATTR_CUNNING, 4 },
+    { 78, ATTR_CUNNING, 3 },
+    { 79, ATTR_WILLPOWER, 3 },
+    { 80, ATTR_AIM, 3 },
+    { 82, ATTR_STRENGTH, 3 },
+    { 83, ATTR_CUNNING, 3 },
+    { 84, ATTR_ENDURANCE, 2 },
+    { 85, ATTR_WILLPOWER, 2 },
+    { 87, ATTR_WILLPOWER, 4 },
+    { 88, ATTR_PRESENCE, 4 },
+    { 89, ATTR_ENDURANCE, 4 },
+    { 90, ATTR_STRENGTH, 4 },
+    { 91, ATTR_CUNNING, 4 },
+    { 92, ATTRIBUTE_NONE, 10 },
+    { 93, ATTRIBUTE_NONE, 10 },
+  };
+
+  if ( ! datacrons ) return;
+
+  std::array<int,ATTRIBUTE_MAX> attributes;
+  boost::fill( attributes, 0 );
+
+  for ( js_node_t* node : js_t::children( datacrons ) )
+  {
+    int id;
+    if ( js_t::get_value( id, node ) )
+    {
+      for ( auto const& d : all_datacrons )
+      {
+        if ( d.id == id )
+        {
+          if ( d.stat == ATTRIBUTE_NONE )
+          {
+            for ( attribute_type i = ATTRIBUTE_NONE; ++i < ATTRIBUTE_MAX; )
+              attributes[i] += d.amount;
+          }
+          else
+            attributes[ d.stat ] += d.amount;
+          break;
+        }
+      }
+    }
+  }
+
+  bool first = true;
+  std::stringstream ss;
+  ss << "datacrons,stats=";
+  for ( attribute_type i = ATTRIBUTE_NONE; ++i < ATTRIBUTE_MAX; )
+  {
+    if ( ! attributes[ i ] ) continue;
+    if ( first )
+      first = false;
+    else
+      ss << '_';
+    ss << attributes[ i ] << util_t::attribute_type_string( i );
+  }
+
+  if ( ! first )
+    p -> items[ SLOT_SHIRT ].options_str = ss.str();
 }
 
 #if 0
-// parse_profession =========================================================
-
-void parse_profession( std::string& professions_str, js_node_t* profile, int index )
-{
-  std::string key = "professions/primary/" + util_t::to_string( index );
-  if ( js_node_t* profession = js_t::get_node( profile, key ) )
-  {
-    int id;
-    std::string rank;
-    if ( js_t::get_value( id, profession, "id" ) && js_t::get_value( rank, profession, "rank" ) )
-    {
-      if ( professions_str.length() > 0 )
-        professions_str += '/';
-      professions_str += util_t::profession_type_string( util_t::translate_profession_id( id ) );
-      professions_str += '=' + rank;
-    }
-  }
-}
-
 struct item_info_t : public item_data_t
 {
   std::string name_str, icon_str;
@@ -394,100 +584,43 @@ void canonical_race_name( std::string& name )
 // mrrobot::download_player =================================================
 
 player_t* download_player( sim_t*             sim,
-                           const std::string& id,
+                           const std::string& key,
                            cache::behavior_t  caching )
 {
-  if ( id != "test")
+  const auto parts = split( key, '|' );
+  const std::string& id = parts[0];
+
+  // Check form validity of the provided profile id before even starting to access the profile
+  try { boost::uuids::string_generator()( id ); }
+  catch( std::runtime_error& )
   {
-    // Check form validity of the provided profile id before even starting to access the profile
-    try
+    sim -> errorf( "'%s' is not a valid Mr. Robot profile identifier.\n", id.c_str() );
+    return nullptr;
+  }
+
+  if ( parts.size() > 1 )
+  {
+    player_type pt = util_t::translate_class_str( parts[ 1 ] );
+    if ( pt == PLAYER_NONE )
     {
-      boost::uuids::string_generator()( id );
-    }
-    catch( std::runtime_error )
-    {
-      sim -> errorf( "'%s' is not a valid Mr. Robot profile identifier.\n", id.c_str() );
-      return 0;
+      sim -> errorf( "'%s' is not a valid advanced class.\n", parts[ 1 ].c_str() );
+      return nullptr;
     }
   }
 
   sim -> current_name = id;
   sim -> current_slot = 0;
 
-  std::string url = "http://swtor.askmrrobot.com/api/character/" + id;
-  std::string result;
-  if ( id == "test" )
-  {
-    result =
-        "{\n"
-        "        \"ProfileId\":\"9674b96a-d94a-47c8-b268-17e65c432915\",\n"
-        "        \"ProfileName\":\"Yellowsix of Juyo (US)\",\n"
-        "        \"LastUpdated\":\"2012-03-05T21:27:35\",\n"
-        "        \"Region\":\"US\",\n"
-        "        \"Server\":\"Juyo\",\n"
-        "        \"Name\":\"Yellowsix\",\n"
-        "        \"Guild\":\"GH-AMR\",\n"
-        "        \"Faction\":\"Empire\",\n"
-        "        \"AdvancedClass\":\"Sorcerer\",\n"
-        "        \"Level\":45,\n"
-        "        \"Gender\":\"Female\",\n"
-        "        \"Race\":\"Chiss\",\n"
-        "        \"Alignment\":\"Neutral\",\n"
-        "        \"SocialLevel\":\"None\",\n"
-        "        \"ValorRank\":0,\n"
-        "        \"CraftingCrewSkill\":\"None\",\n"
-        "        \"CrewSkill2\":\"Biochem\",\n"
-        "        \"CrewSkill3\":\"None\",\n"
-        "        \"SkillString\":\"0000000000000000000-00000000000000000000-000000000000000000\",\n"
-        "        \"Gear\":[\n"
-        "          {\n"
-        "            \"CharacterSlot\":\"Chest\",\n"
-        "            \"Id\":\"30045\",\n"
-        "            \"VariantId\":0,\n"
-        "            \"Mods\":[\n"
-        "              {\n"
-        "                \"Slot\":\"Mod\",\n"
-        "                \"Id\":\"5890\",\n"
-        "                \"Name\":\"Advanced Deflecting Mod 25B\",\n"
-        "                \"Stats\":[\n"
-        "                  {\"Stat\":\"Aim\",\"Value\":61},\n"
-        "                  {\"Stat\":\"Endurance\",\"Value\":37},\n"
-        "                  {\"Stat\":\"Defense\",\"Value\":11}\n"
-        "                ]\n"
-        "              },\n"
-        "              {\n"
-        "                \"Slot\":\"Enhancement\",\n"
-        "                \"Id\":\"9207\",\n"
-        "                \"Name\":\"Advanced Astute Enhancement 25\",\n"
-        "                \"Stats\":[\n"
-        "                  {\"Stat\":\"Endurance\",\"Value\":40},\n"
-        "                  {\"Stat\":\"Accuracy\",\"Value\":51},\n"
-        "                  {\"Stat\":\"Defense\",\"Value\":20}\n"
-        "                ]\n"
-        "              }\n"
-        "            ],\n"
-        "            \"Name\":\"Battlemaster Supercommando's Body Armor\",\n"
-        "            \"ArmorType\":\"Heavy\",\n"
-        "            \"WeaponType\":null,\n"
-        "            \"ShieldType\":null,\n"
-        "            \"Stats\":[\n"
-        "             {\"Stat\":\"Aim\",\"Value\":94},\n"
-        "              {\"Stat\":\"Endurance\",\"Value\":108},\n"
-        "              {\"Stat\":\"Expertise\",\"Value\":50},\n"
-        "              {\"Stat\":\"Accuracy\",\"Value\":51},\n"
-        "              {\"Stat\":\"Defense\",\"Value\":31}\n"
-        "            ],\n"
-        "            \"ItemSetId\":null\n"
-        "          }\n"
-        "        ],\n"
-        "        \"Datacrons\":[]\n"
-        "      }";
-  }
+  std::string url = "http://swtor.askmrrobot.com/api/";
+  if ( USE_TEST_API ) url += "test/";
+  url += "character/v1/" + id;
 
-  else if ( ! http_t::get( result, url, caching ) )
+  std::string result;
+
+  if ( ! http_t::get( result, url, caching ) )
   {
     sim -> errorf( "Unable to download player from '%s'\n", url.c_str() );
-    return 0;
+    return nullptr;
   }
 
   // if ( sim -> debug ) util_t::fprintf( sim -> output_file, "%s\n%s\n", url.c_str(), result.c_str() );
@@ -495,15 +628,16 @@ player_t* download_player( sim_t*             sim,
   if ( ! profile )
   {
     sim -> errorf( "Unable to parse player profile from '%s'\n", url.c_str() );
-    return 0;
+    return nullptr;
   }
   if ( sim -> debug ) js_t::print( profile, sim -> output_file );
 
   std::string name;
-  if ( ! js_t::get_value( name, profile, "Name"  ) )
+  if ( ! js_t::get_value( name, profile, "Name" ) &&
+       ! js_t::get_value( name, profile, "ProfileName" ) )
   {
     sim -> errorf( "Unable to extract player name from '%s'.\n", url.c_str() );
-    return 0;
+    return nullptr;
   }
   if ( ! name.empty() )
     sim -> current_name = name;
@@ -512,24 +646,23 @@ player_t* download_player( sim_t*             sim,
   if ( ! js_t::get_value( level, profile, "Level"  ) )
   {
     sim -> errorf( "Unable to extract player level from '%s'.\n", url.c_str() );
-    return 0;
+    return nullptr;
   }
 
   std::string class_name;
-  if ( ! js_t::get_value( class_name, profile, "AdvancedClass" ) )
+  if ( parts.size() > 1 )
+    class_name = parts[ 1 ];
+  else if ( ! js_t::get_value( class_name, profile, "AdvancedClass" ) )
   {
     sim -> errorf( "Unable to extract player class from '%s'.\n", url.c_str() );
-    return 0;
+    return nullptr;
   }
   canonical_class_name( class_name );
 
   std::string race_name;
-  if ( ! js_t::get_value( race_name, profile, "Race" ) )
-  {
-    sim -> errorf( "Unable to extract player race from '%s'.\n", url.c_str() );
-    return 0;
-  }
-  race_type race = util_t::parse_race_type( race_name );
+  race_type race = RACE_NONE;
+  if ( js_t::get_value( race_name, profile, "Race" ) )
+    race = util_t::parse_race_type( race_name );
 
   player_t* p = player_t::create( sim, class_name, name, race );
   sim -> active_player = p;
@@ -537,7 +670,7 @@ player_t* download_player( sim_t*             sim,
   {
     sim -> errorf( "Unable to build player with class '%s' and name '%s' from '%s'.\n",
                    class_name.c_str(), name.c_str(), url.c_str() );
-    return 0;
+    return nullptr;
   }
 
   p -> level = level;
@@ -545,31 +678,20 @@ player_t* download_player( sim_t*             sim,
   js_t::get_value( p -> server_str, profile, "Server" );
   js_t::get_value( p -> region_str, profile, "Region" );
 
-  p -> origin_str = url;
+  p -> origin_str = "http://swtor.askmrrobot.com/character/" + id;
 
-  if ( parse_profession( profile, "CraftingCrewSkill", p -> professions_str ) )
-    p -> professions_str += "/";
-  if ( parse_profession( profile, "CrewSkill2",        p -> professions_str ) )
-    p -> professions_str += "/";
-  parse_profession( profile, "CrewSkill3",        p -> professions_str );
-
-
-  if ( ! parse_skills( p, profile ) )
-    return 0;
-
-  if ( ! parse_items( p, js_t::get_child( profile, "Gear" ) ) )
-    return 0;
-
-  if ( js_node_t* datacrons = js_t::get_child( profile, "Datacrons" ) )
+  parse_profession( profile, "CraftingCrewSkill", p -> professions_str );
+  if ( false )
   {
-    std::vector<js_node_t*> datacron_list;
-    js_t::get_children( datacron_list, datacrons );
-
-    for ( size_t i = 0; i < datacron_list.size(); ++i )
-    {
-      // FIXME: Do something.
-    }
+    parse_profession( profile, "CrewSkill2",      p -> professions_str );
+    parse_profession( profile, "CrewSkill3",      p -> professions_str );
   }
+
+  parse_skills( p, profile );
+
+  parse_items( p, js_t::get_child( profile, "GearSet" ) );
+
+  parse_datacrons( p, js_t::get_child( profile, "Datacrons" ) );
 
   return p;
 }
@@ -609,7 +731,7 @@ bool parse_talents( player_t& p, const std::string& talent_string )
         encoding[ count++ ] = point_pair.first;
       }
 
-      catch ( base36_t::bad_char bc )
+      catch ( base36_t::bad_char& bc )
       {
         p.sim -> errorf( "Player %s has malformed wowhead talent string. Translation for '%c' unknown.\n",
                          p.name(), bc.c );

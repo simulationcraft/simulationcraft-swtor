@@ -5,28 +5,27 @@
 
 #include "simulationcraft.hpp"
 
-// ==========================================================================
-// Standard Random Number Generator
-// ==========================================================================
-
 // rng_t::rng_t =============================================================
 
-rng_t::rng_t( const std::string& n, bool avg_range, bool avg_gauss ) :
-  name_str( n ), gauss_pair_use( false ),
-  expected_roll( 0 ),  actual_roll( 0 ),  num_roll( 0 ),
-  expected_range( 0 ), actual_range( 0 ), num_range( 0 ),
-  expected_gauss( 0 ), actual_gauss( 0 ), num_gauss( 0 ),
-  average_range( avg_range ),
-  average_gauss( avg_gauss ),
-  next( 0 )
+rng_t::rng_t( const std::string& n ) :
+  name_str( n ),
+  expected_roll( 0 ),  actual_roll( 0 ),
+  expected_range( 0 ), actual_range( 0 ),
+  expected_gauss( 0 ), actual_gauss( 0 ),
+  next( 0 ),
+  gauss_pair_use( false ),
+  num_roll( 0 ), num_range( 0 ), num_gauss( 0 )
 {}
 
-// rng_t::real ==============================================================
+// rng_t::seed ==============================================================
 
-double rng_t::real()
-{
-  return rand() * ( 1.0 / ( ( ( double ) RAND_MAX ) + 1.0 ) );
-}
+void rng_t::seed_( uint32_t )
+{}
+
+// rng_t::roll_ =============================================================
+
+bool rng_t::roll_( double chance )
+{ return real() < chance; }
 
 // rng_t::roll ==============================================================
 
@@ -34,36 +33,40 @@ bool rng_t::roll( double chance )
 {
   if ( chance <= 0 ) return 0;
   if ( chance >= 1 ) return 1;
-  num_roll++;
-  bool result = ( real() < chance );
+  ++num_roll;
+  bool result = roll_( chance );
   expected_roll += chance;
-  if ( result ) actual_roll++;
+  if ( result ) ++actual_roll;
   return result;
 }
 
 // rng_t::range =============================================================
 
-double rng_t::range( double min,
-                     double max )
+double rng_t::range_( double min, double max )
+{
+  double mean = ( min + max ) / 2.0;
+  if ( min < max )
+    return min + real() * ( max - min );
+  else
+    return mean;
+}
+
+double rng_t::range( double min, double max )
 {
   assert( min <= max );
-  double result = ( min + max ) / 2.0;
-  if ( average_range ) return result;
-  num_range++;
-  expected_range += result;
-  if ( min < max ) result =  min + real() * ( max - min );
+  ++num_range;
+  double result = range_( min, max );
+  expected_range += ( min + max ) / 2.0;
   actual_range += result;
   return result;
 }
 
 // rng_t::gauss =============================================================
 
-double rng_t::gauss( double mean,
-                     double stddev,
-                     const bool truncate_low_end )
+double rng_t::gauss_( double mean,
+                      double stddev,
+                      const bool truncate_low_end )
 {
-  if ( average_gauss ) return mean;
-
   // This code adapted from ftp://ftp.taygeta.com/pub/c/boxmuller.c
   // Implements the Polar form of the Box-Muller Transformation
   //
@@ -104,10 +107,15 @@ double rng_t::gauss( double mean,
   if ( truncate_low_end && result < 0 )
     result = 0;
 
-  num_gauss++;
-  expected_gauss += mean;
-  actual_gauss += result;
+  return result;
+}
 
+double rng_t::gauss( double mean, double stddev, const bool truncate_low_end )
+{
+  ++num_gauss;
+  expected_gauss += mean;
+  double result = gauss_( mean, stddev, truncate_low_end );
+  actual_gauss += result;
   return result;
 }
 
@@ -127,13 +135,6 @@ double rng_t::exgauss( double mean, double stddev, double nu )
   if ( result > 5 ) result = 5; // cut it off at 5s
 
   return result;
-}
-
-// rng_t::seed ==============================================================
-
-void rng_t::seed( uint32_t start )
-{
-  srand( start );
 }
 
 // rng_t::report ============================================================
@@ -366,19 +367,65 @@ namespace { // ANONYMOUS ====================================================
 #define DSFMT_PCV2  UINT64_C(0x0000000000000001)
 #define DSFMT_IDSTR "dSFMT2-19937:117-19:ffafffffffb3f-ffdfffc90fffd"
 
+#if defined(__SSE2__)
+#include <emmintrin.h>
+#include <mm_malloc.h>
 
+/** 128-bit data structure */
+union w128_t {
+    __m128i si;
+    __m128d sd;
+    uint64_t u[2];
+    uint32_t u32[4];
+    double d[2];
+};
+
+#else  /* standard C */
 /** 128-bit data structure */
 union w128_t {
   uint64_t u[2];
   uint32_t u32[4];
   double d[2];
 };
+#endif
 
 /** the 128-bit internal state array */
 struct dsfmt_t {
     w128_t status[DSFMT_N + 1];
     int idx;
 };
+#if defined(__SSE2__)
+/**
+ * This function represents the recursion formula.
+ * @param r output 128-bit
+ * @param a a 128-bit part of the internal state array
+ * @param b a 128-bit part of the internal state array
+ * @param d a 128-bit part of the internal state array (I/O)
+ */
+inline static void do_recursion(w128_t *r, w128_t *a, w128_t *b, w128_t *u) {
+  /** mask data for sse2 */
+    static const __m128i sse2_param_mask =
+        _mm_set_epi32( DSFMT_MSK32_3, DSFMT_MSK32_4,
+                       DSFMT_MSK32_1, DSFMT_MSK32_2 );
+
+    static const int SSE2_SHUFF = 0x1b;
+
+    __m128i v, w, x, y, z;
+
+    x = a->si;
+    z = _mm_slli_epi64(x, DSFMT_SL1);
+    y = _mm_shuffle_epi32(u->si, SSE2_SHUFF);
+    z = _mm_xor_si128(z, b->si);
+    y = _mm_xor_si128(y, z);
+
+    v = _mm_srli_epi64(y, DSFMT_SR);
+    w = _mm_and_si128(y, sse2_param_mask);
+    v = _mm_xor_si128(v, x);
+    v = _mm_xor_si128(v, w);
+    r->si = v;
+    u->si = y;
+}
+#else /* standard C */
 
 inline void do_recursion( w128_t* r, const w128_t* a, const w128_t* b, w128_t* lung )
 {
@@ -393,6 +440,7 @@ inline void do_recursion( w128_t* r, const w128_t* a, const w128_t* b, w128_t* l
     r->u[0] = (lung->u[0] >> DSFMT_SR) ^ (lung->u[0] & DSFMT_MSK1) ^ t0;
     r->u[1] = (lung->u[1] >> DSFMT_SR) ^ (lung->u[1] & DSFMT_MSK2) ^ t1;
 }
+#endif
 
 void dsfmt_gen_rand_all(dsfmt_t *dsfmt) {
     int i;
@@ -460,6 +508,7 @@ inline int idxof(int i) {
     return i;
 }
 
+
 /**
  * This function initializes the internal state array with a 32-bit
  * integer seed.
@@ -502,8 +551,6 @@ double dsfmt_genrand_close_open(dsfmt_t *dsfmt) {
     return psfmt64[dsfmt->idx++];
 }
 
-} // ANONYMOUS ==============================================================
-
 class rng_sfmt_t : public rng_t
 {
 private:
@@ -511,34 +558,28 @@ private:
   dsfmt_t dsfmt_global_data;
 
 public:
-  rng_sfmt_t( const std::string& name, bool avg_range=false, bool avg_gauss=false );
+  rng_sfmt_t( const std::string& name ) : rng_t( name )
+  { seed(); }
 
-  virtual int type() const { return RNG_MERSENNE_TWISTER; }
-  virtual double real();
-  virtual void seed( uint32_t start=rand() );
+  virtual rng_type type_() const
+  { return RNG_MERSENNE_TWISTER; }
+
+  virtual double real_()
+  { return dsfmt_genrand_close_open( &dsfmt_global_data ) - 1.0; }
+
+  virtual void seed_( uint32_t start )
+  { dsfmt_chk_init_gen_rand( &dsfmt_global_data, start ); }
+
+#if defined(__SSE2__)
+  // 32-bit libraries typically align malloc chunks to sizeof(double) == 8.
+  // This object needs to be aligned to sizeof(__m128d) == 16.
+  static void* operator new( size_t size )
+  { return _mm_malloc( size, alignof( dsfmt_t ) ); }
+  static void operator delete( void* p )
+  { return _mm_free( p ); }
+#endif
 };
 
-// rng_sfmt_t::rng_sfmt_t ===================================================
-
-rng_sfmt_t::rng_sfmt_t( const std::string& name, bool avg_range, bool avg_gauss ) :
-  rng_t( name, avg_range, avg_gauss )
-{
-  seed();
-}
-
-// rng_sfmt_t::real =========================================================
-
-inline double rng_sfmt_t::real()
-{
-  return dsfmt_genrand_close_open( &dsfmt_global_data ) - 1.0;
-}
-
-// rng_sfmt_t::seed =========================================================
-
-void rng_sfmt_t::seed( uint32_t start )
-{
-  dsfmt_chk_init_gen_rand( &dsfmt_global_data, start );
-}
 
 // ==========================================================================
 // Base-Class for Normalized RNGs
@@ -548,13 +589,13 @@ struct rng_normalized_t : public rng_t
 {
   rng_t* base;
 
-  rng_normalized_t( const std::string& name, rng_t* b, bool avg_range=false, bool avg_gauss=false ) :
-    rng_t( name, avg_range, avg_gauss ), base( b ) {}
+  rng_normalized_t( const std::string& name, rng_t* b ) :
+    rng_t( name ), base( b ) {}
 
-  virtual double real() { return base -> real(); }
-  virtual double range( double min, double max ) { return ( min + max ) / 2.0; }
-  virtual double gauss( double mean, double /* stddev */, bool /* truncate_low_end */ ) { return mean; }
-  virtual bool    roll( double chance ) = 0; // must be overridden
+  virtual double real_() { return base -> real(); }
+  virtual double range_( double min, double max ) { return ( min + max ) / 2.0; }
+  virtual double gauss_( double mean, double /* stddev */, bool /* truncate_low_end */ ) { return mean; }
+  virtual bool    roll_( double chance ) = 0; // must be overridden
 };
 
 // ==========================================================================
@@ -563,184 +604,134 @@ struct rng_normalized_t : public rng_t
 
 struct rng_phase_shift_t : public rng_normalized_t
 {
-  std::vector<double> range_distribution;
-  std::vector<double> gauss_distribution;
+  static const int size = 10;
+
+  static_assert( size > 0, "size must be positive" );
+
+  std::array<double,size> range_distribution, gauss_distribution;
   int range_index, gauss_index;
 
-  rng_phase_shift_t( const std::string& name, rng_t* b, bool avg_range=false, bool avg_gauss=false ) :
-    rng_normalized_t( name, b, avg_range, avg_gauss )
+  rng_phase_shift_t( const std::string& name, rng_t* b ) :
+    rng_normalized_t( name, b )
   {
-    range_distribution.resize( 10 );
-    for ( int i=0; i < 5; i++ )
+    for ( int i=0; i < size / 2; i++ )
     {
-      range_distribution[ i*2   ] = 0.5 + ( i + 0.5 );
-      range_distribution[ i*2+1 ] = 0.5 - ( i + 0.5 );
+      range_distribution[ i*2   ] = i + 1;
+      range_distribution[ i*2+1 ] = -i;
     }
-    range_index = ( int ) real() * 10;
+    range_index = real() * size;
 
-    static const double gauss_offset[] = { 0.3, 0.5, 0.8, 1.3, 2.1 };
-    gauss_distribution.resize( 10 );
-    for ( int i=0; i < 5; i++ )
+    int fib = 2;
+    int last_fib = 1;
+
+    for ( int i=0; i < size / 2; i++ )
     {
-      gauss_distribution[ i*2   ] = 0.0 + gauss_offset[ i ];
-      gauss_distribution[ i*2+1 ] = 0.0 - gauss_offset[ i ];
+      int last_last_fib = last_fib;
+      last_fib = fib;
+      fib += last_last_fib;
+      gauss_distribution[ i*2   ] = fib * ( 1.0 / size );
+      gauss_distribution[ i*2+1 ] = fib * ( -1.0 / size );
     }
-    gauss_index = ( int ) real() * 10;
+    gauss_index = real() * size;
 
     actual_roll = real() - 0.5;
   }
-  virtual int type() const { return RNG_PHASE_SHIFT; }
 
-  virtual double range( double min, double max )
+  virtual rng_type type_() const { return RNG_PHASE_SHIFT; }
+
+  virtual double range_( double min, double max )
   {
-    if ( average_range ) return ( min + max ) / 2.0;
-    num_range++;
-    int size = ( int ) range_distribution.size();
-    if ( ++range_index >= size ) range_index = 0;
-    double result = min + range_distribution[ range_index ] * ( max - min );
-    expected_range += ( max - min ) / 2.0;
-    actual_range += result;
-    return result;
+    if ( ++range_index >= size )
+      range_index = 0;
+    return min + range_distribution[ range_index ] * ( max - min );
   }
-  virtual double gauss( double mean, double stddev, bool /* truncate_low_end */ = false )
+
+  virtual double gauss_( double mean, double stddev, bool /* truncate_low_end */ = false )
   {
-    if ( average_gauss ) return mean;
-    num_gauss++;
-    int size = ( int ) gauss_distribution.size();
-    if ( ++gauss_index >= size ) gauss_index = 0;
-    double result = mean + gauss_distribution[ gauss_index ] * stddev;
-    expected_gauss += mean;
-    actual_gauss += result;
-    return result;
+    if ( ++gauss_index >= size )
+      gauss_index = 0;
+    return mean + gauss_distribution[ gauss_index ] * stddev;
   }
-  virtual bool roll( double chance )
-  {
-    if ( chance <= 0 ) return 0;
-    if ( chance >= 1 ) return 1;
-    num_roll++;
-    expected_roll += chance;
-    if ( actual_roll < expected_roll )
-    {
-      actual_roll++;
-      return true;
-    }
-    return false;
-  }
+
+  virtual bool roll_( double chance )
+  { return actual_roll < expected_roll + chance; }
 };
 
 // ==========================================================================
 // Normalized RNG via Distribution Pre-Fill
 // ==========================================================================
 
-struct rng_pre_fill_t : public rng_normalized_t
+struct rng_pre_fill_t : public rng_phase_shift_t
 {
-  std::vector<double>  roll_distribution;
-  std::vector<double> range_distribution;
-  std::vector<double> gauss_distribution;
-  int roll_index, range_index, gauss_index;
+  std::array<double,size> roll_distribution;
+  int roll_index;
 
-  rng_pre_fill_t( const std::string& name, rng_t* b, bool avg_range=false, bool avg_gauss=false ) :
-    rng_normalized_t( name, b, avg_range, avg_gauss )
+  rng_pre_fill_t( const std::string& name, rng_t* b ) :
+    rng_phase_shift_t( name, b )
   {
-    range_distribution.resize( 10 );
-    for ( int i=0; i < 5; i++ )
-    {
-      range_distribution[ i*2   ] = 0.5 + ( i + 0.5 );
-      range_distribution[ i*2+1 ] = 0.5 - ( i + 0.5 );
-    }
-    range_index = ( int ) real() * 10;
-
-    double gauss_offset[] = { 0.3, 0.5, 0.8, 1.3, 2.1 };
-    gauss_distribution.resize( 10 );
-    for ( int i=0; i < 5; i++ )
-    {
-      gauss_distribution[ i*2   ] = 0.0 + gauss_offset[ i ];
-      gauss_distribution[ i*2+1 ] = 0.0 - gauss_offset[ i ];
-    }
-    gauss_index = ( int ) real() * 10;
-
-    roll_distribution.resize( 10 );
-    roll_index = 10;
+    boost::fill( roll_distribution, 0 );
+    roll_index = size;
   }
-  virtual int type() const { return RNG_PRE_FILL; }
 
-  virtual bool roll( double chance )
+  virtual rng_type type_() const { return RNG_PRE_FILL; }
+
+  virtual bool roll_( double chance )
   {
-    if ( chance <= 0 ) return 0;
-    if ( chance >= 1 ) return 1;
     double avg_chance = ( num_roll > 0 ) ? ( expected_roll / num_roll ) : chance;
-    num_roll++;
-    int size = ( int ) roll_distribution.size();
     if ( ++roll_index >= size )
     {
+      roll_index = 0;
+
       double exact_procs = avg_chance * size + expected_roll - actual_roll;
       int num_procs = ( int ) floor( exact_procs );
       num_procs += base -> roll( exact_procs - num_procs );
       if ( num_procs > size ) num_procs = size;
       int up=1, down=0;
-      if ( num_procs > ( size >> 1 ) )
+      if ( num_procs > size / 2 )
       {
         up = 0;
         down = 1;
         num_procs = size - num_procs;
       }
-      for ( int i=0; i < size; i++ ) roll_distribution[ i ] = down;
+      boost::fill( roll_distribution, down );
       while ( num_procs > 0 )
       {
-        int index = ( int ) ( real() * size * 0.9999 );
+        int index = static_cast<int>( real() * size * 0.999 );
         if ( roll_distribution[ index ] == up ) continue;
         roll_distribution[ index ] = up;
-        num_procs--;
+        --num_procs;
       }
-      roll_index = 0;
     }
-    expected_roll += chance;
-    if ( roll_distribution[ roll_index ] )
-    {
-      actual_roll++;
-      return true;
-    }
-    return false;
+
+    return roll_distribution[ roll_index ] != 0;
   }
 
-  virtual double range( double min, double max )
+  virtual double range_( double min, double max )
   {
-    if ( average_range ) return ( min + max ) / 2.0;
-    int size = ( int ) range_distribution.size();
     if ( ++range_index >= size )
     {
       for ( int i=0; i < size; i++ )
       {
-        int other = ( int ) ( real() * size * 0.999 );
+        int other = static_cast<int>( real() * size * 0.999 );
         std::swap( range_distribution[ i ], range_distribution[ other ] );
       }
       range_index = 0;
     }
-    num_range++;
-    double result = min + range_distribution[ range_index ] * ( max - min );
-    expected_range += ( max - min ) / 2.0;
-    actual_range += result;
-    return result;
+    return min + range_distribution[ range_index ] * ( max - min );
   }
 
-  virtual double gauss( double mean, double stddev, bool /* truncate_low_end */ = false )
+  virtual double gauss_( double mean, double stddev, bool /* truncate_low_end */ = false )
   {
-    if ( average_gauss ) return mean;
-    int size = ( int ) gauss_distribution.size();
     if ( ++gauss_index >= size )
     {
       for ( int i=0; i < size; i++ )
       {
-        int other = ( int ) ( real() * size * 0.999 );
+        int other = static_cast<int>( real() * size * 0.999 );
         std::swap( gauss_distribution[ i ], gauss_distribution[ other ] );
       }
       gauss_index = 0;
     }
-    num_gauss++;
-    double result = mean + gauss_distribution[ gauss_index ] * stddev;
-    expected_gauss += mean;
-    actual_gauss += result;
-    return result;
+    return mean + gauss_distribution[ gauss_index ] * stddev;
   }
 };
 
@@ -748,22 +739,22 @@ struct rng_pre_fill_t : public rng_normalized_t
 // Distribution
 // ==========================================================================
 
-struct distribution_t
+template <size_t size>
+class distribution_t
 {
+  static_assert( size > 0, "Size must be positive." );
+
+public:
   double actual, expected;
-  std::vector<double> chances, values;
-  std::vector<int> counts;
+  std::array<double,size> chances, values;
+  std::array<int,size> counts;
   int last, total_count;
 
-  distribution_t( unsigned int size ) :
+  distribution_t() :
     actual( 0 ), expected( 0 ),
-    chances( size ), values( size ), counts( size ),
+    chances(), values(), counts(),
     last( size-1 ), total_count( 0 )
-  {
-    assert( size > 0 );
-  }
-
-  virtual ~distribution_t() {}
+  {}
 
   virtual int next_bucket()
   {
@@ -794,18 +785,17 @@ struct distribution_t
     return best_bucket;
   }
 
-  virtual double next_value()
+  double next_value()
   {
     return values[ next_bucket() ];
   }
 
-  virtual void verify( rng_t* rng )
+  void verify( rng_t* rng )
   {
-    util_t::printf( "distribution_t::verify:\n" );
-    double sum=0;
-    for ( int i=0; i <= last; i++ ) sum += chances[ i ];
-    util_t::printf( "\tsum: %f\n", sum );
-    std::vector<int> rng_counts( chances.size() );
+    util_t::printf( "distribution_t::verify:\n\tsum: %f\n",
+                    std::accumulate( &chances[ 0 ], &chances[ last + 1 ], double( 0 ) ) );
+
+    std::array<int,size> rng_counts;
     for ( int i=0; i < total_count; i++ )
     {
       double p = rng -> real();
@@ -826,18 +816,18 @@ struct distribution_t
 // Range Distribution
 // ==========================================================================
 
-struct range_distribution_t : public distribution_t
+struct range_distribution_t : public distribution_t<10>
 {
-  range_distribution_t() : distribution_t( 10 )
+  range_distribution_t() : distribution_t()
   {
     for ( int i=0; i < 10; i++ )
     {
-      chances[ i ] = 0.10;
-      values [ i ] = i * 0.10 + 0.05;
+      chances[ i ] = 0.1;
+      values [ i ] = 0.1 * i + 0.05;
     }
   }
 
-  virtual int next_bucket()
+  virtual int next_bucket() // override
   {
     expected += 0.50;
     return distribution_t::next_bucket();
@@ -848,9 +838,9 @@ struct range_distribution_t : public distribution_t
 // Gauss Distribution
 // ==========================================================================
 
-struct gauss_distribution_t : public distribution_t
+struct gauss_distribution_t : public distribution_t<9>
 {
-  gauss_distribution_t() : distribution_t( 9 )
+  gauss_distribution_t() : distribution_t()
   {
     chances[ 0 ] = 0.025;  values[ 0 ] = -2.5;
     chances[ 1 ] = 0.050;  values[ 1 ] = -2.0;
@@ -868,15 +858,17 @@ struct gauss_distribution_t : public distribution_t
 // Roll Distribution
 // ==========================================================================
 
-struct roll_distribution_t : public distribution_t
+struct roll_distribution_t : public distribution_t<200>
 {
   int distance;
   int num_rolls;
   double avg_fill;
 
-  roll_distribution_t() : distribution_t( 200 ), distance( 0 ), num_rolls( 0 ), avg_fill( 0 ) {}
+  roll_distribution_t() :
+    distribution_t(), distance( 0 ), num_rolls( 0 ), avg_fill( 0 )
+  {}
 
-  virtual void fill()
+  void fill()
   {
     double avg_expected = expected / num_rolls;
     if ( avg_fill > 0 && fabs( avg_expected - avg_fill ) < 0.01 ) return;
@@ -893,7 +885,7 @@ struct roll_distribution_t : public distribution_t
     avg_fill = avg_expected;
   }
 
-  virtual int reach( double chance )
+  int reach( double chance )
   {
     num_rolls++;
     expected += chance;
@@ -902,7 +894,7 @@ struct roll_distribution_t : public distribution_t
       fill();
       distance = next_bucket();
     }
-    return ( distance == 0 ) ? 1 : 0;
+    return ( distance == 0 );
   }
 };
 
@@ -916,48 +908,24 @@ struct rng_distance_simple_t : public rng_normalized_t
   range_distribution_t range_d;
   gauss_distribution_t gauss_d;
 
-  rng_distance_simple_t( const std::string& name, rng_t* b, bool avg_range=false, bool avg_gauss=false ) :
-    rng_normalized_t( name, b, avg_range, avg_gauss )
+  rng_distance_simple_t( const std::string& name, rng_t* b ) :
+    rng_normalized_t( name, b )
   {
     roll_d.actual = real();
     range_d.actual = real();
     gauss_d.actual = real() * 2.5;
   }
-  virtual int type() const { return RNG_DISTANCE_SIMPLE; }
 
-  virtual bool roll( double chance )
-  {
-    if ( chance <= 0 ) return 0;
-    if ( chance >= 1 ) return 1;
-    num_roll++;
-    expected_roll += chance;
-    if ( roll_d.reach( chance ) )
-    {
-      actual_roll++;
-      return true;
-    }
-    return false;
-  }
+  virtual rng_type type_() const { return RNG_DISTANCE_SIMPLE; }
 
-  virtual double range( double min, double max )
-  {
-    if ( average_range ) return ( min + max ) / 2.0;
-    num_range++;
-    double result = min + range_d.next_value() * ( max - min );
-    expected_range += ( max - min ) / 2.0;
-    actual_range += result;
-    return result;
-  }
+  virtual bool roll_( double chance )
+  { return roll_d.reach( chance ); }
 
-  virtual double gauss( double mean, double stddev, bool /* truncate_low_end */ = false )
-  {
-    if ( average_gauss ) return mean;
-    num_gauss++;
-    double result = mean + gauss_d.next_value() * stddev;
-    expected_gauss += mean;
-    actual_gauss += result;
-    return result;
-  }
+  virtual double range_( double min, double max )
+  { return min + range_d.next_value() * ( max - min ); }
+
+  virtual double gauss_( double mean, double stddev, bool /* truncate_low_end */ = false )
+  { return mean + gauss_d.next_value() * stddev; }
 };
 
 // ==========================================================================
@@ -966,30 +934,86 @@ struct rng_distance_simple_t : public rng_normalized_t
 
 struct rng_distance_bands_t : public rng_distance_simple_t
 {
-  roll_distribution_t roll_bands[ 10 ];
+  static const size_t size = 10;
 
-  rng_distance_bands_t( const std::string& name, rng_t* b, bool avg_range=false, bool avg_gauss=false ) :
-    rng_distance_simple_t( name, b, avg_range, avg_gauss )
+  roll_distribution_t roll_bands[ size ];
+
+  rng_distance_bands_t( const std::string& name, rng_t* b ) :
+    rng_distance_simple_t( name, b )
   {
-    for ( int i=0; i < 10; i++ ) roll_bands[ i ].actual = real() - 0.5;
+    for ( size_t i=0; i < size; i++ )
+      roll_bands[ i ].actual = real() - 0.5;
   }
-  virtual int type() const { return RNG_DISTANCE_BANDS; }
 
-  virtual bool roll( double chance )
+  virtual rng_type type_() const { return RNG_DISTANCE_BANDS; }
+
+  virtual bool roll_( double chance )
   {
-    if ( chance <= 0 ) return 0;
-    if ( chance >= 1 ) return 1;
-    num_roll++;
-    expected_roll += chance;
-    int band = ( int ) floor( chance * 9.9999 );
-    if ( roll_bands[ band ].reach( chance ) )
-    {
-      actual_roll++;
-      return true;
-    }
-    return false;
+    return roll_bands[ ( int ) floor( chance * ( double( size ) - 0.000001 ) ) ].reach( chance ) != 0;
   }
 };
+
+template <typename Rng, bool average_range, bool average_gauss>
+class rng_wrapper_t : public Rng
+{
+public:
+  rng_wrapper_t( const std::string& name ) : Rng( name ) {}
+  rng_wrapper_t( const std::string& name, rng_t* b ) : Rng( name, b ) {}
+
+  virtual double range_( double min, double max ) // override
+  {
+    if ( average_range ) return ( min + max ) / 2.0;
+    else return Rng::range_( min, max );
+  }
+
+  virtual double gauss_( double mean, double stddev, const bool truncate_low_end ) // override
+  {
+    if ( average_gauss ) return mean;
+    else return Rng::gauss_( mean, stddev, truncate_low_end );
+  }
+};
+
+template <typename T>
+rng_t* make_rng( const std::string& name, bool average_range, bool average_gauss )
+{
+  if ( average_range )
+  {
+    if ( average_gauss )
+      return new rng_wrapper_t<T,true,true>( name );
+    else
+      return new rng_wrapper_t<T,true,false>( name );
+  }
+  else
+  {
+    if ( average_gauss )
+      return new rng_wrapper_t<T,false,true>( name );
+    else
+      return new rng_wrapper_t<T,false,false>( name );
+  }
+}
+
+template <typename T>
+rng_t* make_rng( const std::string& name, rng_t* b, bool average_range, bool average_gauss )
+{
+  assert( b );
+
+  if ( average_range )
+  {
+    if ( average_gauss )
+      return new rng_wrapper_t<T,true,true>( name, b );
+    else
+      return new rng_wrapper_t<T,true,false>( name, b );
+  }
+  else
+  {
+    if ( average_gauss )
+      return new rng_wrapper_t<T,false,true>( name, b );
+    else
+      return new rng_wrapper_t<T,false,false>( name, b );
+  }
+}
+
+} // ANONYMOUS ==============================================================
 
 // ==========================================================================
 // Choosing the RNG package.........
@@ -997,7 +1021,7 @@ struct rng_distance_bands_t : public rng_distance_simple_t
 
 rng_t* rng_t::create( sim_t*             sim,
                       const std::string& name,
-                      int                type )
+                      rng_type           type )
 {
   if ( type == RNG_DEFAULT     ) type = RNG_PHASE_SHIFT;
   if ( type == RNG_CYCLIC      ) type = RNG_PHASE_SHIFT;
@@ -1010,15 +1034,13 @@ rng_t* rng_t::create( sim_t*             sim,
 
   switch ( type )
   {
-  case RNG_STANDARD:         return new rng_t                ( name,    ar, ag );
-  case RNG_MERSENNE_TWISTER: return new rng_sfmt_t           ( name,    ar, ag );
-  case RNG_PHASE_SHIFT:      return new rng_phase_shift_t    ( name, b, ar, ag );
-  case RNG_PRE_FILL:         return new rng_pre_fill_t       ( name, b, ar, ag );
-  case RNG_DISTANCE_SIMPLE:  return new rng_distance_simple_t( name, b, ar, ag );
-  case RNG_DISTANCE_BANDS:   return new rng_distance_bands_t ( name, b, ar, ag );
+  case RNG_MERSENNE_TWISTER: return make_rng<rng_sfmt_t>           ( name,    ar, ag );
+  case RNG_PHASE_SHIFT:      return make_rng<rng_phase_shift_t>    ( name, b, ar, ag );
+  case RNG_PRE_FILL:         return make_rng<rng_pre_fill_t>       ( name, b, ar, ag );
+  case RNG_DISTANCE_SIMPLE:  return make_rng<rng_distance_simple_t>( name, b, ar, ag );
+  case RNG_DISTANCE_BANDS:   return make_rng<rng_distance_bands_t> ( name, b, ar, ag );
+  default: assert( 0 );      return 0;
   }
-  assert( 0 );
-  return 0;
 }
 
 #ifdef UNIT_TEST
@@ -1068,4 +1090,3 @@ int main( int argc, char** argv )
 }
 
 #endif
-

@@ -9,8 +9,8 @@ actions=stim,type=exotech_resolve
 actions+=/mark_of_power
 actions+=/snapshot_stats
 actions+=/resurgence,if=!ticking
-actions+=/innervate,if=target.health_pct<70
-actions+=/dark_infusion,if=target.health_pct<60
+actions+=/innervate,if=target.health.pct<70
+actions+=/dark_infusion,if=target.health.pct<60
 actions+=/consumption,if=buff.force_surge.react&force.pct<=92
 
 enemy=Enemy_Hitting_all_Tanks

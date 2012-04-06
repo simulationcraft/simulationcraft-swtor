@@ -1273,32 +1273,25 @@ const char* chart_t::scaling_dps( std::string& s,
 
 // ternary_coords ===========================================================
 
-std::vector<double> ternary_coords( std::vector<reforge_plot_data_t> xyz )
+std::array<double,2> ternary_coords( const std::vector<reforge_plot_data_t>& xyz )
 {
-  std::vector<double> result;
-  result.resize( 2 );
-  result[0] = xyz[ 2 ].value/2.0 + xyz[ 1 ].value;
-  result[1] = xyz[ 2 ].value/2.0 * sqrt( 3.0 );
-  return result;
+  return std::array<double,2>{{
+    xyz[ 2 ].value/2.0 + xyz[ 1 ].value,
+    xyz[ 2 ].value/2.0 * sqrt( 3.0 )
+  }};
 }
 
 // color_temperature_gradient ===============================================
 
 std::string color_temperature_gradient( double n, double min, double range )
 {
-  std::string result = "";
-  char buffer[ 10 ] = "";
-  int red=0;
-  int blue=0;
-  red = ( int ) floor( 255.0 * ( n - min ) / range );
-  blue = 255 - red;
-  snprintf( buffer, 10, "%.2X", red );
-  result += buffer;
-  result += "00";
-  snprintf( buffer, 10, "%.2X", blue );
-  result += buffer;
+  char buffer[ 12 ];
 
-  return result;
+  const unsigned red = static_cast<unsigned char>( floor( 255.0 * ( n - min ) / range ) );
+  const unsigned blue = 255 - red;
+
+  snprintf( buffer, sizeof( buffer ), "%.2X00%.2X", red, blue );
+  return buffer;
 }
 
 // chart_t::reforge_dps =====================================================
@@ -1336,7 +1329,7 @@ const char* chart_t::reforge_dps( std::string& s,
   {
     int range = p -> sim -> reforge_plot -> reforge_plot_amount;
     int num_points = ( int ) pd.size();
-    std::vector<int> stat_indices = p -> sim -> reforge_plot -> reforge_plot_stat_indices;
+    const std::vector<int>& stat_indices = p -> sim -> reforge_plot -> reforge_plot_stat_indices;
     const reforge_plot_data_t& baseline = pd[ num_points / 2 ][ 2 ];
     double min_delta = baseline.value - ( min_dps - baseline.error / 2 );
     double max_delta = ( max_dps + baseline.error / 2 ) - baseline.value;
@@ -1479,8 +1472,8 @@ const char* chart_t::reforge_dps( std::string& s,
   {
     if ( max_dps == 0 ) return 0;
 
-    std::vector<std::vector<double> > triangle_points;
-    std::vector< std::string > colors;
+    std::vector<std::array<double,2>> triangle_points;
+    std::vector<std::string> colors;
     for ( int i=0; i < ( int ) pd.size(); i++ )
     {
       std::vector<reforge_plot_data_t> scaled_dps = pd[ i ];
@@ -1554,7 +1547,7 @@ const char* chart_t::reforge_dps( std::string& s,
     }
     s += "\n";
     s += "<input type='hidden' name='chem' value='";
-    std::vector<int> stat_indices = p -> sim -> reforge_plot -> reforge_plot_stat_indices;
+    const std::vector<int>& stat_indices = p -> sim -> reforge_plot -> reforge_plot_stat_indices;
     s += "y;s=text_outline;d=FF9473,18,l,000000,_,";
     snprintf( buffer, sizeof( buffer ), "%s", util_t::stat_type_string( stat_indices[ 0 ] ) );
     s += buffer;

@@ -616,12 +616,12 @@ sim_t::sim_t( sim_t* p, int index ) :
   fight_style( "Patchwerk" ), overrides( overrides_t() ), auras( auras_t() ),
   buff_list( 0 ), aura_delay( from_seconds( 0.5 ) ), default_aura_delay( from_seconds( 0.3 ) ),
   default_aura_delay_stddev( from_seconds( 0.05 ) ),
-  cooldown_list( 0 ), replenishment_targets( 0 ),
+  cooldown_list( 0 ),
   elapsed_cpu( timespan_t::zero() ), iteration_dmg( 0 ), iteration_heal( 0 ),
   raid_dps(), total_dmg(), raid_hps(), total_heal(), simulation_length( false ),
   report_progress( 1 ),
   path_str( "." ), output_file( stdout ),
-  armory_throttle( 5 ), current_throttle( 5 ), debug_exp( 0 ),
+  debug_exp( 0 ),
   // Report
   report_precision( 4 ),report_pets_separately( 0 ), report_targets( 1 ), report_details( 1 ),
   report_rng( 0 ), hosted_html( 0 ), print_styles( false ), report_overheal( 0 ),
@@ -993,7 +993,15 @@ void sim_t::combat( int iteration )
     else
     {
       if ( debug ) log_t::output( this, "Executing event: %s", e -> name );
-      e -> execute();
+      try
+      {
+        e -> execute();
+      }
+      catch ( cancel_t& err )
+      {
+        errorf( "%s\n", err.message.c_str() );
+        cancel();
+      }
     }
     delete e;
   }
@@ -1098,98 +1106,106 @@ void sim_t::combat_end()
 
 bool sim_t::init()
 {
-  if ( seed == 0 ) seed = ( int ) time( NULL );
-
-  if ( ! parent ) srand( seed );
-
-  rng = rng_t::create( this, "global", RNG_MERSENNE_TWISTER );
-
-  deterministic_rng = rng_t::create( this, "global_deterministic", RNG_MERSENNE_TWISTER );
-  deterministic_rng -> seed( 31459 + thread_index );
-
-  if ( scaling -> smooth_scale_factors &&
-       scaling -> scale_stat != STAT_NONE )
+  try
   {
-    smooth_rng = true;
-    average_range = true;
-    deterministic_roll = true;
-  }
+    if ( seed == 0 ) seed = ( int ) time( NULL );
 
-  default_rng_ = ( deterministic_roll ? deterministic_rng : rng );
+    if ( ! parent ) srand( seed );
 
-  // Timing wheel depth defaults to about 17 minutes with a granularity of 32 buckets per second.
-  // This makes wheel_size = 32K and it's fully used.
-  if ( wheel_seconds     <  600 ) wheel_seconds     = 1024; // 2^10  Min of 600 to ensure no wrap-around bugs with Water Shield
-  if ( wheel_granularity <=   0 ) wheel_granularity = 32;   // 2^5
+    rng = rng_t::create( this, "global", RNG_MERSENNE_TWISTER );
 
-  wheel_size = ( uint32_t ) ( wheel_seconds * wheel_granularity );
+    deterministic_rng = rng_t::create( this, "global_deterministic", RNG_MERSENNE_TWISTER );
+    deterministic_rng -> seed( 31459 + thread_index );
 
-  // Round up the wheel depth to the nearest power of 2 to enable a fast "mod" operation.
-  for ( wheel_mask = 2; wheel_mask < wheel_size; wheel_mask *= 2 ) { continue; }
-  wheel_size = wheel_mask;
-  wheel_mask--;
-
-  // The timing wheel represents an array of event lists: Each time slice has an event list.
-  delete[] timing_wheel;
-  timing_wheel = new event_t*[wheel_size];
-  std::fill( timing_wheel, timing_wheel + wheel_size, nullptr );
-
-
-  if (   queue_lag_stddev == timespan_t::zero() )   queue_lag_stddev =   queue_lag * 0.25;
-  if (     gcd_lag_stddev == timespan_t::zero() )     gcd_lag_stddev =     gcd_lag * 0.25;
-  if ( channel_lag_stddev == timespan_t::zero() ) channel_lag_stddev = channel_lag * 0.25;
-  if ( world_lag_stddev    < timespan_t::zero() ) world_lag_stddev   =   world_lag * 0.1;
-
-  // Find Already defined target, otherwise create a new one.
-  if ( debug )
-    log_t::output( this, "Creating Enemys." );
-
-  if ( target_list )
-  {
-    target = target_list;
-  }
-  else if ( ! main_target_str.empty() )
-  {
-    player_t* p = find_player( main_target_str );
-    if ( p )
-      target = p;
-  }
-  else
-    target = player_t::create( this, "enemy", "Fluffy_Pillow" );
-
-
-  if ( max_player_level < 0 )
-  {
-    for ( player_t* p = player_list; p; p = p -> next )
+    if ( scaling -> smooth_scale_factors &&
+         scaling -> scale_stat != STAT_NONE )
     {
-      if ( p -> is_enemy() || p -> is_add() )
-        continue;
-      if ( max_player_level < p -> level )
-        max_player_level = p -> level;
+      smooth_rng = true;
+      average_range = true;
+      deterministic_roll = true;
     }
-  }
 
-  if ( ! player_t::init( this ) ) return false;
+    default_rng_ = ( deterministic_roll ? deterministic_rng : rng );
 
-  // Target overrides 2
-  for ( player_t* t = target_list; t; t = t -> next )
-  {
-    if ( ! target_race.empty() )
+    // Timing wheel depth defaults to about 17 minutes with a granularity of 32 buckets per second.
+    // This makes wheel_size = 32K and it's fully used.
+    if ( wheel_seconds     <  600 ) wheel_seconds     = 1024; // 2^10  Min of 600 to ensure no wrap-around bugs with Water Shield
+    if ( wheel_granularity <=   0 ) wheel_granularity = 32;   // 2^5
+
+    wheel_size = ( uint32_t ) ( wheel_seconds * wheel_granularity );
+
+    // Round up the wheel depth to the nearest power of 2 to enable a fast "mod" operation.
+    for ( wheel_mask = 2; wheel_mask < wheel_size; wheel_mask *= 2 ) { continue; }
+    wheel_size = wheel_mask;
+    wheel_mask--;
+
+    // The timing wheel represents an array of event lists: Each time slice has an event list.
+    delete[] timing_wheel;
+    timing_wheel = new event_t*[wheel_size];
+    std::fill( timing_wheel, timing_wheel + wheel_size, nullptr );
+
+
+    if (   queue_lag_stddev == timespan_t::zero() )   queue_lag_stddev =   queue_lag * 0.25;
+    if (     gcd_lag_stddev == timespan_t::zero() )     gcd_lag_stddev =     gcd_lag * 0.25;
+    if ( channel_lag_stddev == timespan_t::zero() ) channel_lag_stddev = channel_lag * 0.25;
+    if ( world_lag_stddev    < timespan_t::zero() ) world_lag_stddev   =   world_lag * 0.1;
+
+    // Find Already defined target, otherwise create a new one.
+    if ( debug )
+      log_t::output( this, "Creating Enemys." );
+
+    if ( target_list )
     {
-      t -> race = util_t::parse_race_type( target_race );
-      t -> race_str = util_t::race_type_string( t -> race );
+      target = target_list;
     }
+    else if ( ! main_target_str.empty() )
+    {
+      player_t* p = find_player( main_target_str );
+      if ( p )
+        target = p;
+    }
+    else
+      target = player_t::create( this, "enemy", "Fluffy_Pillow" );
+
+
+    if ( max_player_level < 0 )
+    {
+      for ( player_t* p = player_list; p; p = p -> next )
+      {
+        if ( p -> is_enemy() || p -> is_add() )
+          continue;
+        if ( max_player_level < p -> level )
+          max_player_level = p -> level;
+      }
+    }
+
+    if ( ! player_t::init( this ) ) return false;
+
+    // Target overrides 2
+    for ( player_t* t = target_list; t; t = t -> next )
+    {
+      if ( ! target_race.empty() )
+      {
+        t -> race = util_t::parse_race_type( target_race );
+        t -> race_str = util_t::race_type_string( t -> race );
+      }
+    }
+
+    raid_event_t::init( this );
+
+    if ( report_precision < 0 ) report_precision = 3;
+
+    raid_dps.reserve( iterations );
+    total_dmg.reserve( iterations );
+    raid_hps.reserve( iterations );
+    total_heal.reserve( iterations );
+    simulation_length.reserve( iterations );
   }
-
-  raid_event_t::init( this );
-
-  if ( report_precision < 0 ) report_precision = 3;
-
-  raid_dps.reserve( iterations );
-  total_dmg.reserve( iterations );
-  raid_hps.reserve( iterations );
-  total_heal.reserve( iterations );
-  simulation_length.reserve( iterations );
+  catch ( cancel_t& c )
+  {
+    errorf( "%s\n", c.message.c_str() );
+    cancel();
+  }
 
   return canceled ? false : true;
 }
@@ -1353,7 +1369,7 @@ void sim_t::analyze_player( player_t* p )
 
 
   // Resources & Gains ======================================================
-  for ( int i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
+  for ( resource_type i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
   {
     int num_buckets = ( int ) p -> timeline_resource[i].size();
 
@@ -1365,7 +1381,7 @@ void sim_t::analyze_player( player_t* p )
     }
   }
 
-  for ( int i=0; i < RESOURCE_MAX; i++ )
+  for ( resource_type i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
   {
     p -> resource_lost  [ i ] /= iterations;
     p -> resource_gained[ i ] /= iterations;
@@ -1420,7 +1436,7 @@ void sim_t::analyze_player( player_t* p )
   std::string encoded_name;
   http_t::format( encoded_name, p -> name_str );
 
-  for ( int i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
+  for ( resource_type i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
   {
     chart_t::timeline        ( p -> timeline_resource_chart[i],      p,
                                p -> timeline_resource[i],
@@ -1755,7 +1771,7 @@ timespan_t sim_t::gauss( timespan_t mean,
 
 // sim_t::get_rng ===========================================================
 
-rng_t* sim_t::get_rng( const std::string& n, int type )
+rng_t* sim_t::get_rng( const std::string& n, rng_type type )
 {
   assert( rng );
 
@@ -1794,55 +1810,38 @@ double sim_t::iteration_adjust()
 
 // sim_t::create_expression =================================================
 
-action_expr_t* sim_t::create_expression( action_t* a,
-                                         const std::string& name_str )
+expr_ptr sim_t::create_expression( action_t* a, const std::string& name_str )
 {
   assert( a -> sim == this );
 
   if ( name_str == "time" )
-  {
-    struct time_expr_t : public action_expr_t
-    {
-      time_expr_t( action_t* a ) : action_expr_t( a, "time", TOK_NUM ) {}
-      virtual int evaluate() { result_num = to_seconds( action -> sim -> current_time );  return TOK_NUM; }
-    };
-    return new time_expr_t( a );
-  }
+    return make_expr( name_str, [this]{ return to_seconds( current_time ); } );
 
-  if ( util_t::str_compare_ci( name_str, "enemies" ) )
-  {
-    struct enemy_amount_expr_t : public action_expr_t
-    {
-      enemy_amount_expr_t( action_t* a ) : action_expr_t( a, "enemy_amount", TOK_NUM ) { }
-      virtual int evaluate() { result_num = action -> sim -> num_enemies; return TOK_NUM; }
-    };
-    return new enemy_amount_expr_t( a );
-  }
+  if ( name_str == "enemies" )
+    return make_expr( name_str, [this]{ return num_enemies; } );
 
   std::vector<std::string> splits;
   int num_splits = util_t::string_split( splits, name_str, "." );
 
   if ( num_splits == 3 && splits[ 0 ] == "aura" )
   {
-    buff_t* buff = buff_t::find( this, splits[ 1 ] );
-    if ( ! buff ) return 0;
-    return buff -> create_expression( a, splits[ 2 ] );
+    if ( buff_t* buff = buff_t::find( this, splits[ 1 ] ) )
+      return buff -> create_expression( splits[ 2 ] );
   }
 
-  if ( num_splits >= 3 && splits[ 0 ] == "actors" )
+  else if ( num_splits >= 3 && splits[ 0 ] == "actors" )
   {
-    player_t* actor = sim_t::find_player( splits[ 1 ] );
-    if ( ! actor ) return 0;
-    return actor -> create_expression( a, join( splits.begin() + 2, splits.end(), '.' ) );
+    if ( player_t* actor = sim_t::find_player( splits[ 1 ] ) )
+      return actor -> create_expression( a, join( splits.begin() + 2, splits.end(), '.' ) );
   }
 
-  if ( num_splits >= 2 && splits[ 0 ] == "target" )
+  else if ( num_splits >= 2 && splits[ 0 ] == "target" )
   {
-    if ( ! target ) return nullptr;
-    return target -> create_expression( a, join( splits.begin() + 1, splits.end(), ',' ) );
+    if ( target )
+      return target -> create_expression( a, join( splits.begin() + 1, splits.end(), ',' ) );
   }
 
-  return 0;
+  return nullptr;
 }
 
 // sim_t::print_options =====================================================
@@ -1920,7 +1919,7 @@ void sim_t::create_options()
     // Regen
     { "regen_periodicity",                OPT_TIMESPAN, &( regen_periodicity                      ) },
     // RNG
-    { "smooth_rng",                       OPT_BOOL,   &( smooth_rng                               ) },
+    { "smooth_rng",                       OPT_DEPRECATED,   &( smooth_rng                               ) },
     { "deterministic_roll",               OPT_BOOL,   &( deterministic_roll                       ) },
     { "average_range",                    OPT_BOOL,   &( average_range                            ) },
     { "average_gauss",                    OPT_BOOL,   &( average_gauss                            ) },
@@ -1929,11 +1928,9 @@ void sim_t::create_options()
     { "active",                           OPT_FUNC,   ( void* ) ::parse_active                      },
     { "armor_update_internval",           OPT_INT,    &( armor_update_interval                    ) },
     { "aura_delay",                       OPT_TIMESPAN, &( aura_delay                             ) },
-    { "replenishment_targets",            OPT_INT,    &( replenishment_targets                    ) },
     { "seed",                             OPT_INT,    &( seed                                     ) },
     { "wheel_granularity",                OPT_FLT,    &( wheel_granularity                        ) },
     { "wheel_seconds",                    OPT_INT,    &( wheel_seconds                            ) },
-    { "armory_throttle",                  OPT_INT,    &( armory_throttle                          ) },
     { "reference_player",                 OPT_STRING, &( reference_player_str                     ) },
     { "raid_events",                      OPT_STRING, &( raid_events_str                          ) },
     { "raid_events+",                     OPT_APPEND, &( raid_events_str                          ) },
@@ -2179,8 +2176,6 @@ int sim_t::main( int argc, char** argv )
 
   if ( canceled ) return 0;
 
-  current_throttle = armory_throttle;
-
   util_t::fprintf( output_file, "\nSimulationCraft %s-%s for Star Wars: The Old Republic %s %s \n",
                    SC_MAJOR_VERSION, SC_MINOR_VERSION, ptr ? SWTOR_VERSION_PTR : SWTOR_VERSION_LIVE, ( ptr ? "PTR" : "Live" ) );
   fflush( output_file );
@@ -2201,13 +2196,13 @@ int sim_t::main( int argc, char** argv )
     }
     if ( abs( vary_combat_length ) >= 1.0 )
     {
-      util_t::fprintf( output_file, "\n |vary_combat_length| >= 1.0, overriding to 0.0.\n" );
-      vary_combat_length = 0.0;
+      util_t::fprintf( output_file, "|vary_combat_length| >= 1.0.\n" );
+      exit( 0 );
     }
     if ( confidence <= 0.0 || confidence >= 1.0 )
     {
-      util_t::fprintf( output_file, "\nInvalid confidence, reseting to 0.95.\n" );
-      confidence = 0.95;
+      util_t::fprintf( output_file, "Invalid confidence: %f.\n", confidence );
+      exit( 0 );
     }
 
     util_t::fprintf( output_file,

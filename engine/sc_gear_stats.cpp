@@ -198,13 +198,3 @@ void gear_stats_t::print( FILE* file )
   }
   util_t::fprintf( file, "\n" );
 }
-
-// gear_stats_t::stat_mod ===================================================
-
-double gear_stats_t::stat_mod( int stat )
-{
-  switch ( stat )
-  {
-  }
-  return 1.0;
-}

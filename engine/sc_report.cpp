@@ -4,6 +4,7 @@
 // ==========================================================================
 
 #include "simulationcraft.hpp"
+#include <fstream>
 
 namespace { // ANONYMOUS NAMESPACE ==========================================
 
@@ -31,24 +32,12 @@ static const char* beta_warnings[] =
 
 // report_t::encode_html ====================================================
 
-void report_t::encode_html( std::string& buffer )
+std::string report_t::encode_html( std::string buffer )
 {
   util_t::replace_all( buffer, '&', "&amp;" );
   util_t::replace_all( buffer, '<', "&lt;" );
   util_t::replace_all( buffer, '>', "&gt;" );
-}
-
-std::string report_t::encode_html( const char* str )
-{
-  std::string nstr;
-
-  if ( str )
-  {
-    nstr = str;
-    encode_html( nstr );
-  }
-
-  return nstr;
+  return buffer;
 }
 
 // report_t::print_profiles =================================================
@@ -58,190 +47,113 @@ void report_t::print_profiles( sim_t* sim )
   int k = 0;
   for ( unsigned int i = 0; i < sim -> actor_list.size(); i++ )
   {
-    player_t* p = sim -> actor_list[i];
-    if ( p -> is_pet() ) continue;
+    player_t& p = *sim -> actor_list[i];
+    if ( p.is_pet() ) continue;
 
     k++;
-    FILE* file = NULL;
 
-    if ( !p -> save_gear_str.empty() ) // Save gear
+    auto maybe_save_profile = [sim,&p]( const std::string& filename,
+                                        save_type st, const char* errorname )
     {
-      file = fopen( p -> save_gear_str.c_str(), "w" );
+      if ( filename.empty() ) return;
+
+      std::ofstream file( filename, std::ios::trunc );
       if ( ! file )
-      {
-        sim -> errorf( "Unable to save gear profile %s for player %s\n", p -> save_gear_str.c_str(), p -> name() );
-      }
+        sim -> errorf( "Unable to save%s%s profile %s for player %s\n",
+                       ( errorname ? " " : "" ), errorname,
+                       filename.c_str(), p.name() );
       else
-      {
-        std::string profile_str = "";
-        p -> create_profile( profile_str, SAVE_GEAR );
-        fprintf( file, "%s", profile_str.c_str() );
-        fclose( file );
-      }
-    }
+        p.create_profile( file, st );
+    };
 
-    if ( !p -> save_talents_str.empty() ) // Save talents
+    maybe_save_profile( p.save_gear_str, SAVE_GEAR, "gear" );
+    maybe_save_profile( p.save_talents_str, SAVE_TALENTS, "talents" );
+    maybe_save_profile( p.save_actions_str, SAVE_ACTIONS, "actions" );
+
+    std::string file_name = p.save_str;
+
+    if ( file_name.empty() )
     {
-      file = fopen( p -> save_talents_str.c_str(), "w" );
-      if ( ! file )
-      {
-        sim -> errorf( "Unable to save talents profile %s for player %s\n", p -> save_talents_str.c_str(), p -> name() );
-      }
-      else
-      {
-        std::string profile_str = "";
-        p -> create_profile( profile_str, SAVE_TALENTS );
-        fprintf( file, "%s", profile_str.c_str() );
-        fclose( file );
-      }
-    }
+      if ( ! sim -> save_profiles )
+        continue;
 
-    if ( !p -> save_actions_str.empty() ) // Save actions
-    {
-      file = fopen( p -> save_actions_str.c_str(), "w" );
-      if ( ! file )
-      {
-        sim -> errorf( "Unable to save actions profile %s for player %s\n", p -> save_actions_str.c_str(), p -> name() );
-      }
-      else
-      {
-        std::string profile_str = "";
-        p -> create_profile( profile_str, SAVE_ACTIONS );
-        fprintf( file, "%s", profile_str.c_str() );
-        fclose( file );
-      }
-    }
-
-    std::string file_name = p -> save_str;
-
-    if ( file_name.empty() && sim -> save_profiles )
-    {
-      file_name  = sim -> save_prefix_str;
-      file_name += p -> name_str;
-      if ( sim -> save_talent_str != 0 )
-      {
-        file_name += "_";
-        file_name += p -> primary_tree_name();
-      }
-      file_name += sim -> save_suffix_str;
-      file_name += ".simc";
+      file_name = sim -> save_prefix_str + p.name_str;
+      if ( sim -> save_talent_str )
+        file_name += '_' + p.primary_tree_name();
+      file_name += sim -> save_suffix_str + ".simc";
       util_t::urlencode( util_t::format_text( file_name, sim -> input_is_utf8 ) );
     }
 
-    if ( file_name.empty() ) continue;
-
-    file = fopen( file_name.c_str(), "w" );
-    if ( ! file )
-    {
-      sim -> errorf( "Unable to save profile %s for player %s\n", file_name.c_str(), p -> name() );
-      continue;
-    }
-
-    std::string profile_str = "";
-    p -> create_profile( profile_str );
-    fprintf( file, "%s", profile_str.c_str() );
-    fclose( file );
+    maybe_save_profile( file_name, SAVE_ALL, nullptr );
   }
 
   // Save overview file for Guild downloads
   //if ( /* guild parse */ )
   if ( sim -> save_raid_summary )
   {
-    FILE* file = NULL;
-
     std::string filename = "Raid_Summary.simc";
-    std::string player_str = "#Raid Summary\n";
-    player_str += "# Contains ";
-    player_str += util_t::to_string( k );
-    player_str += " Players.\n\n";
-
-    for ( unsigned int i = 0; i < sim -> actor_list.size(); i++ )
-    {
-      player_t* p = sim -> actor_list[ i ];
-      if ( p -> is_pet() ) continue;
-
-      std::string file_name = p -> save_str;
-      std::string profile_name;
-
-      if ( file_name.empty() && sim -> save_profiles )
-      {
-        file_name  = "# Player: ";
-        file_name += p -> name_str;
-        file_name += " Spec: ";
-        file_name += p -> primary_tree_name();
-        file_name += " Role: ";
-        file_name += util_t::role_type_string( p -> primary_role() );
-        file_name += "\n";
-        profile_name += sim -> save_prefix_str;
-        profile_name += p -> name_str;
-        if ( sim -> save_talent_str != 0 )
-        {
-          profile_name += "_";
-          profile_name += p -> primary_tree_name();
-        }
-        profile_name += sim -> save_suffix_str;
-        profile_name += ".simc";
-        util_t::urlencode( util_t::format_text( profile_name, sim -> input_is_utf8 ) );
-        file_name += profile_name;
-        file_name += "\n\n";
-      }
-      player_str += file_name;
-    }
-
-
-    file = fopen( filename.c_str(), "w" );
+    std::ofstream file( filename, std::ios::trunc );
     if ( ! file )
-    {
       sim -> errorf( "Unable to save overview profile %s\n", filename.c_str() );
-    }
     else
     {
-      fprintf( file, "%s", player_str.c_str() );
-      fclose( file );
+      file << "#Raid Summary\n"
+              "# Contains " << k << " Players.\n";
+
+      for ( unsigned int i = 0; i < sim -> actor_list.size(); i++ )
+      {
+        player_t* p = sim -> actor_list[ i ];
+        if ( p -> is_pet() ) continue;
+
+        file << '\n';
+
+        if ( ! p -> save_str.empty() )
+          file << p -> save_str << '\n';
+
+        else if ( sim -> save_profiles )
+        {
+          file << "# Player: " << p -> name_str << " Spec: " << p -> primary_tree_name()
+               << " Role: " << util_t::role_type_string( p -> primary_role() ) << '\n';
+
+          std::string profile_name = sim -> save_prefix_str + p -> name_str;
+          if ( sim -> save_talent_str )
+            profile_name += '_' + p -> primary_tree_name();
+          profile_name += sim -> save_suffix_str + ".simc";
+          util_t::urlencode( util_t::format_text( profile_name, sim -> input_is_utf8 ) );
+
+          file << profile_name << '\n';
+        }
+      }
     }
   }
 }
 
 void report_t::print_json_profiles( sim_t* sim )
 {
-  int k = 0;
-  for ( unsigned int i = 0; i < sim -> actor_list.size(); i++ )
+  for ( player_t* p : sim -> actor_list )
   {
-    player_t* p = sim -> actor_list[i];
     if ( p -> is_pet() ) continue;
 
-    k++;
-    FILE* file = NULL;
-
     std::string file_name = p -> save_json_str;
-
-    if ( file_name.empty() && sim -> save_profiles )
+    if ( file_name.empty() )
     {
-      file_name  = sim -> save_prefix_str;
-      file_name += p -> name_str;
-      if ( sim -> save_talent_str != 0 )
-      {
-        file_name += "_";
-        file_name += p -> primary_tree_name();
-      }
-      file_name += sim -> save_suffix_str;
-      file_name += ".simc";
+      if ( ! sim -> save_profiles )
+      continue;
+
+      file_name = sim -> save_prefix_str + p -> name_str;
+      if ( sim -> save_talent_str )
+        file_name += '_' + p -> primary_tree_name();
+      file_name += sim -> save_suffix_str + ".simc";
       util_t::urlencode( util_t::format_text( file_name, sim -> input_is_utf8 ) );
     }
 
-    if ( file_name.empty() ) continue;
-
-    file = fopen( file_name.c_str(), "w" );
+    std::ofstream file( file_name, std::ios::out | std::ios::trunc );
     if ( ! file )
     {
       sim -> errorf( "Unable to save profile %s for player %s\n", file_name.c_str(), p -> name() );
       continue;
     }
-
-    std::string profile_str = "";
-    p -> create_json_profile( profile_str );
-    fprintf( file, "%s", profile_str.c_str() );
-    fclose( file );
+    p -> create_json_profile( file );
   }
 }
 

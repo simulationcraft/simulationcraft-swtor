@@ -3,8 +3,8 @@
 # http://code.google.com/p/simulationcraft-swtor/
 # ==========================================================================
 
-# To build on Unix/Mac: make
-# To build on Windows with MinGW: c:\mingw\bin\mingw32-make OS=WINDOWS
+# To build on Unix/Mac: make OS=UNIX
+# To build on Windows with MinGW: c:\mingw\bin\mingw32-make
 
 # To build debuggable executable, add OPTS=-g to cmd-line invocation
 # By default, 32-bit binary is built.  To build a 64-bit binary, add BITS=64 to the cmd-line invocation
@@ -13,9 +13,9 @@
 
 OS         = WINDOWS
 
-CXX        = g++
+CXX        = g++ -std=c++0x
 CPP_FLAGS  = -Wall -Wextra -Woverloaded-virtual -I.
-OPTS       = -O3 -fomit-frame-pointer -ffast-math -std=gnu++0x
+OPTS       = -O3 -fomit-frame-pointer -ffast-math
 BITS       = 32
 
 -include ../build.conf

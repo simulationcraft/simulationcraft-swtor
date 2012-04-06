@@ -61,11 +61,11 @@ buff_t::buff_t( sim_t*             s,
                 double             ch,
                 bool               q,
                 bool               r,
-                int                rt,
+                rng_type           rt,
                 int                id ) :
   buff_duration( d ), buff_cooldown( cd ), default_chance( ch ),
   name_str( n ), sim( s ), player( 0 ), source( 0 ), initial_source( 0 ),
-  max_stack( ms ), aura_id( id ), rng_type( rt ),
+  max_stack( ms ), aura_id( id ), rt( rt ),
   activated( true ), reverse( r ), constant( false ), quiet( q ),
   uptime_pct()
 {
@@ -82,12 +82,12 @@ buff_t::buff_t( actor_pair_t       p,
                 double             ch,
                 bool               q,
                 bool               r,
-                int                rt,
+                rng_type           rt,
                 int                id,
                 bool               act ) :
   buff_duration( d ), buff_cooldown( cd ), default_chance( ch ),
   name_str( n ), sim( p.target -> sim ), player( p.target ), source( p.source ), initial_source( p.source ),
-  max_stack( ms ), aura_id( id ), rng_type( rt ),
+  max_stack( ms ), aura_id( id ), rt( rt ),
   activated( act ), reverse( r ), constant( false ), quiet( q ),
   uptime_pct()
 {
@@ -130,7 +130,7 @@ void buff_t::parse_options( va_list vap )
     }
     else if ( ! strcmp( parm, "rng" ) )
     {
-      rng_type = ( int ) va_arg( vap, int );
+      rt = ( rng_type ) va_arg( vap, int );
     }
   }
   va_end( vap );
@@ -188,13 +188,13 @@ void buff_t::init()
     cooldown = initial_source-> get_cooldown( "buff_" + name_str );
     if ( initial_source != player )
       name_str = name_str + ':' + initial_source->name_str;
-    rng = initial_source-> get_rng( name_str, rng_type );
+    rng = initial_source-> get_rng( name_str, rt );
     tail = &( player -> buff_list );
   }
   else
   {
     cooldown = sim -> get_cooldown( "buff_" + name_str );
-    rng = sim -> get_rng( name_str, rng_type );
+    rng = sim -> get_rng( name_str, rt );
     tail = &( sim -> buff_list );
   }
   cooldown -> duration = buff_cooldown;
@@ -658,22 +658,14 @@ void buff_t::aura_gain()
 {
   if ( sim -> log )
   {
-    char an[ 128 ];
-    const char* s = name();
+    std::string s = name();
     if ( max_stack >= 0 )
-    {
-      snprintf( an, sizeof( an ), "%s_%d", s, current_stack );
-      s = an;
-    }
+      s += ( boost::format( "_%d" ) % current_stack ).str();
 
     if ( player )
-    {
-      player -> aura_gain( s, current_value );
-    }
+      player -> aura_gain( s.c_str(), current_value );
     else
-    {
-      sim -> aura_gain( s, aura_id );
-    }
+      sim -> aura_gain( s.c_str(), aura_id );
   }
 }
 
@@ -765,98 +757,33 @@ buff_t* buff_t::find( buff_t* b, const std::string& name_str )
 
 // buff_t::create_expression ================================================
 
-action_expr_t* buff_t::create_expression( action_t* action,
-                                          const std::string& type )
+expr_ptr buff_t::create_expression( const std::string& type )
 {
   if ( type == "remains" )
-  {
-    struct buff_remains_expr_t : public action_expr_t
-    {
-      buff_t* buff;
-      buff_remains_expr_t( action_t* a, buff_t* b ) : action_expr_t( a, "buff_remains", TOK_NUM ), buff( b ) {}
-      virtual int evaluate() { result_num = to_seconds( buff -> remains() ); return TOK_NUM; }
-    };
-    return new buff_remains_expr_t( action, this );
-  }
-  else if ( type == "cooldown_remains" )
-  {
-    struct buff_cooldown_remains_expr_t : public action_expr_t
-    {
-      buff_t* buff;
-      buff_cooldown_remains_expr_t( action_t* a, buff_t* b ) : action_expr_t( a, "buff_cooldown_remains", TOK_NUM ), buff( b ) {}
-      virtual int evaluate() { result_num = to_seconds( buff -> cooldown -> remains() ); return TOK_NUM; }
-    };
-    return new buff_cooldown_remains_expr_t( action, this );
-  }
-  else if ( type == "up" )
-  {
-    struct buff_up_expr_t : public action_expr_t
-    {
-      buff_t* buff;
-      buff_up_expr_t( action_t* a, buff_t* b ) : action_expr_t( a, "buff_up", TOK_NUM ), buff( b ) {}
-      virtual int evaluate() { result_num = ( buff -> check() > 0 ) ? 1.0 : 0.0; return TOK_NUM; }
-    };
-    return new buff_up_expr_t( action, this );
-  }
-  else if ( type == "down" )
-  {
-    struct buff_down_expr_t : public action_expr_t
-    {
-      buff_t* buff;
-      buff_down_expr_t( action_t* a, buff_t* b ) : action_expr_t( a, "buff_down", TOK_NUM ), buff( b ) {}
-      virtual int evaluate() { result_num = ( buff -> check() <= 0 ) ? 1.0 : 0.0; return TOK_NUM; }
-    };
-    return new buff_down_expr_t( action, this );
-  }
-  else if ( type == "stack" )
-  {
-    struct buff_stack_expr_t : public action_expr_t
-    {
-      buff_t* buff;
-      buff_stack_expr_t( action_t* a, buff_t* b ) : action_expr_t( a, "buff_stack", TOK_NUM ), buff( b ) {}
-      virtual int evaluate() { result_num = buff -> check(); return TOK_NUM; }
-    };
-    return new buff_stack_expr_t( action, this );
-  }
-  else if ( type == "value" )
-  {
-    struct buff_value_expr_t : public action_expr_t
-    {
-      buff_t* buff;
-      buff_value_expr_t( action_t* a, buff_t* b ) : action_expr_t( a, "buff_value", TOK_NUM ), buff( b ) {}
-      virtual int evaluate() { result_num = buff -> value(); return TOK_NUM; }
-    };
-    return new buff_value_expr_t( action, this );
-  }
-  else if ( type == "react" )
-  {
-    struct buff_react_expr_t : public action_expr_t
-    {
-      buff_t* buff;
-      buff_react_expr_t( action_t* a, buff_t* b ) : action_expr_t( a, "buff_react", TOK_NUM ), buff( b ) {}
-      virtual int evaluate() { result_num = buff -> stack_react(); return TOK_NUM; }
-    };
-    return new buff_react_expr_t( action, this );
-  }
-  else if ( type == "cooldown_react" )
-  {
-    struct buff_cooldown_react_expr_t : public action_expr_t
-    {
-      buff_t* buff;
-      buff_cooldown_react_expr_t( action_t* a, buff_t* b ) : action_expr_t( a, "buff_cooldown_react", TOK_NUM ), buff( b ) {}
-      virtual int evaluate()
-      {
-        if ( buff -> check() && ! buff -> may_react() )
-          result_num = 0;
-        else
-          result_num = to_seconds( buff -> cooldown -> remains() );
-        return TOK_NUM;
-      }
-    };
-    return new buff_cooldown_react_expr_t( action, this );
-  }
+    return make_expr( "buff_" + type, [this]{ return to_seconds( remains() ); } );
 
-  return 0;
+  if ( type == "cooldown_remains" )
+    return make_expr( "buff_" + type, [this]{ return to_seconds( cooldown -> remains() ); } );
+
+  if ( type == "up" )
+    return make_expr( "buff_" + type, [this]{ return check() > 0; } );
+
+  if ( type == "down" )
+    return make_expr( "buff_" + type, [this]{ return check() <= 0; } );
+
+  if ( type == "stack" )
+    return make_expr( "buff_" + type, [this]{ return check(); });
+
+  if ( type == "value" )
+    return make_expr( "buff_" + type, [this]{ return value(); });
+
+  if ( type == "react" )
+    return make_expr( "buff_" + type, [this]{ return stack_react(); });
+
+  if ( type == "cooldown_react" )
+    return make_expr( "buff_" + type, [this]{ return ( check() && ! may_react() ) ? 0.0 : to_seconds( cooldown -> remains() ); });
+
+  return nullptr;
 }
 
 // ==========================================================================
@@ -875,10 +802,10 @@ stat_buff_t::stat_buff_t( player_t*          p,
                           double             ch,
                           bool               q,
                           bool               r,
-                          int                rng_type,
+                          rng_type           rt,
                           int                id,
                           bool               act ) :
-  buff_t( p, n, ms, d, cd, ch, q, r, rng_type, id, act ), amount( a ), stat( st )
+  buff_t( p, n, ms, d, cd, ch, q, r, rt, id, act ), amount( a ), stat( st )
 {
 }
 
@@ -950,10 +877,10 @@ cost_reduction_buff_t::cost_reduction_buff_t( player_t*          p,
                                               bool               re,
                                               bool               q,
                                               bool               r,
-                                              int                rng_type,
+                                              rng_type           rt,
                                               int                id,
                                               bool               act ) :
-  buff_t( p, n, ms, d, cd, ch, q, r, rng_type, id, act ), amount( a ), school( sch ), refreshes( re )
+  buff_t( p, n, ms, d, cd, ch, q, r, rt, id, act ), amount( a ), school( sch ), refreshes( re )
 {
 }
 
@@ -1039,8 +966,8 @@ debuff_t::debuff_t( player_t*          p,
                     double             ch,
                     bool               q,
                     bool               r,
-                    int                rng_type,
+                    rng_type           rt,
                     int                id ) :
-  buff_t( p, n, ms, d, cd, ch, q, r, rng_type, id )
+  buff_t( p, n, ms, d, cd, ch, q, r, rt, id )
 {
 }

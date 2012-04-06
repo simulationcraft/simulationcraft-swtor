@@ -17,6 +17,7 @@ int weapon_t::group() const
   {
 
   case WEAPON_LIGHTSABER:
+  case WEAPON_TRAININGSABER:
   case WEAPON_VIBROKNIFE:
   case WEAPON_TECHBLADE:
   case WEAPON_VIBROSWORD:
@@ -27,7 +28,7 @@ int weapon_t::group() const
   case WEAPON_TECHSTAFF:
     return WEAPON_2H;
 
-  case WEAPON_ASSAULT_CANON:
+  case WEAPON_ASSAULT_CANNON:
   case WEAPON_BLASTER_PISTOL:
   case WEAPON_BLASTER_RIFLE:
   case WEAPON_SCATTERGUN:

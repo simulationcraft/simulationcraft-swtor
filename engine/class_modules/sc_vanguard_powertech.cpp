@@ -93,7 +93,7 @@ struct vanguard_powertech_t : public player_t
     virtual void      init_procs();
     virtual void      init_rng();
     virtual void      init_actions();
-    virtual int       primary_resource() const;
+    virtual resource_type primary_resource() const;
     virtual int       primary_role() const;
             void      create_talents();
 
@@ -295,10 +295,8 @@ void vanguard_powertech_t::init_actions()
 
 // vanguard_powertech_t::primary_resource ==================================================
 
-int vanguard_powertech_t::primary_resource() const
-{
-    return RESOURCE_FORCE;
-}
+resource_type vanguard_powertech_t::primary_resource() const
+{ return RESOURCE_FORCE; }
 
 // vanguard_powertech_t::primary_role ==================================================
 

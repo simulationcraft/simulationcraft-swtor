@@ -488,10 +488,8 @@ static void print_html_raid_imagemap( FILE* file, sim_t* sim, int num, bool dps 
   }
   fprintf( file, "];\n" );
 
-  char imgid[32];
-  util_t::snprintf( imgid, sizeof( imgid ), "%sIMG%d", ( dps ) ? "DPS" : "HPS", num );
-  char mapid[32];
-  util_t::snprintf( mapid, sizeof( mapid ), "%sMAP%d", ( dps ) ? "DPS" : "HPS", num );
+  std::string imgid = ( boost::format( "%sIMG%d" ) % ( dps ? "DPS" : "HPS" ) % num ).str();
+  std::string mapid = ( boost::format( "%sMAP%d" ) % ( dps ? "DPS" : "HPS" ) % num ).str();
 
   fprintf( file,
            "\t\t\tu = document.getElementById('%s').src;\n"
@@ -504,7 +502,7 @@ static void print_html_raid_imagemap( FILE* file, sim_t* sim, int num, bool dps 
            "\t\t\t\t\topen_anchor(target);\n"
            "\t\t\t\t});\n"
            "\t\t\t});\n\n",
-           imgid, mapid, imgid, mapid, mapid );
+           imgid.c_str(), mapid.c_str(), imgid.c_str(), mapid.c_str(), mapid.c_str() );
 }
 
 static void print_html_raid_imagemaps( FILE*  file, sim_t* sim )
@@ -782,10 +780,10 @@ static void print_html_help_boxes( FILE*  file, sim_t* sim )
            "\t\t</div>\n" );
 
   fprintf( file,
-           "\t\t<div id=\"help-max\">\n"
+           "\t\t<div id=\"help-avg\">\n"
            "\t\t\t<div class=\"help-box\">\n"
-           "\t\t\t\t<h3>Max</h3>\n"
-           "\t\t\t\t<p>Maximum crit damage over all iterations.</p>\n"
+           "\t\t\t\t<h3>Avg</h3>\n"
+           "\t\t\t\t<p>Average direct damage per execution.</p>\n"
            "\t\t\t</div>\n"
            "\t\t</div>\n" );
 
@@ -890,6 +888,14 @@ static void print_html_help_boxes( FILE*  file, sim_t* sim )
            "\t\t\t<div class=\"help-box\">\n"
            "\t\t\t\t<h3>UpTime%%</h3>\n"
            "\t\t\t\t<p>Percentage of total time that DoT is ticking on target.</p>\n"
+           "\t\t\t</div>\n"
+           "\t\t</div>\n" );
+
+  fprintf( file,
+           "\t\t<div id=\"help-ticks-avg\">\n"
+           "\t\t\t<div class=\"help-box\">\n"
+           "\t\t\t\t<h3>T-Avg</h3>\n"
+           "\t\t\t\t<p>Average damage per tick.</p>\n"
            "\t\t\t</div>\n"
            "\t\t</div>\n" );
 

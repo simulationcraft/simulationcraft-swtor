@@ -12,8 +12,6 @@
 #include <CoreFoundation/CoreFoundation.h>
 #endif
 
-static const bool ENABLE_MRROBOT_TAB = false;
-
 // ==========================================================================
 // Utilities
 // ==========================================================================
@@ -474,6 +472,8 @@ SimulationCraftWindow::SimulationCraftWindow( QWidget *parent )
 
   setAcceptDrops( true );
 
+  importTab->setCurrentIndex( TAB_MR_ROBOT );
+
   loadHistory();
 }
 
@@ -713,17 +713,14 @@ void SimulationCraftWindow::createImportTab()
   importTab = new QTabWidget();
   mainTab->addTab( importTab, "Import" );
 
-  createBestInSlotTab();
+  cookieJar = new PersistentCookieJar( "simcqt.cookies" );
+  cookieJar->load();
+  mrRobotBuilderView = new SimulationCraftWebView( this );
+  mrRobotBuilderView->page()->networkAccessManager()->setCookieJar( cookieJar );
+  mrRobotBuilderView->setUrl( QUrl( "http://swtor.askmrrobot.com/character/search" ) );
+  importTab->addTab( mrRobotBuilderView, "Mr. Robot" );
 
-  if ( ENABLE_MRROBOT_TAB )
-  {
-    cookieJar = new PersistentCookieJar( "simcqt.cookies" );
-    cookieJar->load();
-    mrRobotBuilderView = new SimulationCraftWebView( this );
-    mrRobotBuilderView->page()->networkAccessManager()->setCookieJar( cookieJar );
-    mrRobotBuilderView->setUrl( QUrl( "http://swtor.askmrrobot.com/character" ) );
-    importTab->addTab( mrRobotBuilderView, "Mr. Robot" );
-  }
+  createBestInSlotTab();
 
   historyList = new QListWidget();
   historyList->setSortingEnabled( true );
@@ -734,6 +731,7 @@ void SimulationCraftWindow::createImportTab()
 
   // Commenting out until it is more fleshed out.
   // createCustomTab();
+
 }
 
 void SimulationCraftWindow::createBestInSlotTab()
@@ -817,7 +815,7 @@ void SimulationCraftWindow::createBestInSlotTab()
       profile = QDir::toNativeSeparators( profile );
       profile += profileList[ i ];
 
-      for ( int pt = PLAYER_NONE; pt < PLAYER_MAX; ++pt )
+      for ( player_type pt = PLAYER_NONE; pt < PLAYER_MAX; ++pt )
       {
         if ( profile.contains( util_t::player_type_string( pt ), Qt::CaseInsensitive ) )
         {
@@ -1105,118 +1103,41 @@ void SimulationCraftWindow::deleteSim()
 // ==========================================================================
 // Import
 // ==========================================================================
-#if 0
-void ImportThread::importBattleNet()
+void ImportThread::importMrRobot()
 {
-  QString region, server, character;
-  QUrl qurl = url;
+  QStringList parts = QUrl( url ).path().split( '/' );
+  QString id = parts[ parts.size() - 1 ];
 
+  if ( id.isEmpty() )
   {
-    QStringList parts = qurl.host().split( '.' );
-
-    if ( parts.size() )
-    {
-      if ( parts[ parts.size() - 1 ].length() == 2 )
-        region = parts[ parts.size() - 1 ];
-      else
-      {
-        for ( QStringList::size_type i = 0; i < parts.size(); ++i )
-        {
-          if ( parts[ i ].length() == 2 )
-          {
-            region = parts[ i ];
-            break;
-          }
-        }
-      }
-    }
-  }
-
-  {
-    QStringList parts = qurl.path().split( '/' );
-    for ( QStringList::size_type i = 0, n = parts.size(); i + 2 < n; ++i )
-    {
-      if ( parts[ i ] == "character" )
-      {
-        server = parts[ i + 1 ];
-        character = parts[ i + 2 ];
-        break;
-      }
-    }
-  }
-
-  if ( false )
-  {
-    QStringList tokens = url.split( QRegExp( "[?&=:/.]" ), QString::SkipEmptyParts );
-    int count = tokens.count();
-    for ( int i=0; i < count-1; i++ )
-    {
-      QString& t = tokens[ i ];
-      if ( t == "http" )
-      {
-        region = tokens[ ++i ];
-      }
-      else if ( t == "r" ) // old armory
-      {
-        server = tokens[ ++i ];
-      }
-      else if ( t == "n" ) // old armory
-      {
-        character = tokens[ ++i ];
-      }
-      else if ( t == "character" && ( i<count-2 ) ) // new battle.net
-      {
-        server    = tokens[ ++i ];
-        character = tokens[ ++i ];
-      }
-    }
-  }
-
-  if ( region.isEmpty() || server.isEmpty() || character.isEmpty() )
-  {
-    fprintf( sim->output_file, "Unable to determine Server and Character information!\n" );
+    fprintf( sim->output_file, "Unable to determine Profile ID!\n" );
   }
   else
   {
     // Windows 7 64bit somehow cannot handle straight toStdString() conversion, so
     // do it in a silly way as a workaround for now.
-    std::string talents = mainWindow->armorySpecChoice->currentText().toUtf8().constData(),
-                cpp_s   = server.toUtf8().constData(),
-                cpp_c   = character.toUtf8().constData(),
-                cpp_r   = region.toUtf8().constData();
-    player = bcp_api::download_player( sim, cpp_r, cpp_s, cpp_c, talents );
-
-    if ( false )
-    {
-      if ( cpp_r == "cn" )
-        player = armory_t::download_player( sim, cpp_r, cpp_s, cpp_c, talents );
-      else
-        player = battle_net_t::download_player( sim, cpp_r, cpp_s, cpp_c, talents );
-    }
+    player = mrrobot::download_player( sim, id.toUtf8().constData() );
   }
 }
-#endif
 
 void ImportThread::run()
 {
   cache::advance_era();
-  /*switch ( tab )
+
+  switch ( tab )
   {
-  case TAB_BATTLE_NET: importBattleNet(); break;
-  default: assert( 0 );
-  }*/
+  case TAB_MR_ROBOT: importMrRobot(); break;
+  default: assert( 0 ); break;
+  }
 
   if ( player )
   {
     player -> role = util_t::parse_role_type( mainWindow->defaultRoleChoice->currentText().toUtf8().constData() );
 
     if ( sim->init() )
-    {
-      std::string buffer="";
-      player->create_profile( buffer );
-      profile = QString::fromUtf8( buffer.c_str() );
-    }
-    else player = 0;
+      profile = QString::fromUtf8( player->create_profile().c_str() );
+    else
+      player = 0;
   }
 }
 
@@ -1629,7 +1550,12 @@ void SimulationCraftWindow::mainButtonClicked( bool /* checked */ )
   case TAB_OVERRIDES: startSim(); break;
   case TAB_HELP:      startSim(); break;
   case TAB_SITE:      startSim(); break;
-  case TAB_IMPORT:    startSim(); break;
+  case TAB_IMPORT:
+    switch ( importTab->currentIndex() )
+    {
+    case TAB_MR_ROBOT: startImport( TAB_MR_ROBOT, cmdLine->text() ); break;
+    }
+    break;
   case TAB_LOG: saveLog(); break;
   case TAB_RESULTS: saveResults(); break;
   }

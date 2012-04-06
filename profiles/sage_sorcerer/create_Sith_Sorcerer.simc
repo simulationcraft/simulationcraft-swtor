@@ -1,8 +1,7 @@
-sith_sorcerer=Sith_Sorcerer_Madness
-level=50
+mrrobot=bf331e5d-8178-4ebc-8dfa-85035a30aae5
+name=Sith_Sorcerer_Madness
 talents=http://www.torhead.com/skill-calc#201hZbcMZfrfRs0krcz.1
 position=ranged_front
-Sage_Sorcerer_Gear.simc
 save=Sith_Sorcerer_Madness.simc
 
 copy=Sith_Sorcerer_Lightning,Sith_Sorcerer_Madness
@@ -24,7 +23,7 @@ actions+=/recklessness
 actions+=/use_relics
 actions+=/affliction,if=!ticking
 actions+=/death_field
-actions+=/chain_lightning,if=buff.wrath.react|buff.lightning_storm.react
+actions+=/chain_lightning,if=(!ptr&buff.wrath.react)|buff.lightning_storm.react
 actions+=/crushing_darkness,if=buff.wrath.react
 actions+=/force_lightning
 actions+=/shock,moving=1
@@ -39,12 +38,12 @@ actions+=/force_lightning,if=buff.lightning_barrage_dd.up
 actions+=/power_potion
 actions+=/recklessness
 actions+=/use_relics
-actions+=/chain_lightning,if=buff.wrath.react|buff.lightning_storm.react
+actions+=/chain_lightning,if=(!ptr&buff.wrath.react)|buff.lightning_storm.react
 actions+=/affliction,if=!ticking
 actions+=/force_lightning,if=buff.lightning_barrage.react
 actions+=/death_field
 actions+=/crushing_darkness,if=buff.wrath.react
 actions+=/polarity_shift
-actions+=/lightning_strike
+actions+=/sequence,name=pewpew:lightning_strike:force_lightning:force_lightning:force_lightning:force_lightning:force_lightning:force_lightning:force_lightning/restart_sequence,name=pewpew
 actions+=/shock,moving=1
 save=Sith_Sorcerer_Conduction.simc

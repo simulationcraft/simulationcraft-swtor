@@ -50,21 +50,10 @@ struct enemy_t : public player_t
 // target_t::primary_role ===================================================
 
   virtual int primary_role() const
-  {
-    return ROLE_TANK;
-  }
+  { return ROLE_TANK; }
 
-  virtual int primary_resource() const
-  {
-    return RESOURCE_NONE;
-  }
-
-// target_t::base_armor =====================================================
-
-  virtual double base_armor() const
-  {
-    return armor;
-  }
+  virtual resource_type primary_resource() const
+  { return RESOURCE_NONE; }
 
   virtual action_t* create_action( const std::string& name, const std::string& options_str );
   virtual void init();
@@ -79,7 +68,7 @@ struct enemy_t : public player_t
   virtual double health_percentage() const;
   virtual void combat_end();
   virtual void recalculate_health();
-  virtual action_expr_t* create_expression( action_t* action, const std::string& type );
+  virtual expr_ptr create_expression( action_t* action, const std::string& type );
   virtual timespan_t available() const { return waiting_time; }
 };
 
@@ -105,10 +94,8 @@ struct enemy_add_t : public pet_t
     pet_t::init_actions();
   }
 
-  virtual int primary_resource() const
-  {
-    return RESOURCE_HEALTH;
-  }
+  virtual resource_type primary_resource() const
+  { return RESOURCE_HEALTH; }
 
   virtual action_t* create_action( const std::string& name, const std::string& options_str );
 };
@@ -356,8 +343,6 @@ void enemy_t::init_base()
   waiting_time = std::min( from_seconds( std::min( to_seconds<int>( sim -> max_time ), sim -> wheel_seconds ) ),
                            from_seconds( 1.0 ) );
 
-  health_per_endurance = 10;
-
   if ( initial_armor <= 0 )
   {
     static const double target_armor_percentage = 0.35;
@@ -481,12 +466,7 @@ pet_t* enemy_t::create_pet( const std::string& add_name, const std::string& /* p
 void enemy_t::create_pets()
 {
   for ( int i=0; i < sim -> target_adds; i++ )
-  {
-    char buffer[ 1024 ];
-    snprintf( buffer, sizeof( buffer ), "add_%i", i );
-
-    create_pet( buffer );
-  }
+    create_pet( ( boost::format( "add_%d" ) % i ).str() );
 }
 
 // enemy_t::find_add ========================================================
@@ -543,20 +523,11 @@ void enemy_t::recalculate_health()
 
 // enemy_t::create_expression ===============================================
 
-action_expr_t* enemy_t::create_expression( action_t* action,
-                                           const std::string& name_str )
+expr_ptr enemy_t::create_expression( action_t* action,
+                                     const std::string& name_str )
 {
   if ( name_str == "adds" )
-  {
-    struct target_adds_expr_t : public action_expr_t
-    {
-      player_t* target;
-      target_adds_expr_t( action_t* a, player_t* t ) :
-        action_expr_t( a, "target_adds", TOK_NUM ), target( t ) {}
-      virtual int evaluate() { result_num = target -> active_pets;  return TOK_NUM; }
-    };
-    return new target_adds_expr_t( action, this );
-  }
+    return make_expr( name_str, [this]{ return active_pets; } );
 
   return player_t::create_expression( action, name_str );
 }

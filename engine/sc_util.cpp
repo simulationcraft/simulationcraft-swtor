@@ -279,40 +279,35 @@ const char* util_t::position_type_string( int type )
 
 // util_t::profession_type_string ===========================================
 
-const char* util_t::profession_type_string( int type )
+const char* util_t::profession_type_string( profession_type type )
 {
   switch ( type )
   {
-  case PROFESSION_NONE:     return "none";
-  case PROFESSION_BIOCHEM:  return "biochem";
+  case PROFESSION_NONE:          return "none";
+  case PROFESSION_ARMORMECH:     return "armormech";
+  case PROFESSION_ARMSTECH:      return "armstech";
+  case PROFESSION_ARTIFICE:      return "artifice";
+  case PROFESSION_BIOCHEM:       return "biochem";
+  case PROFESSION_CYBERTECH:     return "cybertech";
+  case PROFESSION_SYNTHWEAVING:  return "synthweaving";
+  default:                       return "unknown";
   }
-  return "unknown";
 }
 
 // util_t::parse_profession_type ============================================
 
-int util_t::parse_profession_type( const std::string& name )
+profession_type util_t::parse_profession_type( const std::string& name )
 {
-  for ( int i=0; i < PROFESSION_MAX; i++ )
+  for ( profession_type i = PROFESSION_NONE; i < PROFESSION_MAX; ++i )
     if ( util_t::str_compare_ci( name, util_t::profession_type_string( i ) ) )
       return i;
 
   return PROFESSION_UNKNOWN;
 }
 
-// util_t::translate_profession_id ==========================================
-
-profession_type util_t::translate_profession_id( int skill_id )
-{
-  switch ( skill_id )
-  {
-  }
-  return PROFESSION_NONE;
-}
-
 // util_t::player_type_string ===============================================
 
-const char* util_t::player_type_string( int type )
+const char* util_t::player_type_string( player_type type )
 {
   switch ( type )
   {
@@ -346,7 +341,7 @@ const char* util_t::player_type_string( int type )
 
 // util_t::translate_class_str ==============================================
 
-int util_t::translate_class_str( const std::string& s )
+player_type util_t::translate_class_str( const std::string& s )
 {
   std::string fmt_s( s );
   util_t::format_name( fmt_s );
@@ -369,16 +364,16 @@ int util_t::translate_class_str( const std::string& s )
   else if ( fmt_s == "operative"                                ) return IA_OPERATIVE;
   else if ( fmt_s == "sniper"                                   ) return IA_SNIPER;
 
-  else                                                        return PLAYER_NONE;
+  else                                                            return PLAYER_NONE;
 }
 
 // util_t::parse_player_type ================================================
 
 player_type util_t::parse_player_type( const std::string& name )
 {
-  for ( int i=( int ) PLAYER_NONE; i < ( int ) PLAYER_MAX; i++ )
+  for ( player_type i = PLAYER_NONE; i < PLAYER_MAX; ++i )
     if ( util_t::str_compare_ci( name, util_t::player_type_string( i ) ) )
-      return ( player_type ) i;
+      return i;
 
   return PLAYER_NONE;
 }
@@ -474,7 +469,7 @@ int util_t::parse_result_type( const std::string& name )
 
 // util_t::resource_type_string =============================================
 
-const char* util_t::resource_type_string( int type )
+const char* util_t::resource_type_string( resource_type type )
 {
   switch ( type )
   {
@@ -485,15 +480,15 @@ const char* util_t::resource_type_string( int type )
   case RESOURCE_ENERGY:       return "energy";
   case RESOURCE_AMMO:         return "ammo";
   case RESOURCE_FORCE:        return "force";
+  default:                    return "unknown";
   }
-  return "unknown";
 }
 
 // util_t::parse_resource_type ==============================================
 
-int util_t::parse_resource_type( const std::string& name )
+resource_type util_t::parse_resource_type( const std::string& name )
 {
-  for ( int i=0; i < RESOURCE_MAX; i++ )
+  for ( resource_type i=RESOURCE_NONE; i < RESOURCE_MAX; ++i )
     if ( util_t::str_compare_ci( name, util_t::resource_type_string( i ) ) )
       return i;
 
@@ -603,64 +598,69 @@ int util_t::parse_talent_tree( const std::string& name )
 
 // util_t::weapon_type_string ===============================================
 
-const char* util_t::weapon_type_string( int weapon )
+const char* util_t::weapon_type_string( weapon_type weapon )
 {
   switch ( weapon )
   {
-  case WEAPON_LIGHTSABER:                 return "lightsaber";
-  case WEAPON_VIBROKNIFE:                 return "vibroknife";
-  case WEAPON_TECHBLADE:                  return "techblade";
-  case WEAPON_VIBROSWORD:                 return "vibrosword";
-  case WEAPON_DOUBLE_BLADED_LIGHTSABER:   return "doublebladedlightsaber";
-  case WEAPON_ELECTROSTAFF:               return "electrostaf";
-  case WEAPON_TECHSTAFF:                  return "techstaff";
-  case WEAPON_ASSAULT_CANON:              return "assault_canon";
-  case WEAPON_BLASTER_PISTOL:             return "blaster_pistol";
-  case WEAPON_BLASTER_RIFLE:              return "blaster_rifle";
-  case WEAPON_SCATTERGUN:                 return "scattergun";
-  case WEAPON_SNIPER_RIFLE:               return "sniperrifle";
+  case WEAPON_LIGHTSABER:               return "lightsaber";
+  case WEAPON_TRAININGSABER:            return "trainingsaber";
+  case WEAPON_VIBROKNIFE:               return "vibroknife";
+  case WEAPON_TECHBLADE:                return "techblade";
+  case WEAPON_VIBROSWORD:               return "vibrosword";
+  case WEAPON_DOUBLE_BLADED_LIGHTSABER: return "doublebladedlightsaber";
+  case WEAPON_ELECTROSTAFF:             return "electrostaff";
+  case WEAPON_TECHSTAFF:                return "techstaff";
+  case WEAPON_ASSAULT_CANNON:           return "assault_canon";
+  case WEAPON_BLASTER_PISTOL:           return "blaster_pistol";
+  case WEAPON_BLASTER_RIFLE:            return "blaster_rifle";
+  case WEAPON_SCATTERGUN:               return "scattergun";
+  case WEAPON_SNIPER_RIFLE:             return "sniperrifle";
+  default:                              return "unknown";
   }
-  return "unknown";
 }
 
 // util_t::parse_weapon_type ================================================
 
-int util_t::parse_weapon_type( const std::string& name )
+weapon_type util_t::parse_weapon_type( const std::string& name )
 {
-  for ( int i=0; i < WEAPON_MAX; i++ )
+  for ( weapon_type i = WEAPON_NONE; i < WEAPON_MAX; ++i )
     if ( util_t::str_compare_ci( name, util_t::weapon_type_string( i ) ) )
       return i;
 
   return WEAPON_NONE;
 }
 
-// util_t::stim_type_string ================================================
+// util_t::stim_type_string =================================================
 
-const char* util_t::stim_type_string( int stim )
+const char* util_t::stim_type_string( stim_t stim )
 {
   switch ( stim )
   {
-  case STIM_NONE:               return "none";
-  case STIM_EXOTECH_RESOLVE:    return "exotech_resolve";
-  case STIM_RAKATA_RESOLVE:     return "rakata_resolve";
+  case stim_t::none:            return "none";
+  case stim_t::exotech_resolve: return "exotech_resolve";
+  case stim_t::rakata_resolve:  return "rakata_resolve";
   default:                      return "unknown";
   }
 }
 
-// util_t::parse_stim_type =================================================
+// util_t::parse_stim_t =================================================
 
-int util_t::parse_stim_type( const std::string& name )
+stim_t util_t::parse_stim_type( const std::string& name )
 {
-  for ( int i=0; i < STIM_MAX; i++ )
-    if ( util_t::str_compare_ci( name, util_t::stim_type_string( i ) ) )
-      return i;
+  stim_t i = stim_t::max;
 
-  return STIM_NONE;
+  while( --i > stim_t::none )
+  {
+    if ( util_t::str_compare_ci( name, util_t::stim_type_string( i ) ) )
+      break;
+  }
+
+  return i;
 }
 
-// util_t::slot_type_string =================================================
+// util_t::slot_type_string ================================================
 
-const char* util_t::slot_type_string( int slot )
+const char* util_t::slot_type_string( slot_type slot )
 {
   switch ( slot )
   {
@@ -683,26 +683,19 @@ const char* util_t::slot_type_string( int slot )
   case SLOT_OFF_HAND:  return "off_hand";
   case SLOT_RANGED:    return "ranged";
   case SLOT_TABARD:    return "tabard";
+  default:             return "unknown";
   }
-  return "unknown";
-}
-
-// util_t::armor_type_string ================================================
-
-const char* util_t::armor_type_string( player_type /* ptype */, int /* slot_type */ )
-{
-  return NULL;
 }
 
 // util_t::parse_slot_type ==================================================
 
-int util_t::parse_slot_type( const std::string& name )
+slot_type util_t::parse_slot_type( const std::string& name )
 {
-  for ( int i=0; i < SLOT_MAX; i++ )
+  for ( slot_type i = SLOT_MIN; i < SLOT_MAX; i++ )
     if ( util_t::str_compare_ci( name, util_t::slot_type_string( i ) ) )
       return i;
 
-  return SLOT_NONE;
+  return SLOT_INVALID;
 }
 
 // util_t::stat_type_string =================================================
@@ -860,24 +853,6 @@ stat_type util_t::parse_stat_type( const std::string& name )
   return STAT_NONE;
 }
 
-// util_t::parse_reforge_type ===============================================
-
-stat_type util_t::parse_reforge_type( const std::string& name )
-{
-  stat_type s = util_t::parse_stat_type( name );
-
-  switch ( s )
-  {
-  case STAT_EXPERTISE_RATING:
-  case STAT_ACCURACY_RATING:
-  case STAT_CRIT_RATING:
-  case STAT_ALACRITY_RATING:
-    return s;
-  default:
-    return STAT_NONE;
-  }
-}
-
 // util_t::parse_origin =====================================================
 
 bool util_t::parse_origin( std::string& region_str,
@@ -926,118 +901,33 @@ bool util_t::parse_origin( std::string& region_str,
   return true;
 }
 
-// util_t::class_id_mask ====================================================
+// util_t::quality_type_string ==============================================
 
-int util_t::class_id_mask( int type )
-{
-  int cid = class_id( type );
-  if ( cid <= 0 ) return 0;
-  return 1 << ( cid - 1 );
-}
-
-// util_t::class_id =========================================================
-
-int util_t::class_id( int /* type */ )
-{
-  return 0;
-}
-
-// util_t::race_id ==========================================================
-
-unsigned util_t::race_id( int /* r */ )
-{
-  return 0;
-}
-
-// util_t::race_mask ========================================================
-
-unsigned util_t::race_mask( int r )
-{
-  uint32_t id = race_id( r );
-
-  if ( id > 0 )
-    return ( 1 << ( id - 1 ) );
-
-  return 0x00;
-}
-
-// util_t::pet_class_type ===================================================
-
-player_type util_t::pet_class_type( int /* c */ )
-{
-  return PLAYER_PET;
-}
-
-// util_t::pet_mask =========================================================
-
-unsigned util_t::pet_mask( int /* p */ )
-{
-  return 0x0;
-}
-
-// util_t::pet_id ===========================================================
-
-unsigned util_t::pet_id( int p )
-{
-  uint32_t mask = pet_mask( p );
-
-  switch ( mask )
-  {
-  case 0x1: return 1;
-  case 0x2: return 2;
-  case 0x4: return 3;
-  }
-
-  return 0;
-}
-
-// util_t::class_id_string ==================================================
-
-const char* util_t::class_id_string( int /* type */ )
-{
-  return "0";
-}
-
-// util_t::translate_class_id ===============================================
-
-int util_t::translate_class_id( int /* cid */ )
-{
-  return PLAYER_NONE;
-}
-
-// util_t::translate_race_id ================================================
-
-race_type util_t::translate_race_id( int /* rid */ )
-{
-  return RACE_NONE;
-}
-
-// util_t::item_quality_string ==============================================
-
-const char* util_t::item_quality_string( int quality )
+const char* util_t::quality_type_string( quality_type quality )
 {
   switch ( quality )
   {
-  case 1:   return "common";
-  case 2:   return "uncommon";
-  case 3:   return "rare";
-  case 4:   return "epic";
-  case 5:   return "legendary";
-  default:  return "poor";
+  case QUALITY_NONE:      return "none";
+  case QUALITY_CHEAP:     return "cheap";
+  case QUALITY_STANDARD:  return "standard";
+  case QUALITY_PREMIUM:   return "premium";
+  case QUALITY_PROTOTYPE: return "prototype";
+  case QUALITY_CUSTOM:    return "custom";
+  case QUALITY_ARTIFACT:  return "artifact";
+  case QUALITY_LEGENDARY: return "legendary";
+  case QUALITY_LEGACY:    return "legacy";
+  default:                return "unknown";
   }
 }
 
-// util_t::parse_item_quality ===============================================
+// util_t::parse_quality_type ===============================================
 
-int util_t::parse_item_quality( const std::string& quality )
+quality_type util_t::parse_quality_type( const std::string& quality )
 {
-  int i = 6;
-
-  while ( --i > 0 )
-    if ( str_compare_ci( quality, item_quality_string( i ) ) )
-      break;
-
-  return i;
+  for ( quality_type i = QUALITY_NONE; i < QUALITY_MAX; ++i )
+    if ( str_compare_ci( quality, quality_type_string( i ) ) )
+      return i;
+  return QUALITY_NONE;
 }
 
 // util_t::string_split =====================================================
@@ -1181,9 +1071,9 @@ void util_t::replace_all_( std::string& s, char from, const char* to )
 
 std::string util_t::to_string( double f, int precision )
 {
-  char buffer[ 64 ];
-  snprintf( buffer, sizeof( buffer ), "%.*f", precision, f );
-  return std::string( buffer );
+  std::ostringstream ss;
+  ss << std::fixed << std::setprecision( precision ) << f;
+  return ss.str();
 }
 
 // util_t::to_string ========================================================
@@ -1278,19 +1168,35 @@ int util_t::printf( const char *format,  ... )
   return retcode;
 }
 
-// util_t::snprintf =========================================================
+// util_t::schkprintf_report ================================================
 
-int util_t::snprintf( char* buf, size_t size, const char* fmt, ... )
+void util_t::schkprintf_report( const char* file, const char* function,
+                                int line, size_t size, int rval )
 {
-  va_list ap;
-  va_start( ap, fmt );
-  int rval = ::vsnprintf( buf, size, fmt, ap );
-  va_end( ap );
-  if ( rval >= 0 )
-    assert( static_cast<size_t>( rval ) < size );
-  return rval;
+  std::cerr << "schkprintf: buffer too small (" << rval << ">="
+            << size << ") at file \"" << file << "\" line "
+            << line << ", in function \"" << function << '"'
+            << std::endl;
+  abort();
 }
 
+#if !defined(__GNUC__)
+// util_t::schkprintf =======================================================
+
+int util_t::schkprintf( const char* file, const char* function, int line,
+                        char* buf, size_t size, const char* fmt, ... )
+{
+  va_list args;
+  va_start( args, fmt );
+  int rval = vsnprintf( buf, size, fmt, args );
+  va_end( args );
+
+  if ( unlikely( rval >= static_cast<int>( size ) ) )
+    schkprintf_report( file, function, line, size, rval );
+
+  return rval;
+}
+#endif // !defined(__GNUC__)
 
 // util_t::str_to_utf8_ =====================================================
 
@@ -1337,11 +1243,7 @@ void util_t::urlencode_( std::string& str )
     unsigned char c = str[ i ];
 
     if ( c > 0x7F || c == ' ' || c == '\'' )
-    {
-      char enc_str[4];
-      snprintf( enc_str, sizeof( enc_str ), "%%%02X", c );
-      temp += enc_str;
-    }
+      temp += ( boost::format( "%%%02X" ) % c ).str();
     else if ( c == '+' )
       temp += "%20";
     else if ( c < 0x20 )
@@ -1601,11 +1503,9 @@ bool str_to_float( std::string src, double& dest )
 
 int base36_t::decode( char c ) const
 {
-  for( unsigned i = 0; i < 36; ++i)
-  {
-    if ( encoding[ i ] == c )
-      return i;
-  }
+  auto p = boost::find( encoding, c );
+  if ( p != std::end( encoding ) )
+    return p - std::begin( encoding );
 
   throw bad_char( c );
 }
@@ -1630,7 +1530,7 @@ void util_t::format_name_( std::string& name )
     else if ( std::isalpha( c ) )
       c = std::tolower( c );
 
-    else if ( c == ' ' )
+    else if ( c == ' ' || c == '-' )
       c = '_';
 
     else if ( ( c == '_' || c == '+' ) && i == 0 )

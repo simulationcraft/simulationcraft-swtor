@@ -127,11 +127,6 @@ static bool parse_set_bonus( sim_t* sim,
   std::string name = value.substr( first, cut_pt - first );
 
   set_bonus_t* sb = sim -> active_player -> find_set_bonus( name );
-
-  std::cerr << "parse_set_bonus(\"" << opt_name << "\", \"" << value << "\") = "
-            << ( disable ? "(disable) " : "" )
-            << '\"' << name << "\" = " << sb << std::endl;
-
   if ( ! sb )
     return false;
 
@@ -301,10 +296,8 @@ player_t::player_t( sim_t*             s,
 
   base_DR( 0 ),
 
-  // Resources
-  health_per_endurance( 10 ),
   // Consumables
-  stim( STIM_NONE ),
+  stim( stim_t::none ),
   // Events
   executing( 0 ), channeling( 0 ), readying( 0 ), off_gcd( 0 ), in_combat( false ), action_queued( false ),
   cast_delay_reaction( timespan_t::zero() ), cast_delay_occurred( timespan_t::zero() ),
@@ -384,7 +377,7 @@ player_t::player_t( sim_t*             s,
   boost::fill( over_cap, 0 );
 
   items.resize( SLOT_MAX );
-  for ( int i=0; i < SLOT_MAX; i++ )
+  for ( slot_type i = SLOT_MIN; i < SLOT_MAX; i++ )
   {
     items[ i ].slot = i;
     items[ i ].sim = sim;
@@ -393,7 +386,6 @@ player_t::player_t( sim_t*             s,
 
   main_hand_weapon.slot = SLOT_MAIN_HAND;
   off_hand_weapon.slot = SLOT_OFF_HAND;
-  ranged_weapon.slot = SLOT_RANGED;
 
   if ( ! sim -> active_files.empty() ) origin_str = sim -> active_files.top();
 
@@ -622,7 +614,6 @@ void player_t::init()
   init_defense();
   init_weapon( &main_hand_weapon );
   init_weapon( &off_hand_weapon );
-  init_weapon( &ranged_weapon );
   init_professions_bonus();
   init_unique_gear();
   init_enchant();
@@ -682,31 +673,29 @@ void player_t::init_items()
 
   if ( sim -> debug ) log_t::output( sim, "Initializing items for player (%s)", name() );
 
-  std::vector<std::string> splits;
-  int num_splits = util_t::string_split( splits, items_str, "/" );
-  int num_ilvl_items = 0;
-  for ( int i=0; i < num_splits; i++ )
+  for ( auto& s : split( items_str, '/' ) )
   {
-    if ( find_item( splits[ i ] ) )
-    {
-      sim -> errorf( "Player %s has multiple %s equipped.\n", name(), splits[ i ].c_str() );
-    }
-    items.push_back( item_t( this, splits[ i ] ) );
+    if ( find_item( s ) )
+      sim -> errorf( "Player %s has multiple %s equipped.\n", name(), s.c_str() );
+
+    items.push_back( item_t( this, std::move( s ) ) );
   }
 
   gear_stats_t item_stats;
+  int num_ilvl_items = 0;
+  avg_ilvl = 0;
 
-  int num_items = ( int ) items.size();
-  for ( int i=0; i < num_items; i++ )
+  for ( size_t i = 0, num_items = items.size(); i < num_items; ++i )
   {
-    // If the item has been specified in options we want to start from scratch, forgetting about lingering stuff from profile copy
-    if ( items[ i ].options_str != "" )
-    {
-      items[ i ] = item_t( this, items[ i ].options_str );
-      items[ i ].slot = i;
-    }
-
     item_t& item = items[ i ];
+
+    // If the item has been specified in options we want to start from scratch,
+    // forgetting about lingering stuff from profile copy
+    if ( ! item.options_str.empty() )
+    {
+      item = item_t( this, item.options_str );
+      item.slot = static_cast<slot_type>( i );
+    }
 
     if ( ! item.init() )
     {
@@ -718,24 +707,20 @@ void player_t::init_items()
     if ( item.slot != SLOT_SHIRT && item.slot != SLOT_TABARD && item.active() )
     {
       avg_ilvl += item.ilevel;
-      num_ilvl_items++;
+      ++num_ilvl_items;
     }
 
-    for ( int j=0; j < STAT_MAX; j++ )
-    {
+    for ( stat_type j = STAT_NONE; j < STAT_MAX; ++j )
       item_stats.add_stat( j, item.stats.get_stat( j ) );
-    }
   }
 
   if ( num_ilvl_items > 1 )
     avg_ilvl /= num_ilvl_items;
 
-  for ( int i=0; i < STAT_MAX; i++ )
+  for ( stat_type i = STAT_NONE; i < STAT_MAX; ++i )
   {
     if ( gear.get_stat( i ) == 0 )
-    {
       gear.set_stat( i, item_stats.get_stat( i ) );
-    }
   }
 
   if ( sim -> debug )
@@ -745,9 +730,7 @@ void player_t::init_items()
   }
 
   for ( set_bonus_t* sb = set_bonus_list; sb; sb = sb -> next )
-  {
     sb -> init( *this );
-  }
 }
 
 // player_t::init_core ======================================================
@@ -766,8 +749,6 @@ void player_t::init_core()
   initial_accuracy_rating = initial_stats.accuracy_rating;
   initial_surge_rating    = initial_stats.surge_rating;
 
-
-
   for ( int i=0; i < ATTRIBUTE_MAX; i++ )
   {
     initial_stats.attribute[ i ] = gear.attribute[ i ] + enchant.attribute[ i ] + ( is_pet() ? 0 : sim -> enchant.attribute[ i ] );
@@ -780,24 +761,21 @@ void player_t::init_core()
 
 void player_t::init_position()
 {
-  if ( sim -> debug ) log_t::output( sim, "Initializing position for player (%s)", name() );
+  if ( sim -> debug )
+    log_t::output( sim, "Initializing position for player (%s)", name() );
 
-  if ( position_str.empty() )
-  {
-    position_str = util_t::position_type_string( position );
-  }
-  else
-  {
+  if ( ! position_str.empty() )
     position = util_t::parse_position_type( position_str );
-  }
 
   // default to back when we have an invalid position
   if ( position == POSITION_NONE )
   {
-    sim -> errorf( "Player %s has an invalid position of %s, defaulting to back.\n", name(), position_str.c_str() );
+    sim -> errorf( "Player %s has an invalid position of '%s', defaulting to back.\n",
+                   name(), position_str.c_str() );
     position = POSITION_BACK;
-    position_str = util_t::position_type_string( position );
   }
+
+  position_str = util_t::position_type_string( position );
 }
 
 // player_t::init_race ======================================================
@@ -910,9 +888,8 @@ void player_t::init_enchant()
 void player_t::init_resources( bool force )
 {
   if ( sim -> debug ) log_t::output( sim, "Initializing resources for player (%s)", name() );
-  // The first 20pts of intellect/stamina only provide 1pt of mana/health.
 
-  for ( int i=0; i < RESOURCE_MAX; i++ )
+  for ( resource_type i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
   {
     if ( force || resource_initial[ i ] == 0 )
     {
@@ -926,18 +903,15 @@ void player_t::init_resources( bool force )
     resource_current[ i ] = resource_max[ i ] = resource_initial[ i ];
   }
 
-  if ( timeline_resource.empty() )
+  if ( timeline_resource[ 0 ].empty() )
   {
-    timeline_resource.resize( RESOURCE_MAX );
-    timeline_resource_chart.resize( RESOURCE_MAX );
-
-    int size = ( int ) ( to_seconds( sim -> max_time ) * ( 1.0 + sim -> vary_combat_length ) );
+    int size = to_seconds<int>( sim -> max_time * ( 1.0 + sim -> vary_combat_length ) );
     if ( size <= 0 ) size = 600; // Default to 10 minutes
     size *= 2;
     size += 3; // Buffer against rounding.
 
-    for ( auto& v : timeline_resource )
-      v.assign( size, 0 );
+    for ( auto& i : timeline_resource )
+      i.assign( size, 0 );
   }
 }
 
@@ -963,7 +937,7 @@ void player_t::init_professions()
       prof_value = 525;
     }
 
-    int prof_type = util_t::parse_profession_type( prof_name );
+    profession_type prof_type = util_t::parse_profession_type( prof_name );
 
     if ( prof_type == PROFESSION_NONE )
       continue;
@@ -1417,12 +1391,6 @@ void player_t::init_scaling()
           main_hand_weapon.min_dmg += v;
           main_hand_weapon.max_dmg += v;
         }
-        if ( ranged_weapon.damage > 0 )
-        {
-          ranged_weapon.damage     += v;
-          ranged_weapon.min_dmg    += v;
-          ranged_weapon.max_dmg    += v;
-        }
         break;
 
       case STAT_WEAPON_OFFHAND_DMG:
@@ -1466,29 +1434,17 @@ double player_t::get_attribute( attribute_type a ) const
 // player_t::energy_regen_per_second() ======================================
 
 double player_t::energy_regen_per_second() const
-{
-  double r = base_energy_regen_per_second;
-
-  return r;
-}
+{ return base_energy_regen_per_second; }
 
 // player_t::ammo_regen_per_second() ========================================
 
 double player_t::ammo_regen_per_second() const
-{
-  double r = base_ammo_regen_per_second;
-
-  return r;
-}
+{ return base_ammo_regen_per_second; }
 
 // player_t::force_regen_per_second() =======================================
 
 double player_t::force_regen_per_second() const
-{
-  double r = base_force_regen_per_second;
-
-  return r;
-}
+{ return base_force_regen_per_second; }
 
 // player_t::composite_power() ==============================================
 
@@ -1964,7 +1920,7 @@ void player_t::merge( player_t& other )
 
   deaths.merge( other.deaths );
 
-  for ( int i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
+  for ( resource_type i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
   {
     int num_buckets = ( int ) std::min(       timeline_resource[i].size(),
                                         other.timeline_resource[i].size() );
@@ -2084,29 +2040,24 @@ void player_t::reset()
   off_hand_weapon.buff_value = 0;
   off_hand_weapon.bonus_dmg  = 0;
 
-  ranged_weapon.buff_type  = 0;
-  ranged_weapon.buff_value = 0;
-  ranged_weapon.bonus_dmg  = 0;
+  stim = stim_t::none;
 
-  stim            = STIM_NONE;
-  for ( int i=0; i < RESOURCE_MAX; i++ )
+  for ( resource_type i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
   {
     action_callback_t::reset( resource_gain_callbacks[ i ] );
     action_callback_t::reset( resource_loss_callbacks[ i ] );
   }
-  for ( int i=0; i < RESULT_MAX; i++ )
+  for ( result_type i = RESULT_NONE; i < RESULT_MAX; i++ )
   {
     action_callback_t::reset( attack_callbacks[ i ] );
     action_callback_t::reset( spell_callbacks [ i ] );
     action_callback_t::reset( tick_callbacks  [ i ] );
   }
-  for ( int i=0; i < SCHOOL_MAX; i++ )
+  for ( school_type i = SCHOOL_NONE; i < SCHOOL_MAX; i++ )
   {
     action_callback_t::reset( tick_damage_callbacks  [ i ] );
     action_callback_t::reset( direct_damage_callbacks[ i ] );
   }
-
-  replenishment_targets.clear();
 
   init_resources( true );
 
@@ -2424,45 +2375,49 @@ action_t* player_t::execute_action()
 
 void player_t::regen( const timespan_t periodicity )
 {
-  int resource_type = primary_resource();
+  const resource_type r = primary_resource();
+  double base = 0;
+  gain_t* gain = nullptr;
 
-  if ( resource_type == RESOURCE_ENERGY )
+  switch( r )
   {
-    double energy_regen = to_seconds( periodicity ) * energy_regen_per_second();
+  case RESOURCE_ENERGY:
+    base = base_energy_regen_per_second;
+    gain = gains.energy_regen;
+    break;
 
-    resource_gain( RESOURCE_ENERGY, energy_regen, gains.energy_regen );
+  case RESOURCE_FORCE:
+    base = base_force_regen_per_second;
+    gain = gains.force_regen;
+    break;
+
+  case RESOURCE_AMMO:
+    base = base_ammo_regen_per_second;
+    gain = gains.ammo_regen;
+    break;
+
+  default:
+    break;
   }
 
-  else if ( resource_type == RESOURCE_FORCE )
+  if ( gain && base )
+    resource_gain( r, to_seconds( base * periodicity ), gain );
+
+  const unsigned index = to_seconds<unsigned>( sim -> current_time );
+
+  for ( resource_type i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
   {
-    double force_regen = to_seconds( periodicity ) * force_regen_per_second();
-
-    resource_gain( RESOURCE_FORCE, force_regen, gains.force_regen );
-  }
-
-  else if ( resource_type == RESOURCE_AMMO )
-  {
-    double ammo_regen = to_seconds( periodicity ) * ammo_regen_per_second();
-
-    resource_gain( RESOURCE_AMMO, ammo_regen, gains.ammo_regen );
-  }
-
-  int index = (int) to_seconds( sim -> current_time );
-
-  for ( int i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
-  {
-    if ( resource_max[ i ] == 0 ) continue;
-
-    timeline_resource[ i ][ index ] += resource_current[ i ] * to_seconds( periodicity );
+    if ( resource_max[ i ] != 0 )
+      timeline_resource[ i ][ index ] += resource_current[ i ] * to_seconds( periodicity );
   }
 }
 
 // player_t::resource_loss ==================================================
 
-double player_t::resource_loss( int       resource,
-                                double    amount,
-                                gain_t*   source,
-                                action_t* action )
+double player_t::resource_loss( resource_type resource,
+                                double        amount,
+                                gain_t*       source,
+                                action_t*     action )
 {
   if ( amount == 0 )
     return 0;
@@ -2509,10 +2464,10 @@ double player_t::resource_loss( int       resource,
 
 // player_t::resource_gain ==================================================
 
-double player_t::resource_gain( int       resource,
-                                double    amount,
-                                gain_t*   source,
-                                action_t* action )
+double player_t::resource_gain( resource_type resource,
+                                double        amount,
+                                gain_t*       source,
+                                action_t*     action )
 {
   if ( sleeping )
     return 0;
@@ -2811,19 +2766,19 @@ void player_t::stat_loss( int       stat,
   case STAT_MAX_ENERGY:
   case STAT_MAX_AMMO:
   {
-    int r = ( ( stat == STAT_MAX_HEALTH ) ? RESOURCE_HEALTH :
-              ( stat == STAT_MAX_MANA   ) ? RESOURCE_MANA   :
-              ( stat == STAT_MAX_RAGE   ) ? RESOURCE_RAGE   :
-              ( stat == STAT_MAX_ENERGY ) ? RESOURCE_ENERGY : RESOURCE_AMMO );
+    resource_type r = ( stat == STAT_MAX_HEALTH ? RESOURCE_HEALTH :
+                      ( stat == STAT_MAX_MANA   ? RESOURCE_MANA   :
+                      ( stat == STAT_MAX_RAGE   ? RESOURCE_RAGE   :
+                      ( stat == STAT_MAX_ENERGY ? RESOURCE_ENERGY : RESOURCE_AMMO ))));
     recalculate_resource_max( r );
     double delta = resource_current[ r ] - resource_max[ r ];
     if ( delta > 0 ) resource_loss( r, delta, 0, action );
   }
   break;
 
-  case STAT_POWER:             stats.power             -= amount; power                     -= amount; break;
-  case STAT_FORCE_POWER:       stats.force_power       -= amount; force_power               -= amount; break;
-  case STAT_TECH_POWER:        stats.tech_power        -= amount; tech_power                -= amount; break;
+  case STAT_POWER:       stats.power       -= amount; power       -= amount; break;
+  case STAT_FORCE_POWER: stats.force_power -= amount; force_power -= amount; break;
+  case STAT_TECH_POWER:  stats.tech_power  -= amount; tech_power  -= amount; break;
 
   case STAT_ACCURACY_RATING:
     stats.accuracy_rating -= amount;
@@ -3204,9 +3159,9 @@ void player_t::register_harmful_spell_callback( int64_t mask,
 void player_t::register_tick_damage_callback( int64_t mask,
                                               action_callback_t* cb )
 {
-  for ( int64_t i=0; i < SCHOOL_MAX; i++ )
+  for ( school_type i=SCHOOL_NONE; i < SCHOOL_MAX; ++i )
   {
-    if ( mask < 0 || ( mask & ( int64_t( 1 ) << i ) ) )
+    if ( mask < 0 || ( mask & bitmask( i ) ) != 0 )
     {
       tick_damage_callbacks[ i ].push_back( cb );
     }
@@ -3218,9 +3173,9 @@ void player_t::register_tick_damage_callback( int64_t mask,
 void player_t::register_direct_damage_callback( int64_t mask,
                                                 action_callback_t* cb )
 {
-  for ( int64_t i=0; i < SCHOOL_MAX; i++ )
+  for ( school_type i=SCHOOL_NONE; i < SCHOOL_MAX; i++ )
   {
-    if ( mask < 0 || ( mask & ( int64_t( 1 ) << i ) ) )
+    if ( mask < 0 || ( mask & bitmask( i ) ) != 0 )
     {
       direct_damage_callbacks[ i ].push_back( cb );
     }
@@ -3232,9 +3187,9 @@ void player_t::register_direct_damage_callback( int64_t mask,
 void player_t::register_tick_heal_callback( int64_t mask,
                                             action_callback_t* cb )
 {
-  for ( int64_t i=0; i < SCHOOL_MAX; i++ )
+  for ( school_type i = SCHOOL_NONE; i < SCHOOL_MAX; i++ )
   {
-    if ( mask < 0 || ( mask & ( int64_t( 1 ) << i ) ) )
+    if ( mask < 0 || ( mask & bitmask( i ) ) != 0 )
     {
       tick_heal_callbacks[ i ].push_back( cb );
     }
@@ -3246,9 +3201,9 @@ void player_t::register_tick_heal_callback( int64_t mask,
 void player_t::register_direct_heal_callback( int64_t mask,
                                               action_callback_t* cb )
 {
-  for ( int64_t i=0; i < SCHOOL_MAX; i++ )
+  for ( school_type i = SCHOOL_NONE; i < SCHOOL_MAX; i++ )
   {
-    if ( mask < 0 || ( mask & ( int64_t( 1 ) << i ) ) )
+    if ( mask < 0 || ( mask & bitmask( i ) ) != 0 )
     {
       direct_heal_callbacks[ i ].push_back( cb );
     }
@@ -3558,7 +3513,7 @@ uptime_t* player_t::get_uptime( const std::string& name )
 
 // player_t::get_rng ========================================================
 
-rng_t* player_t::get_rng( const std::string& n, int type )
+rng_t* player_t::get_rng( const std::string& n, rng_type type )
 {
   assert( sim -> rng );
 
@@ -3824,13 +3779,13 @@ struct restart_sequence_t : public action_t
   std::string seq_name_str;
 
   restart_sequence_t( player_t* player, const std::string& options_str ) :
-    action_t( ACTION_OTHER, "restart_sequence", player ), seq( 0 )
+    action_t( ACTION_OTHER, "restart_sequence", player ),
+    seq( 0 ), seq_name_str( "default" ) // matches default name for sequences
   {
-    seq_name_str = "default"; // matches default name for sequences
     option_t options[] =
     {
-      { "name", OPT_STRING, &seq_name_str },
-      { NULL, OPT_UNKNOWN, NULL }
+      { "name", OPT_STRING,  &seq_name_str },
+      { NULL,   OPT_UNKNOWN, NULL }
     };
     parse_options( options, options_str );
 
@@ -3841,7 +3796,7 @@ struct restart_sequence_t : public action_t
   {
     if ( ! seq )
     {
-      for ( action_t* a = player -> action_list; a; a = a -> next )
+      for ( action_t* a = player -> action_list; a && ! seq; a = a -> next )
       {
         if ( a -> type != ACTION_SEQUENCE )
           continue;
@@ -3850,10 +3805,16 @@ struct restart_sequence_t : public action_t
           if ( seq_name_str != a -> name_str )
             continue;
 
-        seq = dynamic_cast< sequence_t* >( a );
+        seq = dynamic_cast<sequence_t*>( a );
       }
 
-      assert( seq );
+      if ( !seq )
+      {
+        sim -> errorf( "Can't find sequence %s\n",
+                       seq_name_str.empty() ? "(default)" : seq_name_str.c_str() );
+        sim -> cancel();
+        return;
+      }
     }
 
     seq -> restart();
@@ -3861,7 +3822,7 @@ struct restart_sequence_t : public action_t
 
   virtual bool ready()
   {
-    if ( seq ) return ! seq -> restarted;
+    if ( seq ) return seq -> can_restart();
     return action_t::ready();
   }
 };
@@ -3979,32 +3940,29 @@ struct snapshot_stats_t : public action_t
 
 struct wait_fixed_t : public wait_action_base_t
 {
-  action_expr_t* time_expr;
+  expr_ptr time_expr;
+  std::string wait_str;
 
   wait_fixed_t( player_t* player, const std::string& options_str ) :
-    wait_action_base_t( player, "wait" )
+    wait_action_base_t( player, "wait" ), wait_str( "1.0" )
   {
-    std::string sec_str = "1.0";
-
     option_t options[] =
     {
-      { "sec", OPT_STRING, &sec_str },
+      { "sec", OPT_STRING, &wait_str },
       { NULL,  OPT_UNKNOWN, NULL }
     };
     parse_options( options, options_str );
 
-    time_expr = action_expr_t::parse( this, sec_str );
+    time_expr = expr_t::parse( this, wait_str );
   }
 
   virtual timespan_t execute_time() const
   {
-    int result = time_expr -> evaluate();
-    assert( result == TOK_NUM ); ( void )result;
-    timespan_t wait = from_seconds( time_expr -> result_num );
-
-    if ( wait <= timespan_t::zero() ) wait = player -> available();
-
-    return wait;
+    timespan_t wait = from_seconds( time_expr -> evaluate() );
+    if ( wait > timespan_t::zero() )
+      return wait;
+    else
+      return player -> available();
   }
 };
 
@@ -4092,13 +4050,13 @@ struct base_use_item_t : public action_t
       {
         trigger = unique_gear_t::register_cost_reduction_proc( e.trigger_type, e.trigger_mask, use_name, player,
                                                                e.school, e.max_stacks, e.discharge_amount,
-                                                               e.proc_chance, timespan_t::zero()/*dur*/, timespan_t::zero()/*cd*/, false, e.reverse, 0 );
+                                                               e.proc_chance, timespan_t::zero()/*dur*/, timespan_t::zero()/*cd*/, false, e.reverse );
       }
       else if ( e.stat )
       {
         trigger = unique_gear_t::register_stat_proc( e.trigger_type, e.trigger_mask, use_name, player,
                                                      e.stat, e.max_stacks, e.stat_amount,
-                                                     e.proc_chance, timespan_t::zero()/*dur*/, timespan_t::zero()/*cd*/, e.tick, e.reverse, 0 );
+                                                     e.proc_chance, timespan_t::zero()/*dur*/, timespan_t::zero()/*cd*/, e.tick, e.reverse );
       }
       else if ( e.school )
       {
@@ -4282,7 +4240,7 @@ struct use_slot_t : public base_use_item_t
     }
 
     int slot = util_t::parse_slot_type( slot_name );
-    if ( slot == SLOT_NONE )
+    if ( slot == SLOT_INVALID )
     {
       if ( ! quiet )
         sim -> errorf( "Player %s has 'use_slot' action with invalid slot name '%s'.\n", player -> name(), slot_name.c_str() );
@@ -4429,11 +4387,6 @@ pet_t* player_t::find_pet( const std::string& pet_name )
   return 0;
 }
 
-// player_t::trigger_replenishment ==========================================
-
-void player_t::trigger_replenishment()
-{}
-
 // player_t::parse_talent_trees =============================================
 
 bool player_t::parse_talent_trees( const int encoding[ MAX_TALENT_SLOTS ] )
@@ -4506,162 +4459,65 @@ talent_t* player_t::find_talent( const std::string& n,
 
 // player_t::create_expression ==============================================
 
-action_expr_t* player_t::create_expression( action_t* a,
-                                            const std::string& name_str )
+namespace {
+expr_ptr deprecate_expression( player_t* p, action_t* a, const std::string& old_name, const std::string& new_name )
+{
+  p -> sim -> errorf( "Use of \"%s\" in action expressions is deprecated: use \"%s\" instead.\n",
+                      old_name.c_str(), new_name.c_str() );
+  return p -> create_expression( a, new_name );
+}
+}
+
+expr_ptr player_t::create_expression( action_t* a,
+                                      const std::string& name_str )
 {
   if ( name_str == "health_pct" )
-  {
-    sim -> errorf( "Use of \"health_pct\" in action expressions is deprecated: use \"health.pct\" instead.\n" );
-    return create_expression( a, "health.pct" );
-  }
+    return deprecate_expression( this, a, name_str, "health.pct" );
 
-  struct player_expr_t : public action_expr_t
-  {
-    player_t* player;
+  if ( name_str == "energy_regen" )
+    return deprecate_expression( this, a, name_str, "energy.regen" );
 
-    player_expr_t( action_t* a, const std::string& n, player_t* p ) :
-      action_expr_t( a, n, TOK_NUM ), player( p )
-    {}
-  };
+  if ( name_str == "ammo_regen" )
+    return deprecate_expression( this, a, name_str, "ammo.regen" );
 
-  struct resource_expr_t : public player_expr_t
-  {
-    resource_type rt;
+  if ( name_str == "time_to_max_energy" )
+    return deprecate_expression( this, a, name_str, "energy.time_to_max" );
 
-    resource_expr_t( action_t* a, const std::string& n, player_t* p, resource_type r ) :
-      player_expr_t( a, n, p ), rt( r )
-    {}
+  if ( name_str == "time_to_max_ammo" )
+    return deprecate_expression( this, a, name_str, "ammo.time_to_max" );
 
-    virtual int evaluate()
-    {
-      result_num = player -> resource_current[ rt ];
-      return TOK_NUM;
-    }
-  };
+  if ( name_str == "time_to_max_force" )
+    return deprecate_expression( this, a, name_str, "force.time_to_max" );
 
   resource_type rt = static_cast<resource_type>( util_t::parse_resource_type( name_str ) );
   if ( rt != RESOURCE_NONE )
-    return new resource_expr_t( a, name_str, this, rt );
+    return make_expr( name_str, [this,rt]{ return resource_current[ rt ]; } );
 
   if ( name_str == "level" )
-  {
-    struct level_expr_t : public player_expr_t
-    {
-      level_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "level", p ) {}
-      virtual int evaluate() { result_num = player -> level; return TOK_NUM; }
-    };
-    return new level_expr_t( a, this );
-  }
+    return make_expr( name_str, [this]{ return level; } );
+
   if ( name_str == "multiplier" )
-  {
-    struct multiplier_expr_t : public player_expr_t
-    {
-      multiplier_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "multiplier", p ) {}
-      virtual int evaluate() { result_num = player -> composite_player_multiplier( action -> school, action ); return TOK_NUM; }
-    };
-    return new multiplier_expr_t( a, this );
-  }
+    return make_expr( name_str, [this,a]{ return composite_player_multiplier( a -> school, a ); } );
+
   if ( name_str == "in_combat" )
-  {
-    struct in_combat_expr_t : public player_expr_t
-    {
-      in_combat_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "in_combat", p ) {}
-      virtual int evaluate() { result_num = ( player -> in_combat ? 1 : 0 ); return TOK_NUM; }
-    };
-    return new in_combat_expr_t( a, this );
-  }
+    return make_expr( name_str, [this]{ return in_combat != 0; } );
+
   if ( name_str == "alacrity" )
-  {
-    struct alacrity_expr_t : public player_expr_t
-    {
-      alacrity_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "alacrity", p ) {}
-      virtual int evaluate() { result_num = player -> alacrity(); return TOK_NUM; }
-    };
-    return new alacrity_expr_t( a, this );
-  }
-  if ( name_str == "energy_regen" )
-  {
-    struct energy_regen_expr_t : public player_expr_t
-    {
-      energy_regen_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "energy_regen", p ) {}
-      virtual int evaluate() { result_num = player -> energy_regen_per_second(); return TOK_NUM; }
-    };
-    return new energy_regen_expr_t( a, this );
-  }
-  if ( name_str == "ammo_regen" )
-  {
-    struct ammo_regen_expr_t : public player_expr_t
-    {
-      ammo_regen_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "ammo_regen", p ) {}
-      virtual int evaluate() { result_num = player -> ammo_regen_per_second(); return TOK_NUM; }
-    };
-    return new ammo_regen_expr_t( a, this );
-  }
+    return make_expr( name_str, [this]{ return alacrity(); } );
+
   if ( name_str == "time_to_die" )
-  {
-    struct time_to_die_expr_t : public player_expr_t
-    {
-      time_to_die_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "target_time_to_die", p ) {}
-      virtual int evaluate() { result_num = to_seconds( player -> time_to_die() );  return TOK_NUM; }
-    };
-    return new time_to_die_expr_t( a, this );
-  }
-  if ( name_str == "time_to_max_energy" )
-  {
-    struct time_to_max_energy_expr_t : public player_expr_t
-    {
-      time_to_max_energy_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "time_to_max_energy", p ) {}
-      virtual int evaluate()
-      {
-        result_num = ( player -> resource_max[ RESOURCE_ENERGY ] -
-                       player -> resource_current[ RESOURCE_ENERGY ] ) /
-                     player -> energy_regen_per_second(); return TOK_NUM;
-      }
-    };
-    return new time_to_max_energy_expr_t( a, this );
-  }
-  if ( name_str == "time_to_max_ammo" )
-  {
-    struct time_to_max_ammo_expr_t : public player_expr_t
-    {
-      time_to_max_ammo_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "time_to_max_ammo", p ) {}
-      virtual int evaluate()
-      {
-        result_num = ( player -> resource_max[ RESOURCE_AMMO ] -
-                       player -> resource_current[ RESOURCE_AMMO ] ) /
-                     player -> ammo_regen_per_second(); return TOK_NUM;
-      }
-    };
-    return new time_to_max_ammo_expr_t( a, this );
-  }
+    return make_expr( name_str, [this]{ return to_seconds( time_to_die() ); } );
+
   if ( name_str == "ptr" )
-  {
-    struct ptr_expr_t : public player_expr_t
-    {
-      ptr_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "ptr", p ) {}
-      virtual int evaluate() { result_num = player -> ptr ? 1 : 0; return TOK_NUM; }
-    };
-    return new ptr_expr_t( a, this );
-  }
+    return make_expr( name_str, [this]{ return ptr; } );
+
   if ( name_str == "position_front" )
-  {
-    struct position_front_expr_t : public player_expr_t
-    {
-      position_front_expr_t( action_t* a, player_t* p ) :
-        player_expr_t( a, "position_front", p ) {}
-      virtual int evaluate() { result_num = ( player -> position == POSITION_FRONT || player -> position == POSITION_RANGED_FRONT ) ? 1 : 0; return TOK_NUM; }
-    };
-    return new position_front_expr_t( a, this );
-  }
+    return make_expr( name_str, [this]{ return position == POSITION_FRONT ||
+                                               position == POSITION_RANGED_FRONT; } );
+
   if ( name_str == "position_back" )
-  {
-    struct position_back_expr_t : public player_expr_t
-    {
-      position_back_expr_t( action_t* a, player_t* p ) : player_expr_t( a, "position_back", p ) {}
-      virtual int evaluate() { result_num = ( player -> position == POSITION_BACK || player -> position == POSITION_RANGED_BACK ) ? 1 : 0; return TOK_NUM; }
-    };
-    return new position_back_expr_t( a, this );
-  }
+    return make_expr( name_str, [this]{ return position == POSITION_BACK ||
+                                               position == POSITION_RANGED_BACK; } );
 
   std::vector<std::string> splits;
   int num_splits = util_t::string_split( splits, name_str, "." );
@@ -4669,85 +4525,61 @@ action_expr_t* player_t::create_expression( action_t* a,
   if ( num_splits == 2 && ( rt = static_cast<resource_type>( util_t::parse_resource_type( splits[ 0 ] ) ) ) != RESOURCE_NONE )
   {
     if ( splits[ 1 ] == "deficit" )
+      return make_expr( name_str, [this,rt]{ return resource_max[ rt ] - resource_current[ rt ]; } );
+
+    else if ( splits[ 1 ] == "pct" || splits[ 1 ] == "percent" )
     {
-      struct resource_deficit_expr_t : public resource_expr_t
-      {
-        resource_deficit_expr_t( action_t* a, const std::string& n, player_t* p, resource_type r ) :
-          resource_expr_t( a, n, p, r ) {}
-        virtual int evaluate()
-        {
-          result_num = player -> resource_max[ rt ] - player -> resource_current[ rt ];
-          return TOK_NUM;
-        }
-      };
-      return new resource_deficit_expr_t( a, name_str, this, rt );
+      if ( rt == RESOURCE_HEALTH )
+        return make_expr( name_str, [this]{ return health_percentage() / 100.0; } );
+      else
+        return make_expr( name_str, [this,rt]{ return resource_current[ rt ] / resource_max[ rt ]; } );
     }
 
-    if ( splits[ 1 ] == "pct" || splits[ 1 ] == "percent" )
+    else if ( splits[ 1 ] == "max" )
+      return make_expr( name_str, [this,rt]{ return resource_max[ rt ]; } );
+
+    else if ( splits[ 1 ] == "regen" )
     {
-      struct resource_pct_expr_t : public resource_expr_t
-      {
-        resource_pct_expr_t( action_t* a, const std::string& n, player_t* p, resource_type r ) :
-          resource_expr_t( a, n, p, r ) {}
-        virtual int evaluate()
-        {
-          if ( rt == RESOURCE_HEALTH )
-            result_num = player -> health_percentage() / 100.0;
-          else
-            result_num = player -> resource_current[ rt ] / action -> player -> resource_max[ rt ];
-          return TOK_NUM;
-        }
-      };
-      return new resource_pct_expr_t( a, name_str, this, rt );
+      if ( rt == RESOURCE_FORCE )
+        return make_expr( name_str, [this]{ return force_regen_per_second(); } );
+      if ( rt == RESOURCE_ENERGY )
+        return make_expr( name_str, [this]{ return energy_regen_per_second(); } );
+      if ( rt == RESOURCE_AMMO )
+        return make_expr( name_str, [this]{ return ammo_regen_per_second(); } );
     }
 
-    if ( splits[ 1 ] == "max" )
+    else if ( splits[ 1 ] == "time_to_max" )
     {
-      struct resource_max_expr_t : public resource_expr_t
-      {
-        resource_max_expr_t( action_t* a, const std::string& n, player_t* p, resource_type r ) :
-          resource_expr_t( a, n, p, r ) {}
-        virtual int evaluate() { result_num = player -> resource_max[ rt ]; return TOK_NUM; }
-      };
-      return new resource_max_expr_t( a, name_str, this, rt );
+      if ( rt == RESOURCE_FORCE )
+        return make_expr( name_str, [this]{ return ( resource_max[ RESOURCE_FORCE ] - resource_current[ RESOURCE_FORCE ] )
+                                                   / force_regen_per_second(); } );
+      if ( rt == RESOURCE_ENERGY )
+        return make_expr( name_str, [this]{ return ( resource_max[ RESOURCE_ENERGY ] - resource_current[ RESOURCE_ENERGY ] )
+                                                   / energy_regen_per_second(); } );
+      if ( rt == RESOURCE_AMMO )
+        return make_expr( name_str, [this]{ return ( resource_max[ RESOURCE_AMMO ] - resource_current[ RESOURCE_AMMO ] )
+                                                   / ammo_regen_per_second(); } );
     }
   }
 
-  if ( splits[ 0 ] == "pet" )
+  else if ( splits[ 0 ] == "pet" )
   {
     pet_t* pet = find_pet( splits[ 1 ] );
     if ( pet )
     {
-      struct pet_expr_t : public action_expr_t
-      {
-        pet_t* pet;
-        pet_expr_t( action_t* a, const std::string& n, pet_t* p ) :
-          action_expr_t( a, n, TOK_NUM ), pet( p )
-        {}
-      };
-
       if ( splits[ 2 ] == "active" )
-      {
-        struct pet_active_expr_t : public pet_expr_t
-        {
-          pet_active_expr_t( action_t* a, pet_t* p ) : pet_expr_t( a, "pet_active", p ) {}
-          virtual int evaluate() { result_num = ( pet -> sleeping ) ? 0 : 1; return TOK_NUM; }
-        };
-        return new pet_active_expr_t( a, pet );
-      }
+        return make_expr( name_str, [pet]{ return ! pet -> sleeping; } );
       else if ( splits[ 2 ] == "remains" )
-      {
-        struct pet_remains_expr_t : public pet_expr_t
-        {
-          pet_remains_expr_t( action_t* a, pet_t* p ) : pet_expr_t( a, "pet_remains", p ) {}
-          virtual int evaluate() { result_num = ( pet -> expiration && pet -> expiration-> remains() > timespan_t::zero() ) ? to_seconds( pet -> expiration -> remains() ) : 0; return TOK_NUM; }
-        };
-        return new pet_remains_expr_t( a, pet );
-      }
+        return make_expr( name_str, [pet]() -> double
+          {
+            event_t* e = pet -> expiration;
+            if ( e && e -> remains() > timespan_t::zero() )
+              return to_seconds( e -> remains() );
+            else
+              return 0;
+          } );
       else
-      {
-        return pet -> create_expression( a, name_str.substr( splits[ 1 ].length() + std::strlen( "pet" ) + 2 ) );
-      }
+        return pet -> create_expression( a, join( splits.begin() + 2, splits.end(), '.' ) );
     }
   }
 
@@ -4756,70 +4588,58 @@ action_expr_t* player_t::create_expression( action_t* a,
     if ( pet_t* pet = dynamic_cast<pet_t*>( this ) )
     {
       if ( pet -> owner )
-      {
         return pet -> owner -> create_expression( a, name_str.substr( 6 ) );
-      }
     }
   }
 
   else if ( splits[ 0 ] == "temporary_bonus" )
   {
-    int stat = util_t::parse_stat_type( splits[ 1 ] );
+    stat_type stat = util_t::parse_stat_type( splits[ 1 ] );
 
     if ( stat != STAT_NONE )
     {
-      double* p_stat = 0;
-      int attr = -1;
-
       switch ( stat )
       {
-        case STAT_STRENGTH:         p_stat = &( temporary.attribute[ ATTR_STRENGTH  ] ); attr = ATTR_STRENGTH;  break;
-        case STAT_AIM:              p_stat = &( temporary.attribute[ ATTR_AIM       ] ); attr = ATTR_AIM;       break;
-        case STAT_CUNNING:          p_stat = &( temporary.attribute[ ATTR_CUNNING   ] ); attr = ATTR_CUNNING;   break;
-        case STAT_WILLPOWER:        p_stat = &( temporary.attribute[ ATTR_WILLPOWER ] ); attr = ATTR_WILLPOWER; break;
-        case STAT_ENDURANCE:        p_stat = &( temporary.attribute[ ATTR_ENDURANCE ] ); attr = ATTR_ENDURANCE; break;
-        case STAT_PRESENCE:         p_stat = &( temporary.attribute[ ATTR_PRESENCE  ] ); attr = ATTR_PRESENCE;  break;
-        case STAT_EXPERTISE_RATING: p_stat = &( temporary.expertise_rating            ); break;
-        case STAT_ACCURACY_RATING:  p_stat = &( temporary.accuracy_rating             ); break;
-        case STAT_CRIT_RATING:      p_stat = &( temporary.crit_rating                 ); break;
-        case STAT_ALACRITY_RATING:  p_stat = &( temporary.alacrity_rating             ); break;
-        case STAT_ARMOR:            p_stat = &( temporary.armor                       ); break;
-        case STAT_POWER:            p_stat = &( temporary.power                       ); break;
-        case STAT_FORCE_POWER:      p_stat = &( temporary.force_power                 ); break;
-        case STAT_TECH_POWER:       p_stat = &( temporary.tech_power                  ); break;
-        case STAT_SURGE_RATING:     p_stat = &( temporary.surge_rating                ); break;
-        case STAT_DEFENSE_RATING:   p_stat = &( temporary.defense_rating              ); break;
-        case STAT_SHIELD_RATING:    p_stat = &( temporary.shield_rating               ); break;
-        case STAT_ABSORB_RATING:    p_stat = &( temporary.absorb_rating               ); break;
+        case STAT_STRENGTH:
+        case STAT_AIM:
+        case STAT_CUNNING:
+        case STAT_WILLPOWER:
+        case STAT_ENDURANCE:
+        case STAT_PRESENCE:
+          // Relies on STAT_XXX == ATTR_XXX
+          return make_expr( name_str, [this,stat]{
+              return temporary.attribute[ stat ] * composite_attribute_multiplier( stat );
+            } );
+        case STAT_EXPERTISE_RATING:
+          return make_expr( name_str, [this]{ return temporary.expertise_rating; } );
+        case STAT_ACCURACY_RATING:
+          return make_expr( name_str, [this]{ return temporary.accuracy_rating; } );
+        case STAT_CRIT_RATING:
+          return make_expr( name_str, [this]{ return temporary.crit_rating; } );
+        case STAT_ALACRITY_RATING:
+          return make_expr( name_str, [this]{ return temporary.alacrity_rating; } );
+        case STAT_ARMOR:
+          return make_expr( name_str, [this]{ return temporary.armor; } );
+        case STAT_POWER:
+          return make_expr( name_str, [this]{ return temporary.power; } );
+        case STAT_FORCE_POWER:
+          return make_expr( name_str, [this]{ return temporary.force_power; } );
+        case STAT_TECH_POWER:
+          return make_expr( name_str, [this]{ return temporary.tech_power; } );
+        case STAT_SURGE_RATING:
+          return make_expr( name_str, [this]{ return temporary.surge_rating; } );
+        case STAT_DEFENSE_RATING:
+          return make_expr( name_str, [this]{ return temporary.defense_rating; } );
+        case STAT_SHIELD_RATING:
+          return make_expr( name_str, [this]{ return temporary.shield_rating; } );
+        case STAT_ABSORB_RATING:
+          return make_expr( name_str, [this]{ return temporary.absorb_rating; } );
 
-        default: assert( 0 ); break;
-      }
-
-      if ( p_stat )
-      {
-        struct temporary_stat_expr_t : public player_expr_t
-        {
-          int attr;
-          int stat_type;
-          double& stat;
-
-          temporary_stat_expr_t( action_t* a, player_t* p, double* p_stat, int stat_type, int attr ) :
-            player_expr_t( a, "temporary_stat", p ), attr( attr ), stat_type( stat_type ), stat( *p_stat ) {}
-
-          virtual int evaluate()
-          {
-            result_num = stat;
-            if ( attr != -1 )
-              result_num *= player -> composite_attribute_multiplier( attr );
-
-            return TOK_NUM;
-          }
-        };
-
-        return new temporary_stat_expr_t( a, this, p_stat, stat, attr );
+        default: break;
       }
     }
   }
+
   else if ( num_splits == 3 )
   {
     if ( splits[ 0 ] == "buff" || splits[ 0 ] == "debuff" || splits[ 0 ] == "aura" )
@@ -4828,25 +4648,17 @@ action_expr_t* player_t::create_expression( action_t* a,
       if ( ! buff ) buff = buff_t::find( this, splits[ 1 ] );
       if ( ! buff ) buff = buff_t::find( sim, splits[ 1 ] );
       if ( ! buff ) return 0;
-      return buff -> create_expression( a, splits[ 2 ] );
+      return buff -> create_expression( splits[ 2 ] );
     }
     else if ( splits[ 0 ] == "cooldown" )
     {
       cooldown_t* cooldown = get_cooldown( splits[ 1 ] );
       if ( splits[ 2 ] == "remains" )
-      {
-        struct cooldown_remains_expr_t : public action_expr_t
-        {
-          cooldown_t* cooldown;
-          cooldown_remains_expr_t( action_t* a, cooldown_t* c ) : action_expr_t( a, "cooldown_remains", TOK_NUM ), cooldown( c ) {}
-          virtual int evaluate() { result_num = to_seconds( cooldown -> remains() ); return TOK_NUM; }
-        };
-        return new cooldown_remains_expr_t( a, cooldown );
-      }
+        return make_expr( name_str, [cooldown]{ return to_seconds( cooldown -> remains() ); } );
     }
     else if ( splits[ 0 ] == "dot" )
     {
-      dot_t* dot = 0;
+      dot_t* dot = nullptr;
       for ( targetdata_t* p : sourcedata )
       {
         if ( p && ( dot = p -> get_dot( splits[ 1 ] ) ) )
@@ -4855,64 +4667,47 @@ action_expr_t* player_t::create_expression( action_t* a,
       if ( ! dot )
         dot = get_dot( splits[ 1 ] );
       if ( ! dot )
-        return 0;
-      return dot -> create_expression( a, splits[ 2 ] );
+        return nullptr;
+      return dot -> create_expression( splits[ 2 ] );
     }
     else if ( splits[ 0 ] == "action" )
     {
-      std::vector<action_t*> in_flight_list;
-      for ( action_t* action = action_list; action; action = action -> next )
+      if ( splits[ 2 ] == "in_flight" )
       {
-        if ( action -> name_str == splits[ 1 ] )
+        std::vector<action_t*> in_flight_list;
+        for ( action_t* action = action_list; action; action = action -> next )
         {
-          if ( splits[ 2 ] == "in_flight" )
-          {
+          if ( action -> name_str == splits[ 1 ] )
             in_flight_list.push_back( action );
-          }
-          else
-          {
-            return action -> create_expression( splits[ 2 ] );
-          }
+        }
+        if ( ! in_flight_list.empty() )
+        {
+          return make_expr( name_str, [in_flight_list]() -> bool
+            {
+              for ( action_t& a : in_flight_list | boost::adaptors::indirected )
+                if ( a.travel_event ) return true;
+              return false;
+            } );
         }
       }
-      if ( in_flight_list.size() > 0 )
+      else
       {
-        struct in_flight_multi_expr_t : public action_expr_t
-        {
-          std::vector<action_t*> action_list;
-
-          in_flight_multi_expr_t( action_t* a, std::vector<action_t*>&& al ) :
-            action_expr_t( a, "in_flight", TOK_NUM ),
-            action_list( std::move( al ) )
-          {}
-
-          virtual int evaluate()
-          {
-            result_num = false;
-            for ( action_t* a : action_list )
-            {
-              if ( a -> travel_event != NULL )
-              {
-                result_num = true;
-                break;
-              }
-            }
-            return TOK_NUM;
-          }
-        };
-        return new in_flight_multi_expr_t( a, std::move( in_flight_list ) );
+        if ( action_t* action = find_action( splits[ 1 ] ) )
+          return action -> create_expression( splits[ 2 ] );
       }
     }
   }
-  /*else if ( num_splits == 2 )
-  {
-    if ( splits[ 0 ] == "set_bonus" )
-    {
-      return this -> set_bonus.create_expression( a, splits[ 1 ] );
-    }
-  }*/
 
-  if ( num_splits >= 2 && splits[ 0 ] == "target" )
+  else if ( splits[ 0 ] == "set_bonus" )
+  {
+    if ( num_splits == 2 )
+    {
+      if ( set_bonus_t* sb = find_set_bonus( splits[ 1 ] ) )
+        return make_expr( name_str, [sb]{ return sb -> count; } );
+    }
+  }
+
+  else if ( num_splits >= 2 && splits[ 0 ] == "target" )
     return target -> create_expression( a, join( splits.begin() + 1, splits.end(), '.' ) );
 
   return sim -> create_expression( a, name_str );
@@ -4920,259 +4715,196 @@ action_expr_t* player_t::create_expression( action_t* a,
 
 // player_t::create_profile =================================================
 
-bool player_t::create_profile( std::string& profile_str, int save_type, bool save_html )
+void player_t::create_profile( std::ostream& os, save_type savetype )
 {
-  std::string term;
-
-  if ( save_html )
-    term = "<br>\n";
-  else
-    term = "\n";
-
-  if ( save_type == SAVE_ALL )
-  {
-    profile_str += "#!./simc " + term + term;
-  }
+  if ( savetype == SAVE_ALL )
+    os << "#!./simc\n\n";
 
   if ( ! comment_str.empty() )
+    os << "# " << comment_str << '\n';
+
+  if ( savetype == SAVE_ALL )
   {
-    profile_str += "# " + comment_str + term;
+    os << util_t::player_type_string( type ) << "=\"" << name_str << "\"\n"
+          "origin=\"" << origin_str << "\"\n"
+          "level=" << level << "\n"
+          "race=" << race_str << "\n"
+          "position=" << position_str << "\n"
+          "role=" << util_t::role_type_string( primary_role() ) << "\n"
+          "use_pre_potion=" << use_pre_potion << '\n';
+
+    if ( ! professions_str.empty() )
+      os << "professions=" << professions_str << '\n';
   }
 
-  if ( save_type == SAVE_ALL )
-  {
-    std::string pname = name_str;
-
-    profile_str += util_t::player_type_string( type );
-    profile_str += "=" + util_t::format_text( pname, sim -> input_is_utf8 ) + term;
-    profile_str += "origin=\"" + origin_str + "\"" + term;
-    profile_str += "level=" + util_t::to_string( level ) + term;
-    profile_str += "race=" + race_str + term;
-    profile_str += "position=" + position_str + term;
-    profile_str += "role=";
-    profile_str += util_t::role_type_string( primary_role() ) + term;
-    profile_str += "use_pre_potion=" + util_t::to_string( use_pre_potion ) + term;
-
-    if ( professions_str.size() > 0 )
-    {
-      profile_str += "professions=" + professions_str + term;
-    };
-  }
-
-  if ( save_type == SAVE_ALL || save_type == SAVE_TALENTS )
+  if ( savetype == SAVE_ALL || savetype == SAVE_TALENTS )
   {
     talents_str = torhead::encode_talents( *this );
     if ( ! talents_str.empty() )
-      profile_str += "talents=" + talents_str + term;
+      os << "talents=" << talents_str << '\n';
   }
 
-  if ( save_type == SAVE_ALL || save_type == SAVE_ACTIONS )
+  if ( ( savetype == SAVE_ALL || savetype == SAVE_ACTIONS )
+       && ! action_list_str.empty() )
   {
-    if ( ! action_list_str.empty() )
+    bool first = true;
+    for ( action_t* a = action_list; a; a = a -> next )
     {
-      int i = 0;
-      for ( action_t* a = action_list; a; a = a -> next )
+      if ( ! a -> signature_str.empty() )
       {
-        if ( a -> signature_str.empty() ) continue;
-        profile_str += "actions";
-        profile_str += i ? "+=/" : "=";
-        std::string encoded_action = a -> signature_str;
-        if ( save_html )
-          report_t::encode_html( encoded_action );
-        profile_str += encoded_action + term;
-        i++;
+        os << "actions" <<  ( first ? "=" : "+=/" )
+           << a -> signature_str << '\n';
+        first = false;
       }
     }
   }
 
-  if ( save_type == SAVE_ALL || save_type == SAVE_GEAR )
+  if ( savetype == SAVE_ALL || savetype == SAVE_GEAR )
   {
-    for ( int i=0; i < SLOT_MAX; i++ )
+    for ( item_t& item : items )
     {
-      item_t& item = items[ i ];
-
       if ( item.active() )
-      {
-        profile_str += item.slot_name();
-        profile_str += "=" + item.options_str + term;
-      }
-    }
-    if ( ! items_str.empty() )
-    {
-      profile_str += "items=" + items_str + term;
+        os << item.slot_name() << '=' << item.options_str << '\n';
     }
 
-    profile_str += "# Gear Summary" + term;
-    for ( int i=0; i < STAT_MAX; i++ )
+    if ( ! items_str.empty() )
+      os << "items=" << items_str << '\n';
+
+    os << "# Gear Summary\n";
+    for ( stat_type i = STAT_NONE; i < STAT_MAX; ++i )
     {
       double value = initial_stats.get_stat( i );
       if ( value != 0 )
-      {
-        profile_str += "# gear_";
-        profile_str += util_t::stat_type_string( i );
-        profile_str += "=" + util_t::to_string( value, 0 ) + term;
-      }
-    }
-    profile_str += "# Set Bonuses" + term;
-    for ( set_bonus_t* sb = set_bonus_list; sb; sb = sb -> next )
-    {
-      if ( sb -> two_pc() )  profile_str += "# set_bonus=" + sb -> name + "_2pc" + term ;
-      if ( sb -> four_pc() ) profile_str += "# set_bonus=" + sb -> name + "_4pc" + term ;
+        os << "# gear_" << util_t::stat_type_string( i )
+           << '=' << value << '\n';
     }
 
-    for ( int i=0; i < SLOT_MAX; i++ )
+    os << "# Set Bonuses\n";
+    for ( set_bonus_t* sb = set_bonus_list; sb; sb = sb -> next )
     {
-      item_t& item = items[ i ];
+      std::string name = sb -> name + "_2pc\n";
+      if ( sb -> force_enable_2pc )
+        os << "set_bonus=" << name;
+      else if ( sb -> force_disable_2pc )
+        os << "set_bonus=no_" << name;
+      else if ( sb -> two_pc() )
+        os << "# set_bonus=" << name;
+
+      name = sb -> name + "_4pc\n";
+      if ( sb -> force_enable_4pc )
+        os << "set_bonus=" << name;
+      else if ( sb -> force_disable_4pc )
+        os << "set_bonus=no_" << name;
+      else if ( sb -> four_pc() )
+        os << "# set_bonus=" << name;
+    }
+
+    for ( item_t& item : items )
+    {
       if ( ! item.active() ) continue;
       if ( item.unique || item.unique_enchant || item.unique_addon || ! item.encoded_weapon_str.empty() )
       {
-        profile_str += "# ";
-        profile_str += item.slot_name();
-        profile_str += "=";
-        profile_str += item.name();
-        if ( item.heroic() ) profile_str += ",heroic=1";
-        if ( ! item.encoded_weapon_str.empty() ) profile_str += ",weapon=" + item.encoded_weapon_str;
-        if ( item.unique_enchant ) profile_str += ",enchant=" + item.encoded_enchant_str;
-        if ( item.unique_addon   ) profile_str += ",addon="   + item.encoded_addon_str;
-        profile_str += term;
+        os << "# " << item.slot_name() << '=' << item.name();
+        if ( item.heroic() ) os << ",heroic=1";
+        if ( ! item.encoded_weapon_str.empty() ) os << ",weapon=" << item.encoded_weapon_str;
+        if ( item.unique_enchant ) os << ",enchant=" << item.encoded_enchant_str;
+        if ( item.unique_addon   ) os << ",addon=" << item.encoded_addon_str;
+        os << '\n';
       }
     }
 
-    if ( enchant.attribute[ ATTR_STRENGTH  ] != 0 )  profile_str += "enchant_strength="         + util_t::to_string( enchant.attribute[ ATTR_STRENGTH  ] ) + term;
-    if ( enchant.attribute[ ATTR_AIM       ] != 0 )  profile_str += "enchant_aim="              + util_t::to_string( enchant.attribute[ ATTR_AIM       ] ) + term;
-    if ( enchant.attribute[ ATTR_CUNNING   ] != 0 )  profile_str += "enchant_cunning="          + util_t::to_string( enchant.attribute[ ATTR_CUNNING   ] ) + term;
-    if ( enchant.attribute[ ATTR_WILLPOWER ] != 0 )  profile_str += "enchant_willpower="        + util_t::to_string( enchant.attribute[ ATTR_WILLPOWER ] ) + term;
-    if ( enchant.attribute[ ATTR_ENDURANCE ] != 0 )  profile_str += "enchant_endurance="        + util_t::to_string( enchant.attribute[ ATTR_ENDURANCE ] ) + term;
-    if ( enchant.attribute[ ATTR_PRESENCE  ] != 0 )  profile_str += "enchant_presence="         + util_t::to_string( enchant.attribute[ ATTR_PRESENCE  ] ) + term;
-    if ( enchant.power                       != 0 )  profile_str += "enchant_power="            + util_t::to_string( enchant.power ) + term;
-    if ( enchant.force_power                 != 0 )  profile_str += "enchant_force_power="      + util_t::to_string( enchant.force_power ) + term;
-    if ( enchant.tech_power                  != 0 )  profile_str += "enchant_tech_power="       + util_t::to_string( enchant.tech_power ) + term;
-    if ( enchant.expertise_rating            != 0 )  profile_str += "enchant_expertise_rating=" + util_t::to_string( enchant.expertise_rating ) + term;
-    if ( enchant.armor                       != 0 )  profile_str += "enchant_armor="            + util_t::to_string( enchant.armor ) + term;
-    if ( enchant.alacrity_rating             != 0 )  profile_str += "enchant_alacrity_rating="  + util_t::to_string( enchant.alacrity_rating ) + term;
-    if ( enchant.accuracy_rating             != 0 )  profile_str += "enchant_accuracy_rating="  + util_t::to_string( enchant.accuracy_rating ) + term;
-    if ( enchant.crit_rating                 != 0 )  profile_str += "enchant_crit_rating="      + util_t::to_string( enchant.crit_rating ) + term;
-    if ( enchant.resource[ RESOURCE_HEALTH ] != 0 )  profile_str += "enchant_health="           + util_t::to_string( enchant.resource[ RESOURCE_HEALTH ] ) + term;
-    if ( enchant.resource[ RESOURCE_MANA   ] != 0 )  profile_str += "enchant_mana="             + util_t::to_string( enchant.resource[ RESOURCE_MANA   ] ) + term;
-    if ( enchant.resource[ RESOURCE_RAGE   ] != 0 )  profile_str += "enchant_rage="             + util_t::to_string( enchant.resource[ RESOURCE_RAGE   ] ) + term;
-    if ( enchant.resource[ RESOURCE_ENERGY ] != 0 )  profile_str += "enchant_energy="           + util_t::to_string( enchant.resource[ RESOURCE_ENERGY ] ) + term;
-    if ( enchant.resource[ RESOURCE_AMMO   ] != 0 )  profile_str += "enchant_ammo="             + util_t::to_string( enchant.resource[ RESOURCE_AMMO   ] ) + term;
-}
-
-  return true;
-}
-
-bool player_t::create_json_profile( std::string& profile_str, int save_type, bool save_html )
-{
-  std::string term = "\n";
-
-  profile_str += "{" + term;
-
-  profile_str += "\t\"Character\" : " + term;
-  profile_str += "\t{" + term;
-
-  // Basic Character Definitions
-  profile_str += "\t\t\"Definitions\" : " + term;
-  profile_str += "\t\t{" + term;
-  if ( save_type == SAVE_ALL )
-  {
-    std::string pname = name_str;
-
-    profile_str += "\t\t\t\"Class\" : \"";
-    profile_str += util_t::player_type_string( type );
-    profile_str += "\"," + term;
-    profile_str += "\t\t\t\"Name\" : " + util_t::format_text( pname, sim -> input_is_utf8 ) + "\"," + term;
-    profile_str += "\t\t\t\"Origin\" : " + origin_str + "\"" + term;
-    profile_str += "\t\t\t\"Level\"" + util_t::to_string( level ) + "\"," + term;
-    profile_str += "\t\t\t\"Race\" : \"" + race_str + "\"," + term;
-
-    if ( professions_str.size() > 0 )
-    {
-      profile_str += "\t\t\t\"Professions\" : \"" + professions_str + "\"," + term;
-    };
+    if ( enchant.attribute[ ATTR_STRENGTH  ] != 0 )  os << "enchant_strength="         << enchant.attribute[ ATTR_STRENGTH  ] << '\n';
+    if ( enchant.attribute[ ATTR_AIM       ] != 0 )  os << "enchant_aim="              << enchant.attribute[ ATTR_AIM       ] << '\n';
+    if ( enchant.attribute[ ATTR_CUNNING   ] != 0 )  os << "enchant_cunning="          << enchant.attribute[ ATTR_CUNNING   ] << '\n';
+    if ( enchant.attribute[ ATTR_WILLPOWER ] != 0 )  os << "enchant_willpower="        << enchant.attribute[ ATTR_WILLPOWER ] << '\n';
+    if ( enchant.attribute[ ATTR_ENDURANCE ] != 0 )  os << "enchant_endurance="        << enchant.attribute[ ATTR_ENDURANCE ] << '\n';
+    if ( enchant.attribute[ ATTR_PRESENCE  ] != 0 )  os << "enchant_presence="         << enchant.attribute[ ATTR_PRESENCE  ] << '\n';
+    if ( enchant.power                       != 0 )  os << "enchant_power="            << enchant.power << '\n';
+    if ( enchant.force_power                 != 0 )  os << "enchant_force_power="      << enchant.force_power << '\n';
+    if ( enchant.tech_power                  != 0 )  os << "enchant_tech_power="       << enchant.tech_power << '\n';
+    if ( enchant.expertise_rating            != 0 )  os << "enchant_expertise_rating=" << enchant.expertise_rating << '\n';
+    if ( enchant.armor                       != 0 )  os << "enchant_armor="            << enchant.armor << '\n';
+    if ( enchant.alacrity_rating             != 0 )  os << "enchant_alacrity_rating="  << enchant.alacrity_rating << '\n';
+    if ( enchant.accuracy_rating             != 0 )  os << "enchant_accuracy_rating="  << enchant.accuracy_rating << '\n';
+    if ( enchant.crit_rating                 != 0 )  os << "enchant_crit_rating="      << enchant.crit_rating << '\n';
+    if ( enchant.resource[ RESOURCE_HEALTH ] != 0 )  os << "enchant_health="           << enchant.resource[ RESOURCE_HEALTH ] << '\n';
+    if ( enchant.resource[ RESOURCE_MANA   ] != 0 )  os << "enchant_mana="             << enchant.resource[ RESOURCE_MANA   ] << '\n';
+    if ( enchant.resource[ RESOURCE_RAGE   ] != 0 )  os << "enchant_rage="             << enchant.resource[ RESOURCE_RAGE   ] << '\n';
+    if ( enchant.resource[ RESOURCE_ENERGY ] != 0 )  os << "enchant_energy="           << enchant.resource[ RESOURCE_ENERGY ] << '\n';
+    if ( enchant.resource[ RESOURCE_AMMO   ] != 0 )  os << "enchant_ammo="             << enchant.resource[ RESOURCE_AMMO   ] << '\n';
   }
-  profile_str += "\t\t}," + term;
+}
 
-  // Talents
-  profile_str += "\t\t\"Talents\" : " + term;
-  profile_str += "\t\t{" + term;
+void player_t::create_json_profile( std::ostream& os, save_type savetype )
+{
+  os << "{\n";
+  if ( savetype == SAVE_ALL )
+  {
+    os << "\t\"Class\" : \"" << util_t::player_type_string( type ) << "\",\n"
+          "\t\"Name\" : \"" << name_str << "\",\n"
+          "\t\"Origin\" : \"" << origin_str << "\"\n"
+          "\t\"Level\" : " << level << ",\n"
+          "\t\"Race\" : \"" << race_str << "\",\n";
+
+    if ( ! professions_str.empty() )
+      os << "\t\"Professions\" : \"" << professions_str << "\",\n";
+  }
+
   talents_str = torhead::encode_talents( *this );
   if ( ! talents_str.empty() )
-    profile_str += "\t\t\ttalents=" + talents_str + term;
-  profile_str += "\t\t}," + term;
+    os << "\t\"Talents\" : \"" << talents_str << "\",\n";
 
-  // Gear
-  profile_str += "\t\t\"Gear\" : " + term;
-  profile_str += "\t\t{" + term;
+  os << "\t\"Gear\" : {\n";
+  for ( item_t& item : items )
+  {
+    if ( item.active() )
+      os << "\t\t\"" << item.slot_name() << "\" : \"" + item.options_str + "\",\n";
+  }
+  os << "\t},\n";
 
-    for ( int i=0; i < SLOT_MAX; i++ )
-    {
-      item_t& item = items[ i ];
+  os << "\t\"Position\" : \"" << position_str << "\",\n"
+        "\t\"Role\" : \"" << util_t::role_type_string( primary_role() ) << "\",\n"
+        "\t\"Use_pre_potion\" : " << use_pre_potion << ",\n";
 
-      if ( item.active() )
-      {
-        profile_str += "\t\t\t\"";
-        profile_str += item.slot_name();
-        profile_str += "\" : \"" + item.options_str + "\"," + term;
-      }
-    }
-  profile_str += "\t\t}" + term;
+  os << "\t\"Actions\" : [\n";
+  for ( action_t* a = action_list; a; a = a -> next )
+  {
+    if ( ! a -> signature_str.empty() )
+      os << "\t\t\"" << a -> signature_str << "\",\n";
+  }
+  os << "\t],\n";
 
+  os << "\t\"Gear Summary\" : {\n";
+  for ( stat_type i = STAT_NONE; i < STAT_MAX; ++i )
+  {
+    double value = initial_stats.get_stat( i );
+    if ( value )
+      os << "\t\t\"" << util_t::stat_type_string( i ) << "\" : " << value << ",\n";
+  }
+  os << "\t},\n";
 
-    profile_str += "\t}," + term;
+  os << "\t\"Set Bonuses\" : [\n";
+  for ( set_bonus_t* sb = set_bonus_list; sb; sb = sb -> next )
+  {
+    std::string name = sb -> name + "_2pc";
+    if ( sb -> force_enable_2pc )
+      os << "\t\t\"" << name << "\",\n";
+    else if ( sb -> force_disable_2pc )
+      os << "\t\t\"no_" << name << "\",\n";
+    else if ( sb -> two_pc() )
+      os << "\t\t\"#" << name << "\",\n";
 
-    profile_str += "\t\"SimulationCraft\" : " + term;
-    profile_str += "\t{" + term;
-    profile_str += "\t\t\"Position\" : \"" + position_str + "\"," + term;
-    profile_str += "\t\t\"Role\" : \"";
-    profile_str += util_t::role_type_string( primary_role() );
-    profile_str += "\"," + term;
-    profile_str += "\t\t\"Use_pre_potion\" : \"" + util_t::to_string( use_pre_potion ) + "\"," + term;
+    name = sb -> name + "_4pc";
+    if ( sb -> force_enable_4pc )
+      os << "\t\t\"" << name << "\",\n";
+    else if ( sb -> force_disable_4pc )
+      os << "\t\t\"no_" << name << "\",\n";
+    else if ( sb -> four_pc() )
+      os << "\t\t\"#" << name << "\",\n";
+  }
+  os << "\t],\n";
 
-    // Action Priority List
-    profile_str += "\t\t\"ActionPriorityList\" : \"" + term;
-    profile_str += "\t\t\t";
-      if ( ! action_list_str.empty() )
-      {
-        int i = 0;
-        for ( action_t* a = action_list; a; a = a -> next )
-        {
-          if ( a -> signature_str.empty() ) continue;
-          std::string encoded_action = a -> signature_str;
-          if ( save_html )
-            report_t::encode_html( encoded_action );
-          profile_str += encoded_action;
-          profile_str += i ? "/" : "";
-          i++;
-        }
-      }
-    profile_str += term + "\t\t\"," + term;
-
-    // Gear Summary
-    profile_str += "\t\t\"Gear Summary\" : \"" + term;
-    for ( int i=0; i < STAT_MAX; i++ )
-    {
-      double value = initial_stats.get_stat( i );
-      if ( value != 0 )
-      {
-        profile_str += "\t\t\tgear_";
-        profile_str += util_t::stat_type_string( i );
-        profile_str += "=" + util_t::to_string( value, 0 ) + term;
-      }
-    }
-    profile_str += "\t\t\t# Set Bonuses" + term;
-    for ( set_bonus_t* sb = set_bonus_list; sb; sb = sb -> next )
-    {
-      if ( sb -> two_pc() )  profile_str += "\t\t\tset_bonus=" + sb -> name + "_2pc" + term ;
-      if ( sb -> four_pc() ) profile_str += "\t\t\tset_bonus=" + sb -> name + "_4pc" + term ;
-    }
-    profile_str += "\t\t\"," + term;
-
-  profile_str += "\t}" + term;
-
-  profile_str += "}";
-
-  return true;
+  os << "}";
 }
 
 // player_t::copy_from ======================================================

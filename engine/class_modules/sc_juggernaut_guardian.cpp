@@ -93,7 +93,7 @@ struct juggernaut_guardian_t : public player_t
     virtual void      init_procs();
     virtual void      init_rng();
     virtual void      init_actions();
-    virtual int       primary_resource() const;
+    virtual resource_type primary_resource() const;
     virtual int       primary_role() const;
             void      create_talents();
 
@@ -293,7 +293,7 @@ void juggernaut_guardian_t::init_actions()
 
 // juggernaut_guardian_t::primary_resource ==================================================
 
-int juggernaut_guardian_t::primary_resource() const
+resource_type juggernaut_guardian_t::primary_resource() const
 {
     return RESOURCE_FORCE;
 }

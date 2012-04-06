@@ -93,7 +93,7 @@ struct commando_mercenary_t : public player_t
     virtual void      init_procs();
     virtual void      init_rng();
     virtual void      init_actions();
-    virtual int       primary_resource() const;
+    virtual resource_type primary_resource() const;
     virtual int       primary_role() const;
 
     virtual void init_scaling()
@@ -293,10 +293,8 @@ void commando_mercenary_t::init_actions()
 
 // commando_mercenary_t::primary_resource ==================================================
 
-int commando_mercenary_t::primary_resource() const
-{
-    return RESOURCE_FORCE;
-}
+resource_type commando_mercenary_t::primary_resource() const
+{ return RESOURCE_FORCE; }
 
 // commando_mercenary_t::primary_role ==================================================
 

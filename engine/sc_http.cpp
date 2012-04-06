@@ -45,25 +45,6 @@ struct url_cache_entry_t
 typedef std::unordered_map<std::string, url_cache_entry_t> url_db_t;
 static url_db_t url_db;
 
-// throttle =================================================================
-
-static void throttle( int seconds )
-{
-  static std::time_t last = 0;
-  while ( true )
-  {
-    std::time_t now = std::time( NULL );
-
-    if ( last + seconds <= now )
-    {
-      last = now;
-      return;
-    }
-
-    thread_t::sleep( static_cast<int>( last + seconds - now ) );
-  }
-}
-
 // cache_clear ==============================================================
 
 static void cache_clear()
@@ -612,8 +593,7 @@ void http_t::cache_save()
 bool http_t::get( std::string&       result,
                   const std::string& url,
                   cache::behavior_t  caching,
-                  const std::string& confirmation,
-                  int                throttle_seconds )
+                  const std::string& confirmation )
 {
   result.clear();
 
@@ -658,7 +638,6 @@ bool http_t::get( std::string&       result,
       return false;
 
     util_t::printf( "@" ); fflush( stdout );
-    throttle( throttle_seconds );
 
     if ( ! download( entry, encoded_url ) )
       return false;

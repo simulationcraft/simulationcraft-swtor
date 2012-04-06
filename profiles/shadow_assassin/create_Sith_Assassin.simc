@@ -1,11 +1,13 @@
-sith_assassin=Sith_Assassin_Madness
-level=50
+mrrobot=72bd51f8-fe33-461e-a0a8-ac4513000154
+name=Sith_Assassin_Madness
 talents=http://www.torhead.com/skill-calc#200McZhMZfrbRrRkMfz.1
 position=back
-Shadow_Assassin_Gear.simc
 save=Sith_Assassin_Madness.simc
 
 copy=Sith_Assassin_Deception,Sith_Assassin_Madness
-talents=http://www.torhead.com/skill-calc#2000MZhGMRkhMrtzZcMc.1
+talents=http://www.torhead.com/skill-calc#2000MZhGMRkhMrtzZf0c.1
 save=Sith_Assassin_Deception.simc
 
+copy=Sith_Assassin_Blood,Sith_Assassin_Madness
+talents=http://www.torhead.com/skill-calc#200RIMs00cZZfMfRr0kM.1
+save=Sith_Assassin_Blood.simc

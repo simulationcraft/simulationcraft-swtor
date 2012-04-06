@@ -4,38 +4,29 @@
 // ==========================================================================
 
 #include "../simulationcraft.hpp"
+#include "cons_inq.hpp"
+
+// ==========================================================================
+// Jedi Shadow | Sith Assassin
+// ==========================================================================
+
+namespace { // ANONYMOUS NAMESPACE ==========================================
 
 enum charge_type_t
 {
   CHARGE_NONE = 0, LIGHTNING_CHARGE, SURGING_CHARGE, DARK_CHARGE
 };
 
-// ==========================================================================
-// Jedi Shadow | Sith Assassin
-// ==========================================================================
-
 struct shadow_assassin_t : public player_t
 {
-  struct targetdata_t: public ::targetdata_t
+  struct targetdata_t: public cons_inq::targetdata_t
   {
-    dot_t dot_crushing_darkness;
-    dot_t dot_creeping_terror;
     dot_t dot_lightning_charge;
 
     targetdata_t( shadow_assassin_t& source, player_t& target ) :
-      ::targetdata_t( source, target ),
-      dot_crushing_darkness( "crushing_darkness", &source ),
-      dot_creeping_terror( "creeping_terror", &source ),
+      cons_inq::targetdata_t( source, target ),
       dot_lightning_charge( "lightning_charge", &source )
     {
-      add( dot_crushing_darkness );
-      alias( dot_crushing_darkness, "crushing_darkness_dot" );
-      alias( dot_crushing_darkness, "mind_crush" );
-      alias( dot_crushing_darkness, "mind_crush_dot" );
-
-      add( dot_creeping_terror );
-      alias( dot_creeping_terror, "sever_force" );
-
       add( dot_lightning_charge );
       alias( dot_lightning_charge, "lightning_discharge" );
       alias( dot_lightning_charge, "force_technique" );
@@ -72,27 +63,19 @@ struct shadow_assassin_t : public player_t
     gain_t* darkswell;
     gain_t* calculating_mind;
     gain_t* rakata_stalker_2pc;
+    gain_t* blood_of_sith;
   } gains;
 
   // Procs
   struct procs_t
   {
-    proc_t* exploitive_strikes;
     proc_t* raze;
-    proc_t* exploit_weakness;
-    proc_t* lightning_charge;
-    proc_t* surging_charge;
   } procs;
 
   // RNGs
   struct rngs_t
   {
     rng_t* chain_shock;
-    rng_t* raze;
-    rng_t* exploitive_strikes;
-    rng_t* lightning_charge;
-    rng_t* surging_charge;
-    rng_t* static_charges;
   } rngs;
 
   // Benefits
@@ -116,6 +99,7 @@ struct shadow_assassin_t : public player_t
     talent_t* thrashing_blades;
     talent_t* charge_mastery;
     talent_t* electric_execution;
+    talent_t* blood_of_sith;
 
     // Deception|Infiltration
     talent_t* insulation;
@@ -202,8 +186,9 @@ struct shadow_assassin_t : public player_t
   virtual void      init_rng();
   virtual void      init_actions();
   virtual void      init_spells();
-  virtual int       primary_resource() const;
+  virtual resource_type primary_resource() const;
   virtual int       primary_role() const;
+  virtual double    force_regen_per_second() const; // override
   virtual void      regen( timespan_t periodicity );
   virtual void      reset();
           void      create_talents();
@@ -241,18 +226,13 @@ struct shadow_assassin_t : public player_t
   }
 
   virtual double force_healing_bonus_stats() const
-  {
-    return 0;
-  }
+  { return 0; }
 
   virtual bool report_attack_type( action_t::policy_t policy )
   {
     return policy == action_t::melee_policy || policy == action_t::force_policy;
   }
 };
-
-namespace
-{ // ANONYMOUS NAMESPACE ==========================================
 
 // ==========================================================================
 // Sith assassin Abilities
@@ -293,11 +273,14 @@ struct shadow_assassin_attack_t : public shadow_assassin_action_t
       shadow_assassin_t* p = cast();
       shadow_assassin_t::targetdata_t* td = targetdata();
 
-      if ( p->talents.raze->rank() > 0 && td->dot_lightning_charge.ticking )
+      // Would it makes more sense to move this into the lightning charge callback?
+      if ( p->talents.raze->rank() > 0 && td->dot_lightning_charge.ticking && ! p -> buffs.raze->check() )
       {
-        p->buffs.raze->trigger();
-        if ( p->buffs.raze->up() )
+        if ( p->buffs.raze->trigger() )
+        {
+          p->procs.raze->occur();
           p->cooldowns.crushing_darkness->reset();
+        }
       }
 
     }
@@ -355,7 +338,7 @@ struct shadow_assassin_spell_t : public shadow_assassin_action_t
 
     shadow_assassin_t* p = cast();
 
-    if ( dd.base_min > 0 && p->buffs.recklessness->up() )
+    if ( ( dd.base_min > 0 || channeled ) && p->buffs.recklessness->up() )
       player_crit += 0.60;
   }
 
@@ -402,6 +385,13 @@ struct shadow_assassin_spell_t : public shadow_assassin_action_t
     {
       p->buffs.exploitive_strikes->trigger();
     }
+  }
+
+  virtual void last_tick( dot_t* d )
+  {
+    shadow_assassin_action_t::last_tick( d );
+    if ( channeled )
+      p() -> buffs.recklessness -> decrement();
   }
 };
 
@@ -528,7 +518,7 @@ struct force_lightning_t : public shadow_assassin_spell_t
   force_lightning_t( shadow_assassin_t* p, const std::string& n, const std::string& options_str ) :
       shadow_assassin_spell_t( n, p )
   {
-    rank_level_list = { 2, 5, 8, 11, 14, 19, 27, 39, 50};
+    rank_level_list = { 2, 5, 8, 11, 14, 19, 27, 39, 50 };
 
     parse_options( 0, options_str );
 
@@ -537,7 +527,7 @@ struct force_lightning_t : public shadow_assassin_spell_t
 
     base_cost = 30.0;
     if ( player -> set_bonus.rakata_force_masters -> two_pc() )
-    base_cost -= 2.0;
+      base_cost -= 2.0;
     range = 10.0;
     num_ticks = 3;
     base_tick_time = from_seconds( 1.0 );
@@ -557,7 +547,7 @@ struct crushing_darkness_t : public shadow_assassin_spell_t
     crushing_darkness_dot_t( shadow_assassin_t* p, const std::string& n ) :
         shadow_assassin_spell_t( n, p, SCHOOL_KINETIC )
     {
-      rank_level_list = { 14, 19, 30, 41, 50};
+      rank_level_list = { 14, 19, 30, 41, 50 };
 
       td.standardhealthpercentmin = td.standardhealthpercentmax = .0295;
       td.power_mod = 0.295;
@@ -791,7 +781,6 @@ struct discharge_t: public shadow_assassin_spell_t
 
       background = true;
 
-      base_multiplier *= 1 + p->talents.crackling_charge->rank() * 0.08;
       player_multiplier += p->buffs.static_charges->stack() * 0.06;
       crit_bonus += p->talents.crackling_blasts->rank() * 0.10;
     }
@@ -931,7 +920,6 @@ struct dark_charge_t : public apply_charge_t
 
 struct low_slash_t : public shadow_assassin_attack_t
 {
-
   low_slash_t( shadow_assassin_t* p, const std::string& options_str ) :
       shadow_assassin_attack_t( "low_slash", p, SCHOOL_KINETIC )
   {
@@ -1250,6 +1238,7 @@ struct saber_strike_t : public shadow_assassin_attack_t
     base_cost = 0;
     range = 4.0;
 
+    weapon = &( player->main_hand_weapon );
     weapon_multiplier = -.066;
     dd.power_mod = .33;
 
@@ -1352,13 +1341,13 @@ struct thrash_t : public shadow_assassin_attack_t
 
 // Action Callbacks ( Charge procs )
 
-// Lightning Charge | Force Technique ===========
+// Lightning Charge | Force Technique =======================================
 
 class shadow_assassin_action_callback_t : public action_callback_t
 {
 public:
   shadow_assassin_action_callback_t( shadow_assassin_t* player ) :
-    action_callback_t( player -> sim, player )
+    action_callback_t( player )
   {}
 
   shadow_assassin_t* cast() const
@@ -1424,7 +1413,7 @@ struct lightning_charge_callback_t : public shadow_assassin_action_callback_t
   }
 };
 
-// Surging Charge | Shadow Technique ========================
+// Surging Charge | Shadow Technique ========================================
 
 struct surging_charge_callback_t : public shadow_assassin_action_callback_t
 {
@@ -1518,7 +1507,7 @@ struct surging_charge_callback_t : public shadow_assassin_action_callback_t
   }
 };
 
-// Dark Charge |  ===========
+// Dark Charge | Combat Technique ===========================================
 
 struct dark_charge_callback_t : public shadow_assassin_action_callback_t
 {
@@ -1546,7 +1535,7 @@ struct dark_charge_callback_t : public shadow_assassin_action_callback_t
   dark_charge_callback_t( shadow_assassin_t* p ) :
     shadow_assassin_action_callback_t( p )
   {
-    const char* name = p->type == SITH_ASSASSIN ? "dark_charge" : "force_technique";
+    const char* name = p->type == SITH_ASSASSIN ? "dark_charge" : "combat_technique";
     rng_dark_charge = p->get_rng( name );
     dark_charge_damage_proc = new dark_charge_spell_t( p, name );
   }
@@ -1647,7 +1636,7 @@ action_t* shadow_assassin_t::create_action( const std::string& name,
   return player_t::create_action( name, options_str );
 }
 
-// shadow_assassin_t::init_talents =====================================================
+// shadow_assassin_t::init_talents ==========================================
 
 void shadow_assassin_t::init_talents()
 {
@@ -1657,6 +1646,7 @@ void shadow_assassin_t::init_talents()
   talents.thrashing_blades      = find_talent( "Thrashing Blades" );
   talents.charge_mastery        = find_talent( "Charge Mastery" );
   talents.electric_execution    = find_talent( "Electric Execution" );
+  talents.blood_of_sith         = find_talent( "Blood of Sith" );
 
   // Deception|Infiltration
   talents.insulation            = find_talent( "Insulation" );
@@ -1701,7 +1691,7 @@ void shadow_assassin_t::init_talents()
   talents.creeping_terror       = find_talent( "Creeping Terror" );
 }
 
-// shadow_assassin_t::init_base ========================================================
+// shadow_assassin_t::init_base =============================================
 
 void shadow_assassin_t::init_base()
 {
@@ -1714,7 +1704,7 @@ void shadow_assassin_t::init_base()
   resource_base[RESOURCE_FORCE] += 100 + talents.deceptive_power->rank() * 10;
 }
 
-// shadow_assassin_t::init_benefits =======================================================
+// shadow_assassin_t::init_benefits =========================================
 
 void shadow_assassin_t::init_benefits()
 {
@@ -1734,7 +1724,7 @@ void shadow_assassin_t::init_benefits()
   }
 }
 
-// shadow_assassin_t::init_buffs =======================================================
+// shadow_assassin_t::init_buffs ============================================
 
 void shadow_assassin_t::init_buffs()
 {
@@ -1782,6 +1772,7 @@ void shadow_assassin_t::init_gains()
   gains.parasitism         = get_gain( "parasitism"         );
   gains.calculating_mind   = get_gain( "calculating_mind"   );
   gains.rakata_stalker_2pc = get_gain( "rakata_stalker_2pc" );
+  gains.blood_of_sith      = get_gain( "blood_of_sith" );
 }
 
 // shadow_assassin_t::init_procs =======================================================
@@ -1790,11 +1781,7 @@ void shadow_assassin_t::init_procs()
 {
   player_t::init_procs();
 
-  procs.exploitive_strikes  = get_proc( "exploitive_strikes" );
-  procs.exploit_weakness    = get_proc( "exploit_weakness"   );
-  procs.raze                = get_proc( "raze"               );
-  procs.lightning_charge    = get_proc( "lightning_charge"   );
-  procs.surging_charge      = get_proc( "surging_charge"     );
+  procs.raze = get_proc( "raze" );
 }
 
 // shadow_assassin_t::init_rng =========================================================
@@ -1803,12 +1790,7 @@ void shadow_assassin_t::init_rng()
 {
   player_t::init_rng();
 
-  rngs.chain_shock        = get_rng( "chain_shock"         );
-  rngs.raze               = get_rng( "raze"                );
-  rngs.exploitive_strikes = get_rng( "exploitive_strikes " );
-  rngs.lightning_charge   = get_rng( "lightning_charge"    );
-  rngs.surging_charge     = get_rng( "surging_charge"      );
-  rngs.static_charges     = get_rng( "static_charges"      );
+  rngs.chain_shock = get_rng( "chain_shock" );
 }
 
 // shadow_assassin_t::init_actions =====================================================
@@ -1861,6 +1843,9 @@ void shadow_assassin_t::init_actions()
       if ( !talents.surging_charge->rank() )
         action_list_str += "/force_breach,if=!dot.force_technique.ticking";
 
+      if ( talents.induction->rank() )
+        action_list_str += "/project,if=buff.circling_shadows.stack=2";
+
       action_list_str += "/spinning_strike";
 
       if ( talents.creeping_terror->rank() )
@@ -1878,17 +1863,12 @@ void shadow_assassin_t::init_actions()
 
       if ( talents.unearthed_knowledge->rank() )
         action_list_str += "/project,if=buff.twin_disciplines.down";
-      if ( talents.induction->rank() )
-        action_list_str += "/project,if=buff.circling_shadows.stack=2";
 
       if ( talents.voltaic_slash->rank() )
-        action_list_str += "/clairvoyant_strike"; // TESTME: Does this need a cap threshold like thrash has?
+        action_list_str += "/clairvoyant_strike";
       else
-      {
-        action_list_str += "/double_strike,if=force>70";
-        if ( talents.dark_embrace->rank() )
-          action_list_str += "-12*buff.shadows_respite.up";
-      }
+        action_list_str += "/double_strike";
+      action_list_str += ",if=force>45";
 
       action_list_str += "/saber_strike";
     }
@@ -1929,6 +1909,9 @@ void shadow_assassin_t::init_actions()
       if ( !talents.surging_charge->rank() )
         action_list_str += "/discharge,if=!dot.lightning_discharge.ticking";
 
+      if ( talents.induction->rank() )
+        action_list_str += "/shock,if=buff.induction.stack=2";
+
       action_list_str += "/assassinate";
 
       if ( talents.creeping_terror->rank() )
@@ -1946,17 +1929,12 @@ void shadow_assassin_t::init_actions()
 
       if ( talents.unearthed_knowledge->rank() )
         action_list_str += "/shock,if=buff.unearthed_knowledge.down";
-      if ( talents.induction->rank() )
-        action_list_str += "/shock,if=buff.induction.stack=2";
 
       if ( talents.voltaic_slash->rank() )
-        action_list_str += "/voltaic_slash"; // TESTME: Does this need a cap threshold like thrash has?
+        action_list_str += "/voltaic_slash";
       else
-      {
-        action_list_str += "/thrash,if=force>70";
-        if ( talents.dark_embrace->rank() )
-          action_list_str += "-12*buff.dark_embrace.up";
-      }
+        action_list_str += "/thrash";
+      action_list_str += ",if=force>45";
 
       action_list_str += "/saber_strike";
     }
@@ -1965,7 +1943,7 @@ void shadow_assassin_t::init_actions()
   player_t::init_actions();
 }
 
-// shadow_assassin_t::init_spells ==================================================
+// shadow_assassin_t::init_spells ===========================================
 
 void shadow_assassin_t::init_spells()
 {
@@ -1987,14 +1965,12 @@ void shadow_assassin_t::init_spells()
   register_spell_callback( RESULT_HIT_MASK, new duplicity_callback_t( this ) );
 }
 
-// shadow_assassin_t::primary_resource ==================================================
+// shadow_assassin_t::primary_resource ======================================
 
-int shadow_assassin_t::primary_resource() const
-{
-  return RESOURCE_FORCE;
-}
+resource_type shadow_assassin_t::primary_resource() const
+{ return RESOURCE_FORCE; }
 
-// shadow_assassin_t::primary_role ==================================================
+// shadow_assassin_t::primary_role ==========================================
 
 int shadow_assassin_t::primary_role() const
 {
@@ -2014,21 +1990,34 @@ int shadow_assassin_t::primary_role() const
   return ROLE_HYBRID;
 }
 
-// shadow_assassin_t::regen ==================================================
+// shadow_assassin_t::force_regen_per_second ================================
+
+double shadow_assassin_t::force_regen_per_second() const
+{
+  double m = talents.blood_of_sith -> rank() * 0.1;
+  if (  buffs.dark_embrace -> check() )
+    m += talents.dark_embrace -> rank() * 0.25;
+
+  return player_t::force_regen_per_second()
+      + base_force_regen_per_second * m;
+}
+
+// shadow_assassin_t::regen =================================================
 
 void shadow_assassin_t::regen( timespan_t periodicity )
 {
-  player_t::regen( periodicity );
+  double force_regen = to_seconds( periodicity ) * base_force_regen_per_second;
 
-  if ( buffs.dark_embrace->up() )
-  {
-    double force_regen = to_seconds( periodicity ) * force_regen_per_second() * buffs.dark_embrace->check() * talents.dark_embrace->rank()
-        * 0.25;
-    resource_gain( RESOURCE_FORCE, force_regen, gains.dark_embrace );
-  }
+  if ( buffs.dark_embrace -> up() )
+    resource_gain( RESOURCE_FORCE, force_regen * talents.dark_embrace -> rank() * 0.25, gains.dark_embrace );
+
+  if ( talents.blood_of_sith -> rank() )
+    resource_gain( RESOURCE_FORCE, force_regen * talents.blood_of_sith -> rank() * 0.1, gains.blood_of_sith );
+
+  player_t::regen( periodicity );
 }
 
-// shadow_assassin_t::reset ===========================================================
+// shadow_assassin_t::reset =================================================
 
 void shadow_assassin_t::reset()
 {
@@ -2038,7 +2027,7 @@ void shadow_assassin_t::reset()
   stealth_tag = false;
 }
 
-// shadow_assassin_t::create_talents ==================================================
+// shadow_assassin_t::create_talents ========================================
 
 void shadow_assassin_t::create_talents()
 {
