@@ -12,11 +12,10 @@ struct js_node_t
   std::vector<js_node_t*> children;
 
   js_node_t() = default;
-  js_node_t( const js_node_t& ) = default;
   js_node_t( js_node_t&& ) = default;
 
   template <typename Name>
-  js_node_t( Name&& n ) :
+  explicit js_node_t( Name&& n ) :
     name( std::forward<Name>( n ) )
   {}
 
