@@ -483,11 +483,15 @@ struct noble_sacrifice_t : public sage_sorcerer_spell_t
 
     sage_sorcerer_t* p = cast();
 
-    double health_loss = p -> buffs.resplendence -> up() ? 0 : p -> resource_max[ RESOURCE_HEALTH ] * ( 0.15 - p -> talents.valiance -> rank() * 0.01 );
+    double health_loss = 0;
+    if ( p -> ptr || ! p -> buffs.resplendence -> check() )
+      health_loss = p -> resource_max[ RESOURCE_HEALTH ] *
+          ( 0.15 - p -> talents.valiance -> rank() * ( p -> ptr ? 0.02 : 0.01 ) );
+
     p -> resource_loss( RESOURCE_HEALTH, health_loss, p -> gains.noble_sacrifice_health );
     p -> resource_gain( RESOURCE_FORCE, p -> resource_max[ RESOURCE_FORCE ] * 0.08 , p -> gains.noble_sacrifice_power );
 
-    if ( ! p -> buffs.resplendence -> check() )
+    if ( ! p -> buffs.resplendence -> up() )
       p -> buffs.noble_sacrifice -> trigger();
   }
 };
