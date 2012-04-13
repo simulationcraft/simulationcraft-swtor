@@ -791,16 +791,18 @@ public:
   void dispose() { dispose_(); Container::clear(); }
 };
 
+// timespan_t ===============================================================
+
 #if defined(SC_USE_INTEGER_TIME)
 typedef std::chrono::milliseconds timespan_t;
 #else
 typedef std::chrono::duration<double> timespan_t;
 #endif
 
-// libc++ in GCC 4.6 has a bug in std::chrono::duration::min().
-// It's returning std::numeric_limits<>::min() when it should
-// return std::numeric_limits<>::lowest(). Use timespan_t_min()
-// in place of timespan_t_min() as a workaround.
+// libc++ in GCC 4.6 has a bug in std::chrono::duration::min(). It's
+// returning std::numeric_limits<duration::rep>::min() when it should return
+// std::numeric_limits<duration::rep>::lowest(). Use timespan_t_min() in
+// place of timespan_t::min() as a workaround.
 constexpr timespan_t timespan_t_min()
 { return timespan_t( std::numeric_limits<timespan_t::rep>::lowest() ); }
 
