@@ -94,48 +94,6 @@ buff_t::buff_t( actor_pair_t       p,
   init();
 }
 
-
-// buff_t::parse_options ====================================================
-
-void buff_t::parse_options( va_list vap )
-{
-  while ( true )
-  {
-    const char* parm = ( const char * ) va_arg( vap, const char * );
-    if ( ! parm ) break;
-
-    if ( ! strcmp( parm, "stacks" ) )
-    {
-      max_stack = ( int ) va_arg( vap, int );
-    }
-    else if ( ! strcmp( parm, "chance" ) )
-    {
-      default_chance = ( double ) va_arg( vap, double );
-    }
-    else if ( ! strcmp( parm, "duration" ) )
-    {
-      buff_duration = from_seconds( ( double ) va_arg( vap, double ) );
-    }
-    else if ( ! strcmp( parm, "cooldown" ) )
-    {
-      buff_cooldown = from_seconds( ( double ) va_arg( vap, double ) );
-    }
-    else if ( ! strcmp( parm, "reverse" ) )
-    {
-      reverse = va_arg( vap, int ) ? true : false;
-    }
-    else if ( ! strcmp( parm, "quiet" ) )
-    {
-      quiet = va_arg( vap, int ) ? true : false;
-    }
-    else if ( ! strcmp( parm, "rng" ) )
-    {
-      rt = ( rng_type ) va_arg( vap, int );
-    }
-  }
-  va_end( vap );
-}
-
 // buff_t::init_buff_shared =============================================================
 
 void buff_t::init_buff_shared()

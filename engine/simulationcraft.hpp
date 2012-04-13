@@ -1407,7 +1407,6 @@ struct buff_t
   void init_buff_shared();
   void init();
   void init_buff_t_();
-  virtual void parse_options( va_list vap );
   virtual void combat_begin();
   virtual void combat_end();
 
