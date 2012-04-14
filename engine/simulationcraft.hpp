@@ -1709,8 +1709,8 @@ private:
   rng_t* rng_list;
   int deterministic_roll;
 public:
-  rng_t* rng;
-  rng_t* deterministic_rng;
+  std::unique_ptr<rng_t> rng;
+  std::unique_ptr<rng_t> deterministic_rng;
   int smooth_rng, average_range, average_gauss;
 
   rng_t* default_rng() const { return default_rng_; }
@@ -1718,18 +1718,24 @@ public:
   bool      roll( double chance ) const;
   double    range( double min, double max );
   double    gauss( double mean, double stddev );
-  timespan_t gauss( timespan_t mean, timespan_t stddev );
   double    real() const;
   rng_t*    get_rng( const std::string& name, rng_type type=RNG_DEFAULT );
-
+  timespan_t gauss( timespan_t mean, timespan_t stddev )
+  {
+    return TIMESPAN_FROM_NATIVE_VALUE( gauss( TIMESPAN_TO_NATIVE_VALUE( mean ),
+                                              TIMESPAN_TO_NATIVE_VALUE( stddev ) ) );
+  }
 
   // Timing Wheel Event Management
-  event_t** timing_wheel;
-  int    wheel_seconds, wheel_size, wheel_mask, timing_slice;
+private:
+  std::vector<event_t*> timing_wheel;
+public:
+  int    wheel_seconds;
+  size_t wheel_size, wheel_mask, timing_slice;
   double wheel_granularity;
 
   // Raid Events
-  std::vector<raid_event_t*> raid_events;
+  auto_dispose<std::vector<raid_event_t*>> raid_events;
   std::string raid_events_str;
   std::string fight_style;
 
@@ -1763,10 +1769,10 @@ public:
   cooldown_t* cooldown_list;
 
   // Reporting
-  report_t*  report;
-  scaling_t* scaling;
-  plot_t*    plot;
-  reforge_plot_t* reforge_plot;
+  std::unique_ptr<report_t>  report;
+  std::unique_ptr<scaling_t> scaling;
+  std::unique_ptr<plot_t>    plot;
+  std::unique_ptr<reforge_plot_t> reforge_plot;
   timespan_t elapsed_cpu;
   double     iteration_dmg, iteration_heal;
   sample_data_t raid_dps, total_dmg, raid_hps, total_heal, simulation_length;
@@ -1802,7 +1808,7 @@ public:
 
   // Multi-Threading
   int threads;
-  std::vector<sim_t*> children;
+  auto_dispose<std::vector<sim_t*>> children;
   int thread_index;
   virtual void run() { iterate(); }
 
@@ -2297,9 +2303,9 @@ struct player_t : public noncopyable
 
 
   // Talent Parsing
-  talent_tree_type tree_type[ MAX_TALENT_TREES ];
-  int talent_tab_points[ MAX_TALENT_TREES ];
-  std::vector<talent_t*> talent_trees[ MAX_TALENT_TREES ];
+  std::array<talent_tree_type,MAX_TALENT_TREES> tree_type;
+  std::array<int,MAX_TALENT_TREES> talent_tab_points;
+  std::array<auto_dispose<std::vector<talent_t*>>,MAX_TALENT_TREES> talent_trees;
 
   struct talentinfo_t
   {
@@ -2419,7 +2425,7 @@ public:
   timespan_t cast_delay_occurred;
 
   // Callbacks
-  std::vector<action_callback_t*> all_callbacks;
+  auto_dispose<std::vector<action_callback_t*>> all_callbacks;
   std::vector<action_callback_t*> attack_callbacks[ RESULT_MAX ];
   std::vector<action_callback_t*>  spell_callbacks[ RESULT_MAX ];
   std::vector<action_callback_t*>  heal_callbacks[ RESULT_MAX ];
@@ -2604,7 +2610,7 @@ public:
 
   const size_t targetdata_id;
 private:
-  std::vector<targetdata_t*> targetdata;
+  auto_dispose<std::vector<targetdata_t*>> targetdata;
   std::vector<targetdata_t*> sourcedata;
 
 public:

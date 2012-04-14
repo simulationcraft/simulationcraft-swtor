@@ -124,7 +124,7 @@ void buff_t::init_buff_shared()
   expiration = 0;
   delay = 0;
 
-  buff_duration = std::min( buff_duration, from_seconds( sim -> wheel_seconds - 2.0 ) );
+  buff_duration = std::min( buff_duration, from_seconds( sim -> wheel_seconds - 2 ) );
 
   if ( max_stack >= 0 )
   {

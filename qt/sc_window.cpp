@@ -427,9 +427,8 @@ SimulationCraftWindow::SimulationCraftWindow( QWidget *parent )
   : QWidget( parent ),
     historyWidth( 0 ), historyHeight( 0 ), historyMaximized( 1 ),
     mrRobotBuilderView( 0 ), visibleWebView( 0 ), cookieJar( 0 ),
-    sim( 0 ), simPhase( "%p%" ), simProgress( 100 ), simResults( 0 )
+    sim(), simPhase( "%p%" ), simProgress( 100 ), simResults( 0 )
 {
-  cmdLineText = "";
 #ifndef Q_WS_MAC
   logFileText = "log.txt";
   resultsFileText = "results.html";
@@ -1073,7 +1072,7 @@ sim_t* SimulationCraftWindow::initSim()
 {
   if ( ! sim )
   {
-    sim = new sim_t();
+    sim.reset( new sim_t );
     sim -> input_is_utf8 = true; // Presume GUI input is always UTF-8
     sim -> output_file = fopen( "simc_log.txt", "w" );
     sim -> report_progress = 0;
@@ -1082,7 +1081,7 @@ sim_t* SimulationCraftWindow::initSim()
 #endif
     sim -> parse_option( "debug", ( (   debugChoice->currentIndex() == 2 ) ? "1" : "0" ) );
   }
-  return sim;
+  return get_pointer( sim );
 }
 
 void SimulationCraftWindow::deleteSim()
@@ -1090,8 +1089,7 @@ void SimulationCraftWindow::deleteSim()
   if ( sim )
   {
     fclose( sim -> output_file );
-    delete sim;
-    sim = 0;
+    sim.reset();
     QFile logFile( "simc_log.txt" );
     logFile.open( QIODevice::ReadOnly );
     logText->appendPlainText( logFile.readAll() );

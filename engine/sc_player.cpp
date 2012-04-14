@@ -404,7 +404,6 @@ player_t::player_t( sim_t*             s,
 
 player_t::~player_t()
 {
-  dispose( targetdata );
   dispose_list( action_list );
   dispose_list( proc_list );
   dispose_list( gain_list );
@@ -418,13 +417,7 @@ player_t::~player_t()
 
   // NOTE: Must defend against multiple free()ing, since the same callback
   //       pointer is often registered multiple times.
-  dispose( boost::sort( all_callbacks ) | boost::adaptors::uniqued );
-
-  for ( size_t i=0; i < sizeof_array( talent_trees ); i++ )
-    dispose( talent_trees[ i ] );
-
-  //dispose( glyphs );
-  //dispose( spell_list );
+  assert( boost::unique( boost::sort( all_callbacks ) ) == all_callbacks.end() );
 }
 
 // player_t::init_talent_tree ===============================================
@@ -3466,15 +3459,13 @@ benefit_t* player_t::get_benefit( const std::string& name )
 
 uptime_t* player_t::get_uptime( const std::string& name )
 {
-  uptime_t* u=0;
-
-  for ( u = uptime_list; u; u = u -> next )
+  for ( uptime_t* u = uptime_list; u; u = u -> next )
   {
     if ( u -> name_str == name )
       return u;
   }
 
-  u = new uptime_t( sim, name );
+  uptime_t* u = new uptime_t( sim, name );
 
   uptime_t** tail = &uptime_list;
 
@@ -3495,26 +3486,20 @@ rng_t* player_t::get_rng( const std::string& n, rng_type type )
 {
   assert( sim -> rng );
 
-  if ( type == RNG_GLOBAL ) return sim -> rng;
-  if ( type == RNG_DETERMINISTIC ) return sim -> deterministic_rng;
+  if ( type == RNG_GLOBAL ) return get_pointer( sim -> rng );
+  if ( type == RNG_DETERMINISTIC ) return get_pointer( sim -> deterministic_rng );
 
   if ( ! sim -> smooth_rng ) return sim -> default_rng();
 
-  rng_t* rng=0;
-
-  for ( rng = rng_list; rng; rng = rng -> next )
+  for ( rng_t* rng = rng_list; rng; rng = rng -> next )
   {
     if ( rng -> name_str == n )
       return rng;
   }
 
-  if ( ! rng )
-  {
-    rng = rng_t::create( sim, n, type );
-    rng -> next = rng_list;
-    rng_list = rng;
-  }
-
+  rng_t* rng = rng_t::create( sim, n, type );
+  rng -> next = rng_list;
+  rng_list = rng;
   return rng;
 }
 

@@ -43,14 +43,7 @@ void event_freelist_t::deallocate( void* p )
 // event_freelist_t::~event_freelist_t ======================================
 
 event_freelist_t::~event_freelist_t()
-{
-  while ( list )
-  {
-    free_event_t* p = list;
-    list = list -> next;
-    delete p;
-  }
-}
+{ dispose_list( list ); }
 
 // ==========================================================================
 // Event

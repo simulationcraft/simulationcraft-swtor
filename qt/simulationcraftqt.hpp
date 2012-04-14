@@ -166,7 +166,7 @@ public:
   ImportThread* importThread;
   SimulateThread* simulateThread;
 
-  sim_t* sim;
+  std::unique_ptr<sim_t> sim;
   std::string simPhase;
   int simProgress;
   int simResults;
