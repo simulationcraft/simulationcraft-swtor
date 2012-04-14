@@ -404,16 +404,16 @@ player_t::player_t( sim_t*             s,
 
 player_t::~player_t()
 {
-  dispose_list( action_list );
-  dispose_list( proc_list );
-  dispose_list( gain_list );
-  dispose_list( stats_list );
-  dispose_list( uptime_list );
-  dispose_list( benefit_list );
-  dispose_list( rng_list );
-  dispose_list( dot_list );
-  dispose_list( buff_list );
-  dispose_list( cooldown_list );
+  list_dispose( action_list );
+  list_dispose( proc_list );
+  list_dispose( gain_list );
+  list_dispose( stats_list );
+  list_dispose( uptime_list );
+  list_dispose( benefit_list );
+  list_dispose( rng_list );
+  list_dispose( dot_list );
+  list_dispose( buff_list );
+  list_dispose( cooldown_list );
 
   // NOTE: Must defend against multiple free()ing, since the same callback
   //       pointer is often registered multiple times.

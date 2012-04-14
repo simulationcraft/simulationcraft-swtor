@@ -737,11 +737,11 @@ sim_t::~sim_t()
 {
   flush_events();
 
-  dispose_list( target_list );
-  dispose_list( player_list );
-  dispose_list( rng_list );
-  dispose_list( buff_list );
-  dispose_list( cooldown_list );
+  list_dispose( target_list );
+  list_dispose( player_list );
+  list_dispose( rng_list );
+  list_dispose( buff_list );
+  list_dispose( cooldown_list );
 }
 
 // sim_t::add_event =========================================================

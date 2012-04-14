@@ -706,21 +706,6 @@ inline auto dispose( Range&& r ) -> decltype( std::forward<Range>( r ) )
   return dispose( std::forward<Range>( r ), std::default_delete<value_type>() );
 }
 
-template <typename T, typename D>
-void dispose_list( T* t, D disposer )
-{
-  while ( t )
-  {
-    T* tmp = t;
-    t = t -> next;
-    disposer( tmp );
-  }
-}
-
-template <typename T>
-inline void dispose_list( T* t )
-{ dispose_list( t, std::default_delete<T>() ); }
-
 template <unsigned HW, typename Fwd, typename Out>
 void sliding_window_average( Fwd first, Fwd last, Out out )
 {
@@ -795,6 +780,23 @@ public:
   ~auto_dispose() { dispose_(); }
   void dispose() { dispose_(); Container::clear(); }
 };
+
+// Generic list operations ==================================================
+
+template <typename T, typename D>
+void list_dispose( T* t, D disposer )
+{
+  while ( t )
+  {
+    T* tmp = t;
+    t = t -> next;
+    disposer( tmp );
+  }
+}
+
+template <typename T>
+inline void list_dispose( T* t )
+{ list_dispose( t, std::default_delete<T>() ); }
 
 // timespan_t ===============================================================
 
