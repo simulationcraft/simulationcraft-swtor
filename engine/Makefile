@@ -25,8 +25,25 @@ CPP_FLAGS += -m64
 LINK_FLAGS+= -m64
 endif
 
+# Windows platform with MinGW32
+ifdef SystemRoot
+MODULE_EXT = .exe
+CPP_FLAGS += -DUNICODE
+LINK_LIBS  = -lws2_32 -lwininet
+ifeq ($(NO_STATIC),)
+LINK_FLAGS += -static
+endif
+COPY       = copy
+REMOVE     = del /f
+PATHSEP    = //
+AR         = ar
+# MinGW W32
+ifeq (32,${BITS})
+CPP_FLAGS += -malign-double
+endif
+
 # Any UNIX platform
-ifeq (UNIX,${OS})
+else
 LINK_LIBS += -lpthread
 AR         = ar
 COPY       = cp
@@ -39,24 +56,6 @@ endif
 ifeq (i686,${HOSTTYPE})
 CPP_FLAGS  += -malign-double
 endif
-endif
-endif
-
-# Windows platform with MinGW32
-ifeq (WINDOWS,${OS})
-MODULE_EXT = .exe
-CPP_FLAGS += -DUNICODE
-LINK_LIBS  = -lws2_32 -lwininet
-ifeq ($(NO_STATIC),)
-LINK_FLAGS += -static
-endif
-COPY       = copy
-REMOVE     = del /f
-PATHSEP    = \\
-AR         = ar
-# MinGW W32
-ifeq (32,${BITS})
-CPP_FLAGS += -malign-double
 endif
 endif
 
