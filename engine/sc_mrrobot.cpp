@@ -25,12 +25,12 @@ const base36_t::encoding_t talent_encoding =
 
 const base36_t decoder( talent_encoding );
 
-void parse_profession( js_node_t* profile,
+void parse_profession( js::node_t* profile,
                        const std::string& path,
                        std::string& player_profession_string )
 {
   std::string crafting_skill;
-  if ( js_t::get_value( crafting_skill, profile, path ) )
+  if ( profile -> get( path, crafting_skill ) )
   {
     util_t::format_name( crafting_skill );
     if ( ! player_profession_string.empty() )
@@ -56,10 +56,10 @@ void parse_skill_tree( std::vector<talent_t*>& tree, std::string& s )
   }
 }
 
-void parse_skills( player_t* p, js_node_t* profile )
+void parse_skills( player_t* p, js::node_t* profile )
 {
   std::string skill_string;
-  if ( !js_t::get_value( skill_string, profile, "SkillString" ) )
+  if ( !profile -> get( "SkillString", skill_string ) )
     return;
 
   std::vector<std::string> tree_strings = split( skill_string, '-' );
@@ -132,7 +132,7 @@ weapon_type decode_weapon_type( const std::string& s )
 
 // decode_stats =============================================================
 
-std::string decode_stats( js_node_t* node )
+std::string decode_stats( js::node_t* node )
 {
   static const struct {
     const char* name;
@@ -169,7 +169,7 @@ std::string decode_stats( js_node_t* node )
   for ( auto const& i : stat_mapping )
   {
     int value;
-    if ( ! js_t::get_value( value, node, i.name ) )
+    if ( ! node -> get( i.name, value ) )
       continue;
     if ( first )
       first = false;
@@ -183,15 +183,15 @@ std::string decode_stats( js_node_t* node )
 
 // parse_items ==============================================================
 
-void parse_items( player_t* p, js_node_t* items )
+void parse_items( player_t* p, js::node_t* items )
 {
   if ( !items ) return;
 
-  for ( js_node_t* item : js_t::children( items ) )
+  for ( js::node_t* item : *items )
   {
     std::stringstream item_encoding;
 
-    std::string slot_name = js_t::get_name( item );
+    std::string slot_name = item ->name();
     slot_type slot = translate_slot_name( slot_name );
     if ( slot == SLOT_INVALID )
     {
@@ -200,7 +200,7 @@ void parse_items( player_t* p, js_node_t* items )
     }
 
     std::string name;
-    if ( ! js_t::get_value( name, item, "Name" ) )
+    if ( ! item -> get( "Name", name ) )
     {
       // FIXME: Report weirdness.
       continue;
@@ -209,40 +209,40 @@ void parse_items( player_t* p, js_node_t* items )
 
 #if 0
     int id;
-    if ( js_t::get_value( level, item, "Id" ) )
+    if ( item -> get( "Id", level ) )
       item_encoding << ",id=" << id;
 #endif
 
     int level;
-    if ( js_t::get_value( level, item, "ItemLevel" ) )
+    if ( item -> get( "ItemLevel", level ) )
       item_encoding << ",ilevel=" << level;
 
     std::string quality;
-    if ( js_t::get_value( quality, item, "Quality" ) )
+    if ( item -> get( "Quality", quality ) )
       item_encoding << ",quality=" << util_t::format_name( quality );
 
     if ( slot == SLOT_MAIN_HAND || slot == SLOT_OFF_HAND )
     {
       std::string weapon_type_str;
       weapon_type wt = WEAPON_NONE;
-      if ( js_t::get_value( weapon_type_str, item, "WeaponType" ) )
+      if ( item -> get( "WeaponType", weapon_type_str ) )
       {
         wt = decode_weapon_type( weapon_type_str );
         if ( wt != WEAPON_NONE )
         {
           item_encoding << ",weapon=" << util_t::weapon_type_string( wt );
           int value;
-          js_node_t* dmg = js_t::get_node( item, "Stats/MinDamage" );
-          if ( dmg && js_t::get_value( value, dmg ) )
+          js::node_t* dmg = item -> find( "Stats/MinDamage" );
+          if ( dmg && dmg -> get( value ) )
             item_encoding << '_' << value << "min";
-          dmg = js_t::get_node( item, "Stats/MaxDamage" );
-          if ( dmg && js_t::get_value( value, dmg ) )
+          dmg = item -> find( "Stats/MaxDamage" );
+          if ( dmg && dmg -> get( value ) )
             item_encoding << '_' << value << "max";
         }
       }
     }
 
-    if ( js_node_t* stats = js_t::get_child( item, "Stats" ) )
+    if ( js::node_t* stats = item -> get_child( "Stats" ) )
     {
       std::string s = decode_stats( stats );
       if ( ! s.empty() )
@@ -255,7 +255,7 @@ void parse_items( player_t* p, js_node_t* items )
 
 // parse_datacrons ==========================================================
 
-void parse_datacrons( player_t* p, js_node_t* datacrons )
+void parse_datacrons( player_t* p, js::node_t* datacrons )
 {
   static const struct datacron_stats
   {
@@ -348,10 +348,10 @@ void parse_datacrons( player_t* p, js_node_t* datacrons )
   std::array<int,ATTRIBUTE_MAX> attributes;
   boost::fill( attributes, 0 );
 
-  for ( js_node_t* node : js_t::children( datacrons ) )
+  for ( js::node_t* node : *datacrons )
   {
     int id;
-    if ( js_t::get_value( id, node ) )
+    if ( node -> get( id ) )
     {
       for ( auto const& d : all_datacrons )
       {
@@ -401,7 +401,7 @@ bool download_item_data( item_t& item, item_info_t& item_data,
   if ( ! DEBUG_ITEMS )
     return false;
 
-  js_node_t* js = download_id( item.sim, item.sim -> default_region_str, item_id, caching );
+  js::node_t* js = download_id( item.sim, item.sim -> default_region_str, item_id, caching );
   if ( ! js )
   {
     if ( caching != cache::ONLY )
@@ -411,93 +411,93 @@ bool download_item_data( item_t& item, item_info_t& item_data,
     }
     return false;
   }
-  if ( item.sim -> debug ) js_t::print( js, item.sim -> output_file );
+  if ( item.sim -> debug ) js::print( js, item.sim -> output_file );
 
   try
   {
     {
       int id;
-      if ( ! js_t::get_value( id, js, "id" ) ) throw( "id" );
+      if ( ! js -> get( "id", id ) ) throw( "id" );
       item_data.id = id;
     }
 
-    if ( ! js_t::get_value( item_data.name_str, js, "name" ) ) throw( "name" );
+    if ( ! js -> get( "name", item_data.name_str ) ) throw( "name" );
     item_data.name = item_data.name_str.c_str();
 
-    if ( js_t::get_value( item_data.icon_str, js, "icon" ) )
+    if ( js -> get( "icon", item_data.icon_str ) )
       item_data.icon = item_data.icon_str.c_str();
 
-    if ( ! js_t::get_value( item_data.level, js, "itemLevel" ) ) throw( "level" );
+    if ( ! js -> get( "itemLevel", item_data.level ) ) throw( "level" );
 
-    js_t::get_value( item_data.req_level, js, "requiredLevel" );
-    js_t::get_value( item_data.req_skill, js, "requiredSkill" );
-    js_t::get_value( item_data.req_skill_level, js, "requiredSkillRank" );
+    js -> get( "requiredLevel", item_data.req_level );
+    js -> get( "requiredSkill", item_data.req_skill );
+    js -> get( "requiredSkillRank", item_data.req_skill_level );
 
-    if ( ! js_t::get_value( item_data.quality, js, "quality" ) ) throw( "quality" );
+    if ( ! js -> get( "quality", item_data.quality ) ) throw( "quality" );
 
-    if ( ! js_t::get_value( item_data.inventory_type, js, "inventoryType" ) ) throw( "inventory type" );
-    if ( ! js_t::get_value( item_data.item_class, js, "itemClass" ) ) throw( "item class" );
-    if ( ! js_t::get_value( item_data.item_subclass, js, "itemSubClass" ) ) throw( "item subclass" );
-    js_t::get_value( item_data.bind_type, js, "itemBind" );
+    if ( ! js -> get( "inventoryType", item_data.inventory_type ) ) throw( "inventory type" );
+    if ( ! js -> get( "itemClass", item_data.item_class ) ) throw( "item class" );
+    if ( ! js -> get( "itemSubClass", item_data.item_subclass ) ) throw( "item subclass" );
+    js -> get( "itemBind", item_data.bind_type );
 
-    if ( js_node_t* w = js_t::get_child( js, "weaponInfo" ) )
+    if ( js::node_t* w = js::get_child( js, "weaponInfo" ) )
     {
       int minDmg, maxDmg;
       double speed;
-      if ( ! js_t::get_value( speed, w, "weaponSpeed" ) ) throw( "weapon speed" );
-      if ( ! js_t::get_value( minDmg, w, "damage/minDamage" ) ) throw( "weapon minimum damage" );
-      if ( ! js_t::get_value( maxDmg, w, "damage/maxDamage" ) ) throw( "weapon maximum damage" );
+      if ( ! w -> get( "weaponSpeed", speed ) ) throw( "weapon speed" );
+      if ( ! w -> get( "damage/minDamage", minDmg ) ) throw( "weapon minimum damage" );
+      if ( ! w -> get( "damage/maxDamage", maxDmg ) ) throw( "weapon maximum damage" );
       item_data.delay = speed * 1000.0;
       item_data.dmg_range = maxDmg - minDmg;
     }
 
-    if ( js_node_t* classes = js_t::get_child( js, "allowableClasses" ) )
+    if ( js::node_t* classes = js::get_child( js, "allowableClasses" ) )
     {
-      std::vector<js_node_t*> nodes;
-      js_t::get_children( nodes, classes );
+      std::vector<js::node_t*> nodes;
+      js::get_children( nodes, classes );
       for ( size_t i = 0, n = nodes.size(); i < n; ++i )
       {
         int cid;
-        if ( js_t::get_value( cid, nodes[ i ] ) )
+        if ( js::get_value( cid, nodes[ i ] ) )
           item_data.class_mask |= 1 << ( cid - 1 );
       }
     }
     else
       item_data.class_mask = -1;
 
-    if ( js_node_t* races = js_t::get_child( js, "allowableRaces" ) )
+    if ( js::node_t* races = js::get_child( js, "allowableRaces" ) )
     {
-      std::vector<js_node_t*> nodes;
-      js_t::get_children( nodes, races );
+      std::vector<js::node_t*> nodes;
+      js::get_children( nodes, races );
       for ( size_t i = 0, n = nodes.size(); i < n; ++i )
       {
         int rid;
-        if ( js_t::get_value( rid, nodes[ i ] ) )
+        if ( js::get_value( rid, nodes[ i ] ) )
           item_data.race_mask |= 1 << ( rid - 1 );
       }
     }
     else
       item_data.race_mask = -1;
 
-    if ( js_node_t* stats = js_t::get_child( js, "bonusStats" ) )
+    if ( js::node_t* stats = js::get_child( js, "bonusStats" ) )
     {
-      std::vector<js_node_t*> nodes;
-      js_t::get_children( nodes, stats );
+      std::vector<js::node_t*> nodes;
+      js::get_children( nodes, stats );
       for ( size_t i = 0, n = std::min( nodes.size(), sizeof_array( item_data.stat_type ) ); i < n; ++i )
       {
-        if ( ! js_t::get_value( item_data.stat_type[ i ], nodes[ i ], "stat" ) ) throw( "bonus stat" );
-        if ( ! js_t::get_value( item_data.stat_val[ i ], nodes[ i ], "amount" ) ) throw( "bonus stat amount" );
+        if ( ! nodes[ i ] -> get( "stat", item_data.stat_type[ i ] ) ) throw( "bonus stat" );
+        if ( ! nodes[ i ] -> get( "amount", item_data.stat_val[ i ] ) ) throw( "bonus stat amount" );
       }
     }
 
-    if ( js_node_t* sockets = js_t::get_node( js, "socketInfo/sockets" ) )
+    if ( js::node_t* sockets = js::get_node( js, "socketInfo/sockets" ) )
     {
-      std::vector<js_node_t*> nodes;
-      js_t::get_children( nodes, sockets );
+      std::vector<js::node_t*> nodes;
+      js::get_children( nodes, sockets );
       for ( size_t i = 0, n = std::min( nodes.size(), sizeof_array( item_data.socket_color ) ); i < n; ++i )
       {
         std::string color;
-        if ( js_t::get_value( color, nodes[ i ], "type" ) )
+        if ( nodes[ i ] -> get( "type", color ) )
         {
           if ( color == "META" )
             item_data.socket_color[ i ] = SOCKET_COLOR_META;
@@ -515,7 +515,7 @@ bool download_item_data( item_t& item, item_info_t& item_data,
       }
     }
 
-    js_t::get_value( item_data.id_set, js, "itemSet" );
+    js -> get( "itemSet", item_data.id_set );
 
     // heroic tag is not available from BCP API.
     {
@@ -542,7 +542,7 @@ bool download_item_data( item_t& item, item_info_t& item_data,
 
 // download_roster ==========================================================
 
-js_node_t* download_roster( sim_t* sim,
+js::node_t* download_roster( sim_t* sim,
                             const std::string& region,
                             const std::string& server,
                             const std::string& name,
@@ -557,8 +557,8 @@ js_node_t* download_roster( sim_t* sim,
     sim -> errorf( "BCP API: Unable to download guild %s|%s|%s.\n", region.c_str(), server.c_str(), name.c_str() );
     return 0;
   }
-  js_node_t* js = js_t::create( sim, result );
-  if ( ! js || ! ( js = js_t::get_child( js, "members" ) ) )
+  js::node_t* js = js::create( sim, result );
+  if ( ! js || ! ( js = js::get_child( js, "members" ) ) )
   {
     sim -> errorf( "BCP API: Unable to get members of guild %s|%s|%s.\n", region.c_str(), server.c_str(), name.c_str() );
     return 0;
@@ -624,17 +624,17 @@ player_t* download_player( sim_t*             sim,
   }
 
   // if ( sim -> debug ) util_t::fprintf( sim -> output_file, "%s\n%s\n", url.c_str(), result.c_str() );
-  js_node_t* profile = js_t::create( sim, result );
+  js::handle profile = js::create( sim, result );
   if ( ! profile )
   {
     sim -> errorf( "Unable to parse player profile from '%s'\n", url.c_str() );
     return nullptr;
   }
-  if ( sim -> debug ) js_t::print( profile, sim -> output_file );
+  if ( sim -> debug ) profile -> print( sim -> output_file );
 
   std::string name;
-  if ( ! js_t::get_value( name, profile, "Name" ) &&
-       ! js_t::get_value( name, profile, "ProfileName" ) )
+  if ( ! profile -> get( "Name", name ) &&
+       ! profile -> get( "ProfileName", name ) )
   {
     sim -> errorf( "Unable to extract player name from '%s'.\n", url.c_str() );
     return nullptr;
@@ -643,7 +643,7 @@ player_t* download_player( sim_t*             sim,
     sim -> current_name = name;
 
   int level;
-  if ( ! js_t::get_value( level, profile, "Level"  ) )
+  if ( ! profile -> get( "Level", level ) )
   {
     sim -> errorf( "Unable to extract player level from '%s'.\n", url.c_str() );
     return nullptr;
@@ -652,7 +652,7 @@ player_t* download_player( sim_t*             sim,
   std::string class_name;
   if ( parts.size() > 1 )
     class_name = parts[ 1 ];
-  else if ( ! js_t::get_value( class_name, profile, "AdvancedClass" ) )
+  else if ( ! profile -> get( "AdvancedClass", class_name ) )
   {
     sim -> errorf( "Unable to extract player class from '%s'.\n", url.c_str() );
     return nullptr;
@@ -661,7 +661,7 @@ player_t* download_player( sim_t*             sim,
 
   std::string race_name;
   race_type race = RACE_NONE;
-  if ( js_t::get_value( race_name, profile, "Race" ) )
+  if ( profile -> get( "Race", race_name ) )
     race = util_t::parse_race_type( race_name );
 
   player_t* p = player_t::create( sim, class_name, name, race );
@@ -675,8 +675,8 @@ player_t* download_player( sim_t*             sim,
 
   p -> level = level;
 
-  js_t::get_value( p -> server_str, profile, "Server" );
-  js_t::get_value( p -> region_str, profile, "Region" );
+  profile -> get( "Server", p -> server_str );
+  profile -> get( "Region", p -> region_str );
 
   p -> origin_str = "http://swtor.askmrrobot.com/character/" + id;
 
@@ -689,9 +689,9 @@ player_t* download_player( sim_t*             sim,
 
   parse_skills( p, profile );
 
-  parse_items( p, js_t::get_child( profile, "GearSet" ) );
+  parse_items( p, profile -> get_child( "GearSet" ) );
 
-  parse_datacrons( p, js_t::get_child( profile, "Datacrons" ) );
+  parse_datacrons( p, profile -> get_child( "Datacrons" ) );
 
   return p;
 }
@@ -815,32 +815,32 @@ bool download_slot( item_t& item,
 bool download_guild( sim_t* sim, const std::string& region, const std::string& server, const std::string& name,
                      const std::vector<int>& ranks, int player_filter, int max_rank, cache::behavior_t caching )
 {
-  js_node_t* js = download_roster( sim, region, server, name, caching );
+  js::node_t* js = download_roster( sim, region, server, name, caching );
   if ( !js ) return false;
 
   std::vector<std::string> names;
-  std::vector<js_node_t*> characters;
-  js_t::get_children( characters, js );
+  std::vector<js::node_t*> characters;
+  js::get_children( characters, js );
 
   for ( std::size_t i = 0, n = characters.size(); i < n; ++i )
   {
     int level;
-    if ( ! js_t::get_value( level, characters[ i ], "character/level" ) || level < 85 )
+    if ( ! characters[ i ] -> get( "character/level", level ) || level < 85 )
       continue;
 
     int cid;
-    if ( ! js_t::get_value( cid, characters[ i ], "character/class" ) ||
+    if ( ! characters[ i ] -> get( "character/class", cid ) ||
          ( player_filter != PLAYER_NONE && player_filter != util_t::translate_class_id( cid ) ) )
       continue;
 
     int rank;
-    if ( ! js_t::get_value( rank, characters[ i ], "rank" ) ||
+    if ( ! characters[ i ] -> get( "rank", rank ) ||
          ( ( max_rank > 0 ) && ( rank > max_rank ) ) ||
          ( ! ranks.empty() && range::find( ranks, rank ) == ranks.end() ) )
       continue;
 
     std::string cname;
-    if ( ! js_t::get_value( cname, characters[ i ], "character/name" ) ) continue;
+    if ( ! characters[ i ] -> get( "character/name", cname ) ) continue;
     names.push_back( cname );
   }
 

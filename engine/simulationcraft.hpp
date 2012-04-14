@@ -128,7 +128,7 @@ typedef std::unique_ptr<expr_t> expr_ptr;
 struct gain_t;
 struct heal_t;
 struct item_t;
-struct js_node_t;
+namespace js { class node_t; }
 struct option_t;
 struct pet_t;
 struct player_t;
@@ -4049,38 +4049,84 @@ struct xml_t
 
 // Java Script ==============================================================
 
-struct js_t
+namespace js
 {
-  static const std::string& get_name( const js_node_t* root );
-  static std::string& get_name( js_node_t* root )
-  { return const_cast<std::string&>( get_name( const_cast<const js_node_t*>( root ) ) ); }
+  class node_t
+  {
+    typedef auto_dispose<std::vector<node_t*>> child_list_t;
 
-  static const std::vector<js_node_t*>& children( const js_node_t* root );
+    std::string name_;
+    std::string value_;
+    child_list_t children_;
 
-  static const js_node_t* get_child( const js_node_t* root, const std::string& name );
-  static js_node_t* get_child( js_node_t* root, const std::string& name )
-  { return const_cast<js_node_t*>( get_child( const_cast<const js_node_t*>( root ), name ) ); }
+  public:
+    node_t() = default;
 
-  static const js_node_t* get_node ( const js_node_t* root, const std::string& path );
-  static js_node_t* get_node ( js_node_t* root, const std::string& path )
-  { return const_cast<js_node_t*>( get_node( const_cast<const js_node_t*>( root ), path ) ); }
+    template <typename Name>
+    explicit node_t( Name&& n ) :
+      name_( std::forward<Name>( n ) ) {}
 
-  static bool get_value( int&         value, const js_node_t* root );
-  static bool get_value( int&         value, const js_node_t* root, const std::string& path );
+    ~node_t();
 
-  static bool get_value( double&      value, const js_node_t* root );
-  static bool get_value( double&      value, const js_node_t* root, const std::string& path );
+    const std::string& name() const { return name_; }
+    template <typename Name> void name( Name&& n )
+    { name_ = std::forward<Name>( n ); }
 
-  static bool get_value( std::string& value, const js_node_t* root );
-  static bool get_value( std::string& value, const js_node_t* root, const std::string& path );
+    const std::string& value() const { return value_; }
+    template <typename Value> void value( Value&& v )
+    { value_ = std::forward<Value>( v ); }
 
-  static int  get_value( std::vector<std::string>& value, const js_node_t* root );
-  static int  get_value( std::vector<std::string>& value, const js_node_t* root, const std::string& path );
+    const node_t* find( const std::string& path ) const;
+    node_t* find( const std::string& path )
+    { return const_cast<node_t*>( const_cast<const node_t&>( *this ).find( path ) ); }
 
-  static js_node_t* create( sim_t* sim, const std::string& input );
-  static js_node_t* create( sim_t* sim, FILE* input );
-  static void print( const js_node_t* root, FILE* f=0, int spacing=0 );
-};
+    bool get( int& out ) const;
+    bool get( const std::string& path, int& out ) const;
+    bool get( double& out ) const;
+    bool get( const std::string& path, double& out ) const;
+    bool get( std::string& out ) const;
+    bool get( const std::string& path, std::string& out ) const;
+
+    template <typename T>
+    void set( T&& t ) { value_ = util_t::to_string( std::forward<T>( t ) ); }
+    void set( std::nullptr_t ) { value_.clear(); }
+
+    void add_child( node_t* node ) { children_.emplace_back( node ); }
+
+    node_t* get_child( const std::string& name ) const;
+
+    const std::vector<node_t*>& get_children() const
+    { return children_; }
+
+    std::vector<std::string> get_child_values() const;
+
+    void print( FILE* file = nullptr, int spacing = 0 ) const;
+
+    typedef child_list_t::iterator iterator;
+    iterator begin() { return children_.begin(); }
+    iterator end() { return children_.end(); }
+
+    typedef child_list_t::const_iterator const_iterator;
+    const_iterator begin() const { return children_.begin(); }
+    const_iterator end() const { return children_.end(); }
+    const_iterator cbegin() const { return begin(); }
+    const_iterator cend() const { return end(); }
+  };
+
+  class handle
+  {
+  public:
+    std::unique_ptr<node_t> root;
+
+    explicit handle( node_t* r ) : root( r ) {}
+
+    operator node_t* () const { return root.get(); }
+    node_t* operator -> () const { return root.get(); }
+  };
+
+  handle create( sim_t* sim, const std::string& input );
+  handle create( sim_t* sim, FILE* input );
+}
 
 
 // Handy Actions ============================================================
