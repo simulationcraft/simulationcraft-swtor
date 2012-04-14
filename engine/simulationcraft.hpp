@@ -775,8 +775,18 @@ inline auto sliding_window_average( Range&& r, Out out ) -> decltype( std::forwa
 template <typename Container>
 class auto_dispose : public Container
 {
-  void dispose_() { dispose( *this ); }
+  void dispose_() { ::dispose( *this ); }
+
 public:
+  // movable but not copyable
+  auto_dispose( const auto_dispose& ) = delete;
+  auto_dispose& operator = ( const auto_dispose& ) = delete;
+
+  auto_dispose() = default; // "using Container::Container;" would be nice.
+
+  auto_dispose( auto_dispose&& ) = default;
+  auto_dispose& operator = ( auto_dispose&& ) = default;
+
   ~auto_dispose() { dispose_(); }
   void dispose() { dispose_(); Container::clear(); }
 };
