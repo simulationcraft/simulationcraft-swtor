@@ -661,6 +661,11 @@ inline std::unique_ptr<T>
 make_unique( Args&& ... args )
 { return std::unique_ptr<T>( new T( std::forward<Args>( args )... ) ); }
 
+// Generically extract a ( possibly smart ) pointer.
+template <typename T>
+inline auto get_pointer( const T& p ) -> decltype( std::addressof( *p ) )
+{ return std::addressof( *p ); }
+
 // Generic algorithms =======================================================
 
 template <typename I, typename D>
@@ -760,9 +765,21 @@ void sliding_window_average( Fwd first, Fwd last, Out out )
 template <unsigned HW, typename Range, typename Out>
 inline auto sliding_window_average( Range&& r, Out out ) -> decltype( std::forward<Range>( r ) )
 {
-  sliding_window_average<HW>( boost::begin( r ), boost::end( r ), out );
+  sliding_window_average<HW>( std::begin( r ), std::end( r ), out );
   return std::forward<Range>( r );
 }
+
+// Type adapter that converts Container - a container of
+// pointers - to a type that automatically deletes the
+// pointers on destruction.
+template <typename Container>
+class auto_dispose : public Container
+{
+  void dispose_() { dispose( *this ); }
+public:
+  ~auto_dispose() { dispose_(); }
+  void dispose() { dispose_(); Container::clear(); }
+};
 
 #if defined(SC_USE_INTEGER_TIME)
 typedef std::chrono::milliseconds timespan_t;
