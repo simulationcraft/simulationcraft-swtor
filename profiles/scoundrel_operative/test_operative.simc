@@ -14,7 +14,7 @@ role=hybrid
 use_pre_potion=0
 professions=armormech
 talents=http://swtor.askmrrobot.com/skills/Operative#32-8kd8dd62ik-2i
-actions=stim,type=exotech_resolve
+actions=stim,type=exotech_skill
 actions+=/snapshot_stats
 actions+=/stealth
 actions+=/acid_blade,if=!buff.acid_blade_coating.up&buff.stealth.up

@@ -873,7 +873,7 @@ void scoundrel_operative_t::init_actions()
     // S_SCOUNDREL
     else
     {
-      action_list_str += "stim,type=exotech_resolve";
+      action_list_str += "stim,type=exotech_skill";
       action_list_str += "/snapshot_stats";
 
       switch ( primary_tree() )

@@ -672,6 +672,8 @@ const char* util_t::stim_type_string( stim_type stim )
   case stim_type::none:            return "none";
   case stim_type::exotech_resolve: return "exotech_resolve";
   case stim_type::rakata_resolve:  return "rakata_resolve";
+  case stim_type::exotech_skill:   return "exotech_skill";
+  case stim_type::rakata_skill:    return "rakata_skill";
   default:                         return "unknown";
   }
 }
