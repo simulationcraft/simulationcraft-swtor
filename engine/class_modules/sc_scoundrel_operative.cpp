@@ -909,7 +909,10 @@ void scoundrel_operative_t::init_actions()
 // scoundrel_operative_t::reset =============================================
 
 void scoundrel_operative_t::reset()
-{ acid_blade_poison = 0; }
+{
+  acid_blade_poison = 0;
+  player_t::reset();
+}
 
 // scoundrel_operative_t::primary_resource ==================================
 
