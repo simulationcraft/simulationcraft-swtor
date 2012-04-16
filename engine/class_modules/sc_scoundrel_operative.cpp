@@ -199,6 +199,18 @@ public:
 // all combinations possible, but usually patterend.
 
 
+// action hierarchy
+// ----------------
+// _action_t - tech_attack  - consume_acid_blade_attack - hidden strike
+//                                                      - backstab
+//                          - most abilities except...
+//           - range_attack - rifle_shot
+//                          - overload_shot
+//           - acid_blade
+//           - adrenaline_probe
+//           - stealth
+
+
 struct scoundrel_operative_tech_attack_t : public scoundrel_operative_action_t
 {
   scoundrel_operative_tech_attack_t( const std::string& n, scoundrel_operative_t* p, school_type s=SCHOOL_KINETIC ) :
@@ -326,7 +338,6 @@ struct adrenaline_probe_t : public scoundrel_operative_action_t
     harmful = false;
   }
 
-
   // the combat log isn't in sync with the game here.
   // the combat log shows after 1.5 seconds a tick of 8 and 34, and then another tick of 8 1.5s later.
   // what happens in game is you instantly get 34, and then two ticks of 8.
@@ -360,6 +371,7 @@ struct stealth_t : public scoundrel_operative_action_t
     // does trigger gcd, but since we only use it at the start of combat lets make it instant
     trigger_gcd = timespan_t::zero();
     use_off_gcd = true;
+    harmful = false;
   }
 
   virtual bool ready()
@@ -433,8 +445,11 @@ struct backstab_t : public scoundrel_operative_consume_acid_blade_attack_t
     dd.power_mod = 2.05;
 
     base_cost         -= p->talents.flanking->rank() * 5;
+
+    // are these two additive or multiplacitive? 
     base_multiplier   *= 1 + p->talents.surgical_strikes->rank() * 0.02;
     base_multiplier   *= 1 + p->talents.waylay->rank() * 0.04;
+
     crit_bonus        += p->talents.concealed_attacks->rank() * 0.08;
     crit_multiplier   *= 1 + p->talents.meticulously_kept_blades->rank() * 0.1;
 
@@ -461,8 +476,8 @@ struct collateral_strike_t : public scoundrel_operative_tech_attack_t
     cooldown -> duration = from_seconds( 10.0 );
 
   }
-  // TODO immediately regrants TA if hitting a poisoned target
 
+  // TODO immediately regrants TA if hitting a poisoned target
   virtual void execute()
   {
     scoundrel_operative_tech_attack_t::execute();
@@ -490,7 +505,6 @@ struct laceration_t : public scoundrel_operative_tech_attack_t
     scoundrel_operative_tech_attack_t(n, p), collateral_strike( 0 )
   {
     parse_options( 0, options_str );
-
 
     base_cost = 10;
     range = 4.0;
@@ -666,7 +680,6 @@ struct rifle_shot_t : public scoundrel_operative_range_attack_t
 
 struct overload_shot_t : public scoundrel_operative_range_attack_t
 {
-
   overload_shot_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str) :
     scoundrel_operative_range_attack_t(n, p)
   {
@@ -686,6 +699,20 @@ struct overload_shot_t : public scoundrel_operative_range_attack_t
   }
 };
 
+// Stim Boost | ??? =========================================================
+// energy and health regen consuming a TA
+// waiting on confirmation on implementation
+
+// Cloaking Screen | ??? ====================================================
+// "vanish" allows reusing hidden strike.
+
+// Sever Tendon | ??? =======================================================
+// does damage. mainly for pvp.
+
+// Debilitate | ??? =========================================================
+// stuns non bosses and does damage. pvp mainly.
+
+// Overload Shot | ??? ======================================================
 
 }// ANONYMOUS NAMESPACE ====================================================
 
@@ -710,6 +737,7 @@ action_t* scoundrel_operative_t::create_action( const std::string& name,
     if ( name == "corrosive_dart" ) return new corrosive_dart_t( this, name, options_str );
     if ( name == "acid_blade" ) return new acid_blade_t( this, name, options_str );
     if ( name == "adrenaline_probe" ) return new adrenaline_probe_t( this, name, options_str );
+    if ( name == "fragmentation_grenade" ) return new fragmentation_grenade_t( this, name, options_str );
 
   }
   else if ( type == S_SCOUNDREL )
@@ -843,15 +871,21 @@ void scoundrel_operative_t::init_actions()
   {
     if ( type == IA_OPERATIVE )
     {
-      action_list_str += "stim,type=exotech_resolve";
+      action_list_str += "stim,type=exotech_skill";
       action_list_str += "/snapshot_stats";
-      action_list_str += "/shiv";
-      action_list_str += "/backstab";
+      action_list_str += "/stealth";
+      action_list_str += "/acid_blade,if=!buff.acid_blade_coating.up&buff.stealth.up";
       action_list_str += "/hidden_strike";
-      action_list_str += "/laceration";
-      action_list_str += "/rifleshot";
-      action_list_str += "/overload";
-
+      action_list_str += "/corrosive_dart,if=!dot.corrosive_dart.remains&energy>=60";
+      action_list_str += "/laceration,if=energy>=70&buff.tactical_advantage.stack>=2";
+      action_list_str += "/shiv,if=energy>=75";
+      action_list_str += "/acid_blade,if=!buff.acid_blade_coating.up&energy>=75";
+      action_list_str += "/backstab,if=energy>=65";
+      action_list_str += "/overload_shot,if=energy=100";
+      action_list_str += "/adrenaline_probe,if=energy<=60";
+      action_list_str += "/rifle_shot";
+      
+      
       switch ( primary_tree() )
       {
 
