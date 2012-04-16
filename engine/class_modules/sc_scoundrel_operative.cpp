@@ -408,9 +408,9 @@ struct backstab_t : public scoundrel_operative_consume_acid_blade_attack_t
 {
 
   backstab_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_consume_acid_blade_attack_t(n, p)
+    scoundrel_operative_consume_acid_blade_attack_t( n, p )
   {
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     base_cost = 10;
     cooldown -> duration = from_seconds( 12.0 );
@@ -420,18 +420,15 @@ struct backstab_t : public scoundrel_operative_consume_acid_blade_attack_t
     dd.standardhealthpercentmax = 0.245;
     dd.power_mod = 2.05;
 
-    base_cost         -= p->talents.flanking->rank() * 5;
-
-    // are these two additive or multiplacitive? 
-    base_multiplier   *= 1 + p->talents.surgical_strikes->rank() * 0.02;
-    base_multiplier   *= 1 + p->talents.waylay->rank() * 0.04;
-
-    crit_bonus        += p->talents.concealed_attacks->rank() * 0.08;
-    crit_multiplier   *= 1 + p->talents.meticulously_kept_blades->rank() * 0.1;
-
+    base_cost       -= p->talents.flanking->rank() * 5;
+    // are these two additive or multiplacitive?
+    // Assume additive for now; nearly everything in SWTOR is additive.
+    base_multiplier += p->talents.surgical_strikes -> rank() * 0.02
+                       +  p->talents.waylay -> rank() * 0.04;
+    base_crit       += p -> talents.concealed_attacks->rank() * 0.08;
+    crit_bonus      += p->talents.meticulously_kept_blades->rank() * 0.1;
   }
 };
-
 
 // Laceration | ??? =========================================================
 struct collateral_strike_t : public scoundrel_operative_tech_attack_t
@@ -532,19 +529,18 @@ struct hidden_strike_t : public scoundrel_operative_consume_acid_blade_attack_t
   hidden_strike_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
     scoundrel_operative_consume_acid_blade_attack_t(n, p)
   {
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
-    //base_cost = 17;
-    // FIXME TODO XXX since we only use this once, setting to 7 to offset 10 lost energy from initial acid blade as a workaround
-    base_cost = 7;
+    base_cost = 17;
     range = 4.0;
     cooldown -> duration = from_seconds( 7.5 ); // FIXME 7.5 or 8?
 
     dd.standardhealthpercentmin = 0.218;
     dd.standardhealthpercentmax = 0.278;
     dd.power_mod = 2.48;
-    crit_bonus        += p->talents.concealed_attacks->rank() * 0.08;
-    crit_multiplier   *= 1 + p->talents.meticulously_kept_blades->rank() * 0.1;
+
+    base_crit += p -> talents.concealed_attacks -> rank() * 0.08;
+    crit_bonus += p -> talents.meticulously_kept_blades -> rank() * 0.1;
   }
 
   virtual bool ready()
@@ -851,8 +847,8 @@ void scoundrel_operative_t::init_actions()
       action_list_str += "/overload_shot,if=energy=100";
       action_list_str += "/adrenaline_probe,if=energy<=60";
       action_list_str += "/rifle_shot";
-      
-      
+
+
       switch ( primary_tree() )
       {
 
