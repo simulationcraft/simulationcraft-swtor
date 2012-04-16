@@ -443,6 +443,11 @@ struct collateral_strike_t : public scoundrel_operative_tech_attack_t
     dd.power_mod = 0.56;
     // FIXME BUG with background set it own't execute itself, butignores cooldown and is never "ready" but only runs on execute
     // but with background set, it runs automatically whenever it can. confused.
+    // to explain the problem more clearly.
+    // with this structur eof laceration creating a collateral strike action and executing it. If background isn't set then
+    // collateral_strike executes itself every 10 seconds, regardless of laceration. I don't understand why.
+    // but with background set, the cooldown isn't working and -> remains doesn't work.
+    // so currently it executes every time even if it should be on cooldown
     background = true;
     use_off_gcd = true;
     trigger_gcd = timespan_t::zero();
