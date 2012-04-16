@@ -983,7 +983,7 @@ void scoundrel_operative_t::create_talents()
   };
   init_talent_tree(IA_OPERATIVE_CONCEALMENT , concealment_tree );
 
-  // Concealment
+  // Lethality
   static const talentinfo_t lethality_tree[] = {
     { "Deadly Directive", 2 }, { "Lethality", 3 }, { "Razor Edge", 2 },
     { "Slip Away", 2 }, { "Flash Powder", 2 }, { "Corrosive Microbes", 2 }, { "Lethal Injectors", 1 },
