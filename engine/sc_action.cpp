@@ -624,7 +624,7 @@ double action_t::calculate_direct_damage( int chain_target )
   {
     log_t::output( sim, "%s dmg for %s: dd=%.0f i_dd=%.0f w_dd=%.0f b_dd=%.0f mod=%.2f power=%.0f b_mult=%.2f p_mult=%.2f t_mult=%.2f w_mult=%.2f",
                    player -> name(), name(), dmg, init_direct_dmg, weapon_dmg, base_direct_dmg, dd.power_mod,
-                   total_power(), base_multiplier * dd.base_multiplier, player_multiplier, target_multiplier, weapon_multiplier );
+                   total_power(), base_multiplier * dd.base_multiplier, player_multiplier, target_multiplier, weapon ? weapon_multiplier : 0 );
   }
 
   return dmg;
