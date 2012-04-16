@@ -290,8 +290,6 @@ struct acid_blade_t : public scoundrel_operative_action_t
     harmful = false;
   }
 
-  // TODO first acid blade wanted out of combat so it has no energy cost
-  // currently we start our first hit with 10 lost energy
   virtual void execute()
   {
     scoundrel_operative_action_t::execute();
