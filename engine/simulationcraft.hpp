@@ -406,6 +406,7 @@ enum talent_tree_type
   TREE_CORRUPTION,   TREE_LIGHTNING,     TREE_MADNESS,
   TREE_KINETIC_COMBAT, TREE_INFILTRATION,
   TREE_DARKNESS, TREE_DECEPTION,
+  TREE_MEDICINE, TREE_CONCEALMENT, TREE_LETHALITY,
   TALENT_TREE_MAX
 };
 
@@ -418,6 +419,8 @@ enum talent_tab_type
 
   JEDI_SHADOW_KINETIC_COMBAT = 0,   JEDI_SHADOW_INFILTRATION, JEDI_SHADOW_BALANCE,
   SITH_ASSASSIN_DARKNESS = 0,       SITH_ASSASSIN_DECEPTION,  SITH_ASSASSIN_MADNESS,
+
+  IA_OPERATIVE_MEDICINE = 0,       IA_OPERATIVE_CONCEALMENT,  IA_OPERATIVE_LETHALITY,
 };
 
 enum weapon_type
@@ -2653,7 +2656,7 @@ public:
   virtual void combat_end();
   virtual void merge( player_t& other );
 
-  virtual double energy_regen_per_second() const;
+  virtual double energy_regen_per_second();
   virtual double ammo_regen_per_second() const;
   virtual double force_regen_per_second() const;
 

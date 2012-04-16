@@ -7,9 +7,20 @@
 
 struct scoundrel_operative_targetdata_t : public targetdata_t
 {
+  dot_t dot_corrosive_dart;
+  dot_t dot_adrenaline_probe;
+  dot_t dot_acid_blade_poison;
   scoundrel_operative_targetdata_t( player_t& source, player_t& target )
-    : targetdata_t( source, target )
-  {}
+  : targetdata_t( source, target ),
+    dot_corrosive_dart("corrosive_dart", &source),
+    dot_adrenaline_probe("adrenaline_probe", &source),
+    dot_acid_blade_poison("acid_blade_poison", &source)
+  {
+    add( dot_corrosive_dart );
+    add( dot_adrenaline_probe );
+    add( dot_acid_blade_poison );
+  }
+
 };
 
 
@@ -19,89 +30,143 @@ struct scoundrel_operative_targetdata_t : public targetdata_t
 
 struct scoundrel_operative_t : public player_t
 {
-    // Buffs
-    struct buffs_t
-    {
+  // Buffs
+  struct buffs_t
+  {
+  // buffs from talents
+  buff_t* revitalizers;
+  buff_t* acid_blade_coating;
+  buff_t* acid_blade_arpen;
+  //buff_t* advanced_cloaking;
 
-    } buffs;
+  // core buffs
+  buff_t* stealth;
+  buff_t* stim_boost;
+  buff_t* tactical_advantage;
+  //buff_t* cloaking_screen;
+  
 
-    // Gains
-    struct gains_t
-    {
+  } buffs;
 
-    } gains;
+  // Gains
+  struct gains_t
+  {
+    gain_t* low;
+    gain_t* med;
+    gain_t* high;
+    gain_t* adrenaline_probe;
 
-    // Procs
-    struct procs_t
-    {
+  } gains;
 
-    } procs;
+  // Procs
+  struct procs_t
+  {
 
-    // RNGs
-    struct rngs_t
-    {
+  } procs;
 
-    } rngs;
+  // RNGs
+  struct rngs_t
+  {
+    rng_t* collateral_strike;
 
-    // Benefits
-    struct benefits_t
-    {
+  } rngs;
 
-    } benefits;
+  // Benefits
+  struct benefits_t
+  {
 
-    // Cooldowns
-    struct cooldowns_t
-    {
+  } benefits;
 
-    } cooldowns;
+  // Cooldowns
+  struct cooldowns_t
+  {
 
-    // Talents
-    struct talents_t
-    {
-        // Tree 1
+  } cooldowns;
+
+  // Talents
+  struct talents_t
+  {
+    // Medicine|Sawbones
+  talent_t* incisive_action;
+  talent_t* precision_instruments;
+  talent_t* imperial_education;
+  talent_t* endorphin_rush;
+  talent_t* medical_consult;
+  talent_t* surical_steadiness;
+  talent_t* chem_resistant_inlays;
+
+    // Concealment|Scrapper
+  talent_t* concealed_attacks;
+  talent_t* imperial_brew;
+  talent_t* survival_training;
+  talent_t* infiltrator;
+  talent_t* surgical_strikes;
+  talent_t* inclement_conditioning;
+  talent_t* scouting;
+  talent_t* flanking;
+  talent_t* laceration;
+  talent_t* collateral_strike;
+  talent_t* revitalizers;
+  talent_t* pin_down;
+  talent_t* tactical_opportunity;
+  talent_t* energy_screen;
+  talent_t* waylay;
+  talent_t* culling;
+  talent_t* advanced_cloaking;
+  talent_t* meticulously_kept_blades;
+  talent_t* jarring_strike;
+  talent_t* acid_blade;
+
+  // Lethality|Dirty Fighting
+  talent_t* deadly_directive;
+  talent_t* lethality;
+  talent_t* razor_edge;
+  talent_t* slip_away;
+  talent_t* flash_powder;
+  talent_t* corrosive_microbes;
+  talent_t* lethal_injectors;
+
+  } talents;
+
+  scoundrel_operative_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
+    player_t( sim, pt == IA_OPERATIVE ? IA_OPERATIVE: S_SCOUNDREL, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
+  {
 
 
-        // Tree 2
+    primary_attribute   = ATTR_CUNNING;
+    //secondary_attribute = ATTR_WILLPOWER;
 
+    create_talents();
+    create_options();
+  }
 
-        // Tree 3
+  // Character Definition
+  virtual targetdata_t* new_targetdata( player_t& target ) // override
+  { return new scoundrel_operative_targetdata_t( *this, target ); }
 
-    } talents;
+  virtual action_t* create_action( const std::string& name, const std::string& options );
+  virtual void    init_talents();
+  virtual void    init_base();
+  virtual void    init_benefits();
+  virtual void    init_buffs();
+  virtual void    init_gains();
+  virtual void    init_procs();
+  virtual void    init_rng();
+  virtual void    init_actions();
+  virtual double  armor_penetration() const; // override
+  virtual double  energy_regen_per_second(); // override
+  virtual void    regen( timespan_t periodicity );
+  virtual double  regen( timespan_t periodicity, bool rps_only );
+  virtual         resource_type primary_resource() const;
+  virtual         role_type primary_role() const;
+          void    create_talents();
 
-    scoundrel_operative_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
-        player_t( sim, pt == IA_OPERATIVE ? IA_OPERATIVE: S_SCOUNDREL, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
-    {
-
-
-      primary_attribute   = ATTR_STRENGTH;
-      secondary_attribute = ATTR_WILLPOWER;
-
-      create_talents();
-      create_options();
-    }
-
-    // Character Definition
-    virtual targetdata_t* new_targetdata( player_t& target ) // override
-    { return new scoundrel_operative_targetdata_t( *this, target ); }
-
-    virtual action_t* create_action( const std::string& name, const std::string& options );
-    virtual void      init_talents();
-    virtual void      init_base();
-    virtual void      init_benefits();
-    virtual void      init_buffs();
-    virtual void      init_gains();
-    virtual void      init_procs();
-    virtual void      init_rng();
-    virtual void      init_actions();
-    virtual resource_type primary_resource() const;
-    virtual role_type primary_role() const;
-            void      create_talents();
-
-    virtual void init_scaling()
-    {
-      player_t::init_scaling();
-      scales_with[ STAT_FORCE_POWER ] = true;
-    }
+  virtual void init_scaling()
+  {
+    player_t::init_scaling();
+    // FIXME what goes here, and what else?
+    scales_with[ STAT_TECH_POWER ] = true;
+  }
 };
 
 namespace { // ANONYMOUS NAMESPACE ==========================================
@@ -110,8 +175,8 @@ class scoundrel_operative_action_t : public action_t
 {
 public:
   scoundrel_operative_action_t( const std::string& n, scoundrel_operative_t* player,
-                          attack_policy_t policy, resource_type r, school_type s ) :
-    action_t( ACTION_ATTACK, n.c_str(), player, policy, r, s )
+              attack_policy_t policy, resource_type r, school_type s ) :
+  action_t( ACTION_ATTACK, n.c_str(), player, policy, r, s )
   {}
 
   scoundrel_operative_targetdata_t* targetdata() const
@@ -119,34 +184,510 @@ public:
 
   scoundrel_operative_t* p() const
   { return static_cast<scoundrel_operative_t*>( player ); }
+
+  scoundrel_operative_t* cast() const
+      { return p(); }
+
 };
 
 // ==========================================================================
 // Scoundrel / Operative Abilities
 // ==========================================================================
 
-struct scoundrel_operative_attack_t : public scoundrel_operative_action_t
+// 4 types of attack: melee, ranged, force, tech. denoted by policy.
+// 4 types of damage: kinetic, energy, internal, elemental.
+// all combinations possible, but usually patterend.
+
+
+struct scoundrel_operative_tech_attack_t : public scoundrel_operative_action_t
 {
-    scoundrel_operative_attack_t( const std::string& n, scoundrel_operative_t* p, school_type s=SCHOOL_KINETIC ) :
-      scoundrel_operative_action_t( n, p, melee_policy, RESOURCE_NONE, s )
-    {
-        may_crit   = true;
-    }
+  scoundrel_operative_tech_attack_t( const std::string& n, scoundrel_operative_t* p, school_type s=SCHOOL_KINETIC ) :
+    scoundrel_operative_action_t( n, p, tech_policy, RESOURCE_ENERGY, s )
+  {
+    may_crit   = true;
+  }
+
+  virtual void execute()
+  {
+    scoundrel_operative_t* p = cast();
+    if ( p -> buffs.stealth -> up() )
+      p -> buffs.stealth -> decrement();
+    scoundrel_operative_action_t::execute();
+  }
 
 };
+// Acid Blade Poison | ??? ==================================================
 
-struct scoundrel_operative_spell_t : public scoundrel_operative_action_t
+struct acid_blade_poison_t : public scoundrel_operative_tech_attack_t
 {
-    scoundrel_operative_spell_t( const std::string& n, scoundrel_operative_t* p, school_type s=SCHOOL_KINETIC ) :
-      scoundrel_operative_action_t( n, p, force_policy, RESOURCE_NONE, s )
-    {
-        may_crit   = true;
-        tick_may_crit = true;
-    }
+  acid_blade_poison_t( scoundrel_operative_t* p, const std::string& n ) :
+    scoundrel_operative_tech_attack_t(n, p, SCHOOL_INTERNAL)
+  {
 
+    td.standardhealthpercentmin =  td.standardhealthpercentmax = 0.31;
+    td.power_mod = 0.31;
+    background = true;
+    use_off_gcd = true;
+    trigger_gcd = timespan_t::zero();
+
+    num_ticks = 6;
+    base_tick_time = from_seconds( 1.0 );
+
+  }
 };
 
-} // ANONYMOUS NAMESPACE ====================================================
+// Consume Acid Blade Poison Attack | ??? ===================================
+
+struct scoundrel_operative_consume_acid_blade_attack_t : public scoundrel_operative_tech_attack_t
+{
+  acid_blade_poison_t* acid_blade_poison;
+
+  scoundrel_operative_consume_acid_blade_attack_t( const std::string& n, scoundrel_operative_t* p, school_type s=SCHOOL_KINETIC ) :
+    scoundrel_operative_tech_attack_t( n, p, s )
+  {
+    acid_blade_poison = new acid_blade_poison_t(p, "acid_blade_poison");
+  }
+
+  virtual void execute()
+  {
+    scoundrel_operative_tech_attack_t::execute();
+
+    scoundrel_operative_t* p = cast();
+    if ( p -> buffs.acid_blade_coating -> up() )
+    {
+      p -> buffs.acid_blade_coating -> decrement();
+      p -> buffs.acid_blade_arpen -> trigger();
+      acid_blade_poison->schedule_execute();
+    }
+  }
+};
+
+struct scoundrel_operative_range_attack_t : public scoundrel_operative_action_t
+{
+  scoundrel_operative_range_attack_t( const std::string& n, scoundrel_operative_t* p, school_type s=SCHOOL_ENERGY ) :
+    scoundrel_operative_action_t( n, p, range_policy, RESOURCE_ENERGY, s )
+  {
+    may_crit   = true;
+  }
+
+  virtual void execute()
+  {
+    scoundrel_operative_t* p = cast();
+    if ( p -> buffs.stealth -> up() )
+      p -> buffs.stealth -> decrement();
+    scoundrel_operative_action_t::execute();
+  }
+};
+
+// Acid Blade | ??? =========================================================
+
+struct acid_blade_t : public scoundrel_operative_action_t
+{
+  acid_blade_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
+    scoundrel_operative_action_t(n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE)
+  {
+    parse_options( 0, options_str );
+
+    base_cost = 10;
+    cooldown -> duration = from_seconds( 2.0 );
+    use_off_gcd = true;
+    trigger_gcd = timespan_t::zero();
+
+    harmful = false;
+  }
+
+  // TODO first acid blade wanted out of combat so it has no energy cost
+  // currently we start our first hit with 10 lost energy
+  virtual void execute()
+  {
+    scoundrel_operative_action_t::execute();
+    scoundrel_operative_t* p = cast();
+    p -> buffs.acid_blade_coating -> trigger();
+}
+};
+
+
+// Adrenaline Probe | ??? ===================================================
+
+struct adrenaline_probe_t : public scoundrel_operative_action_t
+{
+  adrenaline_probe_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
+    scoundrel_operative_action_t(n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE)
+  {
+    parse_options( 0, options_str );
+
+    cooldown -> duration = from_seconds( 120 );
+    use_off_gcd = true;
+    trigger_gcd = timespan_t::zero();
+
+    num_ticks = 2;
+    base_tick_time = from_seconds( 1.5 );
+
+    harmful = false;
+  }
+
+
+  // the combat log isn't in sync with the game here.
+  // the combat log shows after 1.5 seconds a tick of 8 and 34, and then another tick of 8 1.5s later.
+  // what happens in game is you instantly get 34, and then two ticks of 8.
+  virtual void execute()
+  {
+    scoundrel_operative_action_t::execute();
+    scoundrel_operative_t* p = cast();
+
+    p -> resource_gain( RESOURCE_ENERGY, 35, p -> gains.adrenaline_probe );
+  }
+
+  virtual void tick(dot_t* d)
+  {
+    scoundrel_operative_action_t::tick(d);
+    scoundrel_operative_t* p = cast();
+
+    p -> resource_gain( RESOURCE_ENERGY, 8, p -> gains.adrenaline_probe );
+  }
+};
+
+// Stealth | ??? =========================================================
+
+struct stealth_t : public scoundrel_operative_action_t
+{
+  bool used;
+
+  stealth_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
+    scoundrel_operative_action_t(n, p, tech_policy, RESOURCE_ENERGY, SCHOOL_NONE), used( false )
+  {
+    parse_options( 0, options_str );
+    // does trigger gcd, but since we only use it at the start of combat lets make it instant
+    trigger_gcd = timespan_t::zero();
+    use_off_gcd = true;
+  }
+
+  virtual bool ready()
+  {
+    return ! used;
+  }
+
+  virtual void reset()
+  {
+    scoundrel_operative_action_t::reset();
+    used = false;
+  }
+
+  virtual void execute()
+  {
+    scoundrel_operative_t* p = cast();
+    p -> buffs.stealth -> trigger();
+    used = true;
+  }
+};
+
+// Shiv | ??? ===============================================================
+
+struct shiv_t : public scoundrel_operative_tech_attack_t
+{
+  shiv_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
+    scoundrel_operative_tech_attack_t(n, p)
+  {
+    //rank_level_list = { 2, 50 }; // FIXME will default to current level.
+
+    parse_options( 0, options_str );
+
+    base_cost = 15;
+    cooldown -> duration = from_seconds( 6.0 );
+    range = 4.0;
+
+    dd.standardhealthpercentmin = 0.148;
+    dd.standardhealthpercentmax = 0.188;
+    dd.power_mod = 1.68;
+
+    base_multiplier *= 1 + p->talents.surgical_strikes->rank() * 0.02;
+  }
+
+  virtual void execute()
+  {
+    scoundrel_operative_tech_attack_t::execute();
+
+    // TODO check if granted on misses etc?
+    scoundrel_operative_t* p = cast();
+    p -> buffs.tactical_advantage -> trigger();
+
+  }
+};
+
+// Backstab | ??? ===========================================================
+
+struct backstab_t : public scoundrel_operative_consume_acid_blade_attack_t
+{
+
+  backstab_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
+    scoundrel_operative_consume_acid_blade_attack_t(n, p)
+  {
+    parse_options( 0, options_str );
+
+    base_cost = 10;
+    cooldown -> duration = from_seconds( 12.0 );
+    range = 4.0;
+
+    dd.standardhealthpercentmin = 0.165;
+    dd.standardhealthpercentmax = 0.245;
+    dd.power_mod = 2.05;
+
+    base_cost         -= p->talents.flanking->rank() * 5;
+    base_multiplier   *= 1 + p->talents.surgical_strikes->rank() * 0.02;
+    base_multiplier   *= 1 + p->talents.waylay->rank() * 0.04;
+    crit_bonus        += p->talents.concealed_attacks->rank() * 0.08;
+    crit_multiplier   *= 1 + p->talents.meticulously_kept_blades->rank() * 0.1;
+
+  }
+};
+
+
+// Laceration | ??? =========================================================
+struct collateral_strike_t : public scoundrel_operative_tech_attack_t
+{
+  collateral_strike_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
+    scoundrel_operative_tech_attack_t(n, p)
+  {
+    parse_options( 0, options_str );
+
+    dd.standardhealthpercentmin =  dd.standardhealthpercentmax = 0.56;
+    dd.power_mod = 0.56;
+    // FIXME BUG with background set it own't execute itself, butignores cooldown and is never "ready" but only runs on execute
+    // but with background set, it runs automatically whenever it can. confused.
+    background = true;
+    use_off_gcd = true;
+    trigger_gcd = timespan_t::zero();
+    // TODO this cooldown is being ignored???
+    cooldown -> duration = from_seconds( 10.0 );
+
+  }
+  // TODO immediately regrants TA if hitting a poisoned target
+
+  virtual void execute()
+  {
+    scoundrel_operative_tech_attack_t::execute();
+    scoundrel_operative_t* p = cast();
+
+    // if target is poisoned regrant TA
+    // FIXME no idea how to get the dots. it works in the action list as dot.corrosive_dart.remains so how to check here?
+    log_t::output( p->sim, "XXX %f\n",to_seconds( target -> get_dot("corrosive_dart") -> remains() ));
+    if (
+        to_seconds( p -> get_dot("corrosive_dart") -> remains() ) > 0 
+        || to_seconds( p -> get_dot("acid_blade_poison") -> remains() ) > 0 
+        )
+    {
+      p -> buffs.tactical_advantage -> trigger();
+      log_t::output( p->sim, "XXX XXX" );
+    }
+  }
+};
+
+struct laceration_t : public scoundrel_operative_tech_attack_t
+{
+  collateral_strike_t* collateral_strike;
+
+  laceration_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
+    scoundrel_operative_tech_attack_t(n, p), collateral_strike( 0 )
+  {
+    parse_options( 0, options_str );
+
+
+    base_cost = 10;
+    range = 4.0;
+
+    dd.standardhealthpercentmin = 0.14;
+    dd.standardhealthpercentmax = 0.22;
+    dd.power_mod = 1.8;
+    base_multiplier *= 1 + p->talents.culling->rank() * 0.02;
+
+
+    if (  p -> talents.collateral_strike -> rank() )
+    {
+      collateral_strike = new collateral_strike_t(p, "collateral strike", options_str);
+      add_child(collateral_strike);
+    }
+  }
+
+  virtual bool ready()
+  {
+    scoundrel_operative_t* p = cast();
+    if (  p -> buffs.tactical_advantage -> check() )
+      return scoundrel_operative_tech_attack_t::ready();
+    return false;
+
+  }
+
+  virtual void execute()
+  {
+    scoundrel_operative_t* p = cast();
+
+    // TODO check if a miss etc consumes the TA
+    p -> buffs.tactical_advantage -> decrement();
+    scoundrel_operative_tech_attack_t::execute();
+
+    if ( collateral_strike )
+    {
+      if ( p -> rngs.collateral_strike -> roll ( p -> talents.collateral_strike -> rank() * 0.25 ) )
+          collateral_strike -> execute();
+    }
+  }
+
+  // TODO check for and consumes tactical advantage
+};
+
+// Hidden Strike | ??? ======================================================
+
+struct hidden_strike_t : public scoundrel_operative_consume_acid_blade_attack_t
+{
+  hidden_strike_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
+    scoundrel_operative_consume_acid_blade_attack_t(n, p)
+  {
+    parse_options( 0, options_str );
+
+    //base_cost = 17;
+    // FIXME TODO XXX since we only use this once, setting to 7 to offset 10 lost energy from initial acid blade as a workaround
+    base_cost = 7;
+    range = 4.0;
+    cooldown -> duration = from_seconds( 7.5 ); // FIXME 7.5 or 8?
+
+    dd.standardhealthpercentmin = 0.218;
+    dd.standardhealthpercentmax = 0.278;
+    dd.power_mod = 2.48;
+    crit_bonus        += p->talents.concealed_attacks->rank() * 0.08;
+    crit_multiplier   *= 1 + p->talents.meticulously_kept_blades->rank() * 0.1;
+  }
+
+  virtual bool ready()
+  {
+    scoundrel_operative_t* p = cast();
+
+    if ( p -> buffs.stealth -> up() )
+      return scoundrel_operative_action_t::ready();
+
+    return false;
+  }
+
+  virtual void execute()
+  {
+    scoundrel_operative_consume_acid_blade_attack_t::execute();
+
+    scoundrel_operative_t* p = cast();
+    p -> buffs.tactical_advantage -> trigger();
+  }
+  // TODO check for talent and trigger knockdown (jarring strike)
+};
+
+// Fragmentation Grenade | ??? ==============================================
+
+struct fragmentation_grenade_t : public scoundrel_operative_tech_attack_t
+{
+  fragmentation_grenade_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
+    scoundrel_operative_tech_attack_t(n, p)
+  {
+    parse_options( 0, options_str );
+
+    base_cost = 20;
+    cooldown -> duration = from_seconds( 6.0 );
+    range = 30.0;
+
+    dd.standardhealthpercentmin = 0.109;
+    dd.standardhealthpercentmax = 0.249;
+    dd.power_mod = 1.29;
+  }
+};
+
+// Corrosive Dart | ??? =====================================================
+
+struct corrosive_dart_t : public scoundrel_operative_tech_attack_t
+{
+  corrosive_dart_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
+    scoundrel_operative_tech_attack_t(n, p, SCHOOL_INTERNAL)
+  {
+    parse_options( 0, options_str );
+
+    base_cost = 20;
+    range = 30.0;
+
+    td.standardhealthpercentmin = td.standardhealthpercentmax = 0.04;
+    td.power_mod = 0.04;
+
+    num_ticks = 3;
+    base_tick_time = from_seconds( 3.0 );
+  }
+};
+
+// Rifle Shot | ??? =========================================================
+
+struct rifle_shot_t : public scoundrel_operative_range_attack_t
+{
+  rifle_shot_t* second_strike;
+
+  rifle_shot_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str,
+      bool is_consequent_strike = false ) :
+    scoundrel_operative_range_attack_t(n, p), second_strike( 0 )
+  {
+    parse_options( 0, options_str );
+
+    base_cost = 0;
+    range = 30.0;
+
+    weapon = &( player->main_hand_weapon );
+    // this isn't working. hitting too weakly
+    weapon_multiplier = -1;
+    dd.power_mod = 0.5;
+    weapon_power_mod = -1;
+
+    // Is a Basic attack
+    base_accuracy -= 0.10;
+
+    if ( is_consequent_strike )
+    {
+      background = true;
+      use_off_gcd = true;
+      trigger_gcd = timespan_t::zero();
+    }
+    else
+    {
+      // TODO does this need options like off the gcd etc?
+      second_strike = new rifle_shot_t( p, "rifle_shot_2", options_str, true );
+      add_child(second_strike);
+    }
+  }
+
+  virtual void execute()
+  {
+    scoundrel_operative_range_attack_t::execute();
+    if ( second_strike )
+        second_strike->schedule_execute();
+  }
+};
+
+// Overload Shot | ??? ======================================================
+
+struct overload_shot_t : public scoundrel_operative_range_attack_t
+{
+
+  overload_shot_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str) :
+    scoundrel_operative_range_attack_t(n, p)
+  {
+    parse_options( 0, options_str );
+
+    base_cost = 17;
+    range = 10.0;
+
+    weapon = &( player->main_hand_weapon );
+    dd.standardhealthpercentmin = dd.standardhealthpercentmax = 0.124;
+    dd.power_mod = 1.24;
+
+    weapon = &( player->main_hand_weapon );
+    weapon_multiplier = -0.17;
+
+    base_multiplier *= 1.0 + 0.15; // skirmisher passive to agents gives 15% boost to overload shot
+  }
+};
+
+
+}// ANONYMOUS NAMESPACE ====================================================
 
 // ==========================================================================
 // scoundrel_operative Character Definition
@@ -155,44 +696,77 @@ struct scoundrel_operative_spell_t : public scoundrel_operative_action_t
 // scoundrel_operative_t::create_action ====================================================
 
 action_t* scoundrel_operative_t::create_action( const std::string& name,
-                                            const std::string& options_str )
+                      const std::string& options_str )
 {
-    if ( type == IA_OPERATIVE )
-    {
+  if ( type == IA_OPERATIVE )
+  {
+    if ( name == "stealth" ) return new stealth_t( this, name, options_str );
+    if ( name == "shiv" ) return new shiv_t( this, name, options_str );
+    if ( name == "backstab" ) return new backstab_t( this, name, options_str );
+    if ( name == "laceration" ) return new laceration_t( this, name, options_str );
+    if ( name == "hidden_strike" ) return new hidden_strike_t( this, name, options_str );
+    if ( name == "rifle_shot" ) return new rifle_shot_t( this, name, options_str );
+    if ( name == "overload_shot" ) return new overload_shot_t( this, name, options_str );
+    if ( name == "corrosive_dart" ) return new corrosive_dart_t( this, name, options_str );
+    if ( name == "acid_blade" ) return new acid_blade_t( this, name, options_str );
+    if ( name == "adrenaline_probe" ) return new adrenaline_probe_t( this, name, options_str );
 
-    }
-    else if ( type == S_SCOUNDREL )
-    {
+  }
+  else if ( type == S_SCOUNDREL )
+  {
 
-    }
+  }
 
-    //if ( name == "apply_charge"           ) return new        apply_charge_t( this, options_str );
+  //if ( name == "apply_charge"       ) return new    apply_charge_t( this, options_str );
 
-    return player_t::create_action( name, options_str );
+  return player_t::create_action( name, options_str );
 }
 
 // scoundrel_operative_t::init_talents =====================================================
 
 void scoundrel_operative_t::init_talents()
 {
-    player_t::init_talents();
+  player_t::init_talents();
 
-    // Darkness|Kinetic Combat
-    //talents.thrashing_blades      = find_talent( "Thrashing Blades" );
+  // Concealment
+  talents.concealed_attacks         = find_talent( "Concealed Attacks"        );
+  talents.concealed_attacks         = find_talent( "Concealed Attacks"        );
+  talents.imperial_brew             = find_talent( "Imperial Brew"            );
+  talents.survival_training         = find_talent( "Survival Training"        );
+  talents.infiltrator               = find_talent( "Infiltrator"              );
+  talents.surgical_strikes          = find_talent( "Surgical Strikes"         );
+  talents.inclement_conditioning    = find_talent( "Inclement Conditioning"   );
+  talents.scouting                  = find_talent( "Scouting"                 );
+  talents.flanking                  = find_talent( "Flanking"                 );
+  talents.laceration                = find_talent( "Laceration"               );
+  talents.collateral_strike         = find_talent( "Collateral Strike"        );
+  talents.revitalizers              = find_talent( "Revitalizers"             );
+  talents.pin_down                  = find_talent( "Pin Down"                 );
+  talents.tactical_opportunity      = find_talent( "Tactical Opportunity"     );
+  talents.energy_screen             = find_talent( "Energy Screen"            );
+  talents.waylay                    = find_talent( "Waylay"                   );
+  talents.culling                   = find_talent( "Culling"                  );
+  talents.advanced_cloaking         = find_talent( "Advanced Cloaking"        );
+  talents.meticulously_kept_blades  = find_talent( "Meticulously Kept Blades" );
+  talents.jarring_strike            = find_talent( "Jarring Strike"           );
+  talents.acid_blade                = find_talent( "Acid Blade"               );
 
-    // Deception|Infiltration
+  // Deception|Infiltration
 
-    // Madness|Balance
+  // Madness|Balance
 }
 
 // scoundrel_operative_t::init_base ========================================================
 
 void scoundrel_operative_t::init_base()
 {
-    player_t::init_base();
+  player_t::init_base();
 
-    default_distance = 3;
-    distance = default_distance;
+  default_distance = 3;
+  distance = default_distance;
+
+  base_energy_regen_per_second = 0;
+  resource_base[RESOURCE_ENERGY] += 100; // TODO 4 piece bonus adds 5 energy
 
 }
 
@@ -200,7 +774,7 @@ void scoundrel_operative_t::init_base()
 
 void scoundrel_operative_t::init_benefits()
 {
-    player_t::init_benefits();
+  player_t::init_benefits();
 
 }
 
@@ -208,15 +782,19 @@ void scoundrel_operative_t::init_benefits()
 
 void scoundrel_operative_t::init_buffs()
 {
-    player_t::init_buffs();
-
-    // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-    // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-    // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-
-    //bool is_juggernaut = ( type == SITH_MARAUDER );
+  player_t::init_buffs();
 
 
+  // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
+  // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
+  // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
+
+  //bool is_juggernaut = ( type == SITH_MARAUDER );
+
+  buffs.tactical_advantage = new buff_t( this, "tactical_advantage", 2, from_seconds( 10 ) );
+  buffs.acid_blade_coating = new buff_t( this, "acid_blade_coating", 1, from_seconds( 20 ) );
+  buffs.acid_blade_arpen = new buff_t( this, "acid_blade_arpen", 1, from_seconds( 15 ) );
+  buffs.stealth = new buff_t( this, "stealth", 1);
 
 }
 
@@ -224,7 +802,12 @@ void scoundrel_operative_t::init_buffs()
 
 void scoundrel_operative_t::init_gains()
 {
-    player_t::init_gains();
+  player_t::init_gains();
+
+  gains.low                     = get_gain( "low"              );
+  gains.med                     = get_gain( "med"              );
+  gains.high                    = get_gain( "high"             );
+  gains.adrenaline_probe        = get_gain( "adrenaline_probe" );
 
 }
 
@@ -232,7 +815,7 @@ void scoundrel_operative_t::init_gains()
 
 void scoundrel_operative_t::init_procs()
 {
-    player_t::init_procs();
+  player_t::init_procs();
 
 }
 
@@ -240,7 +823,9 @@ void scoundrel_operative_t::init_procs()
 
 void scoundrel_operative_t::init_rng()
 {
-    player_t::init_rng();
+  player_t::init_rng();
+
+  rngs.collateral_strike = get_rng("collateral_strike");
 
 }
 
@@ -248,77 +833,167 @@ void scoundrel_operative_t::init_rng()
 
 void scoundrel_operative_t::init_actions()
 {
-    //======================================================================================
-    //
-    //   Please Mirror all changes between Jedi Shadow and Sith Assassin!!!
-    //
-    //======================================================================================
+  //======================================================================================
+  //
+  //   Please Mirror all changes between Jedi Shadow and Sith Assassin!!!
+  //
+  //======================================================================================
 
-    if ( action_list_str.empty() )
+  if ( action_list_str.empty() )
+  {
+    if ( type == IA_OPERATIVE )
     {
-        if ( type == IA_OPERATIVE )
-        {
-            action_list_str += "stim,type=exotech_resolve";
-            action_list_str += "/snapshot_stats";
+      action_list_str += "stim,type=exotech_resolve";
+      action_list_str += "/snapshot_stats";
+      action_list_str += "/shiv";
+      action_list_str += "/backstab";
+      action_list_str += "/hidden_strike";
+      action_list_str += "/laceration";
+      action_list_str += "/rifleshot";
+      action_list_str += "/overload";
 
-            switch ( primary_tree() )
-            {
+      switch ( primary_tree() )
+      {
 
 
-            default: break;
-            }
+      default: break;
+      }
 
-            action_list_default = 1;
-        }
-
-        // S_SCOUNDREL
-        else
-        {
-            action_list_str += "stim,type=exotech_resolve";
-            action_list_str += "/snapshot_stats";
-
-            switch ( primary_tree() )
-            {
-
-            default: break;
-            }
-
-            action_list_default = 1;
-        }
+      action_list_default = 1;
     }
 
-    player_t::init_actions();
+    // S_SCOUNDREL
+    else
+    {
+      action_list_str += "stim,type=exotech_resolve";
+      action_list_str += "/snapshot_stats";
+
+      switch ( primary_tree() )
+      {
+
+      default: break;
+      }
+
+      action_list_default = 1;
+    }
+  }
+
+  player_t::init_actions();
 }
 
 // scoundrel_operative_t::primary_resource ==================================================
 
 resource_type scoundrel_operative_t::primary_resource() const
-{ return RESOURCE_FORCE; }
+{ return RESOURCE_ENERGY; }
 
 // scoundrel_operative_t::primary_role ==================================================
 
 role_type scoundrel_operative_t::primary_role() const
 {
-    switch ( player_t::primary_role() )
-    {
-    case ROLE_TANK:
-        return ROLE_TANK;
-    case ROLE_DPS:
-    case ROLE_HYBRID:
-        return ROLE_HYBRID;
-    default:
-
-        break;
-    }
-
+  switch ( player_t::primary_role() )
+  {
+  case ROLE_TANK:
+    return ROLE_TANK;
+  case ROLE_DPS:
+  case ROLE_HYBRID:
     return ROLE_HYBRID;
+  default:
+     if ( primary_tree() == TREE_MEDICINE )
+        return ROLE_HYBRID; // not healer?
+     if ( primary_tree() == TREE_CONCEALMENT )
+       return ROLE_DPS;
+     if ( primary_tree() == TREE_LETHALITY )
+       return ROLE_DPS;
+
+    break;
+  }
+
+  return ROLE_HYBRID;
+}
+
+// scoundrel_operative_t::armor_penetration ======================================
+
+double scoundrel_operative_t::armor_penetration() const
+{
+  double arpen = player_t::armor_penetration();
+  if ( buffs.acid_blade_arpen->up() )
+  {
+    arpen *= 1.3;
+  }
+  return arpen;
+}
+// scoundrel_operative_t::energy_regen_per_second ================================
+
+double scoundrel_operative_t::energy_regen_per_second()
+{
+  return regen( timespan_t::zero(), true );
+}
+
+void scoundrel_operative_t::regen( timespan_t periodicity )
+{
+  regen( periodicity, false );
+}
+
+double scoundrel_operative_t::regen( timespan_t periodicity, bool rps_only )
+{
+  double seconds = to_seconds( periodicity );
+  double regen_per_second = 0;
+
+  if ( resource_current[ RESOURCE_ENERGY ] < 20 )
+  {
+    regen_per_second += 2;
+    if( !rps_only )
+       resource_gain( RESOURCE_ENERGY, seconds * 2, gains.low );
+  }
+  else if ( resource_current[ RESOURCE_ENERGY ] < 60 )
+  {
+    regen_per_second += 3;
+    if( !rps_only )
+       resource_gain( RESOURCE_ENERGY, seconds * 3, gains.med );
+  }
+  else
+  {
+    regen_per_second += 5;
+    if( !rps_only )
+      resource_gain( RESOURCE_ENERGY, seconds * 5, gains.high );
+  }
+
+  player_t::regen( periodicity );
+  // TODO BUG: if there is a base RPS then it is not added here and needs to be.
+  // since we don't have a base for Operatives it's a silent bug.
+  return regen_per_second;
 }
 
 // scoundrel_operative_t::create_talents ==================================================
 
 void scoundrel_operative_t::create_talents()
 {
-  // See sage_sorcerer_t::create_talents()
+  // Medicine
+  static const talentinfo_t medicine_tree[] = {
+    { "Incisive Action", 2 }, { "Precision Instruments", 2 }, { "Imperial Education", 3 },
+    { "Endorphin Rush", 2 }, { "Medical Consult", 3 }, { "Surgical Steadiness", 2 }, { "Chem-resistant Inlays", 2 },
+    // and the rest
+  };
+  init_talent_tree(IA_OPERATIVE_MEDICINE, medicine_tree );
+
+  // Concealment
+  static const talentinfo_t concealment_tree[] = {
+    { "Concealed Attacks", 2 }, { "Imperial Brew", 3 }, {"Survival Training", 3},
+    { "Infiltrator", 3 }, { "Surgical Strikes", 2 }, { "Inclement Conditioning", 2 }, { "Scouting", 2 },
+    { "Flanking", 1 }, { "Laceration", 1 }, {"Collateral Strike", 2 }, { "Revitalizers", 1 },
+    { "Pin Down", 2 }, { "Tactical Opportunity", 2 }, { "Energy Screen", 1 },
+    { "Waylay", 1 }, { "Culling", 2 }, { "Advanced Cloaking", 2 },
+    { "Meticulously Kept Blades", 3 }, { "Jarring Strike", 2 }, { "Acid Blade", 1 },
+  };
+  init_talent_tree(IA_OPERATIVE_CONCEALMENT , concealment_tree );
+
+  // Concealment
+  static const talentinfo_t lethality_tree[] = {
+    { "Deadly Directive", 2 }, { "Lethality", 3 }, { "Razor Edge", 2 },
+    { "Slip Away", 2 }, { "Flash Powder", 2 }, { "Corrosive Microbes", 2 }, { "Lethal Injectors", 1 },
+  };
+  init_talent_tree(IA_OPERATIVE_LETHALITY, lethality_tree );
+
 }
 
 // ==========================================================================
@@ -329,14 +1004,14 @@ void scoundrel_operative_t::create_talents()
 
 player_t* player_t::create_scoundrel( sim_t* sim, const std::string& name, race_type r )
 {
-    return new scoundrel_operative_t( sim, S_SCOUNDREL, name, r );
+  return new scoundrel_operative_t( sim, S_SCOUNDREL, name, r );
 }
 
 // player_t::create_operative ==========================================
 
 player_t* player_t::create_operative( sim_t* sim, const std::string& name, race_type r )
 {
-    return new scoundrel_operative_t( sim, IA_OPERATIVE, name, r );
+  return new scoundrel_operative_t( sim, IA_OPERATIVE, name, r );
 }
 
 // player_t::scoundrel_operative_init ===========================================

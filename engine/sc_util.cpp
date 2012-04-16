@@ -546,6 +546,15 @@ talent_tree_type util_t::talent_tree( talent_tab_type tree, player_type ptype )
       default: break;
       }
     break;
+    case IA_OPERATIVE:
+      switch ( tree )
+      {
+      case IA_OPERATIVE_MEDICINE: return TREE_MEDICINE;
+      case IA_OPERATIVE_CONCEALMENT:  return TREE_CONCEALMENT;
+      case IA_OPERATIVE_LETHALITY:    return TREE_LETHALITY;
+      default: break;
+      }
+    break;
     default:
       break;
   }
@@ -575,6 +584,10 @@ const char* util_t::talent_tree_string( talent_tree_type tree, bool armory_forma
     // SITH_ASSASSIN
     case TREE_DARKNESS:       return "darkness";
     case TREE_DECEPTION:      return "deception";
+    // IA_OPERATIVE
+    case TREE_MEDICINE:       return "medicine";
+    case TREE_CONCEALMENT:    return "concealment";
+    case TREE_LETHALITY:      return "lethality";
     default:                  return "unknown";
     }
   }
@@ -596,6 +609,10 @@ const char* util_t::talent_tree_string( talent_tree_type tree, bool armory_forma
     // SITH_ASSASSIN
     case TREE_DARKNESS:       return "Darkness";
     case TREE_DECEPTION:      return "Deception";
+    // IA_OPERATIVE
+    case TREE_MEDICINE:       return "Medicine";
+    case TREE_CONCEALMENT:    return "Concealment";
+    case TREE_LETHALITY:      return "Lethality";
     default:                  return "Unknown";
     }
   }
