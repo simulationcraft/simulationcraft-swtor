@@ -2366,8 +2366,6 @@ public:
   double base_armor_penetration;
 
   // Resource Regen
-  double base_energy_regen_per_second;
-  double base_ammo_regen_per_second;
   double base_force_regen_per_second;
   double resource_reduction[ SCHOOL_MAX ], initial_resource_reduction[ SCHOOL_MAX ];
 
@@ -2656,7 +2654,9 @@ public:
   virtual void combat_end();
   virtual void merge( player_t& other );
 
-  virtual double energy_regen_per_second();
+  // The XXX_regen_per_second() methods are used only to implement the "XXX.regen" action expression.
+  // They should return a good approximation of the current rate of regen including all buffs.
+  virtual double energy_regen_per_second() const;
   virtual double ammo_regen_per_second() const;
   virtual double force_regen_per_second() const;
 

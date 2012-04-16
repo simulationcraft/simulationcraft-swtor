@@ -279,7 +279,7 @@ player_t::player_t( sim_t*             s,
   base_armor_penetration( 0 ),
 
   // Resource Regen
-  base_energy_regen_per_second( 0 ), base_ammo_regen_per_second( 0 ), base_force_regen_per_second( 0 ),
+  base_force_regen_per_second( 0 ),
 
   position( POSITION_BACK ),
 
@@ -1431,12 +1431,12 @@ double player_t::get_attribute( attribute_type a ) const
 // player_t::energy_regen_per_second() ======================================
 
 double player_t::energy_regen_per_second()
-{ return base_energy_regen_per_second; }
+{ return 0; }
 
 // player_t::ammo_regen_per_second() ========================================
 
 double player_t::ammo_regen_per_second() const
-{ return base_ammo_regen_per_second; }
+{ return 0; }
 
 // player_t::force_regen_per_second() =======================================
 
@@ -2372,33 +2372,8 @@ action_t* player_t::execute_action()
 
 void player_t::regen( const timespan_t periodicity )
 {
-  const resource_type r = primary_resource();
-  double base = 0;
-  gain_t* gain = nullptr;
-
-  switch( r )
-  {
-  case RESOURCE_ENERGY:
-    base = base_energy_regen_per_second;
-    gain = gains.energy_regen;
-    break;
-
-  case RESOURCE_FORCE:
-    base = base_force_regen_per_second;
-    gain = gains.force_regen;
-    break;
-
-  case RESOURCE_AMMO:
-    base = base_ammo_regen_per_second;
-    gain = gains.ammo_regen;
-    break;
-
-  default:
-    break;
-  }
-
-  if ( gain && base )
-    resource_gain( r, to_seconds( base * periodicity ), gain );
+  if ( primary_resource() == RESOURCE_FORCE )
+    resource_gain( RESOURCE_FORCE, base_force_regen_per_second * to_seconds( periodicity ), gains.force_regen );
 
   const unsigned index = to_seconds<unsigned>( sim -> current_time );
 

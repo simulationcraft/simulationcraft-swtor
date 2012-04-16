@@ -10,17 +10,17 @@ struct scoundrel_operative_targetdata_t : public targetdata_t
   dot_t dot_corrosive_dart;
   dot_t dot_adrenaline_probe;
   dot_t dot_acid_blade_poison;
-  scoundrel_operative_targetdata_t( player_t& source, player_t& target )
-  : targetdata_t( source, target ),
-    dot_corrosive_dart("corrosive_dart", &source),
-    dot_adrenaline_probe("adrenaline_probe", &source),
-    dot_acid_blade_poison("acid_blade_poison", &source)
+
+  scoundrel_operative_targetdata_t( player_t& source, player_t& target ) :
+    targetdata_t( source, target ),
+    dot_corrosive_dart( "corrosive_dart", &source ),
+    dot_adrenaline_probe( "adrenaline_probe", &source ),
+    dot_acid_blade_poison( "acid_blade_poison", &source )
   {
     add( dot_corrosive_dart );
     add( dot_adrenaline_probe );
     add( dot_acid_blade_poison );
   }
-
 };
 
 
@@ -33,19 +33,17 @@ struct scoundrel_operative_t : public player_t
   // Buffs
   struct buffs_t
   {
-  // buffs from talents
-  buff_t* revitalizers;
-  buff_t* acid_blade_coating;
-  buff_t* acid_blade_arpen;
-  //buff_t* advanced_cloaking;
+    // buffs from talents
+    buff_t* revitalizers;
+    buff_t* acid_blade_coating;
+    buff_t* acid_blade_arpen;
+    //buff_t* advanced_cloaking;
 
-  // core buffs
-  buff_t* stealth;
-  buff_t* stim_boost;
-  buff_t* tactical_advantage;
-  //buff_t* cloaking_screen;
-  
-
+    // core buffs
+    buff_t* stealth;
+    buff_t* stim_boost;
+    buff_t* tactical_advantage;
+    //buff_t* cloaking_screen;
   } buffs;
 
   // Gains
@@ -55,93 +53,85 @@ struct scoundrel_operative_t : public player_t
     gain_t* med;
     gain_t* high;
     gain_t* adrenaline_probe;
-
   } gains;
 
   // Procs
   struct procs_t
   {
-
   } procs;
 
   // RNGs
   struct rngs_t
   {
     rng_t* collateral_strike;
-
   } rngs;
 
   // Benefits
   struct benefits_t
   {
-
   } benefits;
 
   // Cooldowns
   struct cooldowns_t
   {
-
   } cooldowns;
 
   // Talents
   struct talents_t
   {
     // Medicine|Sawbones
-  talent_t* incisive_action;
-  talent_t* precision_instruments;
-  talent_t* imperial_education;
-  talent_t* endorphin_rush;
-  talent_t* medical_consult;
-  talent_t* surical_steadiness;
-  talent_t* chem_resistant_inlays;
+    talent_t* incisive_action;
+    talent_t* precision_instruments;
+    talent_t* imperial_education;
+    talent_t* endorphin_rush;
+    talent_t* medical_consult;
+    talent_t* surical_steadiness;
+    talent_t* chem_resistant_inlays;
 
     // Concealment|Scrapper
-  talent_t* concealed_attacks;
-  talent_t* imperial_brew;
-  talent_t* survival_training;
-  talent_t* infiltrator;
-  talent_t* surgical_strikes;
-  talent_t* inclement_conditioning;
-  talent_t* scouting;
-  talent_t* flanking;
-  talent_t* laceration;
-  talent_t* collateral_strike;
-  talent_t* revitalizers;
-  talent_t* pin_down;
-  talent_t* tactical_opportunity;
-  talent_t* energy_screen;
-  talent_t* waylay;
-  talent_t* culling;
-  talent_t* advanced_cloaking;
-  talent_t* meticulously_kept_blades;
-  talent_t* jarring_strike;
-  talent_t* acid_blade;
+    talent_t* concealed_attacks;
+    talent_t* imperial_brew;
+    talent_t* survival_training;
+    talent_t* infiltrator;
+    talent_t* surgical_strikes;
+    talent_t* inclement_conditioning;
+    talent_t* scouting;
+    talent_t* flanking;
+    talent_t* laceration;
+    talent_t* collateral_strike;
+    talent_t* revitalizers;
+    talent_t* pin_down;
+    talent_t* tactical_opportunity;
+    talent_t* energy_screen;
+    talent_t* waylay;
+    talent_t* culling;
+    talent_t* advanced_cloaking;
+    talent_t* meticulously_kept_blades;
+    talent_t* jarring_strike;
+    talent_t* acid_blade;
 
-  // Lethality|Dirty Fighting
-  talent_t* deadly_directive;
-  talent_t* lethality;
-  talent_t* razor_edge;
-  talent_t* slip_away;
-  talent_t* flash_powder;
-  talent_t* corrosive_microbes;
-  talent_t* lethal_injectors;
-
+    // Lethality|Dirty Fighting
+    talent_t* deadly_directive;
+    talent_t* lethality;
+    talent_t* razor_edge;
+    talent_t* slip_away;
+    talent_t* flash_powder;
+    talent_t* corrosive_microbes;
+    talent_t* lethal_injectors;
   } talents;
 
   scoundrel_operative_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
-    player_t( sim, pt == IA_OPERATIVE ? IA_OPERATIVE: S_SCOUNDREL, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
+    player_t( sim, pt == IA_OPERATIVE ? IA_OPERATIVE : S_SCOUNDREL, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
   {
-
-
     primary_attribute   = ATTR_CUNNING;
-    //secondary_attribute = ATTR_WILLPOWER;
+    secondary_attribute = ATTR_AIM;
 
     create_talents();
     create_options();
   }
 
   // Character Definition
-  virtual targetdata_t* new_targetdata( player_t& target ) // override
+  virtual scoundrel_operative_targetdata_t* new_targetdata( player_t& target ) // override
   { return new scoundrel_operative_targetdata_t( *this, target ); }
 
   virtual action_t* create_action( const std::string& name, const std::string& options );
@@ -154,17 +144,15 @@ struct scoundrel_operative_t : public player_t
   virtual void    init_rng();
   virtual void    init_actions();
   virtual double  armor_penetration() const; // override
-  virtual double  energy_regen_per_second(); // override
-  virtual void    regen( timespan_t periodicity );
-  virtual double  regen( timespan_t periodicity, bool rps_only );
-  virtual         resource_type primary_resource() const;
-  virtual         role_type primary_role() const;
+  virtual double  energy_regen_per_second() const; // override
+  virtual void    regen( timespan_t periodicity ); // override
+  virtual resource_type primary_resource() const;
+  virtual role_type primary_role() const;
           void    create_talents();
 
   virtual void init_scaling()
   {
     player_t::init_scaling();
-    // FIXME what goes here, and what else?
     scales_with[ STAT_TECH_POWER ] = true;
   }
 };
@@ -175,7 +163,7 @@ class scoundrel_operative_action_t : public action_t
 {
 public:
   scoundrel_operative_action_t( const std::string& n, scoundrel_operative_t* player,
-              attack_policy_t policy, resource_type r, school_type s ) :
+                                attack_policy_t policy, resource_type r, school_type s ) :
   action_t( ACTION_ATTACK, n.c_str(), player, policy, r, s )
   {}
 
@@ -186,8 +174,7 @@ public:
   { return static_cast<scoundrel_operative_t*>( player ); }
 
   scoundrel_operative_t* cast() const
-      { return p(); }
-
+  { return p(); }
 };
 
 // ==========================================================================
@@ -216,15 +203,13 @@ struct scoundrel_operative_tech_attack_t : public scoundrel_operative_action_t
   scoundrel_operative_tech_attack_t( const std::string& n, scoundrel_operative_t* p, school_type s=SCHOOL_KINETIC ) :
     scoundrel_operative_action_t( n, p, tech_policy, RESOURCE_ENERGY, s )
   {
-    may_crit   = true;
+    may_crit = true;
   }
 
   virtual void execute()
   {
-    scoundrel_operative_t* p = cast();
-    if ( p -> buffs.stealth -> up() )
-      p -> buffs.stealth -> decrement();
     scoundrel_operative_action_t::execute();
+    cast() -> buffs.stealth -> expire();
   }
 
 };
@@ -233,10 +218,9 @@ struct scoundrel_operative_tech_attack_t : public scoundrel_operative_action_t
 struct acid_blade_poison_t : public scoundrel_operative_tech_attack_t
 {
   acid_blade_poison_t( scoundrel_operative_t* p, const std::string& n ) :
-    scoundrel_operative_tech_attack_t(n, p, SCHOOL_INTERNAL)
+    scoundrel_operative_tech_attack_t( n, p, SCHOOL_INTERNAL )
   {
-
-    td.standardhealthpercentmin =  td.standardhealthpercentmax = 0.31;
+    td.standardhealthpercentmin = td.standardhealthpercentmax = 0.31;
     td.power_mod = 0.31;
     background = true;
     use_off_gcd = true;
@@ -244,7 +228,6 @@ struct acid_blade_poison_t : public scoundrel_operative_tech_attack_t
 
     num_ticks = 6;
     base_tick_time = from_seconds( 1.0 );
-
   }
 };
 
@@ -257,7 +240,7 @@ struct scoundrel_operative_consume_acid_blade_attack_t : public scoundrel_operat
   scoundrel_operative_consume_acid_blade_attack_t( const std::string& n, scoundrel_operative_t* p, school_type s=SCHOOL_KINETIC ) :
     scoundrel_operative_tech_attack_t( n, p, s )
   {
-    acid_blade_poison = new acid_blade_poison_t(p, "acid_blade_poison");
+    acid_blade_poison = new acid_blade_poison_t( p, "acid_blade_poison" );
   }
 
   virtual void execute()
@@ -296,7 +279,7 @@ struct scoundrel_operative_range_attack_t : public scoundrel_operative_action_t
 struct acid_blade_t : public scoundrel_operative_action_t
 {
   acid_blade_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_action_t(n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE)
+    scoundrel_operative_action_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE )
   {
     parse_options( 0, options_str );
 
@@ -487,8 +470,8 @@ struct collateral_strike_t : public scoundrel_operative_tech_attack_t
     // FIXME no idea how to get the dots. it works in the action list as dot.corrosive_dart.remains so how to check here?
     log_t::output( p->sim, "XXX %f\n",to_seconds( target -> get_dot("corrosive_dart") -> remains() ));
     if (
-        to_seconds( p -> get_dot("corrosive_dart") -> remains() ) > 0 
-        || to_seconds( p -> get_dot("acid_blade_poison") -> remains() ) > 0 
+        to_seconds( p -> get_dot("corrosive_dart") -> remains() ) > 0
+        || to_seconds( p -> get_dot("acid_blade_poison") -> remains() ) > 0
         )
     {
       p -> buffs.tactical_advantage -> trigger();
@@ -790,12 +773,9 @@ void scoundrel_operative_t::init_base()
 {
   player_t::init_base();
 
-  default_distance = 3;
-  distance = default_distance;
+  distance = default_distance = 3;
 
-  base_energy_regen_per_second = 0;
-  resource_base[RESOURCE_ENERGY] += 100; // TODO 4 piece bonus adds 5 energy
-
+  resource_base[ RESOURCE_ENERGY ] += 100; // TODO 4 piece bonus adds 5 energy
 }
 
 // scoundrel_operative_t::init_benefits =======================================================
@@ -803,7 +783,6 @@ void scoundrel_operative_t::init_base()
 void scoundrel_operative_t::init_benefits()
 {
   player_t::init_benefits();
-
 }
 
 // scoundrel_operative_t::init_buffs =======================================================
@@ -812,18 +791,15 @@ void scoundrel_operative_t::init_buffs()
 {
   player_t::init_buffs();
 
-
   // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-  // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
 
   //bool is_juggernaut = ( type == SITH_MARAUDER );
 
   buffs.tactical_advantage = new buff_t( this, "tactical_advantage", 2, from_seconds( 10 ) );
   buffs.acid_blade_coating = new buff_t( this, "acid_blade_coating", 1, from_seconds( 20 ) );
   buffs.acid_blade_arpen = new buff_t( this, "acid_blade_arpen", 1, from_seconds( 15 ) );
-  buffs.stealth = new buff_t( this, "stealth", 1);
-
+  buffs.stealth = new buff_t( this, "stealth", 1 );
 }
 
 // scoundrel_operative_t::init_gains =======================================================
@@ -844,7 +820,6 @@ void scoundrel_operative_t::init_gains()
 void scoundrel_operative_t::init_procs()
 {
   player_t::init_procs();
-
 }
 
 // scoundrel_operative_t::init_rng =========================================================
@@ -853,8 +828,7 @@ void scoundrel_operative_t::init_rng()
 {
   player_t::init_rng();
 
-  rngs.collateral_strike = get_rng("collateral_strike");
-
+  rngs.collateral_strike = get_rng( "collateral_strike" );
 }
 
 // scoundrel_operative_t::init_actions =====================================================
@@ -933,12 +907,11 @@ role_type scoundrel_operative_t::primary_role() const
     return ROLE_HYBRID;
   default:
      if ( primary_tree() == TREE_MEDICINE )
-        return ROLE_HYBRID; // not healer?
+        return ROLE_HEAL;
      if ( primary_tree() == TREE_CONCEALMENT )
        return ROLE_DPS;
      if ( primary_tree() == TREE_LETHALITY )
        return ROLE_DPS;
-
     break;
   }
 
@@ -950,52 +923,56 @@ role_type scoundrel_operative_t::primary_role() const
 double scoundrel_operative_t::armor_penetration() const
 {
   double arpen = player_t::armor_penetration();
-  if ( buffs.acid_blade_arpen->up() )
-  {
-    arpen *= 1.3;
-  }
+
+  if ( buffs.acid_blade_arpen -> up() )
+    arpen += 0.3;
+
   return arpen;
 }
+
 // scoundrel_operative_t::energy_regen_per_second ================================
 
-double scoundrel_operative_t::energy_regen_per_second()
+double scoundrel_operative_t::energy_regen_per_second() const
 {
-  return regen( timespan_t::zero(), true );
+  double eps;
+
+  if ( resource_current[ RESOURCE_ENERGY ] < 0.2 * resource_max[ RESOURCE_ENERGY ] )
+    eps = 2;
+  else if ( resource_current[ RESOURCE_ENERGY ] < 0.6 * resource_max[ RESOURCE_ENERGY ] )
+    eps = 3;
+  else
+    eps = 5;
+
+  if ( buffs.stim_boost -> check() )
+    eps += 1;
+
+  return eps;
 }
 
 void scoundrel_operative_t::regen( timespan_t periodicity )
 {
-  regen( periodicity, false );
-}
+  double regen_per_second;
+  gain_t* gain;
 
-double scoundrel_operative_t::regen( timespan_t periodicity, bool rps_only )
-{
-  double seconds = to_seconds( periodicity );
-  double regen_per_second = 0;
-
-  if ( resource_current[ RESOURCE_ENERGY ] < 20 )
+  if ( resource_current[ RESOURCE_ENERGY ] < 0.2 * resource_max[ RESOURCE_ENERGY ] )
   {
-    regen_per_second += 2;
-    if( !rps_only )
-       resource_gain( RESOURCE_ENERGY, seconds * 2, gains.low );
+    regen_per_second = 2;
+    gain = gains.low;
   }
-  else if ( resource_current[ RESOURCE_ENERGY ] < 60 )
+  else if ( resource_current[ RESOURCE_ENERGY ] < 0.6 * resource_max[ RESOURCE_ENERGY ] )
   {
-    regen_per_second += 3;
-    if( !rps_only )
-       resource_gain( RESOURCE_ENERGY, seconds * 3, gains.med );
+    regen_per_second = 3;
+    gain = gains.med;
   }
   else
   {
-    regen_per_second += 5;
-    if( !rps_only )
-      resource_gain( RESOURCE_ENERGY, seconds * 5, gains.high );
+    regen_per_second = 5;
+    gain = gains.high;
   }
 
+  resource_gain( RESOURCE_ENERGY, to_seconds( periodicity ) * regen_per_second, gain );
+
   player_t::regen( periodicity );
-  // TODO BUG: if there is a base RPS then it is not added here and needs to be.
-  // since we don't have a base for Operatives it's a silent bug.
-  return regen_per_second;
 }
 
 // scoundrel_operative_t::create_talents ==================================================
