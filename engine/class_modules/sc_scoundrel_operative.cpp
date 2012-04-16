@@ -144,8 +144,11 @@ struct scoundrel_operative_t : public player_t
   virtual void    init_rng();
   virtual void    init_actions();
   virtual double  armor_penetration() const; // override
+
+  std::pair<int,gain_t*> energy_regen_bracket() const;
   virtual double  energy_regen_per_second() const; // override
   virtual void    regen( timespan_t periodicity ); // override
+
   virtual resource_type primary_resource() const;
   virtual role_type primary_role() const;
           void    create_talents();
@@ -907,7 +910,7 @@ role_type scoundrel_operative_t::primary_role() const
   return ROLE_HYBRID;
 }
 
-// scoundrel_operative_t::armor_penetration ======================================
+// scoundrel_operative_t::armor_penetration =================================
 
 double scoundrel_operative_t::armor_penetration() const
 {
@@ -919,18 +922,23 @@ double scoundrel_operative_t::armor_penetration() const
   return arpen;
 }
 
-// scoundrel_operative_t::energy_regen_per_second ================================
+// scoundrel_operative_t::energy_regen_bracket ==============================
+
+std::pair<int,gain_t*> scoundrel_operative_t::energy_regen_bracket() const
+{
+  if ( resource_current[ RESOURCE_ENERGY ] < 0.2 * resource_max[ RESOURCE_ENERGY ] )
+    return std::make_pair( 2, gains.low );
+  else if ( resource_current[ RESOURCE_ENERGY ] < 0.6 * resource_max[ RESOURCE_ENERGY ] )
+    return std::make_pair( 3, gains.med );
+  else
+    return std::make_pair( 5, gains.high );
+}
+
+// scoundrel_operative_t::energy_regen_per_second ===========================
 
 double scoundrel_operative_t::energy_regen_per_second() const
 {
-  double eps;
-
-  if ( resource_current[ RESOURCE_ENERGY ] < 0.2 * resource_max[ RESOURCE_ENERGY ] )
-    eps = 2;
-  else if ( resource_current[ RESOURCE_ENERGY ] < 0.6 * resource_max[ RESOURCE_ENERGY ] )
-    eps = 3;
-  else
-    eps = 5;
+  double eps = energy_regen_bracket().first;
 
   if ( buffs.stim_boost -> check() )
     eps += 1;
@@ -938,33 +946,18 @@ double scoundrel_operative_t::energy_regen_per_second() const
   return eps;
 }
 
+// scoundrel_operative_t::regen =============================================
+
 void scoundrel_operative_t::regen( timespan_t periodicity )
 {
-  double regen_per_second;
-  gain_t* gain;
+  std::pair<int,gain_t*> r = energy_regen_bracket();
 
-  if ( resource_current[ RESOURCE_ENERGY ] < 0.2 * resource_max[ RESOURCE_ENERGY ] )
-  {
-    regen_per_second = 2;
-    gain = gains.low;
-  }
-  else if ( resource_current[ RESOURCE_ENERGY ] < 0.6 * resource_max[ RESOURCE_ENERGY ] )
-  {
-    regen_per_second = 3;
-    gain = gains.med;
-  }
-  else
-  {
-    regen_per_second = 5;
-    gain = gains.high;
-  }
-
-  resource_gain( RESOURCE_ENERGY, to_seconds( periodicity ) * regen_per_second, gain );
+  resource_gain( RESOURCE_ENERGY, to_seconds( periodicity ) * r.first, r.second );
 
   player_t::regen( periodicity );
 }
 
-// scoundrel_operative_t::create_talents ==================================================
+// scoundrel_operative_t::create_talents ====================================
 
 void scoundrel_operative_t::create_talents()
 {
