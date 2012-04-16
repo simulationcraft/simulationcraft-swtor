@@ -120,8 +120,11 @@ struct scoundrel_operative_t : public player_t
     talent_t* lethal_injectors;
   } talents;
 
+  action_t* acid_blade_poison;
+
   scoundrel_operative_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
-    player_t( sim, pt == IA_OPERATIVE ? IA_OPERATIVE : S_SCOUNDREL, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
+    player_t( sim, pt == IA_OPERATIVE ? IA_OPERATIVE : S_SCOUNDREL, name, ( r == RACE_NONE ) ? RACE_HUMAN : r ),
+    acid_blade_poison()
   {
     primary_attribute   = ATTR_CUNNING;
     secondary_attribute = ATTR_AIM;
@@ -143,6 +146,8 @@ struct scoundrel_operative_t : public player_t
   virtual void    init_procs();
   virtual void    init_rng();
   virtual void    init_actions();
+  virtual void    reset();
+
   virtual double  armor_penetration() const; // override
 
   std::pair<int,gain_t*> energy_regen_bracket() const;
@@ -215,34 +220,14 @@ struct scoundrel_operative_tech_attack_t : public scoundrel_operative_action_t
     p() -> buffs.stealth -> expire();
   }
 };
-// Acid Blade Poison | ??? ==================================================
-
-struct acid_blade_poison_t : public scoundrel_operative_tech_attack_t
-{
-  acid_blade_poison_t( scoundrel_operative_t* p, const std::string& n ) :
-    scoundrel_operative_tech_attack_t( n, p, SCHOOL_INTERNAL )
-  {
-    td.standardhealthpercentmin = td.standardhealthpercentmax = 0.031;
-    td.power_mod = 0.31;
-    background = true;
-    trigger_gcd = timespan_t::zero();
-
-    num_ticks = 6;
-    base_tick_time = from_seconds( 1.0 );
-  }
-};
 
 // Consume Acid Blade Poison Attack | ??? ===================================
 
 struct scoundrel_operative_consume_acid_blade_attack_t : public scoundrel_operative_tech_attack_t
 {
-  acid_blade_poison_t* acid_blade_poison;
-
   scoundrel_operative_consume_acid_blade_attack_t( const std::string& n, scoundrel_operative_t* p, school_type s=SCHOOL_KINETIC ) :
     scoundrel_operative_tech_attack_t( n, p, s )
-  {
-    acid_blade_poison = new acid_blade_poison_t( p, "acid_blade_poison" );
-  }
+  {}
 
   virtual void execute()
   {
@@ -253,7 +238,10 @@ struct scoundrel_operative_consume_acid_blade_attack_t : public scoundrel_operat
     {
       p -> buffs.acid_blade_coating -> decrement();
       p -> buffs.acid_blade_arpen -> trigger();
-      acid_blade_poison->schedule_execute();
+
+      assert( p -> acid_blade_poison );
+      p -> acid_blade_poison -> target = target;
+      p -> acid_blade_poison -> execute();
     }
   }
 };
@@ -277,8 +265,28 @@ struct scoundrel_operative_range_attack_t : public scoundrel_operative_action_t
 
 struct acid_blade_t : public scoundrel_operative_action_t
 {
+  // Acid Blade Poison | ??? ==================================================
+
+  struct acid_blade_poison_t : public scoundrel_operative_tech_attack_t
+  {
+    acid_blade_poison_t( scoundrel_operative_t* p, const std::string& n ) :
+      scoundrel_operative_tech_attack_t( n, p, SCHOOL_INTERNAL )
+    {
+      td.standardhealthpercentmin = td.standardhealthpercentmax = 0.031;
+      td.power_mod = 0.31;
+      background = true;
+      trigger_gcd = timespan_t::zero();
+
+      num_ticks = 6;
+      base_tick_time = from_seconds( 1.0 );
+    }
+  };
+
+  acid_blade_poison_t* poison;
+
   acid_blade_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_action_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE )
+    scoundrel_operative_action_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_INTERNAL ),
+    poison( new acid_blade_poison_t( p, n + "_poison" ) )
   {
     parse_options( options_str );
 
@@ -288,12 +296,17 @@ struct acid_blade_t : public scoundrel_operative_action_t
     trigger_gcd = timespan_t::zero();
 
     harmful = false;
+
+    add_child( poison );
   }
 
   virtual void execute()
   {
     scoundrel_operative_action_t::execute();
-    p() -> buffs.acid_blade_coating -> trigger();
+
+    scoundrel_operative_t* p = cast();
+    p -> buffs.acid_blade_coating -> trigger();
+    p -> acid_blade_poison = poison;
   }
 };
 
@@ -884,12 +897,17 @@ void scoundrel_operative_t::init_actions()
   player_t::init_actions();
 }
 
-// scoundrel_operative_t::primary_resource ==================================================
+// scoundrel_operative_t::reset =============================================
+
+void scoundrel_operative_t::reset()
+{ acid_blade_poison = 0; }
+
+// scoundrel_operative_t::primary_resource ==================================
 
 resource_type scoundrel_operative_t::primary_resource() const
 { return RESOURCE_ENERGY; }
 
-// scoundrel_operative_t::primary_role ==================================================
+// scoundrel_operative_t::primary_role ======================================
 
 role_type scoundrel_operative_t::primary_role() const
 {
