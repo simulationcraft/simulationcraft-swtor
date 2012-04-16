@@ -617,11 +617,13 @@ struct corrosive_dart_t : public scoundrel_operative_tech_attack_t
     range = 30.0;
 
     td.standardhealthpercentmin = td.standardhealthpercentmax = 0.04;
-    td.power_mod = 0.04;
+    td.power_mod = 0.4;
 
     num_ticks = 3;
     base_tick_time = from_seconds( 3.0 );
   }
+
+  // FIXME: Implement Lethal Injectors and Corrosive Microbes.
 };
 
 // Rifle Shot | ??? =========================================================
@@ -631,8 +633,8 @@ struct rifle_shot_t : public scoundrel_operative_range_attack_t
   rifle_shot_t* second_strike;
 
   rifle_shot_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str,
-      bool is_consequent_strike = false ) :
-    scoundrel_operative_range_attack_t(n, p), second_strike( 0 )
+                bool is_consequent_strike = false ) :
+    scoundrel_operative_range_attack_t( n, p ), second_strike( 0 )
   {
     parse_options( 0, options_str );
 
