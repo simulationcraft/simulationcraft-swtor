@@ -392,7 +392,7 @@ struct shiv_t : public scoundrel_operative_tech_attack_t
   {
     //rank_level_list = { 2, 50 }; // FIXME will default to current level.
 
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     base_cost = 15;
     cooldown -> duration = from_seconds( 6.0 );
@@ -420,10 +420,11 @@ struct shiv_t : public scoundrel_operative_tech_attack_t
 
 struct backstab_t : public scoundrel_operative_consume_acid_blade_attack_t
 {
-
   backstab_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
     scoundrel_operative_consume_acid_blade_attack_t( n, p )
   {
+    rank_level_list = { 10, 13, 17, 23, 35, 47, 50 };
+
     parse_options( options_str );
 
     base_cost = 10;
