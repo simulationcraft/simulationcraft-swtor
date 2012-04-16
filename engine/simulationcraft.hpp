@@ -3213,9 +3213,10 @@ public:
             resource_type r=RESOURCE_NONE, school_type s=SCHOOL_NONE );
   virtual ~action_t();
 
-  //void parse_data();
-  //void parse_effect_data( int spell_id, int effect_nr );
   virtual void   parse_options( option_t*, const std::string& options_str );
+          void   parse_options( const std::string& options_str )
+  { parse_options( nullptr, options_str ); }
+
   virtual double cost() const;
   virtual double alacrity() const;
   virtual timespan_t gcd() const;
