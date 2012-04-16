@@ -2176,7 +2176,7 @@ void player_t::schedule_ready( timespan_t delta_time,
                      name_str.c_str(),
                      was_executing -> name_str.c_str(),
                      to_seconds( readying -> occurs() ),
-                     to_seconds( cast_delay_reaction ) );
+                     to_seconds( cast_delay_reaction >= timespan_t::zero() ? cast_delay_reaction : timespan_t::zero() ) );
     }
   }
 }
