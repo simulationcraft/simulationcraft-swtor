@@ -222,7 +222,7 @@ struct acid_blade_poison_t : public scoundrel_operative_tech_attack_t
   acid_blade_poison_t( scoundrel_operative_t* p, const std::string& n ) :
     scoundrel_operative_tech_attack_t( n, p, SCHOOL_INTERNAL )
   {
-    td.standardhealthpercentmin = td.standardhealthpercentmax = 0.31;
+    td.standardhealthpercentmin = td.standardhealthpercentmax = 0.031;
     td.power_mod = 0.31;
     background = true;
     trigger_gcd = timespan_t::zero();
