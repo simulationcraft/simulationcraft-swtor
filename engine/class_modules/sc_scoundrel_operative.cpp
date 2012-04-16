@@ -607,9 +607,11 @@ struct fragmentation_grenade_t : public scoundrel_operative_tech_attack_t
 struct corrosive_dart_t : public scoundrel_operative_tech_attack_t
 {
   corrosive_dart_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_tech_attack_t(n, p, SCHOOL_INTERNAL)
+    scoundrel_operative_tech_attack_t( n, p, SCHOOL_INTERNAL )
   {
-    parse_options( 0, options_str );
+    rank_level_list = { 5, 7, 10, 13, 17, 23, 35, 45, 50 };
+
+    parse_options( options_str );
 
     base_cost = 20;
     range = 30.0;
