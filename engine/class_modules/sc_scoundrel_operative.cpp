@@ -388,9 +388,9 @@ struct stealth_t : public scoundrel_operative_action_t
 struct shiv_t : public scoundrel_operative_tech_attack_t
 {
   shiv_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_tech_attack_t(n, p)
+    scoundrel_operative_tech_attack_t( n, p )
   {
-    //rank_level_list = { 2, 50 }; // FIXME will default to current level.
+    rank_level_list = { 2, 5, 8, 11, 14, 19, 29, 38, 50 };
 
     parse_options( options_str );
 
@@ -402,7 +402,7 @@ struct shiv_t : public scoundrel_operative_tech_attack_t
     dd.standardhealthpercentmax = 0.188;
     dd.power_mod = 1.68;
 
-    base_multiplier *= 1 + p->talents.surgical_strikes->rank() * 0.02;
+    base_multiplier += p->talents.surgical_strikes->rank() * 0.02;
   }
 
   virtual void execute()
@@ -549,6 +549,8 @@ struct hidden_strike_t : public scoundrel_operative_consume_acid_blade_attack_t
   hidden_strike_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
     scoundrel_operative_consume_acid_blade_attack_t(n, p)
   {
+    rank_level_list = { 36, 50 };
+
     parse_options( options_str );
 
     base_cost = 17;
@@ -679,7 +681,9 @@ struct overload_shot_t : public scoundrel_operative_range_attack_t
   overload_shot_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str) :
     scoundrel_operative_range_attack_t(n, p)
   {
-    parse_options( 0, options_str );
+    rank_level_list = { 8, 12, 16, 22, 31, 40, 50 };
+
+    parse_options( options_str );
 
     base_cost = 17;
     range = 10.0;
