@@ -206,12 +206,11 @@ struct scoundrel_operative_tech_attack_t : public scoundrel_operative_action_t
     may_crit = true;
   }
 
-  virtual void execute()
+  virtual void execute() // override
   {
     scoundrel_operative_action_t::execute();
-    cast() -> buffs.stealth -> expire();
+    p() -> buffs.stealth -> expire();
   }
-
 };
 // Acid Blade Poison | ??? ==================================================
 
@@ -223,7 +222,6 @@ struct acid_blade_poison_t : public scoundrel_operative_tech_attack_t
     td.standardhealthpercentmin = td.standardhealthpercentmax = 0.31;
     td.power_mod = 0.31;
     background = true;
-    use_off_gcd = true;
     trigger_gcd = timespan_t::zero();
 
     num_ticks = 6;
@@ -267,10 +265,8 @@ struct scoundrel_operative_range_attack_t : public scoundrel_operative_action_t
 
   virtual void execute()
   {
-    scoundrel_operative_t* p = cast();
-    if ( p -> buffs.stealth -> up() )
-      p -> buffs.stealth -> decrement();
     scoundrel_operative_action_t::execute();
+    p() -> buffs.stealth -> expire();
   }
 };
 
@@ -281,7 +277,7 @@ struct acid_blade_t : public scoundrel_operative_action_t
   acid_blade_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
     scoundrel_operative_action_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE )
   {
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     base_cost = 10;
     cooldown -> duration = from_seconds( 2.0 );
@@ -296,9 +292,8 @@ struct acid_blade_t : public scoundrel_operative_action_t
   virtual void execute()
   {
     scoundrel_operative_action_t::execute();
-    scoundrel_operative_t* p = cast();
-    p -> buffs.acid_blade_coating -> trigger();
-}
+    p() -> buffs.acid_blade_coating -> trigger();
+  }
 };
 
 
@@ -309,7 +304,7 @@ struct adrenaline_probe_t : public scoundrel_operative_action_t
   adrenaline_probe_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
     scoundrel_operative_action_t(n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE)
   {
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     cooldown -> duration = from_seconds( 120 );
     use_off_gcd = true;
@@ -329,7 +324,7 @@ struct adrenaline_probe_t : public scoundrel_operative_action_t
     scoundrel_operative_action_t::execute();
     scoundrel_operative_t* p = cast();
 
-    p -> resource_gain( RESOURCE_ENERGY, 35, p -> gains.adrenaline_probe );
+    p -> resource_gain( RESOURCE_ENERGY, 34, p -> gains.adrenaline_probe );
   }
 
   virtual void tick(dot_t* d)
@@ -345,34 +340,32 @@ struct adrenaline_probe_t : public scoundrel_operative_action_t
 
 struct stealth_t : public scoundrel_operative_action_t
 {
-  bool used;
-
   stealth_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_action_t(n, p, tech_policy, RESOURCE_ENERGY, SCHOOL_NONE), used( false )
+    scoundrel_operative_action_t( n, p, tech_policy, RESOURCE_ENERGY, SCHOOL_NONE )
   {
-    parse_options( 0, options_str );
-    // does trigger gcd, but since we only use it at the start of combat lets make it instant
+    parse_options( options_str );
+
+    // does trigger gcd, but since we only use it out of combat lets make it instant
     trigger_gcd = timespan_t::zero();
-    use_off_gcd = true;
+    harmful = false;
     harmful = false;
   }
 
   virtual bool ready()
   {
-    return ! used;
-  }
+    if ( p() -> in_combat )
+      return false;
 
-  virtual void reset()
-  {
-    scoundrel_operative_action_t::reset();
-    used = false;
+    if ( p() -> buffs.stealth -> check() )
+      return false;
+
+    return scoundrel_operative_action_t::ready();
   }
 
   virtual void execute()
   {
-    scoundrel_operative_t* p = cast();
-    p -> buffs.stealth -> trigger();
-    used = true;
+    p() -> buffs.stealth -> trigger();
+    scoundrel_operative_action_t::execute();
   }
 };
 
