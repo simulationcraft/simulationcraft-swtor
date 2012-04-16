@@ -1430,7 +1430,7 @@ double player_t::get_attribute( attribute_type a ) const
 
 // player_t::energy_regen_per_second() ======================================
 
-double player_t::energy_regen_per_second() const
+double player_t::energy_regen_per_second()
 { return base_energy_regen_per_second; }
 
 // player_t::ammo_regen_per_second() ========================================
