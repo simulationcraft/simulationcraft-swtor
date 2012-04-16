@@ -655,6 +655,16 @@ sim_t::sim_t( sim_t* p, int index ) :
   path_str += DIRECTORY_DELIMITER;
   path_str += "shadow_assassin";
 
+  // scoundrel_operative
+  path_str += "|profiles";
+  path_str += DIRECTORY_DELIMITER;
+  path_str += "scoundrel_operative";
+  path_str += "|..";
+  path_str += DIRECTORY_DELIMITER;
+  path_str += "profiles";
+  path_str += DIRECTORY_DELIMITER;
+  path_str += "scoundrel_operative";
+
   path_str += "|profiles_heal";
 
   path_str += "|..";
