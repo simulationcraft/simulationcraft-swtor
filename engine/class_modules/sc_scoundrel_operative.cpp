@@ -694,10 +694,7 @@ struct rifle_shot_t : public scoundrel_operative_range_attack_t
       trigger_gcd = timespan_t::zero();
     }
     else
-    {
       second_strike = new rifle_shot_t( p, n, options_str, true );
-      add_child( second_strike );
-    }
   }
 
   virtual void execute()
