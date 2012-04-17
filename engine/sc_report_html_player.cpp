@@ -1023,8 +1023,8 @@ static void print_html_stats( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\"></td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             a -> buffed.force_damage_bonus,
-             a -> force_damage_bonus() );
+             a -> buffed.range_damage_bonus,
+             a -> range_damage_bonus() );
 
     fprintf( file,
              "\t\t\t\t\t\t\t\t\t<tr>\n"
