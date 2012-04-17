@@ -10,16 +10,22 @@ struct scoundrel_operative_targetdata_t : public targetdata_t
   dot_t dot_corrosive_dart;
   dot_t dot_adrenaline_probe;
   dot_t dot_acid_blade_poison;
+  dot_t dot_stim_boost;
 
   scoundrel_operative_targetdata_t( player_t& source, player_t& target ) :
     targetdata_t( source, target ),
     dot_corrosive_dart( "corrosive_dart", &source ),
     dot_adrenaline_probe( "adrenaline_probe", &source ),
-    dot_acid_blade_poison( "acid_blade_poison", &source )
+    dot_acid_blade_poison( "acid_blade_poison", &source ),
+    dot_stim_boost( "adrenaline_probe", &source )
   {
     add( dot_corrosive_dart );
     add( dot_adrenaline_probe );
     add( dot_acid_blade_poison );
+    // XXX REVIEW i don't know if this is the right way to do stim boost.
+    // it's a dot that ticks a buff. and i've also created a buff. is that redundant?
+    // can the dot be checked instead of the buff for regen_per_second?
+    add( dot_stim_boost );
   }
 };
 
@@ -53,6 +59,7 @@ struct scoundrel_operative_t : public player_t
     gain_t* med;
     gain_t* high;
     gain_t* adrenaline_probe;
+    gain_t* stim_boost;
   } gains;
 
   // Procs
@@ -713,8 +720,48 @@ struct overload_shot_t : public scoundrel_operative_range_attack_t
 };
 
 // Stim Boost | ??? =========================================================
-// energy and health regen consuming a TA
-// waiting on confirmation on implementation
+struct stim_boost_t : public scoundrel_operative_action_t
+{
+  stim_boost_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
+    scoundrel_operative_action_t(n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE)
+  {
+    parse_options( options_str );
+
+    cooldown -> duration = from_seconds( 35 );
+    use_off_gcd = true;
+    trigger_gcd = timespan_t::zero();
+
+    num_ticks = 15;
+    base_tick_time = from_seconds( 3 );
+
+    harmful = false;
+  }
+
+  virtual bool ready()
+  {
+    if ( ! p() -> buffs.tactical_advantage -> check() )
+      return false;
+
+    return scoundrel_operative_action_t::ready();
+  }
+
+  virtual void tick(dot_t* d)
+  {
+    scoundrel_operative_action_t::tick(d);
+
+    scoundrel_operative_t* p = cast();
+    p -> resource_gain( RESOURCE_ENERGY, 3, p -> gains.stim_boost );
+    // also grants revitalise talented, restoring health. not implemented.
+  }
+
+  virtual void execute()
+  {
+    scoundrel_operative_action_t::execute();
+
+    scoundrel_operative_t* p = cast();
+    p -> buffs.stim_boost -> trigger();
+  }
+};
 
 // Cloaking Screen | ??? ====================================================
 // "vanish" allows reusing hidden strike.
@@ -750,6 +797,7 @@ action_t* scoundrel_operative_t::create_action( const std::string& name,
     if ( name == "rifle_shot" )            return new rifle_shot_t( this, name, options_str );
     if ( name == "shiv" )                  return new shiv_t( this, name, options_str );
     if ( name == "stealth" )               return new stealth_t( this, name, options_str );
+    if ( name == "stim_boost" )            return new stim_boost_t( this, name, options_str );
   }
 
   else if ( type == S_SCOUNDREL )
@@ -880,6 +928,7 @@ void scoundrel_operative_t::init_buffs()
   buffs.acid_blade_coating = new buff_t( this, "acid_blade_coating", 1, from_seconds( 20 ) );
   buffs.acid_blade_arpen = new buff_t( this, "acid_blade_arpen", 1, from_seconds( 15 ) );
   buffs.stealth = new buff_t( this, "stealth", 1 );
+  buffs.stim_boost = new buff_t( this, "stim_boost", 1, from_seconds( 45 ) );
 }
 
 // scoundrel_operative_t::init_gains =======================================================
@@ -892,6 +941,7 @@ void scoundrel_operative_t::init_gains()
   gains.med                     = get_gain( "med"              );
   gains.high                    = get_gain( "high"             );
   gains.adrenaline_probe        = get_gain( "adrenaline_probe" );
+  gains.stim_boost              = get_gain( "stim_boost"       );
 
 }
 
