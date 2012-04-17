@@ -464,7 +464,8 @@ struct shiv_t : public scoundrel_operative_tech_attack_t
     dd.standardhealthpercentmax = 0.188;
     dd.power_mod = 1.68;
 
-    base_multiplier += p->talents.surgical_strikes->rank() * 0.02;
+    base_multiplier += p -> talents.surgical_strikes -> rank() * 0.02 +
+                       p -> talents.razor_edge -> rank() * 0.04;
   }
 
   virtual void execute()
