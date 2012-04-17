@@ -820,7 +820,7 @@ void scoundrel_operative_t::init_talents()
     // t2
   talents.slip_away                 = find_talent( "slip_away" );
   talents.flash_powder              = find_talent( "flash_powder" );
-  talents.corrosive_microbes        = find_talent( "corrosive_microbes" );
+  talents.corrosive_microbes        = find_talent( "Corrosive Microbes" );
   talents.lethal_injectors          = find_talent( "lethal_injectors" );
     // t3
   talents.corrosive_grenades        = find_talent( "corrosive_grenades" );
