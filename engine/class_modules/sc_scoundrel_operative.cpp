@@ -795,6 +795,7 @@ struct stim_boost_t : public scoundrel_operative_action_t
 
     scoundrel_operative_t* p = cast();
     p -> buffs.stim_boost -> trigger();
+    p -> buffs.tactical_advantage -> decrement();
   }
 };
 
