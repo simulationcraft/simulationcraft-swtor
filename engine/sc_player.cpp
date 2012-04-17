@@ -1223,7 +1223,7 @@ void player_t::init_buffs()
 {
   if ( sim -> debug ) log_t::output( sim, "Initializing buffs for player (%s)", name() );
 
-  buffs.power_potion    = new stat_buff_t( this, "power_potion", STAT_POWER, 565.0, 1, from_seconds( 15.0 ), from_seconds( 180.0 ) );
+  buffs.power_potion    = new stat_buff_t( this, "power_potion", STAT_POWER, 0, 1, from_seconds( 15.0 ), from_seconds( 180.0 ) );
   buffs.coordination    = new buff_t( this, "coordination",     1 );
   buffs.unnatural_might = new buff_t( this, "unnatural_might",  1 );
 
