@@ -417,7 +417,7 @@ player_t::~player_t()
 
   // NOTE: Must defend against multiple free()ing, since the same callback
   //       pointer is often registered multiple times.
-  assert( boost::unique( boost::sort( all_callbacks ) ) == all_callbacks.end() );
+  assert( boost::unique<boost::return_found>( boost::sort( all_callbacks ) ) == all_callbacks.end() );
 }
 
 // player_t::init_talent_tree ===============================================
