@@ -592,7 +592,7 @@ struct laceration_t : public scoundrel_operative_tech_attack_t
 struct hidden_strike_t : public scoundrel_operative_consume_acid_blade_attack_t
 {
   hidden_strike_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_consume_acid_blade_attack_t(n, p)
+    scoundrel_operative_consume_acid_blade_attack_t( n, p )
   {
     rank_level_list = { 36, 50 };
 
@@ -612,20 +612,18 @@ struct hidden_strike_t : public scoundrel_operative_consume_acid_blade_attack_t
 
   virtual bool ready()
   {
-    scoundrel_operative_t* p = cast();
+    if ( ! p() -> buffs.stealth -> check() )
+      return false;
 
-    if ( p -> buffs.stealth -> up() )
-      return scoundrel_operative_action_t::ready();
-
-    return false;
+    return scoundrel_operative_action_t::ready();
   }
 
   virtual void execute()
   {
+    scoundrel_operative_t& p = *cast();
+    p.buffs.stealth -> up();
     scoundrel_operative_consume_acid_blade_attack_t::execute();
-
-    scoundrel_operative_t* p = cast();
-    p -> buffs.tactical_advantage -> trigger();
+    p.buffs.tactical_advantage -> trigger();
   }
   // TODO check for talent and trigger knockdown (jarring strike)
 };
@@ -635,19 +633,20 @@ struct hidden_strike_t : public scoundrel_operative_consume_acid_blade_attack_t
 struct fragmentation_grenade_t : public scoundrel_operative_tech_attack_t
 {
   fragmentation_grenade_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_tech_attack_t(n, p)
+    scoundrel_operative_tech_attack_t( n, p )
   {
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     base_cost = 20;
     cooldown -> duration = from_seconds( 6.0 );
     range = 30.0;
 
     dd.standardhealthpercentmin = 0.109;
-    dd.standardhealthpercentmax = 0.249;
+    dd.standardhealthpercentmax = 0.149;
     dd.power_mod = 1.29;
+
+    aoe = 4;
   }
-  // TODO aoe for multiple targets?
 };
 
 // Corrosive Dart | ??? =====================================================
