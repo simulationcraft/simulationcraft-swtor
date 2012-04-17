@@ -1002,29 +1002,30 @@ void scoundrel_operative_t::init_actions()
       action_list_str += "/stealth";
       action_list_str += "/adrenaline_probe,if=energy<=60";
       action_list_str += "/stim_boost,if=buff.tactical_advantage.stack>=2";
+      action_list_str += "/acid_blade,if=!buff.acid_blade_coating.up&!cooldown.backstab.remains";
+      action_list_str += "/hidden_strike,if=buff.acid_blade_coating.up";
+      action_list_str += "/backstab,if=buff.acid_blade_coating.up";
+      action_list_str += "/corrosive_dart,if=!ticking&energy>=75";
+      action_list_str += "/shiv,if=energy>=75&buff.tactical_advantage.stack<2";
+      action_list_str += "/laceration,if=energy>=75&buff.tactical_advantage.stack>=2";
+      action_list_str += "/overload_shot,if=energy=100";
+      action_list_str += "/rifle_shot";
 
+      // FIXME primary tree is returning 0... something wrong
       switch ( primary_tree() )
       {
         case TREE_MEDICINE:
           break;
 
-        case TREE_CONCEALMENT:
-          action_list_str += "/acid_blade,if=!buff.acid_blade_coating.up&!cooldown.backstab.remains";
-          action_list_str += "/hidden_strike,if=buff.acid_blade_coating.up";
-          action_list_str += "/backstab,if=buff.acid_blade_coating.up";
-          action_list_str += "/corrosive_dart,if=!ticking&energy>=75";
-          action_list_str += "/shiv,if=energy>=75&buff.tactical_advantage.stack<2";
-          action_list_str += "/laceration,if=energy>=75&buff.tactical_advantage.stack>=2";
-          action_list_str += "/overload_shot,if=energy=100";
+        case TREE_CONCEALMENT;
           break;
 
-        case TREE_LETHALITY:
+        case TREE_LETHALITY;
           break;
 
         default: break;
       }
 
-      action_list_str += "/rifle_shot";
 
       action_list_default = 1;
     }
