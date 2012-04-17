@@ -498,6 +498,8 @@ struct laceration_t : public scoundrel_operative_tech_attack_t
       dd.standardhealthpercentmin = dd.standardhealthpercentmax = 0.056;
       dd.power_mod = 0.56;
 
+      base_multiplier += p -> talents.culling->rank() * 0.02;
+
       // FIXME BUG with background set it own't execute itself, butignores cooldown and is never "ready" but only runs on execute
       // but with background set, it runs automatically whenever it can. confused.
       // to explain the problem more clearly.
