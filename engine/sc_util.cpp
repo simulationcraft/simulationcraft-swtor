@@ -644,8 +644,8 @@ const char* util_t::weapon_type_string( weapon_type weapon )
   case WEAPON_ELECTROSTAFF:             return "electrostaff";
   case WEAPON_TECHSTAFF:                return "techstaff";
   case WEAPON_ASSAULT_CANNON:           return "assault_canon";
-  case WEAPON_BLASTER_PISTOL:           return "blaster_pistol";
-  case WEAPON_BLASTER_RIFLE:            return "blaster_rifle";
+  case WEAPON_BLASTER_PISTOL:           return "blasterpistol";
+  case WEAPON_BLASTER_RIFLE:            return "blasterrifle";
   case WEAPON_SCATTERGUN:               return "scattergun";
   case WEAPON_SNIPER_RIFLE:             return "sniperrifle";
   default:                              return "unknown";

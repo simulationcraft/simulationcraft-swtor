@@ -404,27 +404,20 @@ player_t::player_t( sim_t*             s,
 
 player_t::~player_t()
 {
-  dispose( targetdata );
-  dispose_list( action_list );
-  dispose_list( proc_list );
-  dispose_list( gain_list );
-  dispose_list( stats_list );
-  dispose_list( uptime_list );
-  dispose_list( benefit_list );
-  dispose_list( rng_list );
-  dispose_list( dot_list );
-  dispose_list( buff_list );
-  dispose_list( cooldown_list );
+  list_dispose( action_list );
+  list_dispose( proc_list );
+  list_dispose( gain_list );
+  list_dispose( stats_list );
+  list_dispose( uptime_list );
+  list_dispose( benefit_list );
+  list_dispose( rng_list );
+  list_dispose( dot_list );
+  list_dispose( buff_list );
+  list_dispose( cooldown_list );
 
   // NOTE: Must defend against multiple free()ing, since the same callback
   //       pointer is often registered multiple times.
-  dispose( boost::sort( all_callbacks ) | boost::adaptors::uniqued );
-
-  for ( size_t i=0; i < sizeof_array( talent_trees ); i++ )
-    dispose( talent_trees[ i ] );
-
-  //dispose( glyphs );
-  //dispose( spell_list );
+  assert( boost::unique<boost::return_found>( boost::sort( all_callbacks ) ) == all_callbacks.end() );
 }
 
 // player_t::init_talent_tree ===============================================
@@ -855,14 +848,8 @@ void player_t::init_defense()
 
 // player_t::init_weapon ====================================================
 
-void player_t::init_weapon( weapon_t* w )
-{
-  if ( w -> type == WEAPON_NONE ) return;
-
-  if ( w -> slot == SLOT_MAIN_HAND ) assert( w -> type >= WEAPON_NONE && w -> type < WEAPON_2H );
-  if ( w -> slot == SLOT_OFF_HAND  ) assert( w -> type >= WEAPON_NONE && w -> type < WEAPON_2H );
-  if ( w -> slot == SLOT_RANGED    ) assert( w -> type > WEAPON_2H && w -> type < WEAPON_RANGED );
-}
+void player_t::init_weapon( weapon_t* )
+{}
 
 // player_t::init_unique_gear ===============================================
 
@@ -3466,15 +3453,13 @@ benefit_t* player_t::get_benefit( const std::string& name )
 
 uptime_t* player_t::get_uptime( const std::string& name )
 {
-  uptime_t* u=0;
-
-  for ( u = uptime_list; u; u = u -> next )
+  for ( uptime_t* u = uptime_list; u; u = u -> next )
   {
     if ( u -> name_str == name )
       return u;
   }
 
-  u = new uptime_t( sim, name );
+  uptime_t* u = new uptime_t( sim, name );
 
   uptime_t** tail = &uptime_list;
 
@@ -3495,26 +3480,20 @@ rng_t* player_t::get_rng( const std::string& n, rng_type type )
 {
   assert( sim -> rng );
 
-  if ( type == RNG_GLOBAL ) return sim -> rng;
-  if ( type == RNG_DETERMINISTIC ) return sim -> deterministic_rng;
+  if ( type == RNG_GLOBAL ) return get_pointer( sim -> rng );
+  if ( type == RNG_DETERMINISTIC ) return get_pointer( sim -> deterministic_rng );
 
   if ( ! sim -> smooth_rng ) return sim -> default_rng();
 
-  rng_t* rng=0;
-
-  for ( rng = rng_list; rng; rng = rng -> next )
+  for ( rng_t* rng = rng_list; rng; rng = rng -> next )
   {
     if ( rng -> name_str == n )
       return rng;
   }
 
-  if ( ! rng )
-  {
-    rng = rng_t::create( sim, n, type );
-    rng -> next = rng_list;
-    rng_list = rng;
-  }
-
+  rng_t* rng = rng_t::create( sim, n, type );
+  rng -> next = rng_list;
+  rng_list = rng;
   return rng;
 }
 

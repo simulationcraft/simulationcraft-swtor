@@ -11,7 +11,7 @@
 # Override MODULE on the cmd-line invocation if you want to build a custom named executable, e.g. 'simc64'
 # Override OBJ_DIR if you want your object files built somewhere other than the local directory
 
-OS         = WINDOWS
+OS         =
 
 CXX        = g++ -std=c++0x
 CPP_FLAGS  = -Wall -Wextra -Woverloaded-virtual -I.
@@ -20,13 +20,21 @@ BITS       = 32
 
 -include ../build.conf
 
+ifeq (${OS},)
+ifdef SystemRoot
+OS         = WINDOWS
+else
+OS         = UNIX
+endif
+endif
+
 ifeq (64,${BITS})
 CPP_FLAGS += -m64
 LINK_FLAGS+= -m64
 endif
 
 # Windows platform with MinGW32
-ifdef SystemRoot
+ifeq (${OS},WINDOWS)
 MODULE_EXT = .exe
 CPP_FLAGS += -DUNICODE
 LINK_LIBS  = -lws2_32 -lwininet
@@ -35,15 +43,16 @@ LINK_FLAGS += -static
 endif
 COPY       = copy
 REMOVE     = del /f
-PATHSEP    = //
+PATHSEP    = \\
 AR         = ar
 # MinGW W32
 ifeq (32,${BITS})
 CPP_FLAGS += -malign-double
 endif
+endif
 
 # Any UNIX platform
-else
+ifeq (${OS},UNIX)
 LINK_LIBS += -lpthread
 AR         = ar
 COPY       = cp

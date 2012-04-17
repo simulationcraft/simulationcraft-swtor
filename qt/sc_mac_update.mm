@@ -4,15 +4,15 @@
 #include <Cocoa/Cocoa.h>
 #include <Sparkle/Sparkle.h>
 
-class CocoaInitializer::Private 
+class CocoaInitializer::Private
 {
 	public:
 		NSAutoreleasePool* autoReleasePool_;
 };
 
-CocoaInitializer::CocoaInitializer()
+CocoaInitializer::CocoaInitializer() :
+  d( new CocoaInitializer::Private() )
 {
-	d = new CocoaInitializer::Private();
 	NSApplicationLoad();
 	d->autoReleasePool_ = [[NSAutoreleasePool alloc] init];
 }
@@ -20,7 +20,6 @@ CocoaInitializer::CocoaInitializer()
 CocoaInitializer::~CocoaInitializer()
 {
 	[d->autoReleasePool_ release];
-	delete d;
 }
 
 class SparkleAutoUpdater::Private
@@ -30,9 +29,8 @@ class SparkleAutoUpdater::Private
 };
 
 SparkleAutoUpdater::SparkleAutoUpdater(const QString& aUrl)
+  d( new Private )
 {
-	d = new Private;
-
 	d->updater = [SUUpdater sharedUpdater];
 	[d->updater retain];
 
@@ -44,7 +42,6 @@ SparkleAutoUpdater::SparkleAutoUpdater(const QString& aUrl)
 SparkleAutoUpdater::~SparkleAutoUpdater()
 {
 	[d->updater release];
-	delete d;
 }
 
 void SparkleAutoUpdater::checkForUpdates()

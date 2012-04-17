@@ -587,7 +587,8 @@ static bool parse_item_sources( sim_t*             sim,
 
 sim_t::sim_t( sim_t* p, int index ) :
   parent( p ),
-  target_list( 0 ), player_list( 0 ), active_player( 0 ), num_players( 0 ), num_enemies( 0 ), num_targetdata_ids( 0 ), max_player_level( -1 ), canceled( 0 ),
+  target_list( 0 ), player_list( 0 ), active_player( 0 ), num_players( 0 ),
+  num_enemies( 0 ), num_targetdata_ids( 0 ), max_player_level( -1 ), canceled( 0 ),
 
   queue_lag( from_seconds( 0.037 ) ), queue_lag_stddev( timespan_t::zero() ),
   gcd_lag( from_seconds( 0.150 ) ), gcd_lag_stddev( timespan_t::zero() ),
@@ -597,7 +598,8 @@ sim_t::sim_t( sim_t* p, int index ) :
   world_lag( from_seconds( 0.1 ) ), world_lag_stddev( timespan_t_min() ),
   travel_variance( 0 ), default_skill( 1.0 ), reaction_time( from_seconds( 0.5 ) ),
   regen_periodicity( from_seconds( 1.0 ) ), // observed by philoptik@gmail.com 03/03/2012 according to ingame tooltip
-  current_time( timespan_t::zero() ), max_time( from_seconds( 300 ) ), expected_time( timespan_t::zero() ), vary_combat_length( 0.2 ),
+  current_time( timespan_t::zero() ), max_time( from_seconds( 300 ) ),
+  expected_time( timespan_t::zero() ), vary_combat_length( 0.2 ),
   last_event( timespan_t::zero() ), fixed_time( 0 ),
   events_remaining( 0 ), max_events_remaining( 0 ),
   events_processed( 0 ), total_events_processed( 0 ),
@@ -611,7 +613,7 @@ sim_t::sim_t( sim_t* p, int index ) :
   input_is_utf8( false ), ptr( false ),
   target_death_pct( 0 ), target_level( -1 ), target_adds( 0 ),
   default_rng_( 0 ), rng_list( 0 ), deterministic_roll( false ),
-  rng( 0 ), deterministic_rng( 0 ), smooth_rng( false ), average_range( true ), average_gauss( false ),
+  rng(), deterministic_rng(), smooth_rng( false ), average_range( true ), average_gauss( false ),
   timing_wheel( 0 ), wheel_seconds( 0 ), wheel_size( 0 ), wheel_mask( 0 ), timing_slice( 0 ), wheel_granularity( 0.0 ),
   fight_style( "Patchwerk" ), overrides( overrides_t() ), auras( auras_t() ),
   buff_list( 0 ), aura_delay( from_seconds( 0.5 ) ), default_aura_delay( from_seconds( 0.3 ) ),
@@ -701,9 +703,9 @@ sim_t::sim_t( sim_t* p, int index ) :
   static const char* const dbsources[] = { "local", "bcpapi", "wowhead", "mmoc", "armory", "ptrhead" };
   item_db_sources.assign( boost::begin( dbsources ), boost::end( dbsources ) );
 
-  scaling = new scaling_t( this );
-  plot    = new    plot_t( this );
-  reforge_plot = new reforge_plot_t( this );
+  scaling.reset( new scaling_t( this ) );
+  plot.reset( new plot_t( this ) );
+  reforge_plot.reset( new reforge_plot_t( this ) );
 
   use_optimal_buffs_and_debuffs( 1 );
 
@@ -735,22 +737,11 @@ sim_t::~sim_t()
 {
   flush_events();
 
-  dispose_list( target_list );
-  dispose_list( player_list );
-  dispose_list( rng_list );
-  dispose_list( buff_list );
-  dispose_list( cooldown_list );
-
-  delete rng;
-  delete deterministic_rng;
-  delete scaling;
-  delete plot;
-  delete reforge_plot;
-
-  dispose( raid_events );
-  dispose( children );
-
-  delete[] timing_wheel;
+  list_dispose( target_list );
+  list_dispose( player_list );
+  list_dispose( rng_list );
+  list_dispose( buff_list );
+  list_dispose( cooldown_list );
 }
 
 // sim_t::add_event =========================================================
@@ -822,8 +813,7 @@ event_t* sim_t::next_event()
       return e;
     }
 
-    timing_slice++;
-    if ( timing_slice == wheel_size )
+    if ( ++timing_slice >= timing_wheel.size() )
     {
       timing_slice = 0;
       if ( debug ) log_t::output( this, "Time Wheel turns around." );
@@ -839,24 +829,26 @@ void sim_t::flush_events()
 {
   if ( debug ) log_t::output( this, "Flush Events" );
 
-  for ( int i=0; i < wheel_size; i++ )
+  for ( size_t i = 0; i < timing_wheel.size(); ++i )
   {
-    while ( event_t* e = timing_wheel[ i ] )
+    event_t* list = timing_wheel[ i ];
+    timing_wheel[ i ] = 0;
+
+    while ( list )
     {
+      std::unique_ptr<event_t> e( list );
+      list = list -> next;
+      // Make sure we dont recancel events, although it should
+      // not technically matter
       if ( e -> player && ! e -> canceled )
       {
-        // Make sure we dont recancel events, although it should
-        // not technically matter
-        e -> canceled = 1;
-        e -> player -> events--;
-        if ( e -> player -> events < 0 )
+        if ( --e -> player -> events < 0 )
         {
-          errorf( "sim_t::flush_events assertion error! flushing event %s leaves negative event count for user %s.\n", e -> name, e -> player -> name() );
-          assert( 0 );
+          errorf( "sim_t::flush_events assertion error! flushing event %s leaves negative event count for user %s.\n",
+                  e -> name, e -> player -> name() );
+          assert( false );
         }
       }
-      timing_wheel[ i ] = e -> next;
-      delete e;
     }
   }
 
@@ -874,13 +866,13 @@ void sim_t::cancel_events( player_t* p )
 
   if ( debug ) log_t::output( this, "Canceling events for player %s, events to cancel %d", p -> name(), p -> events );
 
-  int end_slice = to_seconds<uint32_t>( last_event * wheel_granularity ) & wheel_mask;
+  size_t end_slice = to_seconds<size_t>( last_event * wheel_granularity ) & wheel_mask;
 
   // Loop only partial wheel, [current_time..last_event], as that's the range where there
   // are events for actors in the sim
   if ( timing_slice <= end_slice )
   {
-    for ( int i = timing_slice; i <= end_slice && p -> events > 0; i++ )
+    for ( size_t i = timing_slice; i <= end_slice && p -> events > 0; i++ )
     {
       for ( event_t* e = timing_wheel[ i ]; e && p -> events > 0; e = e -> next )
       {
@@ -898,7 +890,7 @@ void sim_t::cancel_events( player_t* p )
   // current time is still at the tail-end, [begin_slice..wheel_size[ and [0..last_event]
   else
   {
-    for ( int i = timing_slice; i < wheel_size && p -> events > 0; i++ )
+    for ( size_t i = timing_slice; i < timing_wheel.size() && p -> events > 0; i++ )
     {
       for ( event_t* e = timing_wheel[ i ]; e && p -> events > 0; e = e -> next )
       {
@@ -912,7 +904,7 @@ void sim_t::cancel_events( player_t* p )
       }
     }
 
-    for ( int i = 0; i <= end_slice && p -> events > 0; i++ )
+    for ( size_t i = 0; i <= end_slice && p -> events > 0; i++ )
     {
       for ( event_t* e = timing_wheel[ i ]; e && p -> events > 0; e = e -> next )
       {
@@ -1122,9 +1114,9 @@ bool sim_t::init()
 
     if ( ! parent ) srand( seed );
 
-    rng = rng_t::create( this, "global", RNG_MERSENNE_TWISTER );
+    rng.reset( rng_t::create( this, "global", RNG_MERSENNE_TWISTER ) );
 
-    deterministic_rng = rng_t::create( this, "global_deterministic", RNG_MERSENNE_TWISTER );
+    deterministic_rng.reset( rng_t::create( this, "global_deterministic", RNG_MERSENNE_TWISTER ) );
     deterministic_rng -> seed( 31459 + thread_index );
 
     if ( scaling -> smooth_scale_factors &&
@@ -1135,25 +1127,24 @@ bool sim_t::init()
       deterministic_roll = true;
     }
 
-    default_rng_ = ( deterministic_roll ? deterministic_rng : rng );
+    default_rng_ = get_pointer( deterministic_roll ? deterministic_rng : rng );
 
     // Timing wheel depth defaults to about 17 minutes with a granularity of 32 buckets per second.
     // This makes wheel_size = 32K and it's fully used.
     if ( wheel_seconds     <  600 ) wheel_seconds     = 1024; // 2^10  Min of 600 to ensure no wrap-around bugs with Water Shield
     if ( wheel_granularity <=   0 ) wheel_granularity = 32;   // 2^5
 
-    wheel_size = ( uint32_t ) ( wheel_seconds * wheel_granularity );
+    wheel_size = static_cast<size_t>( wheel_seconds * wheel_granularity );
 
     // Round up the wheel depth to the nearest power of 2 to enable a fast "mod" operation.
-    for ( wheel_mask = 2; wheel_mask < wheel_size; wheel_mask *= 2 ) { continue; }
+    wheel_mask = 2;
+    while ( wheel_mask < wheel_size )
+      wheel_mask *= 2;
     wheel_size = wheel_mask;
-    wheel_mask--;
+    --wheel_mask;
 
     // The timing wheel represents an array of event lists: Each time slice has an event list.
-    delete[] timing_wheel;
-    timing_wheel = new event_t*[wheel_size];
-    std::fill( timing_wheel, timing_wheel + wheel_size, nullptr );
-
+    timing_wheel.assign( wheel_size, nullptr );
 
     if (   queue_lag_stddev == timespan_t::zero() )   queue_lag_stddev =   queue_lag * 0.25;
     if (     gcd_lag_stddev == timespan_t::zero() )     gcd_lag_stddev =     gcd_lag * 0.25;
@@ -1611,10 +1602,9 @@ void sim_t::merge()
     sim_t* child = children[ i ];
     child -> wait();
     merge( *child );
-    delete child;
   }
 
-  children.clear();
+  children.dispose();
 }
 
 // sim_t::partition =========================================================
@@ -1771,22 +1761,14 @@ double sim_t::gauss( double mean,
   return default_rng_ -> gauss( mean, stddev );
 }
 
-// sim_t::gauss =============================================================
-
-timespan_t sim_t::gauss( timespan_t mean,
-                         timespan_t stddev )
-{
-  return TIMESPAN_FROM_NATIVE_VALUE( gauss( TIMESPAN_TO_NATIVE_VALUE( mean ), TIMESPAN_TO_NATIVE_VALUE( stddev ) ) );
-}
-
 // sim_t::get_rng ===========================================================
 
 rng_t* sim_t::get_rng( const std::string& n, rng_type type )
 {
   assert( rng );
 
-  if ( type == RNG_GLOBAL ) return rng;
-  if ( type == RNG_DETERMINISTIC ) return deterministic_rng;
+  if ( type == RNG_GLOBAL ) return get_pointer( rng );
+  if ( type == RNG_DETERMINISTIC ) return get_pointer( deterministic_rng );
 
   if ( ! smooth_rng ) return default_rng_;
 

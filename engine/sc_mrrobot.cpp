@@ -111,7 +111,7 @@ weapon_type decode_weapon_type( const std::string& s )
     { "LightSaber",    WEAPON_LIGHTSABER },
     { "Pistol",        WEAPON_BLASTER_PISTOL },
     { "PoleSaber",     WEAPON_DOUBLE_BLADED_LIGHTSABER },
-    { "Blaster",       WEAPON_BLASTER_RIFLE },
+    { "BlasterRifle",  WEAPON_BLASTER_RIFLE },
     { "VibroKnife",    WEAPON_VIBROKNIFE },
     { "VibroSword",    WEAPON_VIBROSWORD },
     { "TrainingSaber", WEAPON_TRAININGSABER },
