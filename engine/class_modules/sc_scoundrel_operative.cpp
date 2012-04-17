@@ -17,7 +17,7 @@ struct scoundrel_operative_targetdata_t : public targetdata_t
     dot_corrosive_dart( "corrosive_dart", &source ),
     dot_adrenaline_probe( "adrenaline_probe", &source ),
     dot_acid_blade_poison( "acid_blade_poison", &source ),
-    dot_stim_boost( "adrenaline_probe", &source )
+    dot_stim_boost( "stim_boost", &source )
   {
     add( dot_corrosive_dart );
     add( dot_adrenaline_probe );
@@ -25,6 +25,7 @@ struct scoundrel_operative_targetdata_t : public targetdata_t
     // XXX REVIEW i don't know if this is the right way to do stim boost.
     // it's a dot that ticks a buff. and i've also created a buff. is that redundant?
     // can the dot be checked instead of the buff for regen_per_second?
+    // also if this is done right, then i should create a buff for adrenaline probe
     add( dot_stim_boost );
   }
 };
