@@ -198,6 +198,14 @@ struct scoundrel_operative_t : public player_t
   virtual role_type primary_role() const;
           void    create_talents();
 
+  virtual double composite_attribute_multiplier( attribute_type attr ) const
+  {
+    double m = player_t::composite_attribute_multiplier( attr );
+    if ( attr == ATTR_CUNNING )
+      m += 0.03 * talents.imperial_education -> rank();
+    return m;
+  }
+
   virtual double range_bonus_stats() const
   { return cunning() + player_t::range_bonus_stats(); }
 
