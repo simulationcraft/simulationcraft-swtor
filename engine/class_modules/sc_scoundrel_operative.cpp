@@ -704,7 +704,7 @@ struct rifle_shot_t : public scoundrel_operative_range_attack_t
 
     if ( is_consequent_strike )
     {
-      background = true;
+      background = dual = true;
       trigger_gcd = timespan_t::zero();
       base_execute_time = from_seconds( 0.75 );
     }
