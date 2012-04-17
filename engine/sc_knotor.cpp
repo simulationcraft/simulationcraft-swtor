@@ -37,6 +37,42 @@ const std::string B64( "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123
 
 const map_t knotor_map[] = {
   {
+    { { 0, IA_OPERATIVE }, { 8, S_SCOUNDREL } },
+    3,
+    {
+      {
+        // Medicine|Sawbones
+        { -1, -1, 19, -1 },
+        { -1, 17, 18, -1 },
+        { 13, 14, 15, 16 },
+        { -1, 10, 11, 12 },
+        { -1,  7,  8,  9 },
+        {  3,  4,  5,  6 },
+        {  -1, 0,  1,  2 }
+      },
+      {
+        // Concealment|Scrapper
+        { -1, 19, -1, -1 },
+        { -1, 17, 18, -1 },
+        { 14, 15, 16, -1 },
+        { -1, 11, 12, 13 },
+        {  7,  8,  9, 10 },
+        {  3,  4,  5,  6 },
+        {  0,  1,  2, -1 }
+      },
+      {
+        // Lethality|Dirty Fighting
+        { -1, 19, -1, -1 },
+        { -1, 17, 18, -1 },
+        { -1, 14, 15, 16 },
+        { 10, 11, 12, 13 },
+        { -1,  7,  8,  9 },
+        {  3,  4,  5,  6 },
+        { -1,  0,  1,  2 }
+      }
+    }
+  },
+  {
     { { 1, JEDI_SAGE }, { 7, SITH_SORCERER } },
     2,
     {
