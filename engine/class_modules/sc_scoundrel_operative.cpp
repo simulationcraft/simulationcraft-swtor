@@ -664,45 +664,20 @@ struct corrosive_dart_t : public scoundrel_operative_tech_attack_t
 
 struct rifle_shot_t : public scoundrel_operative_range_attack_t
 {
-  rifle_shot_t* second_strike;
-
-  rifle_shot_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str,
-                bool is_consequent_strike = false ) :
-    scoundrel_operative_range_attack_t( n, p ), second_strike( 0 )
+  rifle_shot_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
+    scoundrel_operative_range_attack_t( n, p )
   {
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     base_cost = 0;
     range = 30.0;
 
-    weapon = &( player->main_hand_weapon );
-    // FIXME: this isn't working. hitting too weakly
-    weapon_multiplier = -1;
+    weapon = &( player -> main_hand_weapon );
+    weapon_multiplier = -0.5;
     dd.power_mod = 0.5;
-    weapon_power_mod = -1;
 
     // Is a Basic attack
     base_accuracy -= 0.10;
-
-    if ( is_consequent_strike )
-    {
-      background = true;
-      use_off_gcd = true;
-      trigger_gcd = timespan_t::zero();
-    }
-    else
-    {
-      // TODO does this need options like off the gcd etc?
-      second_strike = new rifle_shot_t( p, "rifle_shot_2", options_str, true );
-      add_child(second_strike);
-    }
-  }
-
-  virtual void execute()
-  {
-    scoundrel_operative_range_attack_t::execute();
-    if ( second_strike )
-        second_strike->schedule_execute();
   }
 };
 
