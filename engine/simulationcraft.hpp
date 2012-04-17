@@ -3289,7 +3289,11 @@ public:
   virtual double armor() const;
   virtual void   consume_resource();
   virtual void   execute();
+private:
+          void   tick_( timespan_t tick_time );
+public:
   virtual void   tick( dot_t* d );
+          void   extra_tick();
   virtual void   last_tick( dot_t* d );
   virtual void   impact( player_t*, result_type, double dmg );
   virtual void   assess_damage( player_t* t, double amount, dmg_type, result_type );

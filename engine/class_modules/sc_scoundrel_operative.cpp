@@ -63,6 +63,7 @@ struct scoundrel_operative_t : public player_t
   // Procs
   struct procs_t
   {
+    proc_t* corrosive_microbes;
   } procs;
 
   // RNGs
@@ -657,8 +658,12 @@ struct fragmentation_grenade_t : public scoundrel_operative_tech_attack_t
 
 struct corrosive_dart_t : public scoundrel_operative_tech_attack_t
 {
+  rng_t* corrosive_microbes;
+
   corrosive_dart_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_tech_attack_t( n, p, SCHOOL_INTERNAL )
+    scoundrel_operative_tech_attack_t( n, p, SCHOOL_INTERNAL ),
+    corrosive_microbes( p -> talents.corrosive_microbes -> rank()
+                        ? p -> get_rng( "corrosive_microbes" ) : 0 )
   {
     rank_level_list = { 5, 7, 10, 13, 17, 23, 35, 45, 50 };
 
@@ -676,8 +681,19 @@ struct corrosive_dart_t : public scoundrel_operative_tech_attack_t
     base_tick_time = from_seconds( 3.0 );
   }
 
-  // FIXME: Implement Lethal Injectors
-  // along with the rest of the lethality tree
+  virtual void tick( dot_t* d )
+  {
+    scoundrel_operative_tech_attack_t::tick( d );
+
+    scoundrel_operative_t& p = *cast();
+
+    if ( corrosive_microbes &&
+         corrosive_microbes -> roll( 0.125 * p.talents.corrosive_microbes -> rank() ) )
+    {
+      p.procs.corrosive_microbes -> occur();
+      extra_tick();
+    }
+  }
 };
 
 // Rifle Shot | ??? =========================================================
@@ -991,6 +1007,8 @@ void scoundrel_operative_t::init_gains()
 void scoundrel_operative_t::init_procs()
 {
   player_t::init_procs();
+
+  procs.corrosive_microbes = get_proc( "Corrosive Microbe ticks" );
 }
 
 // scoundrel_operative_t::init_rng =========================================================
