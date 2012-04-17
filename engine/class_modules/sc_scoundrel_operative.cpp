@@ -658,14 +658,16 @@ struct corrosive_dart_t : public scoundrel_operative_tech_attack_t
     base_cost = 20;
     range = 30.0;
 
+    may_crit = false;
+    tick_may_crit = true;
     td.standardhealthpercentmin = td.standardhealthpercentmax = 0.04;
     td.power_mod = 0.4;
 
-    num_ticks = 3;
+    num_ticks = 5 + p -> talents.corrosive_microbes -> rank();
     base_tick_time = from_seconds( 3.0 );
   }
 
-  // FIXME: Implement Lethal Injectors and Corrosive Microbes.
+  // FIXME: Implement Lethal Injectors
   // along with the rest of the lethality tree
 };
 
