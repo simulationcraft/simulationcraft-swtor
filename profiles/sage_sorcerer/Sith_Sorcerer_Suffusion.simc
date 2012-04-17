@@ -18,8 +18,8 @@ actions+=/recklessness
 actions+=/use_relics
 actions+=/affliction,if=!ticking
 actions+=/death_field
-actions+=/chain_lightning,if=(!ptr&buff.wrath.react)|buff.lightning_storm.react
 actions+=/crushing_darkness,if=buff.wrath.react
+actions+=/chain_lightning,if=buff.lightning_storm.react
 actions+=/force_lightning
 actions+=/shock,moving=1
 head=rakata_force_masters_headgear,ilevel=58,quality=artifact,stats=456armor_53endurance_48willpower_37power_37crit_51surge

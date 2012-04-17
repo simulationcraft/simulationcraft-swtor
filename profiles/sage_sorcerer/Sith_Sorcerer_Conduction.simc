@@ -16,11 +16,11 @@ actions+=/force_lightning,if=buff.lightning_barrage_dd.up
 actions+=/power_potion
 actions+=/recklessness
 actions+=/use_relics
-actions+=/chain_lightning,if=(!ptr&buff.wrath.react)|buff.lightning_storm.react
 actions+=/affliction,if=!ticking
 actions+=/force_lightning,if=buff.lightning_barrage.react
 actions+=/death_field
 actions+=/crushing_darkness,if=buff.wrath.react
+actions+=/chain_lightning,if=buff.lightning_storm.react
 actions+=/polarity_shift
 actions+=/sequence,name=pewpew:lightning_strike:force_lightning:force_lightning:force_lightning:force_lightning:force_lightning:force_lightning:force_lightning
 actions+=/restart_sequence,name=pewpew

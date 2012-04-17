@@ -18,8 +18,8 @@ actions+=/force_potency
 actions+=/use_relics
 actions+=/weaken_mind,if=!ticking
 actions+=/force_in_balance
-actions+=/telekinetic_wave,if=(!ptr&buff.presence_of_mind.react)|buff.tidal_force.react
-actions+=/mind_crush,if=buff.presence_of_mind.react
+actions+=/mind_crush,if=!ticking&buff.presence_of_mind.react
+actions+=/telekinetic_wave,if=buff.tidal_force.react
 actions+=/telekinetic_throw
 actions+=/project,moving=1
 head=rakata_force_masters_headgear,ilevel=58,quality=artifact,stats=456armor_53endurance_48willpower_37power_37crit_51surge

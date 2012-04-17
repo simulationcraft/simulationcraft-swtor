@@ -9,7 +9,7 @@ talents=http://www.torhead.com/skill-calc#201hZfsrodoMutzZcM0M.1
 save=Sith_Sorcerer_Lightning.simc
 
 copy=Sith_Sorcerer_Hybrid,Sith_Sorcerer_Madness
-talents=http://www.torhead.com/skill-calc#201ZfcM0dZfMfRs0krc.1
+talents=http://www.torhead.com/skill-calc#201oZfcM0bZfMfRs0krc.1
 save=Sith_Sorcerer_Hybrid.simc
 
 copy=Sith_Sorcerer_Suffusion,Sith_Sorcerer_Madness
@@ -23,8 +23,8 @@ actions+=/recklessness
 actions+=/use_relics
 actions+=/affliction,if=!ticking
 actions+=/death_field
-actions+=/chain_lightning,if=(!ptr&buff.wrath.react)|buff.lightning_storm.react
 actions+=/crushing_darkness,if=buff.wrath.react
+actions+=/chain_lightning,if=buff.lightning_storm.react
 actions+=/force_lightning
 actions+=/shock,moving=1
 save=Sith_Sorcerer_Suffusion.simc
@@ -38,11 +38,11 @@ actions+=/force_lightning,if=buff.lightning_barrage_dd.up
 actions+=/power_potion
 actions+=/recklessness
 actions+=/use_relics
-actions+=/chain_lightning,if=(!ptr&buff.wrath.react)|buff.lightning_storm.react
 actions+=/affliction,if=!ticking
 actions+=/force_lightning,if=buff.lightning_barrage.react
 actions+=/death_field
 actions+=/crushing_darkness,if=buff.wrath.react
+actions+=/chain_lightning,if=buff.lightning_storm.react
 actions+=/polarity_shift
 actions+=/sequence,name=pewpew:lightning_strike:force_lightning:force_lightning:force_lightning:force_lightning:force_lightning:force_lightning:force_lightning/restart_sequence,name=pewpew
 actions+=/shock,moving=1
