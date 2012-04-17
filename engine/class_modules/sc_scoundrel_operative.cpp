@@ -169,8 +169,12 @@ struct scoundrel_operative_t : public player_t
 
   scoundrel_operative_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
     player_t( sim, pt == IA_OPERATIVE ? IA_OPERATIVE : S_SCOUNDREL, name, ( r == RACE_NONE ) ? RACE_HUMAN : r ),
-    acid_blade_poison()
+    buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents(), acid_blade_poison()
   {
+    tree_type[ IA_OPERATIVE_MEDICINE    ] = TREE_MEDICINE;
+    tree_type[ IA_OPERATIVE_CONCEALMENT ] = TREE_CONCEALMENT;
+    tree_type[ IA_OPERATIVE_LETHALITY   ] = TREE_LETHALITY;
+
     primary_attribute   = ATTR_CUNNING;
     secondary_attribute = ATTR_AIM;
 
@@ -963,12 +967,11 @@ void scoundrel_operative_t::init_gains()
 {
   player_t::init_gains();
 
-  gains.adrenaline_probe        = get_gain( "adrenaline_probe" );
-  gains.low                     = get_gain( "low"              );
-  gains.med                     = get_gain( "med"              );
-  gains.high                    = get_gain( "high"             );
-  gains.stim_boost              = get_gain( "stim_boost"       );
-
+  gains.adrenaline_probe = get_gain( "adrenaline_probe" );
+  gains.low              = get_gain( "low"              );
+  gains.med              = get_gain( "med"              );
+  gains.high             = get_gain( "high"             );
+  gains.stim_boost       = get_gain( "stim_boost"       );
 }
 
 // scoundrel_operative_t::init_procs =======================================================
