@@ -658,7 +658,7 @@ struct corrosive_dart_t : public scoundrel_operative_tech_attack_t
     td.standardhealthpercentmin = td.standardhealthpercentmax = 0.04;
     td.power_mod = 0.4;
 
-    num_ticks = 5 + p -> talents.corrosive_microbes -> rank();
+    num_ticks = 5 + p -> talents.lethal_injectors -> rank();
     base_tick_time = from_seconds( 3.0 );
   }
 
@@ -1080,20 +1080,20 @@ void scoundrel_operative_t::create_talents()
   static const talentinfo_t medicine_tree[] = {
     { "Incisive Action", 2 }, { "Precision Instruments", 2 }, { "Imperial Education", 3 },
     { "Endorphin Rush", 2 }, { "Medical Consult", 3 }, { "Surgical Steadiness", 2 }, { "Chem-resistant Inlays", 2 },
-    { "Prognosis Critical", 2}, { "Kolto Probe", 1}, { "Sedatives", 2},
-    { "Patient Studies", 2}, { "Medical Engineering", 3}, { "Evasive Imperative", 2},
-    { "Tox Scan", 1}, { "Medical Therapy", 2}, { "Surgical Probe", 1}, { "Surgical Precision", 1},
-    { "Med Shield", 2}, { "Accomplished Doctor", 3},
-    { "Recuperative Nanotech", 1},
+    { "Prognosis Critical", 2 }, { "Kolto Probe", 1 }, { "Sedatives", 2 },
+    { "Patient Studies", 2 }, { "Medical Engineering", 3 }, { "Evasive Imperative", 2 },
+    { "Tox Scan", 1 }, { "Medical Therapy", 2 }, { "Surgical Probe", 1 }, { "Surgical Precision", 1 },
+    { "Med Shield", 2 }, { "Accomplished Doctor", 3 },
+    { "Recuperative Nanotech", 1 },
     // and the rest
   };
   init_talent_tree(IA_OPERATIVE_MEDICINE, medicine_tree );
 
   // Concealment
   static const talentinfo_t concealment_tree[] = {
-    { "Concealed Attacks", 2 }, { "Imperial Brew", 3 }, {"Survival Training", 3},
+    { "Concealed Attacks", 2 }, { "Imperial Brew", 3 }, { "Survival Training", 3 },
     { "Infiltrator", 3 }, { "Surgical Strikes", 2 }, { "Inclement Conditioning", 2 }, { "Scouting", 2 },
-    { "Flanking", 1 }, { "Laceration", 1 }, {"Collateral Strike", 2 }, { "Revitalizers", 1 },
+    { "Flanking", 1 }, { "Laceration", 1 }, { "Collateral Strike", 2 }, { "Revitalizers", 1 },
     { "Pin Down", 2 }, { "Tactical Opportunity", 2 }, { "Energy Screen", 1 },
     { "Waylay", 1 }, { "Culling", 2 }, { "Advanced Cloaking", 2 },
     { "Meticulously Kept Blades", 3 }, { "Jarring Strike", 2 }, { "Acid Blade", 1 },
@@ -1104,10 +1104,10 @@ void scoundrel_operative_t::create_talents()
   static const talentinfo_t lethality_tree[] = {
     { "Deadly Directive", 2 }, { "Lethality", 3 }, { "Razor Edge", 2 },
     { "Slip Away", 2 }, { "Flash Powder", 2 }, { "Corrosive Microbes", 2 }, { "Lethal Injectors", 1 },
-    { "Corrosive Grenades", 1}, { "Combat Stims", 2}, { "Cut Down", 2},
-    { "Lethal Purpose", 2}, { "Adhesive Corrosives", 2}, { "Escape Plan", 2}, { "Lethal Dose", 3},
-    { "Cull", 1}, { "Licence to Kill", 2}, { "Counterstrike", 2},
-    { "Devouring Microbes", 3}, { "Lingering Toxins", 2}, { "Weakening Blast", 1},
+    { "Corrosive Grenades", 1 }, { "Combat Stims", 2 }, { "Cut Down", 2 },
+    { "Lethal Purpose", 2 }, { "Adhesive Corrosives", 2 }, { "Escape Plan", 2 }, { "Lethal Dose", 3 },
+    { "Cull", 1 }, { "Licence to Kill", 2 }, { "Counterstrike", 2 },
+    { "Devouring Microbes", 3 }, { "Lingering Toxins", 2 }, { "Weakening Blast", 1 },
   };
   init_talent_tree(IA_OPERATIVE_LETHALITY, lethality_tree );
 
