@@ -688,6 +688,10 @@ struct rifle_shot_t : public scoundrel_operative_range_attack_t
     range = 30.0;
 
     weapon = &( player->main_hand_weapon );
+    // FIXME still hitting too hard
+    // is 'about' right were a single shot both shots combined.
+    // but with two shots it's hitting for double what it should.
+    // will upload logs and profile for comparison
     weapon_multiplier = 0.5;
     dd.power_mod = 0.5;
 
