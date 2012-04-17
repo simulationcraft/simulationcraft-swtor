@@ -464,6 +464,7 @@ struct shiv_t : public scoundrel_operative_tech_attack_t
     dd.standardhealthpercentmax = 0.188;
     dd.power_mod = 1.68;
 
+    // TEST: Additive or multiplicative?
     base_multiplier += p -> talents.surgical_strikes -> rank() * 0.02 +
                        p -> talents.razor_edge -> rank() * 0.04;
   }
@@ -473,9 +474,8 @@ struct shiv_t : public scoundrel_operative_tech_attack_t
     scoundrel_operative_tech_attack_t::execute();
 
     // TODO check if granted on misses etc?
-    scoundrel_operative_t* p = cast();
-    p -> buffs.tactical_advantage -> trigger();
-
+    if ( result_is_hit() )
+      p() -> buffs.tactical_advantage -> trigger();
   }
 };
 
