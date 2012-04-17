@@ -696,7 +696,7 @@ struct rifle_shot_t : public scoundrel_operative_range_attack_t
     // is 'about' right were a single shot both shots combined.
     // but with two shots it's hitting for double what it should.
     // will upload logs and profile for comparison
-    weapon_multiplier = 0.5;
+    weapon_multiplier = -0.5;
     dd.power_mod = 0.5;
 
     // Is a Basic attack
