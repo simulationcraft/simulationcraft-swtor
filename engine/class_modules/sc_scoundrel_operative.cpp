@@ -509,27 +509,17 @@ struct laceration_t : public scoundrel_operative_tech_attack_t
       // so currently it executes every time even if it should be on cooldown
       background = true;
       trigger_gcd = timespan_t::zero();
-      // TODO this cooldown is being ignored???
       cooldown -> duration = from_seconds( 10.0 );
     }
 
-    // TODO immediately regrants TA if hitting a poisoned target
     virtual void execute()
     {
       scoundrel_operative_tech_attack_t::execute();
-      scoundrel_operative_t* p = cast();
 
       // if target is poisoned regrant TA
-      // FIXME no idea how to get the dots. it works in the action list as dot.corrosive_dart.remains so how to check here?
-      log_t::output( p->sim, "XXX %f\n",to_seconds( target -> get_dot("corrosive_dart") -> remains() ));
-      if (
-          to_seconds( p -> get_dot("corrosive_dart") -> remains() ) > 0
-          || to_seconds( p -> get_dot("acid_blade_poison") -> remains() ) > 0
-          )
-      {
-        p -> buffs.tactical_advantage -> trigger();
-        log_t::output( p->sim, "XXX XXX" );
-      }
+      scoundrel_operative_targetdata_t* td = targetdata();
+      if ( td -> dot_acid_blade_poison.ticking || td -> dot_corrosive_dart.ticking )
+        p() -> buffs.tactical_advantage -> trigger();
     }
   };
 
@@ -546,8 +536,8 @@ struct laceration_t : public scoundrel_operative_tech_attack_t
     dd.standardhealthpercentmin = 0.14;
     dd.standardhealthpercentmax = 0.22;
     dd.power_mod = 1.8;
-    base_multiplier *= 1 + p->talents.culling->rank() * 0.02;
 
+    base_multiplier += p -> talents.culling->rank() * 0.02;
 
     if (  p -> talents.collateral_strike -> rank() )
     {
@@ -558,26 +548,25 @@ struct laceration_t : public scoundrel_operative_tech_attack_t
 
   virtual bool ready()
   {
-    scoundrel_operative_t* p = cast();
-    if (  p -> buffs.tactical_advantage -> check() )
-      return scoundrel_operative_tech_attack_t::ready();
-    return false;
+    if ( ! p() -> buffs.tactical_advantage -> check() )
+      return false;
 
+    return scoundrel_operative_tech_attack_t::ready();
   }
 
   virtual void execute()
   {
+    scoundrel_operative_tech_attack_t::execute();
+
     scoundrel_operative_t* p = cast();
 
     // TODO check if a miss etc consumes the TA
     p -> buffs.tactical_advantage -> decrement();
-    scoundrel_operative_tech_attack_t::execute();
 
-    if ( collateral_strike )
-    {
-      if ( p -> rngs.collateral_strike -> roll ( p -> talents.collateral_strike -> rank() * 0.25 ) )
-          collateral_strike -> execute();
-    }
+    if ( collateral_strike != nullptr &&
+         collateral_strike -> cooldown -> remains() <= timespan_t::zero() &&
+         p -> rngs.collateral_strike -> roll ( p -> talents.collateral_strike -> rank() * 0.25 ) )
+      collateral_strike -> execute();
   }
 };
 
