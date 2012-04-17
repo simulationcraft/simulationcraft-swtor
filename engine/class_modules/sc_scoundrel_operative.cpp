@@ -1015,7 +1015,8 @@ void scoundrel_operative_t::init_actions()
 
       if ( talents.acid_blade -> rank() )
         action_list_str += "/acid_blade,if=!buff.acid_blade_coating.up&!cooldown.backstab.remains";
-      action_list_str += "/hidden_strike"
+      action_list_str += "/use_relics"
+                         "/hidden_strike"
 
                          "/backstab";
       if ( talents.acid_blade -> rank() )
