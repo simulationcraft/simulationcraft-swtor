@@ -485,58 +485,50 @@ struct backstab_t : public scoundrel_operative_consume_acid_blade_attack_t
 };
 
 // Laceration | ??? =========================================================
-struct collateral_strike_t : public scoundrel_operative_tech_attack_t
-{
-  collateral_strike_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_tech_attack_t(n, p)
-  {
-    parse_options( 0, options_str );
-
-    dd.standardhealthpercentmin =  dd.standardhealthpercentmax = 0.56;
-    dd.power_mod = 0.56;
-    // FIXME BUG with background set it own't execute itself, butignores cooldown and is never "ready" but only runs on execute
-    // but with background set, it runs automatically whenever it can. confused.
-    // to explain the problem more clearly.
-    // with this structur eof laceration creating a collateral strike action and executing it. If background isn't set then
-    // collateral_strike executes itself every 10 seconds, regardless of laceration. I don't understand why.
-    // but with background set, the cooldown isn't working and -> remains doesn't work.
-    // so currently it executes every time even if it should be on cooldown
-    background = true;
-    use_off_gcd = true;
-    trigger_gcd = timespan_t::zero();
-    // TODO this cooldown is being ignored???
-    cooldown -> duration = from_seconds( 10.0 );
-
-  }
-
-  // TODO immediately regrants TA if hitting a poisoned target
-  virtual void execute()
-  {
-    scoundrel_operative_tech_attack_t::execute();
-    scoundrel_operative_t* p = cast();
-
-    // if target is poisoned regrant TA
-    // FIXME no idea how to get the dots. it works in the action list as dot.corrosive_dart.remains so how to check here?
-    //log_t::output( p->sim, "XXX %f\n",to_seconds( target -> get_dot("corrosive_dart") -> remains() ));
-    if (
-        to_seconds( p -> get_dot("corrosive_dart") -> remains() ) > 0
-        || to_seconds( p -> get_dot("acid_blade_poison") -> remains() ) > 0
-        )
-    {
-      p -> buffs.tactical_advantage -> trigger();
-      //log_t::output( p->sim, "XXX XXX" );
-    }
-  }
-};
 
 struct laceration_t : public scoundrel_operative_tech_attack_t
 {
+  struct collateral_strike_t : public scoundrel_operative_tech_attack_t
+  {
+    collateral_strike_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
+      scoundrel_operative_tech_attack_t( n, p )
+    {
+      parse_options( options_str );
+
+      dd.standardhealthpercentmin = dd.standardhealthpercentmax = 0.056;
+      dd.power_mod = 0.56;
+
+      base_multiplier += p -> talents.culling->rank() * 0.02;
+
+      // FIXME BUG with background set it own't execute itself, butignores cooldown and is never "ready" but only runs on execute
+      // but with background set, it runs automatically whenever it can. confused.
+      // to explain the problem more clearly.
+      // with this structur eof laceration creating a collateral strike action and executing it. If background isn't set then
+      // collateral_strike executes itself every 10 seconds, regardless of laceration. I don't understand why.
+      // but with background set, the cooldown isn't working and -> remains doesn't work.
+      // so currently it executes every time even if it should be on cooldown
+      background = true;
+      trigger_gcd = timespan_t::zero();
+      cooldown -> duration = from_seconds( 10.0 );
+    }
+
+    virtual void execute()
+    {
+      scoundrel_operative_tech_attack_t::execute();
+
+      // if target is poisoned regrant TA
+      scoundrel_operative_targetdata_t* td = targetdata();
+      if ( td -> dot_acid_blade_poison.ticking || td -> dot_corrosive_dart.ticking )
+        p() -> buffs.tactical_advantage -> trigger();
+    }
+  };
+
   collateral_strike_t* collateral_strike;
 
   laceration_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_tech_attack_t(n, p), collateral_strike( 0 )
+    scoundrel_operative_tech_attack_t( n, p ), collateral_strike( 0 )
   {
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     base_cost = 10;
     range = 4.0;
@@ -544,38 +536,37 @@ struct laceration_t : public scoundrel_operative_tech_attack_t
     dd.standardhealthpercentmin = 0.14;
     dd.standardhealthpercentmax = 0.22;
     dd.power_mod = 1.8;
-    base_multiplier *= 1 + p->talents.culling->rank() * 0.02;
 
+    base_multiplier += p -> talents.culling->rank() * 0.02;
 
     if (  p -> talents.collateral_strike -> rank() )
     {
-      collateral_strike = new collateral_strike_t(p, "collateral strike", options_str);
-      add_child(collateral_strike);
+      collateral_strike = new collateral_strike_t( p, n + "_cs", options_str );
+      add_child( collateral_strike );
     }
   }
 
   virtual bool ready()
   {
-    scoundrel_operative_t* p = cast();
-    if (  p -> buffs.tactical_advantage -> check() )
-      return scoundrel_operative_tech_attack_t::ready();
-    return false;
+    if ( ! p() -> buffs.tactical_advantage -> check() )
+      return false;
 
+    return scoundrel_operative_tech_attack_t::ready();
   }
 
   virtual void execute()
   {
+    scoundrel_operative_tech_attack_t::execute();
+
     scoundrel_operative_t* p = cast();
 
     // TODO check if a miss etc consumes the TA
     p -> buffs.tactical_advantage -> decrement();
-    scoundrel_operative_tech_attack_t::execute();
 
-    if ( collateral_strike )
-    {
-      if ( p -> rngs.collateral_strike -> roll ( p -> talents.collateral_strike -> rank() * 0.25 ) )
-          collateral_strike -> execute();
-    }
+    if ( collateral_strike != nullptr &&
+         collateral_strike -> cooldown -> remains() <= timespan_t::zero() &&
+         p -> rngs.collateral_strike -> roll ( p -> talents.collateral_strike -> rank() * 0.25 ) )
+      collateral_strike -> execute();
   }
 };
 
@@ -656,14 +647,16 @@ struct corrosive_dart_t : public scoundrel_operative_tech_attack_t
     base_cost = 20;
     range = 30.0;
 
+    may_crit = false;
+    tick_may_crit = true;
     td.standardhealthpercentmin = td.standardhealthpercentmax = 0.04;
     td.power_mod = 0.4;
 
-    num_ticks = 3;
+    num_ticks = 5 + p -> talents.corrosive_microbes -> rank();
     base_tick_time = from_seconds( 3.0 );
   }
 
-  // FIXME: Implement Lethal Injectors and Corrosive Microbes.
+  // FIXME: Implement Lethal Injectors
   // along with the rest of the lethality tree
 };
 
@@ -671,45 +664,20 @@ struct corrosive_dart_t : public scoundrel_operative_tech_attack_t
 
 struct rifle_shot_t : public scoundrel_operative_range_attack_t
 {
-  rifle_shot_t* second_strike;
-
-  rifle_shot_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str,
-                bool is_consequent_strike = false ) :
-    scoundrel_operative_range_attack_t( n, p ), second_strike( 0 )
+  rifle_shot_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
+    scoundrel_operative_range_attack_t( n, p )
   {
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     base_cost = 0;
     range = 30.0;
 
-    weapon = &( player->main_hand_weapon );
-    // FIXME: this isn't working. hitting too weakly
-    weapon_multiplier = -1;
+    weapon = &( player -> main_hand_weapon );
+    weapon_multiplier = -0.5;
     dd.power_mod = 0.5;
-    weapon_power_mod = -1;
 
     // Is a Basic attack
     base_accuracy -= 0.10;
-
-    if ( is_consequent_strike )
-    {
-      background = true;
-      use_off_gcd = true;
-      trigger_gcd = timespan_t::zero();
-    }
-    else
-    {
-      // TODO does this need options like off the gcd etc?
-      second_strike = new rifle_shot_t( p, "rifle_shot_2", options_str, true );
-      add_child(second_strike);
-    }
-  }
-
-  virtual void execute()
-  {
-    scoundrel_operative_range_attack_t::execute();
-    if ( second_strike )
-        second_strike->schedule_execute();
   }
 };
 
@@ -766,25 +734,23 @@ action_t* scoundrel_operative_t::create_action( const std::string& name,
 {
   if ( type == IA_OPERATIVE )
   {
-    if ( name == "stealth" )                return new stealth_t( this, name, options_str );
-    if ( name == "shiv" )                   return new shiv_t( this, name, options_str );
-    if ( name == "backstab" )               return new backstab_t( this, name, options_str );
-    if ( name == "laceration" )             return new laceration_t( this, name, options_str );
-    if ( name == "hidden_strike" )          return new hidden_strike_t( this, name, options_str );
-    if ( name == "rifle_shot" )             return new rifle_shot_t( this, name, options_str );
-    if ( name == "overload_shot" )          return new overload_shot_t( this, name, options_str );
-    if ( name == "corrosive_dart" )         return new corrosive_dart_t( this, name, options_str );
-    if ( name == "acid_blade" )             return new acid_blade_t( this, name, options_str );
-    if ( name == "adrenaline_probe" )       return new adrenaline_probe_t( this, name, options_str );
-    if ( name == "fragmentation_grenade" )  return new fragmentation_grenade_t( this, name, options_str );
-
+    if ( name == "acid_blade" )            return new acid_blade_t( this, name, options_str );
+    if ( name == "adrenaline_probe" )      return new adrenaline_probe_t( this, name, options_str );
+    if ( name == "backstab" )              return new backstab_t( this, name, options_str );
+    if ( name == "corrosive_dart" )        return new corrosive_dart_t( this, name, options_str );
+    if ( name == "fragmentation_grenade" ) return new fragmentation_grenade_t( this, name, options_str );
+    if ( name == "hidden_strike" )         return new hidden_strike_t( this, name, options_str );
+    if ( name == "laceration" )            return new laceration_t( this, name, options_str );
+    if ( name == "overload_shot" )         return new overload_shot_t( this, name, options_str );
+    if ( name == "rifle_shot" )            return new rifle_shot_t( this, name, options_str );
+    if ( name == "shiv" )                  return new shiv_t( this, name, options_str );
+    if ( name == "stealth" )               return new stealth_t( this, name, options_str );
   }
+
   else if ( type == S_SCOUNDREL )
   {
 
   }
-
-  //if ( name == "apply_charge"       ) return new    apply_charge_t( this, options_str );
 
   return player_t::create_action( name, options_str );
 }
