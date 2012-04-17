@@ -80,13 +80,33 @@ struct scoundrel_operative_t : public player_t
   struct talents_t
   {
     // Medicine|Sawbones
+    // t1
     talent_t* incisive_action;
     talent_t* precision_instruments;
     talent_t* imperial_education;
+    // t2
     talent_t* endorphin_rush;
     talent_t* medical_consult;
     talent_t* surical_steadiness;
     talent_t* chem_resistant_inlays;
+    // t3
+    talent_t* prognosis_critical;
+    talent_t* kolto_probe;
+    talent_t* sedatives;
+    // t4
+    talent_t* patient_studies;
+    talent_t* medical_engineering;
+    talent_t* evasive_imperative;
+    // t5
+    talent_t* tox_scan;
+    talent_t* medical_therapy;
+    talent_t* surgical_probe;
+    talent_t* surgical_precision;
+    // t6
+    talent_t* med_shield;
+    talent_t* accomplished_doctor;
+    // t7
+    talent_t* recuperative_nanotech;
 
     // Concealment|Scrapper
     talent_t* concealed_attacks;
@@ -111,13 +131,33 @@ struct scoundrel_operative_t : public player_t
     talent_t* acid_blade;
 
     // Lethality|Dirty Fighting
+    // t1
     talent_t* deadly_directive;
     talent_t* lethality;
     talent_t* razor_edge;
+    // t2
     talent_t* slip_away;
     talent_t* flash_powder;
     talent_t* corrosive_microbes;
     talent_t* lethal_injectors;
+    // t3
+    talent_t* corrosive_grenades;
+    talent_t* combat_stims;
+    talent_t* cut_down;
+    // t4
+    talent_t* lethal_purpose;
+    talent_t* adhesive_corrosives;
+    talent_t* escape_plan;
+    talent_t* lethal_dose;
+    // t5
+    talent_t* cull;
+    talent_t* licence_to_kill;
+    talent_t* counterstrike;
+    // t6
+    talent_t* devouring_microbes;
+    talent_t* lingering_toxins;
+    // t7
+    talent_t* weakening_blast;
   } talents;
 
   action_t* acid_blade_poison;
@@ -362,7 +402,6 @@ struct stealth_t : public scoundrel_operative_action_t
     // does trigger gcd, but since we only use it out of combat lets make it instant
     trigger_gcd = timespan_t::zero();
     harmful = false;
-    harmful = false;
   }
 
   virtual bool ready()
@@ -538,8 +577,6 @@ struct laceration_t : public scoundrel_operative_tech_attack_t
           collateral_strike -> execute();
     }
   }
-
-  // TODO check for and consumes tactical advantage
 };
 
 // Hidden Strike | ??? ======================================================
@@ -602,6 +639,7 @@ struct fragmentation_grenade_t : public scoundrel_operative_tech_attack_t
     dd.standardhealthpercentmax = 0.249;
     dd.power_mod = 1.29;
   }
+  // TODO aoe for multiple targets?
 };
 
 // Corrosive Dart | ??? =====================================================
@@ -626,6 +664,7 @@ struct corrosive_dart_t : public scoundrel_operative_tech_attack_t
   }
 
   // FIXME: Implement Lethal Injectors and Corrosive Microbes.
+  // along with the rest of the lethality tree
 };
 
 // Rifle Shot | ??? =========================================================
@@ -644,7 +683,7 @@ struct rifle_shot_t : public scoundrel_operative_range_attack_t
     range = 30.0;
 
     weapon = &( player->main_hand_weapon );
-    // this isn't working. hitting too weakly
+    // FIXME: this isn't working. hitting too weakly
     weapon_multiplier = -1;
     dd.power_mod = 0.5;
     weapon_power_mod = -1;
@@ -688,6 +727,7 @@ struct overload_shot_t : public scoundrel_operative_range_attack_t
     base_cost = 17;
     range = 10.0;
 
+    // FIXME hitting way too weakly
     weapon = &( player->main_hand_weapon );
     dd.standardhealthpercentmin = dd.standardhealthpercentmax = 0.124;
     dd.power_mod = 1.24;
@@ -707,12 +747,11 @@ struct overload_shot_t : public scoundrel_operative_range_attack_t
 // "vanish" allows reusing hidden strike.
 
 // Sever Tendon | ??? =======================================================
-// does damage. mainly for pvp.
+// does damage, snares and roots talented. mainly for pvp.
 
 // Debilitate | ??? =========================================================
 // stuns non bosses and does damage. pvp mainly.
 
-// Overload Shot | ??? ======================================================
 
 }// ANONYMOUS NAMESPACE ====================================================
 
@@ -727,17 +766,17 @@ action_t* scoundrel_operative_t::create_action( const std::string& name,
 {
   if ( type == IA_OPERATIVE )
   {
-    if ( name == "stealth" ) return new stealth_t( this, name, options_str );
-    if ( name == "shiv" ) return new shiv_t( this, name, options_str );
-    if ( name == "backstab" ) return new backstab_t( this, name, options_str );
-    if ( name == "laceration" ) return new laceration_t( this, name, options_str );
-    if ( name == "hidden_strike" ) return new hidden_strike_t( this, name, options_str );
-    if ( name == "rifle_shot" ) return new rifle_shot_t( this, name, options_str );
-    if ( name == "overload_shot" ) return new overload_shot_t( this, name, options_str );
-    if ( name == "corrosive_dart" ) return new corrosive_dart_t( this, name, options_str );
-    if ( name == "acid_blade" ) return new acid_blade_t( this, name, options_str );
-    if ( name == "adrenaline_probe" ) return new adrenaline_probe_t( this, name, options_str );
-    if ( name == "fragmentation_grenade" ) return new fragmentation_grenade_t( this, name, options_str );
+    if ( name == "stealth" )                return new stealth_t( this, name, options_str );
+    if ( name == "shiv" )                   return new shiv_t( this, name, options_str );
+    if ( name == "backstab" )               return new backstab_t( this, name, options_str );
+    if ( name == "laceration" )             return new laceration_t( this, name, options_str );
+    if ( name == "hidden_strike" )          return new hidden_strike_t( this, name, options_str );
+    if ( name == "rifle_shot" )             return new rifle_shot_t( this, name, options_str );
+    if ( name == "overload_shot" )          return new overload_shot_t( this, name, options_str );
+    if ( name == "corrosive_dart" )         return new corrosive_dart_t( this, name, options_str );
+    if ( name == "acid_blade" )             return new acid_blade_t( this, name, options_str );
+    if ( name == "adrenaline_probe" )       return new adrenaline_probe_t( this, name, options_str );
+    if ( name == "fragmentation_grenade" )  return new fragmentation_grenade_t( this, name, options_str );
 
   }
   else if ( type == S_SCOUNDREL )
@@ -756,8 +795,36 @@ void scoundrel_operative_t::init_talents()
 {
   player_t::init_talents();
 
+  // Medicine|Sawbones
+  // t1
+  talents.incisive_action       = find_talent( "incisive_action" );
+  talents.precision_instruments = find_talent( "precision_instruments" );
+  talents.imperial_education = find_talent( "imperial_education" );
+  // t2
+  talents.endorphin_rush            = find_talent( "endorphin_rush" );
+  talents.medical_consult           = find_talent( "medical_consult" );
+  talents.surical_steadiness        = find_talent( "surical_steadiness" );
+  talents.chem_resistant_inlays     = find_talent( "chem_resistant_inlays" );
+  // t3
+  talents.prognosis_critical        = find_talent( "prognosis_critical" );
+  talents.kolto_probe               = find_talent( "kolto_probe" );
+  talents.sedatives                 = find_talent( "sedatives" );
+  // t4
+  talents.patient_studies           = find_talent( "patient_studies" );
+  talents.medical_engineering       = find_talent( "medical_engineering" );
+  talents.evasive_imperative        = find_talent( "evasive_imperative" );
+  // t5
+  talents.tox_scan                  = find_talent( "tox_scan" );
+  talents.medical_therapy           = find_talent( "medical_therapy" );
+  talents.surgical_probe            = find_talent( "surgical_probe" );
+  talents.surgical_precision        = find_talent( "surgical_precision" );
+  // t6
+  talents.med_shield                = find_talent( "med_shield" );
+  talents.accomplished_doctor       = find_talent( "accomplished_doctor" );
+  // t7
+  talents.recuperative_nanotech     = find_talent( "recuperative_nanotech" );
+
   // Concealment
-  talents.concealed_attacks         = find_talent( "Concealed Attacks"        );
   talents.concealed_attacks         = find_talent( "Concealed Attacks"        );
   talents.imperial_brew             = find_talent( "Imperial Brew"            );
   talents.survival_training         = find_talent( "Survival Training"        );
@@ -779,9 +846,34 @@ void scoundrel_operative_t::init_talents()
   talents.jarring_strike            = find_talent( "Jarring Strike"           );
   talents.acid_blade                = find_talent( "Acid Blade"               );
 
-  // Deception|Infiltration
-
-  // Madness|Balance
+    // Lethality|Dirty Fighting
+    // t1
+  talents.deadly_directive          = find_talent( "deadly_directive" );
+  talents.lethality                 = find_talent( "lethality" );
+  talents.razor_edge                = find_talent( "razor_edge" );
+    // t2
+  talents.slip_away                 = find_talent( "slip_away" );
+  talents.flash_powder              = find_talent( "flash_powder" );
+  talents.corrosive_microbes        = find_talent( "corrosive_microbes" );
+  talents.lethal_injectors          = find_talent( "lethal_injectors" );
+    // t3
+  talents.corrosive_grenades        = find_talent( "corrosive_grenades" );
+  talents.combat_stims              = find_talent( "combat_stims" );
+  talents.cut_down                  = find_talent( "cut_down" );
+    // t4
+  talents.lethal_purpose            = find_talent( "lethal_purpose" );
+  talents.adhesive_corrosives       = find_talent( "adhesive_corrosives" );
+  talents.escape_plan               = find_talent( "escape_plan" );
+  talents.lethal_dose               = find_talent( "lethal_dose" );
+    // t5
+  talents.cull                      = find_talent( "cull" );
+  talents.licence_to_kill           = find_talent( "licence_to_kill" );
+  talents.counterstrike             = find_talent( "counterstrike" );
+    // t6
+  talents.devouring_microbes        = find_talent( "devouring_microbes" );
+  talents.lingering_toxins          = find_talent( "lingering_toxins" );
+    // t7
+  talents.weakening_blast           = find_talent( "weakening_blast" );
 }
 
 // scoundrel_operative_t::init_base ========================================================
@@ -998,6 +1090,11 @@ void scoundrel_operative_t::create_talents()
   static const talentinfo_t medicine_tree[] = {
     { "Incisive Action", 2 }, { "Precision Instruments", 2 }, { "Imperial Education", 3 },
     { "Endorphin Rush", 2 }, { "Medical Consult", 3 }, { "Surgical Steadiness", 2 }, { "Chem-resistant Inlays", 2 },
+    { "prognosis_critical", 2}, { "kolto_probe", 1}, { "sedatives", 2},
+    { "patient_studies", 2}, { "medical_engineering", 3}, { "evasive_imperative", 2},
+    { "tox_scan", 1}, { "medical_therapy", 2}, { "surgical_probe", 1}, { "surgical_precision", 1},
+    { "med_shield", 2}, { "accomplished_doctor", 3},
+    { "recuperative_nanotech", 1},
     // and the rest
   };
   init_talent_tree(IA_OPERATIVE_MEDICINE, medicine_tree );
@@ -1017,6 +1114,10 @@ void scoundrel_operative_t::create_talents()
   static const talentinfo_t lethality_tree[] = {
     { "Deadly Directive", 2 }, { "Lethality", 3 }, { "Razor Edge", 2 },
     { "Slip Away", 2 }, { "Flash Powder", 2 }, { "Corrosive Microbes", 2 }, { "Lethal Injectors", 1 },
+    { "corrosive_grenades", 1}, { "combat_stims", 2}, { "cut_down", 2},
+    { "lethal_purpose", 2}, { "adhesive_corrosives", 2}, { "escape_plan", 2}, { "lethal_dose", 3},
+    { "cull", 1}, { "licence_to_kill", 2}, { "counterstrike", 2},
+    { "devouring_microbes", 3}, { "lingering_toxins", 2}, { "weakening_blast", 1},
   };
   init_talent_tree(IA_OPERATIVE_LETHALITY, lethality_tree );
 
