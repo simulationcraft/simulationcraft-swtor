@@ -558,7 +558,7 @@ struct laceration_t : public scoundrel_operative_tech_attack_t
 
     if (  p -> talents.collateral_strike -> rank() )
     {
-      collateral_strike = new collateral_strike_t( p, n + "_cs", options_str );
+      collateral_strike = new collateral_strike_t( p, n + "_collateral_strike", options_str );
       add_child( collateral_strike );
     }
   }
@@ -573,17 +573,21 @@ struct laceration_t : public scoundrel_operative_tech_attack_t
 
   virtual void execute()
   {
+
     scoundrel_operative_tech_attack_t::execute();
 
     scoundrel_operative_t* p = cast();
 
     // TODO check if a miss etc consumes the TA
-    p -> buffs.tactical_advantage -> decrement();
+    if ( result_is_hit() )
+    {
+      p -> buffs.tactical_advantage -> decrement();
 
-    if ( collateral_strike != nullptr &&
-         collateral_strike -> cooldown -> remains() <= timespan_t::zero() &&
-         p -> rngs.collateral_strike -> roll ( p -> talents.collateral_strike -> rank() * 0.25 ) )
-      collateral_strike -> execute();
+      if ( collateral_strike != nullptr &&
+           collateral_strike -> cooldown -> remains() <= timespan_t::zero() &&
+           p -> rngs.collateral_strike -> roll ( p -> talents.collateral_strike -> rank() * 0.25 ) )
+        collateral_strike -> execute();
+    }
   }
 };
 
