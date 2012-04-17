@@ -670,20 +670,41 @@ struct corrosive_dart_t : public scoundrel_operative_tech_attack_t
 
 struct rifle_shot_t : public scoundrel_operative_range_attack_t
 {
-  rifle_shot_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_range_attack_t( n, p )
+  rifle_shot_t* second_strike;
+
+  rifle_shot_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str,
+                bool is_consequent_strike = false ) :
+    scoundrel_operative_range_attack_t( n, p ), second_strike( 0 )
   {
     parse_options( options_str );
 
     base_cost = 0;
     range = 30.0;
 
-    weapon = &( player -> main_hand_weapon );
-    weapon_multiplier = -0.5;
+    weapon = &( player->main_hand_weapon );
+    weapon_multiplier = 0.5;
     dd.power_mod = 0.5;
 
     // Is a Basic attack
     base_accuracy -= 0.10;
+
+    if ( is_consequent_strike )
+    {
+      background = true;
+      trigger_gcd = timespan_t::zero();
+    }
+    else
+    {
+      second_strike = new rifle_shot_t( p, n, options_str, true );
+      add_child( second_strike );
+    }
+  }
+
+  virtual void execute()
+  {
+    scoundrel_operative_range_attack_t::execute();
+    if ( second_strike )
+        second_strike->schedule_execute();
   }
 };
 
