@@ -37,7 +37,6 @@ struct scoundrel_operative_t : public player_t
   struct buffs_t
   {
     // buffs from talents
-    buff_t* revitalizers;
     buff_t* acid_blade_coating;
     buff_t* acid_blade_arpen;
     //buff_t* advanced_cloaking;
