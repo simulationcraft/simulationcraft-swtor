@@ -22,10 +22,6 @@ struct scoundrel_operative_targetdata_t : public targetdata_t
     add( dot_corrosive_dart );
     add( dot_adrenaline_probe );
     add( dot_acid_blade_poison );
-    // XXX REVIEW i don't know if this is the right way to do stim boost.
-    // it's a dot that ticks a buff. and i've also created a buff. is that redundant?
-    // can the dot be checked instead of the buff for regen_per_second?
-    // also if this is done right, then i should create a buff for adrenaline probe
     add( dot_stim_boost );
   }
 };
@@ -49,6 +45,7 @@ struct scoundrel_operative_t : public player_t
     // core buffs
     buff_t* stealth;
     buff_t* stim_boost;
+    buff_t* adrenaline_probe;
     buff_t* tactical_advantage;
     //buff_t* cloaking_screen;
   } buffs;
@@ -399,6 +396,7 @@ struct adrenaline_probe_t : public scoundrel_operative_action_t
     scoundrel_operative_action_t::execute();
     scoundrel_operative_t* p = cast();
 
+    p -> buffs.adrenaline_probe -> trigger();
     p -> resource_gain( RESOURCE_ENERGY, 34, p -> gains.adrenaline_probe );
   }
 
@@ -954,11 +952,12 @@ void scoundrel_operative_t::init_buffs()
 
   //bool is_juggernaut = ( type == SITH_MARAUDER );
 
-  buffs.tactical_advantage = new buff_t( this, "tactical_advantage", 2, from_seconds( 10 ) );
-  buffs.acid_blade_coating = new buff_t( this, "acid_blade_coating", 1, from_seconds( 20 ) );
-  buffs.acid_blade_arpen = new buff_t( this, "acid_blade_arpen", 1, from_seconds( 15 ) );
-  buffs.stealth = new buff_t( this, "stealth", 1 );
-  buffs.stim_boost = new buff_t( this, "stim_boost", 1, from_seconds( 45 ) );
+  buffs.acid_blade_coating  = new buff_t( this, "acid_blade_coating", 1, from_seconds( 20 ) );
+  buffs.acid_blade_arpen    = new buff_t( this, "acid_blade_arpen", 1, from_seconds( 15 )   );
+  buffs.adrenaline_probe    = new buff_t( this, "adrenaline_probe", 1, from_seconds( 3 )    );
+  buffs.stealth             = new buff_t( this, "stealth", 1                                );
+  buffs.stim_boost          = new buff_t( this, "stim_boost", 1, from_seconds( 45 )         );
+  buffs.tactical_advantage  = new buff_t( this, "tactical_advantage", 2, from_seconds( 10 ) );
 }
 
 // scoundrel_operative_t::init_gains =======================================================
@@ -967,10 +966,10 @@ void scoundrel_operative_t::init_gains()
 {
   player_t::init_gains();
 
+  gains.adrenaline_probe        = get_gain( "adrenaline_probe" );
   gains.low                     = get_gain( "low"              );
   gains.med                     = get_gain( "med"              );
   gains.high                    = get_gain( "high"             );
-  gains.adrenaline_probe        = get_gain( "adrenaline_probe" );
   gains.stim_boost              = get_gain( "stim_boost"       );
 
 }
@@ -1005,6 +1004,7 @@ void scoundrel_operative_t::init_actions()
   {
     if ( type == IA_OPERATIVE )
     {
+      // FIXME update from test_operative.simc
       action_list_str += "stim,type=exotech_skill";
       action_list_str += "/snapshot_stats";
       action_list_str += "/stealth";
