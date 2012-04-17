@@ -209,6 +209,13 @@ struct scoundrel_operative_t : public player_t
     player_t::init_scaling();
     scales_with[ STAT_TECH_POWER ] = true;
   }
+
+  virtual bool report_attack_type( action_t::policy_t policy )
+  {
+    return policy == action_t::range_policy ||
+           policy == action_t::tech_policy ||
+           ( primary_role() == ROLE_HEAL && policy == action_t::tech_heal_policy );
+  }
 };
 
 namespace { // ANONYMOUS NAMESPACE ==========================================
