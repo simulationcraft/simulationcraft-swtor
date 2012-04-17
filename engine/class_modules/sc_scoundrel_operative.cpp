@@ -205,6 +205,14 @@ struct scoundrel_operative_t : public player_t
   virtual role_type primary_role() const;
           void    create_talents();
 
+  virtual double composite_attribute_multiplier( attribute_type attr ) const
+  {
+    double m = player_t::composite_attribute_multiplier( attr );
+    if ( attr == ATTR_CUNNING )
+      m += 0.03 * talents.imperial_education -> rank();
+    return m;
+  }
+
   virtual double range_bonus_stats() const
   { return cunning() + player_t::range_bonus_stats(); }
 
@@ -215,6 +223,13 @@ struct scoundrel_operative_t : public player_t
   {
     player_t::init_scaling();
     scales_with[ STAT_TECH_POWER ] = true;
+  }
+
+  virtual bool report_attack_type( action_t::policy_t policy )
+  {
+    return policy == action_t::range_policy ||
+           policy == action_t::tech_policy ||
+           ( primary_role() == ROLE_HEAL && policy == action_t::tech_heal_policy );
   }
 };
 
@@ -665,7 +680,7 @@ struct corrosive_dart_t : public scoundrel_operative_tech_attack_t
     td.standardhealthpercentmin = td.standardhealthpercentmax = 0.04;
     td.power_mod = 0.4;
 
-    num_ticks = 5 + p -> talents.corrosive_microbes -> rank();
+    num_ticks = 5 + p -> talents.lethal_injectors -> rank();
     base_tick_time = from_seconds( 3.0 );
   }
 
@@ -677,20 +692,39 @@ struct corrosive_dart_t : public scoundrel_operative_tech_attack_t
 
 struct rifle_shot_t : public scoundrel_operative_range_attack_t
 {
-  rifle_shot_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_range_attack_t( n, p )
+  rifle_shot_t* second_strike;
+
+  rifle_shot_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str,
+                bool is_consequent_strike = false ) :
+    scoundrel_operative_range_attack_t( n, p ), second_strike( 0 )
   {
     parse_options( options_str );
 
     base_cost = 0;
     range = 30.0;
 
-    weapon = &( player -> main_hand_weapon );
-    weapon_multiplier = -0.5;
+    weapon = &( player->main_hand_weapon );
+    weapon_multiplier = 0.5;
     dd.power_mod = 0.5;
 
     // Is a Basic attack
     base_accuracy -= 0.10;
+
+    if ( is_consequent_strike )
+    {
+      background = true;
+      trigger_gcd = timespan_t::zero();
+      base_execute_time = from_seconds( 0.75 );
+    }
+    else
+      second_strike = new rifle_shot_t( p, n, options_str, true );
+  }
+
+  virtual void execute()
+  {
+    scoundrel_operative_range_attack_t::execute();
+    if ( second_strike )
+        second_strike->schedule_execute();
   }
 };
 
@@ -1111,20 +1145,20 @@ void scoundrel_operative_t::create_talents()
   static const talentinfo_t medicine_tree[] = {
     { "Incisive Action", 2 }, { "Precision Instruments", 2 }, { "Imperial Education", 3 },
     { "Endorphin Rush", 2 }, { "Medical Consult", 3 }, { "Surgical Steadiness", 2 }, { "Chem-resistant Inlays", 2 },
-    { "Prognosis Critical", 2}, { "Kolto Probe", 1}, { "Sedatives", 2},
-    { "Patient Studies", 2}, { "Medical Engineering", 3}, { "Evasive Imperative", 2},
-    { "Tox Scan", 1}, { "Medical Therapy", 2}, { "Surgical Probe", 1}, { "Surgical Precision", 1},
-    { "Med Shield", 2}, { "Accomplished Doctor", 3},
-    { "Recuperative Nanotech", 1},
+    { "Prognosis Critical", 2 }, { "Kolto Probe", 1 }, { "Sedatives", 2 },
+    { "Patient Studies", 2 }, { "Medical Engineering", 3 }, { "Evasive Imperative", 2 },
+    { "Tox Scan", 1 }, { "Medical Therapy", 2 }, { "Surgical Probe", 1 }, { "Surgical Precision", 1 },
+    { "Med Shield", 2 }, { "Accomplished Doctor", 3 },
+    { "Recuperative Nanotech", 1 },
     // and the rest
   };
   init_talent_tree(IA_OPERATIVE_MEDICINE, medicine_tree );
 
   // Concealment
   static const talentinfo_t concealment_tree[] = {
-    { "Concealed Attacks", 2 }, { "Imperial Brew", 3 }, {"Survival Training", 3},
+    { "Concealed Attacks", 2 }, { "Imperial Brew", 3 }, { "Survival Training", 3 },
     { "Infiltrator", 3 }, { "Surgical Strikes", 2 }, { "Inclement Conditioning", 2 }, { "Scouting", 2 },
-    { "Flanking", 1 }, { "Laceration", 1 }, {"Collateral Strike", 2 }, { "Revitalizers", 1 },
+    { "Flanking", 1 }, { "Laceration", 1 }, { "Collateral Strike", 2 }, { "Revitalizers", 1 },
     { "Pin Down", 2 }, { "Tactical Opportunity", 2 }, { "Energy Screen", 1 },
     { "Waylay", 1 }, { "Culling", 2 }, { "Advanced Cloaking", 2 },
     { "Meticulously Kept Blades", 3 }, { "Jarring Strike", 2 }, { "Acid Blade", 1 },
@@ -1135,10 +1169,10 @@ void scoundrel_operative_t::create_talents()
   static const talentinfo_t lethality_tree[] = {
     { "Deadly Directive", 2 }, { "Lethality", 3 }, { "Razor Edge", 2 },
     { "Slip Away", 2 }, { "Flash Powder", 2 }, { "Corrosive Microbes", 2 }, { "Lethal Injectors", 1 },
-    { "Corrosive Grenades", 1}, { "Combat Stims", 2}, { "Cut Down", 2},
-    { "Lethal Purpose", 2}, { "Adhesive Corrosives", 2}, { "Escape Plan", 2}, { "Lethal Dose", 3},
-    { "Cull", 1}, { "Licence to Kill", 2}, { "Counterstrike", 2},
-    { "Devouring Microbes", 3}, { "Lingering Toxins", 2}, { "Weakening Blast", 1},
+    { "Corrosive Grenades", 1 }, { "Combat Stims", 2 }, { "Cut Down", 2 },
+    { "Lethal Purpose", 2 }, { "Adhesive Corrosives", 2 }, { "Escape Plan", 2 }, { "Lethal Dose", 3 },
+    { "Cull", 1 }, { "Licence to Kill", 2 }, { "Counterstrike", 2 },
+    { "Devouring Microbes", 3 }, { "Lingering Toxins", 2 }, { "Weakening Blast", 1 },
   };
   init_talent_tree(IA_OPERATIVE_LETHALITY, lethality_tree );
 
