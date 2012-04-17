@@ -783,20 +783,60 @@ public:
 
 // Generic list operations ==================================================
 
-template <typename T, typename D>
-void list_dispose( T* t, D disposer )
+template <typename T>
+class list_iterator : public std::iterator<std::forward_iterator_tag,T*>
 {
-  while ( t )
-  {
-    T* tmp = t;
-    t = t -> next;
-    disposer( tmp );
-  }
-}
+  T* ptr;
+
+public:
+  list_iterator() : ptr() {}
+
+  template <typename U>
+  explicit list_iterator( const U& p ) : ptr( get_pointer( p ) ) {}
+
+  T* operator * () { return ptr; }
+  //T* operator -> () { return ptr; }
+
+  explicit operator bool () const { return ptr != nullptr; }
+
+  bool operator == ( const list_iterator& other ) const
+  { return ptr == other.ptr; }
+  bool operator != ( const list_iterator& other ) const
+  { return ptr != other.ptr; }
+
+  list_iterator& operator ++ ()
+  { assert( ptr ); ptr = ptr -> next; return *this; }
+  list_iterator operator ++ ( int )
+  { list_iterator tmp( *this ); ++*this; return tmp; }
+};
 
 template <typename T>
-inline void list_dispose( T* t )
-{ list_dispose( t, std::default_delete<T>() ); }
+inline list_iterator<T> list_begin( T* list )
+{ return list_iterator<T>( list ); }
+
+template <typename T>
+inline list_iterator<T> list_end( T* )
+{ return list_iterator<T>(); }
+
+template <typename T>
+inline list_iterator<const T> list_cbegin( const T* list )
+{ return list_begin( list ); }
+
+template <typename T>
+inline list_iterator<const T> list_cend( const T* list )
+{ return list_end( list ); }
+
+template <typename T>
+inline boost::iterator_range<list_iterator<T>> list_range( T* list )
+{ return boost::iterator_range<list_iterator<T>>( list_begin( list ), list_end( list ) ); }
+
+template <typename T, typename D>
+inline void list_dispose( T* list, D disposer )
+{ dispose( list_range( list ), disposer ); }
+
+template <typename T>
+inline void list_dispose( T* list )
+{ list_dispose( list, std::default_delete<T>() ); }
 
 // timespan_t ===============================================================
 
