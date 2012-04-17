@@ -1,7 +1,7 @@
 #!./simc
 
 operative="Operative_Concealment"
-origin="http://swtor.askmrrobot.com/character/868cfbd9-822e-43b4-a2dc-d042c14b8cd4"
+origin="http://swtor.askmrrobot.com/character/0236c2a6-bee0-4dc0-b4eb-9a42da54027f"
 level=50
 race=cyborg
 position=back
@@ -25,6 +25,7 @@ actions+=/overload_shot,if=energy=100
 actions+=/rifle_shot
 head=rakata_enforcers_headgear,ilevel=58,quality=artifact,stats=645armor_105endurance_122cunning_48power_51accuracy
 ear=rakata_enforcers_device,ilevel=58,quality=artifact,stats=85endurance_103cunning_51accuracy_44crit
+shirt=datacrons,stats=40strength_40aim_40cunning_40willpower_40endurance_40presence
 chest=rakata_enforcers_jacket,ilevel=58,quality=artifact,stats=645armor_116endurance_112cunning_51accuracy_48crit
 waist=rakata_enforcers_belt,ilevel=58,quality=artifact,stats=403armor_74endurance_85cunning_37crit
 legs=rakata_enforcers_leggings,ilevel=58,quality=artifact,stats=645armor_105endurance_122cunning_51accuracy_48crit
@@ -35,17 +36,21 @@ implant1=rakata_enforcers_implant,ilevel=58,quality=artifact,stats=98endurance_8
 implant2=rakata_enforcers_package,ilevel=58,quality=artifact,stats=98endurance_85cunning_51power_51surge
 relic1=rakata_relic_of_boundless_ages,ilevel=58,quality=artifact,stats=77endurance,use=380power_120cd_20dur
 relic2=rakata_relic_of_forbidden_secrets,ilevel=58,quality=artifact,stats=77endurance,use=235crit_235surge_120cd_20dur
-main_hand=the_linecutter,ilevel=56,quality=artifact,stats=116endurance_93cunning_84power_605techpower_48accuracy,weapon=blasterrifle_302min_453max
-off_hand=edge,ilevel=51,quality=artifact,stats=68endurance_83cunning_61power_556techpower_40surge,weapon=vibroknife_299min_449max
+main_hand=scorekeeper,ilevel=58,quality=artifact,stats=116endurance_112cunning_612techpower_51accuracy_89crit,weapon=blasterrifle_306min_459max
+off_hand=ghost,ilevel=58,quality=artifact,stats=98endurance_85cunning_82power_612techpower_51accuracy,weapon=vibroknife_330min_494max
 # Gear Summary
-# gear_cunning=1227
-# gear_endurance=1311
-# gear_accuracy_rating=354
-# gear_crit_rating=225
+# gear_strength=40
+# gear_aim=40
+# gear_cunning=1288
+# gear_willpower=40
+# gear_endurance=1381
+# gear_presence=40
+# gear_accuracy_rating=408
+# gear_crit_rating=314
 # gear_armor=3547
-# gear_power=354
-# gear_techpower=1161
-# gear_surge_rating=142
+# gear_power=291
+# gear_techpower=1224
+# gear_surge_rating=102
 # Set Bonuses
-# main_hand=the_linecutter,weapon=blasterrifle_302min_453max
-# off_hand=edge,weapon=vibroknife_299min_449max
+# main_hand=scorekeeper,weapon=blasterrifle_306min_459max
+# off_hand=ghost,weapon=vibroknife_330min_494max
