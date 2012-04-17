@@ -485,58 +485,58 @@ struct backstab_t : public scoundrel_operative_consume_acid_blade_attack_t
 };
 
 // Laceration | ??? =========================================================
-struct collateral_strike_t : public scoundrel_operative_tech_attack_t
-{
-  collateral_strike_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_tech_attack_t(n, p)
-  {
-    parse_options( 0, options_str );
-
-    dd.standardhealthpercentmin =  dd.standardhealthpercentmax = 0.56;
-    dd.power_mod = 0.56;
-    // FIXME BUG with background set it own't execute itself, butignores cooldown and is never "ready" but only runs on execute
-    // but with background set, it runs automatically whenever it can. confused.
-    // to explain the problem more clearly.
-    // with this structur eof laceration creating a collateral strike action and executing it. If background isn't set then
-    // collateral_strike executes itself every 10 seconds, regardless of laceration. I don't understand why.
-    // but with background set, the cooldown isn't working and -> remains doesn't work.
-    // so currently it executes every time even if it should be on cooldown
-    background = true;
-    use_off_gcd = true;
-    trigger_gcd = timespan_t::zero();
-    // TODO this cooldown is being ignored???
-    cooldown -> duration = from_seconds( 10.0 );
-
-  }
-
-  // TODO immediately regrants TA if hitting a poisoned target
-  virtual void execute()
-  {
-    scoundrel_operative_tech_attack_t::execute();
-    scoundrel_operative_t* p = cast();
-
-    // if target is poisoned regrant TA
-    // FIXME no idea how to get the dots. it works in the action list as dot.corrosive_dart.remains so how to check here?
-    log_t::output( p->sim, "XXX %f\n",to_seconds( target -> get_dot("corrosive_dart") -> remains() ));
-    if (
-        to_seconds( p -> get_dot("corrosive_dart") -> remains() ) > 0
-        || to_seconds( p -> get_dot("acid_blade_poison") -> remains() ) > 0
-        )
-    {
-      p -> buffs.tactical_advantage -> trigger();
-      log_t::output( p->sim, "XXX XXX" );
-    }
-  }
-};
 
 struct laceration_t : public scoundrel_operative_tech_attack_t
 {
+  struct collateral_strike_t : public scoundrel_operative_tech_attack_t
+  {
+    collateral_strike_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
+      scoundrel_operative_tech_attack_t( n, p )
+    {
+      parse_options( options_str );
+
+      dd.standardhealthpercentmin = dd.standardhealthpercentmax = 0.056;
+      dd.power_mod = 0.56;
+
+      // FIXME BUG with background set it own't execute itself, butignores cooldown and is never "ready" but only runs on execute
+      // but with background set, it runs automatically whenever it can. confused.
+      // to explain the problem more clearly.
+      // with this structur eof laceration creating a collateral strike action and executing it. If background isn't set then
+      // collateral_strike executes itself every 10 seconds, regardless of laceration. I don't understand why.
+      // but with background set, the cooldown isn't working and -> remains doesn't work.
+      // so currently it executes every time even if it should be on cooldown
+      background = true;
+      trigger_gcd = timespan_t::zero();
+      // TODO this cooldown is being ignored???
+      cooldown -> duration = from_seconds( 10.0 );
+    }
+
+    // TODO immediately regrants TA if hitting a poisoned target
+    virtual void execute()
+    {
+      scoundrel_operative_tech_attack_t::execute();
+      scoundrel_operative_t* p = cast();
+
+      // if target is poisoned regrant TA
+      // FIXME no idea how to get the dots. it works in the action list as dot.corrosive_dart.remains so how to check here?
+      log_t::output( p->sim, "XXX %f\n",to_seconds( target -> get_dot("corrosive_dart") -> remains() ));
+      if (
+          to_seconds( p -> get_dot("corrosive_dart") -> remains() ) > 0
+          || to_seconds( p -> get_dot("acid_blade_poison") -> remains() ) > 0
+          )
+      {
+        p -> buffs.tactical_advantage -> trigger();
+        log_t::output( p->sim, "XXX XXX" );
+      }
+    }
+  };
+
   collateral_strike_t* collateral_strike;
 
   laceration_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_tech_attack_t(n, p), collateral_strike( 0 )
+    scoundrel_operative_tech_attack_t( n, p ), collateral_strike( 0 )
   {
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     base_cost = 10;
     range = 4.0;
@@ -549,8 +549,8 @@ struct laceration_t : public scoundrel_operative_tech_attack_t
 
     if (  p -> talents.collateral_strike -> rank() )
     {
-      collateral_strike = new collateral_strike_t(p, "collateral strike", options_str);
-      add_child(collateral_strike);
+      collateral_strike = new collateral_strike_t( p, n + "_cs", options_str );
+      add_child( collateral_strike );
     }
   }
 
