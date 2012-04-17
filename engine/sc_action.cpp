@@ -794,12 +794,10 @@ void action_t::calculate_result()
   if ( sim -> debug ) log_t::output( sim, "%s result for %s is %s", player -> name(), name(), util_t::result_type_string( result ) );
 }
 
-// action_t::tick ===========================================================
+// action_t::tick_ ==========================================================
 
-void action_t::tick( dot_t* d )
+void action_t::tick_( timespan_t tick_time )
 {
-  if ( sim -> debug ) log_t::output( sim, "%s ticks (%d of %d)", name(), d -> current_tick, d -> num_ticks );
-
   result = RESULT_HIT;
 
   player_buff(); // 23/01/2012 According to http://sithwarrior.com/forums/Thread-Madness-Balance-Sorcerer-DPS-Compendium--573?pid=11311#pid11311
@@ -818,7 +816,25 @@ void action_t::tick( dot_t* d )
 
   if ( harmful && callbacks ) action_callback_t::trigger( player -> tick_callbacks[ result ], this );
 
-  stats -> add_tick( d -> time_to_tick );
+  stats -> add_tick( tick_time );
+}
+
+// action_t::tick ===========================================================
+
+void action_t::tick( dot_t* d )
+{
+  if ( sim -> debug ) log_t::output( sim, "%s ticks (%d of %d)", name(), d -> current_tick, d -> num_ticks );
+
+  tick_( d -> time_to_tick );
+}
+
+// action_t::extra_tick======================================================
+
+void action_t::extra_tick()
+{
+  if ( sim -> debug ) log_t::output( sim, "%s ticks (extra)", name() );
+
+  tick_( timespan_t::zero() );
 }
 
 // action_t::last_tick ======================================================

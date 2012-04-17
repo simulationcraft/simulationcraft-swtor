@@ -87,11 +87,11 @@
 # define finline              inline
 #endif
 
-#define SC_MAJOR_VERSION "115"
-#define SC_MINOR_VERSION "6"
-#define SWTOR_VERSION_LIVE "1.1.5"
+#define SC_MAJOR_VERSION "120"
+#define SC_MINOR_VERSION "1"
+#define SWTOR_VERSION_LIVE "1.2.0"
 #define SWTOR_VERSION_PTR "1.2.0"
-#define SC_USE_PTR ( 1 )
+#define SC_USE_PTR ( 0 )
 #define SC_BETA ( 0 )
 #define SC_EPSILON ( 0.000001 )
 #ifndef M_PI
@@ -2411,6 +2411,7 @@ public:
   double base_power,       initial_power,       power;
   double base_force_power, initial_force_power, force_power;
   double base_tech_power,  initial_tech_power,  tech_power;
+  double base_crit_chance;
 
   double surge_bonus;
   double base_armor_penetration;
@@ -3288,7 +3289,11 @@ public:
   virtual double armor() const;
   virtual void   consume_resource();
   virtual void   execute();
+private:
+          void   tick_( timespan_t tick_time );
+public:
   virtual void   tick( dot_t* d );
+          void   extra_tick();
   virtual void   last_tick( dot_t* d );
   virtual void   impact( player_t*, result_type, double dmg );
   virtual void   assess_damage( player_t* t, double amount, dmg_type, result_type );

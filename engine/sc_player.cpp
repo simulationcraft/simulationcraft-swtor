@@ -275,6 +275,7 @@ player_t::player_t( sim_t*             s,
   base_power( 0 ),       initial_power( 0 ),       power( 0 ),
   base_force_power( 0 ), initial_force_power( 0 ), force_power( 0 ),
   base_tech_power( 0 ),  initial_tech_power( 0 ),  tech_power( 0 ),
+  base_crit_chance( 0.05 ),
   surge_bonus( 0 ),
   base_armor_penetration( 0 ),
 
@@ -1569,7 +1570,7 @@ double player_t::default_bonus_multiplier() const
 
 double player_t::default_crit_chance() const
 {
-  double c = 0.05 + crit_from_rating;
+  double c = base_crit_chance + crit_from_rating;
 
   if ( buffs.coordination -> up() )
     c += 0.05;

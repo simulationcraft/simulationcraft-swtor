@@ -307,48 +307,23 @@ struct sage_sorcerer_spell_t : public sage_sorcerer_action_t
   {
     action_t::init();
 
-    sage_sorcerer_t* p = cast();
-
     if ( td.base_min > 0 && ! channeled )
-      crit_bonus += p -> talents.mental_scarring -> rank() * 0.1;
-  }
-
-  virtual timespan_t execute_time() const
-  {
-    timespan_t et = action_t::execute_time();
-
-    sage_sorcerer_t* p = cast();
-
-    // 1.2 PTS: Presence of Mind now affects Disturbance and Mind Crush only.
-    if ( ! p -> ptr && base_execute_time > timespan_t::zero() && p -> buffs.presence_of_mind -> up() )
-      et = timespan_t::zero();
-
-    return et;
+      crit_bonus += p() -> talents.mental_scarring -> rank() * 0.1;
   }
 
   virtual void execute()
   {
     action_t::execute();
 
-    sage_sorcerer_t* p = cast();
-
-    if ( ! p -> ptr && base_execute_time > timespan_t::zero() )
-      p -> buffs.presence_of_mind -> expire();
-
     if ( dd.base_min > 0 )
-      p -> buffs.force_potency -> decrement();
+      p() -> buffs.force_potency -> decrement();
   }
 
   virtual void player_buff()
   {
     action_t::player_buff();
 
-    sage_sorcerer_t* p = cast();
-
-    if ( ! p -> ptr && base_execute_time > timespan_t::zero() && p -> buffs.presence_of_mind -> up() )
-      dd.player_multiplier *= 1.20;
-
-    if ( ( dd.base_min > 0 || channeled ) && p -> buffs.force_potency -> up() )
+    if ( ( dd.base_min > 0 || channeled ) && p() -> buffs.force_potency -> up() )
       player_crit += 0.60;
   }
 
@@ -483,10 +458,8 @@ struct noble_sacrifice_t : public sage_sorcerer_spell_t
 
     sage_sorcerer_t* p = cast();
 
-    double health_loss = 0;
-    if ( p -> ptr || ! p -> buffs.resplendence -> check() )
-      health_loss = p -> resource_max[ RESOURCE_HEALTH ] *
-          ( 0.15 - p -> talents.valiance -> rank() * ( p -> ptr ? 0.02 : 0.01 ) );
+    double health_loss = p -> resource_max[ RESOURCE_HEALTH ]
+                         * ( 0.15 - p -> talents.valiance -> rank() * 0.02 );
 
     p -> resource_loss( RESOURCE_HEALTH, health_loss, p -> gains.noble_sacrifice_health );
     p -> resource_gain( RESOURCE_FORCE, p -> resource_max[ RESOURCE_FORCE ] * 0.08 , p -> gains.noble_sacrifice_power );
@@ -537,9 +510,7 @@ struct project_t : public sage_sorcerer_spell_t
       }
     }
 
-    // 1.2 PTS: Empowered Throw now increases the damage dealt by Project,
-    // Telekinetic Throw, and Weaken Mind by 2% per point.
-    base_multiplier *= 1.0 + p -> talents.empowered_throw -> rank() * ( p -> ptr ? 0.02 : 0 );
+    base_multiplier *= 1.0 + p -> talents.empowered_throw -> rank() * 0.02;
   }
 
   virtual void execute()
@@ -589,13 +560,8 @@ struct telekinetic_throw_t : public sage_sorcerer_spell_t
     else
       cooldown -> duration = from_seconds( 6.0 );
 
-    // 1.2 PTS: Critical Kinesis now increases the critical chance of
-    // Telekinetic Throw and Disturbance by 3% per point.
-    base_crit += p -> talents.critical_kinesis -> rank() * ( p -> ptr ? 0.03 : 0.05 );
-
-    // 1.2 PTS: Empowered Throw now increases the damage dealt by Project,
-    // Telekinetic Throw, and Weaken Mind by 2% per point.
-    base_multiplier *= 1.0 + p -> talents.empowered_throw -> rank() * ( p -> ptr ? 0.02 : 0.04 );
+    base_crit += p -> talents.critical_kinesis -> rank() * 0.03;
+    base_multiplier *= 1.0 + p -> talents.empowered_throw -> rank() * 0.02;
   }
 
   virtual void execute()
@@ -678,10 +644,7 @@ struct disturbance_t : public sage_sorcerer_spell_t
     range = 30.0;
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
-
-    // 1.2 PTS: Critical Kinesis now increases the critical chance of
-    // Telekinetic Throw and Disturbance by 3% per point.
-    base_crit += p -> talents.critical_kinesis -> rank() * ( p -> ptr ? 0.03 : 0.05 );
+    base_crit += p -> talents.critical_kinesis -> rank() * 0.03;
 
     if ( is_tm )
     {
@@ -700,23 +663,17 @@ struct disturbance_t : public sage_sorcerer_spell_t
 
   virtual timespan_t execute_time() const
   {
-    sage_sorcerer_t* p = cast();
-
-    // 1.2 PTS: Presence of Mind now affects Disturbance and Mind Crush only.
-    if ( p -> ptr && p -> buffs.presence_of_mind -> up() )
+    if ( p() -> buffs.presence_of_mind -> up() )
       return timespan_t::zero();
-    else
-      return sage_sorcerer_spell_t::execute_time();
+
+    return sage_sorcerer_spell_t::execute_time();
   }
 
   virtual void player_buff() // override
   {
     sage_sorcerer_spell_t::player_buff();
 
-    sage_sorcerer_t* p = cast();
-
-    // 1.2 PTS: Presence of Mind now affects Disturbance and Mind Crush only.
-    if ( p -> ptr && p -> buffs.presence_of_mind -> up() )
+    if ( p() -> buffs.presence_of_mind -> up() )
       dd.player_multiplier *= 1.20;
   }
 
@@ -753,8 +710,7 @@ struct disturbance_t : public sage_sorcerer_spell_t
     }
 
     // TESTME: Should PoM really affect the tm proc as implemented here?
-    if ( p -> ptr )
-      p -> buffs.presence_of_mind -> expire();
+    p -> buffs.presence_of_mind -> expire();
   }
 };
 
@@ -834,40 +790,27 @@ struct mind_crush_t : public sage_sorcerer_spell_t
 
   virtual timespan_t execute_time() const
   {
-    sage_sorcerer_t* p = cast();
-
-    // 1.2 PTS: Presence of Mind now affects Disturbance and Mind Crush only.
-    if ( p -> ptr && p -> buffs.presence_of_mind -> up() )
+    if ( p() -> buffs.presence_of_mind -> up() )
       return timespan_t::zero();
-    else
-      return sage_sorcerer_spell_t::execute_time();
+
+    return sage_sorcerer_spell_t::execute_time();
   }
 
   virtual void player_buff() // override
   {
     sage_sorcerer_spell_t::player_buff();
 
-    sage_sorcerer_t* p = cast();
-
-    // 1.2 PTS: Presence of Mind now affects Disturbance and Mind Crush only.
-    if ( p -> ptr )
-    {
-      bool p_o_m = p -> buffs.presence_of_mind -> up();
-      dot_spell -> is_buffed_by_presence_of_mind = p_o_m;
-      if( p_o_m )
-        dd.player_multiplier *= 1.20;
-    }
+    bool p_o_m = p() -> buffs.presence_of_mind -> up();
+    dot_spell -> is_buffed_by_presence_of_mind = p_o_m;
+    if( p_o_m )
+      dd.player_multiplier *= 1.20;
   }
 
   virtual void execute()
   {
     sage_sorcerer_spell_t::execute();
     dot_spell -> execute();
-
-    sage_sorcerer_t* p = cast();
-
-    if ( p -> ptr )
-      p -> buffs.presence_of_mind -> expire();
+    p() -> buffs.presence_of_mind -> expire();
   }
 };
 
@@ -890,14 +833,11 @@ struct weaken_mind_t : public sage_sorcerer_spell_t
     may_crit = false;
     crit_bonus += p -> talents.reverberation -> rank() * 0.1;
 
-    // PTS 1.2: "Inner Strength now correctly affects Weaken Mind"
-    influenced_by_inner_strength = p -> ptr;
+    influenced_by_inner_strength = true;
 
-    // 1.2 PTS: Empowered Throw now increases the damage dealt by Project,
-    // Telekinetic Throw, and Weaken Mind by 2% per point.
     // TESTME: Additive or multiplicative combination?
-    base_multiplier *= 1.0 + p -> talents.drain_thoughts -> rank() * 0.075 +
-        p -> talents.empowered_throw -> rank() * ( p -> ptr ? 0.02 : 0 );
+    base_multiplier += p -> talents.drain_thoughts -> rank() * 0.075 +
+                       p -> talents.empowered_throw -> rank() * 0.02;
   }
 
   virtual void tick( dot_t* d )
@@ -1781,9 +1721,6 @@ void sage_sorcerer_t::init_actions()
       if ( talents.presence_of_mind -> rank() )
         action_list_str += "/mind_crush,if=buff.presence_of_mind.react";
 
-      if ( talents.telekinetic_wave -> rank() && talents.presence_of_mind -> rank() )
-        action_list_str += "/telekinetic_wave,if=!ptr&buff.presence_of_mind.react&force.pct>target.health.pct+0.07&cooldown.mind_crush.remains>4";
-
       if ( talents.sever_force -> rank() > 0 )
         action_list_str += "/sever_force,if=!ticking";
 
@@ -1849,9 +1786,6 @@ void sage_sorcerer_t::init_actions()
 
       if ( talents.presence_of_mind -> rank() )
         action_list_str += "/crushing_darkness,if=buff.wrath.react";
-
-      if ( talents.telekinetic_wave -> rank() && talents.presence_of_mind -> rank() )
-        action_list_str += "/chain_lightning,if=!ptr&buff.wrath.react&force.pct>target.health.pct+0.07&cooldown.crushing_darkness.remains>4";
 
       if ( talents.sever_force -> rank() > 0 )
         action_list_str += "/creeping_terror,if=!ticking";
