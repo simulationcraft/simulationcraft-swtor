@@ -28,6 +28,8 @@ talents=http://swtor.askmrrobot.com/skills/Operative#32-8kd8dd62ik-2i
 actions=stim,type=exotech_skill
 actions+=/snapshot_stats
 actions+=/stealth
+actions+=/use_item,name=rakata_relic_of_boundless_ages
+actions+=/use_item,name=rakata_relic_of_forbidden_secrets
 actions+=/adrenaline_probe,if=energy<=60
 actions+=/stim_boost,if=buff.tactical_advantage.stack>=2
 actions+=/acid_blade,if=!buff.acid_blade_coating.up&!cooldown.backstab.remains
