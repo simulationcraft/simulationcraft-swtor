@@ -734,25 +734,23 @@ action_t* scoundrel_operative_t::create_action( const std::string& name,
 {
   if ( type == IA_OPERATIVE )
   {
-    if ( name == "stealth" )                return new stealth_t( this, name, options_str );
-    if ( name == "shiv" )                   return new shiv_t( this, name, options_str );
-    if ( name == "backstab" )               return new backstab_t( this, name, options_str );
-    if ( name == "laceration" )             return new laceration_t( this, name, options_str );
-    if ( name == "hidden_strike" )          return new hidden_strike_t( this, name, options_str );
-    if ( name == "rifle_shot" )             return new rifle_shot_t( this, name, options_str );
-    if ( name == "overload_shot" )          return new overload_shot_t( this, name, options_str );
-    if ( name == "corrosive_dart" )         return new corrosive_dart_t( this, name, options_str );
-    if ( name == "acid_blade" )             return new acid_blade_t( this, name, options_str );
-    if ( name == "adrenaline_probe" )       return new adrenaline_probe_t( this, name, options_str );
-    if ( name == "fragmentation_grenade" )  return new fragmentation_grenade_t( this, name, options_str );
-
+    if ( name == "acid_blade" )            return new acid_blade_t( this, name, options_str );
+    if ( name == "adrenaline_probe" )      return new adrenaline_probe_t( this, name, options_str );
+    if ( name == "backstab" )              return new backstab_t( this, name, options_str );
+    if ( name == "corrosive_dart" )        return new corrosive_dart_t( this, name, options_str );
+    if ( name == "fragmentation_grenade" ) return new fragmentation_grenade_t( this, name, options_str );
+    if ( name == "hidden_strike" )         return new hidden_strike_t( this, name, options_str );
+    if ( name == "laceration" )            return new laceration_t( this, name, options_str );
+    if ( name == "overload_shot" )         return new overload_shot_t( this, name, options_str );
+    if ( name == "rifle_shot" )            return new rifle_shot_t( this, name, options_str );
+    if ( name == "shiv" )                  return new shiv_t( this, name, options_str );
+    if ( name == "stealth" )               return new stealth_t( this, name, options_str );
   }
+
   else if ( type == S_SCOUNDREL )
   {
 
   }
-
-  //if ( name == "apply_charge"       ) return new    apply_charge_t( this, options_str );
 
   return player_t::create_action( name, options_str );
 }
