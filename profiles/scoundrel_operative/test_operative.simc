@@ -38,7 +38,7 @@ implant1=rakata_enforcers_implant,ilevel=58,quality=artifact,stats=98endurance_8
 implant2=rakata_enforcers_package,ilevel=58,quality=artifact,stats=98endurance_85cunning_51power_51surge
 relic1=rakata_relic_of_boundless_ages,ilevel=58,quality=artifact,stats=77endurance,use=380power_120cd_20dur
 relic2=rakata_relic_of_forbidden_secrets,ilevel=58,quality=artifact,stats=77endurance,use=235crit_235surge_120cd_20dur
-main_hand=the_linecutter,ilevel=56,quality=artifact,stats=116endurance_93cunning_84power_605techpower_48accuracy
+main_hand=the_linecutter,ilevel=56,quality=artifact,stats=116endurance_93cunning_84power_605techpower_48accuracy,weapon=blasterrifle_302min_453max
 off_hand=edge,ilevel=51,quality=artifact,stats=68endurance_83cunning_61power_556techpower_40surge,weapon=vibroknife_299min_449max
 # Gear Summary
 # gear_cunning=1227
