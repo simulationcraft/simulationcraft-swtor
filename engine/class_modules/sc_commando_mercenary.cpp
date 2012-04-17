@@ -344,7 +344,10 @@ player_t* player_t::create_mercenary( sim_t* sim, const std::string& name, race_
 void player_t::commando_mercenary_init( sim_t* sim )
 {
   for ( player_t* p : sim -> actor_list )
+  {
     p -> buffs.fortification_hunters_boon = new buff_t( p, "fortification_hunters_boon", 1 );
+    p -> buffs.fortification_hunters_boon -> constant = true;
+  }
 }
 
 // player_t::commando_mercenary_combat_begin ===================================

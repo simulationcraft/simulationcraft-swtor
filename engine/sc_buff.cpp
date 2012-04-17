@@ -482,7 +482,7 @@ void buff_t::start( int    stacks,
     assert( 0 );
   }
 
-  if ( sim -> current_time <= from_seconds( 0.01 ) ) constant = true;
+  // if ( sim -> current_time <= from_seconds( 0.01 ) ) constant = true;
 
   start_count++;
 

@@ -1994,6 +1994,7 @@ void player_t::sage_sorcerer_init( sim_t* sim )
   {
     player_t* p = sim -> actor_list[i];
     p -> buffs.force_valor = new buff_t( p, "force_valor_mark_of_power", 1 );
+    p -> buffs.force_valor -> constant = true;
   }
 }
 
