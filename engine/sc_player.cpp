@@ -848,14 +848,8 @@ void player_t::init_defense()
 
 // player_t::init_weapon ====================================================
 
-void player_t::init_weapon( weapon_t* w )
-{
-  if ( w -> type == WEAPON_NONE ) return;
-
-  if ( w -> slot == SLOT_MAIN_HAND ) assert( w -> type >= WEAPON_NONE && w -> type < WEAPON_2H );
-  if ( w -> slot == SLOT_OFF_HAND  ) assert( w -> type >= WEAPON_NONE && w -> type < WEAPON_2H );
-  if ( w -> slot == SLOT_RANGED    ) assert( w -> type > WEAPON_2H && w -> type < WEAPON_RANGED );
-}
+void player_t::init_weapon( weapon_t* )
+{}
 
 // player_t::init_unique_gear ===============================================
 
