@@ -1002,25 +1002,38 @@ void scoundrel_operative_t::init_actions()
 
   if ( action_list_str.empty() )
   {
+    action_list_default = true;
+
+    action_list_str += "stim,type=exotech_skill"
+                       "/snapshot_stats";
+
     if ( type == IA_OPERATIVE )
     {
-      action_list_str += "stim,type=exotech_skill";
-      action_list_str += "/snapshot_stats";
-      action_list_str += "/stealth";
-      action_list_str += "/adrenaline_probe,if=energy<=60";
-      action_list_str += "/stim_boost,if=buff.tactical_advantage.stack>=2";
-      action_list_str += "/acid_blade,if=!buff.acid_blade_coating.up&!cooldown.backstab.remains";
-      action_list_str += "/hidden_strike,if=buff.acid_blade_coating.up";
-      action_list_str += "/backstab,if=buff.acid_blade_coating.up";
-      action_list_str += "/corrosive_dart,if=!ticking&energy>=75";
-      action_list_str += "/shiv,if=energy>=75&buff.tactical_advantage.stack<2";
-      action_list_str += "/laceration,if=energy>=75&buff.tactical_advantage.stack>=2";
-      action_list_str += "/overload_shot,if=energy=100";
-      action_list_str += "/rifle_shot";
+      action_list_str += "/stealth"
+                         "/adrenaline_probe,if=energy<=60"
+                         "/stim_boost,if=buff.tactical_advantage.stack>=2";
 
-      // FIXME primary tree is returning 0... something wrong
-      switch ( primary_tree() )
+      if ( talents.acid_blade -> rank() )
+        action_list_str += "/acid_blade,if=!buff.acid_blade_coating.up&!cooldown.backstab.remains";
+      action_list_str += "/hidden_strike"
+
+                         "/backstab";
+      if ( talents.acid_blade -> rank() )
+        action_list_str += ",if=buff.acid_blade_coating.up";
+
+      action_list_str += "/corrosive_dart,if=!ticking&energy>=75"
+                         "/shiv,if=energy>=75&buff.tactical_advantage.stack<2";
+
+      if ( talents.laceration -> rank() )
+        action_list_str += "/laceration,if=energy>=75&buff.tactical_advantage.stack>=2";
+
+      action_list_str += "/overload_shot,if=energy=100"
+                         "/rifle_shot";
+
+      if ( false )
       {
+        switch ( primary_tree() )
+        {
         case TREE_MEDICINE:
           break;
 
@@ -1031,10 +1044,8 @@ void scoundrel_operative_t::init_actions()
           break;
 
         default: break;
+        }
       }
-
-
-      action_list_default = 1;
     }
 
     // S_SCOUNDREL
@@ -1043,13 +1054,14 @@ void scoundrel_operative_t::init_actions()
       action_list_str += "stim,type=exotech_skill";
       action_list_str += "/snapshot_stats";
 
-      switch ( primary_tree() )
+      if ( false )
       {
+        switch ( primary_tree() )
+        {
 
-      default: break;
+        default: break;
+        }
       }
-
-      action_list_default = 1;
     }
   }
 
@@ -1155,7 +1167,7 @@ void scoundrel_operative_t::create_talents()
     { "Med Shield", 2 }, { "Accomplished Doctor", 3 },
     { "Recuperative Nanotech", 1 },
   };
-  init_talent_tree(IA_OPERATIVE_MEDICINE, medicine_tree );
+  init_talent_tree( IA_OPERATIVE_MEDICINE, medicine_tree );
 
   // Concealment
   static const talentinfo_t concealment_tree[] = {
@@ -1166,7 +1178,7 @@ void scoundrel_operative_t::create_talents()
     { "Waylay", 1 }, { "Culling", 2 }, { "Advanced Cloaking", 2 },
     { "Meticulously Kept Blades", 3 }, { "Jarring Strike", 2 }, { "Acid Blade", 1 },
   };
-  init_talent_tree(IA_OPERATIVE_CONCEALMENT , concealment_tree );
+  init_talent_tree( IA_OPERATIVE_CONCEALMENT , concealment_tree );
 
   // Lethality
   static const talentinfo_t lethality_tree[] = {
@@ -1177,7 +1189,7 @@ void scoundrel_operative_t::create_talents()
     { "Cull", 1 }, { "Licence to Kill", 2 }, { "Counterstrike", 2 },
     { "Devouring Microbes", 3 }, { "Lingering Toxins", 2 }, { "Weakening Blast", 1 },
   };
-  init_talent_tree(IA_OPERATIVE_LETHALITY, lethality_tree );
+  init_talent_tree( IA_OPERATIVE_LETHALITY, lethality_tree );
 
 }
 
