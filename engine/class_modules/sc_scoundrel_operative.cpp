@@ -686,7 +686,7 @@ struct rifle_shot_t : public scoundrel_operative_range_attack_t
 struct overload_shot_t : public scoundrel_operative_range_attack_t
 {
   overload_shot_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str) :
-    scoundrel_operative_range_attack_t(n, p)
+    scoundrel_operative_range_attack_t( n, p )
   {
     rank_level_list = { 8, 12, 16, 22, 31, 40, 50 };
 
@@ -695,15 +695,14 @@ struct overload_shot_t : public scoundrel_operative_range_attack_t
     base_cost = 17;
     range = 10.0;
 
-    // FIXME hitting way too weakly
-    weapon = &( player->main_hand_weapon );
     dd.standardhealthpercentmin = dd.standardhealthpercentmax = 0.124;
     dd.power_mod = 1.24;
 
-    weapon = &( player->main_hand_weapon );
+    weapon = &( player -> main_hand_weapon );
     weapon_multiplier = -0.17;
 
-    base_multiplier *= 1.0 + 0.15; // skirmisher passive to agents gives 15% boost to overload shot
+    // "Skirmisher" passive for operatives gives 15% boost to overload shot
+    base_multiplier += 0.15;
   }
 };
 
