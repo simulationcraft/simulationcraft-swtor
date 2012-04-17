@@ -1017,10 +1017,10 @@ void scoundrel_operative_t::init_actions()
         case TREE_MEDICINE:
           break;
 
-        case TREE_CONCEALMENT;
+        case TREE_CONCEALMENT:
           break;
 
-        case TREE_LETHALITY;
+        case TREE_LETHALITY:
           break;
 
         default: break;
