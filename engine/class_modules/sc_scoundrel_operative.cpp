@@ -824,6 +824,37 @@ struct stim_boost_t : public scoundrel_operative_action_t
 // Debilitate | ??? =========================================================
 // stuns non bosses and does damage. pvp mainly.
 
+// Coordination | ??? =======================================================
+
+struct coordination_t : public scoundrel_operative_action_t
+{
+  coordination_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
+    scoundrel_operative_action_t( n, p, tech_policy, RESOURCE_NONE, SCHOOL_NONE )
+  {
+    parse_options( options_str );
+    base_cost = 0.0;
+    harmful = false;
+  }
+
+  virtual void execute()
+  {
+    scoundrel_operative_action_t::execute();
+
+    for ( player_t* p : list_range( sim -> player_list ) )
+    {
+      if ( p -> ooc_buffs() )
+        p -> buffs.coordination -> trigger();
+    }
+  }
+
+  virtual bool ready()
+  {
+    if ( player -> buffs.coordination -> check() )
+      return false;
+
+    return scoundrel_operative_action_t::ready();
+  }
+};
 
 }// ANONYMOUS NAMESPACE ====================================================
 
@@ -841,6 +872,7 @@ action_t* scoundrel_operative_t::create_action( const std::string& name,
     if ( name == "acid_blade" )            return new acid_blade_t( this, name, options_str );
     if ( name == "adrenaline_probe" )      return new adrenaline_probe_t( this, name, options_str );
     if ( name == "backstab" )              return new backstab_t( this, name, options_str );
+    if ( name == "coordination" )          return new coordination_t( this, name, options_str );
     if ( name == "corrosive_dart" )        return new corrosive_dart_t( this, name, options_str );
     if ( name == "fragmentation_grenade" ) return new fragmentation_grenade_t( this, name, options_str );
     if ( name == "hidden_strike" )         return new hidden_strike_t( this, name, options_str );
@@ -1035,6 +1067,7 @@ void scoundrel_operative_t::init_actions()
     action_list_default = true;
 
     action_list_str += "stim,type=exotech_skill"
+                       "/coordination"
                        "/snapshot_stats";
 
     if ( type == IA_OPERATIVE )

@@ -10,6 +10,7 @@ use_pre_potion=0
 professions=armormech
 talents=http://www.torhead.com/skill-calc#4010cZG0MZGMbkrMGdhR.1
 actions=stim,type=exotech_skill
+actions+=/coordination
 actions+=/snapshot_stats
 actions+=/stealth
 actions+=/adrenaline_probe,if=energy<=60
