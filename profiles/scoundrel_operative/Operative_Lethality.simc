@@ -1,0 +1,49 @@
+#!./simc
+
+operative="Operative_Lethality"
+origin="http://swtor.askmrrobot.com/character/868cfbd9-822e-43b4-a2dc-d042c14b8cd4"
+level=50
+race=cyborg
+position=back
+role=hybrid
+use_pre_potion=0
+professions=armormech
+talents=http://www.torhead.com/skill-calc#4010cZG0MZGMbkrMGdhR.1
+actions=stim,type=exotech_skill
+actions+=/snapshot_stats
+actions+=/stealth
+actions+=/adrenaline_probe,if=energy<=60
+actions+=/stim_boost,if=buff.tactical_advantage.stack>=2
+actions+=/use_relics
+actions+=/hidden_strike
+actions+=/backstab
+actions+=/corrosive_dart,if=!ticking&energy>=75
+actions+=/shiv,if=energy>=75&buff.tactical_advantage.stack<2
+actions+=/overload_shot,if=energy=100
+actions+=/rifle_shot
+head=rakata_enforcers_headgear,ilevel=58,quality=artifact,stats=645armor_105endurance_122cunning_48power_51accuracy
+ear=rakata_enforcers_device,ilevel=58,quality=artifact,stats=85endurance_103cunning_51accuracy_44crit
+chest=rakata_enforcers_jacket,ilevel=58,quality=artifact,stats=645armor_116endurance_112cunning_51accuracy_48crit
+waist=rakata_enforcers_belt,ilevel=58,quality=artifact,stats=403armor_74endurance_85cunning_37crit
+legs=rakata_enforcers_leggings,ilevel=58,quality=artifact,stats=645armor_105endurance_122cunning_51accuracy_48crit
+feet=rakata_enforcers_boots,ilevel=58,quality=artifact,stats=403armor_116endurance_112cunning_51accuracy_48crit
+wrists=rakata_enforcers_armguards,ilevel=58,quality=artifact,stats=403armor_71endurance_103cunning_11power
+hands=rakata_enforcers_gloves,ilevel=58,quality=artifact,stats=403armor_105endurance_122cunning_48power_51accuracy
+implant1=rakata_enforcers_implant,ilevel=58,quality=artifact,stats=98endurance_85cunning_51power_51surge
+implant2=rakata_enforcers_package,ilevel=58,quality=artifact,stats=98endurance_85cunning_51power_51surge
+relic1=rakata_relic_of_boundless_ages,ilevel=58,quality=artifact,stats=77endurance,use=380power_120cd_20dur
+relic2=rakata_relic_of_forbidden_secrets,ilevel=58,quality=artifact,stats=77endurance,use=235crit_235surge_120cd_20dur
+main_hand=the_linecutter,ilevel=56,quality=artifact,stats=116endurance_93cunning_84power_605techpower_48accuracy,weapon=blasterrifle_302min_453max
+off_hand=edge,ilevel=51,quality=artifact,stats=68endurance_83cunning_61power_556techpower_40surge,weapon=vibroknife_299min_449max
+# Gear Summary
+# gear_cunning=1227
+# gear_endurance=1311
+# gear_accuracy_rating=354
+# gear_crit_rating=225
+# gear_armor=3547
+# gear_power=354
+# gear_techpower=1161
+# gear_surge_rating=142
+# Set Bonuses
+# main_hand=the_linecutter,weapon=blasterrifle_302min_453max
+# off_hand=edge,weapon=vibroknife_299min_449max
