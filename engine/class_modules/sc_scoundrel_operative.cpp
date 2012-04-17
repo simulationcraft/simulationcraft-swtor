@@ -942,6 +942,8 @@ void scoundrel_operative_t::init_base()
   resource_base[ RESOURCE_ENERGY ] += 100; // TODO 4 piece bonus adds 5 energy
 
   attribute_multiplier_initial[ ATTR_CUNNING ] += 0.03 * talents.imperial_education -> rank();
+
+  base_crit_chance += 0.02 * talents.lethality -> rank();
 }
 
 // scoundrel_operative_t::init_benefits =======================================================

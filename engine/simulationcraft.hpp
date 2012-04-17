@@ -2411,6 +2411,7 @@ public:
   double base_power,       initial_power,       power;
   double base_force_power, initial_force_power, force_power;
   double base_tech_power,  initial_tech_power,  tech_power;
+  double base_crit_chance;
 
   double surge_bonus;
   double base_armor_penetration;
