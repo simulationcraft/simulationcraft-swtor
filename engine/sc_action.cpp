@@ -226,7 +226,6 @@ void action_t::init_action_t_()
   num_ticks                      = 0;
   weapon                         = nullptr;
   weapon_multiplier              = std::numeric_limits<decltype(weapon_multiplier)>::lowest();
-  weapon_power_mod               = 0.0;
   normalize_weapon_speed         = false;
   base_add_multiplier            = 1.0;
   base_aoe_multiplier            = 1.0;

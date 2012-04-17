@@ -3186,7 +3186,6 @@ struct action_t
   timespan_t ability_lag, ability_lag_stddev;
   timespan_t min_gcd, trigger_gcd;
   double range;
-  double weapon_power_mod;
   timespan_t base_execute_time;
   timespan_t base_tick_time;
   double base_cost;

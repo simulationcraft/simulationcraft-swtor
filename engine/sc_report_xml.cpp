@@ -1172,7 +1172,6 @@ void print_xml_player_action_definitions( xml_writer_t & writer, player_t * p )
         {
           writer.begin_tag( "weapon" );
           writer.print_tag( "normalize_speed", a -> normalize_weapon_speed ? "true" : "false" );
-          writer.print_tag( "power_mod", util_t::to_string( a -> weapon_power_mod ) );
           writer.print_tag( "multiplier", util_t::to_string( a -> weapon_multiplier ) );
           writer.end_tag(); // </weapon>
         }

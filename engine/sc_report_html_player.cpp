@@ -679,11 +679,9 @@ static void print_html_action_damage( FILE* file, stats_t* s, player_t* p, int j
                   "\t\t\t\t\t\t\t\t\t\t<h5>Weapon</h5>\n"
                   "\t\t\t\t\t\t\t\t\t\t<ul>\n"
                   "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">normalized:</span>%s</li>\n"
-                  "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">weapon_power_mod:</span>%.6f</li>\n"
                   "\t\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">weapon_multiplier:</span>%.2f</li>\n"
                   "\t\t\t\t\t\t\t\t\t\t</ul>\n",
                   a -> normalize_weapon_speed ? "true" : "false",
-                  a -> weapon_power_mod,
                   a -> weapon_multiplier );
       }
       fprintf ( file,
