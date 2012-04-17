@@ -519,13 +519,6 @@ struct laceration_t : public scoundrel_operative_tech_attack_t
 
       base_multiplier += p -> talents.culling->rank() * 0.02;
 
-      // FIXME BUG with background set it own't execute itself, butignores cooldown and is never "ready" but only runs on execute
-      // but with background set, it runs automatically whenever it can. confused.
-      // to explain the problem more clearly.
-      // with this structur eof laceration creating a collateral strike action and executing it. If background isn't set then
-      // collateral_strike executes itself every 10 seconds, regardless of laceration. I don't understand why.
-      // but with background set, the cooldown isn't working and -> remains doesn't work.
-      // so currently it executes every time even if it should be on cooldown
       background = true;
       trigger_gcd = timespan_t::zero();
       cooldown -> duration = from_seconds( 10.0 );
@@ -842,32 +835,32 @@ void scoundrel_operative_t::init_talents()
 
   // Medicine|Sawbones
   // t1
-  talents.incisive_action           = find_talent( "Incisive Action" );
-  talents.precision_instruments     = find_talent( "Precision Instruments" );
-  talents.imperial_education        = find_talent( "Imperial Education" );
+  talents.incisive_action           = find_talent( "Incisive Action"          );
+  talents.precision_instruments     = find_talent( "Precision Instruments"    );
+  talents.imperial_education        = find_talent( "Imperial Education"       );
   // t2
-  talents.endorphin_rush            = find_talent( "Endorphin Rush" );
-  talents.medical_consult           = find_talent( "Medical Consult" );
-  talents.surical_steadiness        = find_talent( "Surgical Steadiness" );
-  talents.chem_resistant_inlays     = find_talent( "Chem-resistant Inlays" );
+  talents.endorphin_rush            = find_talent( "Endorphin Rush"           );
+  talents.medical_consult           = find_talent( "Medical Consult"          );
+  talents.surical_steadiness        = find_talent( "Surgical Steadiness"      );
+  talents.chem_resistant_inlays     = find_talent( "Chem-resistant Inlays"    );
   // t3
-  talents.prognosis_critical        = find_talent( "Prognosis Critical" );
-  talents.kolto_probe               = find_talent( "Kolto Probe" );
-  talents.sedatives                 = find_talent( "Sedatives" );
+  talents.prognosis_critical        = find_talent( "Prognosis Critical"       );
+  talents.kolto_probe               = find_talent( "Kolto Probe"              );
+  talents.sedatives                 = find_talent( "Sedatives"                );
   // t4
-  talents.patient_studies           = find_talent( "Patient Studies" );
-  talents.medical_engineering       = find_talent( "Medical Engineering" );
-  talents.evasive_imperative        = find_talent( "Evasive Imperative" );
+  talents.patient_studies           = find_talent( "Patient Studies"          );
+  talents.medical_engineering       = find_talent( "Medical Engineering"      );
+  talents.evasive_imperative        = find_talent( "Evasive Imperative"       );
   // t5
-  talents.tox_scan                  = find_talent( "Tox Scan" );
-  talents.medical_therapy           = find_talent( "Medical Therapy" );
-  talents.surgical_probe            = find_talent( "Surgical Probe" );
-  talents.surgical_precision        = find_talent( "Surgical Precision" );
+  talents.tox_scan                  = find_talent( "Tox Scan"                 );
+  talents.medical_therapy           = find_talent( "Medical Therapy"          );
+  talents.surgical_probe            = find_talent( "Surgical Probe"           );
+  talents.surgical_precision        = find_talent( "Surgical Precision"       );
   // t6
-  talents.med_shield                = find_talent( "Med Shield" );
-  talents.accomplished_doctor       = find_talent( "Accomplished Doctor" );
+  talents.med_shield                = find_talent( "Med Shield"               );
+  talents.accomplished_doctor       = find_talent( "Accomplished Doctor"      );
   // t7
-  talents.recuperative_nanotech     = find_talent( "Recuperative Nanotech" );
+  talents.recuperative_nanotech     = find_talent( "Recuperative Nanotech"    );
 
   // Concealment
   talents.concealed_attacks         = find_talent( "Concealed Attacks"        );
@@ -893,32 +886,32 @@ void scoundrel_operative_t::init_talents()
 
     // Lethality|Dirty Fighting
     // t1
-  talents.deadly_directive          = find_talent( "Deadly Directive" );
-  talents.lethality                 = find_talent( "Lethality" );
-  talents.razor_edge                = find_talent( "Razor Edge" );
+  talents.deadly_directive          = find_talent( "Deadly Directive"         );
+  talents.lethality                 = find_talent( "Lethality"                );
+  talents.razor_edge                = find_talent( "Razor Edge"               );
     // t2
-  talents.slip_away                 = find_talent( "Slip Away" );
-  talents.flash_powder              = find_talent( "Flash Powder" );
-  talents.corrosive_microbes        = find_talent( "Corrosive Microbes" );
-  talents.lethal_injectors          = find_talent( "Lethal Injectors" );
+  talents.slip_away                 = find_talent( "Slip Away"                );
+  talents.flash_powder              = find_talent( "Flash Powder"             );
+  talents.corrosive_microbes        = find_talent( "Corrosive Microbes"       );
+  talents.lethal_injectors          = find_talent( "Lethal Injectors"         );
     // t3
-  talents.corrosive_grenades        = find_talent( "Corrosive Grenades" );
-  talents.combat_stims              = find_talent( "Combat Stims" );
-  talents.cut_down                  = find_talent( "Cut Down" );
+  talents.corrosive_grenades        = find_talent( "Corrosive Grenades"       );
+  talents.combat_stims              = find_talent( "Combat Stims"             );
+  talents.cut_down                  = find_talent( "Cut Down"                 );
     // t4
-  talents.lethal_purpose            = find_talent( "Lethal Purpose" );
-  talents.adhesive_corrosives       = find_talent( "Adhesive Corrosives" );
-  talents.escape_plan               = find_talent( "Escape Plan" );
-  talents.lethal_dose               = find_talent( "Lethal Dose" );
+  talents.lethal_purpose            = find_talent( "Lethal Purpose"           );
+  talents.adhesive_corrosives       = find_talent( "Adhesive Corrosives"      );
+  talents.escape_plan               = find_talent( "Escape Plan"              );
+  talents.lethal_dose               = find_talent( "Lethal Dose"              );
     // t5
-  talents.cull                      = find_talent( "Cull" );
-  talents.licence_to_kill           = find_talent( "Licence to Kill" );
-  talents.counterstrike             = find_talent( "Counterstrike" );
+  talents.cull                      = find_talent( "Cull"                     );
+  talents.licence_to_kill           = find_talent( "Licence to Kill"          );
+  talents.counterstrike             = find_talent( "Counterstrike"            );
     // t6
-  talents.devouring_microbes        = find_talent( "Devouring Microbes" );
-  talents.lingering_toxins          = find_talent( "Lingering Toxins" );
+  talents.devouring_microbes        = find_talent( "Devouring Microbes"       );
+  talents.lingering_toxins          = find_talent( "Lingering Toxins"         );
     // t7
-  talents.weakening_blast           = find_talent( "Weakening Blast" );
+  talents.weakening_blast           = find_talent( "Weakening Blast"          );
 }
 
 // scoundrel_operative_t::init_base ========================================================
@@ -1004,28 +997,34 @@ void scoundrel_operative_t::init_actions()
   {
     if ( type == IA_OPERATIVE )
     {
-      // FIXME update from test_operative.simc
       action_list_str += "stim,type=exotech_skill";
       action_list_str += "/snapshot_stats";
       action_list_str += "/stealth";
-      action_list_str += "/acid_blade,if=!buff.acid_blade_coating.up&buff.stealth.up";
-      action_list_str += "/hidden_strike";
-      action_list_str += "/corrosive_dart,if=!dot.corrosive_dart.remains&energy>=60";
-      action_list_str += "/laceration,if=energy>=70&buff.tactical_advantage.stack>=2";
-      action_list_str += "/shiv,if=energy>=75";
-      action_list_str += "/acid_blade,if=!buff.acid_blade_coating.up&energy>=75";
-      action_list_str += "/backstab,if=energy>=65";
-      action_list_str += "/overload_shot,if=energy=100";
       action_list_str += "/adrenaline_probe,if=energy<=60";
-      action_list_str += "/rifle_shot";
-
+      action_list_str += "/stim_boost,if=buff.tactical_advantage.stack>=2";
 
       switch ( primary_tree() )
       {
+        case TREE_MEDICINE:
+          break;
 
+        case TREE_CONCEALMENT:
+          action_list_str += "/acid_blade,if=!buff.acid_blade_coating.up&!cooldown.backstab.remains";
+          action_list_str += "/hidden_strike,if=buff.acid_blade_coating.up";
+          action_list_str += "/backstab,if=buff.acid_blade_coating.up";
+          action_list_str += "/corrosive_dart,if=!ticking&energy>=75";
+          action_list_str += "/shiv,if=energy>=75&buff.tactical_advantage.stack<2";
+          action_list_str += "/laceration,if=energy>=75&buff.tactical_advantage.stack>=2";
+          action_list_str += "/overload_shot,if=energy=100";
+          break;
 
-      default: break;
+        case TREE_LETHALITY:
+          break;
+
+        default: break;
       }
+
+      action_list_str += "/rifle_shot";
 
       action_list_default = 1;
     }
@@ -1071,6 +1070,7 @@ role_type scoundrel_operative_t::primary_role() const
   case ROLE_TANK:
     return ROLE_TANK;
   case ROLE_DPS:
+    return ROLE_DPS;
   case ROLE_HYBRID:
     return ROLE_HYBRID;
   default:
@@ -1146,7 +1146,6 @@ void scoundrel_operative_t::create_talents()
     { "Tox Scan", 1 }, { "Medical Therapy", 2 }, { "Surgical Probe", 1 }, { "Surgical Precision", 1 },
     { "Med Shield", 2 }, { "Accomplished Doctor", 3 },
     { "Recuperative Nanotech", 1 },
-    // and the rest
   };
   init_talent_tree(IA_OPERATIVE_MEDICINE, medicine_tree );
 
