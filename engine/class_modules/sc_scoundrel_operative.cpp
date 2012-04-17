@@ -58,6 +58,7 @@ struct scoundrel_operative_t : public player_t
     gain_t* high;
     gain_t* adrenaline_probe;
     gain_t* stim_boost;
+    gain_t* revitalizers;
   } gains;
 
   // Procs
@@ -748,8 +749,11 @@ struct overload_shot_t : public scoundrel_operative_range_attack_t
 // Stim Boost | ??? =========================================================
 struct stim_boost_t : public scoundrel_operative_action_t
 {
+  static double tick_amount( const scoundrel_operative_t& op )
+  { return 3 + 0.5 * op.talents.culling -> rank(); }
+
   stim_boost_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_action_t(n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE)
+    scoundrel_operative_action_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE )
   {
     parse_options( options_str );
 
@@ -771,13 +775,15 @@ struct stim_boost_t : public scoundrel_operative_action_t
     return scoundrel_operative_action_t::ready();
   }
 
-  virtual void tick(dot_t* d)
+  virtual void tick( dot_t* d )
   {
     scoundrel_operative_action_t::tick(d);
 
-    scoundrel_operative_t* p = cast();
-    p -> resource_gain( RESOURCE_ENERGY, 3, p -> gains.stim_boost );
-    // also grants revitalise talented, restoring health. not implemented.
+    scoundrel_operative_t& p = *cast();
+
+    p.resource_gain( RESOURCE_ENERGY, tick_amount( p ), p.gains.stim_boost );
+    if ( p.talents.revitalizers -> rank() )
+      p.resource_gain( RESOURCE_HEALTH, p.resource_max[ RESOURCE_HEALTH ] * 0.02, p.gains.revitalizers );
   }
 
   virtual void execute()
@@ -972,6 +978,7 @@ void scoundrel_operative_t::init_gains()
   gains.med              = get_gain( "med"              );
   gains.high             = get_gain( "high"             );
   gains.stim_boost       = get_gain( "stim_boost"       );
+  gains.revitalizers     = get_gain( "revitalizers"     );
 }
 
 // scoundrel_operative_t::init_procs =======================================================
@@ -1138,7 +1145,7 @@ double scoundrel_operative_t::energy_regen_per_second() const
   double eps = energy_regen_bracket().first;
 
   if ( buffs.stim_boost -> check() )
-    eps += 1;
+    eps += stim_boost_t::tick_amount( *this ) * ( 1.0 / 3 );
 
   return eps;
 }
