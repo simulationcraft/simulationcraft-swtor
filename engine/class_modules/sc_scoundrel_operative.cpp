@@ -198,6 +198,12 @@ struct scoundrel_operative_t : public player_t
   virtual role_type primary_role() const;
           void    create_talents();
 
+  virtual double range_bonus_stats() const
+  { return cunning() + player_t::range_bonus_stats(); }
+
+  virtual double range_crit_from_stats() const
+  { return rating_scaler.crit_from_stat( cunning() ) + player_t::range_crit_from_stats(); }
+
   virtual void init_scaling()
   {
     player_t::init_scaling();
