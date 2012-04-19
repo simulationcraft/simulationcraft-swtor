@@ -2373,7 +2373,7 @@ struct player_t : public noncopyable
 private:
   double initial_accuracy_rating, accuracy_rating_, base_accuracy_, computed_accuracy;
   double initial_alacrity_rating, alacrity_rating_, base_alacrity_, computed_alacrity;
-  double initial_crit_rating, crit_rating;
+  double initial_crit_rating, crit_rating, base_crit_chance_;
   double initial_surge_rating, surge_rating;
   double initial_defense_rating, defense_rating;
   double initial_shield_rating, shield_rating;
@@ -2391,13 +2391,14 @@ protected:
   void set_accuracy_rating( double value ) { accuracy_rating_ = value; recalculate_accuracy(); }
   void set_base_alacrity( double value )   { base_alacrity_ = value;   recalculate_alacrity(); }
   void set_alacrity_rating( double value ) { alacrity_rating_ = value; recalculate_alacrity(); }
+  void set_base_crit( double value )       { base_crit_chance_ = value; }
 
 public:
-  double get_base_accuracy() const { return base_accuracy_; }
+  double get_base_accuracy() const   { return base_accuracy_; }
   double get_accuracy_rating() const { return accuracy_rating_; }
-  double get_base_alacrity() const { return base_alacrity_; }
+  double get_base_alacrity() const   { return base_alacrity_; }
   double get_alacrity_rating() const { return alacrity_rating_; }
-
+  double get_base_crit() const       { return base_crit_chance_; }
 
   // Attributes
   attribute_type primary_attribute, secondary_attribute;
@@ -2411,7 +2412,6 @@ public:
   double base_power,       initial_power,       power;
   double base_force_power, initial_force_power, force_power;
   double base_tech_power,  initial_tech_power,  tech_power;
-  double base_crit_chance;
 
   double surge_bonus;
   double base_armor_penetration;

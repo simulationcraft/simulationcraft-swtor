@@ -262,7 +262,7 @@ player_t::player_t( sim_t*             s,
   // Ratings
   initial_accuracy_rating( 0 ), accuracy_rating_( 0 ), base_accuracy_( 0 ), computed_accuracy( 0 ),
   initial_alacrity_rating( 0 ), alacrity_rating_( 0 ), base_alacrity_( 0 ), computed_alacrity( 0 ),
-  initial_crit_rating( 0 ), crit_rating( 0 ),
+  initial_crit_rating( 0 ), crit_rating( 0 ), base_crit_chance_( 0.05 ),
   initial_surge_rating( 0 ), surge_rating( 0 ),
   initial_defense_rating( 0 ), defense_rating( 0 ),
   initial_shield_rating( 0 ), shield_rating( 0 ),
@@ -275,7 +275,6 @@ player_t::player_t( sim_t*             s,
   base_power( 0 ),       initial_power( 0 ),       power( 0 ),
   base_force_power( 0 ), initial_force_power( 0 ), force_power( 0 ),
   base_tech_power( 0 ),  initial_tech_power( 0 ),  tech_power( 0 ),
-  base_crit_chance( 0.05 ),
   surge_bonus( 0 ),
   base_armor_penetration( 0 ),
 
@@ -1574,7 +1573,7 @@ double player_t::default_bonus_multiplier() const
 
 double player_t::default_crit_chance() const
 {
-  double c = base_crit_chance + crit_from_rating;
+  double c = base_crit_chance_ + crit_from_rating;
 
   if ( buffs.coordination -> up() )
     c += 0.05;

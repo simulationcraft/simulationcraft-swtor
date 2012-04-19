@@ -803,7 +803,7 @@ struct cull_t : public scoundrel_operative_range_attack_t
   };
 
   cull_extra_t* extra_strike;
-  
+
   cull_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
     scoundrel_operative_range_attack_t( n, p ),
     extra_strike( new cull_extra_t( p, n + "_extra" ) )
@@ -911,7 +911,7 @@ struct overload_shot_t : public scoundrel_operative_range_attack_t
 
     // "Skirmisher" passive for operatives gives 15% boost to overload shot
     base_multiplier += 0.15;
-    // TEST: additive or multiplicative 
+    // TEST: additive or multiplicative
     if ( p -> talents.cut_down->rank() )
        base_multiplier += .03 * p -> talents.cut_down->rank();
   }
@@ -1188,8 +1188,8 @@ void scoundrel_operative_t::init_base()
 
   attribute_multiplier_initial[ ATTR_CUNNING ] += 0.03 * talents.imperial_education -> rank();
 
-  base_crit_chance += 0.02 * talents.lethality -> rank();
   // TODO: base_alacrity from Deadly Diretive grants 2%
+  set_base_crit( get_base_crit() + 0.02 * talents.lethality -> rank() );
 }
 
 // scoundrel_operative_t::init_benefits =======================================================
