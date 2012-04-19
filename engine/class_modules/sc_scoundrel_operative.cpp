@@ -326,17 +326,19 @@ struct scoundrel_operative_poison_attack_t : public scoundrel_operative_tech_att
 
   virtual void tick( dot_t* d )
   {
-    scoundrel_operative_targetdata_t* td = targetdata();
+    scoundrel_operative_t& p = *cast();
+    scoundrel_operative_targetdata_t& td = *targetdata();
 
     // XXX TODO FIX REVIEW
     // this is a dirty filthy hack
     // DK module in simc uses target_debuff(...) and player_multiplier
     {
       double base_multiplier_original = base_multiplier;
-      if ( p() -> talents.devouring_microbes -> rank() && td -> target.health_percentage() < 30 )
-        base_multiplier += 0.05 * p() -> talents.devouring_microbes -> rank();
-      if ( p() -> buffs.weakening_blast -> up() ) {
-        p() -> buffs.weakening_blast -> decrement();
+      if ( p.talents.devouring_microbes -> rank() && td.target.health_percentage() < 30 )
+        base_multiplier += 0.05 * p.talents.devouring_microbes -> rank();
+      if ( p.buffs.weakening_blast -> up() )
+      {
+        p.buffs.weakening_blast -> decrement();
         base_multiplier += 0.3;
       }
 
@@ -345,10 +347,8 @@ struct scoundrel_operative_poison_attack_t : public scoundrel_operative_tech_att
       base_multiplier = base_multiplier_original;
     }
 
-    if ( RESULT_CRIT && p() -> talents.lethal_purpose -> rank() )
-    {
-      p() -> resource_gain( RESOURCE_ENERGY, 1, p() -> gains.lethal_purpose );
-    }
+    if ( result == RESULT_CRIT && p.talents.lethal_purpose -> rank() )
+      p.resource_gain( RESOURCE_ENERGY, p.talents.lethal_purpose -> rank(), p.gains.lethal_purpose );
   }
 };
 
@@ -798,8 +798,7 @@ struct cull_t : public scoundrel_operative_range_attack_t
       dd.power_mod = 0.66;
       background = true;
       trigger_gcd = timespan_t::zero();
-      if ( p -> talents.cut_down->rank() )
-         base_multiplier += .03 * p -> talents.cut_down->rank();
+      base_multiplier += .03 * p -> talents.cut_down->rank();
     }
   };
 
@@ -820,8 +819,7 @@ struct cull_t : public scoundrel_operative_range_attack_t
     weapon_multiplier = -0.1;
     dd.power_mod = 1.35;
 
-    if ( p -> talents.cut_down->rank() )
-       base_multiplier += .03 * p -> talents.cut_down->rank();
+    base_multiplier += .03 * p -> talents.cut_down->rank();
   }
 
 
@@ -913,8 +911,7 @@ struct overload_shot_t : public scoundrel_operative_range_attack_t
     // "Skirmisher" passive for operatives gives 15% boost to overload shot
     base_multiplier += 0.15;
     // TEST: additive or multiplicative
-    if ( p -> talents.cut_down->rank() )
-       base_multiplier += .03 * p -> talents.cut_down->rank();
+    base_multiplier += .03 * p -> talents.cut_down->rank();
   }
 };
 
