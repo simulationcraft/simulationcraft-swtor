@@ -240,8 +240,6 @@ struct scoundrel_operative_t : public player_t
   }
 };
 
-namespace { // ANONYMOUS NAMESPACE ==========================================
-
 class scoundrel_operative_action_t : public action_t
 {
 public:
@@ -398,8 +396,6 @@ struct scoundrel_operative_consume_acid_blade_attack_t : public scoundrel_operat
 
 struct acid_blade_t : public scoundrel_operative_action_t
 {
-  // Acid Blade Poison | ??? ==================================================
-
   struct acid_blade_poison_t : public scoundrel_operative_poison_attack_t
   {
     acid_blade_poison_t( scoundrel_operative_t* p, const std::string& n ) :
@@ -484,7 +480,7 @@ struct adrenaline_probe_t : public scoundrel_operative_action_t
   }
 };
 
-// Stealth | ??? =========================================================
+// Stealth | ??? ============================================================
 
 struct stealth_t : public scoundrel_operative_action_t
 {
@@ -934,6 +930,7 @@ struct overload_shot_t : public scoundrel_operative_range_attack_t
 };
 
 // Stim Boost | ??? =========================================================
+
 struct stim_boost_t : public scoundrel_operative_action_t
 {
   static double tick_amount( const scoundrel_operative_t& op )
@@ -1064,13 +1061,11 @@ struct coordination_t : public scoundrel_operative_action_t
   }
 };
 
-}// ANONYMOUS NAMESPACE ====================================================
-
 // ==========================================================================
 // scoundrel_operative Character Definition
 // ==========================================================================
 
-// scoundrel_operative_t::create_action ====================================================
+// scoundrel_operative_t::create_action =====================================
 
 action_t* scoundrel_operative_t::create_action( const std::string& name,
                       const std::string& options_str )
@@ -1103,7 +1098,7 @@ action_t* scoundrel_operative_t::create_action( const std::string& name,
   return player_t::create_action( name, options_str );
 }
 
-// scoundrel_operative_t::init_talents =====================================================
+// scoundrel_operative_t::init_talents ======================================
 
 void scoundrel_operative_t::init_talents()
 {
@@ -1190,7 +1185,7 @@ void scoundrel_operative_t::init_talents()
   talents.weakening_blast           = find_talent( "Weakening Blast"          );
 }
 
-// scoundrel_operative_t::init_base ========================================================
+// scoundrel_operative_t::init_base =========================================
 
 void scoundrel_operative_t::init_base()
 {
@@ -1206,7 +1201,7 @@ void scoundrel_operative_t::init_base()
   set_base_alacrity( get_base_alacrity() + 0.02 * talents.deadly_directive -> rank() );
 }
 
-// scoundrel_operative_t::init_benefits =======================================================
+// scoundrel_operative_t::init_benefits =====================================
 
 void scoundrel_operative_t::init_benefits()
 {
@@ -1216,7 +1211,7 @@ void scoundrel_operative_t::init_benefits()
   benefits.wb_poison_ticks = get_benefit( "Poison ticks with Weakening Blast" );
 }
 
-// scoundrel_operative_t::init_buffs =======================================================
+// scoundrel_operative_t::init_buffs ========================================
 
 void scoundrel_operative_t::init_buffs()
 {
@@ -1235,7 +1230,7 @@ void scoundrel_operative_t::init_buffs()
   buffs.tactical_advantage  = new buff_t( this, "tactical_advantage", 2, from_seconds( 10 ) );
 }
 
-// scoundrel_operative_t::init_gains =======================================================
+// scoundrel_operative_t::init_gains ========================================
 
 void scoundrel_operative_t::init_gains()
 {
@@ -1251,7 +1246,7 @@ void scoundrel_operative_t::init_gains()
   gains.lethal_purpose   = get_gain( "lethal_purpose"   );
 }
 
-// scoundrel_operative_t::init_procs =======================================================
+// scoundrel_operative_t::init_procs ========================================
 
 void scoundrel_operative_t::init_procs()
 {
@@ -1260,7 +1255,7 @@ void scoundrel_operative_t::init_procs()
   procs.corrosive_microbes = get_proc( "Corrosive Microbe ticks" );
 }
 
-// scoundrel_operative_t::init_rng =========================================================
+// scoundrel_operative_t::init_rng ==========================================
 
 void scoundrel_operative_t::init_rng()
 {
@@ -1269,15 +1264,15 @@ void scoundrel_operative_t::init_rng()
   rngs.collateral_strike = get_rng( "collateral_strike" );
 }
 
-// scoundrel_operative_t::init_actions =====================================================
+// scoundrel_operative_t::init_actions ======================================
 
 void scoundrel_operative_t::init_actions()
 {
-  //======================================================================================
+  //=========================================================================
   //
-  //   Please Mirror all changes between Jedi Shadow and Sith Assassin!!!
+  //   Please Mirror all changes between Empire/Republic
   //
-  //======================================================================================
+  //=========================================================================
 
   if ( action_list_str.empty() )
   {
@@ -1474,7 +1469,6 @@ void scoundrel_operative_t::create_talents()
     { "Devouring Microbes", 3 }, { "Lingering Toxins", 2 }, { "Weakening Blast", 1 },
   };
   init_talent_tree( IA_OPERATIVE_LETHALITY, lethality_tree );
-
 }
 
 } // ANONYMOUS NAMESPACE ====================================================
@@ -1483,28 +1477,28 @@ void scoundrel_operative_t::create_talents()
 // PLAYER_T EXTENSIONS
 // ==========================================================================
 
-// player_t::create_scoundrel ============================================
+// player_t::create_scoundrel ===============================================
 
 player_t* player_t::create_scoundrel( sim_t* sim, const std::string& name, race_type r )
 {
   return new scoundrel_operative_t( sim, S_SCOUNDREL, name, r );
 }
 
-// player_t::create_operative ==========================================
+// player_t::create_operative ===============================================
 
 player_t* player_t::create_operative( sim_t* sim, const std::string& name, race_type r )
 {
   return new scoundrel_operative_t( sim, IA_OPERATIVE, name, r );
 }
 
-// player_t::scoundrel_operative_init ===========================================
+// player_t::scoundrel_operative_init =======================================
 
 void player_t::scoundrel_operative_init( sim_t* /* sim */ )
 {
 
 }
 
-// player_t::scoundrel_operative_combat_begin ===================================
+// player_t::scoundrel_operative_combat_begin ===============================
 
 void player_t::scoundrel_operative_combat_begin( sim_t* /* sim */ )
 {
