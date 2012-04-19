@@ -5,17 +5,18 @@
 
 #include "../simulationcraft.hpp"
 
+// ==========================================================================
+// Vanguard / Powertech
+// ==========================================================================
+
+namespace { // ANONYMOUS ====================================================
+
 struct vanguard_powertech_targetdata_t : public targetdata_t
 {
   vanguard_powertech_targetdata_t( player_t& source, player_t& target )
     : targetdata_t( source, target )
   {}
 };
-
-
-// ==========================================================================
-// Vanguard / Powertech
-// ==========================================================================
 
 struct vanguard_powertech_t : public player_t
 {
@@ -293,12 +294,12 @@ void vanguard_powertech_t::init_actions()
     player_t::init_actions();
 }
 
-// vanguard_powertech_t::primary_resource ==================================================
+// vanguard_powertech_t::primary_resource ===================================
 
 resource_type vanguard_powertech_t::primary_resource() const
 { return RESOURCE_FORCE; }
 
-// vanguard_powertech_t::primary_role ==================================================
+// vanguard_powertech_t::primary_role =======================================
 
 role_type vanguard_powertech_t::primary_role() const
 {
@@ -317,39 +318,41 @@ role_type vanguard_powertech_t::primary_role() const
     return ROLE_HYBRID;
 }
 
-// vanguard_powertech_t::create_talents ==================================================
+// vanguard_powertech_t::create_talents =====================================
 
 void vanguard_powertech_t::create_talents()
 {
   // See sage_sorcerer_t::create_talents()
 }
 
+} // ANONYMOUS NAMESPACE ====================================================
+
 // ==========================================================================
 // PLAYER_T EXTENSIONS
 // ==========================================================================
 
-// player_t::create_vanguard ============================================
+// player_t::create_vanguard ================================================
 
 player_t* player_t::create_vanguard( sim_t* sim, const std::string& name, race_type r )
 {
     return new vanguard_powertech_t( sim, T_VANGUARD, name, r );
 }
 
-// player_t::create_powertech ==========================================
+// player_t::create_powertech ===============================================
 
 player_t* player_t::create_powertech( sim_t* sim, const std::string& name, race_type r )
 {
     return new vanguard_powertech_t( sim, BH_POWERTECH, name, r );
 }
 
-// player_t::vanguard_powertech_init ===========================================
+// player_t::vanguard_powertech_init ========================================
 
 void player_t::vanguard_powertech_init( sim_t* /* sim */ )
 {
 
 }
 
-// player_t::vanguard_powertech_combat_begin ===================================
+// player_t::vanguard_powertech_combat_begin ================================
 
 void player_t::vanguard_powertech_combat_begin( sim_t* /* sim */ )
 {

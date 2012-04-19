@@ -5,16 +5,18 @@
 
 #include "../simulationcraft.hpp"
 
+// ==========================================================================
+// Commando | Mercenary
+// ==========================================================================
+
+namespace { // ANONYMOUS ====================================================
+
 struct commando_mercenary_targetdata_t : public targetdata_t
 {
   commando_mercenary_targetdata_t( player_t& source, player_t& target )
     : targetdata_t( source, target )
   {}
 };
-
-// ==========================================================================
-// Commando | Mercenary
-// ==========================================================================
 
 struct commando_mercenary_t : public player_t
 {
@@ -320,6 +322,8 @@ void commando_mercenary_t::create_talents()
 {
   // See sage_sorcerer_t::create_talents()
 }
+
+} // ANONYMOUS NAMESPACE ====================================================
 
 // ==========================================================================
 // PLAYER_T EXTENSIONS

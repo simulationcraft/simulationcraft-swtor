@@ -5,17 +5,18 @@
 
 #include "../simulationcraft.hpp"
 
+// ==========================================================================
+// Jedi Guardian | Sith Juggernaut
+// ==========================================================================
+
+namespace { // ANONYMOUS ====================================================
+
 struct juggernaut_guardian_targetdata_t : public targetdata_t
 {
   juggernaut_guardian_targetdata_t( player_t& source, player_t& target )
     : targetdata_t( source, target )
   {}
 };
-
-
-// ==========================================================================
-// Jedi Shadow | Sith Assassin
-// ==========================================================================
 
 struct juggernaut_guardian_t : public player_t
 {
@@ -323,6 +324,8 @@ void juggernaut_guardian_t::create_talents()
 {
   // See sage_sorcerer_t::create_talents()
 }
+
+} // ANONYMOUS NAMESPACE ====================================================
 
 // ==========================================================================
 // PLAYER_T EXTENSIONS

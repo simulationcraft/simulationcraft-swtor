@@ -5,6 +5,12 @@
 
 #include "../simulationcraft.hpp"
 
+// ==========================================================================
+// Jedi Sentinel | Sith Marauder
+// ==========================================================================
+
+namespace { // ANONYMOUS ====================================================
+
 struct sentinel_marauder_targetdata_t : public targetdata_t
 {
   sentinel_marauder_targetdata_t( player_t& source, player_t& target )
@@ -12,10 +18,6 @@ struct sentinel_marauder_targetdata_t : public targetdata_t
   {}
 };
 
-
-// ==========================================================================
-// Jedi Shadow | Sith Assassin
-// ==========================================================================
 
 struct sentinel_marauder_t : public player_t
 {
@@ -321,6 +323,8 @@ void sentinel_marauder_t::create_talents()
 {
   // See sage_sorcerer_t::create_talents()
 }
+
+} // ANONYMOUS NAMESPACE ====================================================
 
 // ==========================================================================
 // PLAYER_T EXTENSIONS

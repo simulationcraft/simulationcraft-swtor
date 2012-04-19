@@ -5,17 +5,18 @@
 
 #include "../simulationcraft.hpp"
 
+// ==========================================================================
+// Gunslinger | Sniper
+// ==========================================================================
+
+namespace { // ANONYMOUS ====================================================
+
 struct gunslinger_sniper_targetdata_t : public targetdata_t
 {
   gunslinger_sniper_targetdata_t( player_t& source, player_t& target )
     : targetdata_t( source, target )
   {}
 };
-
-
-// ==========================================================================
-// Gunslinger / Sniper
-// ==========================================================================
 
 struct gunslinger_sniper_t : public player_t
 {
@@ -158,7 +159,7 @@ struct gunslinger_sniper_spell_t : public gunslinger_sniper_action_t
 // Gunslinger / Sniper Character Definition
 // ==========================================================================
 
-// gunslinger_sniper_t::create_action ====================================================
+// gunslinger_sniper_t::create_action =======================================
 
 action_t* gunslinger_sniper_t::create_action( const std::string& name,
                                             const std::string& options_str )
@@ -177,7 +178,7 @@ action_t* gunslinger_sniper_t::create_action( const std::string& name,
     return player_t::create_action( name, options_str );
 }
 
-// gunslinger_sniper_t::init_talents =====================================================
+// gunslinger_sniper_t::init_talents ========================================
 
 void gunslinger_sniper_t::init_talents()
 {
@@ -191,7 +192,7 @@ void gunslinger_sniper_t::init_talents()
     // Madness|Balance
 }
 
-// gunslinger_sniper_t::init_base ========================================================
+// gunslinger_sniper_t::init_base ===========================================
 
 void gunslinger_sniper_t::init_base()
 {
@@ -202,7 +203,7 @@ void gunslinger_sniper_t::init_base()
 
 }
 
-// gunslinger_sniper_t::init_benefits =======================================================
+// gunslinger_sniper_t::init_benefits =======================================
 
 void gunslinger_sniper_t::init_benefits()
 {
@@ -210,7 +211,7 @@ void gunslinger_sniper_t::init_benefits()
 
 }
 
-// gunslinger_sniper_t::init_buffs =======================================================
+// gunslinger_sniper_t::init_buffs ==========================================
 
 void gunslinger_sniper_t::init_buffs()
 {
@@ -226,7 +227,7 @@ void gunslinger_sniper_t::init_buffs()
 
 }
 
-// gunslinger_sniper_t::init_gains =======================================================
+// gunslinger_sniper_t::init_gains ==========================================
 
 void gunslinger_sniper_t::init_gains()
 {
@@ -234,7 +235,7 @@ void gunslinger_sniper_t::init_gains()
 
 }
 
-// gunslinger_sniper_t::init_procs =======================================================
+// gunslinger_sniper_t::init_procs ==========================================
 
 void gunslinger_sniper_t::init_procs()
 {
@@ -242,7 +243,7 @@ void gunslinger_sniper_t::init_procs()
 
 }
 
-// gunslinger_sniper_t::init_rng =========================================================
+// gunslinger_sniper_t::init_rng ============================================
 
 void gunslinger_sniper_t::init_rng()
 {
@@ -250,15 +251,15 @@ void gunslinger_sniper_t::init_rng()
 
 }
 
-// gunslinger_sniper_t::init_actions =====================================================
+// gunslinger_sniper_t::init_actions ========================================
 
 void gunslinger_sniper_t::init_actions()
 {
-    //======================================================================================
+    //=======================================================================
     //
     //   Please Mirror all changes between Gunslinger and Sniper!!!
     //
-    //======================================================================================
+    //=======================================================================
 
     if ( action_list_str.empty() )
     {
@@ -296,12 +297,12 @@ void gunslinger_sniper_t::init_actions()
     player_t::init_actions();
 }
 
-// gunslinger_sniper_t::primary_resource ==================================================
+// gunslinger_sniper_t::primary_resource ====================================
 
 resource_type gunslinger_sniper_t::primary_resource() const
 { return RESOURCE_FORCE; }
 
-// gunslinger_sniper_t::primary_role ==================================================
+// gunslinger_sniper_t::primary_role ========================================
 
 role_type gunslinger_sniper_t::primary_role() const
 {
@@ -320,39 +321,41 @@ role_type gunslinger_sniper_t::primary_role() const
     return ROLE_HYBRID;
 }
 
-// gunslinger_sniper_t::create_talents ==================================================
+// gunslinger_sniper_t::create_talents ======================================
 
 void gunslinger_sniper_t::create_talents()
 {
   // See sage_sorcerer_t::create_talents()
 }
 
+} // ANONYMOUS NAMESPACE ====================================================
+
 // ==========================================================================
 // PLAYER_T EXTENSIONS
 // ==========================================================================
 
-// player_t::create_gunslinger  ============================================
+// player_t::create_gunslinger  =============================================
 
 player_t* player_t::create_gunslinger( sim_t* sim, const std::string& name, race_type r )
 {
     return new gunslinger_sniper_t( sim, S_GUNSLINGER, name, r );
 }
 
-// player_t::create_sniper  ==========================================
+// player_t::create_sniper  =================================================
 
 player_t* player_t::create_sniper( sim_t* sim, const std::string& name, race_type r )
 {
     return new gunslinger_sniper_t( sim, IA_SNIPER, name, r );
 }
 
-// player_t::gunslinger_sniper_init ===========================================
+// player_t::gunslinger_sniper_init =========================================
 
 void player_t::gunslinger_sniper_init( sim_t* /* sim */ )
 {
 
 }
 
-// player_t::gunslinger_sniper_combat_begin ===================================
+// player_t::gunslinger_sniper_combat_begin =================================
 
 void player_t::gunslinger_sniper_combat_begin( sim_t* /* sim */ )
 {

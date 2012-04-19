@@ -5,6 +5,8 @@
 
 #include "../simulationcraft.hpp"
 
+namespace { // ANONYMOUS ====================================================
+
 struct scoundrel_operative_targetdata_t : public targetdata_t
 {
   dot_t dot_corrosive_dart;
@@ -32,7 +34,6 @@ struct scoundrel_operative_targetdata_t : public targetdata_t
     add( *debuff_weakening_blast );
   }
 };
-
 
 // ==========================================================================
 // Scoundrel / Operative
@@ -307,7 +308,7 @@ struct scoundrel_operative_range_attack_t : public scoundrel_operative_action_t
   scoundrel_operative_range_attack_t( const std::string& n, scoundrel_operative_t* p, school_type s=SCHOOL_ENERGY ) :
     scoundrel_operative_action_t( n, p, range_policy, RESOURCE_ENERGY, s )
   {
-    may_crit   = true;
+    may_crit = true;
   }
 
   virtual void execute()
@@ -1475,6 +1476,8 @@ void scoundrel_operative_t::create_talents()
   init_talent_tree( IA_OPERATIVE_LETHALITY, lethality_tree );
 
 }
+
+} // ANONYMOUS NAMESPACE ====================================================
 
 // ==========================================================================
 // PLAYER_T EXTENSIONS
