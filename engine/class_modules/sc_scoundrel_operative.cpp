@@ -324,28 +324,27 @@ struct scoundrel_operative_poison_attack_t : public scoundrel_operative_tech_att
     base_crit += .04 * p -> talents.lethal_dose -> rank();
   }
 
+  virtual void player_buff()
+  {
+    scoundrel_operative_tech_attack_t::player_buff();
+
+    if ( p() -> buffs.weakening_blast -> up() )
+      player_multiplier += 0.3;
+  }
+
+  virtual void target_debuff( player_t* tgt, dmg_type type )
+  {
+    scoundrel_operative_tech_attack_t::target_debuff( tgt, type );
+
+    if ( tgt -> health_percentage() < 30 )
+      target_multiplier += 0.05 * p() -> talents.devouring_microbes -> rank();
+  }
+
   virtual void tick( dot_t* d )
   {
+    scoundrel_operative_tech_attack_t::tick( d );
+
     scoundrel_operative_t& p = *cast();
-    scoundrel_operative_targetdata_t& td = *targetdata();
-
-    // XXX TODO FIX REVIEW
-    // this is a dirty filthy hack
-    // DK module in simc uses target_debuff(...) and player_multiplier
-    {
-      double base_multiplier_original = base_multiplier;
-      if ( p.talents.devouring_microbes -> rank() && td.target.health_percentage() < 30 )
-        base_multiplier += 0.05 * p.talents.devouring_microbes -> rank();
-      if ( p.buffs.weakening_blast -> up() )
-      {
-        p.buffs.weakening_blast -> decrement();
-        base_multiplier += 0.3;
-      }
-
-      scoundrel_operative_tech_attack_t::tick( d );
-      // oh the shame
-      base_multiplier = base_multiplier_original;
-    }
 
     if ( result == RESULT_CRIT && p.talents.lethal_purpose -> rank() )
       p.resource_gain( RESOURCE_ENERGY, p.talents.lethal_purpose -> rank(), p.gains.lethal_purpose );
