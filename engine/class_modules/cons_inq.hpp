@@ -10,32 +10,6 @@
 
 namespace cons_inq { // =====================================================
 
-class targetdata_t : public ::targetdata_t
-{
-public:
-  dot_t dot_telekinetic_throw;
-  dot_t dot_mind_crush;
-  dot_t dot_sever_force;
-
-  targetdata_t( player_t& source, player_t& target ) :
-    ::targetdata_t( source, target ),
-    dot_telekinetic_throw( "telekinetic_throw", &source ),
-    dot_mind_crush( "mind_crush", &source ),
-    dot_sever_force( "sever_force", &source )
-  {
-    add( dot_telekinetic_throw );
-    alias( dot_telekinetic_throw, "force_lightning" );
-
-    add( dot_mind_crush );
-    alias( dot_mind_crush, "mind_crush_dot" );
-    alias( dot_mind_crush, "crushing_darkness" );
-    alias( dot_mind_crush, "crushing_darkness_dot" );
-
-    add( dot_sever_force );
-    alias( dot_sever_force, "creeping_terror" );
-  }
-};
-
 class class_t : public player_t
 {
 public:
@@ -66,6 +40,32 @@ public:
   {
     resource_gain( RESOURCE_FORCE, base_regen_per_second * to_seconds( periodicity ), gains_force_regen );
     player_t::regen( periodicity );
+  }
+};
+
+class targetdata_t : public ::targetdata_t
+{
+public:
+  dot_t dot_telekinetic_throw;
+  dot_t dot_mind_crush;
+  dot_t dot_sever_force;
+
+  targetdata_t( class_t& source, player_t& target ) :
+    ::targetdata_t( source, target ),
+    dot_telekinetic_throw( "telekinetic_throw", &source ),
+    dot_mind_crush( "mind_crush", &source ),
+    dot_sever_force( "sever_force", &source )
+  {
+    add( dot_telekinetic_throw );
+    alias( dot_telekinetic_throw, "force_lightning" );
+
+    add( dot_mind_crush );
+    alias( dot_mind_crush, "mind_crush_dot" );
+    alias( dot_mind_crush, "crushing_darkness" );
+    alias( dot_mind_crush, "crushing_darkness_dot" );
+
+    add( dot_sever_force );
+    alias( dot_sever_force, "creeping_terror" );
   }
 };
 
