@@ -689,7 +689,8 @@ struct corrosive_grenade_t : public scoundrel_operative_tech_attack_t
     if ( d -> ticks() == 0 )
     {
       // TODO
-      // Last Stand talent. replaces with a weaker version that does 15% of original damage over 9 seconds
+      // Adhesive Corrosives talent.
+      // replaces with a weaker version that does 15% of original damage over 9 seconds
       // TEST: 15% of the original 21 seconds worth? 15% of each tick?
       // TEST: only triggers if the dot wasn't refreshed?
     }
