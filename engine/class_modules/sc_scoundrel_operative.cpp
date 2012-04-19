@@ -13,19 +13,23 @@ struct scoundrel_operative_targetdata_t : public targetdata_t
   dot_t dot_stim_boost;
   dot_t dot_corrosive_grenade;
 
+  buff_t* debuff_weakening_blast;
+
   scoundrel_operative_targetdata_t( player_t& source, player_t& target ) :
     targetdata_t( source, target ),
     dot_corrosive_dart( "corrosive_dart", &source ),
     dot_adrenaline_probe( "adrenaline_probe", &source ),
     dot_acid_blade_poison( "acid_blade_poison", &source ),
     dot_stim_boost( "stim_boost", &source ),
-    dot_corrosive_grenade( "corrosive_grenade", &source )
+    dot_corrosive_grenade( "corrosive_grenade", &source ),
+    debuff_weakening_blast( new buff_t( this, "weakening_blast", 10, from_seconds( 15 ) ) )
   {
     add( dot_corrosive_dart );
     add( dot_adrenaline_probe );
     add( dot_acid_blade_poison );
     add( dot_stim_boost );
     add( dot_corrosive_grenade );
+    add( *debuff_weakening_blast );
   }
 };
 
@@ -50,9 +54,6 @@ struct scoundrel_operative_t : public player_t
     buff_t* adrenaline_probe;
     buff_t* tactical_advantage;
     //buff_t* cloaking_screen;
-
-    // TODO FIX this should be at target debuff
-    buff_t* weakening_blast;
   } buffs;
 
   // Gains
@@ -83,6 +84,8 @@ struct scoundrel_operative_t : public player_t
   // Benefits
   struct benefits_t
   {
+    benefit_t* devouring_microbes_ticks;
+    benefit_t* wb_poison_ticks;
   } benefits;
 
   // Cooldowns
@@ -324,20 +327,33 @@ struct scoundrel_operative_poison_attack_t : public scoundrel_operative_tech_att
     base_crit += .04 * p -> talents.lethal_dose -> rank();
   }
 
-  virtual void player_buff()
-  {
-    scoundrel_operative_tech_attack_t::player_buff();
-
-    if ( p() -> buffs.weakening_blast -> up() )
-      player_multiplier += 0.3;
-  }
-
   virtual void target_debuff( player_t* tgt, dmg_type type )
   {
     scoundrel_operative_tech_attack_t::target_debuff( tgt, type );
 
-    if ( tgt -> health_percentage() < 30 )
-      target_multiplier += 0.05 * p() -> talents.devouring_microbes -> rank();
+    scoundrel_operative_t& p = *cast();
+
+    // TEST: Additive or Multiplicative?
+
+    if ( unsigned rank = p.talents.devouring_microbes -> rank() )
+    {
+      bool up = tgt -> health_percentage() < 30;
+      p.benefits.devouring_microbes_ticks -> update( up );
+      if ( up )
+        target_multiplier += 0.05 * rank;
+    }
+
+    if ( p.talents.weakening_blast -> rank() )
+    {
+      scoundrel_operative_targetdata_t& td = *targetdata();
+      bool up = td.debuff_weakening_blast -> up();
+      p.benefits.wb_poison_ticks -> update( up );
+      if ( up )
+      {
+        td.debuff_weakening_blast -> decrement();
+        target_multiplier += 0.3;
+      }
+    }
   }
 
   virtual void tick( dot_t* d )
@@ -973,11 +989,12 @@ struct weakening_blast_t : public scoundrel_operative_range_attack_t
   weakening_blast_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str) :
     scoundrel_operative_range_attack_t( n, p )
   {
-
     parse_options( options_str );
 
     range = 10.0;
     cooldown -> duration = from_seconds( 15 );
+
+    // Is WB really off-GCD? That's bizarre.
     use_off_gcd = true;
     trigger_gcd = timespan_t::zero();
 
@@ -993,10 +1010,7 @@ struct weakening_blast_t : public scoundrel_operative_range_attack_t
     scoundrel_operative_range_attack_t::execute();
 
     if ( result_is_hit() )
-    {
-        // TODO FIX: this should be a target debuff
-        p() -> buffs.weakening_blast -> trigger(10);
-    }
+      targetdata() -> debuff_weakening_blast -> trigger( 10 );
   }
 };
 
@@ -1194,6 +1208,9 @@ void scoundrel_operative_t::init_base()
 void scoundrel_operative_t::init_benefits()
 {
   player_t::init_benefits();
+
+  benefits.devouring_microbes_ticks = get_benefit( "Poison ticks with Devouring Microbes" );
+  benefits.wb_poison_ticks = get_benefit( "Poison ticks with Weakening Blast" );
 }
 
 // scoundrel_operative_t::init_buffs =======================================================
@@ -1213,7 +1230,6 @@ void scoundrel_operative_t::init_buffs()
   buffs.stealth             = new buff_t( this, "stealth", 1                                );
   buffs.stim_boost          = new buff_t( this, "stim_boost", 1, from_seconds( 45 )         );
   buffs.tactical_advantage  = new buff_t( this, "tactical_advantage", 2, from_seconds( 10 ) );
-  buffs.weakening_blast     = new buff_t( this, "weakening_blast", 10, from_seconds( 15 )   );
 }
 
 // scoundrel_operative_t::init_gains =======================================================
@@ -1277,9 +1293,12 @@ void scoundrel_operative_t::init_actions()
       if ( talents.acid_blade -> rank() )
         action_list_str += "/acid_blade,if=!buff.acid_blade_coating.up&!cooldown.backstab.remains";
       action_list_str += "/use_relics"
-                         "/hidden_strike"
+                         "/hidden_strike";
 
-                         "/backstab";
+      if ( talents.weakening_blast -> rank() )
+        action_list_str += "/weakening_blast";
+
+      action_list_str += "/backstab";
       if ( talents.acid_blade -> rank() )
         action_list_str += ",if=buff.acid_blade_coating.up";
 
