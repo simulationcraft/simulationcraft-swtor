@@ -148,6 +148,7 @@ struct shadow_assassin_t : public player_t
 
   shadow_assassin_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
     player_t( sim, pt == SITH_ASSASSIN ? SITH_ASSASSIN : JEDI_SHADOW, name, ( r == RACE_NONE ) ? RACE_HUMAN : r ),
+    buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents(),
     stealth_tag( false )
   {
     if ( pt == SITH_ASSASSIN )

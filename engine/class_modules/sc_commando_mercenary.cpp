@@ -70,7 +70,8 @@ struct commando_mercenary_t : public player_t
     } talents;
 
     commando_mercenary_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
-        player_t( sim, pt == BH_MERCENARY ? BH_MERCENARY : T_COMMANDO, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
+      player_t( sim, pt == BH_MERCENARY ? BH_MERCENARY : T_COMMANDO, name, ( r == RACE_NONE ) ? RACE_HUMAN : r ),
+      buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents()
     {
 
 

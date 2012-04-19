@@ -70,7 +70,8 @@ struct vanguard_powertech_t : public player_t
     } talents;
 
     vanguard_powertech_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
-        player_t( sim, pt == BH_POWERTECH ? BH_POWERTECH : T_VANGUARD, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
+      player_t( sim, pt == BH_POWERTECH ? BH_POWERTECH : T_VANGUARD, name, ( r == RACE_NONE ) ? RACE_HUMAN : r ),
+      buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents()
     {
 
 

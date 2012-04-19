@@ -70,7 +70,8 @@ struct juggernaut_guardian_t : public player_t
     } talents;
 
     juggernaut_guardian_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
-        player_t( sim, pt == SITH_JUGGERNAUT ? SITH_JUGGERNAUT : JEDI_GUARDIAN, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
+      player_t( sim, pt == SITH_JUGGERNAUT ? SITH_JUGGERNAUT : JEDI_GUARDIAN, name, ( r == RACE_NONE ) ? RACE_HUMAN : r ),
+      buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents()
     {
 
 

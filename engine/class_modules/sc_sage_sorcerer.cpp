@@ -101,8 +101,6 @@ struct sage_sorcerer_t : public player_t
     cooldown_t* telekinetic_wave;
   } cooldowns;
 
-  int disable_double_dip;
-
   // Talents
   struct talents_t
   {
@@ -168,11 +166,13 @@ struct sage_sorcerer_t : public player_t
     talent_t* mental_scarring;
     talent_t* psychic_absorption;
     talent_t* sever_force;
-
   } talents;
+
+  int disable_double_dip;
 
   sage_sorcerer_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
     player_t( sim, pt == SITH_SORCERER ? SITH_SORCERER : JEDI_SAGE, name, ( r == RACE_NONE ) ? RACE_HUMAN : r ),
+    buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents(),
     disable_double_dip( false )
   {
     if ( pt == SITH_SORCERER )

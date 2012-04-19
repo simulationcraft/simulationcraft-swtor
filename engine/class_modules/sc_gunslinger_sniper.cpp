@@ -77,10 +77,9 @@ struct gunslinger_sniper_t : public player_t
     } talents;
 
     gunslinger_sniper_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
-        player_t( sim, pt == IA_SNIPER ? IA_SNIPER : S_GUNSLINGER, name, ( r == RACE_NONE ) ? RACE_HUMAN : r )
+      player_t( sim, pt == IA_SNIPER ? IA_SNIPER : S_GUNSLINGER, name, ( r == RACE_NONE ) ? RACE_HUMAN : r ),
+      buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents()
     {
-
-
       primary_attribute   = ATTR_STRENGTH;
       secondary_attribute = ATTR_WILLPOWER;
 
