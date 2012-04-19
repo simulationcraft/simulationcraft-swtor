@@ -2006,24 +2006,26 @@ private:
   static void* operator new( std::size_t ) throw(); // DO NOT USE!
 
 public:
-  event_t*  next;
-  sim_t*    sim;
-  player_t* player;
-  uint32_t  id;
-  timespan_t time;
-  timespan_t reschedule_time;
-  int       canceled;
-  const char* name;
-  event_t( sim_t* s, player_t* p=0, const char* n="" ) :
-    next( 0 ), sim( s ), player( p ), time( timespan_t::zero() ), reschedule_time( timespan_t::zero() ), canceled( 0 ), name( n )
-  {
-    if ( ! name ) name = "unknown";
-  }
+  event_t*        next;
+  sim_t* const    sim;
+  player_t* const player;
+  uint32_t        id;
+  timespan_t      time;
+  timespan_t      reschedule_time;
+  int             canceled;
+  const char*     name;
+
+  event_t( sim_t* s, const char* n = nullptr );
+  event_t( player_t* p, const char* n = nullptr );
+  event_t( buff_t* b, const char* n = nullptr );
+
+  virtual ~event_t() {}
+
   timespan_t occurs()  const { return ( reschedule_time != timespan_t::zero() ) ? reschedule_time : time; }
   timespan_t remains() const { return occurs() - sim -> current_time; }
+
   virtual void reschedule( timespan_t new_time );
   virtual void execute() = 0;
-  virtual ~event_t() {}
 
   // T must be implicitly convertible to event_t* --
   // basically, a pointer to a type derived from event_t.
@@ -3542,13 +3544,13 @@ struct action_priority_list_t
 
 struct player_ready_event_t : public event_t
 {
-  player_ready_event_t( sim_t* sim, player_t* p, timespan_t delta_time );
+  player_ready_event_t( player_t* p, timespan_t delta_time );
   virtual void execute();
 };
 
 struct player_gcd_event_t : public event_t
 {
-  player_gcd_event_t( sim_t* sim, player_t* p, timespan_t delta_time );
+  player_gcd_event_t( player_t* p, timespan_t delta_time );
   virtual void execute();
 };
 
@@ -3557,7 +3559,7 @@ struct player_gcd_event_t : public event_t
 struct action_execute_event_t : public event_t
 {
   action_t* action;
-  action_execute_event_t( sim_t* sim, action_t* a, timespan_t time_to_execute );
+  action_execute_event_t( action_t* a, timespan_t time_to_execute );
   virtual void execute();
 };
 
@@ -3566,7 +3568,7 @@ struct action_execute_event_t : public event_t
 struct dot_tick_event_t : public event_t
 {
   dot_t* dot;
-  dot_tick_event_t( sim_t* sim, dot_t* d, timespan_t time_to_tick );
+  dot_tick_event_t( dot_t* d, timespan_t time_to_tick );
   virtual void execute();
 };
 
@@ -3578,7 +3580,7 @@ struct action_travel_event_t : public event_t
   player_t* target;
   result_type result;
   double damage;
-  action_travel_event_t( sim_t* sim, player_t* t, action_t* a, timespan_t time_to_travel );
+  action_travel_event_t( player_t* t, action_t* a, timespan_t time_to_travel );
   virtual void execute();
 };
 
@@ -4212,6 +4214,19 @@ inline buff_t::actor_pair_t::actor_pair_t( targetdata_t* td )
 
 inline double sim_t::real() const                { return default_rng_ -> real(); }
 inline bool   sim_t::roll( double chance ) const { return default_rng_ -> roll( chance ); }
+
+// event_t inlines
+
+
+inline event_t::event_t( sim_t* s, const char* n ) :
+  sim( s ), player(), reschedule_time(), canceled(), name( n ? n : "unknown" )
+{}
+inline event_t::event_t( player_t* p, const char* n ) :
+  sim( p -> sim ), player( p ), reschedule_time(), canceled(), name( n ? n : "unknown" )
+{}
+inline event_t::event_t( buff_t* b, const char* n ) :
+  sim( b -> sim ), player( b -> player ), reschedule_time(), canceled(), name( n ? n : "unknown" )
+{ assert( ! b -> player || b -> player -> sim == b -> sim ); }
 
 #ifdef WHAT_IF
 

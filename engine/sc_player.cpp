@@ -2149,7 +2149,7 @@ void player_t::schedule_ready( timespan_t delta_time,
     last_foreground_action -> stats -> total_execute_time += delta_time;
   }
 
-  readying = new ( sim ) player_ready_event_t( sim, this, delta_time );
+  readying = new ( sim ) player_ready_event_t( this, delta_time );
 
   if ( was_executing && was_executing -> gcd() > timespan_t::zero() && ! was_executing -> background && ! was_executing -> proc && ! was_executing -> repeating )
   {
@@ -4090,19 +4090,15 @@ struct base_use_item_t : public action_t
         {
           action_callback_t* trigger;
 
-          trigger_expiration_t( sim_t* sim, player_t* player, item_t* item, action_callback_t* t ) :
-            event_t( sim, player ), trigger( t )
-          {
-            name = item -> name();
-            sim -> add_event( this, item -> use.duration );
-          }
+          trigger_expiration_t( player_t* player, item_t* item, action_callback_t* t ) :
+            event_t( player, item -> name() ), trigger( t )
+          { sim -> add_event( this, item -> use.duration ); }
+
           virtual void execute()
-          {
-            trigger -> deactivate();
-          }
+          { trigger -> deactivate(); }
         };
 
-        new ( sim ) trigger_expiration_t( sim, player, item, trigger );
+        new ( sim ) trigger_expiration_t( player, item, trigger );
 
         lockout( item -> use.duration );
       }

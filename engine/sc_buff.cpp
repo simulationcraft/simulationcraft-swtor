@@ -7,40 +7,45 @@
 
 namespace { // ANONYMOUS ====================================================
 
-struct expiration_t : public event_t
+struct buff_event_t : public event_t
 {
   buff_t* buff;
 
-  expiration_t( sim_t* sim, player_t* p, buff_t* b, timespan_t d ) : event_t( sim, p, b -> name() ), buff( b )
+  buff_event_t( buff_t* b, timespan_t d ) :
+    event_t( b, b -> name() ), buff( b )
   { sim -> add_event( this, d ); }
+};
+
+struct expiration_t : public buff_event_t
+{
+  expiration_t( buff_t* b, timespan_t d ) : buff_event_t( b, d ) {}
 
   virtual void execute()
   {
+    assert( buff -> expiration == this );
     buff -> expiration = 0;
     buff -> expire();
   }
 };
 
-struct buff_delay_t : public event_t
+struct buff_delay_t : public buff_event_t
 {
   double  value;
-  buff_t* buff;
   int     stacks;
 
-  buff_delay_t( sim_t* sim, player_t* p, buff_t* b, int stacks, double value ) :
-    event_t( sim, p, b -> name() ), value( value ), buff( b ), stacks( stacks )
-  {
-    timespan_t delay_duration = sim -> gauss( sim -> default_aura_delay, sim -> default_aura_delay_stddev );
-
-    sim -> add_event( this, delay_duration );
-  }
+  buff_delay_t( buff_t* b, int stacks, double value ) :
+    buff_event_t( b, b -> sim -> gauss( b -> sim -> default_aura_delay,
+                                        b -> sim -> default_aura_delay_stddev ) ),
+    value( value ), stacks( stacks )
+  {}
 
   virtual void execute()
   {
     // Add a Cooldown check here to avoid extra processing due to delays
-    if ( buff -> cooldown -> remains() ==  timespan_t::zero() )
+    if ( buff -> cooldown -> remains() <=  timespan_t::zero() )
       buff -> execute( stacks, value );
 
+    assert( buff -> delay == this );
     buff -> delay = 0;
   }
 };
@@ -325,7 +330,7 @@ bool buff_t::trigger( int    stacks,
       d.value = value;
     }
     else
-      delay = new ( sim ) buff_delay_t( sim, player, this, stacks, value );
+      delay = new ( sim ) buff_delay_t( this, stacks, value );
   }
   else
     execute( stacks, value );
@@ -448,7 +453,7 @@ void buff_t::extend_duration( player_t* p, timespan_t extra_seconds )
 
     event_t::cancel( expiration );
 
-    expiration = new ( sim ) expiration_t( sim, player, this, reschedule_time );
+    expiration = new ( sim ) expiration_t( this, reschedule_time );
 
     if ( sim -> debug )
       log_t::output( sim, "%s decreases buff %s by %.1f seconds. New expiration time: %.1f",
@@ -465,7 +470,7 @@ void buff_t::start_expiration( timespan_t t )
 
   if ( t > timespan_t::zero() )
   {
-    expiration = new ( sim ) expiration_t( sim, player, this, t );
+    expiration = new ( sim ) expiration_t( this, t );
   }
 }
 
@@ -497,7 +502,7 @@ void buff_t::start( int    stacks,
 
   if ( buff_duration > timespan_t::zero() )
   {
-    expiration = new ( sim ) expiration_t( sim, player, this, buff_duration );
+    expiration = new ( sim ) expiration_t( this, buff_duration );
   }
 }
 

@@ -128,18 +128,20 @@ void pet_t::summon( timespan_t duration )
   {
     struct expiration_t : public event_t
     {
-      expiration_t( sim_t* sim, pet_t* p, timespan_t duration ) : event_t( sim, p )
-      {
-        sim -> add_event( this, duration );
-      }
+      expiration_t( pet_t* p, timespan_t duration ) :
+        event_t( p )
+      { sim -> add_event( this, duration ); }
 
       virtual void execute()
       {
-        player -> cast_pet() -> expiration = 0;
-        if ( ! player -> sleeping ) player -> cast_pet() -> dismiss();
+        pet_t* pet = static_cast<pet_t*>( player );
+        assert( pet -> expiration == this );
+        pet -> expiration = 0;
+        if ( ! pet -> sleeping )
+          pet -> dismiss();
       }
     };
-    expiration = new ( sim ) expiration_t( sim, this, duration );
+    expiration = new ( sim ) expiration_t( this, duration );
   }
 
   arise();

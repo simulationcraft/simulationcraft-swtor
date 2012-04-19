@@ -994,7 +994,7 @@ void action_t::schedule_execute()
 
   time_to_execute = execute_time();
 
-  execute_event = new ( sim ) action_execute_event_t( sim, this, time_to_execute );
+  execute_event = new ( sim ) action_execute_event_t( this, time_to_execute );
 
   if ( ! background )
   {
@@ -1025,7 +1025,7 @@ void action_t::schedule_travel( player_t* t )
                      player -> name(), to_seconds( time_to_travel ), name() );
     }
 
-    travel_event = new ( sim ) action_travel_event_t( sim, t, this, time_to_travel );
+    travel_event = new ( sim ) action_travel_event_t( t, this, time_to_travel );
   }
 }
 
@@ -1049,7 +1049,7 @@ void action_t::reschedule_execute( timespan_t time )
   else // Impossible to reschedule events "early".  Need to be canceled and re-created.
   {
     event_t::cancel( execute_event );
-    execute_event = new ( sim ) action_execute_event_t( sim, this, time );
+    execute_event = new ( sim ) action_execute_event_t( this, time );
   }
 }
 
