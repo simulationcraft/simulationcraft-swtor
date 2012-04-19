@@ -28,7 +28,7 @@ public:
   targetdata_t( class_t& source, player_t& target );
 };
 
-class class_t : public player_t
+class class_t : public cons_inq::class_t
 {
 public:
   // Buffs
@@ -158,8 +158,8 @@ public:
 
   int disable_double_dip;
 
-  class_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
-    player_t( sim, pt == SITH_SORCERER ? SITH_SORCERER : JEDI_SAGE, name, ( r == RACE_NONE ) ? RACE_HUMAN : r ),
+  class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
+    cons_inq::class_t( sim, pt == SITH_SORCERER ? SITH_SORCERER : JEDI_SAGE, name, rt ),
     buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents(),
     disable_double_dip( false )
   {
@@ -1598,12 +1598,11 @@ void class_t::init_talents()
 
 void class_t::init_base()
 {
-  player_t::init_base();
+  cons_inq::class_t::init_base();
 
   distance = default_distance = 30;
 
-  base_force_regen_per_second = 8.0;
-  resource_base[  RESOURCE_FORCE  ] += 500 + talents.mental_longevity -> rank() * 50;
+  resource_base[ RESOURCE_FORCE ] += 400 + talents.mental_longevity -> rank() * 50;
 
   attribute_multiplier_initial[ ATTR_WILLPOWER ] += talents.will_of_the_jedi -> rank() * 0.03;
 }

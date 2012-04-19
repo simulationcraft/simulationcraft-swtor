@@ -28,7 +28,7 @@ struct targetdata_t: public cons_inq::targetdata_t
   targetdata_t( class_t& source, player_t& target );
 };
 
-struct class_t : public player_t
+struct class_t : public cons_inq::class_t
 {
   // Buffs
   struct buffs_t
@@ -142,8 +142,8 @@ struct class_t : public player_t
     bool stealth_tag;
   } actives;
 
-  class_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
-    player_t( sim, pt == SITH_ASSASSIN ? SITH_ASSASSIN : JEDI_SHADOW, name, ( r == RACE_NONE ) ? RACE_HUMAN : r ),
+  class_t( sim_t* sim, player_type pt, const std::string& name, race_type r ) :
+    cons_inq::class_t( sim, pt == SITH_ASSASSIN ? SITH_ASSASSIN : JEDI_SHADOW, name, r ),
     buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents(), actives()
   {
     if ( pt == SITH_ASSASSIN )
@@ -1683,13 +1683,12 @@ void class_t::init_talents()
 
 void class_t::init_base()
 {
-  player_t::init_base();
+  cons_inq::class_t::init_base();
 
   default_distance = 3;
   distance = default_distance;
 
-  base_force_regen_per_second = 8.0;
-  resource_base[RESOURCE_FORCE] += 100 + talents.deceptive_power->rank() * 10;
+  resource_base[RESOURCE_FORCE] += talents.deceptive_power->rank() * 10;
 }
 
 // class_t::init_benefits =========================================

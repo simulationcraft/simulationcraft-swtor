@@ -36,6 +36,23 @@ public:
   }
 };
 
+class class_t : public player_t
+{
+public:
+  static const int regen_per_second = 8;
+
+  class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
+    player_t( sim, pt, name, rt )
+  {}
+
+  virtual void init_base()
+  {
+    player_t::init_base();
+    player_t::base_force_regen_per_second = regen_per_second;
+    resource_base[ RESOURCE_FORCE ] += 100;
+  }
+};
+
 } // namespace cons_inq =====================================================
 
 #endif // CONS_INQ_HPP
