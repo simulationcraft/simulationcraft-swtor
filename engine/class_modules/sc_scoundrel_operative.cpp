@@ -11,18 +11,21 @@ struct scoundrel_operative_targetdata_t : public targetdata_t
   dot_t dot_adrenaline_probe;
   dot_t dot_acid_blade_poison;
   dot_t dot_stim_boost;
+  dot_t dot_corrosive_grenade;
 
   scoundrel_operative_targetdata_t( player_t& source, player_t& target ) :
     targetdata_t( source, target ),
     dot_corrosive_dart( "corrosive_dart", &source ),
     dot_adrenaline_probe( "adrenaline_probe", &source ),
     dot_acid_blade_poison( "acid_blade_poison", &source ),
-    dot_stim_boost( "stim_boost", &source )
+    dot_stim_boost( "stim_boost", &source ),
+    dot_corrosive_grenade( "corrosive_grenade", &source )
   {
     add( dot_corrosive_dart );
     add( dot_adrenaline_probe );
     add( dot_acid_blade_poison );
     add( dot_stim_boost );
+    add( dot_corrosive_grenade );
   }
 };
 
@@ -147,7 +150,7 @@ struct scoundrel_operative_t : public player_t
     talent_t* corrosive_microbes;
     talent_t* lethal_injectors;
     // t3
-    talent_t* corrosive_grenades;
+    talent_t* corrosive_grenade;
     talent_t* combat_stims;
     talent_t* cut_down;
     // t4
@@ -654,6 +657,45 @@ struct fragmentation_grenade_t : public scoundrel_operative_tech_attack_t
   }
 };
 
+// Corrosive Grenade | ??? ==================================================
+
+struct corrosive_grenade_t : public scoundrel_operative_tech_attack_t
+{
+  corrosive_grenade_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
+    scoundrel_operative_tech_attack_t( n, p, SCHOOL_INTERNAL )
+  {
+    parse_options( options_str );
+
+    base_cost = 20;
+    cooldown -> duration = from_seconds( 12.0 );
+    range = 30.0;
+
+    may_crit = false;
+    tick_may_crit = true;
+    td.standardhealthpercentmin = td.standardhealthpercentmax = 0.32;
+    td.power_mod = 0.32;
+
+    num_ticks = 7;
+    base_tick_time = from_seconds( 3 );
+
+    // TEST: maybe not limited?
+    aoe = 5;
+  }
+
+  virtual void tick( dot_t* d )
+  {
+    scoundrel_operative_tech_attack_t::tick( d );
+
+    if ( d -> ticks() == 0 )
+    {
+      // TODO
+      // Last Stand talent. replaces with a weaker version that does 15% of original damage over 9 seconds
+      // TEST: 15% of the original 21 seconds worth? 15% of each tick?
+      // TEST: only triggers if the dot wasn't refreshed?
+    }
+  }
+};
+
 // Corrosive Dart | ??? =====================================================
 
 struct corrosive_dart_t : public scoundrel_operative_tech_attack_t
@@ -823,6 +865,11 @@ struct stim_boost_t : public scoundrel_operative_action_t
 
 // Debilitate | ??? =========================================================
 // stuns non bosses and does damage. pvp mainly.
+// slip away talent reduces cooldown by 15s
+
+// Flash Bang | ??? =========================================================
+// aoe cc 5 targets 8 seconds.
+// flash powder talent reduces accuracy for 8 seconds after ends
 
 // Coordination | ??? =======================================================
 
@@ -869,19 +916,20 @@ action_t* scoundrel_operative_t::create_action( const std::string& name,
 {
   if ( type == IA_OPERATIVE )
   {
-    if ( name == "acid_blade" )            return new acid_blade_t( this, name, options_str );
-    if ( name == "adrenaline_probe" )      return new adrenaline_probe_t( this, name, options_str );
-    if ( name == "backstab" )              return new backstab_t( this, name, options_str );
-    if ( name == "coordination" )          return new coordination_t( this, name, options_str );
-    if ( name == "corrosive_dart" )        return new corrosive_dart_t( this, name, options_str );
+    if ( name == "acid_blade"            ) return new acid_blade_t( this, name, options_str );
+    if ( name == "adrenaline_probe"      ) return new adrenaline_probe_t( this, name, options_str );
+    if ( name == "backstab"              ) return new backstab_t( this, name, options_str );
+    if ( name == "coordination"          ) return new coordination_t( this, name, options_str );
+    if ( name == "corrosive_dart"        ) return new corrosive_dart_t( this, name, options_str );
     if ( name == "fragmentation_grenade" ) return new fragmentation_grenade_t( this, name, options_str );
-    if ( name == "hidden_strike" )         return new hidden_strike_t( this, name, options_str );
-    if ( name == "laceration" )            return new laceration_t( this, name, options_str );
-    if ( name == "overload_shot" )         return new overload_shot_t( this, name, options_str );
-    if ( name == "rifle_shot" )            return new rifle_shot_t( this, name, options_str );
-    if ( name == "shiv" )                  return new shiv_t( this, name, options_str );
-    if ( name == "stealth" )               return new stealth_t( this, name, options_str );
-    if ( name == "stim_boost" )            return new stim_boost_t( this, name, options_str );
+    if ( name == "hidden_strike"         ) return new hidden_strike_t( this, name, options_str );
+    if ( name == "laceration"            ) return new laceration_t( this, name, options_str );
+    if ( name == "overload_shot"         ) return new overload_shot_t( this, name, options_str );
+    if ( name == "rifle_shot"            ) return new rifle_shot_t( this, name, options_str );
+    if ( name == "shiv"                  ) return new shiv_t( this, name, options_str );
+    if ( name == "stealth"               ) return new stealth_t( this, name, options_str );
+    if ( name == "stim_boost"            ) return new stim_boost_t( this, name, options_str );
+    if ( name == "corrosive_grenade"     ) return new corrosive_grenade_t( this, name, options_str );
   }
 
   else if ( type == S_SCOUNDREL )
@@ -960,7 +1008,7 @@ void scoundrel_operative_t::init_talents()
   talents.corrosive_microbes        = find_talent( "Corrosive Microbes"       );
   talents.lethal_injectors          = find_talent( "Lethal Injectors"         );
     // t3
-  talents.corrosive_grenades        = find_talent( "Corrosive Grenades"       );
+  talents.corrosive_grenade         = find_talent( "Corrosive Grenade"        );
   talents.combat_stims              = find_talent( "Combat Stims"             );
   talents.cut_down                  = find_talent( "Cut Down"                 );
     // t4
@@ -992,6 +1040,7 @@ void scoundrel_operative_t::init_base()
   attribute_multiplier_initial[ ATTR_CUNNING ] += 0.03 * talents.imperial_education -> rank();
 
   base_crit_chance += 0.02 * talents.lethality -> rank();
+  // TODO: base_alacrity from Deadly Diretive grants 2%
 }
 
 // scoundrel_operative_t::init_benefits =======================================================
