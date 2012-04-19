@@ -804,6 +804,9 @@ struct overload_shot_t : public scoundrel_operative_range_attack_t
 
     // "Skirmisher" passive for operatives gives 15% boost to overload shot
     base_multiplier += 0.15;
+    // TEST: additive or multiplicative 
+    if ( p -> talents.cut_down->rank() )
+       base_multiplier += .03 * p -> talents.cut_down->rank();
   }
 };
 
