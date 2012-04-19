@@ -50,6 +50,9 @@ struct scoundrel_operative_t : public player_t
     buff_t* adrenaline_probe;
     buff_t* tactical_advantage;
     //buff_t* cloaking_screen;
+
+    // TODO FIX this should be at target debuff
+    buff_t* weakening_blast;
   } buffs;
 
   // Gains
@@ -325,13 +328,21 @@ struct scoundrel_operative_poison_attack_t : public scoundrel_operative_tech_att
     scoundrel_operative_targetdata_t* td = targetdata();
 
     // XXX TODO FIX REVIEW
-    // this feels very hacky. is there a better way?
+    // this is a dirty filthy hack
     // DK module in simc uses target_debuff(...) and player_multiplier
-    // and what if base_multiplyer was already modified?
-    if ( p() -> talents.devouring_microbes -> rank() && td -> target.health_percentage() < 30 )
-      base_multiplier = 1 + 0.05 * p() -> talents.devouring_microbes -> rank();
+    {
+      double base_multiplier_original = base_multiplier;
+      if ( p() -> talents.devouring_microbes -> rank() && td -> target.health_percentage() < 30 )
+        base_multiplier += 0.05 * p() -> talents.devouring_microbes -> rank();
+      if ( p() -> buffs.weakening_blast -> up() ) {
+        p() -> buffs.weakening_blast -> decrement();
+        base_multiplier += 0.3;
+      }
 
-    scoundrel_operative_tech_attack_t::tick( d );
+      scoundrel_operative_tech_attack_t::tick( d );
+      // oh the shame
+      base_multiplier = base_multiplier_original;
+    }
 
     if ( RESULT_CRIT && p() -> talents.lethal_purpose -> rank() )
     {
@@ -953,6 +964,41 @@ struct stim_boost_t : public scoundrel_operative_action_t
   }
 };
 
+// Weakening Blast | ??? ====================================================
+
+struct weakening_blast_t : public scoundrel_operative_range_attack_t
+{
+  weakening_blast_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str) :
+    scoundrel_operative_range_attack_t( n, p )
+  {
+
+    parse_options( options_str );
+
+    range = 10.0;
+    cooldown -> duration = from_seconds( 15 );
+    use_off_gcd = true;
+    trigger_gcd = timespan_t::zero();
+
+    dd.standardhealthpercentmin = dd.standardhealthpercentmax = 0.087;
+    dd.power_mod = 0.87;
+
+    weapon = &( player -> main_hand_weapon );
+    weapon_multiplier = -0.42;
+  }
+
+  virtual void execute()
+  {
+    scoundrel_operative_range_attack_t::execute();
+
+    if ( result_is_hit() )
+    {
+        // TODO FIX: this should be a target debuff
+        p() -> buffs.weakening_blast -> trigger(10);
+    }
+  }
+};
+
+
 // Cloaking Screen | ??? ====================================================
 // "vanish" allows reusing hidden strike.
 
@@ -1027,6 +1073,7 @@ action_t* scoundrel_operative_t::create_action( const std::string& name,
     if ( name == "stim_boost"            ) return new stim_boost_t( this, name, options_str );
     if ( name == "corrosive_grenade"     ) return new corrosive_grenade_t( this, name, options_str );
     if ( name == "cull"                  ) return new cull_t( this, name, options_str );
+    if ( name == "weakening_blast"       ) return new weakening_blast_t( this, name, options_str );
   }
 
   else if ( type == S_SCOUNDREL )
@@ -1164,6 +1211,7 @@ void scoundrel_operative_t::init_buffs()
   buffs.stealth             = new buff_t( this, "stealth", 1                                );
   buffs.stim_boost          = new buff_t( this, "stim_boost", 1, from_seconds( 45 )         );
   buffs.tactical_advantage  = new buff_t( this, "tactical_advantage", 2, from_seconds( 10 ) );
+  buffs.weakening_blast     = new buff_t( this, "weakening_blast", 10, from_seconds( 15 )   );
 }
 
 // scoundrel_operative_t::init_gains =======================================================
