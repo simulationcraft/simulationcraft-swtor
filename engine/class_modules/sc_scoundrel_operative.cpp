@@ -176,9 +176,6 @@ struct scoundrel_operative_t : public agent_smug::class_t
     tree_type[ IA_OPERATIVE_CONCEALMENT ] = TREE_CONCEALMENT;
     tree_type[ IA_OPERATIVE_LETHALITY   ] = TREE_LETHALITY;
 
-    primary_attribute   = ATTR_CUNNING;
-    secondary_attribute = ATTR_AIM;
-
     create_talents();
     create_options();
   }

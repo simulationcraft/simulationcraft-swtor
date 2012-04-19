@@ -22,7 +22,10 @@ public:
 
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
     player_t( sim, pt, name, rt ), energy_gains()
-  {}
+  {
+    primary_attribute   = ATTR_CUNNING;
+    secondary_attribute = ATTR_AIM;
+  }
 
   virtual void init_base()
   {
