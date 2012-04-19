@@ -61,6 +61,7 @@ struct scoundrel_operative_t : public player_t
     gain_t* adrenaline_probe;
     gain_t* stim_boost;
     gain_t* revitalizers;
+    gain_t* combat_stims;
   } gains;
 
   // Procs
@@ -692,7 +693,6 @@ struct corrosive_grenade_t : public scoundrel_operative_tech_attack_t
       // Lingering Toxins talent
       // replaces with a weaker version that does 15% of original damage over 9 seconds
       // TEST: 15% of the original 21 seconds worth? 15% of each tick?
-      // TEST: only triggers if the dot wasn't refreshed?
     }
   }
 };
@@ -819,7 +819,7 @@ struct stim_boost_t : public scoundrel_operative_action_t
   {
     parse_options( options_str );
 
-    cooldown -> duration = from_seconds( 35 );
+    cooldown -> duration = from_seconds( 35 - p -> talents.combat_stims -> rank() * 7.5 );
     use_off_gcd = true;
     trigger_gcd = timespan_t::zero();
 
@@ -852,9 +852,11 @@ struct stim_boost_t : public scoundrel_operative_action_t
   {
     scoundrel_operative_action_t::execute();
 
-    scoundrel_operative_t* p = cast();
-    p -> buffs.stim_boost -> trigger();
-    p -> buffs.tactical_advantage -> decrement();
+    scoundrel_operative_t& p = *cast();
+    p.buffs.stim_boost -> trigger();
+    p.buffs.tactical_advantage -> decrement();
+    if ( p.talents.combat_stims -> rank() )
+      p.resource_gain( RESOURCE_ENERGY, 5 * p.talents.combat_stims -> rank(), p.gains.combat_stims );
   }
 };
 
@@ -1082,6 +1084,7 @@ void scoundrel_operative_t::init_gains()
   gains.high             = get_gain( "high"             );
   gains.stim_boost       = get_gain( "stim_boost"       );
   gains.revitalizers     = get_gain( "revitalizers"     );
+  gains.combat_stims     = get_gain( "combat_stims"     );
 }
 
 // scoundrel_operative_t::init_procs =======================================================
