@@ -61,7 +61,6 @@ struct scoundrel_operative_t : public player_t
     gain_t* adrenaline_probe;
     gain_t* stim_boost;
     gain_t* revitalizers;
-    gain_t* combat_stims;
   } gains;
 
   // Procs
@@ -856,7 +855,7 @@ struct stim_boost_t : public scoundrel_operative_action_t
     p.buffs.stim_boost -> trigger();
     p.buffs.tactical_advantage -> decrement();
     if ( p.talents.combat_stims -> rank() )
-      p.resource_gain( RESOURCE_ENERGY, 5 * p.talents.combat_stims -> rank(), p.gains.combat_stims );
+      p.resource_gain( RESOURCE_ENERGY, 5 * p.talents.combat_stims -> rank(), p.gains.stim_boost );
   }
 };
 
@@ -1084,7 +1083,6 @@ void scoundrel_operative_t::init_gains()
   gains.high             = get_gain( "high"             );
   gains.stim_boost       = get_gain( "stim_boost"       );
   gains.revitalizers     = get_gain( "revitalizers"     );
-  gains.combat_stims     = get_gain( "combat_stims"     );
 }
 
 // scoundrel_operative_t::init_procs =======================================================
