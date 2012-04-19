@@ -27,6 +27,28 @@ public:
     secondary_attribute = ATTR_AIM;
   }
 
+  virtual resource_type primary_resource() const
+  { return RESOURCE_ENERGY; }
+
+  virtual double range_bonus_stats() const
+{ return cunning() + player_t::range_bonus_stats(); }
+
+  virtual double range_crit_from_stats() const
+  { return rating_scaler.crit_from_stat( cunning() ) + player_t::range_crit_from_stats(); }
+
+  virtual bool report_attack_type( action_t::policy_t policy )
+  {
+    return ( policy == action_t::range_policy ||
+             policy == action_t::tech_policy ) ||
+        ( primary_role() == ROLE_HEAL && policy == action_t::tech_heal_policy );
+  }
+
+  virtual void init_scaling()
+  {
+    player_t::init_scaling();
+    scales_with[ STAT_TECH_POWER ] = true;
+  }
+
   virtual void init_base()
   {
     player_t::init_base();

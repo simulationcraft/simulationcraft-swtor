@@ -199,28 +199,8 @@ struct scoundrel_operative_t : public agent_smug::class_t
 
   virtual double  energy_regen_per_second() const; // override
 
-  virtual resource_type primary_resource() const;
   virtual role_type primary_role() const;
-          void    create_talents();
-
-  virtual double range_bonus_stats() const
-  { return cunning() + base_t::range_bonus_stats(); }
-
-  virtual double range_crit_from_stats() const
-  { return rating_scaler.crit_from_stat( cunning() ) + base_t::range_crit_from_stats(); }
-
-  virtual void init_scaling()
-  {
-    base_t::init_scaling();
-    scales_with[ STAT_TECH_POWER ] = true;
-  }
-
-  virtual bool report_attack_type( action_t::policy_t policy )
-  {
-    return policy == action_t::range_policy ||
-           policy == action_t::tech_policy ||
-           ( primary_role() == ROLE_HEAL && policy == action_t::tech_heal_policy );
-  }
+  void create_talents();
 };
 
 scoundrel_operative_targetdata_t::scoundrel_operative_targetdata_t( scoundrel_operative_t& source, player_t& target ) :
@@ -1347,11 +1327,6 @@ void scoundrel_operative_t::reset()
   acid_blade_poison = 0;
   base_t::reset();
 }
-
-// scoundrel_operative_t::primary_resource ==================================
-
-resource_type scoundrel_operative_t::primary_resource() const
-{ return RESOURCE_ENERGY; }
 
 // scoundrel_operative_t::primary_role ======================================
 

@@ -98,12 +98,6 @@ public:
   virtual resource_type primary_resource() const;
   virtual role_type primary_role() const;
           void      create_talents();
-
-  virtual void init_scaling()
-  {
-    base_t::init_scaling();
-    scales_with[ STAT_FORCE_POWER ] = true;
-  }
 };
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
