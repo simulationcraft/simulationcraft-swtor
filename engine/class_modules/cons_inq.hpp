@@ -19,7 +19,10 @@ public:
 
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
     player_t( sim, pt, name, rt ), gains_force_regen()
-  {}
+  {
+    primary_attribute   = ATTR_WILLPOWER;
+    secondary_attribute = ATTR_STRENGTH;
+  }
 
   virtual void init_base()
   {

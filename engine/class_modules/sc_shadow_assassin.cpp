@@ -163,9 +163,6 @@ struct class_t : public cons_inq::class_t
       cooldowns.crushing_darkness = get_cooldown( "mind_crush" );
     }
 
-    primary_attribute   = ATTR_WILLPOWER;
-    secondary_attribute = ATTR_STRENGTH;
-
     create_talents();
     create_options();
   }

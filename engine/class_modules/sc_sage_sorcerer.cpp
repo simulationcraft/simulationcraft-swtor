@@ -179,9 +179,6 @@ public:
       cooldowns.telekinetic_wave = get_cooldown( "telekinetic_wave" );
     }
 
-    primary_attribute   = ATTR_WILLPOWER;
-    secondary_attribute = ATTR_STRENGTH;
-
     create_talents();
     create_options();
   }
