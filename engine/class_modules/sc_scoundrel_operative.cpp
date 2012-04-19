@@ -161,7 +161,7 @@ struct scoundrel_operative_t : public player_t
     talent_t* lethal_dose;
     // t5
     talent_t* cull;
-    talent_t* licence_to_kill;
+    talent_t* license_to_kill;
     talent_t* counterstrike;
     // t6
     talent_t* devouring_microbes;
@@ -788,7 +788,7 @@ struct cull_t : public scoundrel_operative_range_attack_t
   {
     parse_options( options_str );
 
-    base_cost = 25;
+    base_cost = 25 - 3 * p -> talents.license_to_kill -> rank();
     range = 10.0;
 
     // TODO
@@ -1106,7 +1106,7 @@ void scoundrel_operative_t::init_talents()
   talents.lethal_dose               = find_talent( "Lethal Dose"              );
     // t5
   talents.cull                      = find_talent( "Cull"                     );
-  talents.licence_to_kill           = find_talent( "Licence to Kill"          );
+  talents.license_to_kill           = find_talent( "License to Kill"          );
   talents.counterstrike             = find_talent( "Counterstrike"            );
     // t6
   talents.devouring_microbes        = find_talent( "Devouring Microbes"       );
@@ -1388,7 +1388,7 @@ void scoundrel_operative_t::create_talents()
     { "Slip Away", 2 }, { "Flash Powder", 2 }, { "Corrosive Microbes", 2 }, { "Lethal Injectors", 1 },
     { "Corrosive Grenades", 1 }, { "Combat Stims", 2 }, { "Cut Down", 2 },
     { "Lethal Purpose", 2 }, { "Adhesive Corrosives", 2 }, { "Escape Plan", 2 }, { "Lethal Dose", 3 },
-    { "Cull", 1 }, { "Licence to Kill", 2 }, { "Counterstrike", 2 },
+    { "Cull", 1 }, { "License to Kill", 2 }, { "Counterstrike", 2 },
     { "Devouring Microbes", 3 }, { "Lingering Toxins", 2 }, { "Weakening Blast", 1 },
   };
   init_talent_tree( IA_OPERATIVE_LETHALITY, lethality_tree );
