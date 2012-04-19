@@ -30,6 +30,8 @@ struct targetdata_t: public cons_inq::targetdata_t
 
 struct class_t : public cons_inq::class_t
 {
+  typedef cons_inq::class_t base_t;
+
   // Buffs
   struct buffs_t
   {
@@ -143,7 +145,7 @@ struct class_t : public cons_inq::class_t
   } actives;
 
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type r ) :
-    cons_inq::class_t( sim, pt == SITH_ASSASSIN ? SITH_ASSASSIN : JEDI_SHADOW, name, r ),
+    base_t( sim, pt == SITH_ASSASSIN ? SITH_ASSASSIN : JEDI_SHADOW, name, r ),
     buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents(), actives()
   {
     if ( pt == SITH_ASSASSIN )
@@ -191,7 +193,7 @@ struct class_t : public cons_inq::class_t
 
   virtual void init_scaling()
   {
-    player_t::init_scaling();
+    base_t::init_scaling();
 
     scales_with[STAT_ALACRITY_RATING] = false;
     scales_with[STAT_FORCE_POWER] = true;
@@ -199,17 +201,17 @@ struct class_t : public cons_inq::class_t
 
   virtual double melee_bonus_stats() const
   {
-    return player_t::melee_bonus_stats() + willpower();
+    return base_t::melee_bonus_stats() + willpower();
   }
 
   virtual double melee_crit_from_stats() const
   {
-    return player_t::melee_crit_from_stats() + rating_scaler.crit_from_stat( willpower() );
+    return base_t::melee_crit_from_stats() + rating_scaler.crit_from_stat( willpower() );
   }
 
   virtual double melee_bonus_multiplier() const
   {
-    double m = player_t::melee_bonus_multiplier();
+    double m = base_t::melee_bonus_multiplier();
 
     if ( actives.charge == DARK_CHARGE )
       m -= 0.05;
@@ -1621,14 +1623,14 @@ struct duplicity_callback_t: action_callback_t
   if ( name == "saber_strike"         ) return new        saber_strike_t( this, options_str );
   if ( name == "stealth"              ) return new             stealth_t( this, options_str );
 
-  return player_t::create_action( name, options_str );
+  return base_t::create_action( name, options_str );
 }
 
 // class_t::init_talents ==========================================
 
 void class_t::init_talents()
 {
-  player_t::init_talents();
+  base_t::init_talents();
 
   // Darkness|Kinetic Combat
   talents.thrashing_blades      = find_talent( "Thrashing Blades" );
@@ -1683,7 +1685,7 @@ void class_t::init_talents()
 
 void class_t::init_base()
 {
-  cons_inq::class_t::init_base();
+  base_t::init_base();
 
   default_distance = 3;
   distance = default_distance;
@@ -1695,7 +1697,7 @@ void class_t::init_base()
 
 void class_t::init_benefits()
 {
-  player_t::init_benefits();
+  base_t::init_benefits();
 
   if ( type == SITH_ASSASSIN )
   {
@@ -1715,7 +1717,7 @@ void class_t::init_benefits()
 
 void class_t::init_buffs()
 {
-  player_t::init_buffs();
+  base_t::init_buffs();
 
   // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
@@ -1752,7 +1754,7 @@ void class_t::init_buffs()
 
 void class_t::init_gains()
 {
-  player_t::init_gains();
+  base_t::init_gains();
 
   gains.dark_embrace       = get_gain( "dark_embrace"       );
   gains.darkswell          = get_gain( "darkswell"          );
@@ -1766,7 +1768,7 @@ void class_t::init_gains()
 
 void class_t::init_procs()
 {
-  player_t::init_procs();
+  base_t::init_procs();
 
   procs.raze = get_proc( "raze" );
 }
@@ -1775,7 +1777,7 @@ void class_t::init_procs()
 
 void class_t::init_rng()
 {
-  player_t::init_rng();
+  base_t::init_rng();
 
   rngs.chain_shock = get_rng( "chain_shock" );
 }
@@ -1927,14 +1929,14 @@ void class_t::init_actions()
     }
   }
 
-  player_t::init_actions();
+  base_t::init_actions();
 }
 
 // class_t::init_spells ===========================================
 
 void class_t::init_spells()
 {
-  player_t::register_callbacks();
+  base_t::init_spells();
 
   action_callback_t* c = new lightning_charge_callback_t( this );
   register_attack_callback( RESULT_HIT_MASK, c );
@@ -1962,7 +1964,7 @@ resource_type class_t::primary_resource() const
 
 role_type class_t::primary_role() const
 {
-  switch ( player_t::primary_role() )
+  switch ( base_t::primary_role() )
   {
   case ROLE_TANK:
     return ROLE_TANK;
@@ -1986,15 +1988,14 @@ double class_t::force_regen_per_second() const
   if (  buffs.dark_embrace -> check() )
     m += talents.dark_embrace -> rank() * 0.25;
 
-  return player_t::force_regen_per_second()
-      + base_force_regen_per_second * m;
+  return base_t::force_regen_per_second() + base_regen_per_second * m;
 }
 
 // class_t::regen =================================================
 
 void class_t::regen( timespan_t periodicity )
 {
-  double force_regen = to_seconds( periodicity ) * base_force_regen_per_second;
+  double force_regen = to_seconds( periodicity ) * base_regen_per_second;
 
   if ( buffs.dark_embrace -> up() )
     resource_gain( RESOURCE_FORCE, force_regen * talents.dark_embrace -> rank() * 0.25, gains.dark_embrace );
@@ -2002,14 +2003,14 @@ void class_t::regen( timespan_t periodicity )
   if ( talents.blood_of_sith -> rank() )
     resource_gain( RESOURCE_FORCE, force_regen * talents.blood_of_sith -> rank() * 0.1, gains.blood_of_sith );
 
-  player_t::regen( periodicity );
+  base_t::regen( periodicity );
 }
 
 // class_t::reset =================================================
 
 void class_t::reset()
 {
-  player_t::reset();
+  base_t::reset();
 
   actives = actives_t();
 }

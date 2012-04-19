@@ -278,9 +278,6 @@ player_t::player_t( sim_t*             s,
   surge_bonus( 0 ),
   base_armor_penetration( 0 ),
 
-  // Resource Regen
-  base_force_regen_per_second( 0 ),
-
   position( POSITION_BACK ),
 
   // Defense Mechanics
@@ -1246,7 +1243,6 @@ void player_t::init_buffs()
 
 void player_t::init_gains()
 {
-  gains.force_regen  = get_gain( "force_regen" );
   gains.energy_regen = get_gain( "energy_regen" );
   gains.ammo_regen   = get_gain( "ammo_regen" );
 }
@@ -1432,7 +1428,7 @@ double player_t::ammo_regen_per_second() const
 // player_t::force_regen_per_second() =======================================
 
 double player_t::force_regen_per_second() const
-{ return base_force_regen_per_second; }
+{ return 0; }
 
 // player_t::composite_power() ==============================================
 
@@ -2363,9 +2359,6 @@ action_t* player_t::execute_action()
 
 void player_t::regen( const timespan_t periodicity )
 {
-  if ( primary_resource() == RESOURCE_FORCE )
-    resource_gain( RESOURCE_FORCE, base_force_regen_per_second * to_seconds( periodicity ), gains.force_regen );
-
   const unsigned index = to_seconds<unsigned>( sim -> current_time );
 
   for ( resource_type i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )

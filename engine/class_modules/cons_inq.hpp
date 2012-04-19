@@ -39,17 +39,33 @@ public:
 class class_t : public player_t
 {
 public:
-  static const int regen_per_second = 8;
+  static constexpr double base_regen_per_second = 8;
+
+  gain_t* gains_force_regen;
 
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
-    player_t( sim, pt, name, rt )
+    player_t( sim, pt, name, rt ), gains_force_regen()
   {}
 
   virtual void init_base()
   {
     player_t::init_base();
-    player_t::base_force_regen_per_second = regen_per_second;
     resource_base[ RESOURCE_FORCE ] += 100;
+  }
+
+  virtual void init_gains()
+  {
+    player_t::init_gains();
+    gains_force_regen = get_gain( "force_regen" );
+  }
+
+  virtual double force_regen_per_second() const
+  { return base_regen_per_second; }
+
+  virtual void regen( timespan_t periodicity )
+  {
+    resource_gain( RESOURCE_FORCE, base_regen_per_second * to_seconds( periodicity ), gains_force_regen );
+    player_t::regen( periodicity );
   }
 };
 

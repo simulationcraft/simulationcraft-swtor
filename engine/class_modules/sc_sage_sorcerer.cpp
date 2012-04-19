@@ -30,6 +30,7 @@ public:
 
 class class_t : public cons_inq::class_t
 {
+  typedef cons_inq::class_t base_t;
 public:
   // Buffs
   struct buffs_t
@@ -159,7 +160,7 @@ public:
   int disable_double_dip;
 
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
-    cons_inq::class_t( sim, pt == SITH_SORCERER ? SITH_SORCERER : JEDI_SAGE, name, rt ),
+    base_t( sim, pt == SITH_SORCERER ? SITH_SORCERER : JEDI_SAGE, name, rt ),
     buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents(),
     disable_double_dip( false )
   {
@@ -200,7 +201,7 @@ public:
 
   virtual void      init_scaling()
   {
-    player_t::init_scaling();
+    base_t::init_scaling();
 
     scales_with[ STAT_STRENGTH    ] = false;
     scales_with[ STAT_FORCE_POWER ] = true;
@@ -217,16 +218,16 @@ public:
   virtual double    alacrity() const;
 
   virtual double force_crit_chance() const
-  { return player_t::force_crit_chance() + talents.penetrating_light -> rank() * 0.01; }
+  { return base_t::force_crit_chance() + talents.penetrating_light -> rank() * 0.01; }
 
   virtual double force_healing_crit_chance() const
-  { return player_t::force_healing_crit_chance() + talents.penetrating_light -> rank() * 0.01 + talents.serenity -> rank() * 0.01; }
+  { return base_t::force_healing_crit_chance() + talents.penetrating_light -> rank() * 0.01 + talents.serenity -> rank() * 0.01; }
 
   virtual double    composite_player_heal_multiplier( school_type school ) const
-  { return player_t::composite_player_heal_multiplier( school ) + talents.wisdom -> rank() * 0.01; }
+  { return base_t::composite_player_heal_multiplier( school ) + talents.wisdom -> rank() * 0.01; }
 
   double school_damage_reduction( school_type school ) const
-  { return player_t::school_damage_reduction( school ) + talents.serenity -> rank() * 0.01; }
+  { return base_t::school_damage_reduction( school ) + talents.serenity -> rank() * 0.01; }
 
   heal_info_t assess_heal( double      amount,
                            school_type school,
@@ -236,7 +237,7 @@ public:
   {
     amount *= 1.0 + talents.pain_bearer -> rank() * 0.04;
 
-    return player_t::assess_heal( amount, school, dmg_type, result, action );
+    return base_t::assess_heal( amount, school, dmg_type, result, action );
   }
 
   virtual ::action_t* create_action( const std::string& name, const std::string& options );
@@ -1519,14 +1520,14 @@ struct force_armor_t : public absorb_t
     if ( name == "revivification"     ) return new         salvation_t( this, "revivification", options_str );
   }
 
-  return player_t::create_action( name, options_str );
+  return base_t::create_action( name, options_str );
 }
 
 // class_t::init_talents ============================================
 
 void class_t::init_talents()
 {
-  player_t::init_talents();
+  base_t::init_talents();
 
   // Seer|Corruption
   talents.immutable_force       = find_talent( "Immutable Force" );
@@ -1598,7 +1599,7 @@ void class_t::init_talents()
 
 void class_t::init_base()
 {
-  cons_inq::class_t::init_base();
+  base_t::init_base();
 
   distance = default_distance = 30;
 
@@ -1611,7 +1612,7 @@ void class_t::init_base()
 
 void class_t::init_benefits()
 {
-  player_t::init_benefits();
+  base_t::init_benefits();
 
   if ( type == SITH_SORCERER )
   {
@@ -1633,7 +1634,7 @@ void class_t::init_benefits()
 
 void class_t::init_buffs()
 {
-  player_t::init_buffs();
+  base_t::init_buffs();
 
   // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rngs.type=rngs.CYCLIC, activated=true )
   // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rngs.type=rngs.CYCLIC, activated=true )
@@ -1661,7 +1662,7 @@ void class_t::init_buffs()
 
 void class_t::init_gains()
 {
-  player_t::init_gains();
+  base_t::init_gains();
 
   bool is_sage = ( type == JEDI_SAGE );
 
@@ -1677,14 +1678,14 @@ void class_t::init_gains()
 
 void class_t::init_procs()
 {
-  player_t::init_procs();
+  base_t::init_procs();
 }
 
 // class_t::init_rngs ===============================================
 
 void class_t::init_rng()
 {
-  player_t::init_rng();
+  base_t::init_rng();
 
   rngs.psychic_barrier = get_rng( "psychic_barrier" );
   rngs.upheaval = get_rng( "upheaval" );
@@ -1846,7 +1847,7 @@ void class_t::init_actions()
     }
   }
 
-  player_t::init_actions();
+  base_t::init_actions();
 }
 
 // class_t::primary_resource ========================================
@@ -1858,7 +1859,7 @@ resource_type class_t::primary_resource() const
 
 role_type class_t::primary_role() const
 {
-  switch ( player_t::primary_role() )
+  switch ( base_t::primary_role() )
   {
   case ROLE_HEAL:
     return ROLE_HEAL;
@@ -1876,9 +1877,9 @@ role_type class_t::primary_role() const
 
 double class_t::force_regen_per_second() const
 {
-  double regen = player_t::force_regen_per_second();
-  regen += base_force_regen_per_second * ( buffs.concentration -> check() * 0.10
-                                           - buffs.noble_sacrifice -> check() * 0.25 );
+  double regen = base_t::force_regen_per_second();
+  regen += base_regen_per_second * ( buffs.concentration -> check() * 0.10 -
+                                     buffs.noble_sacrifice -> check() * 0.25 );
   return regen;
 }
 
@@ -1886,7 +1887,7 @@ double class_t::force_regen_per_second() const
 
 void class_t::regen( timespan_t periodicity )
 {
-  double force_regen = to_seconds( periodicity ) * base_force_regen_per_second;
+  double force_regen = to_seconds( periodicity ) * base_regen_per_second;
 
   if ( buffs.concentration -> up() )
     resource_gain( RESOURCE_FORCE, force_regen * buffs.concentration -> check() * 0.10, gains.concentration );
@@ -1894,20 +1895,20 @@ void class_t::regen( timespan_t periodicity )
   if ( buffs.noble_sacrifice -> up() )
     resource_loss( RESOURCE_FORCE, force_regen * buffs.noble_sacrifice -> check() * 0.25, gains.noble_sacrifice_power_regen_lost );
 
-  player_t::regen( periodicity );
+  base_t::regen( periodicity );
 }
 
 // class_t::force_bonus_multiplier ==================================
 
 double class_t::force_bonus_multiplier() const
 {
-  return player_t::force_bonus_multiplier() +
+  return base_t::force_bonus_multiplier() +
       buffs.tremors -> stack() * 0.01;
 }
 
 double class_t::force_healing_bonus_multiplier() const
 {
-  return player_t::force_healing_bonus_multiplier() +
+  return base_t::force_healing_bonus_multiplier() +
       talents.clairvoyance -> rank() * 0.02;
 }
 
@@ -1915,7 +1916,7 @@ double class_t::force_healing_bonus_multiplier() const
 
 double class_t::alacrity() const
 {
-  double sh = player_t::alacrity();
+  double sh = base_t::alacrity();
 
   sh -= buffs.mental_alacrity -> stack() * 0.20;
 
@@ -1964,7 +1965,7 @@ void class_t::create_talents()
 
 void class_t::create_options()
 {
-  player_t::create_options();
+  base_t::create_options();
 
   option_t sage_sorcerer_options[] =
   {

@@ -2409,10 +2409,6 @@ public:
   double surge_bonus;
   double base_armor_penetration;
 
-  // Resource Regen
-  double base_force_regen_per_second;
-  double resource_reduction[ SCHOOL_MAX ], initial_resource_reduction[ SCHOOL_MAX ];
-
   position_type position;
   std::string position_str;
 
@@ -2441,8 +2437,10 @@ public:
   double resource_initial[ RESOURCE_MAX ];
   double resource_max    [ RESOURCE_MAX ];
   double resource_current[ RESOURCE_MAX ];
-  static constexpr double health_per_endurance = 10;
+  double resource_reduction[ SCHOOL_MAX ], initial_resource_reduction[ SCHOOL_MAX ];
   uptime_t* primary_resource_cap;
+
+  static constexpr double health_per_endurance = 10;
 
   // Consumables
   stim_type stim;
@@ -2618,7 +2616,6 @@ public:
   {
     gain_t* energy_regen;
     gain_t* ammo_regen;
-    gain_t* force_regen;
   };
   gains_t gains;
 
