@@ -257,7 +257,7 @@ player_t::player_t( sim_t*             s,
   brain_lag( timespan_t_min() ), brain_lag_stddev( timespan_t_min() ),
   world_lag_override( false ), world_lag_stddev_override( false ),
   events( 0 ),
-  race( r ),
+  race( r == RACE_NONE ? RACE_HUMAN : r ),
 
   // Ratings
   initial_accuracy_rating( 0 ), accuracy_rating_( 0 ), base_accuracy_( 0 ), computed_accuracy( 0 ),
