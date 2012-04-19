@@ -797,6 +797,8 @@ struct cull_t : public scoundrel_operative_range_attack_t
       dd.power_mod = 0.66;
       background = true;
       trigger_gcd = timespan_t::zero();
+      if ( p -> talents.cut_down->rank() )
+         base_multiplier += .03 * p -> talents.cut_down->rank();
     }
   };
 
@@ -816,6 +818,9 @@ struct cull_t : public scoundrel_operative_range_attack_t
     weapon = &( player->main_hand_weapon );
     weapon_multiplier = -0.1;
     dd.power_mod = 1.35;
+
+    if ( p -> talents.cut_down->rank() )
+       base_multiplier += .03 * p -> talents.cut_down->rank();
   }
 
 
