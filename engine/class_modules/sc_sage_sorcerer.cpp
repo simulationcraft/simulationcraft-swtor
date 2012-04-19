@@ -199,12 +199,9 @@ public:
   virtual void      init_scaling()
   {
     base_t::init_scaling();
-
-    scales_with[ STAT_STRENGTH    ] = false;
-    scales_with[ STAT_FORCE_POWER ] = true;
+    scales_with[ STAT_STRENGTH ] = false;
   }
 
-  virtual resource_type primary_resource() const;
   virtual role_type primary_role() const;
 
   virtual double    force_regen_per_second() const; // override
@@ -220,7 +217,7 @@ public:
   virtual double force_healing_crit_chance() const
   { return base_t::force_healing_crit_chance() + talents.penetrating_light -> rank() * 0.01 + talents.serenity -> rank() * 0.01; }
 
-  virtual double    composite_player_heal_multiplier( school_type school ) const
+  virtual double composite_player_heal_multiplier( school_type school ) const
   { return base_t::composite_player_heal_multiplier( school ) + talents.wisdom -> rank() * 0.01; }
 
   double school_damage_reduction( school_type school ) const
@@ -238,8 +235,8 @@ public:
   }
 
   virtual ::action_t* create_action( const std::string& name, const std::string& options );
-          void      create_talents();
-  virtual void      create_options();
+  void create_talents();
+  virtual void create_options();
 
   void trigger_tidal_force( double pc )
   {
@@ -637,7 +634,7 @@ struct disturbance_t : public spell_t
   {
     rank_level_list = { 10, 13, 16, 25, 36, 45, 50 };
 
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     dd.standardhealthpercentmin = .112;
     dd.standardhealthpercentmax = .152;
@@ -776,7 +773,7 @@ struct mind_crush_t : public spell_t
     static const int ranks[] = { 14, 19, 30, 41, 50 };
     rank_level_list = util_t::array_to_vector( ranks );
 
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     dd.standardhealthpercentmin = .103;
     dd.standardhealthpercentmax = .143;
@@ -828,7 +825,7 @@ struct weaken_mind_t : public spell_t
   {
     rank_level_list = { 16, 22, 33, 44, 50 };
 
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     td.standardhealthpercentmin = td.standardhealthpercentmax = .031;
     td.power_mod = 0.31;
@@ -881,7 +878,7 @@ struct turbulence_t : public spell_t
   {
     check_talent( p -> talents.turbulence -> rank() );
 
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     dd.standardhealthpercentmin = .138;
     dd.standardhealthpercentmax = .178;
@@ -919,7 +916,7 @@ struct force_in_balance_t : public spell_t
   {
     check_talent( p -> talents.force_in_balance -> rank() );
 
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     dd.standardhealthpercentmin = .167;
     dd.standardhealthpercentmax = .207;
@@ -955,7 +952,7 @@ struct sever_force_t : public spell_t
   {
     check_talent( p -> talents.sever_force -> rank() );
 
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     td.standardhealthpercentmin = td.standardhealthpercentmax = .031;
     td.power_mod = 0.311;
@@ -988,7 +985,7 @@ struct mental_alacrity_t : public spell_t
   {
     check_talent( p -> talents.mental_alacrity -> rank() );
 
-    parse_options( 0, options_str );
+    parse_options( options_str );
     cooldown -> duration = from_seconds( 120.0 );
     harmful = false;
 
@@ -1015,7 +1012,7 @@ struct telekinetic_wave_t : public spell_t
   {
     check_talent( p -> talents.telekinetic_wave -> rank() );
 
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     if ( is_tm )
     {
@@ -1093,7 +1090,7 @@ struct force_potency_t : public spell_t
   force_potency_t( class_t* p, const std::string& n, const std::string& options_str ) :
     spell_t( n, p )
   {
-    parse_options( 0, options_str );
+    parse_options( options_str );
     cooldown -> duration = from_seconds( 90.0 );
     harmful = false;
 
@@ -1208,7 +1205,7 @@ struct benevolence_t : public heal_t
   benevolence_t( class_t* p, const std::string& n, const std::string& options_str ) :
     heal_t( n, p, SCHOOL_INTERNAL )
   {
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     dd.standardhealthpercentmin = .078;
     dd.standardhealthpercentmax = .098;
@@ -1253,7 +1250,7 @@ struct healing_trance_t : public heal_t
   healing_trance_t( class_t* p, const std::string& n, const std::string& options_str ) :
     heal_t( n, p, SCHOOL_INTERNAL )
   {
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     td.standardhealthpercentmin = td.standardhealthpercentmax = .0515;
     td.power_mod = 1.03;
@@ -1302,7 +1299,7 @@ struct rejuvenate_t : public heal_t
   rejuvenate_t( class_t* p, const std::string& n, const std::string& options_str ) :
     heal_t( n, p, SCHOOL_INTERNAL )
   {
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     dd.standardhealthpercentmin = .035;
     dd.standardhealthpercentmax = .055;
@@ -1356,7 +1353,7 @@ struct salvation_t : public heal_t
     heal_t( n, p, SCHOOL_INTERNAL ),
     tick_spell( 0 )
   {
-    parse_options( 0, options_str );
+    parse_options( options_str );
     harmful = false;
 
     num_ticks = 10;
@@ -1436,7 +1433,7 @@ struct force_armor_t : public absorb_t
   force_armor_t( class_t* p, const std::string& n, const std::string& options_str ) :
     absorb_t( n, p, SCHOOL_INTERNAL )
   {
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     dd.standardhealthpercentmin = .164;
     dd.standardhealthpercentmax = .164;
@@ -1846,11 +1843,6 @@ void class_t::init_actions()
 
   base_t::init_actions();
 }
-
-// class_t::primary_resource ========================================
-
-resource_type class_t::primary_resource() const
-{ return RESOURCE_FORCE; }
 
 // class_t::primary_role ============================================
 

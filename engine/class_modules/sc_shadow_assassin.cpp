@@ -181,7 +181,6 @@ struct class_t : public cons_inq::class_t
   virtual void      init_rng();
   virtual void      init_actions();
   virtual void      init_spells();
-  virtual resource_type primary_resource() const;
   virtual role_type primary_role() const;
   virtual double    force_regen_per_second() const; // override
   virtual void      regen( timespan_t periodicity );
@@ -191,9 +190,7 @@ struct class_t : public cons_inq::class_t
   virtual void init_scaling()
   {
     base_t::init_scaling();
-
-    scales_with[STAT_ALACRITY_RATING] = false;
-    scales_with[STAT_FORCE_POWER] = true;
+    scales_with[ STAT_ALACRITY_RATING ] = false;
   }
 
   virtual double melee_bonus_stats() const
@@ -224,9 +221,7 @@ struct class_t : public cons_inq::class_t
   { return 0; }
 
   virtual bool report_attack_type( action_t::policy_t policy )
-  {
-    return policy == action_t::melee_policy || policy == action_t::force_policy;
-  }
+  { return policy == action_t::melee_policy || policy == action_t::force_policy; }
 };
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
@@ -399,7 +394,7 @@ struct mark_of_power_t : public spell_t
   mark_of_power_t( class_t* p, const std::string& n, const std::string& options_str ) :
       spell_t( n, p )
   {
-    parse_options( 0, options_str );
+    parse_options( options_str );
     base_cost = 0.0;
     harmful = false;
   }
@@ -435,7 +430,7 @@ struct shock_t : public spell_t
   {
     rank_level_list = { 1, 4, 7, 11, 14, 17, 23, 34, 47, 50};
 
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     range = 10.0;
 
@@ -517,7 +512,7 @@ struct force_lightning_t : public spell_t
   {
     rank_level_list = { 2, 5, 8, 11, 14, 19, 27, 39, 50 };
 
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     td.standardhealthpercentmin = td.standardhealthpercentmax = .079;
     td.power_mod = 0.79;
@@ -575,7 +570,7 @@ struct crushing_darkness_t : public spell_t
   {
     rank_level_list = { 14, 19, 30, 41, 50};
 
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     dd.standardhealthpercentmin = .103;
     dd.standardhealthpercentmax = .143;
@@ -646,7 +641,7 @@ struct death_field_t : public spell_t
   {
     check_talent( p->talents.death_field->rank() );
 
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     dd.standardhealthpercentmin = .167;
     dd.standardhealthpercentmax = .207;
@@ -683,7 +678,7 @@ struct creeping_terror_t : public spell_t
   {
     check_talent( p->talents.creeping_terror->rank() );
 
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     td.standardhealthpercentmin = td.standardhealthpercentmax = .031;
     td.power_mod = 0.311;
@@ -715,7 +710,7 @@ struct recklessness_t : public spell_t
   recklessness_t( class_t* p, const std::string& n, const std::string& options_str ) :
       spell_t( n, p, SCHOOL_INTERNAL )
   {
-    parse_options( 0, options_str );
+    parse_options( options_str );
     cooldown->duration = from_seconds( 90.0 );
     harmful = false;
 
@@ -802,7 +797,7 @@ struct discharge_t: public spell_t
   discharge_t( class_t* p, const std::string& n, const std::string& options_str ) :
       spell_t( n, p )
   {
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     range = 10.0;
     base_cost = 20.0;
@@ -862,7 +857,7 @@ struct apply_charge_t : public spell_t
   apply_charge_t( class_t* p, const std::string& name, charge_type charge, const std::string& options_str ) :
       spell_t( name, p ), charge( charge )
   {
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     assert( charge != CHARGE_NONE );
     base_cost = 100.0;
@@ -920,7 +915,7 @@ struct low_slash_t : public attack_t
   low_slash_t( class_t* p, const std::string& options_str ) :
       attack_t( "low_slash", p, SCHOOL_KINETIC )
   {
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     dd.standardhealthpercentmin = dd.standardhealthpercentmax = .132;
     dd.power_mod = 1.32;
@@ -944,7 +939,7 @@ struct voltaic_slash_t : public attack_t
   voltaic_slash_t( class_t* p, const std::string& n, const std::string& options_str, bool is_second_strike = false ) :
       attack_t( n, p, SCHOOL_KINETIC ), second_strike( 0 )
   {
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     dd.standardhealthpercentmin = dd.standardhealthpercentmax = .08;
     dd.power_mod = .8;
@@ -1004,7 +999,7 @@ struct overcharge_saber_t : public spell_t
   overcharge_saber_t( class_t* p, const std::string& n, const std::string& options_str ) :
       spell_t( n, p )
   {
-    parse_options( 0, options_str );
+    parse_options( options_str );
     cooldown->duration = from_seconds( 120.0 - p->talents.resourcefulness->rank() * 15 );
     harmful = false;
 
@@ -1028,7 +1023,7 @@ struct assassinate_t : public attack_t
   assassinate_t( class_t* p, const std::string& n, const std::string& options_str ) :
       attack_t( n, p )
   {
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     dd.standardhealthpercentmin = dd.standardhealthpercentmax = .309;
     dd.power_mod = 3.09;
@@ -1068,7 +1063,7 @@ struct lacerate_t : public attack_t
   lacerate_t( class_t* p, const std::string& n, const std::string& options_str ) :
       attack_t( n, p, SCHOOL_KINETIC )
   {
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     dd.standardhealthpercentmin = dd.standardhealthpercentmax = .071;
     dd.power_mod = 0.71;
@@ -1110,7 +1105,7 @@ struct blackout_t : public stealth_base_t
       stealth_base_t( p, "blackout" )
   {
     check_talent( p->talents.darkswell->rank() );
-    parse_options( 0, options_str );
+    parse_options( options_str );
     cooldown->duration = from_seconds( 60.0 - 7.5 * p->talents.fade->rank() );
   }
 
@@ -1130,7 +1125,7 @@ struct force_cloak_t : public stealth_base_t
   force_cloak_t( class_t* p, const std::string& options_str ) :
       stealth_base_t( p, "force_cloak" )
   {
-    parse_options( 0, options_str );
+    parse_options( options_str );
     cooldown->duration = from_seconds( 180.0 - 30 * p->talents.fade->rank() );
   }
 };
@@ -1228,7 +1223,7 @@ struct saber_strike_t : public attack_t
   saber_strike_t( class_t* p, const std::string& options_str, bool is_consequent_strike = false ) :
       attack_t( "saber_strike", p ), second_strike( 0 ), third_strike( 0 )
   {
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     base_cost = 0;
     range = 4.0;
@@ -1283,7 +1278,7 @@ struct thrash_t : public attack_t
   thrash_t( class_t* p, const std::string& n, const std::string& options_str, bool is_second_strike = false ) :
       attack_t( n, p ), second_strike( 0 )
   {
-    parse_options( 0, options_str );
+    parse_options( options_str );
 
     dd.standardhealthpercentmin = dd.standardhealthpercentmax = .074;
     dd.power_mod = 0.74;
@@ -1951,11 +1946,6 @@ void class_t::init_spells()
   register_attack_callback( RESULT_HIT_MASK, c );
   register_spell_callback( RESULT_HIT_MASK, c );
 }
-
-// class_t::primary_resource ======================================
-
-resource_type class_t::primary_resource() const
-{ return RESOURCE_FORCE; }
 
 // class_t::primary_role ==========================================
 

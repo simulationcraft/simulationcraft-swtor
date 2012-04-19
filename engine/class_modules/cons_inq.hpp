@@ -24,6 +24,12 @@ public:
     secondary_attribute = ATTR_STRENGTH;
   }
 
+  virtual void init_scaling()
+  {
+    player_t::init_scaling();
+    scales_with[ STAT_FORCE_POWER ] = true;
+  }
+
   virtual void init_base()
   {
     player_t::init_base();
@@ -35,6 +41,9 @@ public:
     player_t::init_gains();
     gains_force_regen = get_gain( "force_regen" );
   }
+
+  virtual resource_type primary_resource() const
+  { return RESOURCE_FORCE; }
 
   virtual double force_regen_per_second() const
   { return base_regen_per_second; }
