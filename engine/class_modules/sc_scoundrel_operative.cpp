@@ -322,6 +322,15 @@ struct scoundrel_operative_poison_attack_t : public scoundrel_operative_tech_att
 
   virtual void tick( dot_t* d )
   {
+    scoundrel_operative_targetdata_t* td = targetdata();
+
+    // XXX TODO FIX REVIEW
+    // this feels very hacky. is there a better way?
+    // DK module in simc uses target_debuff(...) and player_multiplier
+    // and what if base_multiplyer was already modified?
+    if ( p() -> talents.devouring_microbes -> rank() && td -> target.health_percentage() < 30 )
+      base_multiplier = 1 + 0.05 * p() -> talents.devouring_microbes -> rank();
+
     scoundrel_operative_tech_attack_t::tick( d );
 
     if ( RESULT_CRIT && p() -> talents.lethal_purpose -> rank() )
