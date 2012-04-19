@@ -1188,8 +1188,8 @@ void scoundrel_operative_t::init_base()
 
   attribute_multiplier_initial[ ATTR_CUNNING ] += 0.03 * talents.imperial_education -> rank();
 
-  // TODO: base_alacrity from Deadly Diretive grants 2%
   set_base_crit( get_base_crit() + 0.02 * talents.lethality -> rank() );
+  set_base_alacrity( get_base_alacrity() + 0.02 * talents.deadly_directive -> rank() );
 }
 
 // scoundrel_operative_t::init_benefits =======================================================
