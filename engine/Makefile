@@ -91,7 +91,7 @@ SRC = \
 	sc_http.cpp \
 	sc_item.cpp \
 	sc_js.cpp \
-  	sc_knotor.cpp \
+	sc_knotor.cpp \
 	sc_log.cpp \
 	sc_main.cpp \
 	sc_mrrobot.cpp \
@@ -122,6 +122,8 @@ SRC = \
 	sc_util.cpp \
 	sc_weapon.cpp \
 	sc_xml.cpp \
+	class_modules$(PATHSEP)agent_smug.hpp \
+	class_modules$(PATHSEP)cons_inq.hpp \
 	class_modules$(PATHSEP)sc_commando_mercenary.cpp \
 	class_modules$(PATHSEP)sc_gunslinger_sniper.cpp \
 	class_modules$(PATHSEP)sc_juggernaut_guardian.cpp \

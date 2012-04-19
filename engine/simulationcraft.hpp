@@ -2614,7 +2614,6 @@ public:
 
   struct gains_t
   {
-    gain_t* energy_regen;
     gain_t* ammo_regen;
   };
   gains_t gains;

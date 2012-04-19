@@ -38,6 +38,7 @@ INCLUDEPATH += engine
 DEPENDPATH += engine
 
 HEADERS += engine/simulationcraft.hpp
+HEADERS += engine/class_modules/agent_smug.hpp
 HEADERS += engine/class_modules/cons_inq.hpp
 HEADERS += engine/utf8.h
 HEADERS += engine/utf8/core.h

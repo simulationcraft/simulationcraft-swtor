@@ -1243,7 +1243,6 @@ void player_t::init_buffs()
 
 void player_t::init_gains()
 {
-  gains.energy_regen = get_gain( "energy_regen" );
   gains.ammo_regen   = get_gain( "ammo_regen" );
 }
 
