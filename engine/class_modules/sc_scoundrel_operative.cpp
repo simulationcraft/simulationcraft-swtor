@@ -61,6 +61,7 @@ struct scoundrel_operative_t : public player_t
     gain_t* adrenaline_probe;
     gain_t* stim_boost;
     gain_t* revitalizers;
+    gain_t* lethal_purpose;
   } gains;
 
   // Procs
@@ -264,9 +265,16 @@ public:
 // ----------------
 // _action_t - tech_attack  - consume_acid_blade_attack - hidden strike
 //                                                      - backstab
+//
+//                          - poison_attack             - corrosive dart
+//                                                      - corrosive grenade
+//                                                      - acid blade poison
+//
 //                          - most abilities except...
+//
 //           - range_attack - rifle_shot
 //                          - overload_shot
+//
 //           - acid_blade
 //           - adrenaline_probe
 //           - stealth
@@ -286,6 +294,42 @@ struct scoundrel_operative_tech_attack_t : public scoundrel_operative_action_t
     p() -> buffs.stealth -> expire();
   }
 };
+
+struct scoundrel_operative_range_attack_t : public scoundrel_operative_action_t
+{
+  scoundrel_operative_range_attack_t( const std::string& n, scoundrel_operative_t* p, school_type s=SCHOOL_ENERGY ) :
+    scoundrel_operative_action_t( n, p, range_policy, RESOURCE_ENERGY, s )
+  {
+    may_crit   = true;
+  }
+
+  virtual void execute()
+  {
+    scoundrel_operative_action_t::execute();
+    p() -> buffs.stealth -> expire();
+  }
+};
+
+struct scoundrel_operative_poison_attack_t : public scoundrel_operative_tech_attack_t
+{
+  scoundrel_operative_poison_attack_t( const std::string& n, scoundrel_operative_t* p, school_type s=SCHOOL_INTERNAL ) :
+    scoundrel_operative_tech_attack_t( n, p, s )
+  {
+    may_crit = false;
+    tick_may_crit = true;
+  }
+
+  virtual void tick( dot_t* d )
+  {
+    scoundrel_operative_tech_attack_t::tick( d );
+
+    if ( RESULT_CRIT && p() -> talents.lethal_purpose -> rank() )
+    {
+      p() -> resource_gain( RESOURCE_ENERGY, 1, p() -> gains.lethal_purpose );
+    }
+  }
+};
+
 
 // Consume Acid Blade Poison Attack | ??? ===================================
 
@@ -312,31 +356,16 @@ struct scoundrel_operative_consume_acid_blade_attack_t : public scoundrel_operat
   }
 };
 
-struct scoundrel_operative_range_attack_t : public scoundrel_operative_action_t
-{
-  scoundrel_operative_range_attack_t( const std::string& n, scoundrel_operative_t* p, school_type s=SCHOOL_ENERGY ) :
-    scoundrel_operative_action_t( n, p, range_policy, RESOURCE_ENERGY, s )
-  {
-    may_crit   = true;
-  }
-
-  virtual void execute()
-  {
-    scoundrel_operative_action_t::execute();
-    p() -> buffs.stealth -> expire();
-  }
-};
-
 // Acid Blade | ??? =========================================================
 
 struct acid_blade_t : public scoundrel_operative_action_t
 {
   // Acid Blade Poison | ??? ==================================================
 
-  struct acid_blade_poison_t : public scoundrel_operative_tech_attack_t
+  struct acid_blade_poison_t : public scoundrel_operative_poison_attack_t
   {
     acid_blade_poison_t( scoundrel_operative_t* p, const std::string& n ) :
-      scoundrel_operative_tech_attack_t( n, p, SCHOOL_INTERNAL )
+      scoundrel_operative_poison_attack_t( n, p )
     {
       td.standardhealthpercentmin = td.standardhealthpercentmax = 0.031;
       td.power_mod = 0.31;
@@ -386,7 +415,7 @@ struct adrenaline_probe_t : public scoundrel_operative_action_t
   {
     parse_options( options_str );
 
-    cooldown -> duration = from_seconds( 120 );
+    cooldown -> duration = from_seconds( 120 - 15 * p -> talents.lethal_purpose -> rank() );
     use_off_gcd = true;
     trigger_gcd = timespan_t::zero();
 
@@ -659,10 +688,10 @@ struct fragmentation_grenade_t : public scoundrel_operative_tech_attack_t
 
 // Corrosive Grenade | ??? ==================================================
 
-struct corrosive_grenade_t : public scoundrel_operative_tech_attack_t
+struct corrosive_grenade_t : public scoundrel_operative_poison_attack_t
 {
   corrosive_grenade_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_tech_attack_t( n, p, SCHOOL_INTERNAL )
+    scoundrel_operative_poison_attack_t( n, p )
   {
     parse_options( options_str );
 
@@ -670,8 +699,6 @@ struct corrosive_grenade_t : public scoundrel_operative_tech_attack_t
     cooldown -> duration = from_seconds( 12.0 );
     range = 30.0;
 
-    may_crit = false;
-    tick_may_crit = true;
     td.standardhealthpercentmin = td.standardhealthpercentmax = 0.32;
     td.power_mod = 0.32;
 
@@ -684,7 +711,7 @@ struct corrosive_grenade_t : public scoundrel_operative_tech_attack_t
 
   virtual void tick( dot_t* d )
   {
-    scoundrel_operative_tech_attack_t::tick( d );
+    scoundrel_operative_poison_attack_t::tick( d );
 
     if ( d -> ticks() == 0 )
     {
@@ -698,12 +725,12 @@ struct corrosive_grenade_t : public scoundrel_operative_tech_attack_t
 
 // Corrosive Dart | ??? =====================================================
 
-struct corrosive_dart_t : public scoundrel_operative_tech_attack_t
+struct corrosive_dart_t : public scoundrel_operative_poison_attack_t
 {
   rng_t* corrosive_microbes;
 
   corrosive_dart_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_tech_attack_t( n, p, SCHOOL_INTERNAL ),
+    scoundrel_operative_poison_attack_t( n, p ),
     corrosive_microbes( p -> talents.corrosive_microbes -> rank()
                         ? p -> get_rng( "corrosive_microbes" ) : 0 )
   {
@@ -714,8 +741,6 @@ struct corrosive_dart_t : public scoundrel_operative_tech_attack_t
     base_cost = 20;
     range = 30.0;
 
-    may_crit = false;
-    tick_may_crit = true;
     td.standardhealthpercentmin = td.standardhealthpercentmax = 0.04;
     td.power_mod = 0.4;
 
@@ -725,7 +750,7 @@ struct corrosive_dart_t : public scoundrel_operative_tech_attack_t
 
   virtual void tick( dot_t* d )
   {
-    scoundrel_operative_tech_attack_t::tick( d );
+    scoundrel_operative_poison_attack_t::tick( d );
 
     scoundrel_operative_t& p = *cast();
 
@@ -1086,6 +1111,7 @@ void scoundrel_operative_t::init_gains()
   gains.high             = get_gain( "high"             );
   gains.stim_boost       = get_gain( "stim_boost"       );
   gains.revitalizers     = get_gain( "revitalizers"     );
+  gains.lethal_purpose   = get_gain( "lethal_purpose"   );
 }
 
 // scoundrel_operative_t::init_procs =======================================================
