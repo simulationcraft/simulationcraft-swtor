@@ -2052,7 +2052,7 @@ struct rating_t
 private:
   static double swtor_diminishing_return( double cap, double divisor, int level, double rating )
   {
-    assert( rating >= 0.0 );
+    // Here reference only, the actual calculation is splut in two pieces in scaling_t.
     return cap * ( 1.0 - std::exp( ( std::log( 1.0 - ( 0.01 / cap ) ) / divisor ) *
                                    rating / std::max( 20, level ) ) );
   }
