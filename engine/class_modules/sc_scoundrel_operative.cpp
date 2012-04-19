@@ -1443,7 +1443,7 @@ void scoundrel_operative_t::create_talents()
   static const talentinfo_t lethality_tree[] = {
     { "Deadly Directive", 2 }, { "Lethality", 3 }, { "Razor Edge", 2 },
     { "Slip Away", 2 }, { "Flash Powder", 2 }, { "Corrosive Microbes", 2 }, { "Lethal Injectors", 1 },
-    { "Corrosive Grenades", 1 }, { "Combat Stims", 2 }, { "Cut Down", 2 },
+    { "Corrosive Grenade", 1 }, { "Combat Stims", 2 }, { "Cut Down", 2 },
     { "Lethal Purpose", 2 }, { "Adhesive Corrosives", 2 }, { "Escape Plan", 2 }, { "Lethal Dose", 3 },
     { "Cull", 1 }, { "License to Kill", 2 }, { "Counterstrike", 2 },
     { "Devouring Microbes", 3 }, { "Lingering Toxins", 2 }, { "Weakening Blast", 1 },
