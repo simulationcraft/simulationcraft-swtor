@@ -79,13 +79,6 @@
 #endif
 
 #define PRINTF_ATTRIBUTE(a,b) __attribute__((format(printf,a,b)))
-#define SC_FINLINE_EXT        __attribute__((always_inline))
-
-#if defined( _MSC_VER )
-# define finline              __forceinline
-#else
-# define finline              inline
-#endif
 
 #define SC_MAJOR_VERSION "120"
 #define SC_MINOR_VERSION "1"
