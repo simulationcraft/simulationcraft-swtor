@@ -764,6 +764,66 @@ struct corrosive_dart_t : public scoundrel_operative_poison_attack_t
   }
 };
 
+// Cull | ??? ===============================================================
+
+struct cull_t : public scoundrel_operative_range_attack_t
+{
+  struct cull_extra_t : public scoundrel_operative_tech_attack_t
+  {
+    cull_extra_t( scoundrel_operative_t* p, const std::string& n ) :
+      scoundrel_operative_tech_attack_t( n, p, SCHOOL_INTERNAL )
+    {
+      dd.standardhealthpercentmin = dd.standardhealthpercentmax = 0.66;
+      dd.power_mod = 0.66;
+      background = true;
+      trigger_gcd = timespan_t::zero();
+    }
+  };
+
+  cull_extra_t* extra_strike;
+  
+  cull_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
+    scoundrel_operative_range_attack_t( n, p ),
+    extra_strike( new cull_extra_t( p, n + "_extra" ) )
+  {
+    parse_options( options_str );
+
+    base_cost = 25;
+    range = 10.0;
+
+    // TODO
+    // TEST blind implementation without logs as reference
+    weapon = &( player->main_hand_weapon );
+    weapon_multiplier = -0.1;
+    dd.power_mod = 1.35;
+  }
+
+
+  virtual bool ready()
+  {
+    if ( ! p() -> buffs.tactical_advantage -> check() )
+      return false;
+
+    return scoundrel_operative_range_attack_t::ready();
+  }
+
+  virtual void execute()
+  {
+    scoundrel_operative_range_attack_t::execute();
+
+    if ( result_is_hit() )
+    {
+      p() -> buffs.tactical_advantage -> decrement();
+
+      scoundrel_operative_targetdata_t* td = targetdata();
+      if ( td -> dot_corrosive_dart.ticking )
+        extra_strike -> execute();
+      if ( td -> dot_corrosive_grenade.ticking )
+        extra_strike -> execute();
+    }
+  }
+};
+
 // Rifle Shot | ??? =========================================================
 
 struct rifle_shot_t : public scoundrel_operative_range_attack_t
@@ -780,10 +840,6 @@ struct rifle_shot_t : public scoundrel_operative_range_attack_t
     range = 30.0;
 
     weapon = &( player->main_hand_weapon );
-    // FIXME still hitting too hard
-    // is 'about' right were a single shot both shots combined.
-    // but with two shots it's hitting for double what it should.
-    // will upload logs and profile for comparison
     weapon_multiplier = -0.5;
     dd.power_mod = 0.5;
 
@@ -961,6 +1017,7 @@ action_t* scoundrel_operative_t::create_action( const std::string& name,
     if ( name == "stealth"               ) return new stealth_t( this, name, options_str );
     if ( name == "stim_boost"            ) return new stim_boost_t( this, name, options_str );
     if ( name == "corrosive_grenade"     ) return new corrosive_grenade_t( this, name, options_str );
+    if ( name == "cull"                  ) return new cull_t( this, name, options_str );
   }
 
   else if ( type == S_SCOUNDREL )
