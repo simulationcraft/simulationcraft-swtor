@@ -419,7 +419,7 @@ void action_t::player_buff()
   player_multiplier              = 1.0;
   dd.player_multiplier           = 1.0;
   td.player_multiplier           = 1.0;
-  player_accuracy                     = attack_policy -> accuracy_chance( *player );
+  player_accuracy                = attack_policy -> accuracy_chance( *player );
   player_crit                    = attack_policy -> crit_chance( *player );
   player_armor_penetration       = player -> armor_penetration();
   player_dd_adder                = 0;
