@@ -811,7 +811,7 @@ struct cull_t : public scoundrel_operative_range_attack_t
     {
       dd.standardhealthpercentmin = dd.standardhealthpercentmax = 0.66;
       dd.power_mod = 0.66;
-      background = true;
+      dual = background = true;
       trigger_gcd = timespan_t::zero();
       base_multiplier += .03 * p -> talents.cut_down->rank();
     }
@@ -835,8 +835,9 @@ struct cull_t : public scoundrel_operative_range_attack_t
     dd.power_mod = 1.35;
 
     base_multiplier += .03 * p -> talents.cut_down->rank();
-  }
 
+    add_child( extra_strike );
+  }
 
   virtual bool ready()
   {
@@ -855,6 +856,7 @@ struct cull_t : public scoundrel_operative_range_attack_t
       p() -> buffs.tactical_advantage -> decrement();
 
       scoundrel_operative_targetdata_t* td = targetdata();
+      assert( ! td -> dot_acid_blade_poison.ticking );
       if ( td -> dot_corrosive_dart.ticking )
         extra_strike -> execute();
       if ( td -> dot_corrosive_grenade.ticking )
