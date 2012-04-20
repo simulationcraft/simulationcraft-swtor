@@ -1048,13 +1048,13 @@ int util_t::string_split( const std::string& str,
     for ( int i=0; i < str_size; i++ )
     {
       std::string& f = format_splits[ i ];
-      const char*  s =    str_splits[ i ].c_str();
+      std::string& s = str_splits[ i ];
 
-      if      ( f == "i" ) *( ( int* )         va_arg( vap, int*    ) ) = atoi( s );
-      else if ( f == "f" ) *( ( double* )      va_arg( vap, double* ) ) = atof( s );
-      else if ( f == "d" ) *( ( double* )      va_arg( vap, double* ) ) = atof( s );
-      else if ( f == "S" ) *( ( std::string* ) va_arg( vap, std::string* ) ) = s;
-      else assert( 0 );
+      if      ( f == "i" ) *( va_arg( vap, int*         ) ) = atoi( s.c_str() );
+      else if ( f == "f" ) *( va_arg( vap, double*      ) ) = atof( s.c_str() );
+      else if ( f == "d" ) *( va_arg( vap, double*      ) ) = atof( s.c_str() );
+      else if ( f == "S" ) *( va_arg( vap, std::string* ) ) = s;
+      else assert( false );
     }
 
     va_end( vap );

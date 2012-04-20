@@ -1721,16 +1721,16 @@ void sim_t::use_optimal_buffs_and_debuffs( int value )
 
 // sim_t::aura_gain =========================================================
 
-void sim_t::aura_gain( const char* aura_name , int /* aura_id */ )
+void sim_t::aura_gain( const std::string& aura_name , int /* aura_id */ )
 {
-  if ( log ) log_t::output( this, "Raid gains %s", aura_name );
+  if ( log ) log_t::output( this, "Raid gains %s", aura_name.c_str() );
 }
 
 // sim_t::aura_loss =========================================================
 
-void sim_t::aura_loss( const char* aura_name , int /* aura_id */ )
+void sim_t::aura_loss( const std::string& aura_name , int /* aura_id */ )
 {
-  if ( log ) log_t::output( this, "Raid loses %s", aura_name );
+  if ( log ) log_t::output( this, "Raid loses %s", aura_name.c_str() );
 }
 
 // sim_t::time_to_think =====================================================

@@ -973,8 +973,8 @@ struct option_t
   static void add( std::vector<option_t>&, const char* name, option_type type, void* address );
   static void copy( std::vector<option_t>& opt_vector, const option_t* opt_array );
   static bool parse( sim_t*, std::vector<option_t>&, const std::string& name, const std::string& value );
-  static bool parse( sim_t*, const char* context, std::vector<option_t>&, const std::string& options_str );
-  static bool parse( sim_t*, const char* context, const option_t*,        const std::string& options_str );
+  static bool parse( sim_t*, const std::string& context, std::vector<option_t>&, const std::string& options_str );
+  static bool parse( sim_t*, const std::string& context, const option_t*,        const std::string& options_str );
   static bool parse_file( sim_t*, FILE* file );
   static bool parse_line( sim_t*, char* line );
   static bool parse_token( sim_t*, std::string& token );
@@ -1881,8 +1881,8 @@ public:
   player_t* find_player( int index );
   cooldown_t* get_cooldown( const std::string& name );
   void      use_optimal_buffs_and_debuffs( int value );
-  void      aura_gain( const char* name, int aura_id=0 );
-  void      aura_loss( const char* name, int aura_id=0 );
+  void      aura_gain( const std::string& name, int aura_id=0 );
+  void      aura_loss( const std::string& name, int aura_id=0 );
   expr_ptr  create_expression( action_t*, const std::string& name );
   int       errorf( const char* format, ... ) PRINTF_ATTRIBUTE( 2,3 );
 };
@@ -2856,8 +2856,8 @@ public:
   struct heal_info_t { double actual, amount; };
   virtual heal_info_t assess_heal( double amount, school_type school, dmg_type, result_type, action_t* a );
 
-  virtual void  summon_pet( const char* name, timespan_t duration=timespan_t::zero() );
-  virtual void dismiss_pet( const char* name );
+  virtual void  summon_pet( const std::string& name, timespan_t duration=timespan_t::zero() );
+  virtual void dismiss_pet( const std::string& name );
 
   virtual bool ooc_buffs() { return true; }
 
@@ -2991,8 +2991,8 @@ public:
   action_t* find_action( const std::string& );
   set_bonus_t* find_set_bonus( const std::string& name );
   bool      dual_wield() const { return main_hand_weapon.type != WEAPON_NONE && off_hand_weapon.type != WEAPON_NONE; }
-  void      aura_gain( const char* name, double value=0 );
-  void      aura_loss( const char* name, double value=0 );
+  void      aura_gain( const std::string& name, double value=0 );
+  void      aura_loss( const std::string& name, double value=0 );
 
   cooldown_t* find_cooldown( const std::string& name ) const;
   dot_t*      find_dot     ( const std::string& name ) const;

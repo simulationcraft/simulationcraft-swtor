@@ -113,7 +113,7 @@ class vanguard_powertech_action_t : public action_t
 public:
   vanguard_powertech_action_t( const std::string& n, vanguard_powertech_t* player,
                           attack_policy_t policy, resource_type r, school_type s ) :
-    action_t( ACTION_ATTACK, n.c_str(), player, policy, r, s )
+    action_t( ACTION_ATTACK, n, player, policy, r, s )
   {}
 
   vanguard_powertech_targetdata_t* targetdata() const

@@ -114,7 +114,7 @@ class commando_mercenary_action_t : public action_t
 public:
   commando_mercenary_action_t( const std::string& n, commando_mercenary_t* player,
                           attack_policy_t policy, resource_type r, school_type s ) :
-    action_t( ACTION_ATTACK, n.c_str(), player, policy, r, s )
+    action_t( ACTION_ATTACK, n, player, policy, r, s )
   {}
 
   commando_mercenary_targetdata_t* targetdata() const

@@ -146,10 +146,10 @@ bool item_t::parse_options()
     { "ilevel",  OPT_STRING, &option_ilevel_str        },
     { "quality", OPT_STRING, &option_quality_str       },
     { "source",  OPT_STRING, &option_data_source_str   },
-    { NULL, OPT_UNKNOWN, NULL }
+    { NULL,      OPT_NONE,   NULL }
   };
 
-  option_t::parse( sim, option_name_str.c_str(), options, remainder );
+  option_t::parse( sim, option_name_str, options, remainder );
 
   util_t::format_name( option_name_str );
 

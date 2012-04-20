@@ -133,7 +133,7 @@ void option_t::save( FILE* file )
 // option_t::add ============================================================
 
 void option_t::add( std::vector<option_t>& options,
-                    const                  char* name,
+                    const char*            name,
                     option_type            type,
                     void*                  address )
 {
@@ -211,7 +211,7 @@ bool option_t::parse( sim_t*                 sim,
 // option_t::parse ==========================================================
 
 bool option_t::parse( sim_t*                 sim,
-                      const char*            context,
+                      const std::string&     context,
                       std::vector<option_t>& options,
                       const std::string&     options_str )
 {
@@ -226,7 +226,7 @@ bool option_t::parse( sim_t*                 sim,
 
     if ( index == std::string::npos )
     {
-      sim -> errorf( "%s: Unexpected parameter '%s'.  Expected format: name=value\n", context, s.c_str() );
+      sim -> errorf( "%s: Unexpected parameter '%s'.  Expected format: name=value\n", context.c_str(), s.c_str() );
       return false;
     }
 
@@ -235,7 +235,7 @@ bool option_t::parse( sim_t*                 sim,
 
     if ( ! option_t::parse( sim, options, n, v ) )
     {
-      sim -> errorf( "%s: Unexpected parameter '%s'.\n", context, n.c_str() );
+      sim -> errorf( "%s: Unexpected parameter '%s'.\n", context.c_str(), n.c_str() );
       return false;
     }
   }
@@ -246,7 +246,7 @@ bool option_t::parse( sim_t*                 sim,
 // option_t::parse ==========================================================
 
 bool option_t::parse( sim_t*             sim,
-                      const char*        context,
+                      const std::string& context,
                       const option_t*    options,
                       const std::string& options_str )
 {

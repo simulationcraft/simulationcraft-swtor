@@ -114,7 +114,7 @@ class juggernaut_guardian_action_t : public action_t
 public:
   juggernaut_guardian_action_t( const std::string& n, juggernaut_guardian_t* player,
                           attack_policy_t policy, resource_type r, school_type s ) :
-    action_t( ACTION_ATTACK, n.c_str(), player, policy, r, s )
+    action_t( ACTION_ATTACK, n, player, policy, r, s )
   {}
 
   juggernaut_guardian_targetdata_t* targetdata() const

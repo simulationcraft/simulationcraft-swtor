@@ -109,7 +109,7 @@ class action_t : public ::action_t
 public:
   action_t( const std::string& n, class_t* player,
             attack_policy_t policy, resource_type r, school_type s ) :
-    base_t( ACTION_ATTACK, n.c_str(), player, policy, r, s )
+    base_t( ACTION_ATTACK, n, player, policy, r, s )
   {}
 
   targetdata_t* targetdata() const

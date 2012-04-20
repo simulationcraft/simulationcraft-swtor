@@ -243,7 +243,7 @@ class action_t : public ::action_t
 public:
   action_t( const std::string& name, class_t* player,
                             attack_policy_t policy, resource_type resource, school_type school ) :
-    base_t( ACTION_ATTACK, name.c_str(), player, policy, resource, school )
+    base_t( ACTION_ATTACK, name, player, policy, resource, school )
   {}
 
   class_t* p() const { return static_cast<class_t*>( player ); }

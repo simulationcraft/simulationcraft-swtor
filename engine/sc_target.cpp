@@ -294,7 +294,7 @@ struct summon_add_t : public action_t
 
     action_t::execute();
 
-    p -> summon_pet( add_name.c_str(), summoning_duration );
+    p -> summon_pet( add_name, summoning_duration );
   }
 
   virtual bool ready()
