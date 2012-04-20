@@ -720,17 +720,14 @@ struct corrosive_grenade_t : public poison_attack_t
     aoe = 5;
   }
 
-  virtual void tick( dot_t* d )
+  virtual void last_tick( dot_t* d )
   {
-    poison_attack_t::tick( d );
+    poison_attack_t::last_tick( d );
 
-    if ( d -> ticks() == 0 )
-    {
-      // TODO
-      // Lingering Toxins talent
-      // replaces with a weaker version that does 15% of original damage over 9 seconds
-      // TEST: 15% of the original 21 seconds worth? 15% of each tick?
-    }
+    // TODO
+    // Lingering Toxins talent
+    // replaces with a weaker version that does 15% of original damage over 9 seconds
+    // TEST: 15% of the original 21 seconds worth? 15% of each tick?
   }
 };
 
