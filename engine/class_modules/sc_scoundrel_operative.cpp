@@ -9,9 +9,9 @@ namespace { // ANONYMOUS ====================================================
 
 namespace scoundrel_operative { // ==========================================
 
-class scoundrel_operative_t;
+class class_t;
 
-struct scoundrel_operative_targetdata_t : public agent_smug::targetdata_t
+struct targetdata_t : public agent_smug::targetdata_t
 {
   dot_t dot_corrosive_dart;
   dot_t dot_adrenaline_probe;
@@ -21,14 +21,14 @@ struct scoundrel_operative_targetdata_t : public agent_smug::targetdata_t
 
   buff_t* debuff_weakening_blast;
 
-  scoundrel_operative_targetdata_t( scoundrel_operative_t& source, player_t& target );
+  targetdata_t( class_t& source, player_t& target );
 };
 
 // ==========================================================================
 // Scoundrel / Operative
 // ==========================================================================
 
-struct scoundrel_operative_t : public agent_smug::class_t
+struct class_t : public agent_smug::class_t
 {
   typedef agent_smug::class_t base_t;
 
@@ -168,7 +168,7 @@ struct scoundrel_operative_t : public agent_smug::class_t
 
   action_t* acid_blade_poison;
 
-  scoundrel_operative_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
+  class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
     base_t( sim, pt == IA_OPERATIVE ? IA_OPERATIVE : S_SCOUNDREL, name, rt ),
     buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents(), acid_blade_poison()
   {
@@ -181,10 +181,10 @@ struct scoundrel_operative_t : public agent_smug::class_t
   }
 
   // Character Definition
-  virtual scoundrel_operative_targetdata_t* new_targetdata( player_t& target ) // override
-  { return new scoundrel_operative_targetdata_t( *this, target ); }
+  virtual targetdata_t* new_targetdata( player_t& target ) // override
+  { return new targetdata_t( *this, target ); }
 
-  virtual action_t* create_action( const std::string& name, const std::string& options );
+  virtual ::action_t* create_action( const std::string& name, const std::string& options );
   virtual void    init_talents();
   virtual void    init_base();
   virtual void    init_benefits();
@@ -203,7 +203,7 @@ struct scoundrel_operative_t : public agent_smug::class_t
   void create_talents();
 };
 
-scoundrel_operative_targetdata_t::scoundrel_operative_targetdata_t( scoundrel_operative_t& source, player_t& target ) :
+targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   agent_smug::targetdata_t( source, target ),
   dot_corrosive_dart( "corrosive_dart", &source ),
   dot_adrenaline_probe( "adrenaline_probe", &source ),
@@ -220,22 +220,20 @@ scoundrel_operative_targetdata_t::scoundrel_operative_targetdata_t( scoundrel_op
   add( *debuff_weakening_blast );
 }
 
-class scoundrel_operative_action_t : public action_t
+class action_t : public ::action_t
 {
+  typedef ::action_t base_t;
 public:
-  scoundrel_operative_action_t( const std::string& n, scoundrel_operative_t* player,
-                                attack_policy_t policy, resource_type r, school_type s ) :
-  action_t( ACTION_ATTACK, n.c_str(), player, policy, r, s )
+  action_t( const std::string& n, class_t* player,
+            attack_policy_t policy, resource_type r, school_type s ) :
+  base_t( ACTION_ATTACK, n, player, policy, r, s )
   {}
 
-  scoundrel_operative_targetdata_t* targetdata() const
-  { return static_cast<scoundrel_operative_targetdata_t*>( action_t::targetdata() ); }
+  targetdata_t* targetdata() const
+  { return static_cast<targetdata_t*>( base_t::targetdata() ); }
 
-  scoundrel_operative_t* p() const
-  { return static_cast<scoundrel_operative_t*>( player ); }
-
-  scoundrel_operative_t* cast() const
-  { return p(); }
+  class_t* p() const { return static_cast<class_t*>( player ); }
+  class_t* cast() const { return p(); }
 };
 
 // ==========================================================================
@@ -266,40 +264,40 @@ public:
 //           - stealth
 
 
-struct scoundrel_operative_tech_attack_t : public scoundrel_operative_action_t
+struct tech_attack_t : public action_t
 {
-  scoundrel_operative_tech_attack_t( const std::string& n, scoundrel_operative_t* p, school_type s=SCHOOL_KINETIC ) :
-    scoundrel_operative_action_t( n, p, tech_policy, RESOURCE_ENERGY, s )
+  tech_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_KINETIC ) :
+    action_t( n, p, tech_policy, RESOURCE_ENERGY, s )
   {
     may_crit = true;
   }
 
   virtual void execute() // override
   {
-    scoundrel_operative_action_t::execute();
+    action_t::execute();
     p() -> buffs.stealth -> expire();
   }
 };
 
-struct scoundrel_operative_range_attack_t : public scoundrel_operative_action_t
+struct range_attack_t : public action_t
 {
-  scoundrel_operative_range_attack_t( const std::string& n, scoundrel_operative_t* p, school_type s=SCHOOL_ENERGY ) :
-    scoundrel_operative_action_t( n, p, range_policy, RESOURCE_ENERGY, s )
+  range_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_ENERGY ) :
+    action_t( n, p, range_policy, RESOURCE_ENERGY, s )
   {
     may_crit = true;
   }
 
   virtual void execute()
   {
-    scoundrel_operative_action_t::execute();
+    action_t::execute();
     p() -> buffs.stealth -> expire();
   }
 };
 
-struct scoundrel_operative_poison_attack_t : public scoundrel_operative_tech_attack_t
+struct poison_attack_t : public tech_attack_t
 {
-  scoundrel_operative_poison_attack_t( const std::string& n, scoundrel_operative_t* p, school_type s=SCHOOL_INTERNAL ) :
-    scoundrel_operative_tech_attack_t( n, p, s )
+  poison_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_INTERNAL ) :
+    tech_attack_t( n, p, s )
   {
     may_crit = false;
     tick_may_crit = true;
@@ -308,9 +306,9 @@ struct scoundrel_operative_poison_attack_t : public scoundrel_operative_tech_att
 
   virtual void target_debuff( player_t* tgt, dmg_type type )
   {
-    scoundrel_operative_tech_attack_t::target_debuff( tgt, type );
+    tech_attack_t::target_debuff( tgt, type );
 
-    scoundrel_operative_t& p = *cast();
+    class_t& p = *cast();
 
     // TEST: Additive or Multiplicative?
 
@@ -324,7 +322,7 @@ struct scoundrel_operative_poison_attack_t : public scoundrel_operative_tech_att
 
     if ( p.talents.weakening_blast -> rank() )
     {
-      scoundrel_operative_targetdata_t& td = *targetdata();
+      targetdata_t& td = *targetdata();
       bool up = td.debuff_weakening_blast -> up();
       p.benefits.wb_poison_ticks -> update( up );
       if ( up )
@@ -337,9 +335,9 @@ struct scoundrel_operative_poison_attack_t : public scoundrel_operative_tech_att
 
   virtual void tick( dot_t* d )
   {
-    scoundrel_operative_tech_attack_t::tick( d );
+    tech_attack_t::tick( d );
 
-    scoundrel_operative_t& p = *cast();
+    class_t& p = *cast();
 
     if ( result == RESULT_CRIT && p.talents.lethal_purpose -> rank() )
       p.resource_gain( RESOURCE_ENERGY, p.talents.lethal_purpose -> rank(), p.gains.lethal_purpose );
@@ -349,17 +347,17 @@ struct scoundrel_operative_poison_attack_t : public scoundrel_operative_tech_att
 
 // Consume Acid Blade Poison Attack | ??? ===================================
 
-struct scoundrel_operative_consume_acid_blade_attack_t : public scoundrel_operative_tech_attack_t
+struct consume_acid_blade_attack_t : public tech_attack_t
 {
-  scoundrel_operative_consume_acid_blade_attack_t( const std::string& n, scoundrel_operative_t* p, school_type s=SCHOOL_KINETIC ) :
-    scoundrel_operative_tech_attack_t( n, p, s )
+  consume_acid_blade_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_KINETIC ) :
+    tech_attack_t( n, p, s )
   {}
 
   virtual void execute()
   {
-    scoundrel_operative_tech_attack_t::execute();
+    tech_attack_t::execute();
 
-    scoundrel_operative_t* p = cast();
+    class_t* p = cast();
     if ( p -> buffs.acid_blade_coating -> up() )
     {
       p -> buffs.acid_blade_coating -> decrement();
@@ -374,12 +372,12 @@ struct scoundrel_operative_consume_acid_blade_attack_t : public scoundrel_operat
 
 // Acid Blade | ??? =========================================================
 
-struct acid_blade_t : public scoundrel_operative_action_t
+struct acid_blade_t : public action_t
 {
-  struct acid_blade_poison_t : public scoundrel_operative_poison_attack_t
+  struct acid_blade_poison_t : public poison_attack_t
   {
-    acid_blade_poison_t( scoundrel_operative_t* p, const std::string& n ) :
-      scoundrel_operative_poison_attack_t( n, p )
+    acid_blade_poison_t( class_t* p, const std::string& n ) :
+      poison_attack_t( n, p )
     {
       td.standardhealthpercentmin = td.standardhealthpercentmax = 0.031;
       td.power_mod = 0.31;
@@ -393,8 +391,8 @@ struct acid_blade_t : public scoundrel_operative_action_t
 
   acid_blade_poison_t* poison;
 
-  acid_blade_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_action_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_INTERNAL ),
+  acid_blade_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    action_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_INTERNAL ),
     poison( new acid_blade_poison_t( p, n + "_poison" ) )
   {
     parse_options( options_str );
@@ -411,21 +409,20 @@ struct acid_blade_t : public scoundrel_operative_action_t
 
   virtual void execute()
   {
-    scoundrel_operative_action_t::execute();
+    action_t::execute();
 
-    scoundrel_operative_t* p = cast();
+    class_t* p = cast();
     p -> buffs.acid_blade_coating -> trigger();
     p -> acid_blade_poison = poison;
   }
 };
 
-
 // Adrenaline Probe | ??? ===================================================
 
-struct adrenaline_probe_t : public scoundrel_operative_action_t
+struct adrenaline_probe_t : public action_t
 {
-  adrenaline_probe_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_action_t(n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE)
+  adrenaline_probe_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    action_t(n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE)
   {
     parse_options( options_str );
 
@@ -444,8 +441,8 @@ struct adrenaline_probe_t : public scoundrel_operative_action_t
   // what happens in game is you instantly get 34, and then two ticks of 8.
   virtual void execute()
   {
-    scoundrel_operative_action_t::execute();
-    scoundrel_operative_t* p = cast();
+    action_t::execute();
+    class_t* p = cast();
 
     p -> buffs.adrenaline_probe -> trigger();
     p -> resource_gain( RESOURCE_ENERGY, 34, p -> gains.adrenaline_probe );
@@ -453,8 +450,8 @@ struct adrenaline_probe_t : public scoundrel_operative_action_t
 
   virtual void tick(dot_t* d)
   {
-    scoundrel_operative_action_t::tick(d);
-    scoundrel_operative_t* p = cast();
+    action_t::tick(d);
+    class_t* p = cast();
 
     p -> resource_gain( RESOURCE_ENERGY, 8, p -> gains.adrenaline_probe );
   }
@@ -462,10 +459,10 @@ struct adrenaline_probe_t : public scoundrel_operative_action_t
 
 // Stealth | ??? ============================================================
 
-struct stealth_t : public scoundrel_operative_action_t
+struct stealth_t : public action_t
 {
-  stealth_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_action_t( n, p, tech_policy, RESOURCE_ENERGY, SCHOOL_NONE )
+  stealth_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    action_t( n, p, tech_policy, RESOURCE_ENERGY, SCHOOL_NONE )
   {
     parse_options( options_str );
 
@@ -482,22 +479,22 @@ struct stealth_t : public scoundrel_operative_action_t
     if ( p() -> buffs.stealth -> check() )
       return false;
 
-    return scoundrel_operative_action_t::ready();
+    return action_t::ready();
   }
 
   virtual void execute()
   {
     p() -> buffs.stealth -> trigger();
-    scoundrel_operative_action_t::execute();
+    action_t::execute();
   }
 };
 
 // Shiv | ??? ===============================================================
 
-struct shiv_t : public scoundrel_operative_tech_attack_t
+struct shiv_t : public tech_attack_t
 {
-  shiv_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_tech_attack_t( n, p )
+  shiv_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    tech_attack_t( n, p )
   {
     rank_level_list = { 2, 5, 8, 11, 14, 19, 29, 38, 50 };
 
@@ -518,7 +515,7 @@ struct shiv_t : public scoundrel_operative_tech_attack_t
 
   virtual void execute()
   {
-    scoundrel_operative_tech_attack_t::execute();
+    tech_attack_t::execute();
 
     // TODO check if granted on misses etc?
     if ( result_is_hit() )
@@ -528,10 +525,10 @@ struct shiv_t : public scoundrel_operative_tech_attack_t
 
 // Backstab | ??? ===========================================================
 
-struct backstab_t : public scoundrel_operative_consume_acid_blade_attack_t
+struct backstab_t : public consume_acid_blade_attack_t
 {
-  backstab_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_consume_acid_blade_attack_t( n, p )
+  backstab_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    consume_acid_blade_attack_t( n, p )
   {
     rank_level_list = { 10, 13, 17, 23, 35, 47, 50 };
 
@@ -557,12 +554,12 @@ struct backstab_t : public scoundrel_operative_consume_acid_blade_attack_t
 
 // Laceration | ??? =========================================================
 
-struct laceration_t : public scoundrel_operative_tech_attack_t
+struct laceration_t : public tech_attack_t
 {
-  struct collateral_strike_t : public scoundrel_operative_tech_attack_t
+  struct collateral_strike_t : public tech_attack_t
   {
-    collateral_strike_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-      scoundrel_operative_tech_attack_t( n, p )
+    collateral_strike_t( class_t* p, const std::string& n, const std::string& options_str ) :
+      tech_attack_t( n, p )
     {
       parse_options( options_str );
 
@@ -578,10 +575,10 @@ struct laceration_t : public scoundrel_operative_tech_attack_t
 
     virtual void execute()
     {
-      scoundrel_operative_tech_attack_t::execute();
+      tech_attack_t::execute();
 
       // if target is poisoned regrant TA
-      scoundrel_operative_targetdata_t* td = targetdata();
+      targetdata_t* td = targetdata();
       if ( td -> dot_acid_blade_poison.ticking || td -> dot_corrosive_dart.ticking )
         p() -> buffs.tactical_advantage -> trigger();
     }
@@ -589,8 +586,8 @@ struct laceration_t : public scoundrel_operative_tech_attack_t
 
   collateral_strike_t* collateral_strike;
 
-  laceration_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_tech_attack_t( n, p ), collateral_strike( 0 )
+  laceration_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    tech_attack_t( n, p ), collateral_strike( 0 )
   {
     parse_options( options_str );
 
@@ -615,15 +612,15 @@ struct laceration_t : public scoundrel_operative_tech_attack_t
     if ( ! p() -> buffs.tactical_advantage -> check() )
       return false;
 
-    return scoundrel_operative_tech_attack_t::ready();
+    return tech_attack_t::ready();
   }
 
   virtual void execute()
   {
 
-    scoundrel_operative_tech_attack_t::execute();
+    tech_attack_t::execute();
 
-    scoundrel_operative_t* p = cast();
+    class_t* p = cast();
 
     // TODO check if a miss etc consumes the TA
     if ( result_is_hit() )
@@ -640,10 +637,10 @@ struct laceration_t : public scoundrel_operative_tech_attack_t
 
 // Hidden Strike | ??? ======================================================
 
-struct hidden_strike_t : public scoundrel_operative_consume_acid_blade_attack_t
+struct hidden_strike_t : public consume_acid_blade_attack_t
 {
-  hidden_strike_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_consume_acid_blade_attack_t( n, p )
+  hidden_strike_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    consume_acid_blade_attack_t( n, p )
   {
     rank_level_list = { 36, 50 };
 
@@ -666,14 +663,14 @@ struct hidden_strike_t : public scoundrel_operative_consume_acid_blade_attack_t
     if ( ! p() -> buffs.stealth -> check() )
       return false;
 
-    return scoundrel_operative_action_t::ready();
+    return action_t::ready();
   }
 
   virtual void execute()
   {
-    scoundrel_operative_t& p = *cast();
+    class_t& p = *cast();
     p.buffs.stealth -> up();
-    scoundrel_operative_consume_acid_blade_attack_t::execute();
+    consume_acid_blade_attack_t::execute();
     p.buffs.tactical_advantage -> trigger();
   }
   // TODO check for talent and trigger knockdown (jarring strike)
@@ -681,10 +678,10 @@ struct hidden_strike_t : public scoundrel_operative_consume_acid_blade_attack_t
 
 // Fragmentation Grenade | ??? ==============================================
 
-struct fragmentation_grenade_t : public scoundrel_operative_tech_attack_t
+struct fragmentation_grenade_t : public tech_attack_t
 {
-  fragmentation_grenade_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_tech_attack_t( n, p )
+  fragmentation_grenade_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    tech_attack_t( n, p )
   {
     parse_options( options_str );
 
@@ -702,10 +699,10 @@ struct fragmentation_grenade_t : public scoundrel_operative_tech_attack_t
 
 // Corrosive Grenade | ??? ==================================================
 
-struct corrosive_grenade_t : public scoundrel_operative_poison_attack_t
+struct corrosive_grenade_t : public poison_attack_t
 {
-  corrosive_grenade_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_poison_attack_t( n, p )
+  corrosive_grenade_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    poison_attack_t( n, p )
   {
     parse_options( options_str );
 
@@ -725,7 +722,7 @@ struct corrosive_grenade_t : public scoundrel_operative_poison_attack_t
 
   virtual void tick( dot_t* d )
   {
-    scoundrel_operative_poison_attack_t::tick( d );
+    poison_attack_t::tick( d );
 
     if ( d -> ticks() == 0 )
     {
@@ -739,12 +736,12 @@ struct corrosive_grenade_t : public scoundrel_operative_poison_attack_t
 
 // Corrosive Dart | ??? =====================================================
 
-struct corrosive_dart_t : public scoundrel_operative_poison_attack_t
+struct corrosive_dart_t : public poison_attack_t
 {
   rng_t* corrosive_microbes;
 
-  corrosive_dart_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_poison_attack_t( n, p ),
+  corrosive_dart_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    poison_attack_t( n, p ),
     corrosive_microbes( p -> talents.corrosive_microbes -> rank()
                         ? p -> get_rng( "corrosive_microbes" ) : 0 )
   {
@@ -764,9 +761,9 @@ struct corrosive_dart_t : public scoundrel_operative_poison_attack_t
 
   virtual void tick( dot_t* d )
   {
-    scoundrel_operative_poison_attack_t::tick( d );
+    poison_attack_t::tick( d );
 
-    scoundrel_operative_t& p = *cast();
+    class_t& p = *cast();
 
     if ( corrosive_microbes &&
          corrosive_microbes -> roll( 0.125 * p.talents.corrosive_microbes -> rank() ) )
@@ -779,12 +776,12 @@ struct corrosive_dart_t : public scoundrel_operative_poison_attack_t
 
 // Cull | ??? ===============================================================
 
-struct cull_t : public scoundrel_operative_range_attack_t
+struct cull_t : public range_attack_t
 {
-  struct cull_extra_t : public scoundrel_operative_tech_attack_t
+  struct cull_extra_t : public tech_attack_t
   {
-    cull_extra_t( scoundrel_operative_t* p, const std::string& n ) :
-      scoundrel_operative_tech_attack_t( n, p, SCHOOL_INTERNAL )
+    cull_extra_t( class_t* p, const std::string& n ) :
+      tech_attack_t( n, p, SCHOOL_INTERNAL )
     {
       dd.standardhealthpercentmin = dd.standardhealthpercentmax = 0.66;
       dd.power_mod = 0.66;
@@ -796,8 +793,8 @@ struct cull_t : public scoundrel_operative_range_attack_t
 
   cull_extra_t* extra_strike;
 
-  cull_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_range_attack_t( n, p ),
+  cull_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    range_attack_t( n, p ),
     extra_strike( new cull_extra_t( p, n + "_extra" ) )
   {
     parse_options( options_str );
@@ -821,18 +818,18 @@ struct cull_t : public scoundrel_operative_range_attack_t
     if ( ! p() -> buffs.tactical_advantage -> check() )
       return false;
 
-    return scoundrel_operative_range_attack_t::ready();
+    return range_attack_t::ready();
   }
 
   virtual void execute()
   {
-    scoundrel_operative_range_attack_t::execute();
+    range_attack_t::execute();
 
     if ( result_is_hit() )
     {
       p() -> buffs.tactical_advantage -> decrement();
 
-      scoundrel_operative_targetdata_t* td = targetdata();
+      targetdata_t* td = targetdata();
       assert( ! td -> dot_acid_blade_poison.ticking );
       if ( td -> dot_corrosive_dart.ticking )
         extra_strike -> execute();
@@ -844,13 +841,13 @@ struct cull_t : public scoundrel_operative_range_attack_t
 
 // Rifle Shot | ??? =========================================================
 
-struct rifle_shot_t : public scoundrel_operative_range_attack_t
+struct rifle_shot_t : public range_attack_t
 {
   rifle_shot_t* second_strike;
 
-  rifle_shot_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str,
+  rifle_shot_t( class_t* p, const std::string& n, const std::string& options_str,
                 bool is_consequent_strike = false ) :
-    scoundrel_operative_range_attack_t( n, p ), second_strike( 0 )
+    range_attack_t( n, p ), second_strike( 0 )
   {
     parse_options( options_str );
 
@@ -876,7 +873,7 @@ struct rifle_shot_t : public scoundrel_operative_range_attack_t
 
   virtual void execute()
   {
-    scoundrel_operative_range_attack_t::execute();
+    range_attack_t::execute();
     if ( second_strike )
         second_strike->schedule_execute();
   }
@@ -884,10 +881,10 @@ struct rifle_shot_t : public scoundrel_operative_range_attack_t
 
 // Overload Shot | ??? ======================================================
 
-struct overload_shot_t : public scoundrel_operative_range_attack_t
+struct overload_shot_t : public range_attack_t
 {
-  overload_shot_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str) :
-    scoundrel_operative_range_attack_t( n, p )
+  overload_shot_t( class_t* p, const std::string& n, const std::string& options_str) :
+    range_attack_t( n, p )
   {
     rank_level_list = { 8, 12, 16, 22, 31, 40, 50 };
 
@@ -911,13 +908,13 @@ struct overload_shot_t : public scoundrel_operative_range_attack_t
 
 // Stim Boost | ??? =========================================================
 
-struct stim_boost_t : public scoundrel_operative_action_t
+struct stim_boost_t : public action_t
 {
-  static double tick_amount( const scoundrel_operative_t& op )
+  static double tick_amount( const class_t& op )
   { return 3 + 0.5 * op.talents.culling -> rank(); }
 
-  stim_boost_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_action_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE )
+  stim_boost_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    action_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE )
   {
     parse_options( options_str );
 
@@ -936,14 +933,14 @@ struct stim_boost_t : public scoundrel_operative_action_t
     if ( ! p() -> buffs.tactical_advantage -> check() )
       return false;
 
-    return scoundrel_operative_action_t::ready();
+    return action_t::ready();
   }
 
   virtual void tick( dot_t* d )
   {
-    scoundrel_operative_action_t::tick(d);
+    action_t::tick(d);
 
-    scoundrel_operative_t& p = *cast();
+    class_t& p = *cast();
 
     p.resource_gain( RESOURCE_ENERGY, tick_amount( p ), p.gains.stim_boost );
     if ( p.talents.revitalizers -> rank() )
@@ -952,9 +949,9 @@ struct stim_boost_t : public scoundrel_operative_action_t
 
   virtual void execute()
   {
-    scoundrel_operative_action_t::execute();
+    action_t::execute();
 
-    scoundrel_operative_t& p = *cast();
+    class_t& p = *cast();
     p.buffs.stim_boost -> trigger();
     p.buffs.tactical_advantage -> decrement();
     if ( p.talents.combat_stims -> rank() )
@@ -964,10 +961,10 @@ struct stim_boost_t : public scoundrel_operative_action_t
 
 // Weakening Blast | ??? ====================================================
 
-struct weakening_blast_t : public scoundrel_operative_range_attack_t
+struct weakening_blast_t : public range_attack_t
 {
-  weakening_blast_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str) :
-    scoundrel_operative_range_attack_t( n, p )
+  weakening_blast_t( class_t* p, const std::string& n, const std::string& options_str) :
+    range_attack_t( n, p )
   {
     parse_options( options_str );
 
@@ -987,7 +984,7 @@ struct weakening_blast_t : public scoundrel_operative_range_attack_t
 
   virtual void execute()
   {
-    scoundrel_operative_range_attack_t::execute();
+    range_attack_t::execute();
 
     if ( result_is_hit() )
       targetdata() -> debuff_weakening_blast -> trigger( 10 );
@@ -1011,10 +1008,10 @@ struct weakening_blast_t : public scoundrel_operative_range_attack_t
 
 // Coordination | ??? =======================================================
 
-struct coordination_t : public scoundrel_operative_action_t
+struct coordination_t : public action_t
 {
-  coordination_t( scoundrel_operative_t* p, const std::string& n, const std::string& options_str ) :
-    scoundrel_operative_action_t( n, p, tech_policy, RESOURCE_NONE, SCHOOL_NONE )
+  coordination_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    action_t( n, p, tech_policy, RESOURCE_NONE, SCHOOL_NONE )
   {
     parse_options( options_str );
     base_cost = 0.0;
@@ -1023,7 +1020,7 @@ struct coordination_t : public scoundrel_operative_action_t
 
   virtual void execute()
   {
-    scoundrel_operative_action_t::execute();
+    action_t::execute();
 
     for ( player_t* p : list_range( sim -> player_list ) )
     {
@@ -1037,7 +1034,7 @@ struct coordination_t : public scoundrel_operative_action_t
     if ( player -> buffs.coordination -> check() )
       return false;
 
-    return scoundrel_operative_action_t::ready();
+    return action_t::ready();
   }
 };
 
@@ -1045,10 +1042,10 @@ struct coordination_t : public scoundrel_operative_action_t
 // scoundrel_operative Character Definition
 // ==========================================================================
 
-// scoundrel_operative_t::create_action =====================================
+// class_t::create_action =====================================
 
-action_t* scoundrel_operative_t::create_action( const std::string& name,
-                      const std::string& options_str )
+::action_t* class_t::create_action( const std::string& name,
+                                                  const std::string& options_str )
 {
   if ( type == IA_OPERATIVE )
   {
@@ -1078,9 +1075,9 @@ action_t* scoundrel_operative_t::create_action( const std::string& name,
   return base_t::create_action( name, options_str );
 }
 
-// scoundrel_operative_t::init_talents ======================================
+// class_t::init_talents ======================================
 
-void scoundrel_operative_t::init_talents()
+void class_t::init_talents()
 {
   base_t::init_talents();
 
@@ -1165,9 +1162,9 @@ void scoundrel_operative_t::init_talents()
   talents.weakening_blast           = find_talent( "Weakening Blast"          );
 }
 
-// scoundrel_operative_t::init_base =========================================
+// class_t::init_base =========================================
 
-void scoundrel_operative_t::init_base()
+void class_t::init_base()
 {
   base_t::init_base();
 
@@ -1177,9 +1174,9 @@ void scoundrel_operative_t::init_base()
   set_base_alacrity( get_base_alacrity() + 0.02 * talents.deadly_directive -> rank() );
 }
 
-// scoundrel_operative_t::init_benefits =====================================
+// class_t::init_benefits =====================================
 
-void scoundrel_operative_t::init_benefits()
+void class_t::init_benefits()
 {
   base_t::init_benefits();
 
@@ -1187,9 +1184,9 @@ void scoundrel_operative_t::init_benefits()
   benefits.wb_poison_ticks = get_benefit( "Poison ticks with Weakening Blast" );
 }
 
-// scoundrel_operative_t::init_buffs ========================================
+// class_t::init_buffs ========================================
 
-void scoundrel_operative_t::init_buffs()
+void class_t::init_buffs()
 {
   base_t::init_buffs();
 
@@ -1206,9 +1203,9 @@ void scoundrel_operative_t::init_buffs()
   buffs.tactical_advantage  = new buff_t( this, "tactical_advantage", 2, from_seconds( 10 ) );
 }
 
-// scoundrel_operative_t::init_gains ========================================
+// class_t::init_gains ========================================
 
-void scoundrel_operative_t::init_gains()
+void class_t::init_gains()
 {
   base_t::init_gains();
 
@@ -1219,27 +1216,27 @@ void scoundrel_operative_t::init_gains()
   gains.lethal_purpose   = get_gain( "lethal_purpose"   );
 }
 
-// scoundrel_operative_t::init_procs ========================================
+// class_t::init_procs ========================================
 
-void scoundrel_operative_t::init_procs()
+void class_t::init_procs()
 {
   base_t::init_procs();
 
   procs.corrosive_microbes = get_proc( "Corrosive Microbe ticks" );
 }
 
-// scoundrel_operative_t::init_rng ==========================================
+// class_t::init_rng ==========================================
 
-void scoundrel_operative_t::init_rng()
+void class_t::init_rng()
 {
   base_t::init_rng();
 
   rngs.collateral_strike = get_rng( "collateral_strike" );
 }
 
-// scoundrel_operative_t::init_actions ======================================
+// class_t::init_actions ======================================
 
-void scoundrel_operative_t::init_actions()
+void class_t::init_actions()
 {
   //=========================================================================
   //
@@ -1320,17 +1317,17 @@ void scoundrel_operative_t::init_actions()
   base_t::init_actions();
 }
 
-// scoundrel_operative_t::reset =============================================
+// class_t::reset =============================================
 
-void scoundrel_operative_t::reset()
+void class_t::reset()
 {
   acid_blade_poison = 0;
   base_t::reset();
 }
 
-// scoundrel_operative_t::primary_role ======================================
+// class_t::primary_role ======================================
 
-role_type scoundrel_operative_t::primary_role() const
+role_type class_t::primary_role() const
 {
   switch ( base_t::primary_role() )
   {
@@ -1353,9 +1350,9 @@ role_type scoundrel_operative_t::primary_role() const
   return ROLE_HYBRID;
 }
 
-// scoundrel_operative_t::armor_penetration =================================
+// class_t::armor_penetration =================================
 
-double scoundrel_operative_t::armor_penetration() const
+double class_t::armor_penetration() const
 {
   double arpen = base_t::armor_penetration();
 
@@ -1365,9 +1362,9 @@ double scoundrel_operative_t::armor_penetration() const
   return arpen;
 }
 
-// scoundrel_operative_t::energy_regen_per_second ===========================
+// class_t::energy_regen_per_second ===========================
 
-double scoundrel_operative_t::energy_regen_per_second() const
+double class_t::energy_regen_per_second() const
 {
   double eps = base_t::energy_regen_per_second();
 
@@ -1377,9 +1374,9 @@ double scoundrel_operative_t::energy_regen_per_second() const
   return eps;
 }
 
-// scoundrel_operative_t::create_talents ====================================
+// class_t::create_talents ====================================
 
-void scoundrel_operative_t::create_talents()
+void class_t::create_talents()
 {
   // Medicine
   static const talentinfo_t medicine_tree[] = {
@@ -1428,14 +1425,14 @@ void scoundrel_operative_t::create_talents()
 
 player_t* player_t::create_scoundrel( sim_t* sim, const std::string& name, race_type r )
 {
-  return new scoundrel_operative::scoundrel_operative_t( sim, S_SCOUNDREL, name, r );
+  return new scoundrel_operative::class_t( sim, S_SCOUNDREL, name, r );
 }
 
 // player_t::create_operative ===============================================
 
 player_t* player_t::create_operative( sim_t* sim, const std::string& name, race_type r )
 {
-  return new scoundrel_operative::scoundrel_operative_t( sim, IA_OPERATIVE, name, r );
+  return new scoundrel_operative::class_t( sim, IA_OPERATIVE, name, r );
 }
 
 // player_t::scoundrel_operative_init =======================================
