@@ -622,8 +622,6 @@ bool item_t::decode_special( special_effect_t& effect,
     stat_type s;
     school_type sc;
 
-    std::cerr << "Token: " << t.name << std::endl;
-
     if ( ( sc = util_t::parse_school_type( t.name ) ) != SCHOOL_NONE )
     {
       effect.school = sc;
