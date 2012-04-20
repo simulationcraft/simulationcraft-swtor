@@ -710,7 +710,7 @@ struct corrosive_grenade_t : public poison_attack_t
     cooldown -> duration = from_seconds( 12.0 );
     range = 30.0;
 
-    td.standardhealthpercentmin = td.standardhealthpercentmax = 0.32;
+    td.standardhealthpercentmin = td.standardhealthpercentmax = 0.032;
     td.power_mod = 0.32;
 
     num_ticks = 7;
