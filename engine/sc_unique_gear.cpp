@@ -896,19 +896,22 @@ bool unique_gear_t::get_equip_encoding( std::string&       encoding,
   const char* e = nullptr;
 
   // SWTOR Equip Relics
-       if ( name == "relentless_winds"                    ) e = "ondamage_224Kinetic_30%_4.5cd";
-  else if ( name == "plasma_burst_device"                 ) e = "ondamage_168Elemental_30%_4.5cd";
-  else if ( name == "energy_surge_device"                 ) e = "ondamage_224Energy_30%_4.5cd";
-  else if ( name == "dark_energy_surge"                   ) e = "ondamage_168Internal_30%_4.5cd";
-  else if ( name == "lightning_pillar"                    ) e = "ondamage_208Energy_30%_4.5cd";
-  else if ( name == "gravity_wave"                        ) e = "Ondamage_208Kinetic_30%_4.5cd";
-  else if ( name == "corrosive_injection_kit"             ) e = "ondamage_156Internal_30%_4.5cd";
-  else if ( name == "burning_force_relic"                 ) e = "ondamage_170Kinetic_30%_4.5cd";
-  else if ( name == "relic_of_kinetic_force"              ) e = "ondamage_224Kinetic_30%_4.5cd";
-  else if ( name == "plasma_injection_nanobots"           ) e = "ondamage_128Elemental_30%_4.5cd";
-  else if ( name == "volatile_energy_module"              ) e = "ondamage_170Energy_30%_4.5c";
-  else if ( name == "relic_of_vital_rupturing"            ) e = "ondamage_128Internal_30%_4.5cd";
-
+       if ( name == "relentless_winds"                          ) e = "ondamage_224Kinetic_30%_4.5cd";
+  else if ( name == "plasma_burst_device"                       ) e = "ondamage_168Elemental_30%_4.5cd";
+  else if ( name == "energy_surge_device"                       ) e = "ondamage_224Energy_30%_4.5cd";
+  else if ( name == "dark_energy_surge"                         ) e = "ondamage_168Internal_30%_4.5cd";
+  else if ( name == "lightning_pillar"                          ) e = "ondamage_208Energy_30%_4.5cd";
+  else if ( name == "gravity_wave"                              ) e = "Ondamage_208Kinetic_30%_4.5cd";
+  else if ( name == "corrosive_injection_kit"                   ) e = "ondamage_156Internal_30%_4.5cd";
+  else if ( name == "burning_force_relic"                       ) e = "ondamage_170Kinetic_30%_4.5cd";
+  else if ( name == "relic_of_kinetic_force"                    ) e = "ondamage_224Kinetic_30%_4.5cd";
+  else if ( name == "plasma_injection_nanobots"                 ) e = "ondamage_128Elemental_30%_4.5cd";
+  else if ( name == "volatile_energy_module"                    ) e = "ondamage_170Energy_30%_4.5c";
+  else if ( name == "relic_of_vital_rupturing"                  ) e = "ondamage_128Internal_30%_4.5cd";
+  else if ( name == "campaign_relic_of_dark_radiance"           ) e = "ondamage_184internal_30%_4.5cd";
+  else if ( name == "campaign_relic_of_elemental_transcendance" ) e = "ondamage_184elemental_30%_4.5cd";
+  else if ( name == "campaign_relic_of_the_cerulean_nova"       ) e = "ondamage_246energy_30%_4.5cd";
+  else if ( name == "campaign_relic_of_the_kinetic_tempest"     ) e = "ondamage_246kinetic_30%_4.5cd";
 
   if ( ! e ) return false;
 
@@ -932,15 +935,19 @@ bool unique_gear_t::get_use_encoding( std::string&       encoding,
   const char* e = nullptr;
 
   // SWTOR Use Relics
-       if ( name == "rakata_relic_of_the_primeval_fatesealer" ) e = "380Alacrity_120cd_20dur";
-  else if ( name == "rakata_relic_of_forbidden_secrets"       ) e = "235Crit_235Surge_120cd_20dur";
-  else if ( name == "rakata_relic_of_boundless_ages"          ) e = "380Power_120cd_20dur";
-  else if ( name == "columi_relic_of_primeval_fatesealer"     ) e = "355Alacrity_120cd_20dur";
-  else if ( name == "columi_relic_of_forbidden_secrets"       ) e = "220Crit_220Surge_120cd_20dur";
-  else if ( name == "columi_relic_of_boundless_ages"          ) e = "355Power_120cd_20dur";
-  else if ( name == "relic_of_primeval_fatesealer"            ) e = "300Alacrity_120cd_20dur";
-  else if ( name == "relic_of_forbidden_secrets"              ) e = "185Crit_185Surge_120cd_20dur";
-  else if ( name == "relic_of_boundless_ages"                 ) e = "300Power_120cd_20dur";
+       if ( name == "rakata_relic_of_boundless_ages"            ) e = "380Power_120cd_20dur";
+  else if ( name == "rakata_relic_of_forbidden_secrets"         ) e = "235Crit_235Surge_120cd_20dur";
+  else if ( name == "rakata_relic_of_the_primeval_fatesealer"   ) e = "380Alacrity_120cd_20dur";
+  else if ( name == "columi_relic_of_boundless_ages"            ) e = "355Power_120cd_20dur";
+  else if ( name == "columi_relic_of_forbidden_secrets"         ) e = "220Crit_220Surge_120cd_20dur";
+  else if ( name == "columi_relic_of_primeval_fatesealer"       ) e = "355Alacrity_120cd_20dur";
+  else if ( name == "relic_of_boundless_ages"                   ) e = "300Power_120cd_20dur";
+  else if ( name == "relic_of_forbidden_secrets"                ) e = "185Crit_185Surge_120cd_20dur";
+  else if ( name == "relic_of_primeval_fatesealer"              ) e = "300Alacrity_120cd_20dur";
+  else if ( name == "campaign_relic_of_boundless_ages"          ) e = "405Power_120cd_20dur";
+  else if ( name == "campaign_relic_of_imperiling_serenity"     ) e = "405Defense_120cd_20dur";
+  else if ( name == "campaign_relic_of_the_primeval_fatesealer" ) e = "405Alacrity_120cd_20dur";
+  else if ( name == "campaign_relic_of_the_shrouded_crusader"   ) e = "255shield_255absorb_120cd_20dur";
 
   if ( ! e ) return false;
 
