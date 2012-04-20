@@ -295,6 +295,17 @@ public:
   { return p(); }
 };
 
+struct attack_t : public action_t
+{
+  attack_t( const std::string& n, class_t* player ) :
+    action_t( n, player, melee_policy, RESOURCE_FORCE, SCHOOL_KINETIC )
+  {
+    may_crit = true;
+  }
+};
+
+typedef cons_inq::saber_strike_t<attack_t> saber_strike_t;
+
 struct spell_t : public action_t
 {
   bool influenced_by_inner_strength;
@@ -1461,10 +1472,10 @@ struct force_armor_t : public absorb_t
 // sage_sorcerer Character Definition
 // ==========================================================================
 
-// class_t::create_action ===========================================
+// class_t::create_action ===================================================
 
 ::action_t* class_t::create_action( const std::string& name,
-                                            const std::string& options_str )
+                                    const std::string& options_str )
 {
   if ( type == JEDI_SAGE )
   {
@@ -1513,6 +1524,8 @@ struct force_armor_t : public absorb_t
     if ( name == "resurgence"         ) return new        rejuvenate_t( this, "resurgence", options_str );
     if ( name == "revivification"     ) return new         salvation_t( this, "revivification", options_str );
   }
+
+  if ( name == "saber_strike"         ) return new      saber_strike_t( this, options_str );
 
   return base_t::create_action( name, options_str );
 }
