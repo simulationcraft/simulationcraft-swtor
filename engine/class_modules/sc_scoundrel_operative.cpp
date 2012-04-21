@@ -281,24 +281,16 @@ struct attack_t : public action_t
     may_crit = true;
   }
 
-  // TODO
-  // need to implement tactical advantage's 2% bonus damage if 1 or more stacks exists
+  virtual void player_buff() // override
+  {
+    action_t::player_buff();
+    if ( p() -> buffs.tactical_advantage -> up() )
+      player_multiplier += 0.02;
+  }
 
   virtual void execute() // override
   {
-    {// i'm a lumberjack and i'm ok XXX TODO FIX REVIEW
-      if ( p() -> buffs.tactical_advantage -> check() )
-      {
-        double base_multiplier_copy = base_multiplier;
-        base_multiplier += 0.02;
-        action_t::execute();
-        base_multiplier = base_multiplier_copy;
-      }
-      else
-      {
-        action_t::execute();
-      }
-    }
+    action_t::execute();
     p() -> buffs.stealth -> expire();
   }
 };
