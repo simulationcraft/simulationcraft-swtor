@@ -234,7 +234,7 @@ public:
             attack_policy_t policy, resource_type r, school_type s ) :
   base_t( ACTION_ATTACK, n, player, policy, r, s )
   {
-    harmful = false; 
+    harmful = false;
   }
 
   targetdata_t* targetdata() const
@@ -281,7 +281,7 @@ struct attack_t : public action_t
     may_crit = true;
   }
 
-  // TODO 
+  // TODO
   // need to implement tactical advantage's 2% bonus damage if 1 or more stacks exists
 
   virtual void execute() // override
@@ -726,8 +726,7 @@ struct corrosive_grenade_t : public poison_attack_t
   corrosive_grenade_t* corrosive_grenade_weak;
 
   corrosive_grenade_t( class_t* p, const std::string& n, const std::string& options_str, bool weak=false ) :
-    poison_attack_t( n, p ),
-    corrosive_grenade_weak( weak ? 0 : new corrosive_grenade_t( p, n + "_weak", options_str, true ) )
+    poison_attack_t( n, p ), corrosive_grenade_weak()
   {
     parse_options( options_str );
 
@@ -759,21 +758,23 @@ struct corrosive_grenade_t : public poison_attack_t
       tick_zero = true;
       // TEST: maybe not limited?
       aoe = 5;
-    }
 
+      if ( p -> talents.lingering_toxins -> rank() )
+        corrosive_grenade_weak = new corrosive_grenade_t( p, n + "_weak", options_str, true );
+    }
   }
 
   virtual void last_tick( dot_t* d )
   {
     poison_attack_t::last_tick( d );
 
-    if ( corrosive_grenade_weak && p() -> talents.lingering_toxins -> rank() )
+    if ( corrosive_grenade_weak )
       corrosive_grenade_weak -> execute();
   }
 
   virtual void execute()
   {
-    if ( corrosive_grenade_weak && p() -> talents.lingering_toxins -> rank() )
+    if ( corrosive_grenade_weak )
       targetdata() -> dot_corrosive_grenade_weak.cancel();
 
     poison_attack_t::execute();
@@ -789,9 +790,8 @@ struct corrosive_dart_t : public poison_attack_t
 
   corrosive_dart_t( class_t* p, const std::string& n, const std::string& options_str, bool weak=false ) :
     poison_attack_t( n, p ),
-    corrosive_microbes( p -> talents.corrosive_microbes -> rank()
-                        ? p -> get_rng( "corrosive_microbes" ) : 0 ),
-    corrosive_dart_weak( weak ? 0 : new corrosive_dart_t( p, n + "_weak", options_str, true ) )
+    corrosive_microbes( p -> get_rng( "corrosive_microbes" ) ),
+    corrosive_dart_weak()
   {
     rank_level_list = { 5, 7, 10, 13, 17, 23, 35, 45, 50 };
 
@@ -818,6 +818,9 @@ struct corrosive_dart_t : public poison_attack_t
       td.standardhealthpercentmin = td.standardhealthpercentmax = 0.04;
       td.power_mod =  0.4;
       num_ticks = 5 + p -> talents.lethal_injectors -> rank();
+
+      if ( p -> talents.lingering_toxins -> rank() )
+        corrosive_dart_weak = new corrosive_dart_t( p, n + "_weak", options_str, true );
     }
   }
 
@@ -839,14 +842,13 @@ struct corrosive_dart_t : public poison_attack_t
   {
     poison_attack_t::last_tick( d );
 
-    if ( p() -> talents.lingering_toxins -> rank() )
-      if ( corrosive_dart_weak )
-        corrosive_dart_weak -> execute();
+    if ( corrosive_dart_weak )
+      corrosive_dart_weak -> execute();
   }
 
   virtual void execute()
   {
-    if ( corrosive_dart_weak && p() -> talents.lingering_toxins -> rank() )
+    if ( corrosive_dart_weak)
       targetdata() -> dot_corrosive_dart_weak.cancel();
 
     poison_attack_t::execute();
