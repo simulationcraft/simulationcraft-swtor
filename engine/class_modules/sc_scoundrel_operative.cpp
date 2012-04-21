@@ -1327,18 +1327,34 @@ void class_t::init_actions()
       if ( talents.weakening_blast -> rank() )
         action_list_str += "/weakening_blast";
 
-      action_list_str += "/backstab";
+      if ( talents.flanking -> rank() )
+        action_list_str += "/backstab,if=energy>=65";
       if ( talents.acid_blade -> rank() )
         action_list_str += ",if=buff.acid_blade_coating.up";
 
-      action_list_str += "/corrosive_dart,if=!ticking&energy>=75"
-                         "/shiv,if=energy>=75&buff.tactical_advantage.stack<2";
+      action_list_str += "/shiv,if=energy>=75&buff.tactical_advantage.stack<2"
+                         "/corrosive_dart,if=!ticking&energy>=75";
+
+      if ( talents.corrosive_grenade -> rank() )
+      action_list_str += "/corrosive_grenade,if=!ticking&energy>=80";
 
       if ( talents.laceration -> rank() )
-        action_list_str += "/laceration,if=energy>=75&buff.tactical_advantage.stack>=2";
+        action_list_str += "/laceration,if=energy>=75";
 
-      action_list_str += "/overload_shot,if=energy=100"
-                         "/rifle_shot";
+      if ( talents.cull -> rank() )
+        action_list_str += "/cull,if=energy>=50&buff.tactical_advantage.stack>=2"
+                           "&(dot.corrosive_dart.ticking|dot.corrosive_dart_weak.ticking)"
+                           "&(dot.corrosive_grenade.ticking|dot.corrosive_grenade_weak.ticking)";
+
+      if ( ! talents.flanking -> rank() )
+        action_list_str += "/backstab,if=energy>=70";
+
+      action_list_str += "/overload_shot,if=energy>";
+      if ( talents.flanking -> rank() )
+        action_list_str += "95";
+      else
+        action_list_str += "100";
+      action_list_str += "/rifle_shot";
 
       if ( false )
       {
