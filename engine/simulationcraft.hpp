@@ -2639,6 +2639,10 @@ public:
     set_bonus_t* rakata_force_masters;
     set_bonus_t* battlemaster_force_masters;
     set_bonus_t* rakata_stalkers;
+    // agents
+    set_bonus_t* rakata_enforcers;
+    set_bonus_t* rakata_field_medics;
+    set_bonus_t* rakata_field_techs;
   };
   set_bonuses_t set_bonus;
 

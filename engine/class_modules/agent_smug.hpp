@@ -55,7 +55,11 @@ public:
 
     distance = default_distance = 3;
 
-    resource_base[ RESOURCE_ENERGY ] += 100; // TODO 4 piece bonus adds 5 energy
+    resource_base[ RESOURCE_ENERGY ] += 100;
+    if ( set_bonus.rakata_enforcers -> four_pc() )
+      resource_base[ RESOURCE_ENERGY ] += 5;
+
+
   }
 
   virtual void init_gains()
