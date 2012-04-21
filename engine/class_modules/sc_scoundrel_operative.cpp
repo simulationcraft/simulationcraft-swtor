@@ -286,7 +286,19 @@ struct attack_t : public action_t
 
   virtual void execute() // override
   {
-    action_t::execute();
+    {// i'm a lumberjack and i'm ok XXX TODO FIX REVIEW
+      if ( p() -> buffs.tactical_advantage -> check() )
+      {
+        double base_multiplier_copy = base_multiplier;
+        base_multiplier += 0.02;
+        action_t::execute();
+        base_multiplier = base_multiplier_copy;
+      }
+      else
+      {
+        action_t::execute();
+      }
+    }
     p() -> buffs.stealth -> expire();
   }
 };
