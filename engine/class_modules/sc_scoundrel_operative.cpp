@@ -707,62 +707,57 @@ struct fragmentation_grenade_t : public tech_attack_t
 
 struct corrosive_grenade_t : public poison_attack_t
 {
+  corrosive_grenade_t* corrosive_grenade_weak;
 
-  struct corrosive_grenade_weak_t : public poison_attack_t
+  corrosive_grenade_t( class_t* p, const std::string& n, const std::string& options_str, bool weak=false ) :
+    poison_attack_t( n, p ),
+    corrosive_grenade_weak( weak ? 0 : new corrosive_grenade_t( p, n + "_weak", options_str, true ) )
   {
-    corrosive_grenade_weak_t( class_t* p, const std::string& n ) :
-      poison_attack_t( n, p )
+    parse_options( options_str );
+
+    range = 30.0;
+    base_tick_time = from_seconds( 3 );
+
+    if ( weak )
     {
-      // FIX range infinite
+      // infinite?
       range = 30.0;
+      base_cost = 0;
 
       td.standardhealthpercentmin
         = td.standardhealthpercentmax
         = 0.0065 * p -> talents.lingering_toxins -> rank();
       td.power_mod = 0.065 * p -> talents.lingering_toxins -> rank();
-
       num_ticks = 3;
-      base_tick_time = from_seconds( 3 );
 
       background = true;
       trigger_gcd = timespan_t::zero();
     }
-  };
+    else
+    {
+      base_cost = 20;
+      cooldown -> duration = from_seconds( 12.0 );
+      td.standardhealthpercentmin = td.standardhealthpercentmax = 0.032;
+      td.power_mod = 0.32;
+      num_ticks = 7;
+      tick_zero = true;
+      // TEST: maybe not limited?
+      aoe = 5;
+    }
 
-  corrosive_grenade_weak_t* corrosive_grenade_weak;
-
-  corrosive_grenade_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    poison_attack_t( n, p ),
-    corrosive_grenade_weak( new corrosive_grenade_weak_t( p, n + "_weak" ) )
-  {
-    parse_options( options_str );
-
-    base_cost = 20;
-    cooldown -> duration = from_seconds( 12.0 );
-    range = 30.0;
-
-    td.standardhealthpercentmin = td.standardhealthpercentmax = 0.032;
-    td.power_mod = 0.32;
-
-    num_ticks = 7;
-    tick_zero = true;
-    base_tick_time = from_seconds( 3 );
-
-    // TEST: maybe not limited?
-    aoe = 5;
   }
 
   virtual void last_tick( dot_t* d )
   {
     poison_attack_t::last_tick( d );
 
-    if ( p() -> talents.lingering_toxins -> rank() )
+    if ( corrosive_grenade_weak && p() -> talents.lingering_toxins -> rank() )
       corrosive_grenade_weak -> execute();
   }
 
   virtual void execute()
   {
-    if ( p() -> talents.lingering_toxins -> rank() )
+    if ( corrosive_grenade_weak && p() -> talents.lingering_toxins -> rank() )
       targetdata() -> dot_corrosive_grenade_weak.cancel();
 
     poison_attack_t::execute();
@@ -773,66 +768,41 @@ struct corrosive_grenade_t : public poison_attack_t
 
 struct corrosive_dart_t : public poison_attack_t
 {
-  struct corrosive_dart_weak_t : public poison_attack_t
-  {
-    rng_t* corrosive_microbes;
-
-    corrosive_dart_weak_t( class_t* p, const std::string& n ) :
-      poison_attack_t( n, p ),
-    corrosive_microbes( p -> talents.corrosive_microbes -> rank()
-                        ? p -> get_rng( "corrosive_microbes" ) : 0 )
-    {
-      // FIX range infinite
-      range = 30.0;
-
-      td.standardhealthpercentmin
-        = td.standardhealthpercentmax
-        = 0.005 * p -> talents.lingering_toxins -> rank();
-      td.power_mod = 0.05 * p -> talents.lingering_toxins -> rank();
-
-      num_ticks = 3 + p -> talents.lethal_injectors -> rank();
-      base_tick_time = from_seconds( 3 );
-
-      background = true;
-      trigger_gcd = timespan_t::zero();
-    }
-
-    virtual void tick( dot_t* d )
-    {
-      poison_attack_t::tick( d );
-
-      class_t& p = *cast();
-
-      if ( corrosive_microbes &&
-           corrosive_microbes -> roll( 0.125 * p.talents.corrosive_microbes -> rank() ) )
-      {
-        p.procs.corrosive_microbes -> occur();
-        extra_tick();
-      }
-    }
-  };
-
   rng_t* corrosive_microbes;
-  corrosive_dart_weak_t* corrosive_dart_weak;
+  corrosive_dart_t* corrosive_dart_weak;
 
-  corrosive_dart_t( class_t* p, const std::string& n, const std::string& options_str ) :
+  corrosive_dart_t( class_t* p, const std::string& n, const std::string& options_str, bool weak=false ) :
     poison_attack_t( n, p ),
     corrosive_microbes( p -> talents.corrosive_microbes -> rank()
                         ? p -> get_rng( "corrosive_microbes" ) : 0 ),
-    corrosive_dart_weak( new corrosive_dart_weak_t( p, n + "_weak" ) )
+    corrosive_dart_weak( weak ? 0 : new corrosive_dart_t( p, n + "_weak", options_str, true ) )
   {
     rank_level_list = { 5, 7, 10, 13, 17, 23, 35, 45, 50 };
 
     parse_options( options_str );
 
-    base_cost = 20;
     range = 30.0;
-
-    td.standardhealthpercentmin = td.standardhealthpercentmax = 0.04;
-    td.power_mod = 0.4;
-
-    num_ticks = 5 + p -> talents.lethal_injectors -> rank();
     base_tick_time = from_seconds( 3.0 );
+
+    if ( weak )
+    {
+      // infinite?
+      range = 30.0;
+      base_cost =  0;
+      td.standardhealthpercentmin = td.standardhealthpercentmax =  0.01;
+      td.power_mod = 0.1;
+      num_ticks = 3 + p -> talents.lethal_injectors -> rank();
+
+      background = true;
+      trigger_gcd = timespan_t::zero();
+    }
+    else
+    {
+      base_cost =  20;
+      td.standardhealthpercentmin = td.standardhealthpercentmax = 0.04;
+      td.power_mod =  0.4;
+      num_ticks = 5 + p -> talents.lethal_injectors -> rank();
+    }
   }
 
   virtual void tick( dot_t* d )
@@ -854,12 +824,13 @@ struct corrosive_dart_t : public poison_attack_t
     poison_attack_t::last_tick( d );
 
     if ( p() -> talents.lingering_toxins -> rank() )
-      corrosive_dart_weak -> execute();
+      if ( corrosive_dart_weak )
+        corrosive_dart_weak -> execute();
   }
 
   virtual void execute()
   {
-    if ( p() -> talents.lingering_toxins -> rank() )
+    if ( corrosive_dart_weak && p() -> talents.lingering_toxins -> rank() )
       targetdata() -> dot_corrosive_dart_weak.cancel();
 
     poison_attack_t::execute();
