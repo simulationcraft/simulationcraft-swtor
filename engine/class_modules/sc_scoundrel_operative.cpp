@@ -970,10 +970,6 @@ struct weakening_blast_t : public range_attack_t
     range = 10.0;
     cooldown -> duration = from_seconds( 15 );
 
-    // Is WB really off-GCD? That's bizarre.
-    use_off_gcd = true;
-    trigger_gcd = timespan_t::zero();
-
     dd.standardhealthpercentmin = dd.standardhealthpercentmax = 0.087;
     dd.power_mod = 0.87;
 
