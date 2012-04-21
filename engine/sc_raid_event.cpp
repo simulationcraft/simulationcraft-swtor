@@ -313,7 +313,7 @@ struct damage_event_t : public raid_event_t
 {
   struct raid_damage_t : public action_t
   {
-    raid_damage_t( const char* n, player_t* player, const school_type s ) :
+    raid_damage_t( const std::string& n, player_t* player, const school_type s ) :
       action_t( ACTION_ATTACK, n, player, force_policy, RESOURCE_NONE, s )
     {
       may_crit = false;
@@ -343,7 +343,7 @@ struct damage_event_t : public raid_event_t
 
     name_str = "raid_damage_" + type_str;
 
-    raid_damage = new raid_damage_t( name_str.c_str(), sim -> target, util_t::parse_school_type( type_str ) );
+    raid_damage = new raid_damage_t( name_str, sim -> target, util_t::parse_school_type( type_str ) );
     raid_damage -> init();
   }
 
@@ -567,27 +567,21 @@ void raid_event_t::schedule()
   {
     raid_event_t* raid_event;
 
-    duration_event_t( sim_t* s, raid_event_t* re, timespan_t time ) : event_t( s ), raid_event( re )
-    {
-      name = re -> name_str.c_str();
-      sim -> add_event( this, time );
-    }
+    duration_event_t( raid_event_t* re, timespan_t time ) :
+      event_t( re -> sim, re -> name_str.c_str() ), raid_event( re )
+    { sim -> add_event( this, time ); }
 
     virtual void execute()
-    {
-      raid_event -> finish();
-    }
+    { raid_event -> finish(); }
   };
 
   struct cooldown_event_t : public event_t
   {
     raid_event_t* raid_event;
 
-    cooldown_event_t( sim_t* s, raid_event_t* re, timespan_t time ) : event_t( s ), raid_event( re )
-    {
-      name = re -> name_str.c_str();
-      sim -> add_event( this, time );
-    }
+    cooldown_event_t( raid_event_t* re, timespan_t time ) :
+      event_t( re -> sim, re -> name_str.c_str() ), raid_event( re )
+    { sim -> add_event( this, time ); }
 
     virtual void execute()
     {
@@ -600,19 +594,19 @@ void raid_event_t::schedule()
 
       if ( raid_event -> saved_duration > timespan_t::zero() )
       {
-        new ( sim ) duration_event_t( sim, raid_event, raid_event -> saved_duration );
+        new ( sim ) duration_event_t( raid_event, raid_event -> saved_duration );
       }
       else raid_event -> finish();
 
       if ( raid_event -> last <= timespan_t::zero() ||
            raid_event -> last > ( sim -> current_time + ct ) )
       {
-        new ( sim ) cooldown_event_t( sim, raid_event, ct );
+        new ( sim ) cooldown_event_t( raid_event, ct );
       }
     }
   };
 
-  new ( sim ) cooldown_event_t( sim, this, cooldown_time() );
+  new ( sim ) cooldown_event_t( this, cooldown_time() );
 }
 
 // raid_event_t::reset ======================================================

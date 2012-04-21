@@ -18,14 +18,13 @@ struct token_t
 
 // parse_tokens =============================================================
 
-static int parse_tokens( std::vector<token_t>& tokens,
-                         const std::string&    encoded_str )
+static std::vector<token_t>
+parse_tokens( const std::string& encoded_str )
 {
-  std::vector<std::string> splits;
-  int num_splits = util_t::string_split( splits, encoded_str, "_" );
+  std::vector<std::string> splits = split( encoded_str, '_' );
+  std::vector<token_t> tokens( splits.size() );
 
-  tokens.resize( num_splits );
-  for ( int i=0; i < num_splits; i++ )
+  for ( size_t i=0; i < splits.size(); i++ )
   {
     token_t& t = tokens[ i ];
     t.full = splits[ i ];
@@ -46,7 +45,7 @@ static int parse_tokens( std::vector<token_t>& tokens,
     }
   }
 
-  return num_splits;
+  return tokens;
 }
 
 } // ANONYMOUS NAMESPACE ====================================================
@@ -146,10 +145,10 @@ bool item_t::parse_options()
     { "ilevel",  OPT_STRING, &option_ilevel_str        },
     { "quality", OPT_STRING, &option_quality_str       },
     { "source",  OPT_STRING, &option_data_source_str   },
-    { NULL, OPT_UNKNOWN, NULL }
+    { NULL,      OPT_NONE,   NULL }
   };
 
-  option_t::parse( sim, option_name_str.c_str(), options, remainder );
+  option_t::parse( sim, option_name_str, options, remainder );
 
   util_t::format_name( option_name_str );
 
@@ -331,10 +330,9 @@ bool item_t::decode_stats()
 {
   if ( encoded_stats_str == "none" ) return true;
 
-  std::vector<token_t> tokens;
-  int num_tokens = parse_tokens( tokens, encoded_stats_str );
+  std::vector<token_t> tokens = parse_tokens( encoded_stats_str );
 
-  for ( int i=0; i < num_tokens; i++ )
+  for ( size_t i = 0; i < tokens.size(); i++ )
   {
     token_t& t = tokens[ i ];
 
@@ -543,10 +541,9 @@ bool item_t::decode_enchant()
     return decode_special( enchant, equip_str );
   }
 
-  std::vector<token_t> tokens;
-  int num_tokens = parse_tokens( tokens, encoded_enchant_str );
+  std::vector<token_t> tokens = parse_tokens( encoded_enchant_str );
 
-  for ( int i=0; i < num_tokens; i++ )
+  for ( size_t i = 0; i < tokens.size(); i++ )
   {
     token_t& t = tokens[ i ];
 
@@ -591,10 +588,9 @@ bool item_t::decode_addon()
     return decode_special( addon, equip_str );
   }
 
-  std::vector<token_t> tokens;
-  int num_tokens = parse_tokens( tokens, encoded_addon_str );
+  std::vector<token_t> tokens = parse_tokens( encoded_addon_str );
 
-  for ( int i=0; i < num_tokens; i++ )
+  for ( size_t i = 0; i < tokens.size(); i++ )
   {
     token_t& t = tokens[ i ];
     stat_type s = util_t::parse_stat_type( t.name );
@@ -616,23 +612,17 @@ bool item_t::decode_addon()
 bool item_t::decode_special( special_effect_t& effect,
                              const std::string& encoding )
 {
-  if ( encoding == "custom" || encoding == "none" ) return true;
+  if ( encoding.empty() || encoding == "custom" || encoding == "none" ) return true;
 
-  std::vector<token_t> tokens;
-  int num_tokens = parse_tokens( tokens, encoding );
+  std::vector<token_t> tokens = parse_tokens( encoding );
 
-  for ( int i=0; i < num_tokens; i++ )
+  for ( size_t i = 0; i < tokens.size(); i++ )
   {
     token_t& t = tokens[ i ];
     stat_type s;
     school_type sc;
 
-    if ( ( s = util_t::parse_stat_type( t.name ) ) != STAT_NONE )
-    {
-      effect.stat = s;
-      effect.stat_amount = t.value;
-    }
-    else if ( ( sc = util_t::parse_school_type( t.name ) ) != SCHOOL_NONE )
+    if ( ( sc = util_t::parse_school_type( t.name ) ) != SCHOOL_NONE )
     {
       effect.school = sc;
       effect.discharge_amount = t.value;
@@ -643,6 +633,11 @@ bool item_t::decode_special( special_effect_t& effect,
         effect.discharge_amount  = atof( splits[ 0 ].c_str() );
         effect.discharge_scaling = atof( splits[ 1 ].c_str() ) / 100.0;
       }
+    }
+    else if ( ( s = util_t::parse_stat_type( t.name ) ) != STAT_NONE )
+    {
+      effect.stat = s;
+      effect.stat_amount = t.value;
     }
     else if ( t.name == "stacks" || t.name == "stack" )
     {
@@ -888,12 +883,11 @@ bool item_t::decode_weapon()
   weapon_t* w = weapon();
   if ( ! w ) return true;
 
-  std::vector<token_t> tokens;
-  int num_tokens = parse_tokens( tokens, encoded_weapon_str );
+  std::vector<token_t> tokens = parse_tokens( encoded_weapon_str );
 
   bool min_set=false, max_set=false;
 
-  for ( int i=0; i < num_tokens; i++ )
+  for ( size_t i = 0; i < tokens.size(); i++ )
   {
     token_t& t = tokens[ i ];
     weapon_type type;

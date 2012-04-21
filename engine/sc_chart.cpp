@@ -410,7 +410,7 @@ int chart_t::raid_gear( std::vector<std::string>& images,
       util_t::urlencode( util_t::str_to_utf8( formatted_name ) );
 
       s += "|";
-      s += formatted_name.c_str();
+      s += formatted_name;
     }
     s += "&amp;";
     if ( sim -> print_styles )

@@ -281,8 +281,8 @@ class action_t : public ::action_t
   typedef ::action_t base_t;
 public:
   action_t( const std::string& n, class_t* player,
-                attack_policy_t policy, resource_type r, school_type s ) :
-    base_t( ACTION_ATTACK, n.c_str(), player, policy, r, s )
+            attack_policy_t policy, resource_type r, school_type s ) :
+    base_t( ACTION_ATTACK, n, player, policy, r, s )
   {}
 
   targetdata_t* targetdata() const
@@ -1114,7 +1114,7 @@ public:
   bool influenced_by_inner_strength;
 
   heal_t( const std::string& n, class_t* p, const school_type s=SCHOOL_KINETIC ) :
-    base_t( n.c_str(), p, force_heal_policy, RESOURCE_FORCE, s ),
+    base_t( n, p, force_heal_policy, RESOURCE_FORCE, s ),
     influenced_by_inner_strength( true )
   {
     may_crit   = true;
@@ -1343,7 +1343,7 @@ struct salvation_t : public heal_t
 
       base_multiplier *= 1.0 + p -> talents.psychic_suffusion -> rank() * 0.05;
 
-      stats = player -> get_stats( n.c_str(), this );
+      stats = player -> get_stats( n, this );
     }
   };
 
@@ -1409,7 +1409,7 @@ class absorb_t : public ::absorb_t
   typedef ::absorb_t base_t;
 public:
   absorb_t( const std::string& n, class_t* p, school_type s=SCHOOL_KINETIC ) :
-    base_t( n.c_str(), p, force_heal_policy, RESOURCE_FORCE, s )
+    base_t( n, p, force_heal_policy, RESOURCE_FORCE, s )
   {}
 
   targetdata_t* targetdata() const

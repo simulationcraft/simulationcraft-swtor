@@ -134,7 +134,7 @@ struct discharge_proc_callback_t : public action_callback_t
 
     struct discharge_spell_t : public action_t
     {
-      discharge_spell_t( const char* n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
+      discharge_spell_t( const std::string& n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
         action_t( ACTION_ATTACK, n, p, force_policy, RESOURCE_NONE, s )
       {
         may_crit = ! no_crit;
@@ -152,7 +152,7 @@ struct discharge_proc_callback_t : public action_callback_t
 
     struct discharge_attack_t : public action_t
     {
-      discharge_attack_t( const char* n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
+      discharge_attack_t( const std::string& n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
         action_t( ACTION_ATTACK, n, p, melee_policy, RESOURCE_NONE, s )
       {
         may_crit = ! no_crit;
@@ -172,18 +172,18 @@ struct discharge_proc_callback_t : public action_callback_t
     if ( amount > 0 )
     {
       cooldown = p -> get_cooldown( "damage_discharge_" + util_t::to_string( cd ) + "cd" );
-      discharge_action = new discharge_spell_t( name_str.c_str(), p, amount, scaling, school, no_crit, no_buffs, no_debuffs );
+      discharge_action = new discharge_spell_t( name_str, p, amount, scaling, school, no_crit, no_buffs, no_debuffs );
     }
     else
     {
       cooldown = p -> get_cooldown( name_str );
-      discharge_action = new discharge_attack_t( name_str.c_str(), p, -amount, scaling, school, no_crit, no_buffs, no_debuffs );
+      discharge_action = new discharge_attack_t( name_str, p, -amount, scaling, school, no_crit, no_buffs, no_debuffs );
     }
 
     cooldown -> duration = cd;
 
-    proc = p -> get_proc( name_str.c_str() );
-    rng  = p -> get_rng ( name_str.c_str(), rt );
+    proc = p -> get_proc( name_str );
+    rng  = p -> get_rng ( name_str, rt );
   }
 
   virtual void reset() { stacks=0; }
@@ -219,7 +219,7 @@ struct discharge_proc_callback_t : public action_callback_t
 
     if ( ++stacks < max_stacks )
     {
-      listener -> aura_gain( name_str.c_str(), stacks );
+      listener -> aura_gain( name_str, stacks );
     }
     else
     {
@@ -253,7 +253,7 @@ struct chance_discharge_proc_callback_t : public action_callback_t
 
     struct discharge_spell_t : public action_t
     {
-      discharge_spell_t( const char* n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
+      discharge_spell_t( const std::string& n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
         action_t( ACTION_ATTACK, n, p, force_policy, RESOURCE_NONE, s )
       {
         may_crit = ! no_crit;
@@ -272,7 +272,7 @@ struct chance_discharge_proc_callback_t : public action_callback_t
 
     struct discharge_attack_t : public action_t
     {
-      discharge_attack_t( const char* n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
+      discharge_attack_t( const std::string& n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
         action_t( ACTION_ATTACK, n, p, melee_policy, RESOURCE_NONE, s )
       {
         may_crit = ! no_crit;
@@ -292,18 +292,18 @@ struct chance_discharge_proc_callback_t : public action_callback_t
     if ( amount > 0 )
     {
       cooldown = p -> get_cooldown( "damage_discharge_" + util_t::to_string( cd ) + "cd" );
-      discharge_action = new discharge_spell_t( name_str.c_str(), p, amount, scaling, school, no_crit, no_buffs, no_debuffs );
+      discharge_action = new discharge_spell_t( name_str, p, amount, scaling, school, no_crit, no_buffs, no_debuffs );
     }
     else
     {
       cooldown = p -> get_cooldown( name_str );
-      discharge_action = new discharge_attack_t( name_str.c_str(), p, -amount, scaling, school, no_crit, no_buffs, no_debuffs );
+      discharge_action = new discharge_attack_t( name_str, p, -amount, scaling, school, no_crit, no_buffs, no_debuffs );
     }
 
     cooldown -> duration = cd;
 
-    proc = p -> get_proc( name_str.c_str() );
-    rng  = p -> get_rng ( name_str.c_str(), rt );
+    proc = p -> get_proc( name_str );
+    rng  = p -> get_rng ( name_str, rt );
   }
 
   virtual void reset() { stacks=0; }
@@ -322,7 +322,7 @@ struct chance_discharge_proc_callback_t : public action_callback_t
 
     if ( ++stacks < max_stacks )
     {
-      listener -> aura_gain( name_str.c_str(), stacks );
+      listener -> aura_gain( name_str, stacks );
       if ( proc_chance )
       {
         if ( proc_chance < 0 )
@@ -373,7 +373,7 @@ struct stat_discharge_proc_callback_t : public action_callback_t
 
     struct discharge_spell_t : public action_t
     {
-      discharge_spell_t( const char* n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
+      discharge_spell_t( const std::string& n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
         action_t( ACTION_ATTACK, n, p, force_policy, RESOURCE_NONE, s )
       {
         may_crit = ! no_crit;
@@ -394,7 +394,7 @@ struct stat_discharge_proc_callback_t : public action_callback_t
     {
       bool no_buffs;
 
-      discharge_attack_t( const char* n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
+      discharge_attack_t( const std::string& n, player_t* p, double amount, double scaling, const school_type s, bool no_crit, bool nb, bool nd ) :
         action_t( ACTION_ATTACK, n, p, melee_policy, RESOURCE_NONE, s )
       {
         may_crit = ! no_crit;
@@ -413,11 +413,11 @@ struct stat_discharge_proc_callback_t : public action_callback_t
 
     if ( discharge_amount > 0 )
     {
-      discharge_action = new discharge_spell_t( name_str.c_str(), p, discharge_amount, discharge_scaling, school, no_crit, no_buffs, no_debuffs );
+      discharge_action = new discharge_spell_t( name_str, p, discharge_amount, discharge_scaling, school, no_crit, no_buffs, no_debuffs );
     }
     else
     {
-      discharge_action = new discharge_attack_t( name_str.c_str(), p, -discharge_amount, discharge_scaling, school, no_crit, no_buffs, no_debuffs );
+      discharge_action = new discharge_attack_t( name_str, p, -discharge_amount, discharge_scaling, school, no_crit, no_buffs, no_debuffs );
     }
   }
 
@@ -812,10 +812,11 @@ action_callback_t* unique_gear_t::register_stat_discharge_proc( int             
 action_callback_t* unique_gear_t::register_stat_proc( item_t& i,
                                                       item_t::special_effect_t& e )
 {
-  const char* name = e.name_str.empty() ? i.name() : e.name_str.c_str();
+  std::string name = e.name_str;
+  if ( name.empty() ) name = i.name();
 
-  return register_stat_proc( e.trigger_type, e.trigger_mask, name, i.player,
-                             e.stat, e.max_stacks, e.stat_amount,
+  return register_stat_proc( e.trigger_type, e.trigger_mask, name,
+                             i.player, e.stat, e.max_stacks, e.stat_amount,
                              e.proc_chance, e.duration, e.cooldown, e.tick,
                              e.reverse, RNG_DEFAULT );
 }
@@ -827,10 +828,11 @@ action_callback_t* unique_gear_t::register_stat_proc( item_t& i,
 action_callback_t* unique_gear_t::register_cost_reduction_proc( item_t& i,
                                                                 item_t::special_effect_t& e )
 {
-  const char* name = e.name_str.empty() ? i.name() : e.name_str.c_str();
+  std::string name = e.name_str;
+  if ( name.empty() ) name = i.name();
 
-  return register_cost_reduction_proc( e.trigger_type, e.trigger_mask, name, i.player,
-                                       e.school, e.max_stacks, e.discharge_amount,
+  return register_cost_reduction_proc( e.trigger_type, e.trigger_mask, name,
+                                       i.player, e.school, e.max_stacks, e.discharge_amount,
                                        e.proc_chance, e.duration, e.cooldown, ! e.no_refresh, e.reverse, RNG_DEFAULT );
 }
 
@@ -841,7 +843,8 @@ action_callback_t* unique_gear_t::register_cost_reduction_proc( item_t& i,
 action_callback_t* unique_gear_t::register_discharge_proc( item_t& i,
                                                            item_t::special_effect_t& e )
 {
-  const char* name = e.name_str.empty() ? i.name() : e.name_str.c_str();
+  std::string name = e.name_str;
+  if ( name.empty() ) name = i.name();
 
   return register_discharge_proc( e.trigger_type, e.trigger_mask, name, i.player,
                                   e.max_stacks, e.school, e.discharge_amount, e.discharge_scaling,
@@ -855,7 +858,8 @@ action_callback_t* unique_gear_t::register_discharge_proc( item_t& i,
 action_callback_t* unique_gear_t::register_chance_discharge_proc( item_t& i,
                                                                   item_t::special_effect_t& e )
 {
-  const char* name = e.name_str.empty() ? i.name() : e.name_str.c_str();
+  std::string name = e.name_str;
+  if ( name.empty() ) name = i.name();
 
   return register_chance_discharge_proc( e.trigger_type, e.trigger_mask, name, i.player,
                                          e.max_stacks, e.school, e.discharge_amount, e.discharge_scaling,
@@ -869,7 +873,8 @@ action_callback_t* unique_gear_t::register_chance_discharge_proc( item_t& i,
 action_callback_t* unique_gear_t::register_stat_discharge_proc( item_t& i,
                                                                 item_t::special_effect_t& e )
 {
-  const char* name = e.name_str.empty() ? i.name() : e.name_str.c_str();
+  std::string name = e.name_str;
+  if ( name.empty() ) name = i.name();
 
   return register_stat_discharge_proc( e.trigger_type, e.trigger_mask, name, i.player,
                                        e.stat, e.max_stacks, e.stat_amount,
@@ -888,28 +893,30 @@ bool unique_gear_t::get_equip_encoding( std::string&       encoding,
                                         const bool         /* ptr */,
                                         const std::string& /* id */ )
 {
-  std::string e;
+  const char* e = nullptr;
 
   // SWTOR Equip Relics
-       if ( name == "relentless_winds"                    ) e = "ondamage_224Kinetic_30%_4.5cd";
-  else if ( name == "plasma_burst_device"                 ) e = "ondamage_168Elemental_30%_4.5cd";
-  else if ( name == "energy_surge_device"                 ) e = "ondamage_224Energy_30%_4.5cd";
-  else if ( name == "dark_energy_surge"                   ) e = "ondamage_168Internal_30%_4.5cd";
-  else if ( name == "lightning_pillar"                    ) e = "ondamage_208Energy_30%_4.5cd";
-  else if ( name == "gravity_wave"                        ) e = "Ondamage_208Kinetic_30%_4.5cd";
-  else if ( name == "corrosive_injection_kit"             ) e = "ondamage_156Internal_30%_4.5cd";
-  else if ( name == "burning_force_relic"                 ) e = "ondamage_170Kinetic_30%_4.5cd";
-  else if ( name == "relic_of_kinetic_force"              ) e = "ondamage_224Kinetic_30%_4.5cd";
-  else if ( name == "plasma_injection_nanobots"           ) e = "ondamage_128Elemental_30%_4.5cd";
-  else if ( name == "volatile_energy_module"              ) e = "ondamage_170Energy_30%_4.5c";
-  else if ( name == "relic_of_vital_rupturing"            ) e = "ondamage_128Internal_30%_4.5cd";
+       if ( name == "relentless_winds"                          ) e = "ondamage_224Kinetic_30%_4.5cd";
+  else if ( name == "plasma_burst_device"                       ) e = "ondamage_168Elemental_30%_4.5cd";
+  else if ( name == "energy_surge_device"                       ) e = "ondamage_224Energy_30%_4.5cd";
+  else if ( name == "dark_energy_surge"                         ) e = "ondamage_168Internal_30%_4.5cd";
+  else if ( name == "lightning_pillar"                          ) e = "ondamage_208Energy_30%_4.5cd";
+  else if ( name == "gravity_wave"                              ) e = "Ondamage_208Kinetic_30%_4.5cd";
+  else if ( name == "corrosive_injection_kit"                   ) e = "ondamage_156Internal_30%_4.5cd";
+  else if ( name == "burning_force_relic"                       ) e = "ondamage_170Kinetic_30%_4.5cd";
+  else if ( name == "relic_of_kinetic_force"                    ) e = "ondamage_224Kinetic_30%_4.5cd";
+  else if ( name == "plasma_injection_nanobots"                 ) e = "ondamage_128Elemental_30%_4.5cd";
+  else if ( name == "volatile_energy_module"                    ) e = "ondamage_170Energy_30%_4.5c";
+  else if ( name == "relic_of_vital_rupturing"                  ) e = "ondamage_128Internal_30%_4.5cd";
+  else if ( name == "campaign_relic_of_dark_radiance"           ) e = "ondamage_184internal_30%_4.5cd";
+  else if ( name == "campaign_relic_of_elemental_transcendance" ) e = "ondamage_184elemental_30%_4.5cd";
+  else if ( name == "campaign_relic_of_the_cerulean_nova"       ) e = "ondamage_246energy_30%_4.5cd";
+  else if ( name == "campaign_relic_of_the_kinetic_tempest"     ) e = "ondamage_246kinetic_30%_4.5cd";
 
-
-  if ( e.empty() ) return false;
-
-  util_t::tolower( e );
+  if ( ! e ) return false;
 
   encoding = e;
+  util_t::tolower( encoding );
 
   return true;
 }
@@ -925,24 +932,27 @@ bool unique_gear_t::get_use_encoding( std::string&       encoding,
                                       const bool         /* ptr */,
                                       const std::string& /* id */ )
 {
-  std::string e;
+  const char* e = nullptr;
 
   // SWTOR Use Relics
-       if ( name == "rakata_relic_of_the_primeval_fatesealer" ) e = "380Alacrity_120cd_20dur";
-  else if ( name == "rakata_relic_of_forbidden_secrets"       ) e = "235Crit_235Surge_120cd_20dur";
-  else if ( name == "rakata_relic_of_boundless_ages"          ) e = "380Power_120cd_20dur";
-  else if ( name == "columi_relic_of_primeval_fatesealer"     ) e = "355Alacrity_120cd_20dur";
-  else if ( name == "columi_relic_of_forbidden_secrets"       ) e = "220Crit_220Surge_120cd_20dur";
-  else if ( name == "columi_relic_of_boundless_ages"          ) e = "355Power_120cd_20dur";
-  else if ( name == "relic_of_primeval_fatesealer"            ) e = "300Alacrity_120cd_20dur";
-  else if ( name == "relic_of_forbidden_secrets"              ) e = "185Crit_185Surge_120cd_20dur";
-  else if ( name == "relic_of_boundless_ages"                 ) e = "300Power_120cd_20dur";
+       if ( name == "rakata_relic_of_boundless_ages"            ) e = "380Power_120cd_20dur";
+  else if ( name == "rakata_relic_of_forbidden_secrets"         ) e = "235Crit_235Surge_120cd_20dur";
+  else if ( name == "rakata_relic_of_the_primeval_fatesealer"   ) e = "380Alacrity_120cd_20dur";
+  else if ( name == "columi_relic_of_boundless_ages"            ) e = "355Power_120cd_20dur";
+  else if ( name == "columi_relic_of_forbidden_secrets"         ) e = "220Crit_220Surge_120cd_20dur";
+  else if ( name == "columi_relic_of_primeval_fatesealer"       ) e = "355Alacrity_120cd_20dur";
+  else if ( name == "relic_of_boundless_ages"                   ) e = "300Power_120cd_20dur";
+  else if ( name == "relic_of_forbidden_secrets"                ) e = "185Crit_185Surge_120cd_20dur";
+  else if ( name == "relic_of_primeval_fatesealer"              ) e = "300Alacrity_120cd_20dur";
+  else if ( name == "campaign_relic_of_boundless_ages"          ) e = "405Power_120cd_20dur";
+  else if ( name == "campaign_relic_of_imperiling_serenity"     ) e = "405Defense_120cd_20dur";
+  else if ( name == "campaign_relic_of_the_primeval_fatesealer" ) e = "405Alacrity_120cd_20dur";
+  else if ( name == "campaign_relic_of_the_shrouded_crusader"   ) e = "255shield_255absorb_120cd_20dur";
 
-  if ( e.empty() ) return false;
-
-  util_t::tolower( e );
+  if ( ! e ) return false;
 
   encoding = e;
+  util_t::tolower( encoding );
 
   return true;
 }

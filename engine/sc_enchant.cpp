@@ -595,7 +595,7 @@ struct weapon_discharge_proc_callback_t : public action_callback_t
 
     struct discharge_spell_t : public action_t
     {
-      discharge_spell_t( const char* n, player_t* p, double dmg, const school_type s ) :
+      discharge_spell_t( const std::string& n, player_t* p, double dmg, const school_type s ) :
         action_t( ACTION_ATTACK, n, p, force_policy, RESOURCE_NONE, s )
       {
         trigger_gcd = timespan_t::zero();
@@ -610,10 +610,10 @@ struct weapon_discharge_proc_callback_t : public action_callback_t
     cooldown = p -> get_cooldown( name_str );
     cooldown -> duration = cd;
 
-    spell = new discharge_spell_t( name_str.c_str(), p, dmg, school );
+    spell = new discharge_spell_t( name_str, p, dmg, school );
 
-    proc = p -> get_proc( name_str.c_str() );
-    rng  = p -> get_rng ( name_str.c_str(), rt );
+    proc = p -> get_proc( name_str );
+    rng  = p -> get_rng ( name_str, rt );
   }
 
   virtual void reset() { stacks=0; }
@@ -638,7 +638,7 @@ struct weapon_discharge_proc_callback_t : public action_callback_t
 
     if ( ++stacks < max_stacks )
     {
-      listener -> aura_gain( name_str.c_str() );
+      listener -> aura_gain( name_str );
     }
     else
     {

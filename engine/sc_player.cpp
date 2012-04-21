@@ -2994,8 +2994,8 @@ player_t::heal_info_t player_t::assess_heal( double      amount,
 
 // player_t::summon_pet =====================================================
 
-void player_t::summon_pet( const char* pet_name,
-                           timespan_t  duration )
+void player_t::summon_pet( const std::string& pet_name,
+                           timespan_t         duration )
 {
   for ( pet_t* p = pet_list; p; p = p -> next_pet )
   {
@@ -3005,12 +3005,12 @@ void player_t::summon_pet( const char* pet_name,
       return;
     }
   }
-  sim -> errorf( "Player %s is unable to summon pet '%s'\n", name(), pet_name );
+  sim -> errorf( "Player %s is unable to summon pet '%s'\n", name(), pet_name.c_str() );
 }
 
 // player_t::dismiss_pet ====================================================
 
-void player_t::dismiss_pet( const char* pet_name )
+void player_t::dismiss_pet( const std::string& pet_name )
 {
   for ( pet_t* p = pet_list; p; p = p -> next_pet )
   {
@@ -3020,7 +3020,7 @@ void player_t::dismiss_pet( const char* pet_name )
       return;
     }
   }
-  assert( 0 );
+  sim -> errorf( "Player %s can't find pet '%s' to dismiss\n", name(), pet_name.c_str() );
 }
 
 // player_t::register_callbacks =============================================
@@ -3189,21 +3189,21 @@ action_t* player_t::find_action( const std::string& str )
 
 // player_t::aura_gain ======================================================
 
-void player_t::aura_gain( const char* aura_name , double value )
+void player_t::aura_gain( const std::string& aura_name , double value )
 {
   if ( sim -> log && ! sleeping )
   {
-    log_t::output( sim, "%s gains %s ( value=%.2f )", name(), aura_name, value );
+    log_t::output( sim, "%s gains %s ( value=%.2f )", name(), aura_name.c_str(), value );
   }
 }
 
 // player_t::aura_loss ======================================================
 
-void player_t::aura_loss( const char* aura_name , double /* value */ )
+void player_t::aura_loss( const std::string& aura_name , double /* value */ )
 {
   if ( sim -> log && ! sleeping )
   {
-    log_t::output( sim, "%s loses %s", name(), aura_name );
+    log_t::output( sim, "%s loses %s", name(), aura_name.c_str() );
   }
 }
 
@@ -3564,7 +3564,7 @@ private:
   {
     harmful = false;
 
-    pet = player -> find_pet( pet_name.c_str() );
+    pet = player -> find_pet( pet_name );
     if ( ! pet )
     {
       sim -> errorf( "Player %s unable to find pet %s for summons.\n", player -> name(), pet_name.c_str() );
@@ -4025,7 +4025,7 @@ struct base_use_item_t : public action_t
       struct discharge_spell_t : public action_t
       {
         discharge_spell_t( const std::string& n, player_t* p, double a, const school_type s ) :
-          action_t( ACTION_ATTACK, n.c_str(), p, force_policy, RESOURCE_NONE, s )
+          action_t( ACTION_ATTACK, n, p, force_policy, RESOURCE_NONE, s )
         {
           trigger_gcd = timespan_t::zero();
           dd.base_min = dd.base_max = a;

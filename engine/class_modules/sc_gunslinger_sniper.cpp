@@ -95,7 +95,6 @@ public:
   virtual void      init_procs();
   virtual void      init_rng();
   virtual void      init_actions();
-  virtual resource_type primary_resource() const;
   virtual role_type primary_role() const;
           void      create_talents();
 };
@@ -110,7 +109,7 @@ class action_t : public ::action_t
 public:
   action_t( const std::string& n, class_t* player,
             attack_policy_t policy, resource_type r, school_type s ) :
-    base_t( ACTION_ATTACK, n.c_str(), player, policy, r, s )
+    base_t( ACTION_ATTACK, n, player, policy, r, s )
   {}
 
   targetdata_t* targetdata() const
@@ -284,11 +283,6 @@ void class_t::init_actions()
 
   base_t::init_actions();
 }
-
-// class_t::primary_resource ====================================
-
-resource_type class_t::primary_resource() const
-{ return RESOURCE_FORCE; }
 
 // class_t::primary_role ========================================
 

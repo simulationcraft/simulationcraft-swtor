@@ -114,7 +114,7 @@ class sentinel_marauder_action_t : public action_t
 public:
   sentinel_marauder_action_t( const std::string& n, sentinel_marauder_t* player,
                           attack_policy_t policy, resource_type r, school_type s ) :
-    action_t( ACTION_ATTACK, n.c_str(), player, policy, r, s )
+    action_t( ACTION_ATTACK, n, player, policy, r, s )
   {}
 
   sentinel_marauder_targetdata_t* targetdata() const
