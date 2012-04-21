@@ -783,8 +783,8 @@ struct corrosive_dart_t : public poison_attack_t
 
       td.standardhealthpercentmin
         = td.standardhealthpercentmax
-        = 0.005 * p -> talents.lingering_toxins -> rank();
-      td.power_mod = 0.05 * p -> talents.lingering_toxins -> rank();
+        = 0.01 * p -> talents.lingering_toxins -> rank();
+      td.power_mod = 0.1 * p -> talents.lingering_toxins -> rank();
 
       num_ticks = 3;
       base_tick_time = from_seconds( 3 );
@@ -794,8 +794,8 @@ struct corrosive_dart_t : public poison_attack_t
     }
   };
 
-  corrosive_dart_weak_t* corrosive_dart_weak;
   rng_t* corrosive_microbes;
+  corrosive_dart_weak_t* corrosive_dart_weak;
 
   corrosive_dart_t( class_t* p, const std::string& n, const std::string& options_str ) :
     poison_attack_t( n, p ),
