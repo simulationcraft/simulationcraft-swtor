@@ -714,6 +714,7 @@ struct corrosive_grenade_t : public poison_attack_t
     td.power_mod = 0.32;
 
     num_ticks = 7;
+    tick_zero = true;
     base_tick_time = from_seconds( 3 );
 
     // TEST: maybe not limited?
