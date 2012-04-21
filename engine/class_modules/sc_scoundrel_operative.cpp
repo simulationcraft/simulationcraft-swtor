@@ -781,7 +781,7 @@ struct cull_t : public range_attack_t
     cull_extra_t( class_t* p, const std::string& n ) :
       tech_attack_t( n, p, SCHOOL_INTERNAL )
     {
-      dd.standardhealthpercentmin = dd.standardhealthpercentmax = 0.66;
+      dd.standardhealthpercentmin = dd.standardhealthpercentmax = 0.066;
       dd.power_mod = 0.66;
       dual = background = true;
       trigger_gcd = timespan_t::zero();
