@@ -775,8 +775,12 @@ struct corrosive_dart_t : public poison_attack_t
 {
   struct corrosive_dart_weak_t : public poison_attack_t
   {
+    rng_t* corrosive_microbes;
+
     corrosive_dart_weak_t( class_t* p, const std::string& n ) :
-      poison_attack_t( n, p )
+      poison_attack_t( n, p ),
+    corrosive_microbes( p -> talents.corrosive_microbes -> rank()
+                        ? p -> get_rng( "corrosive_microbes" ) : 0 )
     {
       // FIX range infinite
       range = 30.0;
@@ -791,6 +795,20 @@ struct corrosive_dart_t : public poison_attack_t
 
       background = true;
       trigger_gcd = timespan_t::zero();
+    }
+
+    virtual void tick( dot_t* d )
+    {
+      poison_attack_t::tick( d );
+
+      class_t& p = *cast();
+
+      if ( corrosive_microbes &&
+           corrosive_microbes -> roll( 0.125 * p.talents.corrosive_microbes -> rank() ) )
+      {
+        p.procs.corrosive_microbes -> occur();
+        extra_tick();
+      }
     }
   };
 
