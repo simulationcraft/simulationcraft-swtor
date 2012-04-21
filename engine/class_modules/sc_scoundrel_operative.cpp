@@ -233,7 +233,9 @@ public:
   action_t( const std::string& n, class_t* player,
             attack_policy_t policy, resource_type r, school_type s ) :
   base_t( ACTION_ATTACK, n, player, policy, r, s )
-  {}
+  {
+    harmful = false; 
+  }
 
   targetdata_t* targetdata() const
   { return static_cast<targetdata_t*>( base_t::targetdata() ); }
@@ -253,30 +255,34 @@ public:
 
 // action hierarchy
 // ----------------
-// _action_t - tech_attack  - consume_acid_blade_attack - hidden strike
-//                                                      - backstab
+// _action_t - attack - tech_attack  - consume_acid_blade_attack - hidden strike
+//                                                               - backstab
 //
-//                          - poison_attack             - corrosive dart
-//                                                      - corrosive grenade
-//                                                      - acid blade poison
+//                                   - poison_attack             - corrosive dart
+//                                                               - corrosive grenade
+//                                                               - acid blade poison
 //
-//                          - most abilities except...
+//                                   - most abilities except...
 //
-//           - range_attack - rifle_shot
-//                          - overload_shot
+//                    - range_attack - rifle_shot
+//                                   - overload_shot
 //
 //           - acid_blade
 //           - adrenaline_probe
 //           - stealth
 
 
-struct tech_attack_t : public action_t
+struct attack_t : public action_t
 {
-  tech_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_KINETIC ) :
-    action_t( n, p, tech_policy, RESOURCE_ENERGY, s )
+  attack_t( const std::string& n, class_t* p, attack_policy_t policy, school_type s ) :
+    action_t( n, p, policy, RESOURCE_ENERGY, s )
   {
+    harmful = true;
     may_crit = true;
   }
+
+  // TODO 
+  // need to implement tactical advantage's 2% bonus damage if 1 or more stacks exists
 
   virtual void execute() // override
   {
@@ -285,19 +291,21 @@ struct tech_attack_t : public action_t
   }
 };
 
-struct range_attack_t : public action_t
+struct tech_attack_t : public attack_t
+{
+  tech_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_KINETIC ) :
+    attack_t( n, p, tech_policy, s )
+  {
+  }
+};
+
+struct range_attack_t : public attack_t
 {
   range_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_ENERGY ) :
-    action_t( n, p, range_policy, RESOURCE_ENERGY, s )
+    attack_t( n, p, range_policy, s )
   {
-    may_crit = true;
   }
 
-  virtual void execute()
-  {
-    action_t::execute();
-    p() -> buffs.stealth -> expire();
-  }
 };
 
 struct poison_attack_t : public tech_attack_t
@@ -408,8 +416,6 @@ struct acid_blade_t : public action_t
     use_off_gcd = true;
     trigger_gcd = timespan_t::zero();
 
-    harmful = false;
-
     add_child( poison );
   }
 
@@ -438,8 +444,6 @@ struct adrenaline_probe_t : public action_t
 
     num_ticks = 2;
     base_tick_time = from_seconds( 1.5 );
-
-    harmful = false;
   }
 
   // the combat log isn't in sync with the game here.
@@ -474,7 +478,6 @@ struct stealth_t : public action_t
 
     // does trigger gcd, but since we only use it out of combat lets make it instant
     trigger_gcd = timespan_t::zero();
-    harmful = false;
   }
 
   virtual bool ready()
@@ -866,8 +869,6 @@ struct cull_t : public range_attack_t
     base_cost = 25 - 3 * p -> talents.license_to_kill -> rank();
     range = 10.0;
 
-    // TODO
-    // TEST blind implementation without logs as reference
     weapon = &( player->main_hand_weapon );
     weapon_multiplier = -0.1;
     dd.standardhealthpercentmin = dd.standardhealthpercentmax = 0.135;
@@ -989,8 +990,6 @@ struct stim_boost_t : public action_t
 
     num_ticks = 15;
     base_tick_time = from_seconds( 3 );
-
-    harmful = false;
   }
 
   virtual bool ready()
@@ -1076,7 +1075,6 @@ struct coordination_t : public action_t
   {
     parse_options( options_str );
     base_cost = 0.0;
-    harmful = false;
   }
 
   virtual void execute()
