@@ -761,14 +761,7 @@ struct corrosive_grenade_t : public poison_attack_t
   {
 
     if ( p() -> talents.lingering_toxins -> rank() )
-    {
-      targetdata_t& td = *targetdata();
-      if ( td.dot_corrosive_grenade_weak.ticking )
-      {
-        // XXX FIXME i don't understand c++ : can't call -> up() or -> cancel()?
-        // td.dot_corrosive_grenade_weak -> cancel();
-      }
-    }
+      targetdata() -> dot_corrosive_grenade_weak.cancel();
 
     poison_attack_t::execute();
   }
