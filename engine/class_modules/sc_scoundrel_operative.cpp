@@ -18,6 +18,7 @@ struct targetdata_t : public agent_smug::targetdata_t
   dot_t dot_acid_blade_poison;
   dot_t dot_stim_boost;
   dot_t dot_corrosive_grenade;
+  dot_t dot_corrosive_grenade_weak;
 
   buff_t* debuff_weakening_blast;
 
@@ -210,6 +211,7 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   dot_acid_blade_poison( "acid_blade_poison", &source ),
   dot_stim_boost( "stim_boost", &source ),
   dot_corrosive_grenade( "corrosive_grenade", &source ),
+  dot_corrosive_grenade_weak( "corrosive_grenade_weak", &source ),
   debuff_weakening_blast( new buff_t( this, "weakening_blast", 10, from_seconds( 15 ) ) )
 {
   add( dot_corrosive_dart );
@@ -217,6 +219,7 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   add( dot_acid_blade_poison );
   add( dot_stim_boost );
   add( dot_corrosive_grenade );
+  add( dot_corrosive_grenade_weak );
   add( *debuff_weakening_blast );
 }
 
@@ -701,8 +704,33 @@ struct fragmentation_grenade_t : public tech_attack_t
 
 struct corrosive_grenade_t : public poison_attack_t
 {
+
+  struct corrosive_grenade_weak_t : public poison_attack_t
+  {
+    corrosive_grenade_weak_t( class_t* p, const std::string& n ) :
+      poison_attack_t( n, p )
+    {
+      // FIX range infinite
+      range = 30.0;
+
+      td.standardhealthpercentmin
+        = td.standardhealthpercentmax
+        = 0.0065 * p -> talents.lingering_toxins -> rank();
+      td.power_mod = 0.065 * p -> talents.lingering_toxins -> rank();
+
+      num_ticks = 3;
+      base_tick_time = from_seconds( 3 );
+
+      background = true;
+      trigger_gcd = timespan_t::zero();
+    }
+  };
+
+  corrosive_grenade_weak_t* corrosive_grenade_weak;
+
   corrosive_grenade_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    poison_attack_t( n, p )
+    poison_attack_t( n, p ),
+    corrosive_grenade_weak( new corrosive_grenade_weak_t( p, n + "_weak" ) )
   {
     parse_options( options_str );
 
@@ -725,10 +753,24 @@ struct corrosive_grenade_t : public poison_attack_t
   {
     poison_attack_t::last_tick( d );
 
-    // TODO
-    // Lingering Toxins talent
-    // replaces with a weaker version that does 15% of original damage over 9 seconds
-    // TEST: 15% of the original 21 seconds worth? 15% of each tick?
+    if ( p() -> talents.lingering_toxins -> rank() )
+      corrosive_grenade_weak -> execute();
+  }
+
+  virtual void execute()
+  {
+
+    if ( p() -> talents.lingering_toxins -> rank() )
+    {
+      targetdata_t& td = *targetdata();
+      if ( td.dot_corrosive_grenade_weak.ticking )
+      {
+        // XXX FIXME i don't understand c++ : can't call -> up() or -> cancel()?
+        // td.dot_corrosive_grenade_weak -> cancel();
+      }
+    }
+
+    poison_attack_t::execute();
   }
 };
 
