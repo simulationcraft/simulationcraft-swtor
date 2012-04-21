@@ -804,6 +804,7 @@ struct cull_t : public range_attack_t
     // TEST blind implementation without logs as reference
     weapon = &( player->main_hand_weapon );
     weapon_multiplier = -0.1;
+    dd.standardhealthpercentmin = dd.standardhealthpercentmax = 0.135;
     dd.power_mod = 1.35;
 
     base_multiplier += .03 * p -> talents.cut_down->rank();
