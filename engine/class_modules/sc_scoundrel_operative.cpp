@@ -911,9 +911,9 @@ struct cull_t : public range_attack_t
 
       targetdata_t* td = targetdata();
       assert( ! td -> dot_acid_blade_poison.ticking );
-      if ( td -> dot_corrosive_dart.ticking | td -> dot_corrosive_dart_weak.ticking )
+      if ( td -> dot_corrosive_dart.ticking || td -> dot_corrosive_dart_weak.ticking )
         extra_strike -> execute();
-      if ( td -> dot_corrosive_grenade.ticking | td -> dot_corrosive_grenade_weak.ticking )
+      if ( td -> dot_corrosive_grenade.ticking || td -> dot_corrosive_grenade_weak.ticking )
         extra_strike -> execute();
     }
   }
