@@ -783,10 +783,10 @@ struct corrosive_dart_t : public poison_attack_t
 
       td.standardhealthpercentmin
         = td.standardhealthpercentmax
-        = 0.01 * p -> talents.lingering_toxins -> rank();
-      td.power_mod = 0.1 * p -> talents.lingering_toxins -> rank();
+        = 0.005 * p -> talents.lingering_toxins -> rank();
+      td.power_mod = 0.05 * p -> talents.lingering_toxins -> rank();
 
-      num_ticks = 3;
+      num_ticks = 3 + p -> talents.lethal_injectors -> rank();
       base_tick_time = from_seconds( 3 );
 
       background = true;
