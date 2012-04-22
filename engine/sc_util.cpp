@@ -549,9 +549,18 @@ talent_tree_type util_t::talent_tree( talent_tab_type tree, player_type ptype )
     case IA_OPERATIVE:
       switch ( tree )
       {
-      case IA_OPERATIVE_MEDICINE: return TREE_MEDICINE;
+      case IA_OPERATIVE_MEDICINE:     return TREE_MEDICINE;
       case IA_OPERATIVE_CONCEALMENT:  return TREE_CONCEALMENT;
       case IA_OPERATIVE_LETHALITY:    return TREE_LETHALITY;
+      default: break;
+      }
+    break;
+    case BH_MERCENARY:
+      switch ( tree )
+      {
+      case BH_MERCENARY_BODYGUARD:    return TREE_BODYGUARD;
+      case BH_MERCENARY_ARSENAL:      return TREE_ARSENAL;
+      case BH_MERCENARY_PYROTECH:     return TREE_PYROTECH;
       default: break;
       }
     break;
@@ -588,6 +597,10 @@ const char* util_t::talent_tree_string( talent_tree_type tree, bool armory_forma
     case TREE_MEDICINE:       return "medicine";
     case TREE_CONCEALMENT:    return "concealment";
     case TREE_LETHALITY:      return "lethality";
+    // BH_MERCENARY
+    case TREE_BODYGUARD:      return "bodyguard";
+    case TREE_ARSENAL:        return "arsenal";
+    case TREE_PYROTECH:       return "Pyrotech";
     default:                  return "unknown";
     }
   }
@@ -613,6 +626,10 @@ const char* util_t::talent_tree_string( talent_tree_type tree, bool armory_forma
     case TREE_MEDICINE:       return "Medicine";
     case TREE_CONCEALMENT:    return "Concealment";
     case TREE_LETHALITY:      return "Lethality";
+    // BH_MERCENARY
+    case TREE_BODYGUARD:      return "Bodyguard";
+    case TREE_ARSENAL:        return "Arsenal";
+    case TREE_PYROTECH:       return "Pyrotech";
     default:                  return "Unknown";
     }
   }
