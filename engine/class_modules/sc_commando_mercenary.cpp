@@ -218,8 +218,7 @@ public:
 struct attack_t : public action_t
 {
     attack_t( const std::string& n, class_t* p, attack_policy_t policy, school_type s ) :
-      // XXX FIX TODO RESOURCE_HEAT
-      action_t( n, p, policy, RESOURCE_ENERGY, s )
+      action_t( n, p, policy, RESOURCE_HEAT, s )
      
     {
       harmful  = true;

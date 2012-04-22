@@ -480,6 +480,7 @@ const char* util_t::resource_type_string( resource_type type )
   case RESOURCE_MANA:   return "mana";
   case RESOURCE_RAGE:   return "rage";
   case RESOURCE_ENERGY: return "energy";
+  case RESOURCE_HEAT:   return "heat";
   case RESOURCE_AMMO:   return "ammo";
   case RESOURCE_FORCE:  return "force";
   default:              return "unknown";

@@ -30,12 +30,14 @@ void gear_stats_t::add_stat( stat_type stat,
   case STAT_RAGE:   resource[ RESOURCE_RAGE   ] += value; break;
   case STAT_ENERGY: resource[ RESOURCE_ENERGY ] += value; break;
   case STAT_AMMO:   resource[ RESOURCE_AMMO   ] += value; break;
+  case STAT_HEAT:   resource[ RESOURCE_HEAT   ] += value; break;
 
   case STAT_MAX_HEALTH:
   case STAT_MAX_MANA:
   case STAT_MAX_RAGE:
   case STAT_MAX_ENERGY:
   case STAT_MAX_AMMO:
+  case STAT_MAX_HEAT:
     break;
 
   case STAT_EXPERTISE_RATING:  expertise_rating  += value; break;
@@ -90,6 +92,7 @@ void gear_stats_t::set_stat( stat_type stat,
   case STAT_RAGE:   resource[ RESOURCE_RAGE   ] = value; break;
   case STAT_ENERGY: resource[ RESOURCE_ENERGY ] = value; break;
   case STAT_AMMO:   resource[ RESOURCE_AMMO   ] = value; break;
+  case STAT_HEAT:   resource[ RESOURCE_HEAT   ] = value; break;
 
   case STAT_MAX_HEALTH:
   case STAT_MAX_MANA:
@@ -156,6 +159,7 @@ double gear_stats_t::get_stat( stat_type stat ) const
   case STAT_RAGE:   return resource[ RESOURCE_RAGE   ];
   case STAT_ENERGY: return resource[ RESOURCE_ENERGY ];
   case STAT_AMMO:   return resource[ RESOURCE_AMMO   ];
+  case STAT_HEAT:   return resource[ RESOURCE_HEAT   ];
 
     return 0;
 

@@ -23,8 +23,7 @@ public:
   }
 
   virtual resource_type primary_resource() const
-  // XXX FIX { return RESOURCE_HEAT; }
-  { return RESOURCE_ENERGY; }
+  { return RESOURCE_HEAT; }
 
   virtual double range_bonus_stats() const
 { return aim() + player_t::range_bonus_stats(); }

@@ -337,7 +337,7 @@ enum resource_type
 {
   RESOURCE_NONE=0,
   RESOURCE_HEALTH, RESOURCE_MANA,  RESOURCE_RAGE, RESOURCE_ENERGY, RESOURCE_AMMO,
-  RESOURCE_FORCE,
+  RESOURCE_FORCE,  RESOURCE_HEAT,
   RESOURCE_MAX
 };
 
@@ -484,8 +484,8 @@ enum stat_type
 {
   STAT_NONE=0,
   STAT_STRENGTH, STAT_AIM, STAT_CUNNING, STAT_WILLPOWER, STAT_ENDURANCE, STAT_PRESENCE,
-  STAT_HEALTH, STAT_MANA, STAT_RAGE, STAT_ENERGY, STAT_AMMO,
-  STAT_MAX_HEALTH, STAT_MAX_MANA, STAT_MAX_RAGE, STAT_MAX_ENERGY, STAT_MAX_AMMO,
+  STAT_HEALTH, STAT_MANA, STAT_RAGE, STAT_ENERGY, STAT_AMMO, STAT_HEAT,
+  STAT_MAX_HEALTH, STAT_MAX_MANA, STAT_MAX_RAGE, STAT_MAX_ENERGY, STAT_MAX_AMMO, STAT_MAX_HEAT,
   STAT_EXPERTISE_RATING,
   STAT_ACCURACY_RATING, STAT_ACCURACY_RATING2, STAT_CRIT_RATING, STAT_ALACRITY_RATING,
   STAT_WEAPON_DMG,
@@ -2619,6 +2619,7 @@ public:
 
   struct gains_t
   {
+    // XXX why is this here
     gain_t* ammo_regen;
   };
   gains_t gains;
@@ -2707,6 +2708,7 @@ public:
   // They should return a good approximation of the current rate of regen including all buffs.
   virtual double energy_regen_per_second() const;
   virtual double ammo_regen_per_second() const;
+  virtual double heat_regen_per_second() const;
   virtual double force_regen_per_second() const;
 
   virtual double composite_power() const;

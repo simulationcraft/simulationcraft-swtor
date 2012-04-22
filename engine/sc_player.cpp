@@ -1246,6 +1246,7 @@ void player_t::init_buffs()
 
 void player_t::init_gains()
 {
+  // XXX why is this here
   gains.ammo_regen   = get_gain( "ammo_regen" );
 }
 
@@ -1425,6 +1426,10 @@ double player_t::energy_regen_per_second() const
 // player_t::ammo_regen_per_second() ========================================
 
 double player_t::ammo_regen_per_second() const
+{ return 0; }
+
+// player_t::ammo_regen_per_second() ========================================
+double player_t::heat_regen_per_second() const
 { return 0; }
 
 // player_t::force_regen_per_second() =======================================
@@ -2623,12 +2628,14 @@ void player_t::stat_gain( stat_type stat,
   case STAT_RAGE:   resource_gain( RESOURCE_RAGE,   amount, gain, action ); break;
   case STAT_ENERGY: resource_gain( RESOURCE_ENERGY, amount, gain, action ); break;
   case STAT_AMMO:   resource_gain( RESOURCE_AMMO,   amount, gain, action ); break;
+  case STAT_HEAT:   resource_gain( RESOURCE_HEAT,   amount, gain, action ); break;
 
   case STAT_MAX_HEALTH: resource_max[ RESOURCE_HEALTH ] += amount; resource_gain( RESOURCE_HEALTH, amount, gain, action ); break;
   case STAT_MAX_MANA:   resource_max[ RESOURCE_MANA   ] += amount; resource_gain( RESOURCE_MANA,   amount, gain, action ); break;
   case STAT_MAX_RAGE:   resource_max[ RESOURCE_RAGE   ] += amount; resource_gain( RESOURCE_RAGE,   amount, gain, action ); break;
   case STAT_MAX_ENERGY: resource_max[ RESOURCE_ENERGY ] += amount; resource_gain( RESOURCE_ENERGY, amount, gain, action ); break;
   case STAT_MAX_AMMO:   resource_max[ RESOURCE_AMMO   ] += amount; resource_gain( RESOURCE_AMMO,   amount, gain, action ); break;
+  case STAT_MAX_HEAT:   resource_max[ RESOURCE_HEAT   ] += amount; resource_gain( RESOURCE_HEAT,   amount, gain, action ); break;
 
   case STAT_POWER:             stats.power             += amount; power                     += amount; break;
   case STAT_FORCE_POWER:       stats.force_power       += amount; force_power               += amount; break;
@@ -2723,17 +2730,20 @@ void player_t::stat_loss( stat_type stat,
   case STAT_RAGE:   resource_loss( RESOURCE_RAGE,   amount, 0, action ); break;
   case STAT_ENERGY: resource_loss( RESOURCE_ENERGY, amount, 0, action ); break;
   case STAT_AMMO:   resource_loss( RESOURCE_AMMO,   amount, 0, action ); break;
+  case STAT_HEAT:   resource_loss( RESOURCE_HEAT,   amount, 0, action ); break;
 
   case STAT_MAX_HEALTH:
   case STAT_MAX_MANA:
   case STAT_MAX_RAGE:
   case STAT_MAX_ENERGY:
   case STAT_MAX_AMMO:
+  case STAT_MAX_HEAT:
   {
     resource_type r = ( stat == STAT_MAX_HEALTH ? RESOURCE_HEALTH :
                       ( stat == STAT_MAX_MANA   ? RESOURCE_MANA   :
                       ( stat == STAT_MAX_RAGE   ? RESOURCE_RAGE   :
-                      ( stat == STAT_MAX_ENERGY ? RESOURCE_ENERGY : RESOURCE_AMMO ))));
+                      ( stat == STAT_MAX_ENERGY ? RESOURCE_ENERGY :
+                      ( stat == STAT_MAX_HEAT   ? RESOURCE_HEAT   :  RESOURCE_AMMO )))));
     recalculate_resource_max( r );
     double delta = resource_current[ r ] - resource_max[ r ];
     if ( delta > 0 ) resource_loss( r, delta, 0, action );
@@ -4498,6 +4508,8 @@ expr_ptr player_t::create_expression( action_t* a,
         return make_expr( name_str, [this]{ return energy_regen_per_second(); } );
       if ( rt == RESOURCE_AMMO )
         return make_expr( name_str, [this]{ return ammo_regen_per_second(); } );
+      if ( rt == RESOURCE_HEAT )
+        return make_expr( name_str, [this]{ return heat_regen_per_second(); } );
     }
 
     else if ( splits[ 1 ] == "time_to_max" )
@@ -4511,6 +4523,9 @@ expr_ptr player_t::create_expression( action_t* a,
       if ( rt == RESOURCE_AMMO )
         return make_expr( name_str, [this]{ return ( resource_max[ RESOURCE_AMMO ] - resource_current[ RESOURCE_AMMO ] )
                                                    / ammo_regen_per_second(); } );
+      if ( rt == RESOURCE_HEAT )
+        return make_expr( name_str, [this]{ return ( resource_max[ RESOURCE_HEAT ] - resource_current[ RESOURCE_HEAT ] )
+                                                   / heat_regen_per_second(); } );
     }
   }
 
@@ -4785,6 +4800,7 @@ void player_t::create_profile( std::ostream& os, save_type savetype )
     if ( enchant.resource[ RESOURCE_RAGE   ] != 0 )  os << "enchant_rage="             << enchant.resource[ RESOURCE_RAGE   ] << '\n';
     if ( enchant.resource[ RESOURCE_ENERGY ] != 0 )  os << "enchant_energy="           << enchant.resource[ RESOURCE_ENERGY ] << '\n';
     if ( enchant.resource[ RESOURCE_AMMO   ] != 0 )  os << "enchant_ammo="             << enchant.resource[ RESOURCE_AMMO   ] << '\n';
+    if ( enchant.resource[ RESOURCE_HEAT   ] != 0 )  os << "enchant_heat="             << enchant.resource[ RESOURCE_HEAT   ] << '\n';
   }
 }
 
@@ -5004,6 +5020,7 @@ void player_t::create_options()
     { "gear_rage",                            OPT_FLT,  &( gear.resource[ RESOURCE_RAGE   ]           ) },
     { "gear_energy",                          OPT_FLT,  &( gear.resource[ RESOURCE_ENERGY ]           ) },
     { "gear_ammo",                            OPT_FLT,  &( gear.resource[ RESOURCE_AMMO   ]           ) },
+    { "gear_heat",                            OPT_FLT,  &( gear.resource[ RESOURCE_HEAT   ]           ) },
     { "gear_armor",                           OPT_FLT,  &( gear.armor                                 ) },
     // Stat Enchants
     { "enchant_strength",                     OPT_FLT,  &( enchant.attribute[ ATTR_STRENGTH  ]        ) },
@@ -5023,10 +5040,12 @@ void player_t::create_options()
     { "enchant_mana",                         OPT_FLT,  &( enchant.resource[ RESOURCE_MANA   ]        ) },
     { "enchant_rage",                         OPT_FLT,  &( enchant.resource[ RESOURCE_RAGE   ]        ) },
     { "enchant_energy",                       OPT_FLT,  &( enchant.resource[ RESOURCE_ENERGY ]        ) },
-    { "enchant_ammo",                         OPT_FLT,  &( enchant.resource[ RESOURCE_AMMO   ]        ) },
+    { "enchant_heat",                         OPT_FLT,  &( enchant.resource[ RESOURCE_HEAT   ]        ) },
     // Regen
     { "infinite_energy",                      OPT_BOOL,   &( infinite_resource[ RESOURCE_ENERGY ]     ) },
     { "infinite_ammo",                        OPT_BOOL,   &( infinite_resource[ RESOURCE_AMMO   ]     ) },
+    // XXX this could be fun. heat works in reverse, so infinite heat is is 0 
+    { "infinite_heat",                        OPT_BOOL,   &( infinite_resource[ RESOURCE_HEAT   ]     ) },
     { "infinite_health",                      OPT_BOOL,   &( infinite_resource[ RESOURCE_HEALTH ]     ) },
     { "infinite_mana",                        OPT_BOOL,   &( infinite_resource[ RESOURCE_MANA   ]     ) },
     { "infinite_rage",                        OPT_BOOL,   &( infinite_resource[ RESOURCE_RAGE   ]     ) },

@@ -157,6 +157,7 @@ static const char* chart_resource_type_string( int type )
   case RESOURCE_MANA:         return "Mana";
   case RESOURCE_RAGE:         return "Rage";
   case RESOURCE_ENERGY:       return "Energy";
+  case RESOURCE_HEAT:         return "Heat";
   case RESOURCE_AMMO:         return "Ammo";
   case RESOURCE_FORCE:        return "Force";
   }
@@ -1967,6 +1968,7 @@ const char* chart_t::resource_color( resource_type type )
   case RESOURCE_FORCE:  return color::blue;
 
   case RESOURCE_ENERGY:
+  case RESOURCE_HEAT:   
   case RESOURCE_AMMO:   return color::yellow;
 
   case RESOURCE_RAGE:   return color::red;
