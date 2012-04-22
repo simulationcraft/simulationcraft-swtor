@@ -22,7 +22,7 @@ actions+=/backstab,if=energy>=65,if=buff.acid_blade_coating.up
 actions+=/shiv,if=energy>=75&buff.tactical_advantage.stack<2
 actions+=/corrosive_dart,if=!ticking&energy>=75
 actions+=/laceration,if=energy>=75
-actions+=/overload_shot,if=energy>95
+actions+=/overload_shot,if=energy>100
 actions+=/rifle_shot
 head=rakata_enforcers_headgear,ilevel=58,quality=artifact,stats=645armor_105endurance_122cunning_48power_51accuracy
 ear=rakata_enforcers_device,ilevel=58,quality=artifact,stats=85endurance_103cunning_51accuracy_44crit

@@ -1354,10 +1354,10 @@ void class_t::init_actions()
         action_list_str += "/backstab,if=energy>=70";
 
       action_list_str += "/overload_shot,if=energy>";
-      if ( talents.flanking -> rank() )
-        action_list_str += "95";
-      else
+      if ( set_bonus.rakata_enforcers -> four_pc() )
         action_list_str += "100";
+      else
+        action_list_str += "95";
       action_list_str += "/rifle_shot";
 
       if ( false )
