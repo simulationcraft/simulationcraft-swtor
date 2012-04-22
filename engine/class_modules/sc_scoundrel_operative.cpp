@@ -5,7 +5,6 @@
 
 #include "agent_smug.hpp"
 
-namespace { // ANONYMOUS ====================================================
 
 namespace scoundrel_operative { // ==========================================
 
@@ -277,7 +276,7 @@ struct attack_t : public action_t
   attack_t( const std::string& n, class_t* p, attack_policy_t policy, school_type s ) :
     action_t( n, p, policy, RESOURCE_ENERGY, s )
   {
-    harmful = true;
+    harmful  = true;
     may_crit = true;
   }
 
@@ -1110,7 +1109,7 @@ struct coordination_t : public action_t
 // class_t::create_action =====================================
 
 ::action_t* class_t::create_action( const std::string& name,
-                                                  const std::string& options_str )
+                                    const std::string& options_str )
 {
   if ( type == IA_OPERATIVE )
   {
@@ -1496,8 +1495,6 @@ void class_t::create_talents()
 
 } // namespace scoundrel_operative ==========================================
 
-} // ANONYMOUS NAMESPACE ====================================================
-
 // ==========================================================================
 // PLAYER_T EXTENSIONS
 // ==========================================================================
@@ -1520,7 +1517,7 @@ player_t* player_t::create_operative( sim_t* sim, const std::string& name, race_
 
 void player_t::scoundrel_operative_init( sim_t* /* sim */ )
 {
-
+  // TODO add buff here like in sc_commando_mercenary ?
 }
 
 // player_t::scoundrel_operative_combat_begin ===============================

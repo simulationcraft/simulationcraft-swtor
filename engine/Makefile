@@ -123,6 +123,7 @@ SRC = \
 	sc_weapon.cpp \
 	sc_xml.cpp \
 	class_modules$(PATHSEP)agent_smug.hpp \
+	class_modules$(PATHSEP)bount_troop.hpp \
 	class_modules$(PATHSEP)cons_inq.hpp \
 	class_modules$(PATHSEP)sc_commando_mercenary.cpp \
 	class_modules$(PATHSEP)sc_gunslinger_sniper.cpp \

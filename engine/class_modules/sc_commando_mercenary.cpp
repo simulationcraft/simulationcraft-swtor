@@ -3,23 +3,24 @@
 // http://code.google.com/p/simulationcraft-swtor/
 // ==========================================================================
 
-#include "../simulationcraft.hpp"
+#include "bount_troop.hpp"
+
+namespace commando_mercenary { // ===========================================
+
+class class_t;
+
+struct targetdata_t : public bount_troop::targetdata_t
+{
+  targetdata_t( class_t& source, player_t& target );
+};
 
 // ==========================================================================
 // Commando | Mercenary
 // ==========================================================================
 
-namespace { // ANONYMOUS ====================================================
-
-struct commando_mercenary_targetdata_t : public targetdata_t
+struct class_t : public bount_troop::class_t
 {
-  commando_mercenary_targetdata_t( player_t& source, player_t& target )
-    : targetdata_t( source, target )
-  {}
-};
-
-struct commando_mercenary_t : public player_t
-{
+    typedef bount_troop::class_t base_t;
     // Buffs
     struct buffs_t
     {
@@ -147,14 +148,14 @@ struct commando_mercenary_t : public player_t
 
     } talents;
 
-    commando_mercenary_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
-      player_t( sim, pt == BH_MERCENARY ? BH_MERCENARY : T_COMMANDO, name, ( r == RACE_NONE ) ? RACE_HUMAN : r ),
+    class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
+      base_t( sim, pt == BH_MERCENARY ? BH_MERCENARY : T_COMMANDO, name, rt ),
       buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents()
     {
 
-
-      primary_attribute   = ATTR_AIM;
-      secondary_attribute = ATTR_CUNNING;
+      tree_type[ BH_MERCENARY_BODYGUARD   ] = TREE_BODYGUARD;
+      tree_type[ BH_MERCENARY_ARSENAL     ] = TREE_ARSENAL;
+      tree_type[ BH_MERCENARY_PYROTECH    ] = TREE_PYROTECH;
 
       create_talents();
       create_options();
@@ -162,7 +163,7 @@ struct commando_mercenary_t : public player_t
 
     // Character Definition
     virtual targetdata_t* new_targetdata( player_t& target ) // override
-    { return new commando_mercenary_targetdata_t( *this, target ); }
+    { return new targetdata_t( *this, target ); }
 
             void      create_talents();
     virtual action_t* create_action( const std::string& name, const std::string& options );
@@ -175,67 +176,65 @@ struct commando_mercenary_t : public player_t
     virtual void      init_rng();
     virtual void      init_actions();
     virtual role_type primary_role() const;
-
-    virtual void init_scaling()
-    {
-      player_t::init_scaling();
-
-      scales_with[ STAT_TECH_POWER ] = true;
-    }
 };
 
-namespace { // ANONYMOUS NAMESPACE ==========================================
-
-class commando_mercenary_action_t : public action_t
+targetdata_t::targetdata_t( class_t& source, player_t& target ) :
+  bount_troop::targetdata_t( source, target )
+  //, dot_corrosive_dart( "corrosive_dart", &source ),
 {
+  //add( dot_corrosive_dart );
+}
+
+class action_t : public ::action_t
+{
+  typedef ::action_t base_t;
 public:
-  commando_mercenary_action_t( const std::string& n, commando_mercenary_t* player,
-                          attack_policy_t policy, resource_type r, school_type s ) :
-    action_t( ACTION_ATTACK, n, player, policy, r, s )
-  {}
+  action_t( const std::string& n, class_t* player,
+            attack_policy_t policy, resource_type r, school_type s ) :
+    base_t( ACTION_ATTACK, n, player, policy, r, s )
+  {
+    harmful = false;
+  }
 
-  commando_mercenary_targetdata_t* targetdata() const
-  { return static_cast<commando_mercenary_targetdata_t*>( action_t::targetdata() ); }
+  targetdata_t* targetdata() const
+  { return static_cast<targetdata_t*>( base_t::targetdata() ); }
 
-  commando_mercenary_t* p() const
-  { return static_cast<commando_mercenary_t*>( player ); }
+  class_t* p() const
+  { return static_cast<class_t*>( player ); }
 };
 
 // ==========================================================================
 // Commando / Mercenary Abilities
 // ==========================================================================
 
-struct commando_mercenary_attack_t : public commando_mercenary_action_t
+// 4 types of attack: melee, ranged, force, tech. denoted by policy.
+// 4 types of damage: kinetic, energy, internal, elemental.
+// all combinations possible, but usually patterend.
+
+
+// action hierarchy
+// action - attack
+
+struct attack_t : public action_t
 {
-    commando_mercenary_attack_t( const std::string& n, commando_mercenary_t* p, school_type s=SCHOOL_KINETIC ) :
-      commando_mercenary_action_t( n, p, melee_policy, RESOURCE_NONE, s )
+    attack_t( const std::string& n, class_t* p, attack_policy_t policy, school_type s ) :
+      // XXX FIX TODO RESOURCE_HEAT
+      action_t( n, p, policy, RESOURCE_ENERGY, s )
+     
     {
-        may_crit   = true;
+      harmful  = true;
+      may_crit = true;
     }
-
 };
-
-struct commando_mercenary_spell_t : public commando_mercenary_action_t
-{
-    commando_mercenary_spell_t( const std::string& n, commando_mercenary_t* p, school_type s=SCHOOL_KINETIC ) :
-      commando_mercenary_action_t( n, p, force_policy, RESOURCE_NONE, s )
-    {
-        may_crit   = true;
-        tick_may_crit = true;
-    }
-
-};
-
-} // ANONYMOUS NAMESPACE ====================================================
 
 // ==========================================================================
 // commando_mercenary Character Definition
 // ==========================================================================
 
-// commando_mercenary_t::create_action ====================================================
+// class_t::create_action =================================================================
 
-action_t* commando_mercenary_t::create_action( const std::string& name,
-                                            const std::string& options_str )
+::action_t* class_t::create_action( const std::string& name,
+                                    const std::string& options_str )
 {
     if ( type == BH_MERCENARY )
     {
@@ -246,14 +245,14 @@ action_t* commando_mercenary_t::create_action( const std::string& name,
 
     }
 
-    return player_t::create_action( name, options_str );
+    return base_t::create_action( name, options_str );
 }
 
-// commando_mercenary_t::init_talents =====================================================
+// class_t::init_talents ==================================================================
 
-void commando_mercenary_t::init_talents()
+void class_t::init_talents()
 {
-  player_t::init_talents();
+  base_t::init_talents();
 
   // Bodyguard
   // t1
@@ -345,30 +344,30 @@ void commando_mercenary_t::init_talents()
 
 }
 
-// commando_mercenary_t::init_base ========================================================
+// class_t::init_base =====================================================================
 
-void commando_mercenary_t::init_base()
+void class_t::init_base()
 {
-    player_t::init_base();
+    base_t::init_base();
 
     default_distance = 20;
     distance = default_distance;
 
 }
 
-// commando_mercenary_t::init_benefits =======================================================
+// class_t::init_benefits =================================================================
 
-void commando_mercenary_t::init_benefits()
+void class_t::init_benefits()
 {
-    player_t::init_benefits();
+    base_t::init_benefits();
 
 }
 
-// commando_mercenary_t::init_buffs =======================================================
+// class_t::init_buffs ====================================================================
 
-void commando_mercenary_t::init_buffs()
+void class_t::init_buffs()
 {
-    player_t::init_buffs();
+    base_t::init_buffs();
 
     // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
     // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
@@ -380,39 +379,39 @@ void commando_mercenary_t::init_buffs()
 
 }
 
-// commando_mercenary_t::init_gains =======================================================
+// class_t::init_gains ====================================================================
 
-void commando_mercenary_t::init_gains()
+void class_t::init_gains()
 {
-    player_t::init_gains();
+    base_t::init_gains();
 
 }
 
-// commando_mercenary_t::init_procs =======================================================
+// class_t::init_procs ====================================================================
 
-void commando_mercenary_t::init_procs()
+void class_t::init_procs()
 {
-    player_t::init_procs();
+    base_t::init_procs();
 
 }
 
-// commando_mercenary_t::init_rng =========================================================
+// class_t::init_rng ======================================================================
 
-void commando_mercenary_t::init_rng()
+void class_t::init_rng()
 {
-    player_t::init_rng();
+    base_t::init_rng();
 
 }
 
-// commando_mercenary_t::init_actions =====================================================
+// class_t::init_actions ==================================================================
 
-void commando_mercenary_t::init_actions()
+void class_t::init_actions()
 {
-    //======================================================================================
+    //=====================================================================================
     //
-    //   Please Mirror all changes between Commando and Mercenary!!!
+    //   Please Mirror all changes between Empire/Republic
     //
-    //======================================================================================
+    //=====================================================================================
 
     if ( action_list_str.empty() )
     {
@@ -448,30 +447,37 @@ void commando_mercenary_t::init_actions()
         }
     }
 
-    player_t::init_actions();
+    base_t::init_actions();
 }
 
-// commando_mercenary_t::primary_role ==================================================
+// class_t::primary_role ===============================================================
 
-role_type commando_mercenary_t::primary_role() const
+role_type class_t::primary_role() const
 {
-  switch ( player_t::primary_role() )
+  switch ( base_t::primary_role() )
   {
   case ROLE_TANK:
     return ROLE_TANK;
   case ROLE_DPS:
+    return ROLE_DPS;
   case ROLE_HYBRID:
     return ROLE_HYBRID;
   default:
+     if ( primary_tree() == TREE_BODYGUARD )
+        return ROLE_HEAL;
+     if ( primary_tree() == TREE_ARSENAL )
+       return ROLE_DPS;
+     if ( primary_tree() == TREE_PYROTECH )
+       return ROLE_DPS;
     break;
   }
 
   return ROLE_HYBRID;
 }
 
-// commando_mercenary_t::create_talents ==================================================
+// class_t::create_talents ===============================================================
 
-void commando_mercenary_t::create_talents()
+void class_t::create_talents()
 {
   static const talentinfo_t bodyguard_tree[] = {
     // t1
@@ -528,24 +534,24 @@ void commando_mercenary_t::create_talents()
   init_talent_tree( BH_MERCENARY_PYROTECH, pyrotech_tree );
 }
 
-} // ANONYMOUS NAMESPACE ====================================================
+} // namespace commando_mercenary============================================
 
 // ==========================================================================
 // PLAYER_T EXTENSIONS
 // ==========================================================================
 
-// player_t::create_jedi_shadow  ============================================
+// player_t::create_commando  ===============================================
 
 player_t* player_t::create_commando( sim_t* sim, const std::string& name, race_type r )
 {
-    return new commando_mercenary_t( sim, T_COMMANDO, name, r );
+    return new commando_mercenary::class_t( sim, T_COMMANDO, name, r );
 }
 
 // player_t::create_BH_MERCENARY  ==========================================
 
 player_t* player_t::create_mercenary( sim_t* sim, const std::string& name, race_type r )
 {
-    return new commando_mercenary_t( sim, BH_MERCENARY, name, r );
+    return new commando_mercenary::class_t( sim, BH_MERCENARY, name, r );
 }
 
 // player_t::commando_mercenary_init ===========================================
