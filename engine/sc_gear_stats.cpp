@@ -144,6 +144,7 @@ double gear_stats_t::get_stat( stat_type stat ) const
   case STAT_MAX_RAGE:
   case STAT_MAX_ENERGY:
   case STAT_MAX_AMMO:
+  case STAT_MAX_HEAT:
   case STAT_ALL:
     return 0;
 
