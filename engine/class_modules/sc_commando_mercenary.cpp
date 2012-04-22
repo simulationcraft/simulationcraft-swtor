@@ -162,14 +162,12 @@ action_t* commando_mercenary_t::create_action( const std::string& name,
 {
     if ( type == BH_MERCENARY )
     {
-
+      if ( name == "apply_charge"           ) return new        apply_charge_t( this, options_str );
     }
     else if ( type == T_COMMANDO )
     {
 
     }
-
-    //if ( name == "apply_charge"           ) return new        apply_charge_t( this, options_str );
 
     return player_t::create_action( name, options_str );
 }
@@ -178,14 +176,102 @@ action_t* commando_mercenary_t::create_action( const std::string& name,
 
 void commando_mercenary_t::init_talents()
 {
-    player_t::init_talents();
+  player_t::init_talents();
+  talents.xxx                       = find_talent( "xxx"  );
 
-    // Darkness|Kinetic Combat
-    //talents.thrashing_blades      = find_talent( "Thrashing Blades" );
+// Bodyguard
 
-    // Deception|Infiltration
+// t1
+Improved Vents
+Med Tech
+Hired Muscle
+// t2
+Empowered Scans
+Surgical Precision System
+Supercharged Gas
+Critical Reaction
+// t3
+Heat Damping
+Kolto Residue
+Kolto Missile
+Power Shield
+// t4
+Powered Insulators
+Critical Efficiency
+Protective Field
+// t5
+Reactive Armor
+Proactive Medicine
+Kolto Shell
+Cure Mind
+// t6
+Warden
+// t7
+Emergency Scan
 
-    // Madness|Balance
+// Arsenal
+
+// t1
+Mandalorian Iron Warheads
+Integrated Systems
+Ironsights
+// t2
+Stabilizers
+Muzzle Fluting
+Upgraded Arsenal
+Custom Enviro Suit
+// t3
+Power Barrier
+Afterburners
+Tracer Missile
+Target Tracking
+// t4
+jet Escape
+Light Em Up
+Terminal Velocity
+// t5
+Pinning Fire
+Riddle
+Tracer Lock
+Kolto Vents
+// t6
+Barrage
+Power Overrides
+// t7
+Heatseeker Missiles
+
+// pyrotech
+
+// t1
+Advanced Targeting
+System Calibrations
+Integrated Cardio Package
+// t2
+Superheated Gas
+Sweltering Heat
+Gyroscopic Alignment Jets
+// t3
+Degauss
+Superheated Rail
+Incendiary Missile
+Infrared Sensors
+// t4
+Rapid Venting
+Prototype Particle Accelerator
+// t5
+Energy Rebounder
+Rain of Fire
+Firebug
+// t6
+Automated Defenses
+Burnout
+// t7
+Thermal Detonator
+
+
+
+
+
 }
 
 // commando_mercenary_t::init_base ========================================================
@@ -194,7 +280,7 @@ void commando_mercenary_t::init_base()
 {
     player_t::init_base();
 
-    default_distance = 3;
+    default_distance = 20;
     distance = default_distance;
 
 }
@@ -253,7 +339,7 @@ void commando_mercenary_t::init_actions()
 {
     //======================================================================================
     //
-    //   Please Mirror all changes between Jedi Shadow and Sith Assassin!!!
+    //   Please Mirror all changes between Commando and Mercenary!!!
     //
     //======================================================================================
 
@@ -297,7 +383,7 @@ void commando_mercenary_t::init_actions()
 // commando_mercenary_t::primary_resource ==================================================
 
 resource_type commando_mercenary_t::primary_resource() const
-{ return RESOURCE_FORCE; }
+{ return RESOURCE_AIM; }
 
 // commando_mercenary_t::primary_role ==================================================
 
