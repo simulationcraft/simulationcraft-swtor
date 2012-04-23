@@ -18,8 +18,8 @@ public:
     player_t( sim, pt, name, rt )
   {
     primary_attribute = ATTR_AIM;
-    // TODO FIX
-    secondary_attribute = ATTR_AIM;
+    // TODO check
+    secondary_attribute = ATTR_CUNNING;
   }
 
   virtual resource_type primary_resource() const

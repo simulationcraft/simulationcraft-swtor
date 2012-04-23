@@ -228,7 +228,7 @@ struct attack_t : public action_t
 
 
 // MERC ABILITIES
-// class_t::chaff_flare =--================================================================
+// class_t::chaff_flare ===================================================================
 // class_t::combat_support_cylinder =======================================================
 // class_t::concussion_missile ============================================================
 // class_t::cure ==========================================================================
@@ -242,7 +242,41 @@ struct attack_t : public action_t
 // class_t::kolto_missile =================================================================
 // class_t::kolto_shell ===================================================================
 // class_t::onboard_aed ===================================================================
+
 // class_t::power_shot ====================================================================
+// Charges up both blasters and fires off two powerful shots. Requires two blasters.
+struct power_shot_t : public attack_t
+{
+  power_shot_t( class_t* p, const std::string& n, const std::string& options_str) :
+    // TODO check unsure of policy and school
+    attack_t( n, p, range_policy, SCHOOL_ENERGY )
+  {
+    // TODO
+    // rank_level_list = { ... 50 }
+
+    parse_options( options_str );
+
+    // XXX fixing now
+    // need cost to generate 16 heat, i suppose like some abilities generate rage.
+    //base_cost = 16;
+    base_cost = 0;
+    range = 30.0;
+
+    // TODO CHECK torhead says slots->[SecondaryRanged] but what about MH hit?
+    weapon = &( player -> off_hand_weapon );
+    weapon_multiplier = 0.15;
+  }
+
+  virtual void execute()
+  {
+    attack_t::execute();
+    // TODO
+    // 2nd shot
+  }
+};
+
+
+
 // class_t::power_surge ===================================================================
 // class_t::rapid_scan ====================================================================
 // class_t::supercharged_gas ==============================================================
@@ -264,7 +298,7 @@ struct attack_t : public action_t
 // class_t::rapid_shots ===================================================================
 // class_t::rocket_punch ==================================================================
 // class_t::shoulder_slam =================================================================
-// class_t::stealth-scan ==================================================================
+// class_t::stealth_scan ==================================================================
 // class_t::thermal_sensor_override =======================================================
 // class_t::unload ========================================================================
 // class_t::vent_head =====================================================================
@@ -284,7 +318,7 @@ struct attack_t : public action_t
 {
     if ( type == BH_MERCENARY )
     {
-      //if ( name == "apply_charge"           ) return new        apply_charge_t( this, options_str );
+      if ( name == "power_shot" ) return new power_shot_t( this, name, options_str );
     }
     else if ( type == T_COMMANDO )
     {
@@ -482,6 +516,9 @@ void class_t::init_actions()
         {
             action_list_str += "stim,type=exotech_resolve";
             action_list_str += "/snapshot_stats";
+
+            // testing
+            action_list_str += "/power_shot";
 
             switch ( primary_tree() )
             {
