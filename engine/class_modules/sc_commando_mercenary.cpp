@@ -256,13 +256,11 @@ struct power_shot_t : public attack_t
 
     parse_options( options_str );
 
-    // XXX fixing now
-    // need cost to generate 16 heat, i suppose like some abilities generate rage.
-    //base_cost = 16;
-    base_cost = 0;
+    base_cost = 16;
     range = 30.0;
 
     // TODO CHECK torhead says slots->[SecondaryRanged] but what about MH hit?
+    // i think there's a lot missing from this ability on torhead. moving on...
     weapon = &( player -> off_hand_weapon );
     weapon_multiplier = 0.15;
   }
@@ -275,13 +273,49 @@ struct power_shot_t : public attack_t
   }
 };
 
-
-
 // class_t::power_surge ===================================================================
 // class_t::rapid_scan ====================================================================
 // class_t::supercharged_gas ==============================================================
 // class_t::sweeping_blasters =============================================================
 // class_t::tracer_missile ================================================================
+struct tracer_missile_t : public attack_t
+{
+  tracer_missile_t( class_t* p, const std::string& n, const std::string& options_str) :
+    attack_t( n, p, tech_policy, SCHOOL_KINETIC )
+  {
+    // TODO
+    // rank_level_list = { ... 50 }
+
+    parse_options( options_str );
+
+    base_cost                   = 16;
+    range                       = 30.0;
+    travel_speed                = 18.4; // XXX guess. how to convert theirs to ours?
+    dd.power_mod                = 1.71;
+    dd.standardhealthpercentmin = 0.131;
+    dd.standardhealthpercentmax = 0.211;
+  }
+
+  // FIXME is this the right place to check if a person has an ability?
+  // Or should that go in the action list
+  virtual bool ready()
+  {
+    if ( ! p() -> talents.tracer_missile -> rank() )
+      return false;
+
+    return attack_t::ready();
+  }
+
+  virtual void execute()
+  {
+    attack_t::execute();
+    // TODO
+    // on hit
+    // apply "Heat Signature" armor debuff
+    // barrage proc
+    // tracer lock
+  }
+};
 
 // BH ABILITIES TODO move into bount_troop.hpp?
 
@@ -318,7 +352,8 @@ struct power_shot_t : public attack_t
 {
     if ( type == BH_MERCENARY )
     {
-      if ( name == "power_shot" ) return new power_shot_t( this, name, options_str );
+      if ( name == "power_shot"     ) return new power_shot_t     ( this, name, options_str );
+      if ( name == "tracer_missile" ) return new tracer_missile_t ( this, name, options_str );
     }
     else if ( type == T_COMMANDO )
     {
@@ -518,7 +553,7 @@ void class_t::init_actions()
             action_list_str += "/snapshot_stats";
 
             // testing
-            action_list_str += "/power_shot";
+            action_list_str += "/tracer_missile";
 
             switch ( primary_tree() )
             {

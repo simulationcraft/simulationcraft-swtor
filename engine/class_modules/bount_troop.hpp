@@ -52,8 +52,9 @@ public:
 
     distance = default_distance = 20;
 
-    // XXX fix resource_base[ RESOURCE_HEAT ] += 100;
-    resource_base[ RESOURCE_ENERGY ] += 100;
+    // TODO heat needs to be reversed, so it dissipates and abilities generate it
+    // 
+    resource_base[ RESOURCE_HEAT ] += 100;
   }
 
   virtual void init_gains()
