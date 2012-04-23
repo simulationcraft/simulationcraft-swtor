@@ -12,7 +12,8 @@ class class_t;
 struct targetdata_t : public bount_troop::targetdata_t
 {
   targetdata_t( class_t& source, player_t& target );
- 
+
+  // TODO this applies arpen to target of 4% per stack
   buff_t* debuff_heat_signature;
 };
 
@@ -572,7 +573,7 @@ void class_t::init_actions()
             action_list_str += "/snapshot_stats";
 
             // testing
-            action_list_str += "/tracer_missile";
+            action_list_str += "/tracer_missile,if=heat>76";
 
             switch ( primary_tree() )
             {
