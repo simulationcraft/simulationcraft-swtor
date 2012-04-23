@@ -11,10 +11,13 @@ class class_t;
 
 struct targetdata_t : public bount_troop::targetdata_t
 {
-  targetdata_t( class_t& source, player_t& target );
+
+  dot_t dot_unload;
 
   // TODO this applies arpen to target of 4% per stack
   buff_t* debuff_heat_signature;
+
+  targetdata_t( class_t& source, player_t& target );
 };
 
 // ==========================================================================
@@ -186,9 +189,10 @@ struct class_t : public bount_troop::class_t
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   bount_troop::targetdata_t( source, target ),
-  //, dot_corrosive_dart( "corrosive_dart", &source ),
+  dot_unload( "unload", &source ),
   debuff_heat_signature( new buff_t( this, "heat_signature", 5, from_seconds( 15 ) ) )
 {
+  add( dot_unload );
   add( *debuff_heat_signature );
 }
 
@@ -305,7 +309,8 @@ struct tracer_missile_t : public attack_t
     base_cost                   = 16;
     base_execute_time           = from_seconds( 2 );
     range                       = 30.0;
-    travel_speed                = 18.4; // XXX guess. how to convert theirs to ours?
+    // TODO uncomment.
+    //travel_speed                = 18.4; // XXX guess. how to convert theirs to ours?
     dd.power_mod                = 1.71;
     dd.standardhealthpercentmin = 0.131;
     dd.standardhealthpercentmax = 0.211;
@@ -360,6 +365,46 @@ struct tracer_missile_t : public attack_t
 // class_t::stealth_scan ==================================================================
 // class_t::thermal_sensor_override =======================================================
 // class_t::unload ========================================================================
+struct unload_t : public attack_t
+{
+  unload_t( class_t* p, const std::string& n, const std::string& options_str) :
+    // TODO test range_policy and school energy?
+    attack_t( n, p, range_policy, SCHOOL_ENERGY )
+  {
+    // TODO
+    // rank_level_list = { ... 50 }
+
+    parse_options( options_str );
+
+    base_cost                   = 16;
+    cooldown -> duration        = from_seconds( 15.0 );
+    range                       = 30.0;
+    channeled                   = true;
+    td.standardhealthpercentmin = td.standardhealthpercentmax      = 0.0263;
+    td.power_mod                = 0.263;
+    // XXX REVIEW FIX trying to implement this as a dot since it's 3 channeled
+    // weapon blasts. But I think td defines the dot, and weapon implies direct
+    // damage. so it's doing a weapon hit at 0, followed by 3 weaker dots.
+    weapon                      = &( player -> main_hand_weapon );
+    weapon_multiplier           = 0.82;
+    num_ticks                   = 3;
+    base_tick_time              = from_seconds( 1 );
+  }
+
+  virtual void player_buff()
+  {
+    action_t::player_buff();
+    if ( p() -> buffs.barrage -> up() )
+      player_multiplier += 0.25;
+  }
+
+  virtual void last_tick(dot_t* d)
+  {
+    action_t::last_tick( d );
+    p() -> buffs.barrage -> expire();
+  }
+};
+
 // TODO buffs.barrage -> up() next Unload  does 25% more damage
 // barrage buff resets Unload cooldown? here, or in unload::ready()
 // class_t::vent_head =====================================================================
@@ -381,6 +426,7 @@ struct tracer_missile_t : public attack_t
     {
       if ( name == "power_shot"     ) return new power_shot_t     ( this, name, options_str );
       if ( name == "tracer_missile" ) return new tracer_missile_t ( this, name, options_str );
+      if ( name == "unload"         ) return new unload_t         ( this, name, options_str );
     }
     else if ( type == T_COMMANDO )
     {
