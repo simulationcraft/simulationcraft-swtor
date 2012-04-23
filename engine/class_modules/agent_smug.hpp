@@ -72,9 +72,9 @@ public:
 
   std::pair<int,gain_t*> energy_regen_bracket() const
   {
-    if ( resource_current[ RESOURCE_ENERGY ] < 0.2 * resource_max[ RESOURCE_ENERGY ] )
+    if ( resource_current[ RESOURCE_ENERGY ] < 20 )
       return std::make_pair( 2, energy_gains.low );
-    else if ( resource_current[ RESOURCE_ENERGY ] < 0.6 * resource_max[ RESOURCE_ENERGY ] )
+    else if ( resource_current[ RESOURCE_ENERGY ] < 60 )
       return std::make_pair( 3, energy_gains.medium );
     else
       return std::make_pair( 5, energy_gains.high );
