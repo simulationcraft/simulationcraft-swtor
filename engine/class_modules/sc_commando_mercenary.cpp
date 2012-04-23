@@ -47,7 +47,6 @@ struct class_t : public bount_troop::class_t
     // RNGs
     struct rngs_t
     {
-      rng_t* barrage;
 
     } rngs;
 
