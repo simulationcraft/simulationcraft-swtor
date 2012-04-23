@@ -12,6 +12,8 @@ class class_t;
 struct targetdata_t : public bount_troop::targetdata_t
 {
   targetdata_t( class_t& source, player_t& target );
+  
+  buff_t* debuff_heat_signature;
 };
 
 // ==========================================================================
@@ -24,6 +26,9 @@ struct class_t : public bount_troop::class_t
     // Buffs
     struct buffs_t
     {
+      buff_t* barrage;
+      buff_t* power_barrier;
+      buff_t* tracer_lock;
 
     } buffs;
 
@@ -42,6 +47,7 @@ struct class_t : public bount_troop::class_t
     // RNGs
     struct rngs_t
     {
+      rng_t* barrage;
 
     } rngs;
 
@@ -179,10 +185,11 @@ struct class_t : public bount_troop::class_t
 };
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
-  bount_troop::targetdata_t( source, target )
+  bount_troop::targetdata_t( source, target ),
   //, dot_corrosive_dart( "corrosive_dart", &source ),
+  debuff_heat_signature( new buff_t( this, "heat_signature", 5, from_seconds( 15 ) ) )
 {
-  //add( dot_corrosive_dart );
+  add( *debuff_heat_signature );
 }
 
 class action_t : public ::action_t
@@ -201,6 +208,7 @@ public:
 
   class_t* p() const
   { return static_cast<class_t*>( player ); }
+  class_t* cast() const { return p(); }
 };
 
 // ==========================================================================
@@ -309,11 +317,21 @@ struct tracer_missile_t : public attack_t
   virtual void execute()
   {
     attack_t::execute();
-    // TODO
-    // on hit
-    // apply "Heat Signature" armor debuff
-    // barrage proc
-    // tracer lock
+
+    if ( result_is_hit() )
+    {
+      // XXX REVIEW can't this thing be put in action_t or something? it's C voodoo to me
+      class_t& p = *cast();
+
+      // BUG: debuff is ignoring travel time and incorrectly applying instantly
+      targetdata() -> debuff_heat_signature -> trigger( p.talents.light_em_up -> rank() ? 2 : 1 );
+
+      if ( p.talents.tracer_lock -> rank() )
+        p.buffs.tracer_lock -> trigger();
+
+      if ( p.talents.barrage -> rank() )
+        p.buffs.barrage -> trigger();
+    }
   }
 };
 
@@ -335,6 +353,8 @@ struct tracer_missile_t : public attack_t
 // class_t::stealth_scan ==================================================================
 // class_t::thermal_sensor_override =======================================================
 // class_t::unload ========================================================================
+// TODO buffs.barrage -> up() next Unload  does 25% more damage
+// barrage buff resets Unload cooldown? here, or in unload::ready()
 // class_t::vent_head =====================================================================
 
 // ==========================================================================
@@ -482,15 +502,14 @@ void class_t::init_benefits()
 
 void class_t::init_buffs()
 {
-    base_t::init_buffs();
+  base_t::init_buffs();
 
-    // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-    // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-    // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-
-    //bool is_mercenary = ( type == BH_MERCENARY );
-
-
+  // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
+  // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
+  // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
+  std::cerr << talents.barrage -> rank() << std::endl;
+  buffs.barrage  = new buff_t( this, "barrage", 1, from_seconds( 15 ), from_seconds( 6 ), (talents.barrage -> rank() * 0.15) );
+  buffs.tracer_lock  = new buff_t( this, "tracer_lock", 5, from_seconds( 15 ));
 
 }
 
