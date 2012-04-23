@@ -13,6 +13,13 @@ namespace bount_troop { // ===================================================
 class class_t : public player_t
 {
 public:
+  struct
+  {
+    gain_t* minimum;
+    gain_t* low;
+    gain_t* medium;
+    gain_t* high;
+  } heat_gains;
 
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
     player_t( sim, pt, name, rt )
@@ -60,9 +67,34 @@ public:
   virtual void init_gains()
   {
     player_t::init_gains();
-    //energy_gains.low    = get_gain( "low"  );
+    heat_gains.minimum = get_gain( "min"  );
+    heat_gains.low     = get_gain( "low"  );
+    heat_gains.medium  = get_gain( "med"  );
+    heat_gains.high    = get_gain( "high" );
   }
 
+  std::pair<int,gain_t*> heat_regen_bracket() const
+  {
+    if ( resource_current[ RESOURCE_HEAT ] <= 20 )
+      return std::make_pair( 2, heat_gains.minimum );
+    else if ( resource_current[ RESOURCE_HEAT ] <= 40 )
+      return std::make_pair( 3, heat_gains.low );
+    else if ( resource_current[ RESOURCE_HEAT ] <= 60 )
+      return std::make_pair( 4, heat_gains.medium );
+    else
+      return std::make_pair( 5, heat_gains.high );
+  }
+
+  virtual double heat_regen_per_second() const
+  { return heat_regen_bracket().first;; }
+
+  virtual void regen( timespan_t periodicity )
+  {
+    std::pair<int,gain_t*> r = heat_regen_bracket();
+    resource_gain( RESOURCE_HEAT, to_seconds( periodicity ) * r.first, r.second );
+
+    player_t::regen( periodicity );
+  }
 };
 
 class targetdata_t : public ::targetdata_t

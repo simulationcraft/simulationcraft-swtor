@@ -278,9 +278,6 @@ struct power_shot_t : public attack_t
 
     if ( result_is_hit() && p.talents.barrage -> rank() )
         p.buffs.barrage -> trigger();
-
-    // TODO
-    // 2nd shot
   }
 };
 
