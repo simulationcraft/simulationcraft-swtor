@@ -12,7 +12,7 @@ class class_t;
 struct targetdata_t : public bount_troop::targetdata_t
 {
   targetdata_t( class_t& source, player_t& target );
-  
+ 
   buff_t* debuff_heat_signature;
 };
 
@@ -226,7 +226,7 @@ struct attack_t : public action_t
 {
     attack_t( const std::string& n, class_t* p, attack_policy_t policy, school_type s ) :
       action_t( n, p, policy, RESOURCE_HEAT, s )
-     
+    
     {
       harmful  = true;
       may_crit = true;
@@ -396,89 +396,89 @@ void class_t::init_talents()
 
   // Bodyguard
   // t1
-  talents.improved_vents = find_talent( "Improved Vents" );
-  talents.med_tech = find_talent( "Med Tech" );
-  talents.hired_muscle = find_talent( "Hired Muscle" );
+  talents.improved_vents                 = find_talent( "Improved Vents" );
+  talents.med_tech                       = find_talent( "Med Tech" );
+  talents.hired_muscle                   = find_talent( "Hired Muscle" );
   // t2
-  talents.empowered_scans = find_talent( "Empowered Scans" );
-  talents.surgical_precision_system = find_talent( "Surgical Precision System" );
-  talents.supercharged_gas = find_talent( "Supercharged Gas" );
-  talents.critical_reaction = find_talent( "Critical Reaction" );
+  talents.empowered_scans                = find_talent( "Empowered Scans" );
+  talents.surgical_precision_system      = find_talent( "Surgical Precision System" );
+  talents.supercharged_gas               = find_talent( "Supercharged Gas" );
+  talents.critical_reaction              = find_talent( "Critical Reaction" );
   // t3
-  talents.heat_damping = find_talent( "Heat Damping" );
-  talents.kolto_residue = find_talent( "Kolto Residue" );
-  talents.kolto_missile = find_talent( "Kolto Missile" );
-  talents.power_shield = find_talent( "Power Shield" );
+  talents.heat_damping                   = find_talent( "Heat Damping" );
+  talents.kolto_residue                  = find_talent( "Kolto Residue" );
+  talents.kolto_missile                  = find_talent( "Kolto Missile" );
+  talents.power_shield                   = find_talent( "Power Shield" );
   // t4
-  talents.powered_insulators = find_talent( "Powered Insulators" );
-  talents.critical_efficiency = find_talent( "Critical Efficiency" );
-  talents.protective_field = find_talent( "Protective Field" );
+  talents.powered_insulators             = find_talent( "Powered Insulators" );
+  talents.critical_efficiency            = find_talent( "Critical Efficiency" );
+  talents.protective_field               = find_talent( "Protective Field" );
   // t5
-  talents.reactive_armor = find_talent( "Reactive Armor" );
-  talents.proactive_medicine = find_talent( "Proactive Medicine" );
-  talents.kolto_shell = find_talent( "Kolto Shell" );
-  talents.cure_mind = find_talent( "Cure Mind" );
+  talents.reactive_armor                 = find_talent( "Reactive Armor" );
+  talents.proactive_medicine             = find_talent( "Proactive Medicine" );
+  talents.kolto_shell                    = find_talent( "Kolto Shell" );
+  talents.cure_mind                      = find_talent( "Cure Mind" );
   // t6
-  talents.warden = find_talent( "Warden" );
+  talents.warden                         = find_talent( "Warden" );
   // t7
-  talents.emergency_scan = find_talent( "Emergency Scan" );
+  talents.emergency_scan                 = find_talent( "Emergency Scan" );
 
   // Arsenal
   // t1
-  talents.mandalorian_iron_warheads = find_talent( "Mandalorian Iron Warheads" );
-  talents.integrated_systems = find_talent( "Integrated Systems" );
-  talents.ironsights = find_talent( "Ironsights" );
+  talents.mandalorian_iron_warheads      = find_talent( "Mandalorian Iron Warheads" );
+  talents.integrated_systems             = find_talent( "Integrated Systems" );
+  talents.ironsights                     = find_talent( "Ironsights" );
   // t2
-  talents.stabilizers = find_talent( "Stabilizers" );
-  talents.muzzle_fluting = find_talent( "Muzzle Fluting" );
-  talents.upgraded_arsenal = find_talent( "Upgraded Arsenal" );
-  talents.custom_enviro_suit = find_talent( "Custom Enviro Suit" );
+  talents.stabilizers                    = find_talent( "Stabilizers" );
+  talents.muzzle_fluting                 = find_talent( "Muzzle Fluting" );
+  talents.upgraded_arsenal               = find_talent( "Upgraded Arsenal" );
+  talents.custom_enviro_suit             = find_talent( "Custom Enviro Suit" );
   // t3
-  talents.power_barrier = find_talent( "Power Barrier" );
-  talents.afterburners = find_talent( "Afterburners" );
-  talents.tracer_missile = find_talent( "Tracer Missile" );
-  talents.target_tracking = find_talent( "Target Tracking" );
+  talents.power_barrier                  = find_talent( "Power Barrier" );
+  talents.afterburners                   = find_talent( "Afterburners" );
+  talents.tracer_missile                 = find_talent( "Tracer Missile" );
+  talents.target_tracking                = find_talent( "Target Tracking" );
   // t4
-  talents.jet_escape = find_talent( "Jet Escape" );
-  talents.light_em_up = find_talent( "Light 'Em Up" );
-  talents.terminal_velocity = find_talent( "Terminal Velocity" );
+  talents.jet_escape                     = find_talent( "Jet Escape" );
+  talents.light_em_up                    = find_talent( "Light 'Em Up" );
+  talents.terminal_velocity              = find_talent( "Terminal Velocity" );
   // t5
-  talents.pinning_fire = find_talent( "Pinning Fire" );
-  talents.riddle = find_talent( "Riddle" );
-  talents.tracer_lock = find_talent( "Tracer Lock" );
-  talents.kolto_vents = find_talent( "Kolto Vents" );
+  talents.pinning_fire                   = find_talent( "Pinning Fire" );
+  talents.riddle                         = find_talent( "Riddle" );
+  talents.tracer_lock                    = find_talent( "Tracer Lock" );
+  talents.kolto_vents                    = find_talent( "Kolto Vents" );
   // t6
-  talents.barrage = find_talent( "Barrage" );
-  talents.power_overrides = find_talent( "Power Overrides" );
+  talents.barrage                        = find_talent( "Barrage" );
+  talents.power_overrides                = find_talent( "Power Overrides" );
   // t7
-  talents.heatseeker_missiles = find_talent( "Heatseeker Missiles" );
+  talents.heatseeker_missiles            = find_talent( "Heatseeker Missiles" );
 
   // pyrotech
   // t1
-  talents.advanced_targeting = find_talent( "Advanced Targeting" );
-  talents.system_calibrations = find_talent( "System Calibrations" );
-  talents.integrated_cardio_package = find_talent( "Integrated Cardio Package" );
+  talents.advanced_targeting             = find_talent( "Advanced Targeting" );
+  talents.system_calibrations            = find_talent( "System Calibrations" );
+  talents.integrated_cardio_package      = find_talent( "Integrated Cardio Package" );
   // t2
-  talents.superheated_gas = find_talent( "Superheated Gas" );
-  talents.sweltering_heat = find_talent( "Sweltering Heat" );
-  talents.gyroscopic_alignment_jets = find_talent( "Gyroscopic Alignment Jets" );
+  talents.superheated_gas                = find_talent( "Superheated Gas" );
+  talents.sweltering_heat                = find_talent( "Sweltering Heat" );
+  talents.gyroscopic_alignment_jets      = find_talent( "Gyroscopic Alignment Jets" );
   // t3
-  talents.degauss = find_talent( "Degauss" );
-  talents.superheated_rail = find_talent( "Superheated Rail" );
-  talents.incendiary_missile = find_talent( "Incendiary Missile" );
-  talents.infrared_sensors = find_talent( "Infrared Sensors" );
+  talents.degauss                        = find_talent( "Degauss" );
+  talents.superheated_rail               = find_talent( "Superheated Rail" );
+  talents.incendiary_missile             = find_talent( "Incendiary Missile" );
+  talents.infrared_sensors               = find_talent( "Infrared Sensors" );
   // t4
-  talents.rapid_venting = find_talent( "Rapid Venting" );
+  talents.rapid_venting                  = find_talent( "Rapid Venting" );
   talents.prototype_particle_accelerator = find_talent( "Prototype Particle Accelerator" );
   // t5
-  talents.energy_rebounder = find_talent( "Energy Rebounder" );
-  talents.rain_of_fire = find_talent( "Rain of Fire" );
-  talents.firebug = find_talent( "Firebug" );
+  talents.energy_rebounder               = find_talent( "Energy Rebounder" );
+  talents.rain_of_fire                   = find_talent( "Rain of Fire" );
+  talents.firebug                        = find_talent( "Firebug" );
   // t6
-  talents.automated_defenses = find_talent( "Automated Defenses" );
-  talents.burnout = find_talent( "Burnout" );
+  talents.automated_defenses             = find_talent( "Automated Defenses" );
+  talents.burnout                        = find_talent( "Burnout" );
   // t7
-  talents.thermal_detonator = find_talent( "Thermal Detonator" );
+  talents.thermal_detonator              = find_talent( "Thermal Detonator" );
 
 
 
@@ -623,55 +623,55 @@ void class_t::create_talents()
 {
   static const talentinfo_t bodyguard_tree[] = {
     // t1
-    { "Improved Vents", 2 }, { "Med Tech", 2 }, { "Hired Muscle", 3 },
+    { "Improved Vents"    , 2 }, { "Med Tech"                 , 2 }, { "Hired Muscle"    , 3 },
     // t2
-    { "Empowered Scans", 2 }, { "Surgical Precision System", 2 }, { "Supercharged Gas", 1 }, { "Critical Reaction", 2 },
+    { "Empowered Scans"   , 2 }, { "Surgical Precision System", 2 }, { "Supercharged Gas", 1 }, { "Critical Reaction", 2 },
     // t3
-    { "Heat Damping", 1 }, { "Kolto Residue", 2 }, { "Kolto Missile", 1 }, { "Power Shield", 1 },
+    { "Heat Damping"      , 1 }, { "Kolto Residue"            , 2 }, { "Kolto Missile"   , 1 }, { "Power Shield"     , 1 },
     // t4
-    { "Powered Insulators", 2 }, { "Critical Efficiency", 3 }, { "Protective Field", 2 },
+    { "Powered Insulators", 2 }, { "Critical Efficiency"      , 3 }, { "Protective Field", 2 },
     // t5
-    { "Reactive Armor", 1 }, { "Proactive Medicine", 2 }, { "Kolto Shell", 1 }, { "Cure Mind", 1 },
+    { "Reactive Armor"    , 1 }, { "Proactive Medicine"       , 2 }, { "Kolto Shell"     , 1 }, { "Cure Mind"        , 1 },
     // t6
-    { "Warden", 5 },
+    { "Warden"            , 5 },
     // t7
-    { "Emergency Scan", 1 }
+    { "Emergency Scan"    , 1 }
   };
   init_talent_tree( BH_MERCENARY_BODYGUARD, bodyguard_tree );
 
   static const talentinfo_t arsenal_tree[] = {
     // t1
-    { "Mandalorian Iron Warheads", 2 }, { "Integrated Systems", 2 }, { "Ironsights", 3 },
+    { "Mandalorian Iron Warheads", 2 }, { "Integrated Systems", 2 }, { "Ironsights"       , 3 },
     // t2
-    { "Stabilizers", 3 }, { "Muzzle Fluting", 1 }, { "Upgraded Arsenal", 1 }, { "Custom Enviro Suit", 2 },
+    { "Stabilizers"              , 3 }, { "Muzzle Fluting"    , 1 }, { "Upgraded Arsenal" , 1 }, { "Custom Enviro Suit", 2 },
     // t3
-    { "Power Barrier", 2 }, { "Afterburners", 2 }, { "Tracer Missile", 1 }, { "Target Tracking", 2 },
+    { "Power Barrier"            , 2 }, { "Afterburners"      , 2 }, { "Tracer Missile"   , 1 }, { "Target Tracking"   , 2 },
     // t4
-    { "jet Escape", 2 }, { "Light 'Em Up", 1 }, { "Terminal Velocity", 2 },
+    { "jet Escape"               , 2 }, { "Light 'Em Up"      , 1 }, { "Terminal Velocity", 2 },
     // t5
-    { "Pinning Fire", 2 }, { "Riddle", 1 }, { "Tracer Lock", 1 }, { "Kolto Vents", 1 },
+    { "Pinning Fire"             , 2 }, { "Riddle"            , 1 }, { "Tracer Lock"      , 1 }, { "Kolto Vents"       , 1 },
     // t6
-    { "Barrage", 3 }, { "Power Overrides", 2 },
+    { "Barrage"                  , 3 }, { "Power Overrides"   , 2 },
     // t7
-    { "Heatseeker Missiles", 1 }
+    { "Heatseeker Missiles"      , 1 }
   };
   init_talent_tree( BH_MERCENARY_ARSENAL, arsenal_tree );
 
   static const talentinfo_t pyrotech_tree[] = {
     // t1
-    { "Advanced Targeting", 3 }, { "System Calibrations", 2 }, { "Integrated Cardio Package", 3 },
+    { "Advanced Targeting", 3 }, { "System Calibrations"           , 2 }, { "Integrated Cardio Package", 3 },
     // t2
-    { "Superheated Gas", 3 }, { "Sweltering Heat", 2 }, { "Gyroscopic Alignment Jets", 2 },
+    { "Superheated Gas"   , 3 }, { "Sweltering Heat"               , 2 }, { "Gyroscopic Alignment Jets", 2 },
     // t3
-    { "Degauss", 2 }, { "Superheated Rail", 2 }, { "Incendiary Missile", 1 }, { "Infrared Sensors", 2 },
+    { "Degauss"           , 2 }, { "Superheated Rail"              , 2 }, { "Incendiary Missile"       , 1 }, { "Infrared Sensors", 2 },
     // t4
-    { "Rapid Venting", 2 }, { "Prototype Particle Accelerator", 3 },
+    { "Rapid Venting"     , 2 }, { "Prototype Particle Accelerator", 3 },
     // t5
-    { "Energy Rebounder", 2 }, { "Rain of Fire", 3 }, { "Firebug", 2 },
+    { "Energy Rebounder"  , 2 }, { "Rain of Fire"                  , 3 }, { "Firebug"                  , 2 },
     // t6
-    { "Automated Defenses", 2 }, { "Burnout", 3 },
+    { "Automated Defenses", 2 }, { "Burnout"                       , 3 },
     // t7
-    { "Thermal Detonator", 1 }
+    { "Thermal Detonator" , 1 }
   };
   init_talent_tree( BH_MERCENARY_PYROTECH, pyrotech_tree );
 }
