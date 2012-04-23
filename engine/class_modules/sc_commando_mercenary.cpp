@@ -275,6 +275,10 @@ struct power_shot_t : public attack_t
   virtual void execute()
   {
     attack_t::execute();
+
+    if ( result_is_hit() && p.talents.barrage -> rank() )
+        p.buffs.barrage -> trigger();
+
     // TODO
     // 2nd shot
   }
