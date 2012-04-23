@@ -303,6 +303,7 @@ struct tracer_missile_t : public attack_t
     parse_options( options_str );
 
     base_cost                   = 16;
+    base_execute_time           = from_seconds( 2 );
     range                       = 30.0;
     travel_speed                = 18.4; // XXX guess. how to convert theirs to ours?
     dd.power_mod                = 1.71;
