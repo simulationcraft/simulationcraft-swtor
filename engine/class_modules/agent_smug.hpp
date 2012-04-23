@@ -15,6 +15,7 @@ class class_t : public player_t
 public:
   struct
   {
+    gain_t* minimum;
     gain_t* low;
     gain_t* medium;
     gain_t* high;
@@ -65,17 +66,20 @@ public:
   virtual void init_gains()
   {
     player_t::init_gains();
-    energy_gains.low    = get_gain( "low"  );
-    energy_gains.medium = get_gain( "med"  );
-    energy_gains.high   = get_gain( "high" );
+    energy_gains.minimum = get_gain( "min"  );
+    energy_gains.low     = get_gain( "low"  );
+    energy_gains.medium  = get_gain( "med"  );
+    energy_gains.high    = get_gain( "high" );
   }
 
   std::pair<int,gain_t*> energy_regen_bracket() const
   {
-    if ( resource_current[ RESOURCE_ENERGY ] < 20 )
-      return std::make_pair( 2, energy_gains.low );
-    else if ( resource_current[ RESOURCE_ENERGY ] < 60 )
-      return std::make_pair( 3, energy_gains.medium );
+    if ( resource_current[ RESOURCE_ENERGY ] <= 20 )
+      return std::make_pair( 2, energy_gains.minimum );
+    else if ( resource_current[ RESOURCE_ENERGY ] <= 40 )
+      return std::make_pair( 3, energy_gains.low );
+    else if ( resource_current[ RESOURCE_ENERGY ] <= 60 )
+      return std::make_pair( 4, energy_gains.medium );
     else
       return std::make_pair( 5, energy_gains.high );
   }
