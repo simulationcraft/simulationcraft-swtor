@@ -479,9 +479,6 @@ void class_t::init_talents()
   talents.burnout                        = find_talent( "Burnout" );
   // t7
   talents.thermal_detonator              = find_talent( "Thermal Detonator" );
-
-
-
 }
 
 // class_t::init_base =====================================================================
@@ -500,7 +497,6 @@ void class_t::init_base()
 void class_t::init_benefits()
 {
     base_t::init_benefits();
-
 }
 
 // class_t::init_buffs ====================================================================
@@ -512,9 +508,8 @@ void class_t::init_buffs()
   // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-  std::cerr << talents.barrage -> rank() << std::endl;
-  buffs.barrage  = new buff_t( this, "barrage", 1, from_seconds( 15 ), from_seconds( 6 ), (talents.barrage -> rank() * 0.15) );
-  buffs.tracer_lock  = new buff_t( this, "tracer_lock", 5, from_seconds( 15 ));
+  buffs.barrage     = new buff_t( this, "barrage",     1, from_seconds( 15 ), from_seconds( 6 ), (talents.barrage -> rank() * 0.15) );
+  buffs.tracer_lock = new buff_t( this, "tracer_lock", 5, from_seconds( 15 ));
 
 }
 
