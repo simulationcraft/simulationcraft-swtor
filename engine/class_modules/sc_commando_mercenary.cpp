@@ -407,7 +407,7 @@ struct unload_t : public attack_t
 
 // TODO buffs.barrage -> up() next Unload  does 25% more damage
 // barrage buff resets Unload cooldown? here, or in unload::ready()
-// class_t::vent_head =====================================================================
+// class_t::vent_heat =====================================================================
 
 // ==========================================================================
 // commando_mercenary Character Definition
