@@ -247,7 +247,40 @@ struct attack_t : public action_t
 // class_t::emergency_scan ================================================================
 // class_t::fusion_missile ================================================================
 // class_t::healing_scan ==================================================================
-// class_t::heatseeker ====================================================================
+// class_t::heatseeker_missiles ===========================================================
+struct heatseeker_missiles_t : public attack_t
+{
+  heatseeker_missiles_t( class_t* p, const std::string& n, const std::string& options_str) :
+    attack_t( n, p, tech_policy, SCHOOL_KINETIC )
+  {
+    // TODO
+    // rank_level_list = { ... 50 }
+
+    parse_options( options_str );
+
+    base_cost                   = 16;
+    cooldown -> duration        = from_seconds( 15 );
+    range                       = 30.0;
+
+    dd.power_mod                = 2.08;
+    dd.standardhealthpercentmin = 0.168;
+    dd.standardhealthpercentmax = 0.248;
+  }
+
+  virtual void target_debuff( player_t* tgt, dmg_type type )
+  {
+    attack_t::target_debuff( tgt, type );
+    if ( unsigned stacks = p() -> buffs.tracer_lock -> stack() )
+      target_multiplier += 0.05 * stacks;
+  }
+
+  virtual void execute()
+  {
+    p() -> buffs.tracer_lock -> expire();
+    attack_t::execute();
+  }
+};
+
 // class_t::high_velocity_gas_cylinder ====================================================
 // class_t::incendiary_missile ============================================================
 // class_t::jet_boost =====================================================================
@@ -359,6 +392,28 @@ struct tracer_missile_t : public attack_t
 // class_t::heroic_moment =================================================================
 // class_t::kolto_overload ================================================================
 // class_t::missile_blast =================================================================
+// class_t::rail_shot =====================================================================
+struct rail_shot_t : public attack_t
+{
+  rail_shot_t( class_t* p, const std::string& n, const std::string& options_str) :
+    // ENERGY or tech?
+    attack_t( n, p, range_policy, SCHOOL_ENERGY )
+  {
+    parse_options( options_str );
+
+    base_cost                   = 16;
+    cooldown -> duration        = from_seconds( 15 );
+    range                       = 30.0;
+
+    dd.power_mod                = 1.9;
+    dd.standardhealthpercentmin =
+    dd.standardhealthpercentmax = 0.19;
+
+    weapon                      = &( player -> main_hand_weapon );
+    weapon_multiplier           = 0.27;
+  }
+};
+
 // class_t::rapid_shots ===================================================================
 // class_t::rocket_punch ==================================================================
 // class_t::shoulder_slam =================================================================
@@ -367,6 +422,7 @@ struct tracer_missile_t : public attack_t
 // class_t::unload ========================================================================
 struct unload_t : public attack_t
 {
+  // TODO offhand attack
   unload_t( class_t* p, const std::string& n, const std::string& options_str) :
     // TODO test range_policy and school energy?
     attack_t( n, p, range_policy, SCHOOL_ENERGY )
@@ -391,6 +447,8 @@ struct unload_t : public attack_t
     base_tick_time              = from_seconds( 1 );
   }
 
+// barrage buff resets Unload cooldown? tracer_missile, or in unload::ready()
+
   virtual void player_buff()
   {
     action_t::player_buff();
@@ -401,12 +459,13 @@ struct unload_t : public attack_t
   virtual void last_tick(dot_t* d)
   {
     action_t::last_tick( d );
+    // TODO check if this technically expires on execute or finish
+    // currently doing it on finish since player_buff references it
+    // also not sure if this struct is created each time the action is executed or is reused :)
     p() -> buffs.barrage -> expire();
   }
 };
 
-// TODO buffs.barrage -> up() next Unload  does 25% more damage
-// barrage buff resets Unload cooldown? here, or in unload::ready()
 // class_t::vent_heat =====================================================================
 
 // ==========================================================================
@@ -424,9 +483,11 @@ struct unload_t : public attack_t
 {
     if ( type == BH_MERCENARY )
     {
-      if ( name == "power_shot"     ) return new power_shot_t     ( this, name, options_str );
-      if ( name == "tracer_missile" ) return new tracer_missile_t ( this, name, options_str );
-      if ( name == "unload"         ) return new unload_t         ( this, name, options_str );
+      if ( name == "power_shot"          ) return new power_shot_t          ( this, name, options_str );
+      if ( name == "tracer_missile"      ) return new tracer_missile_t      ( this, name, options_str );
+      if ( name == "unload"              ) return new unload_t              ( this, name, options_str );
+      if ( name == "rail_shot"           ) return new rail_shot_t           ( this, name, options_str );
+      if ( name == "heatseeker_missiles" ) return new heatseeker_missiles_t ( this, name, options_str );
     }
     else if ( type == T_COMMANDO )
     {
@@ -620,7 +681,11 @@ void class_t::init_actions()
             action_list_str += "/snapshot_stats";
 
             // testing
+
+            // TODO check for barrage talent
+            action_list_str += "/unload,if=heat>76&buff.barrage.up";
             action_list_str += "/tracer_missile,if=heat>76";
+            action_list_str += "/rail_shot,if=heat>76";
 
             switch ( primary_tree() )
             {
