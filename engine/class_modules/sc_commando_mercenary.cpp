@@ -231,10 +231,10 @@ struct attack_t : public action_t
 {
     attack_t( const std::string& n, class_t* p, attack_policy_t policy, school_type s ) :
       action_t( n, p, policy, RESOURCE_HEAT, s )
-    
     {
-      harmful  = true;
-      may_crit = true;
+      harmful       = true;
+      may_crit      = true;
+      tick_may_crit = true;
     }
 };
 
@@ -340,7 +340,7 @@ struct tracer_missile_t : public attack_t
     parse_options( options_str );
 
     base_cost                   = 16;
-    base_execute_time           = from_seconds( 2 );
+    base_execute_time           = from_seconds( 2 - 0.5 * p -> talents.muzzle_fluting -> rank() );
     range                       = 30.0;
     // TODO uncomment.
     //travel_speed                = 18.4; // XXX guess. how to convert theirs to ours?
@@ -448,6 +448,13 @@ struct unload_t : public attack_t
   }
 
 // barrage buff resets Unload cooldown? tracer_missile, or in unload::ready()
+  virtual bool ready()
+  {
+    if ( p() -> buffs.barrage -> up() )
+      reset();
+
+    return action_t::ready();
+  }
 
   virtual void player_buff()
   {
