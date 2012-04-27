@@ -3198,6 +3198,9 @@ struct action_t
     double player_multiplier;
     double target_multiplier;
     double power_mod;
+    // XXX adding in to implement Unload as a channeled dot
+    double weapon_multiplier;
+    weapon_t* weapon;
 
     damage_factors_t() :
       standardhealthpercentmin( 0 ), standardhealthpercentmax( 0 ),

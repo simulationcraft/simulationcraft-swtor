@@ -382,11 +382,11 @@ struct unload_t : public attack_t
     channeled                   = true;
     td.standardhealthpercentmin = td.standardhealthpercentmax      = 0.0263;
     td.power_mod                = 0.263;
-    // XXX REVIEW FIX trying to implement this as a dot since it's 3 channeled
-    // weapon blasts. But I think td defines the dot, and weapon implies direct
-    // damage. so it's doing a weapon hit at 0, followed by 3 weaker dots.
-    weapon                      = &( player -> main_hand_weapon );
-    weapon_multiplier           = 0.82;
+    // XXX REVIEW
+    // added td.weapon & td.weapon_multiplier to sc_action_t instead of making it reference weapon
+    // since direct_damage will work with just weapon set and did not want to break that behavior
+    td.weapon                   = &( player -> main_hand_weapon );
+    td.weapon_multiplier        = 0.82;
     num_ticks                   = 3;
     base_tick_time              = from_seconds( 1 );
   }
