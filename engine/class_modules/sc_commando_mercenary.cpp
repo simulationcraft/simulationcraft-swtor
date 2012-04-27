@@ -445,6 +445,7 @@ struct unload_t : public attack_t
     td.weapon_multiplier        = 0.82;
     num_ticks                   = 3;
     base_tick_time              = from_seconds( 1 );
+    base_multiplier             = 1 + 0.33 * p -> talents.riddle -> rank();
   }
 
 // barrage buff resets Unload cooldown? tracer_missile, or in unload::ready()
