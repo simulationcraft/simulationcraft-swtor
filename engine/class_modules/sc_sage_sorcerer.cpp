@@ -989,7 +989,8 @@ struct mental_alacrity_t : public spell_t
     cooldown -> duration = from_seconds( 120.0 );
     harmful = false;
 
-    // TODO: Does it trigger a gcd?
+    use_off_gcd = true;
+    trigger_gcd = timespan_t::zero();
   }
 
   virtual void execute()
