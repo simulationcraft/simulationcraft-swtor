@@ -416,6 +416,8 @@ struct acid_blade_t : public action_t
     action_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_INTERNAL ),
     poison( new acid_blade_poison_t( p, n + "_poison" ) )
   {
+    check_talent( p -> talents.acid_blade -> rank() );
+
     parse_options( options_str );
 
     base_cost = 10;
@@ -606,6 +608,8 @@ struct laceration_t : public tech_attack_t
   laceration_t( class_t* p, const std::string& n, const std::string& options_str ) :
     tech_attack_t( n, p ), collateral_strike( 0 )
   {
+    check_talent( p -> talents.laceration -> rank() );
+
     parse_options( options_str );
 
     base_cost = 10;
@@ -723,6 +727,8 @@ struct corrosive_grenade_t : public poison_attack_t
   corrosive_grenade_t( class_t* p, const std::string& n, const std::string& options_str, bool weak=false ) :
     poison_attack_t( n, p ), corrosive_grenade_weak()
   {
+    check_talent( p -> talents.corrosive_grenade -> rank() );
+
     parse_options( options_str );
 
     range = 30.0;
@@ -843,7 +849,7 @@ struct corrosive_dart_t : public poison_attack_t
 
   virtual void execute()
   {
-    if ( corrosive_dart_weak)
+    if ( corrosive_dart_weak )
       targetdata() -> dot_corrosive_dart_weak.cancel();
 
     poison_attack_t::execute();
@@ -873,6 +879,8 @@ struct cull_t : public range_attack_t
     range_attack_t( n, p ),
     extra_strike( new cull_extra_t( p, n + "_extra" ) )
   {
+    check_talent( p -> talents.cull -> rank() );
+
     parse_options( options_str );
 
     base_cost = 25 - 3 * p -> talents.license_to_kill -> rank();
@@ -1039,6 +1047,8 @@ struct weakening_blast_t : public range_attack_t
   weakening_blast_t( class_t* p, const std::string& n, const std::string& options_str) :
     range_attack_t( n, p )
   {
+    check_talent( p -> talents.weakening_blast -> rank() );
+
     parse_options( options_str );
 
     range = 10.0;
