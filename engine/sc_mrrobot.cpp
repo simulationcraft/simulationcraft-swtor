@@ -42,7 +42,7 @@ void parse_profession( js::node_t* profile,
 
 void parse_skill_tree( std::vector<talent_t*>& tree, std::string& s )
 {
-  for ( unsigned i = 0; i < s.size() && i < tree.size(); ++i )
+  for ( size_t i = 0; i < s.size() && i < tree.size(); ++i )
   {
     signed char c = s[ s.size() - i - 1 ] - '0';
 
@@ -62,12 +62,11 @@ void parse_skills( player_t* p, js::node_t* profile )
   if ( !profile -> get( "SkillString", skill_string ) )
     return;
 
-  std::vector<std::string> tree_strings = split( skill_string, '-' );
+  auto tree_strings = split( skill_string, '-' );
+  size_t max = std::min( static_cast<size_t>( MAX_TALENT_TREES ),
+                         tree_strings.size() );
 
-  unsigned max = std::min( static_cast<unsigned>( MAX_TALENT_TREES ),
-                           tree_strings.size() );
-
-  for ( unsigned tree = 0; tree < max; ++tree )
+  for ( size_t tree = 0; tree < max; ++tree )
     parse_skill_tree( p -> talent_trees[ tree ], tree_strings[ tree ] );
 }
 
@@ -707,17 +706,16 @@ bool parse_talents( player_t& p, const std::string& talent_string )
   int encoding[ MAX_TALENT_SLOTS ];
   boost::fill( encoding, 0 );
 
-  std::vector<std::string> tree_strings;
-  util_t::string_split( tree_strings, talent_string, "-" );
+  auto tree_strings = split( talent_string, '-' );
 
-  for ( unsigned tree=0; tree < MAX_TALENT_TREES && tree < tree_strings.size(); ++tree )
+  for ( size_t tree=0; tree < MAX_TALENT_TREES && tree < tree_strings.size(); ++tree )
   {
-    unsigned count = 0;
-    for ( unsigned j=0; j < tree; j++ )
+    size_t count = 0;
+    for ( size_t j=0; j < tree; j++ )
       count += p.talent_trees[ j ].size();
-    unsigned tree_size = p.talent_trees[ tree ].size();
+    size_t tree_size = p.talent_trees[ tree ].size();
     std::string::size_type pos = tree_strings[ tree ].length();
-    unsigned tree_count = 0;
+    size_t tree_count = 0;
     while ( pos-- > 0 )
     {
       try

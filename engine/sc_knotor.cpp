@@ -212,7 +212,7 @@ const map_t knotor_map[] = {
 
 const map_t& get_map( int advanced_class, int version )
 {
-  for ( unsigned i = 0; i < sizeof_array( knotor_map ); ++i )
+  for ( size_t i = 0; i < sizeof_array( knotor_map ); ++i )
   {
     const map_t& map = knotor_map[ i ];
     if ( version == map.version &&

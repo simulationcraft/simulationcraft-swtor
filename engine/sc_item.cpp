@@ -406,10 +406,10 @@ bool item_t::decode_random_suffix()
                    name(), rsid, ilevel, quality, f );
   }
 
-  std::vector<std::string>          stat_list;
+  std::vector<std::string> stat_list;
   for ( int i = 0; i < 5; i++ )
   {
-    unsigned                         enchant_id;
+    unsigned enchant_id;
     if ( ! ( enchant_id = suffix_data.enchant_id[ i ] ) )
       continue;
 
@@ -478,7 +478,7 @@ bool item_t::decode_random_suffix()
   if ( ! encoded_stats_str.empty() && stat_list.size() > 0 )
     encoded_stats_str += "_";
 
-  for ( unsigned i = 0; i < stat_list.size(); i++ )
+  for ( size_t i = 0; i < stat_list.size(); i++ )
   {
     encoded_stats_str += stat_list[ i ];
 
@@ -967,7 +967,7 @@ bool item_t::download_slot( item_t& item,
   {
     bool has_local = false;
 
-    for ( unsigned i = 0; ! success && i < item.sim -> item_db_sources.size(); i++ )
+    for ( size_t i = 0; ! success && i < item.sim -> item_db_sources.size(); i++ )
     {
       const std::string& src = item.sim -> item_db_sources[ i ];
       if ( src == "local" )
@@ -1000,7 +1000,7 @@ bool item_t::download_slot( item_t& item,
   if ( cb != cache::ONLY )
   {
     // Download in earnest from a data source
-    for ( unsigned i = 0; ! success && i < item.sim -> item_db_sources.size(); i++ )
+    for ( size_t i = 0; ! success && i < item.sim -> item_db_sources.size(); i++ )
     {
       const std::string& src = item.sim -> item_db_sources[ i ];
       if ( src == "wowhead" )
@@ -1044,7 +1044,7 @@ bool item_t::download_item( item_t& /* item */, const std::string& /* item_id */
     bool has_local = false;
 
     // Check data source caches, except local
-    for ( unsigned i = 0; ! success && i < source_list.size(); i++ )
+    for ( size_t i = 0; ! success && i < source_list.size(); i++ )
     {
       if ( source_list[ i ] == "local" )
         has_local = true;
@@ -1071,7 +1071,7 @@ bool item_t::download_item( item_t& /* item */, const std::string& /* item_id */
   if ( cache::items() != cache::ONLY )
   {
     // Download in earnest from a data source
-    for ( unsigned i = 0; ! success && i < source_list.size(); i++ )
+    for ( size_t i = 0; ! success && i < source_list.size(); i++ )
     {
       if ( source_list[ i ] == "wowhead" )
         success = wowhead_t::download_item( item, item_id, false );
@@ -1102,7 +1102,7 @@ bool item_t::download_glyph( player_t* player, std::string& glyph_name, const st
     bool has_local = false;
 
     // Check data source caches, except local
-    for ( unsigned i = 0; ! success && i < player -> sim -> item_db_sources.size(); i++ )
+    for ( size_t i = 0; ! success && i < player -> sim -> item_db_sources.size(); i++ )
     {
       const std::string& src = player -> sim -> item_db_sources[ i ];
       if ( src == "local" )
@@ -1124,7 +1124,7 @@ bool item_t::download_glyph( player_t* player, std::string& glyph_name, const st
   if ( cache::items() != cache::ONLY )
   {
     // Download in earnest from a data source
-    for ( unsigned i = 0; ! success && i < player -> sim -> item_db_sources.size(); i++ )
+    for ( size_t i = 0; ! success && i < player -> sim -> item_db_sources.size(); i++ )
     {
       const std::string& src = player -> sim -> item_db_sources[ i ];
       if ( src == "wowhead" )
@@ -1164,7 +1164,7 @@ int item_t::parse_gem( item_t&            item,
     // Check data source caches, except local
     bool has_local = false;
 
-    for ( unsigned i = 0; gem_type == GEM_NONE && i < source_list.size(); i++ )
+    for ( size_t i = 0; gem_type == GEM_NONE && i < source_list.size(); i++ )
     {
       if ( source_list[ i ] == "local" )
         has_local = true;
@@ -1185,7 +1185,7 @@ int item_t::parse_gem( item_t&            item,
   if ( cache::items() != cache::ONLY )
   {
     // Nothing found from a cache, nor local item db. Let's fetch, again honoring our source list
-    for ( unsigned i = 0; gem_type == GEM_NONE && i < source_list.size(); i++ )
+    for ( size_t i = 0; gem_type == GEM_NONE && i < source_list.size(); i++ )
     {
       if ( source_list[ i ] == "wowhead" )
         gem_type = wowhead_t::parse_gem( item, gem_id );

@@ -349,7 +349,7 @@ regen_event_t::regen_event_t( sim_t* sim ) :
 
 void regen_event_t::execute()
 {
-  for ( unsigned int i = 0; i < sim -> actor_list.size(); i++ )
+  for ( size_t i = 0; i < sim -> actor_list.size(); i++ )
   {
     player_t* p = sim -> actor_list[i];
     if ( p -> sleeping ) continue;

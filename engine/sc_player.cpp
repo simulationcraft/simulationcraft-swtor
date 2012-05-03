@@ -443,7 +443,7 @@ bool player_t::init( sim_t* sim )
     if ( sim -> debug )
       log_t::output( sim, "Creating Pets." );
 
-    for ( unsigned int i = 0; i < sim -> actor_list.size(); i++ )
+    for ( size_t i = 0; i < sim -> actor_list.size(); i++ )
     {
       player_t* p = sim -> actor_list[i];
       p -> create_pets();
@@ -498,7 +498,7 @@ bool player_t::init( sim_t* sim )
   bool too_quiet = true; // Check for at least 1 active player
   bool zero_dds = true; // Check for at least 1 player != TANK/HEAL
 
-  for ( unsigned int i = 0; i < sim -> actor_list.size(); i++ )
+  for ( size_t i = 0; i < sim -> actor_list.size(); i++ )
   {
     player_t* p = sim -> actor_list[i];
     if ( sim -> default_actions && ! p -> is_pet() ) p -> action_list_str.clear();
@@ -524,7 +524,7 @@ bool player_t::init( sim_t* sim )
     log_t::output( sim, "Building Parties." );
 
   int party_index=0;
-  for ( unsigned i=0; i < sim -> party_encoding.size(); i++ )
+  for ( size_t i=0; i < sim -> party_encoding.size(); i++ )
   {
     std::string& party_str = sim -> party_encoding[ i ];
 
@@ -574,7 +574,7 @@ bool player_t::init( sim_t* sim )
   if ( sim -> debug )
     log_t::output( sim, "Registering Callbacks." );
 
-  for ( unsigned int i = 0; i < sim -> actor_list.size(); i++ )
+  for ( size_t i = 0; i < sim -> actor_list.size(); i++ )
   {
     player_t* p = sim -> actor_list[i];
     p -> register_callbacks();
@@ -3240,7 +3240,7 @@ dot_t* player_t::find_dot( const std::string& name ) const
 
 action_priority_list_t* player_t::find_action_priority_list( const std::string& name ) const
 {
-  for ( unsigned int i = 0; i < action_priority_list.size(); i++ )
+  for ( size_t i = 0; i < action_priority_list.size(); i++ )
   {
     action_priority_list_t* a = action_priority_list[i];
     if ( a -> name_str == name )
@@ -4199,7 +4199,7 @@ struct use_slot_t : public base_use_item_t
       return;
     }
 
-    for ( unsigned i = 0; i < player -> items.size(); ++i )
+    for ( size_t i = 0; i < player -> items.size(); ++i )
     {
       if ( player -> items[ i ].slot == slot )
       {
@@ -4884,7 +4884,7 @@ void player_t::copy_from( const player_t& source )
 
     for ( int i=0; i < MAX_TALENT_TREES; i++ )
     {
-      for ( unsigned j = 0; j < talent_trees[ i ].size(); j++ )
+      for ( size_t j = 0; j < talent_trees[ i ].size(); j++ )
       {
         talent_t* t = talent_trees[ i ][ j ];
         int rank = 0;
@@ -4902,7 +4902,7 @@ void player_t::copy_from( const player_t& source )
 
   action_list_str = source.action_list_str;
   action_priority_list.clear();
-  for ( unsigned int i = 0; i < source.action_priority_list.size(); i++ )
+  for ( size_t i = 0; i < source.action_priority_list.size(); i++ )
   {
     action_priority_list.push_back( source.action_priority_list[ i ] );
   }

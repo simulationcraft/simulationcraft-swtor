@@ -155,7 +155,7 @@ void sample_data_t::create_distribution( unsigned int num_buckets )
     double range = max - min + 2;
 
     distribution.assign( num_buckets, 0 );
-    for ( unsigned int i=0; i < data.size(); i++ )
+    for ( size_t i=0; i < data.size(); i++ )
     {
       int index = ( int ) ( num_buckets * ( data[ i ] - min + 1 ) / range );
       assert( 0 <= index && static_cast<size_t>( index ) < distribution.size() );

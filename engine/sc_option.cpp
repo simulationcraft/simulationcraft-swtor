@@ -89,7 +89,7 @@ void option_t::print( FILE* file )
   {
     std::vector<std::string>& v = *( ( std::vector<std::string>* ) address );
     util_t::fprintf( file, "%s=", name );
-    for ( unsigned i=0; i < v.size(); i++ ) util_t::fprintf( file, "%s%s", ( i?" ":"" ), v[ i ].c_str() );
+    for ( size_t i=0; i < v.size(); i++ ) util_t::fprintf( file, "%s%s", ( i?" ":"" ), v[ i ].c_str() );
     util_t::fprintf( file, "\n" );
   }
 }
@@ -124,7 +124,7 @@ void option_t::save( FILE* file )
     if ( ! v.empty() )
     {
       util_t::fprintf( file, "%s=", name );
-      for ( unsigned i=0; i < v.size(); i++ ) util_t::fprintf( file, "%s%s", ( i?" ":"" ), v[ i ].c_str() );
+      for ( size_t i=0; i < v.size(); i++ ) util_t::fprintf( file, "%s%s", ( i?" ":"" ), v[ i ].c_str() );
       util_t::fprintf( file, "\n" );
     }
   }

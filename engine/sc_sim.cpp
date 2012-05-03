@@ -552,7 +552,7 @@ static bool parse_item_sources( sim_t*             sim,
 
   sim -> item_db_sources.clear();
 
-  for ( unsigned i = 0; i < sources.size(); i++ )
+  for ( size_t i = 0; i < sources.size(); i++ )
   {
     if ( ! util_t::str_compare_ci( sources[ i ], "local" ) &&
          ! util_t::str_compare_ci( sources[ i ], "mmoc" ) &&
@@ -1509,7 +1509,7 @@ void sim_t::analyze()
 
   confidence_estimator = rng -> stdnormal_inv( 1.0 - ( 1.0 - confidence ) / 2.0 );
 
-  for ( unsigned int i = 0; i < actor_list.size(); i++ )
+  for ( size_t i = 0; i < actor_list.size(); i++ )
     analyze_player( actor_list[i] );
 
 
@@ -1583,7 +1583,7 @@ void sim_t::merge( sim_t& other_sim )
     b -> merge( buff_t::find( &other_sim, b -> name() ) );
   }
 
-  for ( unsigned int i = 0; i < actor_list.size(); i++ )
+  for ( size_t i = 0; i < actor_list.size(); i++ )
   {
     player_t* p = actor_list[i];
     player_t* other_p = other_sim.find_player( p -> index );
@@ -1658,7 +1658,7 @@ bool sim_t::execute()
 
 player_t* sim_t::find_player( const std::string& name )
 {
-  for ( unsigned int i = 0; i < actor_list.size(); i++ )
+  for ( size_t i = 0; i < actor_list.size(); i++ )
   {
     player_t* p = actor_list[i];
     if ( name == p -> name() ) return p;
@@ -1670,7 +1670,7 @@ player_t* sim_t::find_player( const std::string& name )
 
 player_t* sim_t::find_player( int index )
 {
-  for ( unsigned int i = 0; i < actor_list.size(); i++ )
+  for ( size_t i = 0; i < actor_list.size(); i++ )
   {
     player_t* p = actor_list[i];
     if ( index == p -> index ) return p;

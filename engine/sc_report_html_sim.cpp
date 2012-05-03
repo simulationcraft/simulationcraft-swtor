@@ -464,21 +464,20 @@ static void print_html_raid_summary( FILE*  file, sim_t* sim )
 
 static void print_html_raid_imagemap( FILE* file, sim_t* sim, int num, bool dps )
 {
-  std::vector<player_t*> player_list = ( dps ) ? sim -> players_by_dps : sim -> players_by_hps;
+  std::vector<player_t*> player_list;
+
+  if ( dps )
+    std::copy_if( sim -> players_by_dps.begin(), sim -> players_by_dps.end(),
+                  std::back_inserter( player_list ),
+                  []( const player_t* p ){ return p -> dps.mean > 0; } );
+  else
+    std::copy_if( sim -> players_by_hps.begin(), sim -> players_by_hps.end(),
+                  std::back_inserter( player_list ),
+                  []( const player_t* p ){ return p -> hps.mean > 0; } );
+
   int start = num * MAX_PLAYERS_PER_CHART;
-  unsigned int end = start + MAX_PLAYERS_PER_CHART;
-
-  for ( unsigned int i=0; i < player_list.size(); i++ )
-  {
-    player_t* p = player_list[ i ];
-    if ( dps ? p -> dps.mean <= 0 : p -> hps.mean <=0 )
-    {
-      player_list.resize( i );
-      break;
-    }
-  }
-
-  if ( end > player_list.size() ) end = static_cast<unsigned>( player_list.size() );
+  int end = std::min( start + MAX_PLAYERS_PER_CHART,
+                      static_cast<int>( player_list.size() ) );
 
   fprintf( file, "\t\t\tn = [" );
   for ( int i=end-1; i >= start; i-- )

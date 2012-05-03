@@ -29,7 +29,7 @@ static const double url_cache_version = 3.1;
 
 static mutex_t cache_mutex;
 
-static const unsigned int NETBUFSIZE = 1 << 15;
+static const size_t NETBUFSIZE = 1 << 15;
 
 struct url_cache_entry_t
 {

@@ -1991,7 +1991,7 @@ player_t* player_t::create_sith_sorcerer( sim_t* sim, const std::string& name, r
 
 void player_t::sage_sorcerer_init( sim_t* sim )
 {
-  for ( unsigned int i = 0; i < sim -> actor_list.size(); i++ )
+  for ( size_t i = 0; i < sim -> actor_list.size(); i++ )
   {
     player_t* p = sim -> actor_list[i];
     p -> buffs.force_valor = new buff_t( p, "force_valor_mark_of_power", 1 );

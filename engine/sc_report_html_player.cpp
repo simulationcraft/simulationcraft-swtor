@@ -1981,7 +1981,7 @@ static void print_html_player_buffs( FILE* file, player_t* p )
                "\t\t\t\t\t\t\t\t<td colspan=\"7\" class=\"filler\">\n"
                "\t\t\t\t\t\t\t\t\t<h4>Stack Uptimes</h4>\n"
                "\t\t\t\t\t\t\t\t\t<ul>\n" );
-      for ( unsigned int j= 0; j < b -> stack_uptime.size(); j++ )
+      for ( size_t j = 0; j < b -> stack_uptime.size(); j++ )
       {
         double uptime = b -> stack_uptime[ j ].uptime;
         if ( uptime > 0 )

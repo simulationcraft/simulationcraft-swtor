@@ -45,7 +45,7 @@ std::string report_t::encode_html( std::string buffer )
 void report_t::print_profiles( sim_t* sim )
 {
   int k = 0;
-  for ( unsigned int i = 0; i < sim -> actor_list.size(); i++ )
+  for ( size_t i = 0; i < sim -> actor_list.size(); i++ )
   {
     player_t& p = *sim -> actor_list[i];
     if ( p.is_pet() ) continue;
@@ -100,7 +100,7 @@ void report_t::print_profiles( sim_t* sim )
       file << "#Raid Summary\n"
               "# Contains " << k << " Players.\n";
 
-      for ( unsigned int i = 0; i < sim -> actor_list.size(); i++ )
+      for ( size_t i = 0; i < sim -> actor_list.size(); i++ )
       {
         player_t* p = sim -> actor_list[ i ];
         if ( p -> is_pet() ) continue;

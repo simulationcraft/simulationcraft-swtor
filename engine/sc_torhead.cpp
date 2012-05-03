@@ -35,7 +35,7 @@ std::string encode_tree( const std::vector<talent_t*>& tree )
 {
   std::string result;
 
-  unsigned i = 0;
+  size_t i = 0;
   while( i < tree.size() )
   {
     int first = 0;
@@ -51,7 +51,7 @@ std::string encode_tree( const std::vector<talent_t*>& tree )
     result += encode_pair( first, second );
   }
 
-  unsigned length = result.size();
+  size_t length = result.size();
   while ( length > 0 && result[ length - 1 ] == '0' )
     --length;
   result.resize( length );
@@ -116,10 +116,10 @@ bool parse_talents( player_t& p, const std::string& talent_string )
   boost::fill( encoding, 0 );
 
   int tree = 0;
-  unsigned tree_count = 0;
+  size_t tree_count = 0;
   size_t count = 0;
 
-  for ( unsigned int i=0; i < talent_string.length(); i++ )
+  for ( size_t i = 0; i < talent_string.size(); ++i )
   {
     if ( tree >= MAX_TALENT_TREES )
     {
@@ -191,7 +191,7 @@ std::string encode_talents( const player_t& p )
     ss << "http://www.torhead.com/skill-calc#" << ac_code;
 
     // This is necessary because sometimes the talent trees change shape between live/ptr.
-    for ( unsigned i=0; i < sizeof_array( p.talent_trees ); ++i )
+    for ( size_t i = 0; i < sizeof_array( p.talent_trees ); ++i )
     {
       if ( i > 0 ) ss << 'Z';
       ss << encode_tree( p.talent_trees[ i ] );

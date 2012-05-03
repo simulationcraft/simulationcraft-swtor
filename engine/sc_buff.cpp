@@ -602,7 +602,7 @@ void buff_t::expire()
       constant = false;
     }
 
-  for ( unsigned int i = 0; i < stack_uptime.size(); i++ )
+  for ( size_t i = 0; i < stack_uptime.size(); i++ )
     stack_uptime[ i ].update( false );
 }
 
@@ -675,7 +675,7 @@ void buff_t::merge( const buff_t* other )
   uptime_pct.merge( other -> uptime_pct );
 
   assert( stack_uptime.size() == other -> stack_uptime.size() );
-  for ( unsigned int i = 0; i < stack_uptime.size(); i++ )
+  for ( size_t i = 0; i < stack_uptime.size(); i++ )
     stack_uptime[ i ].merge ( other -> stack_uptime[ i ] );
 }
 

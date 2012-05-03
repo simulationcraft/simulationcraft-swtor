@@ -169,7 +169,7 @@ public:
       { '>', "&gt;" },
     };
 
-    for ( unsigned int i = 0; i < sizeof_array( replacements ); ++i )
+    for ( size_t i = 0; i < sizeof_array( replacements ); ++i )
       util_t::replace_all( v, replacements[ i ].from, replacements[ i ].to );
 
     return v;
