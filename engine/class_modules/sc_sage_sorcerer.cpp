@@ -986,20 +986,17 @@ struct mental_alacrity_t : public spell_t
     check_talent( p -> talents.mental_alacrity -> rank() );
 
     parse_options( options_str );
-    cooldown -> duration = from_seconds( 120.0 );
-    harmful = false;
 
-    use_off_gcd = true;
+    cooldown -> duration = from_seconds( 120 );
     trigger_gcd = timespan_t::zero();
+    harmful = false;
   }
 
   virtual void execute()
   {
     spell_t::execute();
 
-    class_t* p = cast();
-
-    p -> buffs.mental_alacrity -> trigger();
+    p() -> buffs.mental_alacrity -> trigger();
   }
 };
 
@@ -1009,7 +1006,7 @@ struct telekinetic_wave_t : public spell_t
 
   telekinetic_wave_t( class_t* p, const std::string& n, const std::string& options_str, bool is_tm = false ) :
     spell_t( n + std::string( is_tm ? "_tm" : "" ), p ),
-    tm( 0 )
+    tm( nullptr )
   {
     check_talent( p -> talents.telekinetic_wave -> rank() );
 
