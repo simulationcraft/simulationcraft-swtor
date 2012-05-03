@@ -13,15 +13,16 @@ class class_t;
 
 struct targetdata_t : public agent_smug::targetdata_t
 {
-  dot_t dot_corrosive_dart;
-  dot_t dot_adrenaline_probe;
+  buff_t* debuff_weakening_blast;
+
   dot_t dot_acid_blade_poison;
-  dot_t dot_stim_boost;
+  dot_t dot_adrenaline_probe;
+  dot_t dot_corrosive_dart;
+  dot_t dot_corrosive_dart_weak;
   dot_t dot_corrosive_grenade;
   dot_t dot_corrosive_grenade_weak;
-  dot_t dot_corrosive_dart_weak;
-
-  buff_t* debuff_weakening_blast;
+  dot_t dot_orbital_strike;
+  dot_t dot_stim_boost;
 
   targetdata_t( class_t& source, player_t& target );
 };
@@ -207,23 +208,25 @@ struct class_t : public agent_smug::class_t
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   agent_smug::targetdata_t( source, target ),
-  dot_corrosive_dart( "corrosive_dart", &source ),
-  dot_adrenaline_probe( "adrenaline_probe", &source ),
+  debuff_weakening_blast( new buff_t( this, "weakening_blast", 10, from_seconds( 15 ) ) ),
   dot_acid_blade_poison( "acid_blade_poison", &source ),
-  dot_stim_boost( "stim_boost", &source ),
+  dot_adrenaline_probe( "adrenaline_probe", &source ),
+  dot_corrosive_dart( "corrosive_dart", &source ),
+  dot_corrosive_dart_weak( "corrosive_dart_weak", &source ),
   dot_corrosive_grenade( "corrosive_grenade", &source ),
   dot_corrosive_grenade_weak( "corrosive_grenade_weak", &source ),
-  dot_corrosive_dart_weak( "corrosive_dart_weak", &source ),
-  debuff_weakening_blast( new buff_t( this, "weakening_blast", 10, from_seconds( 15 ) ) )
+  dot_orbital_strike( "orbital_strike", &source ),
+  dot_stim_boost( "stim_boost", &source )
 {
-  add( dot_corrosive_dart );
-  add( dot_adrenaline_probe );
+  add( *debuff_weakening_blast );
   add( dot_acid_blade_poison );
-  add( dot_stim_boost );
+  add( dot_adrenaline_probe );
+  add( dot_corrosive_dart );
+  add( dot_corrosive_dart_weak );
   add( dot_corrosive_grenade );
   add( dot_corrosive_grenade_weak );
-  add( dot_corrosive_dart_weak );
-  add( *debuff_weakening_blast );
+  add( dot_orbital_strike );
+  add( dot_stim_boost );
 }
 
 class action_t : public ::action_t
@@ -1058,6 +1061,28 @@ struct weakening_blast_t : public range_attack_t
 };
 
 
+// Orbital Strike | ??? =====================================================
+struct orbital_strike_t : public tech_attack_t
+{
+  orbital_strike_t( class_t* p, const std::string& n, const std::string& options_str) :
+      tech_attack_t( n, p, SCHOOL_ELEMENTAL )
+  {
+    parse_options( options_str );
+
+    base_cost                   = 30;
+    range                       = 30.0;
+    cooldown -> duration        = from_seconds( 60 );
+    td.standardhealthpercentmin = 
+    td.standardhealthpercentmax = 0.177;
+    td.power_mod                = 1.77;
+    num_ticks                   = 3; // TODO: sniper set bonus? +1 tick
+    base_tick_time              = from_seconds( 3 );
+    base_execute_time           = from_seconds( 3 );
+
+    aoe = 99; // TODO FIX: unlimited. "all targets in area"
+  }
+};
+
 // Cloaking Screen | ??? ====================================================
 // "vanish" allows reusing hidden strike.
 
@@ -1130,6 +1155,7 @@ struct coordination_t : public action_t
     if ( name == "corrosive_grenade"     ) return new corrosive_grenade_t( this, name, options_str );
     if ( name == "cull"                  ) return new cull_t( this, name, options_str );
     if ( name == "weakening_blast"       ) return new weakening_blast_t( this, name, options_str );
+    if ( name == "orbital_strike"        ) return new orbital_strike_t( this, name, options_str );
   }
 
   else if ( type == S_SCOUNDREL )
@@ -1353,6 +1379,7 @@ void class_t::init_actions()
       if ( ! talents.flanking -> rank() )
         action_list_str += "/backstab,if=energy>=70";
 
+      action_list_str += "/orbital_strike,if=energy>65";
       action_list_str += "/overload_shot,if=energy>";
       if ( set_bonus.rakata_enforcers -> four_pc() )
         action_list_str += "100";
