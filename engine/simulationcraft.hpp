@@ -3992,9 +3992,22 @@ inline Result join( Range&& r, Delim&& d )
                        std::forward<Delim>( d ) );
 }
 
+template <typename Bidirectional>
+std::string strip_whitespace( Bidirectional first, Bidirectional last )
+{
+  while ( first != last && std::isspace( *first ) )
+    ++first;
+  while ( first != last && std::isspace( *( last - 1 ) ) )
+    --last;
+  return std::string( first, last );
+}
+
+template <typename Range>
+std::string strip_whitespace( Range&& r )
+{ return strip_whitespace( std::begin( r ), std::end( r ) ); }
+
 std::string tolower( const std::string& src );
 #if 0 // UNUSED
-std::string trim( const std::string& src );
 void replace_char( std::string& str, char old_c, char new_c  );
 void replace_str( std::string& str, const std::string& old_str, const std::string& new_str  );
 bool str_to_float( const std::string& src, double& dest );

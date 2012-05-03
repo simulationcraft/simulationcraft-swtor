@@ -1471,20 +1471,6 @@ std::string tolower( const std::string& src )
 }
 
 #if 0 // UNUSED
-std::string trim( const std::string& src )
-{
-  std::string dest;
-
-  std::string::size_type begin = src.find_first_not_of( ' ' );
-  if ( begin != src.npos )
-  {
-    std::string::size_type end = src.find_last_not_of( ' ' );
-    dest.assign( src, begin, end - begin );
-  }
-
-  return dest;
-}
-
 void replace_char( std::string& str, char old_c, char new_c  )
 {
   for ( std::string::size_type i = 0, n = str.length(); i < n; ++i )

@@ -587,8 +587,8 @@ player_t* download_player( sim_t*             sim,
                            const std::string& key,
                            cache::behavior_t  caching )
 {
-  const auto parts = split( key, '|' );
-  const std::string& id = parts[0];
+  auto parts = split( key, '|' );
+  auto id = strip_whitespace( parts[ 0 ] );
 
   // Check form validity of the provided profile id before even starting to access the profile
   try { boost::uuids::string_generator()( id ); }
