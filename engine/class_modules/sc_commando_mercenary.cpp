@@ -12,6 +12,7 @@ class class_t;
 struct targetdata_t : public bount_troop::targetdata_t
 {
 
+  dot_t dot_rapid_shots;
   dot_t dot_unload;
 
   // TODO this applies arpen to target of 4% per stack
@@ -189,9 +190,11 @@ struct class_t : public bount_troop::class_t
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   bount_troop::targetdata_t( source, target ),
+  dot_rapid_shots( "rapid_shots", &source ),
   dot_unload( "unload", &source ),
   debuff_heat_signature( new buff_t( this, "heat_signature", 5, from_seconds( 15 ) ) )
 {
+  add( dot_rapid_shots );
   add( dot_unload );
   add( *debuff_heat_signature );
 }
@@ -415,6 +418,28 @@ struct rail_shot_t : public attack_t
 };
 
 // class_t::rapid_shots ===================================================================
+struct rapid_shots_t : public attack_t
+{
+  // TODO implement offhand shot
+  rapid_shots_t( class_t* p, const std::string& n, const std::string& options_str) :
+    // TODO check policy and school
+    attack_t( n, p, range_policy, SCHOOL_ENERGY )
+  {
+    // TODO
+    // rank_level_list = { ... 50 }
+    parse_options( options_str );
+
+    // REVIEW
+    // hitting way too hard. hits 5 times for each weapon for about 1/5 the damage. Can't work out how to translate the torhead data into these fields.
+    range                       = 30.0;
+    td.weapon                   = &( player -> main_hand_weapon );
+    td.weapon_multiplier        = -0.8;
+    td.power_mod                = 1;
+    num_ticks                   = 5;
+    base_tick_time              = from_seconds( 0.3 );
+  }
+};
+
 // class_t::rocket_punch ==================================================================
 // class_t::shoulder_slam =================================================================
 // class_t::stealth_scan ==================================================================
@@ -496,6 +521,7 @@ struct unload_t : public attack_t
       if ( name == "unload"              ) return new unload_t              ( this, name, options_str );
       if ( name == "rail_shot"           ) return new rail_shot_t           ( this, name, options_str );
       if ( name == "heatseeker_missiles" ) return new heatseeker_missiles_t ( this, name, options_str );
+      if ( name == "rapid_shots"         ) return new rapid_shots_t         ( this, name, options_str );
     }
     else if ( type == T_COMMANDO )
     {
@@ -694,6 +720,7 @@ void class_t::init_actions()
             action_list_str += "/unload,if=heat>76&buff.barrage.up";
             action_list_str += "/tracer_missile,if=heat>76";
             action_list_str += "/rail_shot,if=heat>76";
+            action_list_str += "/rapid_shots";
 
             switch ( primary_tree() )
             {
