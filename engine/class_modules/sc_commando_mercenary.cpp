@@ -14,6 +14,7 @@ struct targetdata_t : public bount_troop::targetdata_t
 
   dot_t dot_rapid_shots;
   dot_t dot_unload;
+  dot_t dot_unload_offhand;
   dot_t dot_vent_heat;
 
   // TODO this applies arpen to target of 4% per stack
@@ -201,16 +202,18 @@ struct class_t : public bount_troop::class_t
 };
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
-  bount_troop::targetdata_t( source, target ),
-  dot_rapid_shots ( "rapid_shots" , &source ), 
-  dot_unload      ( "unload"      , &source ), 
-  dot_vent_heat   ( "vent_heat"   , &source ), 
+  bount_troop::targetdata_t ( source           , target  ), 
+  dot_rapid_shots           ( "rapid_shots"    , &source ), 
+  dot_unload                ( "unload"         , &source ), 
+  dot_unload_offhand        ( "unload_offhand" , &source ), 
+  dot_vent_heat             ( "vent_heat"      , &source ), 
   debuff_heat_signature( new buff_t( this, "heat_signature", 5, from_seconds( 15 ) ) )
 {
-  add ( dot_rapid_shots        ) ;
-  add ( dot_unload             ) ;
-  add ( dot_vent_heat          ) ;
-  add ( *debuff_heat_signature ) ;
+  add ( dot_rapid_shots        );
+  add ( dot_unload             );
+  add ( dot_unload_offhand     );
+  add ( dot_vent_heat          );
+  add ( *debuff_heat_signature );
 }
 
 class action_t : public ::action_t
@@ -273,6 +276,7 @@ struct terminal_velocity_attack_t : public attack_t
 
   virtual void execute()
   {
+    // TODO BUG: tick damage still has an execute which hits for 0. that can crit and so incorrectly procs terminal velocity
     attack_t::execute();
     terminal_velocity();
   }
@@ -291,6 +295,7 @@ struct terminal_velocity_attack_t : public attack_t
         result == RESULT_CRIT
         && p -> rngs.terminal_velocity -> roll ( p -> talents.terminal_velocity -> rank() * 0.5 )
         // XXX can't do this. it stops working after the first iteration??
+        // using a class var instead for now, which resets in ::reset
         // && ( sim -> current_time - p -> procs.terminal_velocity -> last_proc ) > from_seconds( 3.0 )
        )
     {
@@ -304,7 +309,6 @@ struct terminal_velocity_attack_t : public attack_t
         p -> procs.terminal_velocity -> occur();
       }
     }
-
   }
 };
 
@@ -492,7 +496,6 @@ struct tracer_missile_t : public missile_attack_t
 struct rail_shot_t : public attack_t
 {
   rail_shot_t( class_t* p, const std::string& n, const std::string& options_str) :
-    // TODO TEST: ENERGY or tech? assuming energy since it's weapon damage
     attack_t( n, p, range_policy, SCHOOL_ENERGY )
   {
     parse_options( options_str );
@@ -555,36 +558,56 @@ struct rapid_shots_t : public attack_t
 // class_t::rocket_punch ==================================================================
 // class_t::shoulder_slam =================================================================
 // class_t::stealth_scan ==================================================================
+
 // class_t::thermal_sensor_override =======================================================
+// TODO next ability generates no heat 15 second cooldown.
+
 // class_t::unload ========================================================================
 struct unload_t : public terminal_velocity_attack_t
 {
-  // TODO offhand attack
-  unload_t( class_t* p, const std::string& n, const std::string& options_str) :
-    // TODO test range_policy and school energy?
-    terminal_velocity_attack_t( p, n, range_policy, SCHOOL_ENERGY )
+  unload_t* offhand_attack;
+  unload_t( class_t* p, const std::string& n, const std::string& options_str,
+      bool is_offhand = false ) :
+    terminal_velocity_attack_t( p, n, range_policy, SCHOOL_ENERGY ), offhand_attack( 0 )
   {
     // TODO
     // rank_level_list = { ... 50 }
 
     parse_options( options_str );
 
-    base_cost                   = 16;
-    cooldown -> duration        = from_seconds( 15.0 );
     range                       = 30.0;
-    channeled                   = true;
-    td.standardhealthpercentmin = 
-    td.standardhealthpercentmax = 0.0263;
-    td.power_mod                = 0.263;
-    // XXX REVIEW
-    // added td.weapon & td.weapon_multiplier to sc_action_t instead of making it reference weapon
-    // since direct_damage will work with just weapon set and did not want to break that behavior
-    td.weapon                   = &( player -> main_hand_weapon );
-    td.weapon_multiplier        = 0.82;
     num_ticks                   = 3;
     base_tick_time              = from_seconds( 1 );
-    base_multiplier             = 1 + 0.33 * p -> talents.riddle -> rank();
+    base_multiplier             = 1 + ( 0.33 * p -> talents.riddle -> rank() );
     crit_bonus                  += 0.15 * p -> talents.target_tracking -> rank();
+
+    if ( is_offhand )
+    {
+      background           =
+      dual                 = true;
+      base_cost            = 0;
+      trigger_gcd          = timespan_t::zero();
+      // TODO FIX not hitting for anything...
+      td.weapon            = &( player -> off_hand_weapon );
+      td.weapon_multiplier = -0.3;
+
+    }
+    else
+    {
+      offhand_attack = new unload_t( p, n+"_offhand", options_str, true);
+      base_cost                   = 16;
+      cooldown -> duration        = from_seconds( 15.0 );
+      channeled                   = true;
+      td.standardhealthpercentmin = 
+      td.standardhealthpercentmax = 0.0263;
+      td.power_mod                = 0.263;
+      // XXX REVIEW
+      // added td.weapon & td.weapon_multiplier to sc_action_t instead of making it reference weapon
+      // since direct_damage will work with just weapon set and did not want to break that behavior
+      // not hitting hard enough either. maybe 20% less?
+      td.weapon                   = &( player -> main_hand_weapon );
+      td.weapon_multiplier        = -0.82;
+    }
   }
 
   // TODO CHECK barrage buff resets Unload cooldown? tracer_missile, or in unload::ready()
@@ -607,7 +630,15 @@ struct unload_t : public terminal_velocity_attack_t
   virtual void last_tick(dot_t* d)
   {
     terminal_velocity_attack_t::last_tick( d );
-    p() -> buffs.barrage -> expire();
+    // BUG: how to be sure MH/OH is the last one?
+      p() -> buffs.barrage -> expire();
+  }
+
+  virtual void execute()
+  {
+    terminal_velocity_attack_t::execute();
+    if ( offhand_attack )
+      offhand_attack->schedule_execute();
   }
 };
 
@@ -631,7 +662,6 @@ struct vent_heat_t : public action_t
     action_t::execute();
     class_t* p = cast();
 
-    // TODO TEST: confirm if immediately gives 34 + 16 with talents
     p -> resource_gain( RESOURCE_HEAT, 34, p -> gains.vent_heat );
     if ( unsigned rank = p -> talents.improved_vents -> rank() )
       p -> resource_gain( RESOURCE_HEAT, 8 * rank, p -> gains.improved_vents );
