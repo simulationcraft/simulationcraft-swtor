@@ -552,6 +552,7 @@ struct rapid_shots_t : public attack_t
     base_accuracy               -= 0.10;
     num_ticks                   = 5;
     base_tick_time              = from_seconds( 0.3 );
+    base_multiplier             = 0.2;
   }
 };
 
@@ -933,15 +934,15 @@ void class_t::init_actions()
             // TODO check for arsenal
             action_list_str += "/high_velocity_gas_cylinder,if=!buff.high_velocity_gas_cylinder.up";
             // TODO check for talent improved vents
-            action_list_str += "/vent_heat,if=heat<=65";
+            action_list_str += "/vent_heat,if=heat<=66";
             // TODO check for barrage talent
             action_list_str += "/unload,if=heat>76&buff.barrage.up";
             // TODO check for talent
-            action_list_str += "/heatseeker_missiles,if=heat>76&buff.tracer_lock.stack>=5";
-            action_list_str += "/tracer_missile,if=heat>76";
-            action_list_str += "/rail_shot,if=heat>76";
+            action_list_str += "/heatseeker_missiles,if=heat>76";
+            // todo check for 4 piece
+            action_list_str += "/rail_shot,if=heat>75&buff.tracer_lock.stack>=5";
             // TODO check for talent tracer missile
-            action_list_str += "/tracer_missile,if=heat>76";
+            action_list_str += "/tracer_missile,if=heat>71";
             action_list_str += "/rapid_shots";
 
             switch ( primary_tree() )
