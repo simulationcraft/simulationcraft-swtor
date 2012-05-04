@@ -423,16 +423,16 @@ struct rail_shot_t : public attack_t
   {
     parse_options( options_str );
 
-    base_cost                   = 16;
-    cooldown -> duration        = from_seconds( 15 );
-    range                       = 30.0;
+    base_cost                    =  16;
+    cooldown -> duration         =  from_seconds( 15 );
+    range                        =  30.0;
+    base_accuracy               -= 0.10;
+    dd.power_mod                 =  1.9;
+    dd.standardhealthpercentmin  =  
+    dd.standardhealthpercentmax  =  0.19;
 
-    dd.power_mod                = 1.9;
-    dd.standardhealthpercentmin =
-    dd.standardhealthpercentmax = 0.19;
-
-    weapon                      = &( player -> main_hand_weapon );
-    weapon_multiplier           = 0.27;
+    weapon                       =  &( player -> main_hand_weapon );
+    weapon_multiplier            =  0.27;
   }
 };
 
@@ -676,11 +676,13 @@ void class_t::init_talents()
 
 void class_t::init_base()
 {
-    base_t::init_base();
+  base_t::init_base();
 
-    default_distance = 20;
-    distance = default_distance;
+  default_distance = 20;
+  distance = default_distance;
 
+  attribute_multiplier_initial[ ATTR_AIM ] += 0.03 * talents.ironsights -> rank();
+  set_base_accuracy( get_base_accuracy() + 0.01 * talents.advanced_targeting -> rank() );
 }
 
 // class_t::init_benefits =================================================================
