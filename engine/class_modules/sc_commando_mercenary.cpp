@@ -468,6 +468,16 @@ struct rail_shot_t : public attack_t
     weapon                       =  &( player -> main_hand_weapon );
     weapon_multiplier            =  0.27;
   }
+
+  virtual void player_buff()
+  {
+    attack_t::player_buff();
+    class_t* p = cast();
+    if ( p -> talents.upgraded_arsenal -> rank() && p -> buffs.high_velocity_gas_cylinder -> up() )
+      base_cost = 8;
+    else
+      base_cost = 16;
+  }
 };
 
 // class_t::rapid_shots ===================================================================
