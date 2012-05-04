@@ -44,6 +44,7 @@ struct class_t : public bount_troop::class_t
     struct gains_t
     {
       gain_t* improved_vents;
+      gain_t* terminal_velocity;
       gain_t* vent_heat;
 
     } gains;
@@ -51,13 +52,13 @@ struct class_t : public bount_troop::class_t
     // Procs
     struct procs_t
     {
-
+      proc_t* terminal_velocity;
     } procs;
 
     // RNGs
     struct rngs_t
     {
-
+      rng_t* terminal_velocity;
     } rngs;
 
     // Benefits
@@ -273,6 +274,23 @@ struct missile_attack_t : public attack_t
     if ( unsigned rank = p() -> talents.mandalorian_iron_warheads -> rank() )
       player_multiplier += 0.03 * rank;
   }
+
+  virtual void execute()
+  {
+    attack_t::execute();
+
+    class_t* p = cast();
+
+    if (
+        result == RESULT_CRIT
+        && p -> rngs.terminal_velocity -> roll ( p -> talents.terminal_velocity -> rank() * 0.5 )
+        && ( sim -> current_time - p -> procs.terminal_velocity -> last_proc ) > from_seconds( 3.0 )
+       )
+    {
+      p -> resource_gain( RESOURCE_HEAT, 8, p -> gains.terminal_velocity );
+      p -> procs.terminal_velocity -> occur();
+    }
+  }
 };
 
 // MERC ABILITIES
@@ -294,18 +312,21 @@ struct heatseeker_missiles_t : public missile_attack_t
 
     parse_options( options_str );
 
-    base_cost                   = 16;
-    cooldown -> duration        = from_seconds( 15 );
-    range                       = 30.0;
+    base_cost                    = 16;
+    cooldown -> duration         = from_seconds( 15 );
+    range                        = 30.0;
 
-    dd.power_mod                = 2.08;
-    dd.standardhealthpercentmin = 0.168;
-    dd.standardhealthpercentmax = 0.248;
+    dd.power_mod                 = 2.08;
+    dd.standardhealthpercentmin  = 0.168;
+    dd.standardhealthpercentmax  = 0.248;
+
+    // TODO TEST: crit_bonus, crit_multiplier, or crit_bonus_multiplier? assuming additive to surge
+    crit_bonus                  += 0.15 * p -> talents.target_tracking -> rank();
   }
 
   virtual void target_debuff( player_t* tgt, dmg_type type )
   {
-    attack_t::target_debuff( tgt, type );
+    missile_attack_t::target_debuff( tgt, type );
     if ( unsigned stacks = p() -> buffs.tracer_lock -> stack() )
       target_multiplier += 0.05 * stacks;
   }
@@ -313,7 +334,7 @@ struct heatseeker_missiles_t : public missile_attack_t
   virtual void execute()
   {
     p() -> buffs.tracer_lock -> expire();
-    attack_t::execute();
+    missile_attack_t::execute();
   }
 };
 
@@ -413,12 +434,12 @@ struct tracer_missile_t : public missile_attack_t
     if ( ! p() -> talents.tracer_missile -> rank() )
       return false;
 
-    return attack_t::ready();
+    return missile_attack_t::ready();
   }
 
   virtual void execute()
   {
-    attack_t::execute();
+    missile_attack_t::execute();
 
     if ( result_is_hit() )
     {
@@ -792,8 +813,9 @@ void class_t::init_gains()
 {
     base_t::init_gains();
 
-    gains.improved_vents = get_gain( "improved_vents" );
-    gains.vent_heat      = get_gain( "vent_heat" );
+    gains.improved_vents    = get_gain( "improved_vents" );
+    gains.terminal_velocity = get_gain( "terminal_velocity" );
+    gains.vent_heat         = get_gain( "vent_heat" );
 }
 
 // class_t::init_procs ====================================================================
@@ -802,14 +824,16 @@ void class_t::init_procs()
 {
     base_t::init_procs();
 
+    procs.terminal_velocity = get_proc( "Terminal Velocity" );
 }
 
 // class_t::init_rng ======================================================================
 
 void class_t::init_rng()
 {
-    base_t::init_rng();
+  base_t::init_rng();
 
+  rngs.terminal_velocity = get_rng( "terminal_velocity" );
 }
 
 // class_t::init_actions ==================================================================
