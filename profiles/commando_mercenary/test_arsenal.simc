@@ -1,7 +1,9 @@
 #!./simc
-
-log=1
-iterations=1
+html=arsenal.html
+#log=1
+#iterations=1
+#debug=1
+iterations=1000
 threads=1
 
 mercenary="Mercenary 1-20-1"
@@ -15,8 +17,15 @@ professions=none
 talents=http://www.torhead.com/skill-calc#300Mc0zZMIkdRrdozfzZs.1
 actions=stim,type=exotech_resolve
 actions+=/snapshot_stats
-actions+=/unload,if=buff.barrage.up
+#actions+=/high_velocity_gas_cylinder,if=!buff.high_velocity_gas_cylinder.up
+# test for heat_signatures on target before rail_shot
+actions+=/vent_heat,if=heat<=65
+actions+=/unload
+actions+=/heatseeker_missiles,if=heat>76
+actions+=/rail_shot,if=heat>76&buff.tracer_lock.stack>=5
 actions+=/tracer_missile,if=heat>76
+#actions+=/rapid_shots
+actions+=/high_velocity_gas_cylinder,if=!buff.high_velocity_gas_cylinder.up
 head=rakata_eliminators_helmet,ilevel=58,quality=artifact,stats=861armor_132endurance_112aim_31power_51accuracy
 ear=rakata_eliminators_adaptor,ilevel=58,quality=artifact,stats=98endurance_85aim_51accuracy_51crit
 shirt=datacrons,stats=40strength_40aim_40cunning_40willpower_40endurance_40presence
