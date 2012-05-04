@@ -225,7 +225,9 @@ void action_t::init_action_t_()
   tick_dmg                       = 0.0;
   num_ticks                      = 0;
   weapon                         = nullptr;
+  td.weapon                      = nullptr;
   weapon_multiplier              = std::numeric_limits<decltype(weapon_multiplier)>::lowest();
+  td.weapon_multiplier           = std::numeric_limits<decltype(weapon_multiplier)>::lowest();
   normalize_weapon_speed         = false;
   base_add_multiplier            = 1.0;
   base_aoe_multiplier            = 1.0;
@@ -543,6 +545,7 @@ double action_t::calculate_tick_weapon_damage()
 {
   if ( ! td.weapon ) return 0;
 
+  std::cout << "td.weapon:" << td.weapon << "\n";
   double dmg = sim -> range( td.weapon -> min_dmg, td.weapon -> max_dmg ) + td.weapon -> bonus_dmg;
 
   // OH penalty
@@ -574,9 +577,9 @@ double action_t::calculate_tick_damage()
 
   double weapon_dmg = 0;
   // XXX hack test for mercenaries unload
+  assert( ( td.weapon == nullptr ) == ( td.weapon_multiplier == std::numeric_limits<decltype( td.weapon_multiplier )>::lowest() ) );
   if ( td.weapon )
   {
-  assert( ( td.weapon == nullptr ) == ( td.weapon_multiplier == std::numeric_limits<decltype( td.weapon_multiplier )>::lowest() ) );
     // x% weapon damage + Y
     // e.g. Obliterate, Shred, Backstab
     // XXX hack temp
