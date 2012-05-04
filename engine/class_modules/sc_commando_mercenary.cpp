@@ -409,6 +409,7 @@ struct power_shot_t : public attack_t
     // i think there's a lot missing from this ability on torhead. moving on...
     weapon = &( player -> off_hand_weapon );
     weapon_multiplier = 0.15;
+    base_crit += ( p -> set_bonus.rakata_eliminators -> two_pc() ? 0.15 : 0 );
   }
 
   virtual void execute()
@@ -441,25 +442,16 @@ struct tracer_missile_t : public missile_attack_t
 
     parse_options( options_str );
 
-    base_cost                   = 16;
-    base_execute_time           = from_seconds( 2 - 0.5 * p -> talents.muzzle_fluting -> rank() );
-    range                       = 30.0;
-    // TODO uncomment.
-    //travel_speed                = 18.4; // XXX guess. how to convert theirs to ours?
-    dd.power_mod                = 1.71;
-    dd.standardhealthpercentmin = 0.131;
-    dd.standardhealthpercentmax = 0.211;
+    base_cost                    = 16;
+    base_execute_time            = from_seconds( 2 - 0.5 * p -> talents.muzzle_fluting -> rank() );
+    range                        = 30.0;
+    travel_speed                 = 18.4; // XXX guess. how to convert theirs to ours?
+    dd.power_mod                 = 1.71;
+    dd.standardhealthpercentmin  = 0.131;
+    dd.standardhealthpercentmax  = 0.211;
+    base_crit                   += ( p -> set_bonus.rakata_eliminators -> two_pc() ? 0.15 : 0 );
 
-  }
 
-  // FIXME is this the right place to check if a person has an ability?
-  // Or should that go in the action list
-  virtual bool ready()
-  {
-    if ( ! p() -> talents.tracer_missile -> rank() )
-      return false;
-
-    return missile_attack_t::ready();
   }
 
   virtual void execute()
@@ -468,7 +460,8 @@ struct tracer_missile_t : public missile_attack_t
 
     if ( result_is_hit() )
     {
-      // XXX REVIEW can't this thing be put in action_t or something? it's C voodoo to me
+      // XXX REVIEW can't this thing be put in action_t or something so we always have p?
+      // it's C voodoo to me
       class_t& p = *cast();
 
       // BUG: debuff is ignoring travel time and incorrectly applying instantly
@@ -499,12 +492,12 @@ struct tracer_missile_t : public missile_attack_t
 struct rail_shot_t : public attack_t
 {
   rail_shot_t( class_t* p, const std::string& n, const std::string& options_str) :
-    // ENERGY or tech?
+    // TODO TEST: ENERGY or tech? assuming energy since it's weapon damage
     attack_t( n, p, range_policy, SCHOOL_ENERGY )
   {
     parse_options( options_str );
 
-    base_cost                    =  16;
+    base_cost                    =  16 - ( p -> set_bonus.rakata_eliminators -> four_pc() ? 8 : 0 );
     cooldown -> duration         =  from_seconds( 15 );
     range                        =  30.0;
     dd.power_mod                 =  1.9;
@@ -520,9 +513,9 @@ struct rail_shot_t : public attack_t
     attack_t::player_buff();
     class_t* p = cast();
     if ( p -> talents.upgraded_arsenal -> rank() && p -> buffs.high_velocity_gas_cylinder -> up() )
-      base_cost = 8;
+      base_cost = 8 - ( p -> set_bonus.rakata_eliminators -> four_pc() ? 8 : 0 );
     else
-      base_cost = 16;
+      base_cost = 16 - ( p -> set_bonus.rakata_eliminators -> four_pc() ? 8 : 0 );
 
     if ( p -> talents.tracer_lock -> rank() )
       player_multiplier += 0.06 * p -> buffs.tracer_lock -> stack();
@@ -595,6 +588,7 @@ struct unload_t : public terminal_velocity_attack_t
   }
 
   // TODO CHECK barrage buff resets Unload cooldown? tracer_missile, or in unload::ready()
+  // what if we cancel the channel before we expire the buff? it'll forever be ready...
   virtual bool ready()
   {
     if ( p() -> buffs.barrage -> up() )
@@ -637,7 +631,7 @@ struct vent_heat_t : public action_t
     action_t::execute();
     class_t* p = cast();
 
-    // TODO check immediately gives 34 + 16 with talents
+    // TODO TEST: confirm if immediately gives 34 + 16 with talents
     p -> resource_gain( RESOURCE_HEAT, 34, p -> gains.vent_heat );
     if ( unsigned rank = p -> talents.improved_vents -> rank() )
       p -> resource_gain( RESOURCE_HEAT, 8 * rank, p -> gains.improved_vents );
@@ -657,7 +651,6 @@ struct vent_heat_t : public action_t
 // ==========================================================================
 
 // TODO passives
-// class_t::riddle increases unload damage by 33% passive?
 // class_t::hired_protection reduced the cooldown of revive by 100%
 
 // class_t::create_action =================================================================
@@ -703,6 +696,11 @@ double class_t::armor_penetration() const
 
   if ( buffs.high_velocity_gas_cylinder -> up() )
     arpen += 0.35;
+
+  // XXX TODO HACK FIX hacking these in for now. they should be put integrated into player or target
+  // somehow, like shatter shot is
+  // sunder and heatsignature
+  arpen += 0.4;
 
   return arpen;
 }
