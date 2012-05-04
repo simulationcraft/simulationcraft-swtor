@@ -580,5 +580,9 @@ void player_t::enemy_combat_begin( sim_t* sim )
   {
       if ( sim -> overrides.shatter_shot )
         p -> debuffs.shatter_shot -> override(); // move to correct class
+      if ( sim -> overrides.sunder )
+        p -> debuffs.sunder -> override( 5, -1); // move to correct class
+      if ( sim -> overrides.heat_signature )
+        p -> debuffs.heat_signature -> override(5, -1); // move to correct class
   }
 }

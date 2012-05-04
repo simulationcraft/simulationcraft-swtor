@@ -539,6 +539,24 @@ double action_t::calculate_weapon_damage()
 
   return dmg;
 }
+double action_t::calculate_tick_weapon_damage()
+{
+  if ( ! td.weapon ) return 0;
+
+  double dmg = sim -> range( td.weapon -> min_dmg, td.weapon -> max_dmg ) + td.weapon -> bonus_dmg;
+
+  // OH penalty
+  if ( td.weapon -> slot == SLOT_OFF_HAND )
+    dmg *= 0.3; // FIXME: check this multiplier for SWTOR, Marauder talent will increase it.
+
+  if ( sim -> debug )
+  {
+    log_t::output( sim, "%s tick weapon damage for %s: dmg=%.3f bd=%.3f",
+                   player -> name(), name(), dmg, weapon -> bonus_dmg );
+  }
+
+  return dmg;
+}
 
 // action_t::calculate_tick_damage ==========================================
 
@@ -562,10 +580,7 @@ double action_t::calculate_tick_damage()
     // x% weapon damage + Y
     // e.g. Obliterate, Shred, Backstab
     // XXX hack temp
-    weapon_t* tweapon = weapon;
-    weapon = td.weapon;
-    weapon_dmg = calculate_weapon_damage() * ( 1 + td.weapon_multiplier );
-    weapon = tweapon;
+    weapon_dmg = calculate_tick_weapon_damage() * ( 1 + td.weapon_multiplier );
     dmg += weapon_dmg;
   }
 

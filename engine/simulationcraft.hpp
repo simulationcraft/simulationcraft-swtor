@@ -1784,6 +1784,8 @@ public:
     int coordination;// 5% crit. implement as buff, also add equal republic buffs
     int force_valor; // 5% stat bonus. implement sith version
     int shatter_shot; // -20% target armor. implement as buff, also add equal buffs
+    int sunder; // -20% target armor. (4%x5) implement as buff, also add equal buffs
+    int heat_signature; // -20% target armor. (4%x5) implement as buff, also add equal buffs
     int unnatural_might;// 5% damage bonus. implement as buff, also add equal republic buffs
     int fortification_hunters_boon; // 5% endurance
   };
@@ -2611,6 +2613,8 @@ public:
     debuff_t* flying;
     debuff_t* invulnerable;
     debuff_t* shatter_shot;
+    debuff_t* sunder;
+    debuff_t* heat_signature;
     debuff_t* vulnerable;
 
     bool snared();
@@ -3291,6 +3295,7 @@ public:
   virtual double calculate_direct_damage( int chain_target = 0 );
   virtual double calculate_tick_damage();
   virtual double calculate_weapon_damage();
+  virtual double calculate_tick_weapon_damage();
   virtual double armor() const;
   virtual void   consume_resource();
   virtual void   execute();

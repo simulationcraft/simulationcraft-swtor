@@ -1716,6 +1716,8 @@ void sim_t::use_optimal_buffs_and_debuffs( int value )
   overrides.force_valor                 = optimal_raid;
   overrides.fortification_hunters_boon  = optimal_raid;
   overrides.shatter_shot                = optimal_raid;
+  overrides.sunder                      = optimal_raid;
+  overrides.heat_signature              = optimal_raid;
   overrides.unnatural_might             = optimal_raid;
 }
 
@@ -1976,6 +1978,8 @@ void sim_t::create_options()
     { "override.force_valor",             OPT_BOOL,   &( overrides.force_valor                     ) },
     { "override.fortification_hunters_boon", OPT_BOOL, &( overrides.fortification_hunters_boon     ) },
     { "override.shatter_shot",            OPT_BOOL,   &( overrides.shatter_shot                    ) },
+    { "override.sunder",                  OPT_BOOL,   &( overrides.sunder                          ) },
+    { "override.heat_signature",          OPT_BOOL,   &( overrides.heat_signature                  ) },
     { "override.unnatural_might",         OPT_BOOL,   &( overrides.unnatural_might                 ) },
     // Stat Enchants
     { "default_enchant_strength",                 OPT_FLT,  &( enchant.attribute[ ATTR_STRENGTH  ] ) },

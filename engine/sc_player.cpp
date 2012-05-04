@@ -1226,23 +1226,25 @@ void player_t::init_buffs()
 {
   if ( sim -> debug ) log_t::output( sim, "Initializing buffs for player (%s)", name() );
 
-  buffs.power_potion    = new stat_buff_t( this, "power_potion", STAT_POWER, 0, 1, from_seconds( 15.0 ), from_seconds( 180.0 ) );
+  buffs.power_potion        = new stat_buff_t( this, "power_potion", STAT_POWER, 0, 1, from_seconds( 15.0 ), from_seconds( 180.0 ) );
 
-  buffs.coordination    = new buff_t( this, "coordination",     1 );
+  buffs.coordination        = new buff_t( this, "coordination",     1 );
   buffs.coordination -> constant = true;
 
-  buffs.unnatural_might = new buff_t( this, "unnatural_might",  1 );
+  buffs.unnatural_might     = new buff_t( this, "unnatural_might",  1 );
   buffs.unnatural_might -> constant = true;
 
-  buffs.raid_movement   = new buff_t( this, "raid_movement",    1 );
-  buffs.self_movement   = new buff_t( this, "self_movement",    1 );
-  buffs.stunned         = new buff_t( this, "stunned",         -1 );
-  debuffs.bleeding      = new debuff_t( this, "bleeding",     -1 );
-  debuffs.invulnerable  = new debuff_t( this, "invulnerable", -1 );
-  debuffs.vulnerable    = new debuff_t( this, "vulnerable",   -1 );
+  buffs.raid_movement       = new buff_t( this, "raid_movement",    1 );
+  buffs.self_movement       = new buff_t( this, "self_movement",    1 );
+  buffs.stunned             = new buff_t( this, "stunned",         -1 );
+  debuffs.bleeding          = new debuff_t( this, "bleeding",     -1 );
+  debuffs.invulnerable      = new debuff_t( this, "invulnerable", -1 );
+  debuffs.vulnerable        = new debuff_t( this, "vulnerable",   -1 );
 
-  debuffs.shatter_shot  = new debuff_t( this, "shatter_shot", 1, from_seconds( 45.0 ) ); // TODO: move to player_t extension of correct class
-  debuffs.flying        = new debuff_t( this, "flying",   -1 );
+  debuffs.shatter_shot      = new debuff_t( this, "shatter_shot", 1, from_seconds( 45.0 ) ); // TODO: move to player_t extension of correct class
+  debuffs.sunder            = new debuff_t( this, "sunder", 5, from_seconds( 15.0 ) ); // TODO: move to player_t extension of correct class
+  debuffs.heat_signature    = new debuff_t( this, "heat_signature", 5, from_seconds( 15.0 ) ); // TODO: move to player_t extension of correct class
+  debuffs.flying            = new debuff_t( this, "flying",   -1 );
 }
 
 // player_t::init_gains =====================================================
@@ -1473,7 +1475,13 @@ double player_t::armor_penetration() const
 // player_t::armor_penetration_debuff =======================================
 
 double player_t::armor_penetration_debuff() const
-{ return debuffs.shatter_shot -> up() ? 0.2 : 0; }
+{
+  double arpen = 0.0
+    + 0.20 * debuffs.shatter_shot -> stack()
+    + 0.04 * debuffs.sunder -> stack()
+    + 0.04 * debuffs.heat_signature -> stack();
+  return arpen;
+}
 
 // player_t::kinetic_damage_reduction =======================================
 
