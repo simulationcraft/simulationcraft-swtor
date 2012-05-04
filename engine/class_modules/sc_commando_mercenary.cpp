@@ -261,26 +261,29 @@ struct attack_t : public action_t
   }
 };
 
-struct missile_attack_t : public attack_t
+struct terminal_velocity_attack_t : public attack_t
 {
-    missile_attack_t( class_t* p, const std::string& n ) :
-      attack_t( n, p, range_policy, SCHOOL_KINETIC)
+    terminal_velocity_attack_t( class_t* p, const std::string& n, attack_policy_t policy, school_type s ) :
+      attack_t( n, p, policy, s)
   {
-  }
-
-  virtual void player_buff()
-  {
-    action_t::player_buff();
-    if ( unsigned rank = p() -> talents.mandalorian_iron_warheads -> rank() )
-      player_multiplier += 0.03 * rank;
   }
 
   virtual void execute()
   {
     attack_t::execute();
+    terminal_velocity();
+  }
 
+  virtual void tick( dot_t* d )
+  {
+    attack_t::tick( d );
+    terminal_velocity();
+  }
+
+
+  virtual void terminal_velocity()
+  {
     class_t* p = cast();
-
     if (
         result == RESULT_CRIT
         && p -> rngs.terminal_velocity -> roll ( p -> talents.terminal_velocity -> rank() * 0.5 )
@@ -290,6 +293,22 @@ struct missile_attack_t : public attack_t
       p -> resource_gain( RESOURCE_HEAT, 8, p -> gains.terminal_velocity );
       p -> procs.terminal_velocity -> occur();
     }
+
+  }
+};
+
+struct missile_attack_t : public terminal_velocity_attack_t
+{
+    missile_attack_t( class_t* p, const std::string& n ) :
+      terminal_velocity_attack_t( p, n, range_policy, SCHOOL_KINETIC)
+  {
+  }
+
+  virtual void player_buff()
+  {
+    terminal_velocity_attack_t::player_buff();
+    if ( unsigned rank = p() -> talents.mandalorian_iron_warheads -> rank() )
+      player_multiplier += 0.03 * rank;
   }
 };
 
@@ -530,12 +549,12 @@ struct rapid_shots_t : public attack_t
 // class_t::stealth_scan ==================================================================
 // class_t::thermal_sensor_override =======================================================
 // class_t::unload ========================================================================
-struct unload_t : public attack_t
+struct unload_t : public terminal_velocity_attack_t
 {
   // TODO offhand attack
   unload_t( class_t* p, const std::string& n, const std::string& options_str) :
     // TODO test range_policy and school energy?
-    attack_t( n, p, range_policy, SCHOOL_ENERGY )
+    terminal_velocity_attack_t( p, n, range_policy, SCHOOL_ENERGY )
   {
     // TODO
     // rank_level_list = { ... 50 }
@@ -565,19 +584,19 @@ struct unload_t : public attack_t
     if ( p() -> buffs.barrage -> up() )
       reset();
 
-    return action_t::ready();
+    return terminal_velocity_attack_t::ready();
   }
 
   virtual void player_buff()
   {
-    action_t::player_buff();
+    terminal_velocity_attack_t::player_buff();
     if ( p() -> buffs.barrage -> up() )
       player_multiplier += 0.25;
   }
 
   virtual void last_tick(dot_t* d)
   {
-    action_t::last_tick( d );
+    terminal_velocity_attack_t::last_tick( d );
     p() -> buffs.barrage -> expire();
   }
 };
