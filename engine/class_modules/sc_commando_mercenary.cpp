@@ -164,6 +164,8 @@ struct class_t : public bount_troop::class_t
 
     } talents;
 
+    timespan_t last_terminal_velocity_proc;
+
     class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
       base_t( sim, pt == BH_MERCENARY ? BH_MERCENARY : T_COMMANDO, name, rt ),
       buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents()
@@ -194,6 +196,7 @@ struct class_t : public bount_troop::class_t
     virtual role_type primary_role() const;
     virtual double    alacrity() const;
     virtual double    armor_penetration() const;
+    virtual void      reset();
 
 };
 
@@ -287,11 +290,19 @@ struct terminal_velocity_attack_t : public attack_t
     if (
         result == RESULT_CRIT
         && p -> rngs.terminal_velocity -> roll ( p -> talents.terminal_velocity -> rank() * 0.5 )
-        && ( sim -> current_time - p -> procs.terminal_velocity -> last_proc ) > from_seconds( 3.0 )
+        // XXX can't do this. it stops working after the first iteration??
+        // && ( sim -> current_time - p -> procs.terminal_velocity -> last_proc ) > from_seconds( 3.0 )
        )
     {
-      p -> resource_gain( RESOURCE_HEAT, 8, p -> gains.terminal_velocity );
-      p -> procs.terminal_velocity -> occur();
+      if (
+          p -> last_terminal_velocity_proc == timespan_t::zero()
+          || sim -> current_time - p -> last_terminal_velocity_proc > from_seconds( 3.0 )
+         )
+      {
+        p -> last_terminal_velocity_proc = sim -> current_time;
+        p -> resource_gain( RESOURCE_HEAT, 8, p -> gains.terminal_velocity );
+        p -> procs.terminal_velocity -> occur();
+      }
     }
 
   }
@@ -346,14 +357,9 @@ struct heatseeker_missiles_t : public missile_attack_t
   virtual void target_debuff( player_t* tgt, dmg_type type )
   {
     missile_attack_t::target_debuff( tgt, type );
-    if ( unsigned stacks = p() -> buffs.tracer_lock -> stack() )
-      target_multiplier += 0.05 * stacks;
-  }
 
-  virtual void execute()
-  {
-    p() -> buffs.tracer_lock -> expire();
-    missile_attack_t::execute();
+    if ( unsigned stacks = targetdata() -> debuff_heat_signature -> stack() )
+      target_multiplier += 0.05 * stacks;
   }
 };
 
@@ -517,6 +523,15 @@ struct rail_shot_t : public attack_t
       base_cost = 8;
     else
       base_cost = 16;
+
+    if ( p -> talents.tracer_lock -> rank() )
+      player_multiplier += 0.06 * p -> buffs.tracer_lock -> stack();
+  }
+
+  virtual void execute()
+  {
+    attack_t::execute();
+    p() -> buffs.tracer_lock -> expire();
   }
 };
 
@@ -576,6 +591,7 @@ struct unload_t : public terminal_velocity_attack_t
     num_ticks                   = 3;
     base_tick_time              = from_seconds( 1 );
     base_multiplier             = 1 + 0.33 * p -> talents.riddle -> rank();
+    crit_bonus                  += 0.15 * p -> talents.target_tracking -> rank();
   }
 
   // TODO CHECK barrage buff resets Unload cooldown? tracer_missile, or in unload::ready()
@@ -1000,6 +1016,12 @@ void class_t::create_talents()
     { "Thermal Detonator" , 1 }
   };
   init_talent_tree( BH_MERCENARY_PYROTECH, pyrotech_tree );
+}
+
+void class_t::reset()
+{
+  last_terminal_velocity_proc = timespan_t::zero();
+  base_t::reset();
 }
 
 } // namespace commando_mercenary============================================
