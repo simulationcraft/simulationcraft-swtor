@@ -41,6 +41,7 @@ struct class_t : public bount_troop::class_t
     // Gains
     struct gains_t
     {
+      gain_t* improved_vents;
       gain_t* vent_heat;
 
     } gains;
@@ -536,7 +537,10 @@ struct vent_heat_t : public action_t
     action_t::execute();
     class_t* p = cast();
 
+    // TODO check immediately gives 34 + 16 with talents
     p -> resource_gain( RESOURCE_HEAT, 34, p -> gains.vent_heat );
+    if ( unsigned rank = p -> talents.improved_vents -> rank() )
+      p -> resource_gain( RESOURCE_HEAT, 8 * rank, p -> gains.improved_vents );
   }
 
   virtual void tick(dot_t* d)
@@ -713,7 +717,8 @@ void class_t::init_gains()
 {
     base_t::init_gains();
 
-    gains.vent_heat = get_gain( "vent_heat" );
+    gains.improved_vents = get_gain( "improved_vents" );
+    gains.vent_heat      = get_gain( "vent_heat" );
 }
 
 // class_t::init_procs ====================================================================
