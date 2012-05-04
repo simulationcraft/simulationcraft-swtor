@@ -554,10 +554,11 @@ double action_t::calculate_tick_damage()
 
   dmg += total_power() * td.power_mod;
 
-  assert( ( td.weapon == nullptr ) == ( td.weapon_multiplier == std::numeric_limits<decltype( td.weapon_multiplier )>::lowest() ) );
   double weapon_dmg = 0;
+  // XXX hack test for mercenaries unload
   if ( td.weapon )
   {
+  assert( ( td.weapon == nullptr ) == ( td.weapon_multiplier == std::numeric_limits<decltype( td.weapon_multiplier )>::lowest() ) );
     // x% weapon damage + Y
     // e.g. Obliterate, Shred, Backstab
     // XXX hack temp
