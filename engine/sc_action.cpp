@@ -545,7 +545,6 @@ double action_t::calculate_tick_weapon_damage()
 {
   if ( ! td.weapon ) return 0;
 
-  std::cout << "td.weapon:" << td.weapon << "\n";
   double dmg = sim -> range( td.weapon -> min_dmg, td.weapon -> max_dmg ) + td.weapon -> bonus_dmg;
 
   // OH penalty
