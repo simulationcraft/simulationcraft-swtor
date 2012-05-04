@@ -14,6 +14,7 @@ struct targetdata_t : public bount_troop::targetdata_t
 
   dot_t dot_rapid_shots;
   dot_t dot_unload;
+  dot_t dot_vent_heat;
 
   // TODO this applies arpen to target of 4% per stack
   buff_t* debuff_heat_signature;
@@ -40,6 +41,7 @@ struct class_t : public bount_troop::class_t
     // Gains
     struct gains_t
     {
+      gain_t* vent_heat;
 
     } gains;
 
@@ -190,13 +192,15 @@ struct class_t : public bount_troop::class_t
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   bount_troop::targetdata_t( source, target ),
-  dot_rapid_shots( "rapid_shots", &source ),
-  dot_unload( "unload", &source ),
+  dot_rapid_shots ( "rapid_shots" , &source ), 
+  dot_unload      ( "unload"      , &source ), 
+  dot_vent_heat   ( "vent_heat"   , &source ), 
   debuff_heat_signature( new buff_t( this, "heat_signature", 5, from_seconds( 15 ) ) )
 {
-  add( dot_rapid_shots );
-  add( dot_unload );
-  add( *debuff_heat_signature );
+  add ( dot_rapid_shots        ) ;
+  add ( dot_unload             ) ;
+  add ( dot_vent_heat          ) ;
+  add ( *debuff_heat_signature ) ;
 }
 
 class action_t : public ::action_t
@@ -241,6 +245,20 @@ struct attack_t : public action_t
     }
 };
 
+struct missile_attack_t : public attack_t
+{
+    missile_attack_t( class_t* p, const std::string& n ) :
+      attack_t( n, p, range_policy, SCHOOL_KINETIC)
+  {
+  }
+
+  virtual void player_buff()
+  {
+    action_t::player_buff();
+    if ( unsigned rank = p() -> talents.mandalorian_iron_warheads -> rank() )
+      player_multiplier += 0.03 * rank;
+  }
+};
 
 // MERC ABILITIES
 // class_t::chaff_flare ===================================================================
@@ -251,10 +269,10 @@ struct attack_t : public action_t
 // class_t::fusion_missile ================================================================
 // class_t::healing_scan ==================================================================
 // class_t::heatseeker_missiles ===========================================================
-struct heatseeker_missiles_t : public attack_t
+struct heatseeker_missiles_t : public missile_attack_t
 {
   heatseeker_missiles_t( class_t* p, const std::string& n, const std::string& options_str) :
-    attack_t( n, p, tech_policy, SCHOOL_KINETIC )
+    missile_attack_t( p, n )
   {
     // TODO
     // rank_level_list = { ... 50 }
@@ -332,10 +350,10 @@ struct power_shot_t : public attack_t
 // class_t::supercharged_gas ==============================================================
 // class_t::sweeping_blasters =============================================================
 // class_t::tracer_missile ================================================================
-struct tracer_missile_t : public attack_t
+struct tracer_missile_t : public missile_attack_t
 {
   tracer_missile_t( class_t* p, const std::string& n, const std::string& options_str) :
-    attack_t( n, p, tech_policy, SCHOOL_KINETIC )
+    missile_attack_t( p, n )
   {
     // TODO
     // rank_level_list = { ... 50 }
@@ -350,6 +368,7 @@ struct tracer_missile_t : public attack_t
     dd.power_mod                = 1.71;
     dd.standardhealthpercentmin = 0.131;
     dd.standardhealthpercentmax = 0.211;
+
   }
 
   // FIXME is this the right place to check if a person has an ability?
@@ -429,7 +448,7 @@ struct rapid_shots_t : public attack_t
     // rank_level_list = { ... 50 }
     parse_options( options_str );
 
-    // REVIEW
+    // TODO REVIEW
     // hitting way too hard. hits 5 times for each weapon for about 1/5 the damage. Can't work out how to translate the torhead data into these fields.
     range                       = 30.0;
     td.weapon                   = &( player -> main_hand_weapon );
@@ -461,7 +480,8 @@ struct unload_t : public attack_t
     cooldown -> duration        = from_seconds( 15.0 );
     range                       = 30.0;
     channeled                   = true;
-    td.standardhealthpercentmin = td.standardhealthpercentmax      = 0.0263;
+    td.standardhealthpercentmin = 
+    td.standardhealthpercentmax = 0.0263;
     td.power_mod                = 0.263;
     // XXX REVIEW
     // added td.weapon & td.weapon_multiplier to sc_action_t instead of making it reference weapon
@@ -473,7 +493,7 @@ struct unload_t : public attack_t
     base_multiplier             = 1 + 0.33 * p -> talents.riddle -> rank();
   }
 
-// barrage buff resets Unload cooldown? tracer_missile, or in unload::ready()
+  // TODO CHECK barrage buff resets Unload cooldown? tracer_missile, or in unload::ready()
   virtual bool ready()
   {
     if ( p() -> buffs.barrage -> up() )
@@ -492,14 +512,41 @@ struct unload_t : public attack_t
   virtual void last_tick(dot_t* d)
   {
     action_t::last_tick( d );
-    // TODO check if this technically expires on execute or finish
-    // currently doing it on finish since player_buff references it
-    // also not sure if this struct is created each time the action is executed or is reused :)
     p() -> buffs.barrage -> expire();
   }
 };
 
 // class_t::vent_heat =====================================================================
+struct vent_heat_t : public action_t
+{
+  vent_heat_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    action_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE )
+  {
+
+    parse_options( options_str );
+
+    cooldown -> duration = from_seconds( 120.0 );
+    num_ticks            = 2;
+    base_tick_time       = from_seconds( 3 );
+    trigger_gcd          = timespan_t::zero();
+  }
+
+  virtual void execute()
+  {
+    action_t::execute();
+    class_t* p = cast();
+
+    p -> resource_gain( RESOURCE_HEAT, 34, p -> gains.vent_heat );
+  }
+
+  virtual void tick(dot_t* d)
+  {
+    action_t::tick(d);
+    class_t* p = cast();
+
+    p -> resource_gain( RESOURCE_HEAT, 8, p -> gains.vent_heat );
+  }
+};
 
 // ==========================================================================
 // commando_mercenary Character Definition
@@ -522,6 +569,7 @@ struct unload_t : public attack_t
       if ( name == "rail_shot"           ) return new rail_shot_t           ( this, name, options_str );
       if ( name == "heatseeker_missiles" ) return new heatseeker_missiles_t ( this, name, options_str );
       if ( name == "rapid_shots"         ) return new rapid_shots_t         ( this, name, options_str );
+      if ( name == "vent_heat"           ) return new vent_heat_t           ( this, name, options_str );
     }
     else if ( type == T_COMMANDO )
     {
@@ -662,6 +710,7 @@ void class_t::init_gains()
 {
     base_t::init_gains();
 
+    gains.vent_heat = get_gain( "vent_heat" );
 }
 
 // class_t::init_procs ====================================================================
@@ -790,7 +839,7 @@ void class_t::create_talents()
     // t3
     { "Power Barrier"            , 2 }, { "Afterburners"      , 2 }, { "Tracer Missile"   , 1 }, { "Target Tracking"   , 2 },
     // t4
-    { "jet Escape"               , 2 }, { "Light 'Em Up"      , 1 }, { "Terminal Velocity", 2 },
+    { "Jet Escape"               , 2 }, { "Light 'Em Up"      , 1 }, { "Terminal Velocity", 2 },
     // t5
     { "Pinning Fire"             , 2 }, { "Riddle"            , 1 }, { "Tracer Lock"      , 1 }, { "Kolto Vents"       , 1 },
     // t6
