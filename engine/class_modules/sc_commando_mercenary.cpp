@@ -34,6 +34,7 @@ struct class_t : public bount_troop::class_t
     {
       buff_t* barrage;
       buff_t* critical_reaction;
+      buff_t* high_velocity_gas_cylinder;
       buff_t* power_barrier;
       buff_t* tracer_lock;
 
@@ -191,6 +192,7 @@ struct class_t : public bount_troop::class_t
     virtual void      init_actions();
     virtual role_type primary_role() const;
     virtual double    alacrity() const;
+    virtual double    armor_penetration() const;
 
 };
 
@@ -316,6 +318,25 @@ struct heatseeker_missiles_t : public missile_attack_t
 };
 
 // class_t::high_velocity_gas_cylinder ====================================================
+struct high_velocity_gas_cylinder_t : public action_t
+{
+  high_velocity_gas_cylinder_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    action_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE )
+  {
+    parse_options( options_str );
+    base_execute_time = from_seconds( 1.5 );
+  }
+
+  virtual void execute()
+  {
+    action_t::execute();
+    class_t* p = cast();
+
+    p -> buffs.high_velocity_gas_cylinder -> trigger();
+    // TODO when implemented p -> buffs.combustible_gas_cylinder -> expire();
+  }
+};
+
 // class_t::incendiary_missile ============================================================
 // class_t::jet_boost =====================================================================
 // class_t::kolto_missile =================================================================
@@ -370,6 +391,7 @@ struct tracer_missile_t : public missile_attack_t
   {
     // TODO
     // rank_level_list = { ... 50 }
+    check_talent( p -> talents.tracer_missile -> rank() );
 
     parse_options( options_str );
 
@@ -579,13 +601,14 @@ struct vent_heat_t : public action_t
 {
     if ( type == BH_MERCENARY )
     {
-      if ( name == "power_shot"          ) return new power_shot_t          ( this, name, options_str );
-      if ( name == "tracer_missile"      ) return new tracer_missile_t      ( this, name, options_str );
-      if ( name == "unload"              ) return new unload_t              ( this, name, options_str );
-      if ( name == "rail_shot"           ) return new rail_shot_t           ( this, name, options_str );
-      if ( name == "heatseeker_missiles" ) return new heatseeker_missiles_t ( this, name, options_str );
-      if ( name == "rapid_shots"         ) return new rapid_shots_t         ( this, name, options_str );
-      if ( name == "vent_heat"           ) return new vent_heat_t           ( this, name, options_str );
+      if ( name == "heatseeker_missiles"        ) return new heatseeker_missiles_t        ( this, name, options_str );
+      if ( name == "high_velocity_gas_cylinder" ) return new high_velocity_gas_cylinder_t ( this, name, options_str );
+      if ( name == "power_shot"                 ) return new power_shot_t                 ( this, name, options_str );
+      if ( name == "rail_shot"                  ) return new rail_shot_t                  ( this, name, options_str );
+      if ( name == "rapid_shots"                ) return new rapid_shots_t                ( this, name, options_str );
+      if ( name == "tracer_missile"             ) return new tracer_missile_t             ( this, name, options_str );
+      if ( name == "unload"                     ) return new unload_t                     ( this, name, options_str );
+      if ( name == "vent_heat"                  ) return new vent_heat_t                  ( this, name, options_str );
     }
     else if ( type == T_COMMANDO )
     {
@@ -606,6 +629,18 @@ double class_t::alacrity() const
 
   return sh;
 }
+// class_t::armor_penetration ================================================================
+
+double class_t::armor_penetration() const
+{
+  double arpen = base_t::armor_penetration();
+
+  if ( buffs.high_velocity_gas_cylinder -> up() )
+    arpen += 0.35;
+
+  return arpen;
+}
+
 
 
 // class_t::init_talents ==================================================================
@@ -732,9 +767,12 @@ void class_t::init_buffs()
   // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-  buffs.critical_reaction = new buff_t( this, "critical_reaction",     1, from_seconds( 6 ),  from_seconds( 0 ), (talents.critical_reaction -> rank() * 0.5) );
   buffs.barrage           = new buff_t( this, "barrage",               1, from_seconds( 15 ), from_seconds( 6 ), (talents.barrage -> rank() * 0.15) );
-  buffs.tracer_lock       = new buff_t( this, "tracer_lock",           5, from_seconds( 15 ));
+  buffs.critical_reaction = new buff_t( this, "critical_reaction",     1, from_seconds( 6 ),  from_seconds( 0 ), (talents.critical_reaction -> rank() * 0.5) );
+
+  buffs.tracer_lock = new buff_t( this, "tracer_lock", 5, from_seconds( 15 ) );
+
+  buffs.high_velocity_gas_cylinder = new buff_t( this, "high_velocity_gas_cylinder", 1 );
 
 }
 
@@ -800,10 +838,18 @@ void class_t::init_actions()
 
             // testing
 
+            // TODO check for arsenal
+            action_list_str += "/high_velocity_gas_cylinder,if=!buff.high_velocity_gas_cylinder.up";
+            // TODO check for talent improved vents
+            action_list_str += "/vent_heat,if=heat<=65";
             // TODO check for barrage talent
             action_list_str += "/unload,if=heat>76&buff.barrage.up";
+            // TODO check for talent
+            action_list_str += "/heatseeker_missiles,if=heat>76&buff.tracer_lock.stack>=5";
             action_list_str += "/tracer_missile,if=heat>76";
             action_list_str += "/rail_shot,if=heat>76";
+            // TODO check for talent tracer missile
+            action_list_str += "/tracer_missile,if=heat>76";
             action_list_str += "/rapid_shots";
 
             switch ( primary_tree() )
