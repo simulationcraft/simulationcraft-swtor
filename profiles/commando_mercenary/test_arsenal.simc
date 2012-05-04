@@ -1,0 +1,59 @@
+#!./simc
+html=arsenal.html
+#log=1
+#iterations=1
+#debug=1
+iterations=1000
+threads=1
+
+mercenary="Mercenary 1-20-1"
+origin="http://swtor.askmrrobot.com/character/fbcf6ea9-f33c-428d-9e4b-9d834bd89ad4"
+level=50
+race=human
+position=back
+role=hybrid
+use_pre_potion=0
+professions=none
+talents=http://www.torhead.com/skill-calc#300Mc0zZMIkdRrdozfzZs.1
+actions=stim,type=exotech_resolve
+actions+=/snapshot_stats
+#actions+=/high_velocity_gas_cylinder,if=!buff.high_velocity_gas_cylinder.up
+# test for heat_signatures on target before rail_shot
+actions+=/vent_heat,if=heat<=65
+actions+=/unload
+actions+=/heatseeker_missiles,if=heat>76
+actions+=/rail_shot,if=heat>76&buff.tracer_lock.stack>=5
+actions+=/tracer_missile,if=heat>76
+#actions+=/rapid_shots
+actions+=/high_velocity_gas_cylinder,if=!buff.high_velocity_gas_cylinder.up
+head=rakata_eliminators_helmet,ilevel=58,quality=artifact,stats=861armor_132endurance_112aim_31power_51accuracy
+ear=rakata_eliminators_adaptor,ilevel=58,quality=artifact,stats=98endurance_85aim_51accuracy_51crit
+shirt=datacrons,stats=40strength_40aim_40cunning_40willpower_40endurance_40presence
+chest=rakata_eliminators_chestguard,ilevel=58,quality=artifact,stats=861armor_105endurance_122aim_51accuracy_48crit
+waist=rakata_eliminators_belt,ilevel=58,quality=artifact,stats=538armor_71endurance_103aim_11crit
+legs=rakata_eliminators_greaves,ilevel=58,quality=artifact,stats=861armor_116endurance_112aim_51accuracy_48crit
+feet=rakata_eliminators_boots,ilevel=58,quality=artifact,stats=538armor_105endurance_122aim_51accuracy_48crit
+wrists=rakata_eliminators_vambraces,ilevel=58,quality=artifact,stats=538armor_74endurance_85aim_37power
+hands=rakata_eliminators_gauntlets,ilevel=58,quality=artifact,stats=538armor_132endurance_112aim_31power_51accuracy
+implant1=rakata_eliminators_enhancer,ilevel=58,quality=artifact,stats=85endurance_103aim_44power_51surge
+implant2=rakata_eliminators_system,ilevel=58,quality=artifact,stats=85endurance_103aim_44power_51surge
+relic1=rakata_relic_of_boundless_ages,ilevel=58,quality=artifact,stats=77endurance,use=380power_120cd_20dur
+relic2=rakata_relic_of_forbidden_secrets,ilevel=58,quality=artifact,stats=77endurance,use=235crit_235surge_120cd_20dur
+main_hand=quiet,ilevel=58,quality=artifact,stats=132endurance_112aim_72power_612techpower_51accuracy,weapon=blasterpistol_268min_497max
+off_hand=peace,ilevel=58,quality=artifact,stats=132endurance_112aim_72power_612techpower_51accuracy,weapon=blasterpistol_268min_497max
+# Gear Summary
+# gear_strength=40
+# gear_aim=1323
+# gear_cunning=40
+# gear_willpower=40
+# gear_endurance=1461
+# gear_presence=40
+# gear_accuracy_rating=408
+# gear_crit_rating=206
+# gear_armor=4735
+# gear_power=331
+# gear_techpower=1224
+# gear_surge_rating=102
+# Set Bonuses
+# main_hand=quiet,weapon=blasterpistol_268min_497max
+# off_hand=peace,weapon=blasterpistol_268min_497max

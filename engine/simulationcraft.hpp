@@ -337,7 +337,7 @@ enum resource_type
 {
   RESOURCE_NONE=0,
   RESOURCE_HEALTH, RESOURCE_MANA,  RESOURCE_RAGE, RESOURCE_ENERGY, RESOURCE_AMMO,
-  RESOURCE_FORCE,
+  RESOURCE_FORCE,  RESOURCE_HEAT,
   RESOURCE_MAX
 };
 
@@ -395,11 +395,12 @@ constexpr school_mask_t SCHOOL_ALL_MASK = ~school_mask_t( 0 );
 enum talent_tree_type
 {
   TREE_NONE=0,
-  TREE_SEER,         TREE_TELEKINETICS,  TREE_BALANCE,
-  TREE_CORRUPTION,   TREE_LIGHTNING,     TREE_MADNESS,
+  TREE_SEER,           TREE_TELEKINETICS,   TREE_BALANCE,
+  TREE_CORRUPTION,     TREE_LIGHTNING,      TREE_MADNESS,
   TREE_KINETIC_COMBAT, TREE_INFILTRATION,
-  TREE_DARKNESS, TREE_DECEPTION,
-  TREE_MEDICINE, TREE_CONCEALMENT, TREE_LETHALITY,
+  TREE_DARKNESS,       TREE_DECEPTION,
+  TREE_MEDICINE,       TREE_CONCEALMENT,    TREE_LETHALITY,
+  TREE_BODYGUARD,      TREE_ARSENAL,        TREE_PYROTECH,
   TALENT_TREE_MAX
 };
 
@@ -407,13 +408,15 @@ enum talent_tab_type
 {
   TALENT_TAB_NONE = -1,
 
-  JEDI_SAGE_SEER = 0,           JEDI_SAGE_TELEKINETICS,   JEDI_SAGE_BALANCE,
-  SITH_SORCERER_CORRUPTION = 0, SITH_SORCERER_LIGHTNING,  SITH_SORCERER_MADNESS,
+  JEDI_SAGE_SEER = 0,             JEDI_SAGE_TELEKINETICS,    JEDI_SAGE_BALANCE,
+  SITH_SORCERER_CORRUPTION = 0,   SITH_SORCERER_LIGHTNING,   SITH_SORCERER_MADNESS,
 
-  JEDI_SHADOW_KINETIC_COMBAT = 0,   JEDI_SHADOW_INFILTRATION, JEDI_SHADOW_BALANCE,
-  SITH_ASSASSIN_DARKNESS = 0,       SITH_ASSASSIN_DECEPTION,  SITH_ASSASSIN_MADNESS,
+  JEDI_SHADOW_KINETIC_COMBAT = 0, JEDI_SHADOW_INFILTRATION,  JEDI_SHADOW_BALANCE,
+  SITH_ASSASSIN_DARKNESS = 0,     SITH_ASSASSIN_DECEPTION,   SITH_ASSASSIN_MADNESS,
 
-  IA_OPERATIVE_MEDICINE = 0,       IA_OPERATIVE_CONCEALMENT,  IA_OPERATIVE_LETHALITY,
+  IA_OPERATIVE_MEDICINE = 0,      IA_OPERATIVE_CONCEALMENT,  IA_OPERATIVE_LETHALITY,
+
+  BH_MERCENARY_BODYGUARD = 0,     BH_MERCENARY_ARSENAL,      BH_MERCENARY_PYROTECH,
 };
 
 enum weapon_type
@@ -481,8 +484,8 @@ enum stat_type
 {
   STAT_NONE=0,
   STAT_STRENGTH, STAT_AIM, STAT_CUNNING, STAT_WILLPOWER, STAT_ENDURANCE, STAT_PRESENCE,
-  STAT_HEALTH, STAT_MANA, STAT_RAGE, STAT_ENERGY, STAT_AMMO,
-  STAT_MAX_HEALTH, STAT_MAX_MANA, STAT_MAX_RAGE, STAT_MAX_ENERGY, STAT_MAX_AMMO,
+  STAT_HEALTH, STAT_MANA, STAT_RAGE, STAT_ENERGY, STAT_AMMO, STAT_HEAT,
+  STAT_MAX_HEALTH, STAT_MAX_MANA, STAT_MAX_RAGE, STAT_MAX_ENERGY, STAT_MAX_AMMO, STAT_MAX_HEAT,
   STAT_EXPERTISE_RATING,
   STAT_ACCURACY_RATING, STAT_ACCURACY_RATING2, STAT_CRIT_RATING, STAT_ALACRITY_RATING,
   STAT_WEAPON_DMG,
@@ -2616,6 +2619,7 @@ public:
 
   struct gains_t
   {
+    // XXX why is this here
     gain_t* ammo_regen;
   };
   gains_t gains;
@@ -2639,10 +2643,12 @@ public:
     set_bonus_t* rakata_force_masters;
     set_bonus_t* battlemaster_force_masters;
     set_bonus_t* rakata_stalkers;
-    // agents
+    // agent
     set_bonus_t* rakata_enforcers;
     set_bonus_t* rakata_field_medics;
     set_bonus_t* rakata_field_techs;
+    // mercenary
+    set_bonus_t* rakata_eliminators;
   };
   set_bonuses_t set_bonus;
 
@@ -2704,6 +2710,7 @@ public:
   // They should return a good approximation of the current rate of regen including all buffs.
   virtual double energy_regen_per_second() const;
   virtual double ammo_regen_per_second() const;
+  virtual double heat_regen_per_second() const;
   virtual double force_regen_per_second() const;
 
   virtual double composite_power() const;
@@ -3193,6 +3200,9 @@ struct action_t
     double player_multiplier;
     double target_multiplier;
     double power_mod;
+    // XXX adding in to implement Unload as a channeled dot
+    double weapon_multiplier;
+    weapon_t* weapon;
 
     damage_factors_t() :
       standardhealthpercentmin( 0 ), standardhealthpercentmax( 0 ),

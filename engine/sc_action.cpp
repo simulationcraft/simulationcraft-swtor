@@ -553,6 +553,21 @@ double action_t::calculate_tick_damage()
   double base_tick_dmg = dmg;
 
   dmg += total_power() * td.power_mod;
+
+  assert( ( td.weapon == nullptr ) == ( td.weapon_multiplier == std::numeric_limits<decltype( td.weapon_multiplier )>::lowest() ) );
+  double weapon_dmg = 0;
+  if ( td.weapon )
+  {
+    // x% weapon damage + Y
+    // e.g. Obliterate, Shred, Backstab
+    // XXX hack temp
+    weapon_t* tweapon = weapon;
+    weapon = td.weapon;
+    weapon_dmg = calculate_weapon_damage() * ( 1 + td.weapon_multiplier );
+    weapon = tweapon;
+    dmg += weapon_dmg;
+  }
+
   dmg *= total_td_multiplier();
 
   double init_tick_dmg = dmg;
@@ -567,9 +582,9 @@ double action_t::calculate_tick_damage()
 
   if ( sim -> debug )
   {
-    log_t::output( sim, "%s dmg for %s: td=%.0f i_td=%.0f b_td=%.0f mod=%.2f power=%.0f b_mult=%.2f p_mult=%.2f t_mult=%.2f",
-                   player -> name(), name(), dmg, init_tick_dmg, base_tick_dmg, td.power_mod,
-                   total_power(), base_multiplier * td.base_multiplier, player_multiplier, target_multiplier );
+    log_t::output( sim, "%s dmg for %s: td=%.0f i_td=%.0f w_td=%0f b_td=%.0f mod=%.2f power=%.0f b_mult=%.2f p_mult=%.2f t_mult=%.2f w_mult=%2f",
+                   player -> name(), name(), dmg, init_tick_dmg, weapon_dmg, base_tick_dmg, td.power_mod,
+                   total_power(), base_multiplier * td.base_multiplier, player_multiplier, target_multiplier, td.weapon ? td.weapon_multiplier : 0 );
   }
 
   return dmg;
