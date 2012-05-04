@@ -461,7 +461,6 @@ struct rail_shot_t : public attack_t
     base_cost                    =  16;
     cooldown -> duration         =  from_seconds( 15 );
     range                        =  30.0;
-    base_accuracy               -= 0.10;
     dd.power_mod                 =  1.9;
     dd.standardhealthpercentmin  =  
     dd.standardhealthpercentmax  =  0.19;
@@ -489,6 +488,7 @@ struct rapid_shots_t : public attack_t
     td.weapon                   = &( player -> main_hand_weapon );
     td.weapon_multiplier        = -0.8;
     td.power_mod                = 1;
+    base_accuracy               -= 0.10;
     num_ticks                   = 5;
     base_tick_time              = from_seconds( 0.3 );
   }
