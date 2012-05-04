@@ -727,11 +727,6 @@ double class_t::armor_penetration() const
   if ( buffs.high_velocity_gas_cylinder -> up() )
     arpen += 0.35;
 
-  // XXX TODO HACK FIX hacking these in for now. they should be put integrated into player or target
-  // somehow, like shatter shot is
-  // sunder and heatsignature
-  arpen += 0.4;
-
   return arpen;
 }
 
