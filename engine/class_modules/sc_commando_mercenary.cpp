@@ -33,6 +33,7 @@ struct class_t : public bount_troop::class_t
     struct buffs_t
     {
       buff_t* barrage;
+      buff_t* critical_reaction;
       buff_t* power_barrier;
       buff_t* tracer_lock;
 
@@ -189,6 +190,8 @@ struct class_t : public bount_troop::class_t
     virtual void      init_rng();
     virtual void      init_actions();
     virtual role_type primary_role() const;
+    virtual double    alacrity() const;
+
 };
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
@@ -244,6 +247,15 @@ struct attack_t : public action_t
       may_crit      = true;
       tick_may_crit = true;
     }
+
+  virtual void execute()
+  {
+    action_t::execute();
+
+    class_t* p = cast();
+    if ( result == RESULT_CRIT && p -> talents.critical_reaction -> rank() )
+      p -> buffs.critical_reaction->trigger();
+  }
 };
 
 struct missile_attack_t : public attack_t
@@ -583,6 +595,19 @@ struct vent_heat_t : public action_t
     return base_t::create_action( name, options_str );
 }
 
+// class_t::recalculate_alacrity =============================================================
+
+double class_t::alacrity() const
+{
+  double sh = base_t::alacrity();
+
+  if ( buffs.critical_reaction -> up() )
+    sh -= 0.05;
+
+  return sh;
+}
+
+
 // class_t::init_talents ==================================================================
 
 void class_t::init_talents()
@@ -707,8 +732,9 @@ void class_t::init_buffs()
   // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-  buffs.barrage     = new buff_t( this, "barrage",     1, from_seconds( 15 ), from_seconds( 6 ), (talents.barrage -> rank() * 0.15) );
-  buffs.tracer_lock = new buff_t( this, "tracer_lock", 5, from_seconds( 15 ));
+  buffs.critical_reaction = new buff_t( this, "critical_reaction",     1, from_seconds( 6 ),  from_seconds( 0 ), (talents.critical_reaction -> rank() * 0.5) );
+  buffs.barrage           = new buff_t( this, "barrage",               1, from_seconds( 15 ), from_seconds( 6 ), (talents.barrage -> rank() * 0.15) );
+  buffs.tracer_lock       = new buff_t( this, "tracer_lock",           5, from_seconds( 15 ));
 
 }
 
