@@ -51,6 +51,7 @@ reforge_plot_t::reforge_plot_t( sim_t* s ) :
   reforge_plot_amount( 200 ),
   reforge_plot_iterations( -1 ),
   reforge_plot_debug( 0 ),
+  reforge_plot_gnuplot( 0 ),
   current_stat_combo( 0 ),
   num_stat_combos( 0 )
 {
@@ -249,17 +250,25 @@ void reforge_plot_t::analyze()
   {
     if ( p -> quiet ) continue;
 
+    if ( reforge_plot_gnuplot ) util_t::fprintf( reforge_plot_output_file, "#" );
     util_t::fprintf( reforge_plot_output_file, "%s Reforge Plot Results:\n", p -> name_str.c_str() );
-
+    if ( reforge_plot_gnuplot ) util_t::fprintf( reforge_plot_output_file, "#" );
     for ( int i=0; i < ( int ) reforge_plot_stat_indices.size(); i++ )
     {
       util_t::fprintf( reforge_plot_output_file, "%s, ",
                        util_t::stat_type_string( reforge_plot_stat_indices[ i ] ) );
     }
     util_t::fprintf( reforge_plot_output_file, " DPS\n" );
+    if ( reforge_plot_gnuplot ) util_t::fprintf( reforge_plot_output_file, "\n" );
 
+
+    double first = p -> reforge_plot_data[ 0 ][ 0 ].value;
     for ( int i=0; i < ( int ) p -> reforge_plot_data.size(); i++ )
     {
+      if ( reforge_plot_gnuplot && first != p -> reforge_plot_data[ i ][ 0 ].value )
+        util_t::fprintf( reforge_plot_output_file, "\n" );
+      first = p -> reforge_plot_data[ i ][ 0 ].value;
+
       for ( int j=0; j < ( int ) p -> reforge_plot_data[ i ].size(); j++ )
         util_t::fprintf( reforge_plot_output_file, "%f, ",
                          p -> reforge_plot_data[ i ][ j ].value );
@@ -317,6 +326,7 @@ void reforge_plot_t::create_options()
     { "reforge_plot_stat",       OPT_STRING, &( reforge_plot_stat_str   ) },
     { "reforge_plot_output_file",OPT_STRING, &( reforge_plot_output_file_str ) },
     { "reforge_plot_debug",      OPT_BOOL,   &( reforge_plot_debug      ) },
+    { "reforge_plot_gnuplot",    OPT_BOOL,   &( reforge_plot_gnuplot    ) },
     { NULL, OPT_UNKNOWN, NULL }
   };
 

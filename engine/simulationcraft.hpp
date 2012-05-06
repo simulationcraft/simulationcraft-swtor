@@ -1981,6 +1981,7 @@ struct reforge_plot_t
   int    reforge_plot_amount;
   int    reforge_plot_iterations;
   int    reforge_plot_debug;
+  int    reforge_plot_gnuplot;
   int    current_stat_combo;
   int    num_stat_combos;
 
