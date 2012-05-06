@@ -934,7 +934,7 @@ void class_t::init_actions()
         // Commando
         if ( type == T_COMMANDO )
         {
-            action_list_str += "stim,type=exotech_resolve";
+            action_list_str += "stim,type=exotech_reflex";
             action_list_str += "/snapshot_stats";
 
             switch ( primary_tree() )
@@ -950,7 +950,7 @@ void class_t::init_actions()
         // Mercenary
         else
         {
-            action_list_str += "stim,type=exotech_resolve";
+            action_list_str += "stim,type=exotech_reflex";
             action_list_str += "/snapshot_stats";
 
             // testing

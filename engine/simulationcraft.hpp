@@ -514,6 +514,8 @@ enum class stim_type
   rakata_resolve,
   exotech_skill,
   rakata_skill,
+  exotech_reflex,
+  rakata_reflex,
   max
 };
 

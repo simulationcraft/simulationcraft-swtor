@@ -9,7 +9,7 @@ role=hybrid
 use_pre_potion=0
 professions=none
 talents=http://www.torhead.com/skill-calc#300Mc0zZMIkdRrdozfzZs.1
-actions=stim,type=exotech_resolve
+actions=stim,type=exotech_reflex
 actions+=/snapshot_stats
 actions+=/high_velocity_gas_cylinder,if=!buff.high_velocity_gas_cylinder.up
 actions+=/vent_heat,if=heat<=66

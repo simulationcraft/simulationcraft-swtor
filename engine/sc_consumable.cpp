@@ -76,6 +76,16 @@ struct use_stim_t : public action_t
       p -> stat_gain( STAT_POWER, 46, gain, this );
       break;
 
+    case stim_type::exotech_reflex:
+      p -> stat_gain( STAT_AIM, 128, gain, this );
+      p -> stat_gain( STAT_POWER, 52, gain, this );
+      break;
+
+    case stim_type::rakata_reflex:
+      p -> stat_gain( STAT_AIM, 112, gain, this );
+      p -> stat_gain( STAT_POWER, 46, gain, this );
+      break;
+
     default:
       assert( 0 );
       break;
