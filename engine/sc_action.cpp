@@ -1224,7 +1224,7 @@ void action_t::init()
     }
   }
 
-  double standard_rank_amount =
+  const double standard_rank_amount =
       ( type == ACTION_HEAL || type == ACTION_ABSORB ) ?
         rating_t::standardhealth_healing( rank_level ) :
         rating_t::standardhealth_damage( rank_level );
