@@ -13,6 +13,7 @@ struct targetdata_t : public bount_troop::targetdata_t
 {
 
   dot_t dot_rapid_shots;
+  dot_t dot_rapid_shots_offhand;
   dot_t dot_unload;
   dot_t dot_unload_offhand;
   dot_t dot_vent_heat;
@@ -202,18 +203,20 @@ struct class_t : public bount_troop::class_t
 };
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
-  bount_troop::targetdata_t ( source           , target  ), 
-  dot_rapid_shots           ( "rapid_shots"    , &source ), 
-  dot_unload                ( "unload"         , &source ), 
-  dot_unload_offhand        ( "unload_offhand" , &source ), 
-  dot_vent_heat             ( "vent_heat"      , &source ), 
+  bount_troop::targetdata_t ( source                , target  ), 
+  dot_rapid_shots           ( "rapid_shots"         , &source ), 
+  dot_rapid_shots_offhand   ( "rapid_shots_offhand" , &source ), 
+  dot_unload                ( "unload"              , &source ), 
+  dot_unload_offhand        ( "unload_offhand"      , &source ), 
+  dot_vent_heat             ( "vent_heat"           , &source ), 
   debuff_heat_signature( new buff_t( this, "heat_signature", 5, from_seconds( 15 ) ) )
 {
-  add ( dot_rapid_shots        );
-  add ( dot_unload             );
-  add ( dot_unload_offhand     );
-  add ( dot_vent_heat          );
-  add ( *debuff_heat_signature );
+  add ( dot_rapid_shots         );
+  add ( dot_rapid_shots_offhand );
+  add ( dot_unload              );
+  add ( dot_unload_offhand      );
+  add ( dot_vent_heat           );
+  add ( *debuff_heat_signature  );
 }
 
 class action_t : public ::action_t
@@ -350,9 +353,14 @@ struct heatseeker_missiles_t : public missile_attack_t
     cooldown -> duration         = from_seconds( 15 );
     range                        = 30.0;
 
-    dd.power_mod                 = 2.08;
-    dd.standardhealthpercentmin  = 0.168;
-    dd.standardhealthpercentmax  = 0.248;
+    // from torhead. 
+    //dd.power_mod                 = 2.08;
+    //dd.standardhealthpercentmin  = 0.168;
+    //dd.standardhealthpercentmax  = 0.248;
+    // from game data files
+    dd.power_mod                 = 2.6;
+    dd.standardhealthpercentmin  = 0.21;
+    dd.standardhealthpercentmax  = 0.31;
 
     // TODO TEST: crit_bonus, crit_multiplier, or crit_bonus_multiplier? assuming additive to surge
     crit_bonus                  += 0.15 * p -> talents.target_tracking -> rank();
@@ -534,25 +542,44 @@ struct rail_shot_t : public attack_t
 // class_t::rapid_shots ===================================================================
 struct rapid_shots_t : public attack_t
 {
-  // TODO implement offhand shot
-  rapid_shots_t( class_t* p, const std::string& n, const std::string& options_str) :
-    // TODO check policy and school
-    attack_t( n, p, range_policy, SCHOOL_ENERGY )
+  rapid_shots_t* offhand_attack;
+
+  rapid_shots_t( class_t* p, const std::string& n, const std::string& options_str,
+      bool is_offhand = false ) :
+    attack_t( n, p, range_policy, SCHOOL_ENERGY ), offhand_attack( 0 )
   {
-    // TODO
-    // rank_level_list = { ... 50 }
+    rank_level_list = { 0 };
     parse_options( options_str );
 
-    // TODO REVIEW
-    // hitting way too hard. hits 5 times for each weapon for about 1/5 the damage. Can't work out how to translate the torhead data into these fields.
     range                       = 30.0;
-    td.weapon                   = &( player -> main_hand_weapon );
     td.weapon_multiplier        = -0.8;
-    td.power_mod                = 1;
     base_accuracy               -= 0.10;
     num_ticks                   = 5;
     base_tick_time              = from_seconds( 0.3 );
-    base_multiplier             = 0.2;
+
+    if ( is_offhand )
+    {
+      background                = true;
+      dual                      = true;
+      trigger_gcd               = timespan_t::zero();
+      td.weapon                 = &( player -> off_hand_weapon );
+      rank_level_list           = { 0 };
+      td.power_mod              = 0;
+    }
+    else
+    {
+      offhand_attack            = new rapid_shots_t( p, n+"_offhand", options_str, true );
+      add_child( offhand_attack );
+      td.weapon                 = &( player -> main_hand_weapon );
+      td.power_mod              = 0.2;
+    }
+  }
+
+  virtual void execute()
+  {
+    attack_t::execute();
+    if ( offhand_attack )
+      offhand_attack->schedule_execute();
   }
 };
 
@@ -567,6 +594,7 @@ struct rapid_shots_t : public attack_t
 struct unload_t : public terminal_velocity_attack_t
 {
   unload_t* offhand_attack;
+
   unload_t( class_t* p, const std::string& n, const std::string& options_str,
       bool is_offhand = false ) :
     terminal_velocity_attack_t( p, n, range_policy, SCHOOL_ENERGY ), offhand_attack( 0 )
@@ -581,33 +609,29 @@ struct unload_t : public terminal_velocity_attack_t
     base_tick_time              = from_seconds( 1 );
     base_multiplier             = 1 + ( 0.33 * p -> talents.riddle -> rank() );
     crit_bonus                  += 0.15 * p -> talents.target_tracking -> rank();
+    td.standardhealthpercentmin = 
+    td.standardhealthpercentmax = 0.105;
+    td.power_mod                = 1.05;
+    td.weapon_multiplier        = -0.3;
 
     if ( is_offhand )
     {
-      background           =
-      dual                 = true;
-      base_cost            = 0;
-      trigger_gcd          = timespan_t::zero();
-      // TODO FIX not hitting for anything...
-      td.weapon            = &( player -> off_hand_weapon );
-      td.weapon_multiplier = -0.3;
-
+      background                = true;
+      dual                      = true;
+      base_cost                 = 0;
+      trigger_gcd               = timespan_t::zero();
+      td.weapon                 = &( player -> off_hand_weapon );
+      rank_level_list           = { 0 };
+      td.power_mod              = 0;
     }
     else
     {
-      offhand_attack = new unload_t( p, n+"_offhand", options_str, true);
-      base_cost                   = 16;
-      cooldown -> duration        = from_seconds( 15.0 );
-      channeled                   = true;
-      td.standardhealthpercentmin = 
-      td.standardhealthpercentmax = 0.0263;
-      td.power_mod                = 0.263;
-      // XXX REVIEW
-      // added td.weapon & td.weapon_multiplier to sc_action_t instead of making it reference weapon
-      // since direct_damage will work with just weapon set and did not want to break that behavior
-      // not hitting hard enough either. maybe 20% less?
-      td.weapon                   = &( player -> main_hand_weapon );
-      td.weapon_multiplier        = -0.82;
+      offhand_attack            = new unload_t( p, n+"_offhand", options_str, true);
+      add_child( offhand_attack);
+      base_cost                 = 16;
+      cooldown -> duration      = from_seconds( 15.0 );
+      channeled                 = true;
+      td.weapon                 = &( player -> main_hand_weapon );
     }
   }
 
@@ -631,7 +655,7 @@ struct unload_t : public terminal_velocity_attack_t
   virtual void last_tick(dot_t* d)
   {
     terminal_velocity_attack_t::last_tick( d );
-    // BUG: how to be sure MH/OH is the last one?
+    if ( ! offhand_attack )
       p() -> buffs.barrage -> expire();
   }
 
@@ -872,9 +896,9 @@ void class_t::init_gains()
 {
     base_t::init_gains();
 
-    gains.improved_vents    = get_gain( "improved_vents" );
+    gains.improved_vents    = get_gain( "improved_vents"    );
     gains.terminal_velocity = get_gain( "terminal_velocity" );
-    gains.vent_heat         = get_gain( "vent_heat" );
+    gains.vent_heat         = get_gain( "vent_heat"         );
 }
 
 // class_t::init_procs ====================================================================

@@ -32,12 +32,6 @@ public:
   virtual resource_type primary_resource() const
   { return RESOURCE_HEAT; }
 
-  virtual double range_bonus_stats() const
-{ return aim() + player_t::range_bonus_stats(); }
-
-  virtual double range_crit_from_stats() const
-  { return rating_scaler.crit_from_stat( aim() ) + player_t::range_crit_from_stats(); }
-
   virtual bool report_attack_type( action_t::policy_t policy )
   {
     return ( policy == action_t::range_policy ||

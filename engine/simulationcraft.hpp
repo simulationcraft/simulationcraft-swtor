@@ -3334,6 +3334,7 @@ public:
 
   // Some actions require different multipliers for the "direct" and "tick" portions.
 
+  // XXX TODO TEST: multiplcative or additive in swtor? Suspect additive
   virtual double total_dd_multiplier() const { return total_multiplier() * dd.base_multiplier * dd.player_multiplier * dd.target_multiplier; }
   virtual double total_td_multiplier() const { return total_multiplier() * td.base_multiplier * td.player_multiplier * td.target_multiplier; }
 

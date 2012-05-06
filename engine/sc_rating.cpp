@@ -14,7 +14,7 @@ namespace { // ANONYMOUS ====================================================
 // Source: http://sithwarrior.com/forums/Thread-SWTOR-formula-list?pid=8298#pid8298
 // Which he supposedly datamined with Nodeviewer.
 const int base_health_table[] = {
-  /*  0 */    0,
+  /*  0 */    1,
   /*  1 */  130,
   /*  2 */  140,
   /*  3 */  150,
@@ -72,7 +72,7 @@ struct standard_health_t
 
 // Source: http://sithwarrior.com/forums/Thread-SWTOR-formula-list?pid=3547#pid3547
 const standard_health_t standard_health_table[] = {
-  /*  0 */ {    0,    0 },
+  /*  0 */ {    1,    1 },
   /*  1 */ {  180,  375 },
   /*  2 */ {  210,  430 },
   /*  3 */ {  240,  505 },

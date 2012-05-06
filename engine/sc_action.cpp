@@ -554,7 +554,7 @@ double action_t::calculate_tick_weapon_damage()
   if ( sim -> debug )
   {
     log_t::output( sim, "%s tick weapon damage for %s: dmg=%.3f bd=%.3f",
-                   player -> name(), name(), dmg, weapon -> bonus_dmg );
+                   player -> name(), name(), dmg, td.weapon -> bonus_dmg );
   }
 
   return dmg;
@@ -564,7 +564,7 @@ double action_t::calculate_tick_weapon_damage()
 
 double action_t::calculate_tick_damage()
 {
-  if ( td.base_max == 0 && td.power_mod == 0 ) return 0;
+  if ( td.base_max == 0 && td.power_mod == 0 && td.weapon == 0 ) return 0;
 
   double dmg = sim -> range( td.base_min, td.base_max );
 
@@ -1224,7 +1224,7 @@ void action_t::init()
     }
   }
 
-  const double standard_rank_amount =
+  double standard_rank_amount =
       ( type == ACTION_HEAL || type == ACTION_ABSORB ) ?
         rating_t::standardhealth_healing( rank_level ) :
         rating_t::standardhealth_damage( rank_level );
@@ -1260,6 +1260,10 @@ void action_t::init()
 
   if ( sim -> travel_variance && travel_speed && player -> distance )
     rng_travel = player -> get_rng( name_str + "_travel", RNG_DISTRIBUTED );
+
+  if ( sim -> debug )
+    log_t::output( sim, "%s initialised: ranklevel(%d amount:%f) dd.bmin(%f) dd.bmax(%f) td.bmin(%f) tdbmax(%f)",
+        name(), rank_level, standard_rank_amount, dd.base_min, dd.base_max, td.base_min, td.base_max  );
 
   initialized = true;
 }
