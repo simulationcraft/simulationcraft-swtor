@@ -8,7 +8,7 @@ position=back
 role=hybrid
 use_pre_potion=0
 professions=armormech
-talents=http://www.torhead.com/skill-calc#401ZZ.1
+talents=http://www.torhead.com/skill-calc#401MffrzGoRdsZ0cZG.1
 actions=stim,type=exotech_skill
 actions+=/coordination
 actions+=/snapshot_stats
