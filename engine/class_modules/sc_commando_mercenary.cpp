@@ -404,17 +404,14 @@ struct high_velocity_gas_cylinder_t : public action_t
 // class_t::onboard_aed ===================================================================
 
 // class_t::power_shot ====================================================================
-// Charges up both blasters and fires off two powerful shots. Requires two blasters.
 struct power_shot_t : public attack_t
 {
   power_shot_t* offhand_attack;
 
   power_shot_t( class_t* p, const std::string& n, const std::string& options_str,
       bool is_offhand = false ) :
-    // TODO check unsure of policy and school
     attack_t( n, p, range_policy, SCHOOL_ENERGY )
   {
-    // TODO
     rank_level_list = { 10, 13, 16, 22, 33, 45, 50 };
 
     parse_options( options_str );
@@ -445,6 +442,13 @@ struct power_shot_t : public attack_t
       offhand_attack             = new power_shot_t( p, n+"_offhand", options_str, true );
       add_child( offhand_attack );
     }
+  }
+
+  virtual void player_buff()
+  {
+    attack_t::player_buff();
+    if ( unsigned rank = p() -> talents.mandalorian_iron_warheads -> rank() )
+      player_multiplier += 0.03 * rank;
   }
 
   virtual void execute()
@@ -487,8 +491,6 @@ struct tracer_missile_t : public missile_attack_t
     dd.standardhealthpercentmin  = 0.131;
     dd.standardhealthpercentmax  = 0.211;
     base_crit                   += ( p -> set_bonus.rakata_eliminators -> two_pc() ? 0.15 : 0 );
-
-
   }
 
   virtual void execute()
@@ -541,7 +543,6 @@ struct rail_shot_t : public attack_t
     dd.power_mod                 =  1.9;
     dd.standardhealthpercentmin  =  
     dd.standardhealthpercentmax  =  0.19;
-
     weapon                       =  &( player -> main_hand_weapon );
     weapon_multiplier            =  0.27;
   }
@@ -581,7 +582,7 @@ struct rapid_shots_t : public attack_t
     parse_options( options_str );
 
     range                       = 30.0;
-    base_accuracy               -= 0.10;
+    base_accuracy              -= 0.10;
     num_ticks                   = 5;
     base_tick_time              = from_seconds( 0.3 );
     td.weapon                   = &( player -> main_hand_weapon );
@@ -991,7 +992,6 @@ void class_t::init_actions()
             if ( set_bonus.rakata_eliminators -> four_pc() )
               action_list_str += "/rail_shot,if=buff.tracer_lock.stack>=5&buff.high_velocity_gas_cylinder.up";
             action_list_str += "/rail_shot,if=heat>75&buff.tracer_lock.stack>=5";
-            // TODO check for talent tracer missile
             if ( talents.tracer_missile )
               action_list_str += "/tracer_missile,if=heat>71";
             else
