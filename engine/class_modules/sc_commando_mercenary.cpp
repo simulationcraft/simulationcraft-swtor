@@ -924,20 +924,26 @@ void class_t::init_buffs()
 
 void class_t::init_gains()
 {
-    base_t::init_gains();
+  base_t::init_gains();
+  bool is_bh = ( type == BH_MERCENARY );
+  const char* improved_vents    = is_bh ? "improved_vents"    : "cell_capacitor"  ; 
+  const char* terminal_velocity = is_bh ? "terminal_velocity" : "penetrate_armor" ; 
+  const char* vent_heat         = is_bh ? "vent_heat"         : "recharge_cells"  ; 
 
-    gains.improved_vents    = get_gain( "improved_vents"    );
-    gains.terminal_velocity = get_gain( "terminal_velocity" );
-    gains.vent_heat         = get_gain( "vent_heat"         );
+  gains.improved_vents    = get_gain( improved_vents    );
+  gains.terminal_velocity = get_gain( terminal_velocity );
+  gains.vent_heat         = get_gain( vent_heat         );
 }
 
 // class_t::init_procs ====================================================================
 
 void class_t::init_procs()
 {
-    base_t::init_procs();
+  base_t::init_procs();
+  bool is_bh = ( type == BH_MERCENARY );
+  const char* terminal_velocity = is_bh ? "Terminal Velocity" : "Penetrate Armor" ;
 
-    procs.terminal_velocity = get_proc( "Terminal Velocity" );
+  procs.terminal_velocity = get_proc( terminal_velocity );
 }
 
 // class_t::init_rng ======================================================================
@@ -945,8 +951,11 @@ void class_t::init_procs()
 void class_t::init_rng()
 {
   base_t::init_rng();
+  bool is_bh = ( type == BH_MERCENARY );
+  const char* terminal_velocity = is_bh ? "terminal_velocity" : "penetrate_armor" ;
 
-  rngs.terminal_velocity = get_rng( "terminal_velocity" );
+
+  rngs.terminal_velocity = get_rng( terminal_velocity );
 }
 
 // class_t::init_actions ==================================================================
