@@ -318,7 +318,7 @@ struct terminal_velocity_attack_t : public attack_t
 struct missile_attack_t : public terminal_velocity_attack_t
 {
     missile_attack_t( class_t* p, const std::string& n ) :
-      terminal_velocity_attack_t( p, n, range_policy, SCHOOL_KINETIC)
+      terminal_velocity_attack_t( p, n, tech_policy, SCHOOL_KINETIC)
   {
   }
 
@@ -362,7 +362,6 @@ struct heatseeker_missiles_t : public missile_attack_t
     dd.standardhealthpercentmin  = 0.21;
     dd.standardhealthpercentmax  = 0.31;
 
-    // TODO TEST: crit_bonus, crit_multiplier, or crit_bonus_multiplier? assuming additive to surge
     crit_bonus                  += 0.15 * p -> talents.target_tracking -> rank();
   }
 

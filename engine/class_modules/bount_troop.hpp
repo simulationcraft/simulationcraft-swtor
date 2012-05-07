@@ -40,6 +40,12 @@ public:
         ( primary_role() == ROLE_HEAL && policy == action_t::tech_heal_policy );
   }
 
+  virtual double tech_bonus_stats() const
+  { return aim() + player_t::tech_bonus_stats(); }
+
+  virtual double tech_crit_from_stats() const
+  { return rating_scaler.crit_from_stat( aim() ) + player_t::tech_crit_from_stats(); }
+
   virtual void init_scaling()
   {
     player_t::init_scaling();
