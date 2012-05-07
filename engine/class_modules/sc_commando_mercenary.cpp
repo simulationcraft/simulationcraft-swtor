@@ -347,12 +347,15 @@ struct heatseeker_missiles_t : public missile_attack_t
     // TODO
     // rank_level_list = { ... 50 }
 
+    check_talent( p -> talents.heatseeker_missiles -> rank() );
+
     parse_options( options_str );
 
     base_cost                    = 16;
     cooldown -> duration         = from_seconds( 15 );
     range                        = 30.0;
 
+    // XXX outdated pre 1.2
     // from torhead. 
     //dd.power_mod                 = 2.08;
     //dd.standardhealthpercentmin  = 0.168;

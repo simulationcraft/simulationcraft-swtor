@@ -3326,7 +3326,8 @@ public:
   virtual void   check_race( race_type );
   virtual const char* name() const { return name_str.c_str(); }
 
-  double total_multiplier() const { return base_multiplier * player_multiplier * target_multiplier; }
+  // XXX  assuming additive multiplier in swtor: tested on all profiles and minimal impact (<50dps)
+  double total_multiplier() const { return base_multiplier + player_multiplier + target_multiplier - 2; }
   double total_accuracy() const   { return base_accuracy   + player_accuracy;                       }
   double total_crit() const       { return base_crit       + player_crit       + target_crit;       }
   double total_crit_bonus() const;
@@ -3337,9 +3338,9 @@ public:
 
   // Some actions require different multipliers for the "direct" and "tick" portions.
 
-  // XXX TODO TEST: multiplcative or additive in swtor? Suspect additive
-  virtual double total_dd_multiplier() const { return total_multiplier() * dd.base_multiplier * dd.player_multiplier * dd.target_multiplier; }
-  virtual double total_td_multiplier() const { return total_multiplier() * td.base_multiplier * td.player_multiplier * td.target_multiplier; }
+  // XXX  assuming additive multiplier in swtor: tested on all profiles and minimal impact (<50dps)
+  virtual double total_dd_multiplier() const { return total_multiplier() + dd.base_multiplier + dd.player_multiplier + dd.target_multiplier - 3; }
+  virtual double total_td_multiplier() const { return total_multiplier() + td.base_multiplier + td.player_multiplier + td.target_multiplier - 3; }
 
   virtual expr_ptr create_expression( const std::string& name );
 

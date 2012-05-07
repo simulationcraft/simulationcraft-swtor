@@ -283,14 +283,14 @@ struct attack_t : public action_t
     may_crit = true;
   }
 
-  virtual void player_buff() // override
+  virtual void player_buff()
   {
     action_t::player_buff();
     if ( p() -> buffs.tactical_advantage -> up() )
       player_multiplier += 0.02;
   }
 
-  virtual void execute() // override
+  virtual void execute()
   {
     action_t::execute();
     p() -> buffs.stealth -> expire();
