@@ -407,36 +407,57 @@ struct high_velocity_gas_cylinder_t : public action_t
 // Charges up both blasters and fires off two powerful shots. Requires two blasters.
 struct power_shot_t : public attack_t
 {
-  power_shot_t( class_t* p, const std::string& n, const std::string& options_str) :
+  power_shot_t* offhand_attack;
+
+  power_shot_t( class_t* p, const std::string& n, const std::string& options_str,
+      bool is_offhand = false ) :
     // TODO check unsure of policy and school
     attack_t( n, p, range_policy, SCHOOL_ENERGY )
   {
     // TODO
-    // rank_level_list = { ... 50 }
+    rank_level_list = { 10, 13, 16, 22, 33, 45, 50 };
 
     parse_options( options_str );
 
-    base_cost = 16;
-    range = 30.0;
+    base_cost                    = 16;
+    range                        = 30.0;
+    base_execute_time            = from_seconds( 2 - 0.5 * p -> talents.muzzle_fluting -> rank() );
+    weapon_multiplier            = 0.15;
+    weapon                       = &( player -> main_hand_weapon );
+    dd.power_mod                 = 1.71;
+    dd.standardhealthpercentmin  = 
+    dd.standardhealthpercentmax  = 0.171;
+    base_crit                   += ( p -> set_bonus.rakata_eliminators -> two_pc() ? 0.15 : 0 );
 
-    // TODO CHECK torhead says slots->[SecondaryRanged] but what about MH hit?
-    // i think there's a lot missing from this ability on torhead. moving on...
-    weapon = &( player -> off_hand_weapon );
-    weapon_multiplier = 0.15;
-    base_crit += ( p -> set_bonus.rakata_eliminators -> two_pc() ? 0.15 : 0 );
+    if ( is_offhand )
+    {
+      base_cost                  = 0;
+      background                 = true;
+      dual                       = true;
+      base_execute_time          = timespan_t::zero();
+      trigger_gcd                = timespan_t::zero();
+      weapon                     = &( player -> off_hand_weapon );
+      rank_level_list            = { 0 };
+      dd.power_mod               = 0;
+    }
+    else
+    {
+      offhand_attack             = new power_shot_t( p, n+"_offhand", options_str, true );
+      add_child( offhand_attack );
+    }
   }
 
   virtual void execute()
   {
     attack_t::execute();
-
     class_t& p = *cast();
 
-    if ( result_is_hit() && p.talents.barrage -> rank() )
-        p.buffs.barrage -> trigger();
-
-    // TODO
-    // 2nd shot
+    if ( offhand_attack )
+    {
+      offhand_attack -> schedule_execute();
+      if ( result_is_hit() && p.talents.barrage -> rank() )
+          p.buffs.barrage -> trigger();
+    }
   }
 };
 
@@ -560,10 +581,12 @@ struct rapid_shots_t : public attack_t
     parse_options( options_str );
 
     range                       = 30.0;
-    td.weapon_multiplier        = -0.8;
     base_accuracy               -= 0.10;
     num_ticks                   = 5;
     base_tick_time              = from_seconds( 0.3 );
+    td.weapon                   = &( player -> main_hand_weapon );
+    td.weapon_multiplier        = -0.8;
+    td.power_mod                = 0.2;
 
     if ( is_offhand )
     {
@@ -578,8 +601,6 @@ struct rapid_shots_t : public attack_t
     {
       offhand_attack            = new rapid_shots_t( p, n+"_offhand", options_str, true );
       add_child( offhand_attack );
-      td.weapon                 = &( player -> main_hand_weapon );
-      td.power_mod              = 0.2;
     }
   }
 
@@ -611,13 +632,17 @@ struct unload_t : public terminal_velocity_attack_t
 
     parse_options( options_str );
 
+    base_cost                   = 16;
     range                       = 30.0;
+    cooldown -> duration        = from_seconds( 15.0 );
+    channeled                   = true;
     num_ticks                   = 3;
     base_tick_time              = from_seconds( 1 );
     base_multiplier             = 1 + ( 0.33 * p -> talents.riddle -> rank() );
-    crit_bonus                  += 0.15 * p -> talents.target_tracking -> rank();
+    crit_bonus                 += 0.15 * p -> talents.target_tracking -> rank();
     td.standardhealthpercentmin = 
     td.standardhealthpercentmax = 0.105;
+    td.weapon                   = &( player -> main_hand_weapon );
     td.power_mod                = 1.05;
     td.weapon_multiplier        = -0.3;
 
@@ -625,6 +650,7 @@ struct unload_t : public terminal_velocity_attack_t
     {
       background                = true;
       dual                      = true;
+      channeled                 = false;
       base_cost                 = 0;
       trigger_gcd               = timespan_t::zero();
       td.weapon                 = &( player -> off_hand_weapon );
@@ -634,11 +660,7 @@ struct unload_t : public terminal_velocity_attack_t
     else
     {
       offhand_attack            = new unload_t( p, n+"_offhand", options_str, true);
-      add_child( offhand_attack);
-      base_cost                 = 16;
-      cooldown -> duration      = from_seconds( 15.0 );
-      channeled                 = true;
-      td.weapon                 = &( player -> main_hand_weapon );
+      add_child( offhand_attack );
     }
   }
 
@@ -959,24 +981,28 @@ void class_t::init_actions()
         {
             action_list_str += "stim,type=exotech_reflex";
             action_list_str += "/snapshot_stats";
-
-            // TODO check for arsenal
+            // ARSENAL
             action_list_str += "/high_velocity_gas_cylinder,if=!buff.high_velocity_gas_cylinder.up";
-            // TODO check for talent improved vents
             action_list_str += "/vent_heat,if=heat<=66";
             action_list_str += "/use_relics";
             action_list_str += "/unload,if=heat>76";
-            // TODO check for talent
-            action_list_str += "/heatseeker_missiles,if=heat>76";
-            // todo check for 4 piece
+            if ( talents.heatseeker_missiles)
+              action_list_str += "/heatseeker_missiles,if=heat>76";
+            if ( set_bonus.rakata_eliminators -> four_pc() )
+              action_list_str += "/rail_shot,if=buff.tracer_lock.stack>=5&buff.high_velocity_gas_cylinder.up";
             action_list_str += "/rail_shot,if=heat>75&buff.tracer_lock.stack>=5";
             // TODO check for talent tracer missile
-            action_list_str += "/tracer_missile,if=heat>71";
+            if ( talents.tracer_missile )
+              action_list_str += "/tracer_missile,if=heat>71";
+            else
+              action_list_str += "/power_shot,if=heat>75";
             action_list_str += "/rapid_shots";
 
             switch ( primary_tree() )
             {
+            case TREE_ARSENAL:
 
+              break;
             default: break;
             }
 
