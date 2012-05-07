@@ -966,6 +966,7 @@ void class_t::init_actions()
             action_list_str += "/high_velocity_gas_cylinder,if=!buff.high_velocity_gas_cylinder.up";
             // TODO check for talent improved vents
             action_list_str += "/vent_heat,if=heat<=66";
+            action_list_str += "/use_relics";
             // TODO check for barrage talent
             action_list_str += "/unload,if=heat>76&buff.barrage.up";
             // TODO check for talent

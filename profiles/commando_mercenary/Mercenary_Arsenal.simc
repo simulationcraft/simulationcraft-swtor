@@ -13,6 +13,7 @@ actions=stim,type=exotech_reflex
 actions+=/snapshot_stats
 actions+=/high_velocity_gas_cylinder,if=!buff.high_velocity_gas_cylinder.up
 actions+=/vent_heat,if=heat<=66
+actions+=/use_relics
 actions+=/unload,if=heat>76&buff.barrage.up
 actions+=/heatseeker_missiles,if=heat>76
 actions+=/rail_shot,if=heat>75&buff.tracer_lock.stack>=5
