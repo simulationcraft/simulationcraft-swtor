@@ -441,6 +441,8 @@ struct power_shot_t : public attack_t
 };
 
 // class_t::power_surge ===================================================================
+// TODO 120s cooldown. next ability with a cast time is instant.
+
 // class_t::rapid_scan ====================================================================
 // class_t::supercharged_gas ==============================================================
 // class_t::sweeping_blasters =============================================================
@@ -508,6 +510,8 @@ struct rail_shot_t : public attack_t
   rail_shot_t( class_t* p, const std::string& n, const std::string& options_str) :
     attack_t( n, p, range_policy, SCHOOL_ENERGY )
   {
+    rank_level_list = { 9, 12, 15, 20, 31, 42, 50 };
+
     parse_options( options_str );
 
     base_cost                    =  16 - ( p -> set_bonus.rakata_eliminators -> four_pc() ? 8 : 0 );
@@ -550,7 +554,9 @@ struct rapid_shots_t : public attack_t
       bool is_offhand = false ) :
     attack_t( n, p, range_policy, SCHOOL_ENERGY ), offhand_attack( 0 )
   {
+    // 0 grants no bonus from level.
     rank_level_list = { 0 };
+
     parse_options( options_str );
 
     range                       = 30.0;
@@ -601,8 +607,7 @@ struct unload_t : public terminal_velocity_attack_t
       bool is_offhand = false ) :
     terminal_velocity_attack_t( p, n, range_policy, SCHOOL_ENERGY ), offhand_attack( 0 )
   {
-    // TODO
-    // rank_level_list = { ... 50 }
+    rank_level_list = { 3, 6, 9, 12, 15, 21, 32, 44, 50 };
 
     parse_options( options_str );
 
