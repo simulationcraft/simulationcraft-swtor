@@ -1717,17 +1717,17 @@ void class_t::init_buffs()
 
   bool is_shadow = ( type == JEDI_SHADOW );
 
-  const char* dark_embrace = is_shadow ? "shadows_respite" : "dark_embrace";
-  const char* deathmark = is_shadow ? "force_suppression" : "deathmark";
-  const char* exploit_weakness = is_shadow ? "find_weakness" : "exploit_weakness";
-  const char* exploitive_strikes = is_shadow ? "force_synergy" : "exploitive_strikes";
-  const char* induction = is_shadow ? "circling_shadows" : "induction";
-  const char* overcharge_saber = is_shadow ? "battle_readiness" : "overcharge_saber";
-  const char* raze = is_shadow ? "force_strike" : "raze";
-  const char* recklessness = is_shadow ? "force_potency" : "recklessness";
-  const char* static_charges = is_shadow ? "exit_strategy" : "static_charges";
-  const char* unearthed_knowledge = is_shadow ? "twin_disciplines" : "unearthed_knowledge";
-  const char* voltaic_slash = is_shadow ? "clairvoyant_strike" : "voltaic_slash";
+  const char* dark_embrace        = is_shadow ? "shadows_respite"    : "dark_embrace"        ;
+  const char* deathmark           = is_shadow ? "force_suppression"  : "deathmark"           ;
+  const char* exploit_weakness    = is_shadow ? "find_weakness"      : "exploit_weakness"    ;
+  const char* exploitive_strikes  = is_shadow ? "force_synergy"      : "exploitive_strikes"  ;
+  const char* induction           = is_shadow ? "circling_shadows"   : "induction"           ;
+  const char* overcharge_saber    = is_shadow ? "battle_readiness"   : "overcharge_saber"    ;
+  const char* raze                = is_shadow ? "force_strike"       : "raze"                ;
+  const char* recklessness        = is_shadow ? "force_potency"      : "recklessness"        ;
+  const char* static_charges      = is_shadow ? "exit_strategy"      : "static_charges"      ;
+  const char* unearthed_knowledge = is_shadow ? "twin_disciplines"   : "unearthed_knowledge" ;
+  const char* voltaic_slash       = is_shadow ? "clairvoyant_strike" : "voltaic_slash"       ;
 
   buffs.exploit_weakness    = new buff_t( this, exploit_weakness,    1, from_seconds( 10.0 ), from_seconds( 10.0 ), talents.duplicity -> rank () * 0.1 );
   buffs.dark_embrace        = new buff_t( this, dark_embrace,        1, from_seconds(  6.0 ), timespan_t::zero() );

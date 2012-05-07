@@ -70,6 +70,7 @@ struct class_t : public agent_smug::class_t
   struct rngs_t
   {
     rng_t* collateral_strike;
+    rng_t* corrosive_microbes;
   } rngs;
 
   // Benefits
@@ -205,27 +206,41 @@ struct class_t : public agent_smug::class_t
   void create_talents();
 };
 
+
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
-  agent_smug::targetdata_t( source, target ),
-  debuff_weakening_blast( new buff_t( this, "weakening_blast", 10, from_seconds( 15 ) ) ),
-  dot_acid_blade_poison( "acid_blade_poison", &source ),
-  dot_adrenaline_probe( "adrenaline_probe", &source ),
-  dot_corrosive_dart( "corrosive_dart", &source ),
-  dot_corrosive_dart_weak( "corrosive_dart_weak", &source ),
-  dot_corrosive_grenade( "corrosive_grenade", &source ),
-  dot_corrosive_grenade_weak( "corrosive_grenade_weak", &source ),
-  dot_orbital_strike( "orbital_strike", &source ),
-  dot_stim_boost( "stim_boost", &source )
+  agent_smug::targetdata_t( source, target )
 {
-  add( *debuff_weakening_blast );
-  add( dot_acid_blade_poison );
-  add( dot_adrenaline_probe );
-  add( dot_corrosive_dart );
-  add( dot_corrosive_dart_weak );
-  add( dot_corrosive_grenade );
-  add( dot_corrosive_grenade_weak );
-  add( dot_orbital_strike );
-  add( dot_stim_boost );
+  bool is_op = ( source.type == IA_OPERATIVE );
+  const char* weakening_blast        = is_op ? "weakening_blast"        : "hemorrhaging_blast"     ; 
+  const char* acid_blade_poison      = is_op ? "acid_blade_poison"      : "flechette_round_poison" ; 
+  const char* adrenaline_probe       = is_op ? "adrenaline_probe"       : "cool_head"              ; 
+  const char* corrosive_dart         = is_op ? "corrosive_dart"         : "vital_shot"             ; 
+  const char* corrosive_dart_weak    = is_op ? "corrosive_dart_weak"    : "vital_shot_weak"        ; 
+  const char* corrosive_grenade      = is_op ? "corrosive_grenade"      : "shrap_bomb"             ; 
+  const char* corrosive_grenade_weak = is_op ? "corrosive_grenade_weak" : "shrap_bomb_weak"        ; 
+  const char* orbital_strike         = is_op ? "orbital_strike"         : "xs_freighter_flyby"     ; 
+  const char* stim_boost             = is_op ? "stim_boost"             : "pugnacity"              ; 
+
+  debuff_weakening_blast     = new buff_t ( this, weakening_blast, 10, from_seconds (  15 ) ); 
+
+  dot_acid_blade_poison      = dot_t      ( acid_blade_poison, &source              ); 
+  dot_adrenaline_probe       = dot_t      ( adrenaline_probe, &source               ); 
+  dot_corrosive_dart         = dot_t      ( corrosive_dart, &source                 ); 
+  dot_corrosive_dart_weak    = dot_t      ( corrosive_dart_weak, &source            ); 
+  dot_corrosive_grenade      = dot_t      ( corrosive_grenade, &source              ); 
+  dot_corrosive_grenade_weak = dot_t      ( corrosive_grenade_weak, &source         ); 
+  dot_orbital_strike         = dot_t      ( orbital_strike, &source                 ); 
+  dot_stim_boost             = dot_t      ( stim_boost, &source                     ); 
+
+  add( *debuff_weakening_blast    ) ;
+  add( dot_acid_blade_poison      ) ;
+  add( dot_adrenaline_probe       ) ;
+  add( dot_corrosive_dart         ) ;
+  add( dot_corrosive_dart_weak    ) ;
+  add( dot_corrosive_grenade      ) ;
+  add( dot_corrosive_grenade_weak ) ;
+  add( dot_orbital_strike         ) ;
+  add( dot_stim_boost             ) ;
 }
 
 class action_t : public ::action_t
@@ -785,12 +800,10 @@ struct corrosive_grenade_t : public poison_attack_t
 
 struct corrosive_dart_t : public poison_attack_t
 {
-  rng_t* corrosive_microbes;
   corrosive_dart_t* corrosive_dart_weak;
 
   corrosive_dart_t( class_t* p, const std::string& n, const std::string& options_str, bool weak=false ) :
     poison_attack_t( n, p ),
-    corrosive_microbes( p -> get_rng( "corrosive_microbes" ) ),
     corrosive_dart_weak()
   {
     rank_level_list = { 5, 7, 10, 13, 17, 23, 35, 45, 50 };
@@ -830,8 +843,8 @@ struct corrosive_dart_t : public poison_attack_t
 
     class_t& p = *cast();
 
-    if ( corrosive_microbes &&
-         corrosive_microbes -> roll( 0.125 * p.talents.corrosive_microbes -> rank() ) )
+    if ( p.talents.corrosive_microbes -> rank()
+         && p.rngs.corrosive_microbes -> roll( 0.125 * p.talents.corrosive_microbes -> rank() ) )
     {
       p.procs.corrosive_microbes -> occur();
       extra_tick();
@@ -1146,31 +1159,42 @@ struct coordination_t : public action_t
 ::action_t* class_t::create_action( const std::string& name,
                                     const std::string& options_str )
 {
-  if ( type == IA_OPERATIVE )
-  {
-    if ( name == "acid_blade"            ) return new acid_blade_t( this, name, options_str );
-    if ( name == "adrenaline_probe"      ) return new adrenaline_probe_t( this, name, options_str );
-    if ( name == "backstab"              ) return new backstab_t( this, name, options_str );
-    if ( name == "coordination"          ) return new coordination_t( this, name, options_str );
-    if ( name == "corrosive_dart"        ) return new corrosive_dart_t( this, name, options_str );
-    if ( name == "fragmentation_grenade" ) return new fragmentation_grenade_t( this, name, options_str );
-    if ( name == "hidden_strike"         ) return new hidden_strike_t( this, name, options_str );
-    if ( name == "laceration"            ) return new laceration_t( this, name, options_str );
-    if ( name == "overload_shot"         ) return new overload_shot_t( this, name, options_str );
-    if ( name == "rifle_shot"            ) return new rifle_shot_t( this, name, options_str );
-    if ( name == "shiv"                  ) return new shiv_t( this, name, options_str );
-    if ( name == "stealth"               ) return new stealth_t( this, name, options_str );
-    if ( name == "stim_boost"            ) return new stim_boost_t( this, name, options_str );
-    if ( name == "corrosive_grenade"     ) return new corrosive_grenade_t( this, name, options_str );
-    if ( name == "cull"                  ) return new cull_t( this, name, options_str );
-    if ( name == "weakening_blast"       ) return new weakening_blast_t( this, name, options_str );
-    if ( name == "orbital_strike"        ) return new orbital_strike_t( this, name, options_str );
-  }
+  bool is_op = ( type == IA_OPERATIVE );
+  const char* acid_blade            = is_op ? "acid_blade"            : "flechette_round"    ; 
+  const char* adrenaline_probe      = is_op ? "adrenaline_probe"      : "cool_head"          ; 
+  const char* backstab              = is_op ? "backstab"              : "back_blast"         ; 
+  const char* coordination          = is_op ? "coordination"          : "lucky_shots"        ; 
+  const char* corrosive_dart        = is_op ? "corrosive_dart"        : "vital_shot"         ; 
+  const char* corrosive_grenade     = is_op ? "corrosive_grenade"     : "shrap_bomb"         ; 
+  const char* cull                  = is_op ? "cull"                  : "wounding_shot"      ; 
+  const char* fragmentation_grenade = is_op ? "fragmentation_grenade" : "thermal_grenade"    ; 
+  const char* hidden_strike         = is_op ? "hidden_strike"         : "shoot_first"        ; 
+  const char* laceration            = is_op ? "laceration"            : "sucker_punch"       ; 
+  const char* orbital_strike        = is_op ? "orbital_strike"        : "xs_freighter_flyby" ; 
+  const char* overload_shot         = is_op ? "overload_shot"         : "quick_shot"         ; 
+  const char* rifle_shot            = is_op ? "rifle_shot"            : "flurry_of_bolts"    ; 
+  const char* shiv                  = is_op ? "shiv"                  : "blaster_whip"       ; 
+  const char* stealth               = is_op ? "stealth"               : "stealth"            ; 
+  const char* stim_boost            = is_op ? "stim_boost"            : "pugnacity"          ; 
+  const char* weakening_blast       = is_op ? "weakening_blast"       : "hemorrhaging_blast" ; 
 
-  else if ( type == S_SCOUNDREL )
-  {
-
-  }
+  if ( name == acid_blade            ) return new acid_blade_t            ( this, name, options_str ) ;
+  if ( name == adrenaline_probe      ) return new adrenaline_probe_t      ( this, name, options_str ) ;
+  if ( name == backstab              ) return new backstab_t              ( this, name, options_str ) ;
+  if ( name == coordination          ) return new coordination_t          ( this, name, options_str ) ;
+  if ( name == corrosive_dart        ) return new corrosive_dart_t        ( this, name, options_str ) ;
+  if ( name == corrosive_grenade     ) return new corrosive_grenade_t     ( this, name, options_str ) ;
+  if ( name == cull                  ) return new cull_t                  ( this, name, options_str ) ;
+  if ( name == fragmentation_grenade ) return new fragmentation_grenade_t ( this, name, options_str ) ;
+  if ( name == hidden_strike         ) return new hidden_strike_t         ( this, name, options_str ) ;
+  if ( name == laceration            ) return new laceration_t            ( this, name, options_str ) ;
+  if ( name == orbital_strike        ) return new orbital_strike_t        ( this, name, options_str ) ;
+  if ( name == overload_shot         ) return new overload_shot_t         ( this, name, options_str ) ;
+  if ( name == rifle_shot            ) return new rifle_shot_t            ( this, name, options_str ) ;
+  if ( name == shiv                  ) return new shiv_t                  ( this, name, options_str ) ;
+  if ( name == stealth               ) return new stealth_t               ( this, name, options_str ) ;
+  if ( name == stim_boost            ) return new stim_boost_t            ( this, name, options_str ) ;
+  if ( name == weakening_blast       ) return new weakening_blast_t       ( this, name, options_str ) ;
 
   return base_t::create_action( name, options_str );
 }
@@ -1293,14 +1317,21 @@ void class_t::init_buffs()
   // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
 
-  //bool is_juggernaut = ( type == SITH_MARAUDER );
+  bool is_op = ( type == IA_OPERATIVE );
+  const char* acid_blade_coating = is_op ? "acid_blade_coating" : "flechette_round_coating" ; 
+  const char* acid_blade_arpen   = is_op ? "acid_blade_arpen"   : "flechette_round_arpen"   ; 
+  const char* adrenaline_probe   = is_op ? "adrenaline_probe"   : "cool_head"               ; 
+  const char* stealth            = is_op ? "stealth"            : "stealth"                 ; 
+  const char* stim_boost         = is_op ? "stim_boost"         : "pugnacity"               ; 
+  const char* tactical_advantage = is_op ? "tactical_advantage" : "upper_hand"              ; 
 
-  buffs.acid_blade_coating  = new buff_t( this, "acid_blade_coating", 1, from_seconds( 20 ) );
-  buffs.acid_blade_arpen    = new buff_t( this, "acid_blade_arpen", 1, from_seconds( 15 )   );
-  buffs.adrenaline_probe    = new buff_t( this, "adrenaline_probe", 1, from_seconds( 3 )    );
-  buffs.stealth             = new buff_t( this, "stealth", 1                                );
-  buffs.stim_boost          = new buff_t( this, "stim_boost", 1, from_seconds( 45 )         );
-  buffs.tactical_advantage  = new buff_t( this, "tactical_advantage", 2, from_seconds( 10 ) );
+
+  buffs.acid_blade_coating = new buff_t( this , acid_blade_coating , 1 ,  from_seconds( 20 ) ); 
+  buffs.acid_blade_arpen   = new buff_t( this , acid_blade_arpen   , 1 ,  from_seconds( 15 ) ); 
+  buffs.adrenaline_probe   = new buff_t( this , adrenaline_probe   , 1 ,  from_seconds(  3 ) ); 
+  buffs.stealth            = new buff_t( this , stealth            , 1                       ); 
+  buffs.stim_boost         = new buff_t( this , stim_boost         , 1 ,  from_seconds( 45 ) ); 
+  buffs.tactical_advantage = new buff_t( this , tactical_advantage , 2 ,  from_seconds( 10 ) ); 
 }
 
 // class_t::init_gains ========================================
@@ -1309,11 +1340,18 @@ void class_t::init_gains()
 {
   base_t::init_gains();
 
-  gains.adrenaline_probe = get_gain( "adrenaline_probe" );
-  gains.stim_boost       = get_gain( "stim_boost"       );
-  gains.revitalizers     = get_gain( "revitalizers"     );
-  gains.combat_stims     = get_gain( "combat_stims"     );
-  gains.lethal_purpose   = get_gain( "lethal_purpose"   );
+  bool is_op = ( type == IA_OPERATIVE );
+  const char* adrenaline_probe = is_op ? "adrenaline_probe" : "cool_head"         ; 
+  const char* combat_stims     = is_op ? "combat_stims"     : "street_tough"      ; 
+  const char* lethal_purpose   = is_op ? "lethal_purpose"   : "fighting_spirit"   ; 
+  const char* revitalizers     = is_op ? "revitalizers"     : "surprise_comeback" ; 
+  const char* stim_boost       = is_op ? "stim_boost"       : "pugnacity"         ; 
+
+  gains.adrenaline_probe = get_gain( adrenaline_probe );
+  gains.combat_stims     = get_gain( combat_stims     );
+  gains.lethal_purpose   = get_gain( lethal_purpose   );
+  gains.revitalizers     = get_gain( revitalizers     );
+  gains.stim_boost       = get_gain( stim_boost       );
 }
 
 // class_t::init_procs ========================================
@@ -1322,7 +1360,10 @@ void class_t::init_procs()
 {
   base_t::init_procs();
 
-  procs.corrosive_microbes = get_proc( "Corrosive Microbe ticks" );
+  bool is_op = ( type == IA_OPERATIVE );
+  const char* corrosive_microbes = is_op ? "Corrosive Microbes tick" : "Mortal Wounds tick" ; 
+
+  procs.corrosive_microbes = get_proc( corrosive_microbes );
 }
 
 // class_t::init_rng ==========================================
@@ -1331,7 +1372,12 @@ void class_t::init_rng()
 {
   base_t::init_rng();
 
-  rngs.collateral_strike = get_rng( "collateral_strike" );
+  bool is_op = ( type == IA_OPERATIVE );
+  const char* collateral_strike  = is_op ? "collateral_strike"  : "flying_fists"  ; 
+  const char* corrosive_microbes = is_op ? "corrosive_microbes" : "mortal_wounds" ; 
+
+  rngs.collateral_strike  = get_rng( collateral_strike  );
+  rngs.corrosive_microbes = get_rng( corrosive_microbes );
 }
 
 // class_t::init_actions ======================================
@@ -1344,89 +1390,92 @@ void class_t::init_actions()
   //
   //=========================================================================
 
+  bool is_op = ( type == IA_OPERATIVE );
+  const std::string acid_blade            = is_op ? "acid_blade"            : "flechette_round"    ; 
+  const std::string adrenaline_probe      = is_op ? "adrenaline_probe"      : "cool_head"          ; 
+  const std::string backstab              = is_op ? "backstab"              : "back_blast"         ; 
+  const std::string coordination          = is_op ? "coordination"          : "lucky_shots"        ; 
+  const std::string corrosive_dart        = is_op ? "corrosive_dart"        : "vital_shot"         ; 
+  const std::string corrosive_grenade     = is_op ? "corrosive_grenade"     : "shrap_bomb"         ; 
+  const std::string cull                  = is_op ? "cull"                  : "wounding_shot"      ; 
+  const std::string fragmentation_grenade = is_op ? "fragmentation_grenade" : "thermal_grenade"    ; 
+  const std::string hidden_strike         = is_op ? "hidden_strike"         : "shoot_first"        ; 
+  const std::string laceration            = is_op ? "laceration"            : "sucker_punch"       ; 
+  const std::string orbital_strike        = is_op ? "orbital_strike"        : "xs_freighter_flyby" ; 
+  const std::string overload_shot         = is_op ? "overload_shot"         : "quick_shot"         ; 
+  const std::string rifle_shot            = is_op ? "rifle_shot"            : "flurry_of_bolts"    ; 
+  const std::string shiv                  = is_op ? "shiv"                  : "blaster_whip"       ; 
+  const std::string stealth               = is_op ? "stealth"               : "stealth"            ; 
+  const std::string stim_boost            = is_op ? "stim_boost"            : "pugnacity"          ; 
+  const std::string tactical_advantage    = is_op ? "tactical_advantage"    : "upper_hand"         ; 
+  const std::string weakening_blast       = is_op ? "weakening_blast"       : "hemorrhaging_blast" ; 
+  const std::string sl = "/";
+
   if ( action_list_str.empty() )
   {
     action_list_default = true;
 
-    action_list_str += "stim,type=exotech_skill"
-                       "/coordination"
+    action_list_str += "/stim,type=exotech_skill"
+                       + sl + coordination +
                        "/snapshot_stats";
 
-    if ( type == IA_OPERATIVE )
-    {
-      action_list_str += "/stealth"
-                         "/adrenaline_probe,if=energy<=60"
-                         "/stim_boost,if=buff.tactical_advantage.stack>=2";
+    action_list_str += "/stealth"
+                       + sl + adrenaline_probe + ",if=energy<=60"
+                       + sl + stim_boost + ",if=buff." + tactical_advantage + ".stack>=2";
 
-      if ( talents.acid_blade -> rank() )
-        action_list_str += "/acid_blade,if=!buff.acid_blade_coating.up&!cooldown.backstab.remains";
-      action_list_str += "/use_relics"
-                         "/hidden_strike";
+    if ( talents.acid_blade -> rank() )
+      action_list_str += sl + acid_blade + ",if=!buff." + acid_blade + "_coating.up&!cooldown." + backstab + ".remains";
+    action_list_str += "/use_relics"
+                       + sl + hidden_strike;
 
-      if ( talents.weakening_blast -> rank() )
-        action_list_str += "/weakening_blast";
 
-      if ( talents.flanking -> rank() )
-        action_list_str += "/backstab,if=energy>=65";
-      if ( talents.acid_blade -> rank() )
-        action_list_str += ",if=buff.acid_blade_coating.up";
+    if ( talents.flanking -> rank() )
+      action_list_str += sl + backstab + ",if=energy>=65";
+    if ( talents.acid_blade -> rank() )
+      action_list_str += ",if=buff." + acid_blade + "_coating.up";
 
-      action_list_str += "/shiv,if=energy>=75&buff.tactical_advantage.stack<2"
-                         "/corrosive_dart,if=!ticking&energy>=75";
+    if ( talents.weakening_blast -> rank() )
+      action_list_str += sl + weakening_blast;
 
-      if ( talents.corrosive_grenade -> rank() )
-      action_list_str += "/corrosive_grenade,if=!ticking&energy>=80";
+    action_list_str += sl + shiv + ",if=energy>=75&buff." + tactical_advantage + ".stack<2"
+                       + sl + corrosive_dart + ",if=!ticking&energy>=75";
 
-      if ( talents.laceration -> rank() )
-        action_list_str += "/laceration,if=energy>=75";
+    if ( talents.corrosive_grenade -> rank() )
+    action_list_str += sl + corrosive_grenade + ",if=!ticking&energy>=80";
 
-      if ( talents.cull -> rank() )
-        action_list_str += "/cull,if=energy>=50&buff.tactical_advantage.stack>=2"
-                           "&(dot.corrosive_dart.ticking|dot.corrosive_dart_weak.ticking)"
-                           "&(dot.corrosive_grenade.ticking|dot.corrosive_grenade_weak.ticking)";
+    if ( talents.laceration -> rank() )
+      action_list_str += sl + laceration + ",if=energy>=75";
 
-      if ( ! talents.flanking -> rank() )
-        action_list_str += "/backstab,if=energy>=70";
+    if ( talents.cull -> rank() )
+      action_list_str += sl + cull + ",if=energy>=50&buff." + tactical_advantage + ".stack>=2"
+                         "&(dot." + corrosive_dart + ".ticking|dot." + corrosive_dart + "_weak.ticking)"
+                         "&(dot." + corrosive_grenade + ".ticking|dot." + corrosive_grenade + "_weak.ticking)";
 
-      action_list_str += "/orbital_strike,if=energy>65";
-      action_list_str += "/overload_shot,if=energy>";
-      if ( set_bonus.rakata_enforcers -> four_pc() )
-        action_list_str += "100";
-      else
-        action_list_str += "95";
-      action_list_str += "/rifle_shot";
+    if ( ! talents.flanking -> rank() )
+      action_list_str += sl + backstab + ",if=energy>=70";
 
-      if ( false )
-      {
-        switch ( primary_tree() )
-        {
-        case TREE_MEDICINE:
-          break;
-
-        case TREE_CONCEALMENT:
-          break;
-
-        case TREE_LETHALITY:
-          break;
-
-        default: break;
-        }
-      }
-    }
-
-    // S_SCOUNDREL
+    action_list_str += sl + orbital_strike + ",if=energy>65";
+    action_list_str += sl + overload_shot + ",if=energy>";
+    if ( set_bonus.rakata_enforcers -> four_pc() )
+      action_list_str += "100";
     else
+      action_list_str += "95";
+    action_list_str += sl + rifle_shot;
+
+    if ( false )
     {
-      action_list_str += "stim,type=exotech_skill";
-      action_list_str += "/snapshot_stats";
-
-      if ( false )
+      switch ( primary_tree() )
       {
-        switch ( primary_tree() )
-        {
+      case TREE_MEDICINE:
+        break;
 
-        default: break;
-        }
+      case TREE_CONCEALMENT:
+        break;
+
+      case TREE_LETHALITY:
+        break;
+
+      default: break;
       }
     }
   }

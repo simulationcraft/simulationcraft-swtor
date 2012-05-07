@@ -1,2 +1,14 @@
-#mrrobot=
-#save=Scoundrel.simc
+mrrobot=dc7edc33-2adb-4e6d-8655-5b98dbfb4a26
+name=Scoundrel_Scrapper
+talents=http://www.torhead.com/skill-calc#7010cZGIRodzRdGoZhM0z.1
+position=back
+save=Scoundrel_Scrapper.simc
+
+copy=Scoundrel_Dirty_Fighting,Scoundrel_Scrapper
+talents=http://www.torhead.com/skill-calc#4010cZG0MZGMbkrMGdhR.1
+position=back
+save=Scoundrel_Dirty_Fighting.simc
+
+copy=Scoundrel_Sawbones,Scoundrel_Scrapper
+talents=http://www.torhead.com/skill-calc#401MffrzGoRdsZ0cZG.1
+save=Scoundrel_Sawbones.simc
