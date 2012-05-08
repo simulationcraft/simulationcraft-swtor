@@ -204,15 +204,15 @@ void action_t::init_action_t_()
   base_multiplier                = 1.0;
   base_accuracy                  = 0.0;
   base_crit                      = 0.0;
-  base_armor_penetration         = 0.0;
+  base_armor_penetration         = 1.0;
   player_multiplier              = 1.0;
   player_accuracy                     = 0.0;
   player_crit                    = 0.0;
-  player_armor_penetration       = 0.0;
+  player_armor_penetration       = 1.0;
   target_multiplier              = 1.0;
   target_accuracy                     = 0.0;
   target_crit                    = 0.0;
-  target_armor_penetration       = 0.0;
+  target_armor_penetration       = 1.0;
   crit_multiplier                = 1.0;
   crit_bonus                     = 0.5;
   crit_bonus_multiplier          = 1.0;
@@ -487,7 +487,7 @@ bool action_t::result_is_miss( result_type r )
 double action_t::armor() const
 {
   double a = target -> composite_armor();
-  a *= 1 - total_armor_penetration();
+  a *= total_armor_penetration();
   return a;
 }
 

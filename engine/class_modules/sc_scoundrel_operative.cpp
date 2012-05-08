@@ -1523,7 +1523,7 @@ double class_t::armor_penetration() const
   double arpen = base_t::armor_penetration();
 
   if ( buffs.acid_blade_arpen -> up() )
-    arpen += 0.3;
+    arpen *= ( 1 - 0.3 );
 
   return arpen;
 }
