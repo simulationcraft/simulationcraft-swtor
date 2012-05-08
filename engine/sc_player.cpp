@@ -276,7 +276,7 @@ player_t::player_t( sim_t*             s,
   base_force_power( 0 ), initial_force_power( 0 ), force_power( 0 ),
   base_tech_power( 0 ),  initial_tech_power( 0 ),  tech_power( 0 ),
   surge_bonus( 0 ),
-  base_armor_penetration( 0 ),
+  base_armor_penetration( 1 ),
 
   position( POSITION_BACK ),
 
@@ -1476,10 +1476,12 @@ double player_t::armor_penetration() const
 
 double player_t::armor_penetration_debuff() const
 {
-  double arpen = 0.0
+  // assuming these are additive
+  double arpen = 1.0 - (
     + 0.20 * debuffs.shatter_shot -> stack()
     + 0.04 * debuffs.sunder -> stack()
-    + 0.04 * debuffs.heat_signature -> stack();
+    + 0.04 * debuffs.heat_signature -> stack()
+  );
   return arpen;
 }
 

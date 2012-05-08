@@ -355,15 +355,9 @@ struct heatseeker_missiles_t : public missile_attack_t
     cooldown -> duration         = from_seconds( 15 );
     range                        = 30.0;
 
-    // XXX outdated pre 1.2
-    // from torhead. 
-    //dd.power_mod                 = 2.08;
-    //dd.standardhealthpercentmin  = 0.168;
-    //dd.standardhealthpercentmax  = 0.248;
-    // from game data files
-    dd.power_mod                 = 2.6;
-    dd.standardhealthpercentmin  = 0.21;
-    dd.standardhealthpercentmax  = 0.31;
+    dd.power_mod                 = 2.08;
+    dd.standardhealthpercentmin  = 0.168;
+    dd.standardhealthpercentmax  = 0.248;
 
     crit_bonus                  += 0.15 * p -> talents.target_tracking -> rank();
   }
@@ -780,7 +774,7 @@ double class_t::armor_penetration() const
   double arpen = base_t::armor_penetration();
 
   if ( buffs.high_velocity_gas_cylinder -> up() )
-    arpen += 0.35;
+    arpen *= 0.65;
 
   return arpen;
 }

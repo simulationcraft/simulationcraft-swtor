@@ -3332,7 +3332,7 @@ public:
   double total_crit() const       { return base_crit       + player_crit       + target_crit;       }
   double total_crit_bonus() const;
   double total_armor_penetration() const
-  { return base_armor_penetration + player_armor_penetration + target_armor_penetration; }
+  { return base_armor_penetration * player_armor_penetration * target_armor_penetration; }
 
   virtual double total_power() const;
 

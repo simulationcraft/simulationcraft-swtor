@@ -294,7 +294,7 @@ struct attack_t : public action_t
       player_crit += p->talents.exploitive_strikes->rank() * 0.03;
 
     if ( p->actives.charge == SURGING_CHARGE )
-      player_armor_penetration += p->talents.charge_mastery->rank() * 0.03;
+      player_armor_penetration *= ( 1 - p->talents.charge_mastery->rank() * 0.03 );
 
     if ( p->actives.charge == LIGHTNING_CHARGE )
       player_crit += p->talents.charge_mastery->rank() * 0.01;
@@ -1208,7 +1208,7 @@ struct maul_t : public attack_t
     class_t* p = cast();
 
     if ( p->buffs.exploit_weakness->up() )
-      player_armor_penetration += 0.5;
+      player_armor_penetration *= 0.5;
   }
 };
 
