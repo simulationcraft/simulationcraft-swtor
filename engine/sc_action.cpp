@@ -806,6 +806,11 @@ void action_t::calculate_result()
   // First roll: Accuracy vs. Defense determines if attack lands
   double random = sim -> real();
   double accuracy = 1.0 + total_accuracy();
+  if (
+      ( td.weapon && td.weapon -> slot == SLOT_OFF_HAND )
+      || ( weapon && weapon -> slot == SLOT_OFF_HAND )
+  )
+    accuracy -= 0.34;
 
   if ( random < accuracy - target_avoidance )
   {
