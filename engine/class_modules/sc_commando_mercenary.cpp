@@ -886,7 +886,7 @@ void class_t::init_base()
   attribute_multiplier_initial[ ATTR_AIM ] += 0.03 * talents.ironsights          -> rank();
   set_base_accuracy( get_base_accuracy()   +  0.01 * talents.advanced_targeting  -> rank() );
   set_base_alacrity( get_base_alacrity()   +  0.02 * talents.system_calibrations -> rank() );
-  set_base_crit( get_base_crit()           +  0.02 *  talents.hired_muscle       -> rank() );
+  set_base_crit( get_base_crit()           +  0.01 *  talents.hired_muscle       -> rank() );
 }
 
 // class_t::init_benefits =================================================================
