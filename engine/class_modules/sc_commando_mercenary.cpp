@@ -303,7 +303,7 @@ struct terminal_velocity_attack_t : public attack_t
   {
     class_t* p = cast();
     if (
-        result == RESULT_CRIT && direct_dmg > 0
+        result == RESULT_CRIT && ( direct_dmg > 0 || tick_dmg > 0 )
         && p -> rngs.terminal_velocity -> roll ( p -> talents.terminal_velocity -> rank() * 0.5 )
         // XXX can't do this. it stops working after the first iteration??
         // using a class var instead for now, which resets in ::reset
