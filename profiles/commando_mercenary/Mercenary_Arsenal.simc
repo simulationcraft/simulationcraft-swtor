@@ -19,6 +19,7 @@ actions+=/heatseeker_missiles,if=heat>76
 actions+=/rail_shot,if=buff.tracer_lock.stack>=5&buff.high_velocity_gas_cylinder.up
 actions+=/rail_shot,if=heat>75&buff.tracer_lock.stack>=5
 actions+=/tracer_missile,if=heat>71
+actions+=/thermal_sensor_override
 actions+=/rapid_shots
 head=rakata_eliminators_helmet,ilevel=58,quality=artifact,stats=861armor_132endurance_112aim_31power_51accuracy
 ear=rakata_eliminators_adaptor,ilevel=58,quality=artifact,stats=98endurance_85aim_51accuracy_51crit

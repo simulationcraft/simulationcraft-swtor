@@ -38,6 +38,7 @@ struct class_t : public bount_troop::class_t
       buff_t* critical_reaction;
       buff_t* high_velocity_gas_cylinder;
       buff_t* power_barrier;
+      buff_t* thermal_sensor_override;
       buff_t* tracer_lock;
 
     } buffs;
@@ -235,6 +236,17 @@ public:
   class_t* p() const
   { return static_cast<class_t*>( player ); }
   class_t* cast() const { return p(); }
+
+  virtual double cost() const
+  {
+    double c = base_t::cost();
+    class_t* p = cast();
+    if (  p -> buffs.thermal_sensor_override -> up() ) {
+      c = 0.0;
+      p -> buffs.thermal_sensor_override -> expire();
+    }
+    return c;
+  }
 };
 
 // ==========================================================================
@@ -620,7 +632,25 @@ struct rapid_shots_t : public attack_t
 // class_t::stealth_scan ==================================================================
 
 // class_t::thermal_sensor_override =======================================================
-// TODO next ability generates no heat 15 second cooldown.
+struct thermal_sensor_override_t : public action_t
+{
+  thermal_sensor_override_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    action_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE )
+  {
+    parse_options( options_str );
+
+    cooldown -> duration = from_seconds( 120 );
+    trigger_gcd = timespan_t::zero();
+  }
+
+  virtual void execute()
+  {
+    action_t::execute();
+
+    class_t* p = cast();
+    p -> buffs.thermal_sensor_override -> trigger();
+  }
+};
 
 // class_t::unload ========================================================================
 struct unload_t : public terminal_velocity_attack_t
@@ -752,6 +782,7 @@ struct vent_heat_t : public action_t
       if ( name == "power_shot"                 ) return new power_shot_t                 ( this, name, options_str );
       if ( name == "rail_shot"                  ) return new rail_shot_t                  ( this, name, options_str );
       if ( name == "rapid_shots"                ) return new rapid_shots_t                ( this, name, options_str );
+      if ( name == "thermal_sensor_override"    ) return new thermal_sensor_override_t    ( this, name, options_str );
       if ( name == "tracer_missile"             ) return new tracer_missile_t             ( this, name, options_str );
       if ( name == "unload"                     ) return new unload_t                     ( this, name, options_str );
       if ( name == "vent_heat"                  ) return new vent_heat_t                  ( this, name, options_str );
@@ -917,7 +948,8 @@ void class_t::init_buffs()
   buffs.barrage           = new buff_t( this, "barrage",               1, from_seconds( 15 ), from_seconds( 6 ), (talents.barrage -> rank() * 0.15) );
   buffs.critical_reaction = new buff_t( this, "critical_reaction",     1, from_seconds( 6 ),  from_seconds( 0 ), (talents.critical_reaction -> rank() * 0.5) );
 
-  buffs.tracer_lock = new buff_t( this, "tracer_lock", 5, from_seconds( 15 ) );
+  buffs.tracer_lock             = new buff_t( this, "tracer_lock",             5, from_seconds( 15 ) );
+  buffs.thermal_sensor_override = new buff_t( this, "thermal_sensor_override", 1, from_seconds( 15 ) );
 
   buffs.high_velocity_gas_cylinder = new buff_t( this, "high_velocity_gas_cylinder", 1 );
 
@@ -1008,6 +1040,7 @@ void class_t::init_actions()
               action_list_str += "/tracer_missile,if=heat>71";
             else
               action_list_str += "/power_shot,if=heat>75";
+            action_list_str += "/thermal_sensor_override";
             action_list_str += "/rapid_shots";
 
             switch ( primary_tree() )
