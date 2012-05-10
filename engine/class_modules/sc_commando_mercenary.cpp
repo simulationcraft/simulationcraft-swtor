@@ -241,11 +241,24 @@ public:
   {
     double c = base_t::cost();
     class_t* p = cast();
-    if (  p -> buffs.thermal_sensor_override -> up() ) {
-      c = 0.0;
-      p -> buffs.thermal_sensor_override -> expire();
-    }
+    if (  c > 0.0 && p -> buffs.thermal_sensor_override -> up() )
+      c = 0;
+
     return c;
+  }
+
+  bool ignore_thermal_sensor_override()
+  {
+    return false;
+  }
+
+  virtual void consume_resource()
+  {
+    base_t::consume_resource();
+    class_t* p = cast();
+    if ( !ignore_thermal_sensor_override() && base_cost && p -> buffs.thermal_sensor_override -> up() )
+      p -> buffs.thermal_sensor_override -> expire();
+    return;
   }
 };
 
@@ -565,19 +578,30 @@ struct rail_shot_t : public attack_t
   {
     attack_t::player_buff();
     class_t* p = cast();
-    if ( p -> talents.upgraded_arsenal -> rank() && p -> buffs.high_velocity_gas_cylinder -> up() )
-      base_cost = 8 - ( p -> set_bonus.rakata_eliminators -> four_pc() ? 8 : 0 );
-    else
-      base_cost = 16 - ( p -> set_bonus.rakata_eliminators -> four_pc() ? 8 : 0 );
 
     if ( p -> talents.tracer_lock -> rank() )
       player_multiplier += 0.06 * p -> buffs.tracer_lock -> stack();
+  }
+
+  virtual double cost() const
+  {
+    double c = attack_t::cost();
+    class_t* p = cast();
+    if ( p -> talents.upgraded_arsenal -> rank() && p -> buffs.high_velocity_gas_cylinder -> up() )
+      c -= 8;
+
+    return c;
   }
 
   virtual void execute()
   {
     attack_t::execute();
     p() -> buffs.tracer_lock -> expire();
+  }
+
+  bool ignore_thermal_sensor_override()
+  {
+    return true;
   }
 };
 
