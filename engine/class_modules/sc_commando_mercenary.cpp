@@ -199,7 +199,6 @@ struct class_t : public bount_troop::class_t
     virtual double    alacrity() const;
     virtual double    armor_penetration() const;
     virtual void      reset();
-
 };
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
@@ -260,12 +259,22 @@ struct attack_t : public action_t
       tick_may_crit = true;
     }
 
+  // these should be callbacks
   virtual void execute()
   {
     action_t::execute();
 
     class_t* p = cast();
-    if ( result == RESULT_CRIT && p -> talents.critical_reaction -> rank() )
+    if ( result == RESULT_CRIT && direct_dmg > 0 && p -> talents.critical_reaction -> rank() )
+      p -> buffs.critical_reaction->trigger();
+  }
+
+  virtual void tick( dot_t* d )
+  {
+    action_t::tick( d );
+
+    class_t* p = cast();
+    if ( result == RESULT_CRIT && tick_dmg > 0 && p -> talents.critical_reaction -> rank() )
       p -> buffs.critical_reaction->trigger();
   }
 };
@@ -634,7 +643,7 @@ struct unload_t : public terminal_velocity_attack_t
     num_ticks                   = 3;
     base_tick_time              = from_seconds( 1 );
     base_multiplier             = 1 + ( 0.33 * p -> talents.riddle -> rank() );
-    crit_bonus                 += 0.15 * p -> talents.target_tracking -> rank();
+    crit_bonus                 += p -> bugs ? 0 : ( 0.15 * p -> talents.target_tracking -> rank() );
     td.standardhealthpercentmin = 
     td.standardhealthpercentmax = 0.105;
     td.weapon                   = &( player -> main_hand_weapon );
@@ -888,6 +897,7 @@ void class_t::init_base()
   set_base_alacrity( get_base_alacrity()   +  0.02 * talents.system_calibrations -> rank() );
   set_base_crit( get_base_crit()           +  0.01 *  talents.hired_muscle       -> rank() );
 }
+
 
 // class_t::init_benefits =================================================================
 
