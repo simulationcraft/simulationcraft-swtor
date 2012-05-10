@@ -262,7 +262,7 @@ void reforge_plot_t::analyze()
     if ( reforge_plot_gnuplot ) util_t::fprintf( reforge_plot_output_file, "\n" );
 
 
-    double first = p -> reforge_plot_data[ 0 ][ 0 ].value;
+    double first = p -> reforge_plot_data.size() ? p -> reforge_plot_data[ 0 ][ 0 ].value : 0;
     for ( int i=0; i < ( int ) p -> reforge_plot_data.size(); i++ )
     {
       if ( reforge_plot_gnuplot && first != p -> reforge_plot_data[ i ][ 0 ].value )
