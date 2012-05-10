@@ -59,10 +59,10 @@ static OptionEntry* getDebuffOptions()
 {
   static OptionEntry options[] =
   {
-    { "Toggle All Debuffs",     "",                       "Toggle all debuffs on/off"     },
-    { "Armor Reduction SH",     "override.shatter_shot",  "-20% Armor Shatter Shot"       },
-    { "Armor Reduction SS",     "override.shatter_shot",  "-20% Armor Sundering Strike"   },
-    { "Armor Reduction HS",     "override.shatter_shot",  "-20% Armor Heat Signature"     },
+    { "Toggle All Debuffs",     "",                        "Toggle all debuffs on/off"     },
+    { "Armor Reduction SH",     "override.shatter_shot",   "-20% Armor Shatter Shot"       },
+    { "Armor Reduction SU",     "override.sunder",         "-20% Armor Sundering Strike"   },
+    { "Armor Reduction HS",     "override.heat_signature", "-20% Armor Heat Signature"     },
     { NULL, NULL, NULL }
   };
   return options;
