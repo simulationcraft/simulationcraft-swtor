@@ -600,7 +600,7 @@ double action_t::calculate_tick_damage()
 
   if ( sim -> debug )
   {
-    log_t::output( sim, "%s dmg for %s: td=%.0f i_td=%.0f w_td=%0f b_td=%.0f mod=%.2f power=%.0f b_mult=%.2f p_mult=%.2f t_mult=%.2f w_mult=%2f",
+    log_t::output( sim, "%s dmg for %s: td=%.2f i_td=%.2f w_td=%2f b_td=%.2f mod=%.2f power=%.2f b_mult=%.2f p_mult=%.2f t_mult=%.2f w_mult=%2f",
                    player -> name(), name(), dmg, init_tick_dmg, weapon_dmg, base_tick_dmg, td.power_mod,
                    total_power(), base_multiplier * td.base_multiplier, player_multiplier, target_multiplier, td.weapon ? td.weapon_multiplier : 0 );
   }
