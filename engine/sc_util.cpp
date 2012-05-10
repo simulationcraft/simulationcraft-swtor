@@ -838,7 +838,7 @@ const char* util_t::stat_type_abbrev( stat_type stat )
   case STAT_ARMOR:          return "Armor";
   case STAT_BONUS_ARMOR:    return "BArmor";
   case STAT_DEFENSE_RATING: return "Def";
-  case STAT_SHIELD_RATING:  return "Shld";
+  case STAT_SHIELD_RATING:  return "Shield";
   case STAT_ABSORB_RATING:  return "Abs";
 
   case STAT_POWER: return "Power";
