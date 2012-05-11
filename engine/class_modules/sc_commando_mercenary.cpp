@@ -680,10 +680,12 @@ struct thermal_sensor_override_t : public action_t
 struct unload_t : public terminal_velocity_attack_t
 {
   unload_t* offhand_attack;
+  bool has_reset;
 
   unload_t( class_t* p, const std::string& n, const std::string& options_str,
       bool is_offhand = false ) :
-    terminal_velocity_attack_t( p, n, range_policy, SCHOOL_ENERGY ), offhand_attack( 0 )
+    terminal_velocity_attack_t( p, n, range_policy, SCHOOL_ENERGY ), offhand_attack( 0 ),
+    has_reset( false )
   {
     rank_level_list = { 3, 6, 9, 12, 15, 21, 32, 44, 50 };
 
@@ -725,8 +727,11 @@ struct unload_t : public terminal_velocity_attack_t
   // what if we cancel the channel before we expire the buff? it'll forever be ready...
   virtual bool ready()
   {
-    if ( p() -> buffs.barrage -> up() )
+    if ( !has_reset && p() -> buffs.barrage -> up() )
+    {
       reset();
+      has_reset = true;
+    }
 
     return terminal_velocity_attack_t::ready();
   }
@@ -742,14 +747,20 @@ struct unload_t : public terminal_velocity_attack_t
   {
     terminal_velocity_attack_t::last_tick( d );
     if ( offhand_attack )
+    {
       p() -> buffs.barrage -> expire();
+      has_reset = false;
+    }
   }
 
   virtual void execute()
   {
-    terminal_velocity_attack_t::execute();
+    // FIX: firing offhand first in the hope it finishes first
+    // and benefits from barrage before the MH last tick expires it
     if ( offhand_attack )
       offhand_attack->schedule_execute();
+
+    terminal_velocity_attack_t::execute();
   }
 };
 
