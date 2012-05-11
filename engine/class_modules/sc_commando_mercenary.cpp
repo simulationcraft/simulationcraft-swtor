@@ -741,7 +741,7 @@ struct unload_t : public terminal_velocity_attack_t
   virtual void last_tick(dot_t* d)
   {
     terminal_velocity_attack_t::last_tick( d );
-    if ( ! offhand_attack )
+    if ( offhand_attack )
       p() -> buffs.barrage -> expire();
   }
 
