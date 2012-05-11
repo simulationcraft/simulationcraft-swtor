@@ -31,6 +31,8 @@ struct targetdata_t : public bount_troop::targetdata_t
 struct class_t : public bount_troop::class_t
 {
     typedef bount_troop::class_t base_t;
+
+    action_t* unload;
     // Buffs
     struct buffs_t
     {
@@ -486,8 +488,13 @@ struct power_shot_t : public attack_t
     if ( offhand_attack )
     {
       offhand_attack -> schedule_execute();
-      if ( result_is_hit() && p.talents.barrage -> rank() )
+      // TEST: if barrage can proc from /either/ powershot hit, the this should move out in scope
+      if ( result_is_hit() && p.talents.barrage -> rank() && !p.buffs.barrage -> up() )
+      {
           p.buffs.barrage -> trigger();
+          if ( p.buffs.barrage -> up() )
+            p.unload -> reset();
+      }
     }
   }
 };
@@ -536,8 +543,12 @@ struct tracer_missile_t : public missile_attack_t
       if ( p.talents.tracer_lock -> rank() )
         p.buffs.tracer_lock -> trigger();
 
-      if ( p.talents.barrage -> rank() )
-        p.buffs.barrage -> trigger();
+      if ( p.talents.barrage -> rank() && !p.buffs.barrage -> up() )
+      {
+          p.buffs.barrage -> trigger();
+          if ( p.buffs.barrage -> up() )
+            p.unload -> reset();
+      }
     }
   }
 };
@@ -680,12 +691,10 @@ struct thermal_sensor_override_t : public action_t
 struct unload_t : public terminal_velocity_attack_t
 {
   unload_t* offhand_attack;
-  bool has_reset;
 
   unload_t( class_t* p, const std::string& n, const std::string& options_str,
       bool is_offhand = false ) :
-    terminal_velocity_attack_t( p, n, range_policy, SCHOOL_ENERGY ), offhand_attack( 0 ),
-    has_reset( false )
+    terminal_velocity_attack_t( p, n, range_policy, SCHOOL_ENERGY ), offhand_attack( 0 )
   {
     rank_level_list = { 3, 6, 9, 12, 15, 21, 32, 44, 50 };
 
@@ -723,19 +732,6 @@ struct unload_t : public terminal_velocity_attack_t
     }
   }
 
-  // TODO CHECK barrage buff resets Unload cooldown? tracer_missile, or in unload::ready()
-  // what if we cancel the channel before we expire the buff? it'll forever be ready...
-  virtual bool ready()
-  {
-    if ( !has_reset && p() -> buffs.barrage -> up() )
-    {
-      reset();
-      has_reset = true;
-    }
-
-    return terminal_velocity_attack_t::ready();
-  }
-
   virtual void player_buff()
   {
     terminal_velocity_attack_t::player_buff();
@@ -746,21 +742,24 @@ struct unload_t : public terminal_velocity_attack_t
   virtual void last_tick(dot_t* d)
   {
     terminal_velocity_attack_t::last_tick( d );
+    // TODO BUG FIX:
+    // This will expire before the last tick of the offhand.
+    // We could do it on the offhand tick, but there's a bug with the use of a DOT here
+    // in that if the execute() is a miss, the dot ticks never fire and there is no last dot.
+    // given offhand has a high miss chance this happens a lot.
+    // It might be best to update sc_action to support dual hits, and damage-over-time that
+    // isn't a traditional dot. That way it is all wrapped up in one class with a clear start
+    // and finish
     if ( offhand_attack )
-    {
       p() -> buffs.barrage -> expire();
-      has_reset = false;
-    }
   }
 
   virtual void execute()
   {
-    // FIX: firing offhand first in the hope it finishes first
-    // and benefits from barrage before the MH last tick expires it
+    terminal_velocity_attack_t::execute();
+
     if ( offhand_attack )
       offhand_attack->schedule_execute();
-
-    terminal_velocity_attack_t::execute();
   }
 };
 
@@ -819,8 +818,14 @@ struct vent_heat_t : public action_t
       if ( name == "rapid_shots"                ) return new rapid_shots_t                ( this, name, options_str );
       if ( name == "thermal_sensor_override"    ) return new thermal_sensor_override_t    ( this, name, options_str );
       if ( name == "tracer_missile"             ) return new tracer_missile_t             ( this, name, options_str );
-      if ( name == "unload"                     ) return new unload_t                     ( this, name, options_str );
       if ( name == "vent_heat"                  ) return new vent_heat_t                  ( this, name, options_str );
+
+      // barrage resets unload's cooldown so we want it accessible
+      if ( name == "unload"                     ) 
+      {
+        unload = new unload_t                     ( this, name, options_str );
+        return unload;
+      }
     }
     else if ( type == T_COMMANDO )
     {
