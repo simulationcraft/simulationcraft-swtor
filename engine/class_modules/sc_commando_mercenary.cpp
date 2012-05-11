@@ -32,7 +32,6 @@ struct class_t : public bount_troop::class_t
 {
     typedef bount_troop::class_t base_t;
 
-    action_t* unload;
     // Buffs
     struct buffs_t
     {
@@ -75,7 +74,7 @@ struct class_t : public bount_troop::class_t
     // Cooldowns
     struct cooldowns_t
     {
-
+      cooldown_t* unload;
     } cooldowns;
 
     // Talents
@@ -175,10 +174,20 @@ struct class_t : public bount_troop::class_t
       base_t( sim, pt == BH_MERCENARY ? BH_MERCENARY : T_COMMANDO, name, rt ),
       buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents()
     {
+      if ( type == BH_MERCENARY )
+      {
+        tree_type[ BH_MERCENARY_BODYGUARD   ] = TREE_BODYGUARD;
+        tree_type[ BH_MERCENARY_ARSENAL     ] = TREE_ARSENAL;
+        tree_type[ BH_MERCENARY_PYROTECH    ] = TREE_PYROTECH;
+        cooldowns.unload = get_cooldown( "unload" );
+      }
+      else if ( type == T_COMMANDO )
+      {
+        tree_type[ BH_MERCENARY_BODYGUARD   ] = TREE_BODYGUARD;
+        tree_type[ BH_MERCENARY_ARSENAL     ] = TREE_ARSENAL;
+        tree_type[ BH_MERCENARY_PYROTECH    ] = TREE_PYROTECH;
+      }
 
-      tree_type[ BH_MERCENARY_BODYGUARD   ] = TREE_BODYGUARD;
-      tree_type[ BH_MERCENARY_ARSENAL     ] = TREE_ARSENAL;
-      tree_type[ BH_MERCENARY_PYROTECH    ] = TREE_PYROTECH;
 
       create_talents();
       create_options();
@@ -493,7 +502,7 @@ struct power_shot_t : public attack_t
       {
           p.buffs.barrage -> trigger();
           if ( p.buffs.barrage -> up() )
-            p.unload -> reset();
+            p.cooldowns.unload -> reset();
       }
     }
   }
@@ -547,7 +556,7 @@ struct tracer_missile_t : public missile_attack_t
       {
           p.buffs.barrage -> trigger();
           if ( p.buffs.barrage -> up() )
-            p.unload -> reset();
+            p.cooldowns.unload -> reset();
       }
     }
   }
@@ -819,13 +828,7 @@ struct vent_heat_t : public action_t
       if ( name == "thermal_sensor_override"    ) return new thermal_sensor_override_t    ( this, name, options_str );
       if ( name == "tracer_missile"             ) return new tracer_missile_t             ( this, name, options_str );
       if ( name == "vent_heat"                  ) return new vent_heat_t                  ( this, name, options_str );
-
-      // barrage resets unload's cooldown so we want it accessible
-      if ( name == "unload"                     ) 
-      {
-        unload = new unload_t                     ( this, name, options_str );
-        return unload;
-      }
+      if ( name == "unload"                     ) return new unload_t                     ( this, name, options_str );
     }
     else if ( type == T_COMMANDO )
     {
