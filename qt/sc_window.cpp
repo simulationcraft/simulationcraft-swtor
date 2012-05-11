@@ -77,6 +77,8 @@ static OptionEntry* getScalingOptions()
       "Use Positive Deltas Only",         "",         "Normally Accuracy/Expertise use negative scale factors to show DPS lost by reducing that stat.\n"
       "This option forces a positive scale delta, which is useful for classes with soft caps."
     },
+    { "Analyze Aim",                      "aim",          "Calculate scale factor for Aim"                    },
+    { "Analyze Cunning",                  "strength",     "Calculate scale factor for Strength"               },
     { "Analyze Strength",                 "strength",     "Calculate scale factor for Strength"               },
     { "Analyze Willpower",                "willpower",    "Calculate scale factor for Willpower"              },
     { "Analyze Accuracy Rating",          "acc",          "Calculate scale factor for Accuracy Rating"        },
