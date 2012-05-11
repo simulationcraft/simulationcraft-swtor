@@ -13,7 +13,7 @@
 :: Qt-Framework: C:\Qt\4.8.0
 
 :: Update the qt_dir as necessary
-set qt_dir=C:\QtSDK\Desktop\Qt\4.8.0\mingw
+set qt_dir=C:\QtSDK\Desktop\Qt\4.8.1\mingw
 set mingw_dir=C:\MinGW
 
 :: IMPORTANT NOTE FOR DEBUGGING
