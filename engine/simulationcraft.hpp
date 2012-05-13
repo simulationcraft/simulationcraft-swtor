@@ -81,7 +81,7 @@
 #define PRINTF_ATTRIBUTE(a,b) __attribute__((format(printf,a,b)))
 
 #define SC_MAJOR_VERSION "120"
-#define SC_MINOR_VERSION "1"
+#define SC_MINOR_VERSION "3"
 #define SWTOR_VERSION_LIVE "1.2.0"
 #define SWTOR_VERSION_PTR "1.2.0"
 #define SC_USE_PTR ( 0 )
