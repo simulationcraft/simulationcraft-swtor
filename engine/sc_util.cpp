@@ -598,6 +598,10 @@ const char* util_t::talent_tree_string( talent_tree_type tree, bool armory_forma
     case TREE_MEDICINE:       return "medicine";
     case TREE_CONCEALMENT:    return "concealment";
     case TREE_LETHALITY:      return "lethality";
+    // IA_SNIPER
+    case TREE_MARKSMANSHIP:   return "marksmanship";
+    case TREE_ENGINEERING:    return "engineering";
+    case TREE_LETH:           return "lethality";
     // BH_MERCENARY
     case TREE_BODYGUARD:      return "bodyguard";
     case TREE_ARSENAL:        return "arsenal";
@@ -627,6 +631,10 @@ const char* util_t::talent_tree_string( talent_tree_type tree, bool armory_forma
     case TREE_MEDICINE:       return "Medicine";
     case TREE_CONCEALMENT:    return "Concealment";
     case TREE_LETHALITY:      return "Lethality";
+    // IA_SNIPER
+    case TREE_MARKSMANSHIP:   return "Marksmanship";
+    case TREE_ENGINEERING:    return "Engineering";
+    case TREE_LETH:           return "Lethality";
     // BH_MERCENARY
     case TREE_BODYGUARD:      return "Bodyguard";
     case TREE_ARSENAL:        return "Arsenal";
