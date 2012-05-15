@@ -700,10 +700,12 @@ struct thermal_sensor_override_t : public action_t
 struct unload_t : public terminal_velocity_attack_t
 {
   unload_t* offhand_attack;
+  bool benefit_from_barrage;
 
   unload_t( class_t* p, const std::string& n, const std::string& options_str,
       bool is_offhand = false ) :
-    terminal_velocity_attack_t( p, n, range_policy, SCHOOL_ENERGY ), offhand_attack( 0 )
+    terminal_velocity_attack_t( p, n, range_policy, SCHOOL_ENERGY ), offhand_attack( 0 ),
+    benefit_from_barrage(false)
   {
     rank_level_list = { 3, 6, 9, 12, 15, 21, 32, 44, 50 };
 
@@ -722,6 +724,8 @@ struct unload_t : public terminal_velocity_attack_t
     td.weapon                   = &( player -> main_hand_weapon );
     td.power_mod                = 1.05;
     td.weapon_multiplier        = -0.3;
+    // tick crits. the invisible execute hit shouldn't
+    may_crit                    = false;
 
     if ( is_offhand )
     {
@@ -744,28 +748,31 @@ struct unload_t : public terminal_velocity_attack_t
   virtual void player_buff()
   {
     terminal_velocity_attack_t::player_buff();
-    if ( p() -> buffs.barrage -> up() )
+    if ( benefit_from_barrage )
       player_multiplier += 0.25;
   }
 
   virtual void last_tick(dot_t* d)
   {
     terminal_velocity_attack_t::last_tick( d );
-    // TODO BUG FIX:
-    // This will expire before the last tick of the offhand.
-    // We could do it on the offhand tick, but there's a bug with the use of a DOT here
-    // in that if the execute() is a miss, the dot ticks never fire and there is no last dot.
-    // given offhand has a high miss chance this happens a lot.
-    // It might be best to update sc_action to support dual hits, and damage-over-time that
-    // isn't a traditional dot. That way it is all wrapped up in one class with a clear start
-    // and finish
     if ( offhand_attack )
       p() -> buffs.barrage -> expire();
+
+    benefit_from_barrage = false;
   }
 
+  // TODO FIX BUG:
+  // using a dot for unload is wrong. Dots have a hit/miss on execute, and if hits all ticks will hit,
+  // or if miss, no ticks will hit. Unload is hit/miss per tick. Either need to modify sc_action to
+  // support "repeating" attacks, or change this to instantiate 6(!) unload actions and execute them manually
   virtual void execute()
   {
+    if ( p() -> buffs.barrage -> up() )
+      benefit_from_barrage = true;
+
     terminal_velocity_attack_t::execute();
+    if ( ! RESULT_HIT )
+      benefit_from_barrage = false;
 
     if ( offhand_attack )
       offhand_attack->schedule_execute();
