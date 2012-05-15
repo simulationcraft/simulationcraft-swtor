@@ -556,6 +556,15 @@ talent_tree_type util_t::talent_tree( talent_tab_type tree, player_type ptype )
       default: break;
       }
     break;
+    case IA_SNIPER:
+      switch ( tree )
+      {
+      case IA_SNIPER_MARKSMANSHIP:    return TREE_MARKSMANSHIP;
+      case IA_SNIPER_ENGINEERING:     return TREE_ENGINEERING;
+      case IA_SNIPER_LETHALITY:       return TREE_LETH;
+      default: break;
+      }
+    break;
     case BH_MERCENARY:
       switch ( tree )
       {
