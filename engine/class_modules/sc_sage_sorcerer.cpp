@@ -575,6 +575,10 @@ struct telekinetic_throw_t : public spell_t
     if ( p -> buffs.psychic_projection -> up() || p -> buffs.psychic_projection_dd -> up() )
     {
       is_buffed_by_psychic_projection = true;
+      if ( p -> bugs && p -> buffs.psychic_projection_dd -> check() )
+      {
+        num_ticks = 1;
+      }
       if ( p -> bugs && ! p -> disable_double_dip && p -> buffs.psychic_projection -> check() )
       {
         p -> buffs.psychic_projection_dd -> trigger();
@@ -584,6 +588,8 @@ struct telekinetic_throw_t : public spell_t
       is_buffed_by_psychic_projection = false;
 
     spell_t::execute();
+
+    num_ticks = 3;
   }
 
   virtual timespan_t tick_time() const
