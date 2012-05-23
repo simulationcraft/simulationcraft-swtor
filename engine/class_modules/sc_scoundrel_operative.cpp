@@ -1106,6 +1106,25 @@ struct orbital_strike_t : public tech_attack_t
   }
 };
 
+// Explosive Probe | ??? ====================================================
+struct explosive_probe_t : public tech_attack_t
+{
+  explosive_probe_t( class_t* p, const std::string& n, const std::string& options_str) :
+    tech_attack_t( n, p )
+  {
+    // rank_level_list = { 50 };
+
+    parse_options( options_str );
+
+    base_cost                   = 20;
+    range                       = 30.0;
+    cooldown -> duration        = from_seconds( 30 );
+    dd.standardhealthpercentmin = 0.23;
+    dd.standardhealthpercentmax = 0.25;
+    dd.power_mod                = 2.5;
+  }
+};
+
 // Cloaking Screen | ??? ====================================================
 // "vanish" allows reusing hidden strike.
 
@@ -1168,6 +1187,7 @@ struct coordination_t : public action_t
   const char* corrosive_dart        = is_op ? "corrosive_dart"        : "vital_shot"         ; 
   const char* corrosive_grenade     = is_op ? "corrosive_grenade"     : "shrap_bomb"         ; 
   const char* cull                  = is_op ? "cull"                  : "wounding_shot"      ; 
+  const char* explosive_probe       = is_op ? "explosive_probe"       : "sabotage_charge"    ;
   const char* fragmentation_grenade = is_op ? "fragmentation_grenade" : "thermal_grenade"    ; 
   const char* hidden_strike         = is_op ? "hidden_strike"         : "shoot_first"        ; 
   const char* laceration            = is_op ? "laceration"            : "sucker_punch"       ; 
@@ -1186,6 +1206,7 @@ struct coordination_t : public action_t
   if ( name == corrosive_dart        ) return new corrosive_dart_t        ( this, name, options_str ) ;
   if ( name == corrosive_grenade     ) return new corrosive_grenade_t     ( this, name, options_str ) ;
   if ( name == cull                  ) return new cull_t                  ( this, name, options_str ) ;
+  if ( name == explosive_probe       ) return new explosive_probe_t       ( this, name, options_str ) ;
   if ( name == fragmentation_grenade ) return new fragmentation_grenade_t ( this, name, options_str ) ;
   if ( name == hidden_strike         ) return new hidden_strike_t         ( this, name, options_str ) ;
   if ( name == laceration            ) return new laceration_t            ( this, name, options_str ) ;
@@ -1294,7 +1315,6 @@ void class_t::init_base()
   base_t::init_base();
 
   attribute_multiplier_initial[ ATTR_CUNNING ] += 0.03 * talents.imperial_education -> rank();
-
   set_base_crit( get_base_crit() + 0.02 * talents.lethality -> rank() );
   set_base_alacrity( get_base_alacrity() + 0.02 * talents.deadly_directive -> rank() );
 }
@@ -1399,6 +1419,7 @@ void class_t::init_actions()
   const std::string corrosive_dart        = is_op ? "corrosive_dart"        : "vital_shot"         ; 
   const std::string corrosive_grenade     = is_op ? "corrosive_grenade"     : "shrap_bomb"         ; 
   const std::string cull                  = is_op ? "cull"                  : "wounding_shot"      ; 
+  const std::string explosive_probe       = is_op ? "explosive_probe"       : "sabotage_charge"    ;
   const std::string fragmentation_grenade = is_op ? "fragmentation_grenade" : "thermal_grenade"    ; 
   const std::string hidden_strike         = is_op ? "hidden_strike"         : "shoot_first"        ; 
   const std::string laceration            = is_op ? "laceration"            : "sucker_punch"       ; 
