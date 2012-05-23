@@ -596,6 +596,9 @@ void player_t::init()
   rating_scaler.init( level );
 
   init_target();
+  init_items();
+  init_weapon( &main_hand_weapon );
+  init_weapon( &off_hand_weapon );
   init_talents();
   init_spells();
   init_race();
@@ -603,13 +606,10 @@ void player_t::init()
   init_racials();
   init_position();
   init_professions();
-  init_items();
   init_core();
   init_spell();
   init_attack();
   init_defense();
-  init_weapon( &main_hand_weapon );
-  init_weapon( &off_hand_weapon );
   init_professions_bonus();
   init_unique_gear();
   init_enchant();
