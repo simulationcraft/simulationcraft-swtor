@@ -1121,7 +1121,7 @@ struct explosive_probe_t : public tech_attack_t
     cooldown -> duration        = from_seconds( 30 );
     dd.standardhealthpercentmin = 0.23;
     dd.standardhealthpercentmax = 0.25;
-    dd.power_mod                = 2.5;
+    dd.power_mod                = 2.4;
   }
 };
 
