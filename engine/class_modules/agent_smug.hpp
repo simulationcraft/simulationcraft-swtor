@@ -13,6 +13,8 @@ namespace agent_smug { // ===================================================
 class class_t : public player_t
 {
 public:
+  typedef player_t base_t;
+
   struct
   {
     gain_t* minimum;
@@ -20,6 +22,38 @@ public:
     gain_t* medium;
     gain_t* high;
   } energy_gains;
+
+  struct talents_t
+  {
+    // Lethality|Dirty Fighting
+    // t1
+    talent_t* deadly_directive;
+    talent_t* lethality;
+    talent_t* razor_edge;
+    // t2
+    talent_t* slip_away;
+    talent_t* flash_powder;
+    talent_t* corrosive_microbes;
+    talent_t* lethal_injectors;
+    // t3
+    talent_t* corrosive_grenade;
+    talent_t* combat_stims;
+    talent_t* cut_down;
+    // t4
+    talent_t* lethal_purpose;
+    talent_t* adhesive_corrosives;
+    talent_t* escape_plan;
+    talent_t* lethal_dose;
+    // t5
+    talent_t* cull;
+    talent_t* license_to_kill;
+    talent_t* counterstrike;
+    // t6
+    talent_t* devouring_microbes;
+    talent_t* lingering_toxins;
+    // t7
+    talent_t* weakening_blast;
+  };
 
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
     player_t( sim, pt, name, rt ), energy_gains()
@@ -94,6 +128,10 @@ public:
 
     player_t::regen( periodicity );
   }
+
+  void init_talents(talents_t& talents);
+
+  void create_talents();
 };
 
 class targetdata_t : public ::targetdata_t

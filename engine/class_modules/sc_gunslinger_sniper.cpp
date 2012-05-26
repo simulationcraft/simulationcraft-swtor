@@ -63,7 +63,7 @@ public:
   } cooldowns;
 
   // Talents
-  struct talents_t
+  struct talents_t:base_t::talents_t
   {
     // Marksmanship|Sharpshooter
     // t1
@@ -122,35 +122,6 @@ public:
     talent_t* electrified_railgun;
     // t7
     talent_t* plasma_probe;
-
-    // Lethality|Dirty Fighting
-    // t1
-    talent_t* deadly_directive;
-    talent_t* lethality;
-    talent_t* razor_edge;
-    // t2
-    talent_t* slip_away;
-    talent_t* flash_powder;
-    talent_t* corrosive_microbes;
-    talent_t* lethal_injectors;
-    // t3
-    talent_t* corrosive_grenade;
-    talent_t* combat_stims;
-    talent_t* cut_down;
-    // t4
-    talent_t* lethal_purpose;
-    talent_t* adhesive_corrosives;
-    talent_t* escape_plan;
-    talent_t* lethal_dose;
-    // t5
-    talent_t* cull;
-    talent_t* license_to_kill;
-    talent_t* counterstrike;
-    // t6
-    talent_t* devouring_microbes;
-    talent_t* lingering_toxins;
-    // t7
-    talent_t* weakening_blast;
   } talents;
 
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
@@ -159,7 +130,7 @@ public:
   {
     tree_type[ IA_SNIPER_MARKSMANSHIP ] = TREE_MARKSMANSHIP;
     tree_type[ IA_SNIPER_ENGINEERING  ] = TREE_ENGINEERING;
-    tree_type[ IA_SNIPER_LETHALITY    ] = TREE_LETH;
+    tree_type[ IA_LETHALITY           ] = TREE_LETHALITY;
 
     create_talents();
     create_options();
@@ -294,7 +265,7 @@ struct rifle_shot_t : public range_attack_t
 
 void class_t::init_talents()
 {
-  base_t::init_talents();
+  base_t::init_talents(talents);
 
   // Marksmanship|Sharpshooter
   // t1
@@ -353,35 +324,6 @@ void class_t::init_talents()
   talents.electrified_railgun                 = find_talent( "Electrified Railgun"                );
   // t7
   talents.plasma_probe                        = find_talent( "Plasma Probe"                       );
-
-  // Lethality|Dirty Fighting
-  // t1
-  talents.deadly_directive                    = find_talent( "Deadly Directive"                   );
-  talents.lethality                           = find_talent( "Lethality"                          );
-  talents.razor_edge                          = find_talent( "Razor Edge"                         );
-  // t2
-  talents.slip_away                           = find_talent( "Slip Away"                          );
-  talents.flash_powder                        = find_talent( "Flash Powder"                       );
-  talents.corrosive_microbes                  = find_talent( "Corrosive Microbes"                 );
-  talents.lethal_injectors                    = find_talent( "Lethal Injectors"                   );
-  // t3
-  talents.corrosive_grenade                   = find_talent( "Corrosive Grenade"                  );
-  talents.combat_stims                        = find_talent( "Combat Stims"                       );
-  talents.cut_down                            = find_talent( "Cut Down"                           );
-  // t4
-  talents.lethal_purpose                      = find_talent( "Lethal Purpose"                     );
-  talents.adhesive_corrosives                 = find_talent( "Adhesive Corrosives"                );
-  talents.escape_plan                         = find_talent( "Escape Plan"                        );
-  talents.lethal_dose                         = find_talent( "Lethal Dose"                        );
-  // t5
-  talents.cull                                = find_talent( "Cull"                               );
-  talents.license_to_kill                     = find_talent( "License to Kill"                    );
-  talents.counterstrike                       = find_talent( "Counterstrike"                      );
-  // t6
-  talents.devouring_microbes                  = find_talent( "Devouring Microbes"                 );
-  talents.lingering_toxins                    = find_talent( "Lingering Toxins"                   );
-  // t7
-  talents.weakening_blast                     = find_talent( "Weakening Blast"                    );
 }
 
 // class_t::init_base ===========================================
@@ -487,6 +429,8 @@ role_type class_t::primary_role() const
 
 void class_t::create_talents()
 {
+  base_t::create_talents();
+
   // Marksmanship|Sharpshooter
   static const talentinfo_t marksmanship_tree[] = {
     { "Cover Screen", 2 }, { "Steady Shots", 2 }, { "Marksmanship", 3 },
@@ -510,17 +454,6 @@ void class_t::create_talents()
     { "Plasma Probe", 1 }
   };
   init_talent_tree( IA_SNIPER_ENGINEERING, engineering_tree );
-
-  // Lethality|Dirty Fighting
-  static const talentinfo_t lethality_tree[] = {
-    { "Deadly Directive", 2 }, { "Lethality", 3 }, { "Razor Edge", 2 },
-    { "Slip Away", 2 }, { "Flash Powder", 2 }, { "Corrosive Microbes", 2 }, { "Lethal Injectors", 1 },
-    { "Corrosive Grenade", 1 }, { "Combat Stims", 2 }, { "Cut Down", 2 },
-    { "Lethal Purpose", 2 }, { "Adhesive Corrosives", 2 }, { "Escape Plan", 2 }, { "Lethal Dose", 3 },
-    { "Cull", 1 }, { "License to Kill", 2 }, { "Counterstrike", 2 },
-    { "Devouring Microbes", 3 }, { "Lingering Toxins", 2 }, { "Weakening Blast", 1 },
-  };
-  init_talent_tree( IA_SNIPER_LETHALITY, lethality_tree );
 }
 
 } // namespace gunslinger_sniper ============================================
