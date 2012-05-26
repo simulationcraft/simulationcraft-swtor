@@ -2698,6 +2698,7 @@ public:
   virtual std::string init_use_racial_actions( const std::string& append = std::string() );
   virtual void init_actions();
   virtual void init_scaling();
+  virtual void init_abilities();
   virtual void init_talents();
   virtual void init_spells();
   virtual void init_buffs();

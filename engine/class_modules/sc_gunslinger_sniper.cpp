@@ -124,8 +124,14 @@ public:
     talent_t* plasma_probe;
   } talents;
 
+  // Abilities
+  struct abilities_t:base_t::abilities_t
+  {
+    std::string ambush;
+  } abilities;
+
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
-    base_t( sim, pt == IA_SNIPER ? IA_SNIPER : S_GUNSLINGER, name, rt ),
+    base_t( sim, pt == IA_SNIPER ? IA_SNIPER : S_GUNSLINGER, name, rt, &talents, &abilities ),
     buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents()
   {
     tree_type[ IA_SNIPER_MARKSMANSHIP ] = TREE_MARKSMANSHIP;
@@ -137,109 +143,51 @@ public:
   }
 
   // Character Definition
-  virtual targetdata_t* new_targetdata( player_t& target ) // override
+  targetdata_t* new_targetdata( player_t& target ) // override
   { return new targetdata_t( *this, target ); }
-  virtual ::action_t* create_action( const std::string& name, const std::string& options );
-  virtual void      init_talents();
-  virtual void      init_base();
-  virtual void      init_benefits();
-  virtual void      init_buffs();
-  virtual void      init_gains();
-  virtual void      init_procs();
-  virtual void      init_rng();
-  virtual void      init_actions();
-  virtual role_type primary_role() const;
-          void      create_talents();
+  ::action_t* create_action( const std::string& name, const std::string& options );
+  void      init_talents();
+  void      init_abilities();
+  void      init_base();
+  void      init_benefits();
+  void      init_buffs();
+  void      init_gains();
+  void      init_procs();
+  void      init_rng();
+  void      init_actions();
+  role_type primary_role() const;
+  void      create_talents();
 };
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   agent_smug::targetdata_t( source, target )
 {}
 
-class action_t : public ::action_t
-{
-  typedef ::action_t base_t;
-public:
-  action_t( const std::string& n, class_t* player,
-            attack_policy_t policy, resource_type r, school_type s ) :
-    base_t( ACTION_ATTACK, n, player, policy, r, s )
-  {}
-
-  targetdata_t* targetdata() const
-  { return static_cast<targetdata_t*>( base_t::targetdata() ); }
-
-  class_t* p() const
-  { return static_cast<class_t*>( player ); }
-};
-
 // ==========================================================================
 // Gunslinger / Sniper Abilities
 // ==========================================================================
 
-struct attack_t : public action_t
+// Ambush | Aimed Shot ======================================================
+struct ambush_t : public agent_smug::range_attack_t
 {
-  attack_t( const std::string& n, class_t* p, attack_policy_t policy, school_type s ) :
-    action_t( n, p, policy, RESOURCE_ENERGY, s )
+  ambush_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    range_attack_t( n, p )
   {
-    harmful  = true;
-    may_crit = true;
-  }
-};
+    // todo: get this list right
+    rank_level_list = { 8, 12, 16, 22, 31, 40, 50 };
 
-struct tech_attack_t : public attack_t
-{
-  tech_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_KINETIC ) :
-    attack_t( n, p, tech_policy, s )
-  {
-  }
-};
-
-struct range_attack_t : public attack_t
-{
-  range_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_ENERGY ) :
-    attack_t( n, p, range_policy, s )
-  {
-  }
-
-};
-
-// Rifle Shot | Flurry Of Bolts =========================================================
-
-struct rifle_shot_t : public range_attack_t
-{
-  rifle_shot_t* second_strike;
-
-  rifle_shot_t( class_t* p, const std::string& n, const std::string& options_str,
-                bool is_consequent_strike = false ) :
-    range_attack_t( n, p ), second_strike( 0 )
-  {
     parse_options( options_str );
 
-    base_cost = 0;
+    base_cost = 15;
+    base_execute_time = from_seconds( 2.5 );
+    cooldown -> duration = from_seconds( 15 );
     range = 35.0;
 
-    weapon = &( player->main_hand_weapon );
-    weapon_multiplier = -0.5;
-    dd.power_mod = 0.5;
+    dd.standardhealthpercentmin = dd.standardhealthpercentmax = 0.329;
+    dd.power_mod = 3.29;
 
-    // Is a Basic attack
-    base_accuracy -= 0.10;
-
-    if ( is_consequent_strike )
-    {
-      background = dual = true;
-      trigger_gcd = timespan_t::zero();
-      base_execute_time = from_seconds( 0.75 );
-    }
-    else
-      second_strike = new rifle_shot_t( p, n, options_str, true );
-  }
-
-  virtual void execute()
-  {
-    range_attack_t::execute();
-    if ( second_strike )
-        second_strike->schedule_execute();
+    weapon = &( player -> main_hand_weapon );
+    weapon_multiplier = 1.2;
   }
 };
 
@@ -248,24 +196,39 @@ struct rifle_shot_t : public range_attack_t
 // ==========================================================================
 
 // class_t::create_action =======================================
-
 ::action_t* class_t::create_action( const std::string& name,
                                     const std::string& options_str )
 {
-  bool sniper = ( type == IA_SNIPER );
-
-  const char* rifle_shot            = sniper ? "rifle_shot"            : "flurry_of_bolts"    ;
-
-  if ( name == rifle_shot            ) return new rifle_shot_t            ( this, name, options_str ) ;
-
+  if ( name == abilities.ambush ) return new ambush_t( this, name, options_str );
   return base_t::create_action( name, options_str );
+}
+
+// class_t::init_abilities =======================================
+
+void class_t::init_abilities()
+{
+  base_t::init_abilities();
+
+  //=======================================================================
+  //
+  //   Please Mirror all changes between Gunslinger and Sniper!!!
+  //
+  //=======================================================================
+  if ( type == IA_SNIPER)
+  {
+    abilities.ambush = "ambush";
+  }
+  else
+  {
+    abilities.ambush = "aimed_shot";
+  }
 }
 
 // class_t::init_talents ========================================
 
 void class_t::init_talents()
 {
-  base_t::init_talents(talents);
+  base_t::init_talents();
 
   // Marksmanship|Sharpshooter
   // t1
@@ -334,7 +297,6 @@ void class_t::init_base()
 
   default_distance = 3;
   distance = default_distance;
-
 }
 
 // class_t::init_benefits =======================================
@@ -342,7 +304,6 @@ void class_t::init_base()
 void class_t::init_benefits()
 {
   base_t::init_benefits();
-
 }
 
 // class_t::init_buffs ==========================================
@@ -350,15 +311,6 @@ void class_t::init_benefits()
 void class_t::init_buffs()
 {
   base_t::init_buffs();
-
-  // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-  // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-  // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-
-  //bool is_juggernaut = ( type == SITH_MARAUDER );
-
-
-
 }
 
 // class_t::init_gains ==========================================
@@ -389,18 +341,13 @@ void class_t::init_rng()
 
 void class_t::init_actions()
 {
-  //=======================================================================
-  //
-  //   Please Mirror all changes between Gunslinger and Sniper!!!
-  //
-  //=======================================================================
-  bool sniper = ( type == IA_SNIPER );
-  const std::string rifle_shot            = sniper ? "rifle_shot"            : "flurry_of_bolts"    ;
   const std::string sl = "/";
 
   if ( action_list_str.empty() )
   {
-    action_list_str += sl + rifle_shot;
+    action_list_default = true;
+    action_list_str += sl + abilities.ambush + ",if=energy>75";
+    action_list_str += sl + abilities.rifle_shot;
   }
 
   base_t::init_actions();
@@ -410,19 +357,7 @@ void class_t::init_actions()
 
 role_type class_t::primary_role() const
 {
-  switch ( base_t::primary_role() )
-  {
-  case ROLE_TANK:
-    return ROLE_TANK;
-  case ROLE_DPS:
-  case ROLE_HYBRID:
-    return ROLE_HYBRID;
-  default:
-
-    break;
-  }
-
-  return ROLE_HYBRID;
+  return ROLE_DPS;
 }
 
 // class_t::create_talents ======================================

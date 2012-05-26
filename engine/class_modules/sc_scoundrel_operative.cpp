@@ -140,10 +140,16 @@ struct class_t : public agent_smug::class_t
     talent_t* acid_blade;
   } talents;
 
+  // Abilities
+  struct abilities_t:base_t::abilities_t
+  {
+
+  } abilities;
+
   action_t* acid_blade_poison;
 
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
-    base_t( sim, pt == IA_OPERATIVE ? IA_OPERATIVE : S_SCOUNDREL, name, rt ),
+    base_t( sim, pt == IA_OPERATIVE ? IA_OPERATIVE : S_SCOUNDREL, name, rt, &talents, &abilities ),
     buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents(), acid_blade_poison()
   {
     tree_type[ IA_OPERATIVE_MEDICINE    ] = TREE_MEDICINE;
@@ -155,25 +161,26 @@ struct class_t : public agent_smug::class_t
   }
 
   // Character Definition
-  virtual targetdata_t* new_targetdata( player_t& target ) // override
+  targetdata_t* new_targetdata( player_t& target ) // override
   { return new targetdata_t( *this, target ); }
 
-  virtual ::action_t* create_action( const std::string& name, const std::string& options );
-  virtual void    init_talents();
-  virtual void    init_base();
-  virtual void    init_benefits();
-  virtual void    init_buffs();
-  virtual void    init_gains();
-  virtual void    init_procs();
-  virtual void    init_rng();
-  virtual void    init_actions();
-  virtual void    reset();
+  ::action_t* create_action( const std::string& name, const std::string& options );
+  void    init_talents();
+  void    init_abilities();
+  void    init_base();
+  void    init_benefits();
+  void    init_buffs();
+  void    init_gains();
+  void    init_procs();
+  void    init_rng();
+  void    init_actions();
+  void    reset();
 
-  virtual double  armor_penetration() const; // override
+  double  armor_penetration() const; // override
 
-  virtual double  energy_regen_per_second() const; // override
+  double  energy_regen_per_second() const; // override
 
-  virtual role_type primary_role() const;
+  role_type primary_role() const;
   void create_talents();
 };
 
@@ -269,14 +276,14 @@ struct attack_t : public action_t
     may_crit = true;
   }
 
-  virtual void player_buff()
+  void player_buff()
   {
     action_t::player_buff();
     if ( p() -> buffs.tactical_advantage -> up() )
       player_multiplier += 0.02;
   }
 
-  virtual void execute()
+  void execute()
   {
     action_t::execute();
     p() -> buffs.stealth -> expire();
@@ -310,7 +317,7 @@ struct poison_attack_t : public tech_attack_t
     base_crit += .04 * p -> talents.lethal_dose -> rank();
   }
 
-  virtual void target_debuff( player_t* tgt, dmg_type type )
+  void target_debuff( player_t* tgt, dmg_type type )
   {
     tech_attack_t::target_debuff( tgt, type );
 
@@ -339,7 +346,7 @@ struct poison_attack_t : public tech_attack_t
     }
   }
 
-  virtual void tick( dot_t* d )
+  void tick( dot_t* d )
   {
     tech_attack_t::tick( d );
 
@@ -359,7 +366,7 @@ struct consume_acid_blade_attack_t : public tech_attack_t
     tech_attack_t( n, p, s )
   {}
 
-  virtual void execute()
+  void execute()
   {
     tech_attack_t::execute();
 
@@ -413,7 +420,7 @@ struct acid_blade_t : public action_t
     add_child( poison );
   }
 
-  virtual void execute()
+  void execute()
   {
     action_t::execute();
 
@@ -443,7 +450,7 @@ struct adrenaline_probe_t : public action_t
   // the combat log isn't in sync with the game here.
   // the combat log shows after 1.5 seconds a tick of 8 and 34, and then another tick of 8 1.5s later.
   // what happens in game is you instantly get 34, and then two ticks of 8.
-  virtual void execute()
+  void execute()
   {
     action_t::execute();
     class_t* p = cast();
@@ -452,7 +459,7 @@ struct adrenaline_probe_t : public action_t
     p -> resource_gain( RESOURCE_ENERGY, 34, p -> gains.adrenaline_probe );
   }
 
-  virtual void tick(dot_t* d)
+  void tick(dot_t* d)
   {
     action_t::tick(d);
     class_t* p = cast();
@@ -474,7 +481,7 @@ struct stealth_t : public action_t
     trigger_gcd = timespan_t::zero();
   }
 
-  virtual bool ready()
+  bool ready()
   {
     if ( p() -> in_combat )
       return false;
@@ -485,7 +492,7 @@ struct stealth_t : public action_t
     return action_t::ready();
   }
 
-  virtual void execute()
+  void execute()
   {
     p() -> buffs.stealth -> trigger();
     action_t::execute();
@@ -1192,11 +1199,30 @@ struct coordination_t : public action_t
   return base_t::create_action( name, options_str );
 }
 
+// class_t::init_abilities =======================================
+
+void class_t::init_abilities()
+{
+  base_t::init_abilities();
+
+  //=======================================================================
+  //
+  //   Please Mirror all changes between Scoundrel and Operative!!!
+  //
+  //=======================================================================
+  if ( type == IA_OPERATIVE)
+  {
+  }
+  else
+  {
+  }
+}
+
 // class_t::init_talents ======================================
 
 void class_t::init_talents()
 {
-  base_t::init_talents(talents);
+  base_t::init_talents();
 
   // Medicine|Sawbones
   // t1

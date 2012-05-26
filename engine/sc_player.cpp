@@ -599,6 +599,7 @@ void player_t::init()
   init_items();
   init_weapon( &main_hand_weapon );
   init_weapon( &off_hand_weapon );
+  init_abilities();
   init_talents();
   init_spells();
   init_race();
@@ -1196,6 +1197,11 @@ void player_t::init_actions()
   action_sequence.clear();
   action_sequence.reserve( capacity );
 }
+
+// player_t::init_abilities ===================================================
+
+void player_t::init_abilities()
+{}
 
 // player_t::init_talents ===================================================
 

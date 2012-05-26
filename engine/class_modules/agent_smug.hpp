@@ -54,10 +54,19 @@ public:
     // t7
     talent_t* weakening_blast;
   };
+  talents_t* talents;
 
-  class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
+  struct abilities_t
+  {
+    std::string rifle_shot;
+  };
+  abilities_t* abilities;
+
+  class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt, talents_t* talents, abilities_t* abilities ) :
     player_t( sim, pt, name, rt ), energy_gains()
   {
+    this->talents = talents;
+    this->abilities = abilities;
     primary_attribute   = ATTR_CUNNING;
     secondary_attribute = ATTR_AIM;
   }
@@ -93,8 +102,6 @@ public:
     resource_base[ RESOURCE_ENERGY ] += 100;
     if ( set_bonus.rakata_enforcers -> four_pc() )
       resource_base[ RESOURCE_ENERGY ] += 5;
-
-
   }
 
   virtual void init_gains()
@@ -129,9 +136,13 @@ public:
     player_t::regen( periodicity );
   }
 
-  void init_talents(talents_t& talents);
+  virtual ::action_t* create_action( const std::string& name, const std::string& options );
 
-  void create_talents();
+  virtual void init_abilities();
+
+  virtual void init_talents();
+
+  virtual void create_talents();
 };
 
 class targetdata_t : public ::targetdata_t
@@ -140,6 +151,50 @@ public:
   targetdata_t( class_t& source, player_t& target ) :
     ::targetdata_t( source, target )
   {}
+};
+
+class action_t : public ::action_t
+{
+  typedef ::action_t base_t;
+public:
+  action_t( const std::string& n, class_t* player,
+            attack_policy_t policy, resource_type r, school_type s ) :
+  base_t( ACTION_ATTACK, n, player, policy, r, s )
+  {
+    harmful = false;
+  }
+
+  targetdata_t* targetdata() const
+  { return static_cast<targetdata_t*>( base_t::targetdata() ); }
+
+  class_t* p() const { return static_cast<class_t*>( player ); }
+  class_t* cast() const { return p(); }
+};
+
+struct attack_t : public action_t
+{
+  attack_t( const std::string& n, class_t* p, attack_policy_t policy, school_type s ) :
+    action_t( n, p, policy, RESOURCE_ENERGY, s )
+  {
+    harmful  = true;
+    may_crit = true;
+  }
+};
+
+struct tech_attack_t : public attack_t
+{
+  tech_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_KINETIC ) :
+    attack_t( n, p, tech_policy, s )
+  {
+  }
+};
+
+struct range_attack_t : public attack_t
+{
+  range_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_ENERGY ) :
+    attack_t( n, p, range_policy, s )
+  {
+  }
 };
 
 } // namespace agent_smug ===================================================
