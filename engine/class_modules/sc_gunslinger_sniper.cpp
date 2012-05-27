@@ -51,7 +51,7 @@ public:
   } rngs;
 
   // Benefits
-  struct benefits_t
+  struct benefits_t:base_t::benefits_t
   {
 
   } benefits;
@@ -131,7 +131,7 @@ public:
   } abilities;
 
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
-    base_t( sim, pt == IA_SNIPER ? IA_SNIPER : S_GUNSLINGER, name, rt, buffs, gains, talents, abilities ),
+    base_t( sim, pt == IA_SNIPER ? IA_SNIPER : S_GUNSLINGER, name, rt, buffs, gains, benefits, talents, abilities ),
     buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents()
   {
     tree_type[ IA_SNIPER_MARKSMANSHIP ] = TREE_MARKSMANSHIP;

@@ -98,6 +98,37 @@ struct rifle_shot_t : public range_attack_t
 };
 
 // ==========================================================================
+// Smuggler / Agent Callbacks
+// ==========================================================================
+
+class action_callback_t : public ::action_callback_t
+{
+public:
+  action_callback_t( class_t* player ) :
+    ::action_callback_t( player )
+  {}
+
+  class_t* p() const { return static_cast<class_t*>( listener ); }
+  class_t* cast() const { return p(); }
+};
+
+struct poison_tick_crit_callback_t : public action_callback_t
+{
+  poison_tick_crit_callback_t( class_t* p ) :
+    action_callback_t( p )
+  {}
+
+  virtual void trigger (::action_t* a, void* /* call_data */)
+  {
+    if (a->name_str == p()->abilities.corrosive_dart ||
+        a->name_str == p()->abilities.corrosive_grenade)
+    {
+      p()->resource_gain( RESOURCE_ENERGY, p()->talents.lethal_purpose -> rank(), p()->gains.lethal_purpose );
+    }
+  }
+};
+
+// ==========================================================================
 // Smuggler / Agent Character Definition
 // ==========================================================================
 
@@ -126,8 +157,10 @@ void class_t::init_abilities()
     abilities.adrenaline_probe = "adrenaline_probe";
     abilities.coordination = "coordination";
     abilities.corrosive_dart = "corrosive_dart";
+    abilities.corrosive_grenade = "corrosive_grenade";
     abilities.explosive_probe = "explosive_probe";
     abilities.fragmentation_grenade = "fragmentation_grenade";
+    abilities.lethal_purpose = "lethal_purpose";
     abilities.orbital_strike = "orbital_strike";
     abilities.overload_shot = "overload_shot";
     abilities.rifle_shot = "rifle_shot";
@@ -138,8 +171,10 @@ void class_t::init_abilities()
     abilities.adrenaline_probe = "cool_head";
     abilities.coordination = "lucky_shots";
     abilities.corrosive_dart = "vital_shot";
+    abilities.corrosive_grenade = "shrap_bomb";
     abilities.explosive_probe = "sabotage_charge";
     abilities.fragmentation_grenade = "thermal_grenade";
+    abilities.lethal_purpose = "fighting_spirit";
     abilities.orbital_strike = "xs_freighter_flyby";
     abilities.overload_shot = "quick_shot";
     abilities.rifle_shot = "flurry_of_bolts";
@@ -204,6 +239,16 @@ void class_t::init_gains()
   energy_gains.high    = get_gain( "high" );
 
   gains.adrenaline_probe = get_gain( abilities.adrenaline_probe );
+  gains.lethal_purpose   = get_gain( abilities.lethal_purpose );
+}
+
+// class_t::init_actions ========================================
+
+void class_t::init_actions()
+{
+  base_t::init_actions();
+
+  register_tick_callback( RESULT_CRIT_MASK, new poison_tick_crit_callback_t ( this ) );
 }
 
 // class_t::create_talents =======================================

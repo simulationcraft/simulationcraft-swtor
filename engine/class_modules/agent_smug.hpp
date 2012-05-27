@@ -32,8 +32,15 @@ public:
   struct gains_t
   {
     gain_t* adrenaline_probe;
+    gain_t* lethal_purpose;
   };
   gains_t& gains;
+
+  struct benefits_t
+  {
+    benefit_t* devouring_microbes_ticks;
+  };
+  benefits_t& benefits;
 
   struct talents_t
   {
@@ -73,8 +80,10 @@ public:
     std::string adrenaline_probe;
     std::string coordination;
     std::string corrosive_dart;
+    std::string corrosive_grenade;
     std::string explosive_probe;
     std::string fragmentation_grenade;
+    std::string lethal_purpose;
     std::string orbital_strike;
     std::string overload_shot;
     std::string rifle_shot;
@@ -82,8 +91,8 @@ public:
   };
   abilities_t& abilities;
 
-  class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt, buffs_t& buffs, gains_t& gains, talents_t& talents, abilities_t& abilities ) :
-    player_t( sim, pt, name, rt ), energy_gains(), buffs(buffs), gains(gains), talents(talents), abilities(abilities)
+  class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt, buffs_t& buffs, gains_t& gains, benefits_t& benefits, talents_t& talents, abilities_t& abilities ) :
+    player_t( sim, pt, name, rt ), energy_gains(), buffs(buffs), gains(gains), benefits(benefits), talents(talents), abilities(abilities)
   {
     primary_attribute   = ATTR_CUNNING;
     secondary_attribute = ATTR_AIM;
@@ -152,6 +161,8 @@ public:
   virtual void init_talents();
 
   virtual void init_buffs();
+
+  virtual void init_actions();
 
   virtual void init_gains();
 

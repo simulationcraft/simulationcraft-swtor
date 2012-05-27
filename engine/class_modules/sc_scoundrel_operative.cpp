@@ -54,7 +54,6 @@ struct class_t : public agent_smug::class_t
     gain_t* stim_boost;
     gain_t* revitalizers;
     gain_t* combat_stims;
-    gain_t* lethal_purpose;
   } gains;
 
   // Procs
@@ -71,9 +70,8 @@ struct class_t : public agent_smug::class_t
   } rngs;
 
   // Benefits
-  struct benefits_t
+  struct benefits_t:base_t::benefits_t
   {
-    benefit_t* devouring_microbes_ticks;
     benefit_t* wb_poison_ticks;
   } benefits;
 
@@ -140,13 +138,26 @@ struct class_t : public agent_smug::class_t
   // Abilities
   struct abilities_t:base_t::abilities_t
   {
-
+    std::string acid_blade;
+    std::string acid_blade_arpen;
+    std::string acid_blade_coating;
+    std::string acid_blade_poison;
+    std::string backstab;
+    std::string combat_stims;
+    std::string cull;
+    std::string hidden_strike;
+    std::string laceration;
+    std::string revitalizers;
+    std::string stealth;
+    std::string stim_boost;
+    std::string tactical_advantage;
+    std::string weakening_blast;
   } abilities;
 
   action_t* acid_blade_poison;
 
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
-    base_t( sim, pt == IA_OPERATIVE ? IA_OPERATIVE : S_SCOUNDREL, name, rt, buffs, gains, talents, abilities ),
+    base_t( sim, pt == IA_OPERATIVE ? IA_OPERATIVE : S_SCOUNDREL, name, rt, buffs, gains, benefits, talents, abilities ),
     buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents(), acid_blade_poison()
   {
     tree_type[ IA_OPERATIVE_MEDICINE    ] = TREE_MEDICINE;
@@ -177,6 +188,10 @@ struct class_t : public agent_smug::class_t
 
   double  energy_regen_per_second() const; // override
 
+  double  composite_player_multiplier(school_type school, ::action_t *a) const;
+
+
+
   role_type primary_role() const;
   void create_talents();
 };
@@ -187,7 +202,6 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
 {
   bool is_op = ( source.type == IA_OPERATIVE );
   const char* weakening_blast        = is_op ? "weakening_blast"        : "hemorrhaging_blast"     ; 
-  const char* acid_blade_poison      = is_op ? "acid_blade_poison"      : "flechette_round_poison" ; 
   const char* corrosive_dart_weak    = is_op ? "corrosive_dart_weak"    : "vital_shot_weak"        ;
   const char* corrosive_grenade      = is_op ? "corrosive_grenade"      : "shrap_bomb"             ; 
   const char* corrosive_grenade_weak = is_op ? "corrosive_grenade_weak" : "shrap_bomb_weak"        ; 
@@ -195,7 +209,7 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
 
   debuff_weakening_blast     = new buff_t ( this, weakening_blast, 10, from_seconds (  15 ) ); 
 
-  dot_acid_blade_poison      = dot_t      ( acid_blade_poison, &source              ); 
+  dot_acid_blade_poison      = dot_t      ( source.abilities.acid_blade_poison, &source              );
   dot_corrosive_dart         = dot_t      ( source.abilities.corrosive_dart, &source                 );
   dot_corrosive_dart_weak    = dot_t      ( corrosive_dart_weak, &source            ); 
   dot_corrosive_grenade      = dot_t      ( corrosive_grenade, &source              ); 
@@ -258,7 +272,6 @@ public:
 //           - adrenaline_probe
 //           - stealth
 
-
 struct attack_t : public action_t
 {
   attack_t( const std::string& n, class_t* p, attack_policy_t policy, school_type s ) :
@@ -266,19 +279,6 @@ struct attack_t : public action_t
   {
     harmful  = true;
     may_crit = true;
-  }
-
-  void player_buff()
-  {
-    action_t::player_buff();
-    if ( p() -> buffs.tactical_advantage -> up() )
-      player_multiplier += 0.02;
-  }
-
-  void execute()
-  {
-    action_t::execute();
-    p() -> buffs.stealth -> expire();
   }
 };
 
@@ -336,16 +336,6 @@ struct poison_attack_t : public tech_attack_t
         target_multiplier += 0.3;
       }
     }
-  }
-
-  void tick( dot_t* d )
-  {
-    tech_attack_t::tick( d );
-
-    class_t& p = *cast();
-
-    if ( result == RESULT_CRIT && p.talents.lethal_purpose -> rank() )
-      p.resource_gain( RESOURCE_ENERGY, p.talents.lethal_purpose -> rank(), p.gains.lethal_purpose );
   }
 };
 
@@ -1063,6 +1053,48 @@ struct coordination_t : public action_t
 };
 
 // ==========================================================================
+// Scoundrel / Operative Callbacks
+// ==========================================================================
+
+class action_callback_t : public ::action_callback_t
+{
+public:
+  action_callback_t( class_t* player ) :
+    ::action_callback_t( player )
+  {}
+
+  class_t* p() const { return static_cast<class_t*>( listener ); }
+  class_t* cast() const { return p(); }
+};
+
+struct all_attack_callback_t : public action_callback_t
+{
+  all_attack_callback_t( class_t* p ) :
+    action_callback_t( p )
+  {}
+
+  virtual void trigger( ::action_t* /* a */, void* /* call_data */)
+  {
+    p() -> buffs.stealth -> expire();
+  }
+};
+
+struct poison_tick_crit_callback_t : public action_callback_t
+{
+  poison_tick_crit_callback_t( class_t* p ) :
+    action_callback_t( p )
+  {}
+
+  virtual void trigger (::action_t* a, void* /* call_data */)
+  {
+    if (a->name_str == p()->abilities.acid_blade_poison)
+    {
+      p()->resource_gain( RESOURCE_ENERGY, p()->talents.lethal_purpose -> rank(), p()->gains.lethal_purpose );
+    }
+  }
+};
+
+// ==========================================================================
 // scoundrel_operative Character Definition
 // ==========================================================================
 
@@ -1071,33 +1103,22 @@ struct coordination_t : public action_t
 ::action_t* class_t::create_action( const std::string& name,
                                     const std::string& options_str )
 {
-  bool is_op = ( type == IA_OPERATIVE );
-  const char* acid_blade            = is_op ? "acid_blade"            : "flechette_round"    ; 
-  const char* backstab              = is_op ? "backstab"              : "back_blast"         ; 
-  const char* corrosive_grenade     = is_op ? "corrosive_grenade"     : "shrap_bomb"         ; 
-  const char* cull                  = is_op ? "cull"                  : "wounding_shot"      ; 
-  const char* hidden_strike         = is_op ? "hidden_strike"         : "shoot_first"        ; 
-  const char* laceration            = is_op ? "laceration"            : "sucker_punch"       ; 
-  const char* stealth               = is_op ? "stealth"               : "stealth"            ; 
-  const char* stim_boost            = is_op ? "stim_boost"            : "pugnacity"          ; 
-  const char* weakening_blast       = is_op ? "weakening_blast"       : "hemorrhaging_blast" ; 
-
-  if ( name == acid_blade            ) return new acid_blade_t            ( this, name, options_str ) ;
-  if ( name == backstab              ) return new backstab_t              ( this, name, options_str ) ;
+  if ( name == abilities.acid_blade            ) return new acid_blade_t            ( this, name, options_str ) ;
+  if ( name == abilities.backstab              ) return new backstab_t              ( this, name, options_str ) ;
   if ( name == abilities.coordination          ) return new coordination_t          ( this, name, options_str ) ;
   if ( name == abilities.corrosive_dart        ) return new corrosive_dart_t        ( this, name, options_str ) ;
-  if ( name == corrosive_grenade     ) return new corrosive_grenade_t     ( this, name, options_str ) ;
-  if ( name == cull                  ) return new cull_t                  ( this, name, options_str ) ;
+  if ( name == abilities.corrosive_grenade     ) return new corrosive_grenade_t     ( this, name, options_str ) ;
+  if ( name == abilities.cull                  ) return new cull_t                  ( this, name, options_str ) ;
   if ( name == abilities.explosive_probe       ) return new explosive_probe_t       ( this, name, options_str ) ;
   if ( name == abilities.fragmentation_grenade ) return new fragmentation_grenade_t ( this, name, options_str ) ;
-  if ( name == hidden_strike         ) return new hidden_strike_t         ( this, name, options_str ) ;
-  if ( name == laceration            ) return new laceration_t            ( this, name, options_str ) ;
-  if ( name == abilities.orbital_strike ) return new orbital_strike_t        ( this, name, options_str ) ;
+  if ( name == abilities.hidden_strike         ) return new hidden_strike_t         ( this, name, options_str ) ;
+  if ( name == abilities.laceration            ) return new laceration_t            ( this, name, options_str ) ;
+  if ( name == abilities.orbital_strike        ) return new orbital_strike_t        ( this, name, options_str ) ;
   if ( name == abilities.overload_shot         ) return new overload_shot_t         ( this, name, options_str ) ;
   if ( name == abilities.shiv                  ) return new shiv_t                  ( this, name, options_str ) ;
-  if ( name == stealth               ) return new stealth_t               ( this, name, options_str ) ;
-  if ( name == stim_boost            ) return new stim_boost_t            ( this, name, options_str ) ;
-  if ( name == weakening_blast       ) return new weakening_blast_t       ( this, name, options_str ) ;
+  if ( name == abilities.stealth               ) return new stealth_t               ( this, name, options_str ) ;
+  if ( name == abilities.stim_boost            ) return new stim_boost_t            ( this, name, options_str ) ;
+  if ( name == abilities.weakening_blast       ) return new weakening_blast_t       ( this, name, options_str ) ;
 
   return base_t::create_action( name, options_str );
 }
@@ -1115,9 +1136,37 @@ void class_t::init_abilities()
   //=======================================================================
   if ( type == IA_OPERATIVE)
   {
+    abilities.acid_blade = "acid_blade";
+    abilities.acid_blade_arpen ="acid_blade_arpen";
+    abilities.acid_blade_coating = "acid_blade_coating";
+    abilities.acid_blade_poison = "acid_blade_poison";
+    abilities.backstab = "backstab";
+    abilities.combat_stims = "combat_stims";
+    abilities.cull = "cull";
+    abilities.hidden_strike = "hidden_strike";
+    abilities.laceration = "laceration";
+    abilities.revitalizers = "revitalizers";
+    abilities.stealth = "stealth";
+    abilities.stim_boost = "stim_boost";
+    abilities.tactical_advantage = "tactical_advantage";
+    abilities.weakening_blast = "weakening_blast";
   }
   else
   {
+    abilities.acid_blade = "flechette_round";
+    abilities.acid_blade_arpen = "flechette_round_arpen";
+    abilities.acid_blade_coating = "flechette_round_coating";
+    abilities.acid_blade_poison = "flechette_round_poison";
+    abilities.backstab = "back_blast";
+    abilities.combat_stims = "street_tough";
+    abilities.cull = "wounding_shot";
+    abilities.hidden_strike =  "shoot_first";
+    abilities.laceration = "sucker_punch";
+    abilities.revitalizers = "surprise_comeback";
+    abilities.stealth = "stealth";
+    abilities.stim_boost = "pugnacity";
+    abilities.tactical_advantage = "upper_hand";
+    abilities.weakening_blast = "hemorrhaging_blast";
   }
 }
 
@@ -1209,19 +1258,11 @@ void class_t::init_buffs()
   // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
 
-  bool is_op = ( type == IA_OPERATIVE );
-  const char* acid_blade_coating = is_op ? "acid_blade_coating" : "flechette_round_coating" ; 
-  const char* acid_blade_arpen   = is_op ? "acid_blade_arpen"   : "flechette_round_arpen"   ; 
-  const char* stealth            = is_op ? "stealth"            : "stealth"                 ; 
-  const char* stim_boost         = is_op ? "stim_boost"         : "pugnacity"               ; 
-  const char* tactical_advantage = is_op ? "tactical_advantage" : "upper_hand"              ; 
-
-
-  buffs.acid_blade_coating = new buff_t( this , acid_blade_coating , 1 ,  from_seconds( 20 ) ); 
-  buffs.acid_blade_arpen   = new buff_t( this , acid_blade_arpen   , 1 ,  from_seconds( 15 ) ); 
-  buffs.stealth            = new buff_t( this , stealth            , 1                       );
-  buffs.stim_boost         = new buff_t( this , stim_boost         , 1 ,  from_seconds( 45 ) ); 
-  buffs.tactical_advantage = new buff_t( this , tactical_advantage , 2 ,  from_seconds( 10 ) ); 
+  buffs.acid_blade_coating = new buff_t( this , abilities.acid_blade_coating , 1 ,  from_seconds( 20 ) );
+  buffs.acid_blade_arpen   = new buff_t( this , abilities.acid_blade_arpen   , 1 ,  from_seconds( 15 ) );
+  buffs.stealth            = new buff_t( this , abilities.stealth            , 1                       );
+  buffs.stim_boost         = new buff_t( this , abilities.stim_boost         , 1 ,  from_seconds( 45 ) );
+  buffs.tactical_advantage = new buff_t( this , abilities.tactical_advantage , 2 ,  from_seconds( 10 ) );
 }
 
 // class_t::init_gains ========================================
@@ -1230,16 +1271,9 @@ void class_t::init_gains()
 {
   base_t::init_gains();
 
-  bool is_op = ( type == IA_OPERATIVE );
-  const char* combat_stims     = is_op ? "combat_stims"     : "street_tough"      ; 
-  const char* lethal_purpose   = is_op ? "lethal_purpose"   : "fighting_spirit"   ; 
-  const char* revitalizers     = is_op ? "revitalizers"     : "surprise_comeback" ; 
-  const char* stim_boost       = is_op ? "stim_boost"       : "pugnacity"         ; 
-
-  gains.combat_stims     = get_gain( combat_stims     );
-  gains.lethal_purpose   = get_gain( lethal_purpose   );
-  gains.revitalizers     = get_gain( revitalizers     );
-  gains.stim_boost       = get_gain( stim_boost       );
+  gains.combat_stims = get_gain( abilities.combat_stims );
+  gains.revitalizers = get_gain( abilities.revitalizers );
+  gains.stim_boost   = get_gain( abilities.stim_boost   );
 }
 
 // class_t::init_procs ========================================
@@ -1278,17 +1312,6 @@ void class_t::init_actions()
   //
   //=========================================================================
 
-  bool is_op = ( type == IA_OPERATIVE );
-  const std::string acid_blade            = is_op ? "acid_blade"            : "flechette_round"    ; 
-  const std::string backstab              = is_op ? "backstab"              : "back_blast"         ; 
-  const std::string corrosive_grenade     = is_op ? "corrosive_grenade"     : "shrap_bomb"         ; 
-  const std::string cull                  = is_op ? "cull"                  : "wounding_shot"      ; 
-  const std::string hidden_strike         = is_op ? "hidden_strike"         : "shoot_first"        ; 
-  const std::string laceration            = is_op ? "laceration"            : "sucker_punch"       ; 
-  const std::string stealth               = is_op ? "stealth"               : "stealth"            ; 
-  const std::string stim_boost            = is_op ? "stim_boost"            : "pugnacity"          ; 
-  const std::string tactical_advantage    = is_op ? "tactical_advantage"    : "upper_hand"         ; 
-  const std::string weakening_blast       = is_op ? "weakening_blast"       : "hemorrhaging_blast" ; 
   const std::string sl = "/";
 
   if ( action_list_str.empty() )
@@ -1301,38 +1324,38 @@ void class_t::init_actions()
 
     action_list_str += "/stealth"
                        + sl + abilities.adrenaline_probe + ",if=energy<=60"
-                       + sl + stim_boost + ",if=buff." + tactical_advantage + ".stack>=2";
+                       + sl + abilities.stim_boost + ",if=buff." + abilities.tactical_advantage + ".stack>=2";
 
     if ( talents.acid_blade -> rank() )
-      action_list_str += sl + acid_blade + ",if=!buff." + acid_blade + "_coating.up&!cooldown." + backstab + ".remains";
+      action_list_str += sl + abilities.acid_blade + ",if=!buff." + abilities.acid_blade + "_coating.up&!cooldown." + abilities.backstab + ".remains";
     action_list_str += "/use_relics"
-                       + sl + hidden_strike;
+                       + sl + abilities.hidden_strike;
 
 
     if ( talents.flanking -> rank() )
-      action_list_str += sl + backstab + ",if=energy>=65";
+      action_list_str += sl + abilities.backstab + ",if=energy>=65";
     if ( talents.acid_blade -> rank() )
-      action_list_str += ",if=buff." + acid_blade + "_coating.up";
+      action_list_str += ",if=buff." + abilities.acid_blade + "_coating.up";
 
     if ( talents.weakening_blast -> rank() )
-      action_list_str += sl + weakening_blast;
+      action_list_str += sl + abilities.weakening_blast;
 
-    action_list_str += sl + abilities.shiv + ",if=energy>=75&buff." + tactical_advantage + ".stack<2"
+    action_list_str += sl + abilities.shiv + ",if=energy>=75&buff." + abilities.tactical_advantage + ".stack<2"
                        + sl + abilities.corrosive_dart + ",if=!ticking&energy>=75";
 
     if ( talents.corrosive_grenade -> rank() )
-    action_list_str += sl + corrosive_grenade + ",if=!ticking&energy>=80";
+    action_list_str += sl + abilities.corrosive_grenade + ",if=!ticking&energy>=80";
 
     if ( talents.laceration -> rank() )
-      action_list_str += sl + laceration + ",if=energy>=75";
+      action_list_str += sl + abilities.laceration + ",if=energy>=75";
 
     if ( talents.cull -> rank() )
-      action_list_str += sl + cull + ",if=energy>=50&buff." + tactical_advantage + ".stack>=2"
+      action_list_str += sl + abilities.cull + ",if=energy>=50&buff." +abilities. tactical_advantage + ".stack>=2"
                          "&(dot." + abilities.corrosive_dart + ".ticking|dot." + abilities.corrosive_dart + "_weak.ticking)"
-                         "&(dot." + corrosive_grenade + ".ticking|dot." + corrosive_grenade + "_weak.ticking)";
+                         "&(dot." + abilities.corrosive_grenade + ".ticking|dot." + abilities.corrosive_grenade + "_weak.ticking)";
 
     if ( ! talents.flanking -> rank() )
-      action_list_str += sl + backstab + ",if=energy>=70";
+      action_list_str += sl + abilities.backstab + ",if=energy>=70";
 
     action_list_str += sl + abilities.orbital_strike + ",if=energy>65";
     action_list_str += sl + abilities.overload_shot + ",if=energy>";
@@ -1359,6 +1382,9 @@ void class_t::init_actions()
       }
     }
   }
+
+  register_attack_callback( RESULT_ALL_MASK, new all_attack_callback_t( this ) );
+  register_tick_callback( RESULT_CRIT_MASK, new poison_tick_crit_callback_t ( this ) );
 
   base_t::init_actions();
 }
@@ -1418,6 +1444,18 @@ double class_t::energy_regen_per_second() const
     eps += stim_boost_t::tick_amount( *this ) * ( 1.0 / 3 );
 
   return eps;
+}
+
+// class_t::composite_player_multiplier ===========================
+
+double class_t::composite_player_multiplier(school_type school, ::action_t *a) const
+{
+  double multiplier = base_t::composite_player_multiplier(school, a);
+
+  if ( buffs.tactical_advantage -> up() )
+    multiplier += 0.02;
+
+  return multiplier;
 }
 
 // class_t::create_talents ====================================
