@@ -149,7 +149,7 @@ struct class_t : public agent_smug::class_t
   action_t* acid_blade_poison;
 
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
-    base_t( sim, pt == IA_OPERATIVE ? IA_OPERATIVE : S_SCOUNDREL, name, rt, &talents, &abilities ),
+    base_t( sim, pt == IA_OPERATIVE ? IA_OPERATIVE : S_SCOUNDREL, name, rt, talents, abilities ),
     buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents(), acid_blade_poison()
   {
     tree_type[ IA_OPERATIVE_MEDICINE    ] = TREE_MEDICINE;

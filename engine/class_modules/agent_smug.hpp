@@ -54,19 +54,17 @@ public:
     // t7
     talent_t* weakening_blast;
   };
-  talents_t* talents;
+  talents_t& talents;
 
   struct abilities_t
   {
     std::string rifle_shot;
   };
-  abilities_t* abilities;
+  abilities_t& abilities;
 
-  class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt, talents_t* talents, abilities_t* abilities ) :
-    player_t( sim, pt, name, rt ), energy_gains()
+  class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt, talents_t& talents, abilities_t& abilities ) :
+    player_t( sim, pt, name, rt ), energy_gains(), talents(talents), abilities(abilities)
   {
-    this->talents = talents;
-    this->abilities = abilities;
     primary_attribute   = ATTR_CUNNING;
     secondary_attribute = ATTR_AIM;
   }
@@ -136,7 +134,7 @@ public:
     player_t::regen( periodicity );
   }
 
-  virtual ::action_t* create_action( const std::string& name, const std::string& options );
+  virtual ::action_t* create_action( const std::string& name, const std::string& options ) = 0;
 
   virtual void init_abilities();
 
