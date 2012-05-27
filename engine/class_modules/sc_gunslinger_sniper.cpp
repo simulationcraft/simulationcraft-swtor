@@ -27,13 +27,13 @@ public:
   typedef agent_smug::class_t base_t;
 
   // Buffs
-  struct buffs_t
+  struct buffs_t:base_t::buffs_t
   {
 
   } buffs;
 
   // Gains
-  struct gains_t
+  struct gains_t:base_t::gains_t
   {
 
   } gains;
@@ -131,7 +131,7 @@ public:
   } abilities;
 
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
-    base_t( sim, pt == IA_SNIPER ? IA_SNIPER : S_GUNSLINGER, name, rt, talents, abilities ),
+    base_t( sim, pt == IA_SNIPER ? IA_SNIPER : S_GUNSLINGER, name, rt, buffs, gains, talents, abilities ),
     buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents()
   {
     tree_type[ IA_SNIPER_MARKSMANSHIP ] = TREE_MARKSMANSHIP;

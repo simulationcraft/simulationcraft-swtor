@@ -7,9 +7,55 @@
 
 namespace agent_smug { // ===================================================
 
+targetdata_t::targetdata_t( class_t& source, player_t& target ) :
+  ::targetdata_t( source, target )
+{
+  dot_adrenaline_probe       = dot_t      ( source.abilities.adrenaline_probe, &source               );
+
+  add( dot_adrenaline_probe       ) ;
+}
+
 // ==========================================================================
 // Smuggler / Agent Abilities
 // ==========================================================================
+
+// Adrenaline Probe | Cool Head =============================================
+
+struct adrenaline_probe_t : public action_t
+{
+  adrenaline_probe_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    action_t(n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE)
+  {
+    parse_options( options_str );
+
+    cooldown -> duration = from_seconds( 120 - 15 * p -> talents.lethal_purpose -> rank() );
+    use_off_gcd = true;
+    trigger_gcd = timespan_t::zero();
+
+    num_ticks = 2;
+    base_tick_time = from_seconds( 1.5 );
+  }
+
+  // the combat log isn't in sync with the game here.
+  // the combat log shows after 1.5 seconds a tick of 8 and 34, and then another tick of 8 1.5s later.
+  // what happens in game is you instantly get 34, and then two ticks of 8.
+  void execute()
+  {
+    action_t::execute();
+    class_t* p = cast();
+
+    p -> buffs.adrenaline_probe -> trigger();
+    p -> resource_gain( RESOURCE_ENERGY, 34, p -> gains.adrenaline_probe );
+  }
+
+  void tick(dot_t* d)
+  {
+    action_t::tick(d);
+    class_t* p = cast();
+
+    p -> resource_gain( RESOURCE_ENERGY, 8, p -> gains.adrenaline_probe );
+  }
+};
 
 // Rifle Shot | Flurry Of Bolts =========================================================
 struct rifle_shot_t : public range_attack_t
@@ -23,7 +69,8 @@ struct rifle_shot_t : public range_attack_t
     parse_options( options_str );
 
     base_cost = 0;
-    range = 35.0;
+    // todo variable to 35 for sniper
+    range = 30.0;
 
     weapon = &( player->main_hand_weapon );
     weapon_multiplier = -0.5;
@@ -59,6 +106,7 @@ struct rifle_shot_t : public range_attack_t
 ::action_t* class_t::create_action( const std::string& name,
                                     const std::string& options_str )
 {
+  if ( name == abilities.adrenaline_probe ) return new adrenaline_probe_t ( this, name, options_str ) ;
   if ( name == abilities.rifle_shot ) return new rifle_shot_t ( this, name, options_str ) ;
 
   return base_t::create_action( name, options_str );
@@ -75,11 +123,27 @@ void class_t::init_abilities()
   //=======================================================================
   if ( type == IA_SNIPER || type == IA_OPERATIVE )
   {
+    abilities.adrenaline_probe = "adrenaline_probe";
+    abilities.coordination = "coordination";
+    abilities.corrosive_dart = "corrosive_dart";
+    abilities.explosive_probe = "explosive_probe";
+    abilities.fragmentation_grenade = "fragmentation_grenade";
+    abilities.orbital_strike = "orbital_strike";
+    abilities.overload_shot = "overload_shot";
     abilities.rifle_shot = "rifle_shot";
+    abilities.shiv = "shiv";
   }
   else
   {
+    abilities.adrenaline_probe = "cool_head";
+    abilities.coordination = "lucky_shots";
+    abilities.corrosive_dart = "vital_shot";
+    abilities.explosive_probe = "sabotage_charge";
+    abilities.fragmentation_grenade = "thermal_grenade";
+    abilities.orbital_strike = "xs_freighter_flyby";
+    abilities.overload_shot = "quick_shot";
     abilities.rifle_shot = "flurry_of_bolts";
+    abilities.shiv = "blaster_whip";
   }
 }
 
@@ -117,6 +181,29 @@ void class_t::init_talents()
   talents.lingering_toxins                    = find_talent( "Lingering Toxins"                   );
   // t7
   talents.weakening_blast                     = find_talent( "Weakening Blast"                    );
+}
+
+// class_t::init_buffs ===========================================
+
+void class_t::init_buffs()
+{
+  base_t::init_buffs();
+
+  buffs.adrenaline_probe   = new buff_t( this , abilities.adrenaline_probe   , 1 ,  from_seconds(  3 ) );
+}
+
+// class_t::init_gains ========================================
+
+void class_t::init_gains()
+{
+  base_t::init_gains();
+
+  energy_gains.minimum = get_gain( "min"  );
+  energy_gains.low     = get_gain( "low"  );
+  energy_gains.medium  = get_gain( "med"  );
+  energy_gains.high    = get_gain( "high" );
+
+  gains.adrenaline_probe = get_gain( abilities.adrenaline_probe );
 }
 
 // class_t::create_talents =======================================

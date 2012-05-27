@@ -23,6 +23,18 @@ public:
     gain_t* high;
   } energy_gains;
 
+  struct buffs_t
+  {
+    buff_t* adrenaline_probe;
+  };
+  buffs_t& buffs;
+
+  struct gains_t
+  {
+    gain_t* adrenaline_probe;
+  };
+  gains_t& gains;
+
   struct talents_t
   {
     // Lethality|Dirty Fighting
@@ -58,12 +70,20 @@ public:
 
   struct abilities_t
   {
+    std::string adrenaline_probe;
+    std::string coordination;
+    std::string corrosive_dart;
+    std::string explosive_probe;
+    std::string fragmentation_grenade;
+    std::string orbital_strike;
+    std::string overload_shot;
     std::string rifle_shot;
+    std::string shiv;
   };
   abilities_t& abilities;
 
-  class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt, talents_t& talents, abilities_t& abilities ) :
-    player_t( sim, pt, name, rt ), energy_gains(), talents(talents), abilities(abilities)
+  class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt, buffs_t& buffs, gains_t& gains, talents_t& talents, abilities_t& abilities ) :
+    player_t( sim, pt, name, rt ), energy_gains(), buffs(buffs), gains(gains), talents(talents), abilities(abilities)
   {
     primary_attribute   = ATTR_CUNNING;
     secondary_attribute = ATTR_AIM;
@@ -102,15 +122,6 @@ public:
       resource_base[ RESOURCE_ENERGY ] += 5;
   }
 
-  virtual void init_gains()
-  {
-    player_t::init_gains();
-    energy_gains.minimum = get_gain( "min"  );
-    energy_gains.low     = get_gain( "low"  );
-    energy_gains.medium  = get_gain( "med"  );
-    energy_gains.high    = get_gain( "high" );
-  }
-
   std::pair<int,gain_t*> energy_regen_bracket() const
   {
     if ( resource_current[ RESOURCE_ENERGY ] <= 20 )
@@ -140,15 +151,19 @@ public:
 
   virtual void init_talents();
 
+  virtual void init_buffs();
+
+  virtual void init_gains();
+
   virtual void create_talents();
 };
 
 class targetdata_t : public ::targetdata_t
 {
 public:
-  targetdata_t( class_t& source, player_t& target ) :
-    ::targetdata_t( source, target )
-  {}
+  dot_t dot_adrenaline_probe;
+
+  targetdata_t( class_t& source, player_t& target );
 };
 
 class action_t : public ::action_t
