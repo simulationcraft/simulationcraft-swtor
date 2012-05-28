@@ -298,7 +298,6 @@ struct range_attack_t : public attack_t
     attack_t( n, p, range_policy, s )
   {
   }
-
 };
 
 struct poison_attack_t : public tech_attack_t
@@ -306,9 +305,9 @@ struct poison_attack_t : public tech_attack_t
   poison_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_INTERNAL ) :
     tech_attack_t( n, p, s )
   {
-    may_crit = false;
-    tick_may_crit = true;
-    base_crit += .04 * p -> talents.lethal_dose -> rank();
+    may_crit       =  false;
+    tick_may_crit  =  true;
+    base_crit     += .04 * p -> talents.lethal_dose -> rank();
   }
 
   void target_debuff( player_t* tgt, dmg_type type )
@@ -316,8 +315,6 @@ struct poison_attack_t : public tech_attack_t
     tech_attack_t::target_debuff( tgt, type );
 
     class_t& p = *cast();
-
-    // TEST: Additive or Multiplicative?
 
     if ( unsigned rank = p.talents.devouring_microbes -> rank() )
     {
@@ -456,17 +453,14 @@ struct shiv_t : public tech_attack_t
 
     parse_options( options_str );
 
-    base_cost = 15;
-    cooldown -> duration = from_seconds( 6.0 );
-    range = 4.0;
-
-    dd.standardhealthpercentmin = 0.148;
-    dd.standardhealthpercentmax = 0.188;
-    dd.power_mod = 1.68;
-
-    // TEST: Additive or multiplicative?
-    base_multiplier += p -> talents.surgical_strikes -> rank() * 0.02 +
-                       p -> talents.razor_edge -> rank() * 0.04;
+    base_cost                    = 15;
+    cooldown -> duration         = from_seconds( 6.0 );
+    range                        = 4.0;
+    dd.standardhealthpercentmin  = 0.148;
+    dd.standardhealthpercentmax  = 0.188;
+    dd.power_mod                 = 1.68;
+    base_multiplier             += p -> talents.surgical_strikes -> rank() * 0.02
+                                 + p -> talents.razor_edge       -> rank() * 0.04;
   }
 
   virtual void execute()
@@ -490,22 +484,18 @@ struct backstab_t : public consume_acid_blade_attack_t
 
     parse_options( options_str );
 
-    base_cost = 10;
-    cooldown -> duration = from_seconds( 12.0 );
-    range = 4.0;
-
+    cooldown -> duration        = from_seconds( 12.0 );
+    range                       = 4.0;
     dd.standardhealthpercentmin = 0.165;
     dd.standardhealthpercentmax = 0.245;
-    dd.power_mod = 2.05;
-
-    base_cost       -= p->talents.flanking->rank() * 5;
-    // are these two additive or multiplacitive?
-    // Assume additive for now; nearly everything in SWTOR is additive.
-    base_multiplier += p->talents.surgical_strikes -> rank() * 0.02
-                       +  p->talents.waylay -> rank() * 0.04;
-    base_crit       += ( p -> talents.concealed_attacks->rank() * 0.08 )
-                       +  ( p -> set_bonus.rakata_enforcers -> two_pc() ? 0.15 : 0 );
-    crit_bonus      += p->talents.meticulously_kept_blades->rank() * 0.1;
+    dd.power_mod                = 2.05;
+    base_cost                   = 10
+                                - p -> talents.flanking                 -> rank()   * 5;
+    base_multiplier            += p -> talents.surgical_strikes         -> rank()   * 0.02
+                               +  p -> talents.waylay                   -> rank()   * 0.04;
+    base_crit                  += p -> talents.concealed_attacks        -> rank()   * 0.08
+                               +  p -> set_bonus.rakata_enforcers       -> two_pc() ? 0.15 : 0;
+    crit_bonus                 += p -> talents.meticulously_kept_blades -> rank()   * 0.1;
   }
 };
 
@@ -520,15 +510,13 @@ struct laceration_t : public tech_attack_t
     {
       parse_options( options_str );
 
-      dd.standardhealthpercentmin = 0.14;
-      dd.standardhealthpercentmax = 0.22;
-      dd.power_mod = 1.8;
-
-      base_multiplier += p -> talents.culling->rank() * 0.02;
-
-      background = true;
-      trigger_gcd = timespan_t::zero();
-      cooldown -> duration = from_seconds( 10.0 );
+      cooldown -> duration        =  from_seconds( 10.0 );
+      dd.standardhealthpercentmin =  0.14;
+      dd.standardhealthpercentmax =  0.22;
+      dd.power_mod                =  1.8;
+      base_multiplier             += p -> talents.culling->rank() * 0.02;
+      background                  =  true;
+      trigger_gcd                 =  timespan_t::zero();
     }
 
     virtual void execute()
@@ -551,14 +539,12 @@ struct laceration_t : public tech_attack_t
 
     parse_options( options_str );
 
-    base_cost = 10;
-    range = 4.0;
-
-    dd.standardhealthpercentmin = 0.14;
-    dd.standardhealthpercentmax = 0.22;
-    dd.power_mod = 1.8;
-
-    base_multiplier += p -> talents.culling->rank() * 0.02;
+    base_cost                   =  10;
+    range                       =  4.0;
+    dd.standardhealthpercentmin =  0.14;
+    dd.standardhealthpercentmax =  0.22;
+    dd.power_mod                =  1.8;
+    base_multiplier             += p -> talents.culling->rank() * 0.02;
 
     if (  p -> talents.collateral_strike -> rank() )
     {
@@ -587,9 +573,9 @@ struct laceration_t : public tech_attack_t
     {
       p -> buffs.tactical_advantage -> decrement();
 
-      if ( collateral_strike != nullptr &&
-           collateral_strike -> cooldown -> remains() <= timespan_t::zero() &&
-           p -> rngs.collateral_strike -> roll ( p -> talents.collateral_strike -> rank() * 0.25 ) )
+      if ( collateral_strike != nullptr
+          && collateral_strike -> cooldown -> remains() <= timespan_t::zero()
+          && p -> rngs.collateral_strike -> roll ( p -> talents.collateral_strike -> rank() * 0.25 ))
         collateral_strike -> execute();
     }
   }
@@ -606,16 +592,14 @@ struct hidden_strike_t : public consume_acid_blade_attack_t
 
     parse_options( options_str );
 
-    base_cost = 17;
-    range = 4.0;
-    cooldown -> duration = from_seconds( 7.5 ); // FIXME 7.5 or 8?
-
-    dd.standardhealthpercentmin = 0.218;
-    dd.standardhealthpercentmax = 0.278;
-    dd.power_mod = 2.48;
-
-    base_crit += p -> talents.concealed_attacks -> rank() * 0.08;
-    crit_bonus += p -> talents.meticulously_kept_blades -> rank() * 0.1;
+    base_cost                   =  17;
+    range                       =  4.0;
+    cooldown -> duration        =  from_seconds( 7.5 ); // FIXME TEST: 7.5 or 8?
+    dd.standardhealthpercentmin =  0.218;
+    dd.standardhealthpercentmax =  0.278;
+    dd.power_mod                =  2.48;
+    base_crit                   += p -> talents.concealed_attacks        -> rank() * 0.08;
+    crit_bonus                  += p -> talents.meticulously_kept_blades -> rank() * 0.1;
   }
 
   virtual bool ready()
@@ -645,15 +629,13 @@ struct fragmentation_grenade_t : public tech_attack_t
   {
     parse_options( options_str );
 
-    base_cost = 20;
-    cooldown -> duration = from_seconds( 6.0 );
-    range = 30.0;
-
+    base_cost                   = 20;
+    cooldown -> duration        = from_seconds( 6.0 );
+    range                       = 30.0;
     dd.standardhealthpercentmin = 0.109;
     dd.standardhealthpercentmax = 0.149;
-    dd.power_mod = 1.29;
-
-    aoe = 4;
+    dd.power_mod                = 1.29;
+    aoe                         = 4;
   }
 };
 
@@ -676,28 +658,26 @@ struct corrosive_grenade_t : public poison_attack_t
     if ( weak )
     {
       // infinite?
-      range = 30.0;
-      base_cost = 0;
-
-      td.standardhealthpercentmin
-        = td.standardhealthpercentmax
-        = 0.0065 * p -> talents.lingering_toxins -> rank();
-      td.power_mod = 0.065 * p -> talents.lingering_toxins -> rank();
-      num_ticks = 3;
-
-      background = true;
-      trigger_gcd = timespan_t::zero();
+      range                       = 30.0;
+      base_cost                   = 0;
+      td.standardhealthpercentmin = 
+      td.standardhealthpercentmax = 0.0065 * p -> talents.lingering_toxins -> rank();
+      td.power_mod                = 0.065  * p -> talents.lingering_toxins -> rank();
+      num_ticks                   = 3;
+      background                  = true;
+      trigger_gcd                 = timespan_t::zero();
     }
     else
     {
-      base_cost = 20;
-      cooldown -> duration = from_seconds( 12.0 );
-      td.standardhealthpercentmin = td.standardhealthpercentmax = 0.032;
-      td.power_mod = 0.32;
-      num_ticks = 7;
-      tick_zero = true;
+      base_cost                   = 20;
+      cooldown -> duration        = from_seconds( 12.0 );
+      td.standardhealthpercentmin = 
+      td.standardhealthpercentmax = 0.032;
+      td.power_mod                = 0.32;
+      num_ticks                   = 7;
+      tick_zero                   = true;
       // TEST: maybe not limited?
-      aoe = 5;
+      aoe                         = 5;
 
       if ( p -> talents.lingering_toxins -> rank() )
         corrosive_grenade_weak = new corrosive_grenade_t( p, n + "_weak", options_str, true );
@@ -741,21 +721,22 @@ struct corrosive_dart_t : public poison_attack_t
     if ( weak )
     {
       // infinite?
-      range = 30.0;
-      base_cost =  0;
-      td.standardhealthpercentmin = td.standardhealthpercentmax =  0.01;
-      td.power_mod = 0.1;
-      num_ticks = 3 + p -> talents.lethal_injectors -> rank();
-
-      background = true;
-      trigger_gcd = timespan_t::zero();
+      range                       = 30.0;
+      base_cost                   = 0;
+      td.standardhealthpercentmin = 
+      td.standardhealthpercentmax = 0.01;
+      td.power_mod                = 0.1;
+      num_ticks                   = 3 + p -> talents.lethal_injectors -> rank();
+      background                  = true;
+      trigger_gcd                 = timespan_t::zero();
     }
     else
     {
-      base_cost =  20;
-      td.standardhealthpercentmin = td.standardhealthpercentmax = 0.04;
-      td.power_mod =  0.4;
-      num_ticks = 5 + p -> talents.lethal_injectors -> rank();
+      base_cost                   = 20;
+      td.standardhealthpercentmin = 
+      td.standardhealthpercentmax = 0.04;
+      td.power_mod                = 0.4;
+      num_ticks                   = 5 + p -> talents.lethal_injectors -> rank();
 
       if ( p -> talents.lingering_toxins -> rank() )
         corrosive_dart_weak = new corrosive_dart_t( p, n + "_weak", options_str, true );
@@ -802,11 +783,13 @@ struct cull_t : public range_attack_t
     cull_extra_t( class_t* p, const std::string& n ) :
       tech_attack_t( n, p, SCHOOL_INTERNAL )
     {
-      dd.standardhealthpercentmin = dd.standardhealthpercentmax = 0.066;
-      dd.power_mod = 0.66;
-      dual = background = true;
-      trigger_gcd = timespan_t::zero();
-      base_multiplier += .03 * p -> talents.cut_down->rank();
+      dd.standardhealthpercentmin =  
+      dd.standardhealthpercentmax =  0.066;
+      dd.power_mod                =  0.66;
+      dual                        =
+      background                  = true;
+      trigger_gcd                 =  timespan_t::zero();
+      base_multiplier             += .03 * p -> talents.cut_down->rank();
     }
   };
 
@@ -820,15 +803,14 @@ struct cull_t : public range_attack_t
 
     parse_options( options_str );
 
-    base_cost = 25 - 3 * p -> talents.license_to_kill -> rank();
-    range = 10.0;
-
-    weapon = &( player->main_hand_weapon );
-    weapon_multiplier = -0.1;
-    dd.standardhealthpercentmin = dd.standardhealthpercentmax = 0.135;
-    dd.power_mod = 1.35;
-
-    base_multiplier += .03 * p -> talents.cut_down->rank();
+    base_cost                   =  25 - 3 * p -> talents.license_to_kill -> rank();
+    range                       =  10.0;
+    weapon                      =  &( player->main_hand_weapon );
+    weapon_multiplier           =  -0.1;
+    dd.standardhealthpercentmin =  
+    dd.standardhealthpercentmax =  0.135;
+    dd.power_mod                =  1.35;
+    base_multiplier             += .03 * p -> talents.cut_down->rank();
 
     add_child( extra_strike );
   }
@@ -870,19 +852,15 @@ struct overload_shot_t : public range_attack_t
 
     parse_options( options_str );
 
-    base_cost = 17;
-    range = 10.0;
-
-    dd.standardhealthpercentmin = dd.standardhealthpercentmax = 0.124;
-    dd.power_mod = 1.24;
-
-    weapon = &( player -> main_hand_weapon );
-    weapon_multiplier = -0.17;
-
-    // "Skirmisher" passive for operatives gives 15% boost to overload shot
-    base_multiplier += 0.15;
-    // TEST: additive or multiplicative
-    base_multiplier += .03 * p -> talents.cut_down->rank();
+    base_cost                   =  17;
+    range                       =  10.0;
+    dd.standardhealthpercentmin =
+    dd.standardhealthpercentmax = 0.124;
+    dd.power_mod                =  1.24;
+    weapon                      =  &( player -> main_hand_weapon );
+    weapon_multiplier           =  -0.17;
+    base_multiplier             += 0.15 // passive: skirmisher
+                                +  .03 * p -> talents.cut_down->rank();
   }
 };
 
@@ -899,11 +877,10 @@ struct stim_boost_t : public action_t
     parse_options( options_str );
 
     cooldown -> duration = from_seconds( 35 - p -> talents.combat_stims -> rank() * 7.5 );
-    use_off_gcd = true;
-    trigger_gcd = timespan_t::zero();
-
-    num_ticks = 15;
-    base_tick_time = from_seconds( 3 );
+    use_off_gcd          = true;
+    trigger_gcd          = timespan_t::zero();
+    num_ticks            = 15;
+    base_tick_time       = from_seconds( 3 );
   }
 
   virtual bool ready()
@@ -948,14 +925,13 @@ struct weakening_blast_t : public range_attack_t
 
     parse_options( options_str );
 
-    range = 10.0;
-    cooldown -> duration = from_seconds( 15 );
-
-    dd.standardhealthpercentmin = dd.standardhealthpercentmax = 0.087;
-    dd.power_mod = 0.87;
-
-    weapon = &( player -> main_hand_weapon );
-    weapon_multiplier = -0.42;
+    range                       = 10.0;
+    cooldown -> duration        = from_seconds( 15 );
+    dd.standardhealthpercentmin =
+    dd.standardhealthpercentmax = 0.087;
+    dd.power_mod                = 0.87;
+    weapon                      = &( player -> main_hand_weapon );
+    weapon_multiplier           = -0.42;
   }
 
   virtual void execute()
@@ -1131,45 +1107,23 @@ void class_t::init_abilities()
 {
   base_t::init_abilities();
 
-  //=======================================================================
-  //
-  //   Please Mirror all changes between Scoundrel and Operative!!!
-  //
-  //=======================================================================
-  if ( type == IA_OPERATIVE)
-  {
-    abilities.acid_blade = "acid_blade";
-    abilities.acid_blade_arpen ="acid_blade_arpen";
-    abilities.acid_blade_coating = "acid_blade_coating";
-    abilities.acid_blade_poison = "acid_blade_poison";
-    abilities.backstab = "backstab";
-    abilities.combat_stims = "combat_stims";
-    abilities.cull = "cull";
-    abilities.hidden_strike = "hidden_strike";
-    abilities.laceration = "laceration";
-    abilities.revitalizers = "revitalizers";
-    abilities.stealth = "stealth";
-    abilities.stim_boost = "stim_boost";
-    abilities.tactical_advantage = "tactical_advantage";
-    abilities.weakening_blast = "weakening_blast";
-  }
-  else
-  {
-    abilities.acid_blade = "flechette_round";
-    abilities.acid_blade_arpen = "flechette_round_arpen";
-    abilities.acid_blade_coating = "flechette_round_coating";
-    abilities.acid_blade_poison = "flechette_round_poison";
-    abilities.backstab = "back_blast";
-    abilities.combat_stims = "street_tough";
-    abilities.cull = "wounding_shot";
-    abilities.hidden_strike =  "shoot_first";
-    abilities.laceration = "sucker_punch";
-    abilities.revitalizers = "surprise_comeback";
-    abilities.stealth = "stealth";
-    abilities.stim_boost = "pugnacity";
-    abilities.tactical_advantage = "upper_hand";
-    abilities.weakening_blast = "hemorrhaging_blast";
-  }
+  bool op = type == IA_OPERATIVE;
+
+  // ABILITY                   =    ? OPERATIVE LABEL      : SCOUNDREL LABEL           ;
+  abilities.acid_blade         = op ? "acid_blade"         : "flechette_round"         ; 
+  abilities.acid_blade_arpen   = op ? "acid_blade_arpen"   : "flechette_round_arpen"   ; 
+  abilities.acid_blade_coating = op ? "acid_blade_coating" : "flechette_round_coating" ; 
+  abilities.acid_blade_poison  = op ? "acid_blade_poison"  : "flechette_round_poison"  ; 
+  abilities.backstab           = op ? "backstab"           : "back_blast"              ; 
+  abilities.combat_stims       = op ? "combat_stims"       : "street_tough"            ; 
+  abilities.cull               = op ? "cull"               : "wounding_shot"           ; 
+  abilities.hidden_strike      = op ? "hidden_strike"      : "shoot_first"             ; 
+  abilities.laceration         = op ? "laceration"         : "sucker_punch"            ; 
+  abilities.revitalizers       = op ? "revitalizers"       : "surprise_comeback"       ; 
+  abilities.stealth            = op ? "stealth"            : "stealth"                 ; 
+  abilities.stim_boost         = op ? "stim_boost"         : "pugnacity"               ; 
+  abilities.tactical_advantage = op ? "tactical_advantage" : "upper_hand"              ; 
+  abilities.weakening_blast    = op ? "weakening_blast"    : "hemorrhaging_blast"      ; 
 }
 
 // class_t::init_talents ======================================
@@ -1248,7 +1202,7 @@ void class_t::init_benefits()
   base_t::init_benefits();
 
   benefits.devouring_microbes_ticks = get_benefit( "Poison ticks with Devouring Microbes" );
-  benefits.wb_poison_ticks = get_benefit( "Poison ticks with Weakening Blast" );
+  benefits.wb_poison_ticks          = get_benefit( "Poison ticks with Weakening Blast" );
 }
 
 // class_t::init_buffs ========================================
@@ -1468,24 +1422,25 @@ void class_t::create_talents()
 
   // Medicine
   static const talentinfo_t medicine_tree[] = {
-    { "Incisive Action", 2 }, { "Precision Instruments", 2 }, { "Imperial Education", 3 },
-    { "Endorphin Rush", 2 }, { "Medical Consult", 3 }, { "Surgical Steadiness", 2 }, { "Chem-resistant Inlays", 2 },
-    { "Prognosis Critical", 2 }, { "Kolto Probe", 1 }, { "Sedatives", 2 },
-    { "Patient Studies", 2 }, { "Medical Engineering", 3 }, { "Evasive Imperative", 2 },
-    { "Tox Scan", 1 }, { "Medical Therapy", 2 }, { "Surgical Probe", 1 }, { "Surgical Precision", 1 },
-    { "Med Shield", 2 }, { "Accomplished Doctor", 3 },
-    { "Recuperative Nanotech", 1 },
+     { "Incisive Action"       , 2 }, { "Precision Instruments" , 2 }, { "Imperial Education"  , 3 },
+     { "Endorphin Rush"        , 2 }, { "Medical Consult"       , 3 }, { "Surgical Steadiness" , 2 }, { "Chem-resistant Inlays" , 2 },
+     { "Prognosis Critical"    , 2 }, { "Kolto Probe"           , 1 }, { "Sedatives"           , 2 },
+     { "Patient Studies"       , 2 }, { "Medical Engineering"   , 3 }, { "Evasive Imperative"  , 2 },
+     { "Tox Scan"              , 1 }, { "Medical Therapy"       , 2 }, { "Surgical Probe"      , 1 }, { "Surgical Precision"    , 1 },
+     { "Med Shield"            , 2 }, { "Accomplished Doctor"   , 3 },
+     { "Recuperative Nanotech" , 1 },
   };
   init_talent_tree( IA_OPERATIVE_MEDICINE, medicine_tree );
 
   // Concealment
   static const talentinfo_t concealment_tree[] = {
-    { "Concealed Attacks", 2 }, { "Imperial Brew", 3 }, { "Survival Training", 3 },
-    { "Infiltrator", 3 }, { "Surgical Strikes", 2 }, { "Inclement Conditioning", 2 }, { "Scouting", 2 },
-    { "Flanking", 1 }, { "Laceration", 1 }, { "Collateral Strike", 2 }, { "Revitalizers", 1 },
-    { "Pin Down", 2 }, { "Tactical Opportunity", 2 }, { "Energy Screen", 1 },
-    { "Waylay", 1 }, { "Culling", 2 }, { "Advanced Cloaking", 2 },
-    { "Meticulously Kept Blades", 3 }, { "Jarring Strike", 2 }, { "Acid Blade", 1 },
+     { "Concealed Attacks"        , 2 },  { "Imperial Brew"        , 3 },  { "Survival Training"      , 3 },
+     { "Infiltrator"              , 3 },  { "Surgical Strikes"     , 2 },  { "Inclement Conditioning" , 2 },  { "Scouting"     , 2 },
+     { "Flanking"                 , 1 },  { "Laceration"           , 1 },  { "Collateral Strike"      , 2 },  { "Revitalizers" , 1 },
+     { "Pin Down"                 , 2 },  { "Tactical Opportunity" , 2 },  { "Energy Screen"          , 1 },
+     { "Waylay"                   , 1 },  { "Culling"              , 2 },  { "Advanced Cloaking"      , 2 },
+     { "Meticulously Kept Blades" , 3 },  { "Jarring Strike"       , 2 },
+     { "Acid Blade"               , 1 },
   };
   init_talent_tree( IA_OPERATIVE_CONCEALMENT , concealment_tree );
 }
