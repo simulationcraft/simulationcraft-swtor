@@ -170,12 +170,8 @@ public:
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   agent_smug::targetdata_t( source, target )
 {
-  bool is_sn = ( source.type == IA_SNIPER );
-  const char* interrogation_probe = is_sn ? "interrogation_probe" : "shock_charge" ;
-  const char* series_of_shots     = is_sn ? "series_of_shots"     : "speed_shot"   ;
-
-  dot_interrogation_probe = dot_t ( interrogation_probe, &source );
-  dot_series_of_shots     = dot_t ( series_of_shots,     &source );
+  dot_interrogation_probe = dot_t ( source.abilities.interrogation_probe, &source );
+  dot_series_of_shots     = dot_t ( source.abilities.series_of_shots,     &source );
 
   add( dot_interrogation_probe );
   add( dot_series_of_shots     );
