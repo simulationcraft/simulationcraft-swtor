@@ -11,13 +11,7 @@ class class_t;
 
 struct targetdata_t : public agent_smug::targetdata_t
 {
-  buff_t* debuff_weakening_blast;
-
   dot_t dot_acid_blade_poison;
-  dot_t dot_corrosive_dart;
-  dot_t dot_corrosive_dart_weak;
-  dot_t dot_corrosive_grenade;
-  dot_t dot_corrosive_grenade_weak;
   dot_t dot_stim_boost;
 
   targetdata_t( class_t& source, player_t& target );
@@ -70,7 +64,6 @@ struct class_t : public agent_smug::class_t
   // Benefits
   struct benefits_t:base_t::benefits_t
   {
-    benefit_t* wb_poison_ticks;
   } benefits;
 
   // Cooldowns
@@ -156,7 +149,6 @@ struct class_t : public agent_smug::class_t
     std::string stealth;
     std::string stim_boost;
     std::string tactical_advantage;
-    std::string weakening_blast;
   } abilities;
 
   action_t* acid_blade_poison;
@@ -199,28 +191,10 @@ struct class_t : public agent_smug::class_t
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   agent_smug::targetdata_t( source, target )
 {
-  bool is_op = ( source.type == IA_OPERATIVE );
-  const char* weakening_blast        = is_op ? "weakening_blast"        : "hemorrhaging_blast" ; 
-  const char* corrosive_dart_weak    = is_op ? "corrosive_dart_weak"    : "vital_shot_weak"    ;
-  const char* corrosive_grenade      = is_op ? "corrosive_grenade"      : "shrap_bomb"         ; 
-  const char* corrosive_grenade_weak = is_op ? "corrosive_grenade_weak" : "shrap_bomb_weak"    ; 
-  const char* stim_boost             = is_op ? "stim_boost"             : "pugnacity"          ; 
+  dot_acid_blade_poison      = dot_t ( source.abilities.acid_blade_poison      , &source );
+  dot_stim_boost             = dot_t ( source.abilities.stim_boost             , &source );
 
-  debuff_weakening_blast     = new buff_t ( this, weakening_blast, 10, from_seconds (  15 ) ); 
-
-  dot_acid_blade_poison      = dot_t ( source.abilities.acid_blade_poison , &source ); 
-  dot_corrosive_dart         = dot_t ( source.abilities.corrosive_dart    , &source ); 
-  dot_corrosive_dart_weak    = dot_t ( corrosive_dart_weak                , &source ); 
-  dot_corrosive_grenade      = dot_t ( corrosive_grenade                  , &source ); 
-  dot_corrosive_grenade_weak = dot_t ( corrosive_grenade_weak             , &source ); 
-  dot_stim_boost             = dot_t ( stim_boost                         , &source ); 
-
-  add( *debuff_weakening_blast    );
   add( dot_acid_blade_poison      );
-  add( dot_corrosive_dart         );
-  add( dot_corrosive_dart_weak    );
-  add( dot_corrosive_grenade      );
-  add( dot_corrosive_grenade_weak );
   add( dot_stim_boost             );
 }
 
@@ -908,35 +882,6 @@ struct stim_boost_t : public action_t
   }
 };
 
-// Weakening Blast | ??? ====================================================
-
-struct weakening_blast_t : public range_attack_t
-{
-  weakening_blast_t( class_t* p, const std::string& n, const std::string& options_str) :
-    range_attack_t( n, p )
-  {
-    check_talent( p -> talents.weakening_blast -> rank() );
-
-    parse_options( options_str );
-
-    range                       = 10.0;
-    cooldown -> duration        = from_seconds( 15 );
-    dd.standardhealthpercentmin =
-    dd.standardhealthpercentmax = 0.087;
-    dd.power_mod                = 0.87;
-    weapon                      = &( player -> main_hand_weapon );
-    weapon_multiplier           = -0.42;
-  }
-
-  virtual void execute()
-  {
-    range_attack_t::execute();
-
-    if ( result_is_hit() )
-      targetdata() -> debuff_weakening_blast -> trigger( 10 );
-  }
-};
-
 // Cloaking Screen | ??? ====================================================
 // "vanish" allows reusing hidden strike.
 
@@ -1015,7 +960,6 @@ struct poison_tick_crit_callback_t : public action_callback_t
   if ( name == abilities.shiv                  ) return new shiv_t                  ( this, name, options_str ) ;
   if ( name == abilities.stealth               ) return new stealth_t               ( this, name, options_str ) ;
   if ( name == abilities.stim_boost            ) return new stim_boost_t            ( this, name, options_str ) ;
-  if ( name == abilities.weakening_blast       ) return new weakening_blast_t       ( this, name, options_str ) ;
 
   return base_t::create_action( name, options_str );
 }
@@ -1042,7 +986,6 @@ void class_t::init_abilities()
   abilities.stealth            = op ? "stealth"            : "stealth"                 ; 
   abilities.stim_boost         = op ? "stim_boost"         : "pugnacity"               ; 
   abilities.tactical_advantage = op ? "tactical_advantage" : "upper_hand"              ; 
-  abilities.weakening_blast    = op ? "weakening_blast"    : "hemorrhaging_blast"      ; 
 }
 
 // class_t::init_talents ======================================
@@ -1119,9 +1062,6 @@ void class_t::init_base()
 void class_t::init_benefits()
 {
   base_t::init_benefits();
-
-  benefits.devouring_microbes_ticks = get_benefit( "Poison ticks with Devouring Microbes" );
-  benefits.wb_poison_ticks          = get_benefit( "Poison ticks with Weakening Blast" );
 }
 
 // class_t::init_buffs ========================================

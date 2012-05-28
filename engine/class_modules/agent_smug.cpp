@@ -10,11 +10,22 @@ namespace agent_smug { // ===================================================
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   ::targetdata_t( source, target )
 {
-  dot_adrenaline_probe = dot_t( source.abilities.adrenaline_probe, &source );
-  dot_orbital_strike = dot_t( source.abilities.orbital_strike, &source );
+  debuff_weakening_blast     = new buff_t ( this, source.abilities.weakening_blast, 10, from_seconds (  15 ) );
 
-  add( dot_adrenaline_probe );
-  add( dot_orbital_strike );
+  dot_adrenaline_probe       = dot_t ( source.abilities.adrenaline_probe       , &source );
+  dot_corrosive_dart         = dot_t ( source.abilities.corrosive_dart         , &source );
+  dot_corrosive_dart_weak    = dot_t ( source.abilities.corrosive_dart_weak    , &source );
+  dot_corrosive_grenade      = dot_t ( source.abilities.corrosive_grenade      , &source );
+  dot_corrosive_grenade_weak = dot_t ( source.abilities.corrosive_grenade_weak , &source );
+  dot_orbital_strike         = dot_t ( source.abilities.orbital_strike         , &source );
+
+  add( *debuff_weakening_blast    );
+  add( dot_adrenaline_probe       );
+  add( dot_corrosive_dart         );
+  add( dot_corrosive_dart_weak    );
+  add( dot_corrosive_grenade      );
+  add( dot_corrosive_grenade_weak );
+  add( dot_orbital_strike         );
 }
 
 // ==========================================================================
@@ -60,6 +71,7 @@ struct adrenaline_probe_t : public action_t
 };
 
 // Coordination | Lucky Shots ===============================================
+
 struct coordination_t : public action_t
 {
   coordination_t( class_t* p, const std::string& n, const std::string& options_str ) :
@@ -90,6 +102,7 @@ struct coordination_t : public action_t
 };
 
 // Explosive Probe | Sabotage Charge ========================================
+
 struct explosive_probe_t : public tech_attack_t
 {
   typedef tech_attack_t base_t;
@@ -120,6 +133,7 @@ struct explosive_probe_t : public tech_attack_t
 };
 
 // Orbital Strike | XS Freighter Flyby ======================================
+
 struct orbital_strike_t : public tech_attack_t
 {
   orbital_strike_t( class_t* p, const std::string& n, const std::string& options_str) :
@@ -142,6 +156,7 @@ struct orbital_strike_t : public tech_attack_t
 };
 
 // Rifle Shot | Flurry Of Bolts =========================================================
+
 struct rifle_shot_t : public range_attack_t
 {
   rifle_shot_t* second_strike;
@@ -198,9 +213,8 @@ struct rifle_shot_t : public range_attack_t
   }
 };
 
-
-
 // Snipe | Charged Burst ====================================================
+
 struct snipe_t : public range_attack_t
 {
   typedef range_attack_t base_t;
@@ -230,6 +244,7 @@ struct snipe_t : public range_attack_t
 };
 
 // Take Cover | Take Cover ==================================================
+
 struct take_cover_t : public action_t
 {
   typedef action_t base_t;
@@ -253,6 +268,34 @@ struct take_cover_t : public action_t
   }
 };
 
+// Weakening Blast | Hemorrhaging Blast =================================================
+
+struct weakening_blast_t : public range_attack_t
+{
+  weakening_blast_t( class_t* p, const std::string& n, const std::string& options_str) :
+    range_attack_t( n, p )
+  {
+    check_talent( p -> talents.weakening_blast -> rank() );
+
+    parse_options( options_str );
+
+    range                       = 10.0;
+    cooldown -> duration        = from_seconds( 15 );
+    dd.standardhealthpercentmin =
+    dd.standardhealthpercentmax = 0.087;
+    dd.power_mod                = 0.87;
+    weapon                      = &( player -> main_hand_weapon );
+    weapon_multiplier           = -0.42;
+  }
+
+  virtual void execute()
+  {
+    range_attack_t::execute();
+
+    if ( result_is_hit() )
+      targetdata() -> debuff_weakening_blast -> trigger( 10 );
+  }
+};
 
 // ==========================================================================
 // Smuggler / Agent Callbacks
@@ -301,7 +344,7 @@ struct poison_tick_crit_callback_t : public action_callback_t
   if ( name == abilities.rifle_shot       ) return new rifle_shot_t       ( this, name, options_str ) ;
   if ( name == abilities.snipe            ) return new snipe_t            ( this, name, options_str ) ;
   if ( name == abilities.take_cover       ) return new take_cover_t       ( this, name, options_str ) ;
-
+  if ( name == abilities.weakening_blast  ) return new weakening_blast_t  ( this, name, options_str ) ;
 
   return base_t::create_action( name, options_str );
 }
@@ -317,23 +360,28 @@ void class_t::init_abilities()
   //=======================================================================
   bool ag = type == IA_SNIPER || type == IA_OPERATIVE;
 
-  // ABILITY                      =    ? AGENT LABEL             : SMUGGLER LABEL       ;
-  abilities.adrenaline_probe      = ag ? "adrenaline_probe"      : "cool_head"          ;
-  abilities.coordination          = ag ? "coordination"          : "lucky_shots"        ;
-  abilities.corrosive_dart        = ag ? "corrosive_dart"        : "vital_shot"         ;
-  abilities.corrosive_grenade     = ag ? "corrosive_grenade"     : "shrap_bomb"         ;
-  abilities.explosive_probe       = ag ? "explosive_probe"       : "sabotage_charge"    ;
-  abilities.fragmentation_grenade = ag ? "fragmentation_grenade" : "thermal_grenade"    ;
-  abilities.lethal_purpose        = ag ? "lethal_purpose"        : "fighting_spirit"    ;
-  abilities.orbital_strike        = ag ? "orbital_strike"        : "xs_freighter_flyby" ;
-  abilities.overload_shot         = ag ? "overload_shot"         : "quick_shot"         ;
-  abilities.rifle_shot            = ag ? "rifle_shot"            : "flurry_of_bolts"    ;
-  abilities.shiv                  = ag ? "shiv"                  : "blaster_whip"       ;
-  abilities.snipe                 = ag ? "snipe"                 : "charged_burst"      ;
-  abilities.take_cover            = ag ? "take_cover"            : "take_cover"         ;
+  // ABILITY                        =    ? AGENT LABEL              : SMUGGLER LABEL       ;
+  abilities.adrenaline_probe        = ag ? "adrenaline_probe"       : "cool_head"          ;
+  abilities.coordination            = ag ? "coordination"           : "lucky_shots"        ;
+  abilities.corrosive_dart          = ag ? "corrosive_dart"         : "vital_shot"         ;
+  abilities.corrosive_dart_weak     = ag ? "corrosive_dart_weak"    : "vital_shot_weak"    ;
+  abilities.corrosive_grenade       = ag ? "corrosive_grenade"      : "shrap_bomb"         ;
+  abilities.corrosive_grenade_weak  = ag ? "corrosive_grenade_weak" : "shrap_bomb_weak"    ;
+  abilities.corrosive_microbes      = ag ? "corrosive_microbes"     : "mortal_wounds"      ;
+  abilities.corrosive_microbes_tick = ag ? "corrosive_microbes_tick": "mortal_wounds_tick" ;
+  abilities.explosive_probe         = ag ? "explosive_probe"        : "sabotage_charge"    ;
+  abilities.fragmentation_grenade   = ag ? "fragmentation_grenade"  : "thermal_grenade"    ;
+  abilities.lethal_purpose          = ag ? "lethal_purpose"         : "fighting_spirit"    ;
+  abilities.orbital_strike          = ag ? "orbital_strike"         : "xs_freighter_flyby" ;
+  abilities.overload_shot           = ag ? "overload_shot"          : "quick_shot"         ;
+  abilities.rifle_shot              = ag ? "rifle_shot"             : "flurry_of_bolts"    ;
+  abilities.shiv                    = ag ? "shiv"                   : "blaster_whip"       ;
+  abilities.snipe                   = ag ? "snipe"                  : "charged_burst"      ;
+  abilities.take_cover              = ag ? "take_cover"             : "take_cover"         ;
+  abilities.weakening_blast         = ag ? "weakening_blast"        : "hemorrhaging_blast" ;
 
   // buffs
-  abilities.cover                 = ag ? "cover"                 : "cover"              ;
+  abilities.cover                   = ag ? "cover"                  : "cover"              ;
 }
 
 // class_t::init_talents =======================================
@@ -370,6 +418,16 @@ void class_t::init_talents()
   talents.lingering_toxins                    = find_talent( "Lingering Toxins"    );
   // t7
   talents.weakening_blast                     = find_talent( "Weakening Blast"     );
+}
+
+// class_t::init_benefits =====================================
+
+void class_t::init_benefits()
+{
+  base_t::init_benefits();
+
+  benefits.devouring_microbes_ticks = get_benefit( "Poison ticks with Devouring Microbes" );
+  benefits.wb_poison_ticks          = get_benefit( "Poison ticks with Weakening Blast" );
 }
 
 // class_t::init_buffs ===========================================

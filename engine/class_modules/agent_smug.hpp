@@ -40,6 +40,7 @@ public:
   struct benefits_t
   {
     benefit_t* devouring_microbes_ticks;
+    benefit_t* wb_poison_ticks;
   };
   benefits_t& benefits;
 
@@ -81,7 +82,11 @@ public:
     std::string adrenaline_probe;
     std::string coordination;
     std::string corrosive_dart;
+    std::string corrosive_dart_weak;
     std::string corrosive_grenade;
+    std::string corrosive_grenade_weak;
+    std::string corrosive_microbes;
+    std::string corrosive_microbes_tick;
     std::string explosive_probe;
     std::string fragmentation_grenade;
     std::string lethal_purpose;
@@ -91,6 +96,7 @@ public:
     std::string shiv;
     std::string snipe;
     std::string take_cover;
+    std::string weakening_blast;
 
     // buff names
     std::string cover;
@@ -166,6 +172,8 @@ public:
 
   virtual void init_talents();
 
+  virtual void init_benefits();
+
   virtual void init_buffs();
 
   virtual void init_actions();
@@ -178,7 +186,13 @@ public:
 class targetdata_t : public ::targetdata_t
 {
 public:
+  buff_t* debuff_weakening_blast;
+
   dot_t dot_adrenaline_probe;
+  dot_t dot_corrosive_dart;
+  dot_t dot_corrosive_dart_weak;
+  dot_t dot_corrosive_grenade;
+  dot_t dot_corrosive_grenade_weak;
   dot_t dot_orbital_strike;
 
   targetdata_t( class_t& source, player_t& target );
@@ -195,9 +209,7 @@ public:
     harmful = false;
   }
 
-  targetdata_t* targetdata() const
-  { return static_cast<targetdata_t*>( base_t::targetdata() ); }
-
+  targetdata_t* targetdata() const { return static_cast<targetdata_t*>( base_t::targetdata() ); }
   class_t* p() const { return static_cast<class_t*>( player ); }
   class_t* cast() const { return p(); }
 };
@@ -226,6 +238,43 @@ struct range_attack_t : public attack_t
   range_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_ENERGY ) :
     attack_t( n, p, range_policy, s )
   {
+  }
+};
+
+struct poison_attack_t : public tech_attack_t
+{
+  poison_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_INTERNAL ) :
+    tech_attack_t( n, p, s )
+  {
+    may_crit       =  false;
+    base_crit     += .04 * p -> talents.lethal_dose -> rank();
+  }
+
+  void target_debuff( player_t* tgt, dmg_type type )
+  {
+    tech_attack_t::target_debuff( tgt, type );
+
+    class_t& p = *cast();
+
+    if ( unsigned rank = p.talents.devouring_microbes -> rank() )
+    {
+      bool up = tgt -> health_percentage() < 30;
+      p.benefits.devouring_microbes_ticks -> update( up );
+      if ( up )
+        target_multiplier += 0.05 * rank;
+    }
+
+    if ( p.talents.weakening_blast -> rank() )
+    {
+      targetdata_t& td = *targetdata();
+      bool up = td.debuff_weakening_blast -> up();
+      p.benefits.wb_poison_ticks -> update( up );
+      if ( up )
+      {
+        td.debuff_weakening_blast -> decrement();
+        target_multiplier += 0.3;
+      }
+    }
   }
 };
 
