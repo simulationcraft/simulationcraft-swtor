@@ -114,25 +114,32 @@ struct class_t : public agent_smug::class_t
     talent_t* recuperative_nanotech;
 
     // Concealment|Scrapper
+    // t1
     talent_t* concealed_attacks;
     talent_t* imperial_brew;
     talent_t* survival_training;
+    // t2
     talent_t* infiltrator;
     talent_t* surgical_strikes;
     talent_t* inclement_conditioning;
     talent_t* scouting;
+    // t3
     talent_t* flanking;
     talent_t* laceration;
     talent_t* collateral_strike;
     talent_t* revitalizers;
+    // t4
     talent_t* pin_down;
     talent_t* tactical_opportunity;
     talent_t* energy_screen;
+    // t5
     talent_t* waylay;
     talent_t* culling;
     talent_t* advanced_cloaking;
+    // t6
     talent_t* meticulously_kept_blades;
     talent_t* jarring_strike;
+    // t7
     talent_t* acid_blade;
   } talents;
 
@@ -163,7 +170,7 @@ struct class_t : public agent_smug::class_t
   {
     tree_type[ IA_OPERATIVE_MEDICINE    ] = TREE_MEDICINE;
     tree_type[ IA_OPERATIVE_CONCEALMENT ] = TREE_CONCEALMENT;
-    tree_type[ IA_LETHALITY   ]           = TREE_LETHALITY;
+    tree_type[ IA_LETHALITY             ] = TREE_LETHALITY;
 
     create_talents();
     create_options();
@@ -174,27 +181,21 @@ struct class_t : public agent_smug::class_t
   { return new targetdata_t( *this, target ); }
 
   ::action_t* create_action( const std::string& name, const std::string& options );
-  void    init_talents();
-  void    init_abilities();
-  void    init_base();
-  void    init_benefits();
-  void    init_buffs();
-  void    init_gains();
-  void    init_procs();
-  void    init_rng();
-  void    init_actions();
-  void    reset();
-
-  double  armor_penetration() const; // override
-
-  double  energy_regen_per_second() const; // override
-
-  double  composite_player_multiplier(school_type school, ::action_t *a) const;
-
-
-
+  void      init_talents();
+  void      init_abilities();
+  void      init_base();
+  void      init_benefits();
+  void      init_buffs();
+  void      init_gains();
+  void      init_procs();
+  void      init_rng();
+  void      init_actions();
+  void      reset();
+  double    armor_penetration() const;
+  double    energy_regen_per_second() const;
+  double    composite_player_multiplier(school_type school, ::action_t *a) const;
+  void      create_talents();
   role_type primary_role() const;
-  void create_talents();
 };
 
 
@@ -202,30 +203,30 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   agent_smug::targetdata_t( source, target )
 {
   bool is_op = ( source.type == IA_OPERATIVE );
-  const char* weakening_blast        = is_op ? "weakening_blast"        : "hemorrhaging_blast"     ; 
-  const char* corrosive_dart_weak    = is_op ? "corrosive_dart_weak"    : "vital_shot_weak"        ;
-  const char* corrosive_grenade      = is_op ? "corrosive_grenade"      : "shrap_bomb"             ; 
-  const char* corrosive_grenade_weak = is_op ? "corrosive_grenade_weak" : "shrap_bomb_weak"        ; 
-  const char* stim_boost             = is_op ? "stim_boost"             : "pugnacity"              ; 
+  const char* weakening_blast        = is_op ? "weakening_blast"        : "hemorrhaging_blast" ; 
+  const char* corrosive_dart_weak    = is_op ? "corrosive_dart_weak"    : "vital_shot_weak"    ;
+  const char* corrosive_grenade      = is_op ? "corrosive_grenade"      : "shrap_bomb"         ; 
+  const char* corrosive_grenade_weak = is_op ? "corrosive_grenade_weak" : "shrap_bomb_weak"    ; 
+  const char* stim_boost             = is_op ? "stim_boost"             : "pugnacity"          ; 
 
   debuff_weakening_blast     = new buff_t ( this, weakening_blast, 10, from_seconds (  15 ) ); 
 
-  dot_acid_blade_poison      = dot_t      ( source.abilities.acid_blade_poison, &source              );
-  dot_corrosive_dart         = dot_t      ( source.abilities.corrosive_dart, &source                 );
-  dot_corrosive_dart_weak    = dot_t      ( corrosive_dart_weak, &source            ); 
-  dot_corrosive_grenade      = dot_t      ( corrosive_grenade, &source              ); 
-  dot_corrosive_grenade_weak = dot_t      ( corrosive_grenade_weak, &source         ); 
-  dot_orbital_strike         = dot_t      ( source.abilities.orbital_strike, &source                 );
-  dot_stim_boost             = dot_t      ( stim_boost, &source                     ); 
+  dot_acid_blade_poison      = dot_t ( source.abilities.acid_blade_poison , &source ); 
+  dot_corrosive_dart         = dot_t ( source.abilities.corrosive_dart    , &source ); 
+  dot_corrosive_dart_weak    = dot_t ( corrosive_dart_weak                , &source ); 
+  dot_corrosive_grenade      = dot_t ( corrosive_grenade                  , &source ); 
+  dot_corrosive_grenade_weak = dot_t ( corrosive_grenade_weak             , &source ); 
+  dot_orbital_strike         = dot_t ( source.abilities.orbital_strike    , &source ); 
+  dot_stim_boost             = dot_t ( stim_boost                         , &source ); 
 
-  add( *debuff_weakening_blast    ) ;
-  add( dot_acid_blade_poison      ) ;
-  add( dot_corrosive_dart         ) ;
-  add( dot_corrosive_dart_weak    ) ;
-  add( dot_corrosive_grenade      ) ;
-  add( dot_corrosive_grenade_weak ) ;
-  add( dot_orbital_strike         ) ;
-  add( dot_stim_boost             ) ;
+  add( *debuff_weakening_blast    );
+  add( dot_acid_blade_poison      );
+  add( dot_corrosive_dart         );
+  add( dot_corrosive_dart_weak    );
+  add( dot_corrosive_grenade      );
+  add( dot_corrosive_grenade_weak );
+  add( dot_orbital_strike         );
+  add( dot_stim_boost             );
 }
 
 class action_t : public ::action_t
