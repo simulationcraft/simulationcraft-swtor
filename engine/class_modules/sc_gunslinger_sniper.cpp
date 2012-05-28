@@ -209,19 +209,11 @@ void class_t::init_abilities()
 {
   base_t::init_abilities();
 
-  //=======================================================================
-  //
-  //   Please Mirror all changes between Gunslinger and Sniper!!!
-  //
-  //=======================================================================
-  if ( type == IA_SNIPER)
-  {
-    abilities.ambush = "ambush";
-  }
-  else
-  {
-    abilities.ambush = "aimed_shot";
-  }
+  bool sn = type == IA_SNIPER;
+
+  //               =    ? SNIPER LABEL : GUNSLINGER LABEL ; 
+  abilities.ambush = sn ? "ambush"     : "aimed_shot"     ; 
+
 }
 
 // class_t::init_talents ========================================
@@ -368,25 +360,25 @@ void class_t::create_talents()
 
   // Marksmanship|Sharpshooter
   static const talentinfo_t marksmanship_tree[] = {
-    { "Cover Screen", 2 }, { "Steady Shots", 2 }, { "Marksmanship", 3 },
-    { "Heavy Shot", 1 }, { "Ballistic Dampers", 2 }, { "Precision Ambush", 2}, { "Imperial Demarcation", 2 },
-    { "Snap Shot", 2 }, { "Diversion", 1 }, { "Reactive Shot", 2 },
-    { "Between the Eyes", 2 }, { "Sector Ranger", 1 }, { "Sniper Volley", 3 }, { "Sniper's Nest", 1},
-    { "Recoil Control", 2 }, { "Followthrough", 1 }, { "Pillbox Sniper", 2 },
-    { "Imperial Assassin", 3 }, { "Siege Bunker", 2},
-    { "Rapid Fire", 1 }
+     { "Cover Screen"      , 2 }, { "Steady Shots"      , 2 }, { "Marksmanship"     , 3 },
+     { "Heavy Shot"        , 1 }, { "Ballistic Dampers" , 2 }, { "Precision Ambush" , 2 }, { "Imperial Demarcation" , 2 },
+     { "Snap Shot"         , 2 }, { "Diversion"         , 1 }, { "Reactive Shot"    , 2 },
+     { "Between the Eyes"  , 2 }, { "Sector Ranger"     , 1 }, { "Sniper Volley"    , 3 }, { "Sniper's Nest"        , 1 },
+     { "Recoil Control"    , 2 }, { "Followthrough"     , 1 }, { "Pillbox Sniper"   , 2 },
+     { "Imperial Assassin" , 3 }, { "Siege Bunker"      , 2 },
+     { "Rapid Fire"        , 1 }
   };
   init_talent_tree( IA_SNIPER_MARKSMANSHIP, marksmanship_tree );
 
   // Engineering|Saboteur
   static const talentinfo_t engineering_tree[] = {
-    { "Engineer's Tool Belt", 2 }, { "Energy Tanks", 2 }, { "Gearhead", 3 },
-    { "Explosive Engineering", 3 }, { "Vital Regulators", 2 }, { "Stroke of Genius", 2 }, { "Vitality Serum", 2},
-    { "Cluster Bombs", 2 }, { "Efficient Engineering", 2 }, { "Interrogation Probe", 1 }, { "Inventive Interrogation Techniques", 2},
-    { "Imperial Methodology", 1 }, { "Calculated Pursuit", 2 }, { "Experimental Explosives", 2 },
-    { "Energy Overrides", 2 }, { "EMP Discharge", 1 }, { "Augmented Shields", 2},
-    { "Deployed Shields", 2 }, { "Electrified Railgun", 3},
-    { "Plasma Probe", 1 }
+     { "Engineer's Tool Belt"  , 2 }, { "Energy Tanks"          , 2 }, { "Gearhead"                , 3 },
+     { "Explosive Engineering" , 3 }, { "Vital Regulators"      , 2 }, { "Stroke of Genius"        , 2 }, { "Vitality Serum"                     , 2 },
+     { "Cluster Bombs"         , 2 }, { "Efficient Engineering" , 2 }, { "Interrogation Probe"     , 1 }, { "Inventive Interrogation Techniques" , 2 },
+     { "Imperial Methodology"  , 1 }, { "Calculated Pursuit"    , 2 }, { "Experimental Explosives" , 2 },
+     { "Energy Overrides"      , 2 }, { "EMP Discharge"         , 1 }, { "Augmented Shields"       , 2 },
+     { "Deployed Shields"      , 2 }, { "Electrified Railgun"   , 3 },
+     { "Plasma Probe"          , 1 }
   };
   init_talent_tree( IA_SNIPER_ENGINEERING, engineering_tree );
 }
