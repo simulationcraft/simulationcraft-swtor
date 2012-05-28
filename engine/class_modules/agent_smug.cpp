@@ -10,9 +10,9 @@ namespace agent_smug { // ===================================================
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   ::targetdata_t( source, target )
 {
-  dot_adrenaline_probe       = dot_t      ( source.abilities.adrenaline_probe, &source               );
+  dot_adrenaline_probe = dot_t( source.abilities.adrenaline_probe, &source );
 
-  add( dot_adrenaline_probe       ) ;
+  add( dot_adrenaline_probe );
 }
 
 // ==========================================================================
@@ -152,34 +152,20 @@ void class_t::init_abilities()
   //   Please Mirror all changes between Smuggler and Agent!!!
   //
   //=======================================================================
-  if ( type == IA_SNIPER || type == IA_OPERATIVE )
-  {
-    abilities.adrenaline_probe = "adrenaline_probe";
-    abilities.coordination = "coordination";
-    abilities.corrosive_dart = "corrosive_dart";
-    abilities.corrosive_grenade = "corrosive_grenade";
-    abilities.explosive_probe = "explosive_probe";
-    abilities.fragmentation_grenade = "fragmentation_grenade";
-    abilities.lethal_purpose = "lethal_purpose";
-    abilities.orbital_strike = "orbital_strike";
-    abilities.overload_shot = "overload_shot";
-    abilities.rifle_shot = "rifle_shot";
-    abilities.shiv = "shiv";
-  }
-  else
-  {
-    abilities.adrenaline_probe = "cool_head";
-    abilities.coordination = "lucky_shots";
-    abilities.corrosive_dart = "vital_shot";
-    abilities.corrosive_grenade = "shrap_bomb";
-    abilities.explosive_probe = "sabotage_charge";
-    abilities.fragmentation_grenade = "thermal_grenade";
-    abilities.lethal_purpose = "fighting_spirit";
-    abilities.orbital_strike = "xs_freighter_flyby";
-    abilities.overload_shot = "quick_shot";
-    abilities.rifle_shot = "flurry_of_bolts";
-    abilities.shiv = "blaster_whip";
-  }
+  bool ag = type == IA_SNIPER || type == IA_OPERATIVE;
+
+  // ABILITY                      =    ? AGENT LABEL             : SMUGGLER LABEL       ;
+  abilities.adrenaline_probe      = ag ? "adrenaline_probe"      : "cool_head"          ;  
+  abilities.coordination          = ag ? "coordination"          : "lucky_shots"        ;  
+  abilities.corrosive_dart        = ag ? "corrosive_dart"        : "vital_shot"         ;  
+  abilities.corrosive_grenade     = ag ? "corrosive_grenade"     : "shrap_bomb"         ;  
+  abilities.explosive_probe       = ag ? "explosive_probe"       : "sabotage_charge"    ;  
+  abilities.fragmentation_grenade = ag ? "fragmentation_grenade" : "thermal_grenade"    ;  
+  abilities.lethal_purpose        = ag ? "lethal_purpose"        : "fighting_spirit"    ;  
+  abilities.orbital_strike        = ag ? "orbital_strike"        : "xs_freighter_flyby" ;  
+  abilities.overload_shot         = ag ? "overload_shot"         : "quick_shot"         ;  
+  abilities.rifle_shot            = ag ? "rifle_shot"            : "flurry_of_bolts"    ;  
+  abilities.shiv                  = ag ? "shiv"                  : "blaster_whip"       ;  
 }
 
 // class_t::init_talents =======================================
@@ -190,32 +176,32 @@ void class_t::init_talents()
 
   // Lethality|Dirty Fighting
   // t1
-  talents.deadly_directive                    = find_talent( "Deadly Directive"                   );
-  talents.lethality                           = find_talent( "Lethality"                          );
-  talents.razor_edge                          = find_talent( "Razor Edge"                         );
+  talents.deadly_directive                    = find_talent( "Deadly Directive"    );
+  talents.lethality                           = find_talent( "Lethality"           );
+  talents.razor_edge                          = find_talent( "Razor Edge"          );
   // t2
-  talents.slip_away                           = find_talent( "Slip Away"                          );
-  talents.flash_powder                        = find_talent( "Flash Powder"                       );
-  talents.corrosive_microbes                  = find_talent( "Corrosive Microbes"                 );
-  talents.lethal_injectors                    = find_talent( "Lethal Injectors"                   );
+  talents.slip_away                           = find_talent( "Slip Away"           );
+  talents.flash_powder                        = find_talent( "Flash Powder"        );
+  talents.corrosive_microbes                  = find_talent( "Corrosive Microbes"  );
+  talents.lethal_injectors                    = find_talent( "Lethal Injectors"    );
   // t3
-  talents.corrosive_grenade                   = find_talent( "Corrosive Grenade"                  );
-  talents.combat_stims                        = find_talent( "Combat Stims"                       );
-  talents.cut_down                            = find_talent( "Cut Down"                           );
+  talents.corrosive_grenade                   = find_talent( "Corrosive Grenade"   );
+  talents.combat_stims                        = find_talent( "Combat Stims"        );
+  talents.cut_down                            = find_talent( "Cut Down"            );
   // t4
-  talents.lethal_purpose                      = find_talent( "Lethal Purpose"                     );
-  talents.adhesive_corrosives                 = find_talent( "Adhesive Corrosives"                );
-  talents.escape_plan                         = find_talent( "Escape Plan"                        );
-  talents.lethal_dose                         = find_talent( "Lethal Dose"                        );
+  talents.lethal_purpose                      = find_talent( "Lethal Purpose"      );
+  talents.adhesive_corrosives                 = find_talent( "Adhesive Corrosives" );
+  talents.escape_plan                         = find_talent( "Escape Plan"         );
+  talents.lethal_dose                         = find_talent( "Lethal Dose"         );
   // t5
-  talents.cull                                = find_talent( "Cull"                               );
-  talents.license_to_kill                     = find_talent( "License to Kill"                    );
-  talents.counterstrike                       = find_talent( "Counterstrike"                      );
+  talents.cull                                = find_talent( "Cull"                );
+  talents.license_to_kill                     = find_talent( "License to Kill"     );
+  talents.counterstrike                       = find_talent( "Counterstrike"       );
   // t6
-  talents.devouring_microbes                  = find_talent( "Devouring Microbes"                 );
-  talents.lingering_toxins                    = find_talent( "Lingering Toxins"                   );
+  talents.devouring_microbes                  = find_talent( "Devouring Microbes"  );
+  talents.lingering_toxins                    = find_talent( "Lingering Toxins"    );
   // t7
-  talents.weakening_blast                     = find_talent( "Weakening Blast"                    );
+  talents.weakening_blast                     = find_talent( "Weakening Blast"     );
 }
 
 // class_t::init_buffs ===========================================
@@ -233,10 +219,10 @@ void class_t::init_gains()
 {
   base_t::init_gains();
 
-  energy_gains.minimum = get_gain( "min"  );
-  energy_gains.low     = get_gain( "low"  );
-  energy_gains.medium  = get_gain( "med"  );
-  energy_gains.high    = get_gain( "high" );
+  energy_gains.minimum   = get_gain( "min"  );
+  energy_gains.low       = get_gain( "low"  );
+  energy_gains.medium    = get_gain( "med"  );
+  energy_gains.high      = get_gain( "high" );
 
   gains.adrenaline_probe = get_gain( abilities.adrenaline_probe );
   gains.lethal_purpose   = get_gain( abilities.lethal_purpose );
@@ -257,12 +243,13 @@ void class_t::create_talents()
 {
   // Lethality|Dirty Fighting
   static const talentinfo_t lethality_tree[] = {
-    { "Deadly Directive", 2 }, { "Lethality", 3 }, { "Razor Edge", 2 },
-    { "Slip Away", 2 }, { "Flash Powder", 2 }, { "Corrosive Microbes", 2 }, { "Lethal Injectors", 1 },
-    { "Corrosive Grenade", 1 }, { "Combat Stims", 2 }, { "Cut Down", 2 },
-    { "Lethal Purpose", 2 }, { "Adhesive Corrosives", 2 }, { "Escape Plan", 2 }, { "Lethal Dose", 3 },
-    { "Cull", 1 }, { "License to Kill", 2 }, { "Counterstrike", 2 },
-    { "Devouring Microbes", 3 }, { "Lingering Toxins", 2 }, { "Weakening Blast", 1 },
+     { "Deadly Directive"   , 2 }, { "Lethality"           , 3 }, { "Razor Edge"         , 2 },
+     { "Slip Away"          , 2 }, { "Flash Powder"        , 2 }, { "Corrosive Microbes" , 2 }, { "Lethal Injectors" , 1 },
+     { "Corrosive Grenade"  , 1 }, { "Combat Stims"        , 2 }, { "Cut Down"           , 2 },
+     { "Lethal Purpose"     , 2 }, { "Adhesive Corrosives" , 2 }, { "Escape Plan"        , 2 }, { "Lethal Dose"      , 3 },
+     { "Cull"               , 1 }, { "License to Kill"     , 2 }, { "Counterstrike"      , 2 },
+     { "Devouring Microbes" , 3 }, { "Lingering Toxins"    , 2 },
+     { "Weakening Blast"    , 1 },
   };
   init_talent_tree( IA_LETHALITY, lethality_tree );
 }
