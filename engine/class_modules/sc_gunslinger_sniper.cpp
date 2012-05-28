@@ -21,6 +21,7 @@ public:
   targetdata_t( class_t& source, player_t& target );
 
   dot_t dot_interrogation_probe;
+  dot_t dot_series_of_shots;
 };
 
 class class_t : public agent_smug::class_t
@@ -133,6 +134,7 @@ public:
     std::string ambush;
     std::string followthrough;
     std::string interrogation_probe;
+    std::string series_of_shots;
   } abilities;
 
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
@@ -170,10 +172,13 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
 {
   bool is_sn = ( source.type == IA_SNIPER );
   const char* interrogation_probe = is_sn ? "interrogation_probe" : "shock_charge" ;
+  const char* series_of_shots     = is_sn ? "series_of_shots"     : "speed_shot"   ;
 
   dot_interrogation_probe = dot_t ( interrogation_probe, &source );
+  dot_series_of_shots     = dot_t ( series_of_shots,     &source );
 
   add( dot_interrogation_probe );
+  add( dot_series_of_shots     );
 
 }
 
@@ -241,6 +246,8 @@ struct followthrough_t : public agent_smug::range_attack_t
   followthrough_t( class_t* p, const std::string& n, const std::string& options_str) :
     range_attack_t( n, p )
   {
+    check_talent( p -> talents.followthrough -> rank() );
+
     // rank_level_list = { ... ,50 };
 
     parse_options( options_str );
@@ -272,7 +279,7 @@ struct interrogation_probe_t : public agent_smug::tech_attack_t
   interrogation_probe_t( class_t* p, const std::string& n, const std::string& options_str) :
     tech_attack_t( n, p, SCHOOL_ENERGY )
   {
-    check_talent( static_cast<class_t*>(p) -> talents.interrogation_probe -> rank() );
+    check_talent( p -> talents.interrogation_probe -> rank() );
 
     // rank_level_list = { ... ,50 };
 
@@ -290,6 +297,35 @@ struct interrogation_probe_t : public agent_smug::tech_attack_t
   }
 
   // not implemented: cooldown resets if ends prematurely (target dies, dispelled).
+};
+
+// Series of Shots | Speed Shot =============================================
+struct series_of_shots_t : public agent_smug::tech_attack_t
+{
+  typedef agent_smug::tech_attack_t base_t;
+
+  series_of_shots_t( class_t* p, const std::string& n, const std::string& options_str) :
+    tech_attack_t( n, p, SCHOOL_ENERGY )
+  {
+    // rank_level_list = { ... , 50 };
+
+    parse_options( options_str );
+
+    base_cost                   = 20;
+    range                       = 35.0;
+    cooldown -> duration        = from_seconds( 15.0 );
+    channeled                   = true;
+    tick_zero                   = true;
+    num_ticks                   = 3;
+    base_tick_time              = from_seconds( 1 );
+    td.standardhealthpercentmin =
+    td.standardhealthpercentmax = 0.098;
+    td.weapon                   = &( player -> main_hand_weapon );
+    td.power_mod                = 0.98;
+    td.weapon_multiplier        = -0.348;
+    // tick crits. the invisible execute hit shouldn't
+    may_crit                    = false;
+  }
 };
 
 // ==========================================================================
@@ -333,6 +369,7 @@ struct followthrough_trigger_callback_t : public action_callback_t
   if ( name == abilities.ambush              ) return new ambush_t              ( this, name, options_str ) ;
   if ( name == abilities.followthrough       ) return new followthrough_t       ( this, name, options_str ) ;
   if ( name == abilities.interrogation_probe ) return new interrogation_probe_t ( this, name, options_str ) ;
+  if ( name == abilities.series_of_shots     ) return new series_of_shots_t     ( this, name, options_str ) ;
   return base_t::create_action( name, options_str );
 }
 
@@ -348,6 +385,7 @@ void class_t::init_abilities()
   abilities.ambush              = sn ? "ambush"              : "aimed_shot"     ;
   abilities.followthrough       = sn ? "followthrough"       : "trickshot"      ;
   abilities.interrogation_probe = sn ? "interrogation_probe" : "shock_charge"   ;
+  abilities.series_of_shots     = sn ? "series_of_shots"     : "speed_shot"     ;
 
 }
 
@@ -483,15 +521,14 @@ void class_t::init_actions()
     // guessing priority and optimal energy
     if ( talents.interrogation_probe -> rank() )
       action_list_str += sl + abilities.interrogation_probe + ",if=energy>65";
-    // guessing priority and optimal energy
-    action_list_str += sl + abilities.followthrough + ",if=buff." + abilities.followthrough + ".up";
-    action_list_str += sl + abilities.ambush + ",if=energy>75";
-    // guessing priority and optimal energy
     action_list_str += sl + abilities.orbital_strike + ",if=energy>65";
-    // guessing priority and optimal energy
+    action_list_str += sl + abilities.series_of_shots + ",if=energy>80";
+    if ( talents.followthrough -> rank() )
+      action_list_str += sl + abilities.followthrough + ",if=buff." + abilities.followthrough + ".up";
     action_list_str += sl + abilities.explosive_probe + ",if=energy>80";
-    // guessing priority and optimal energy
-    action_list_str += sl + abilities.snipe + ",if=energy>75";
+    // probably want to prioritise ambush/snipe if followthrough ICD is up
+    action_list_str += sl + abilities.ambush + ",if=energy>75";
+    action_list_str += sl + abilities.snipe + ",if=energy>95";
     action_list_str += sl + abilities.rifle_shot;
   }
 
