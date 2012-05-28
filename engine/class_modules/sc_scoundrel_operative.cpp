@@ -250,6 +250,7 @@ struct attack_t : public action_t
   {
     harmful  = true;
     may_crit = true;
+    tick_may_crit = true;
   }
 };
 
