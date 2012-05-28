@@ -675,7 +675,7 @@ sim_t::sim_t( sim_t* p, int index ) :
   path_str += DIRECTORY_DELIMITER;
   path_str += "profiles";
   path_str += DIRECTORY_DELIMITER;
-  path_str += "gunslingler_sniper";
+  path_str += "gunslinger_sniper";
 
   // commando_mercenary
   path_str += "|profiles";
