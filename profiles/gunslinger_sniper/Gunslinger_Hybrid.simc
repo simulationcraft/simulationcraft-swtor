@@ -10,6 +10,7 @@ use_pre_potion=0
 professions=armormech
 talents=http://www.torhead.com/skill-calc#700rcrbbkRRZrI0bRoZb.1
 actions=aimed_shot,if=energy>75
+actions+=/charged_burst,if=energy>80
 actions+=/flurry_of_bolts
 head=rakata_field_techs_headgear,ilevel=58,quality=artifact,stats=645armor_124endurance_99cunning_57power_51accuracy
 ear=rakata_enforcers_device,ilevel=58,quality=artifact,stats=85endurance_103cunning_51accuracy_44crit

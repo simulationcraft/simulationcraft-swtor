@@ -65,7 +65,7 @@ struct rifle_shot_t : public range_attack_t
 
   rifle_shot_t( class_t* p, const std::string& n, const std::string& options_str,
                 bool is_consequent_strike = false, bool is_offhand_attack = false ) :
-    range_attack_t( n, p ), second_strike( 0 )
+    range_attack_t( n, p ), second_strike( 0 ), offhand_attack( 0 )
   {
     parse_options( options_str );
 
@@ -97,7 +97,7 @@ struct rifle_shot_t : public range_attack_t
       rank_level_list            = { 0 };
       dd.power_mod               = 0;
     }
-      else if ( player -> type == S_GUNSLINGER )
+    else if ( player -> type == S_GUNSLINGER )
     {
       offhand_attack             = new rifle_shot_t( p, n+"_offhand", options_str, is_consequent_strike, true );
       add_child( offhand_attack );
@@ -111,6 +111,27 @@ struct rifle_shot_t : public range_attack_t
         second_strike->schedule_execute();
     if ( offhand_attack )
        offhand_attack->schedule_execute();
+  }
+};
+
+// Snipe | Charged Burst ====================================================
+struct snipe_t : public range_attack_t
+{
+  snipe_t( class_t* p, const std::string& n, const std::string& options_str) :
+    range_attack_t( n, p )
+  {
+
+    parse_options( options_str );
+
+    range = ( player -> type == IA_SNIPER || player -> type == S_GUNSLINGER ) ? 35 : 30.0;
+
+    base_cost                   = 20;
+    base_execute_time           = from_seconds( 1.5 );
+    dd.power_mod                = 1.85;
+    dd.standardhealthpercentmin =
+    dd.standardhealthpercentmax = 0.185;
+    weapon                      = &( player->main_hand_weapon );
+    weapon_multiplier           = 0.23;
   }
 };
 
@@ -154,8 +175,9 @@ struct poison_tick_crit_callback_t : public action_callback_t
 ::action_t* class_t::create_action( const std::string& name,
                                     const std::string& options_str )
 {
-  if ( name == abilities.adrenaline_probe ) return new adrenaline_probe_t ( this, name, options_str ) ;
-  if ( name == abilities.rifle_shot ) return new rifle_shot_t ( this, name, options_str ) ;
+  if ( name == abilities.adrenaline_probe ) return new adrenaline_probe_t ( this, name, options_str );
+  if ( name == abilities.rifle_shot       ) return new rifle_shot_t       ( this, name, options_str );
+  if ( name == abilities.snipe            ) return new snipe_t            ( this, name, options_str );
 
   return base_t::create_action( name, options_str );
 }
@@ -183,6 +205,7 @@ void class_t::init_abilities()
   abilities.overload_shot         = ag ? "overload_shot"         : "quick_shot"         ;
   abilities.rifle_shot            = ag ? "rifle_shot"            : "flurry_of_bolts"    ;
   abilities.shiv                  = ag ? "shiv"                  : "blaster_whip"       ;
+  abilities.snipe                 = ag ? "snipe"                 : "charged_burst"      ;
 }
 
 // class_t::init_talents =======================================

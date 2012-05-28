@@ -88,6 +88,7 @@ public:
     std::string overload_shot;
     std::string rifle_shot;
     std::string shiv;
+    std::string snipe;
   };
   abilities_t& abilities;
 

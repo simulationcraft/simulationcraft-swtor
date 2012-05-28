@@ -368,6 +368,7 @@ void class_t::init_actions()
   {
     action_list_default = true;
     action_list_str += sl + abilities.ambush + ",if=energy>75";
+    action_list_str += sl + abilities.snipe + ",if=energy>80";
     action_list_str += sl + abilities.rifle_shot;
   }
 
