@@ -62,6 +62,7 @@ struct adrenaline_probe_t : public action_t
 // Explosive Probe | Sabotage Charge ========================================
 struct explosive_probe_t : public tech_attack_t
 {
+  typedef tech_attack_t base_t;
   explosive_probe_t( class_t* p, const std::string& n, const std::string& options_str) :
     tech_attack_t( n, p )
   {
@@ -79,7 +80,13 @@ struct explosive_probe_t : public tech_attack_t
   // TODO: explosive probe "attaches" to the target and detonates on damage
   // (tooltip says damage. game data has text that says blaster damage)
   // this is not implemented yet.
-  // also this can only be used from cover. Cover is not implemented yet.
+
+  virtual bool ready()
+  {
+    // TODO only ready if in cover
+    // cover not yet implemented
+    return base_t::ready();
+  }
 };
 
 
@@ -166,6 +173,7 @@ struct orbital_strike_t : public tech_attack_t
 // Snipe | Charged Burst ====================================================
 struct snipe_t : public range_attack_t
 {
+  typedef range_attack_t base_t;
   snipe_t( class_t* p, const std::string& n, const std::string& options_str) :
     range_attack_t( n, p )
   {
@@ -181,6 +189,13 @@ struct snipe_t : public range_attack_t
     dd.standardhealthpercentmax = 0.185;
     weapon                      = &( player->main_hand_weapon );
     weapon_multiplier           = 0.23;
+  }
+
+  virtual bool ready()
+  {
+    // TODO only ready if in cover
+    // cover not yet implemented
+    return base_t::ready();
   }
 };
 
