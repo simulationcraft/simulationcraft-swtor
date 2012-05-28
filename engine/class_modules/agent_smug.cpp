@@ -61,21 +61,19 @@ struct adrenaline_probe_t : public action_t
 struct rifle_shot_t : public range_attack_t
 {
   rifle_shot_t* second_strike;
+  rifle_shot_t* offhand_attack;
 
   rifle_shot_t( class_t* p, const std::string& n, const std::string& options_str,
-                bool is_consequent_strike = false ) :
+                bool is_consequent_strike = false, bool is_offhand_attack = false ) :
     range_attack_t( n, p ), second_strike( 0 )
   {
     parse_options( options_str );
 
     base_cost = 0;
-    // todo variable to 35 for sniper
-    range = 30.0;
-
+    range = ( player -> type == IA_SNIPER || player -> type == S_GUNSLINGER ) ? 35 : 30.0;
     weapon = &( player->main_hand_weapon );
     weapon_multiplier = -0.5;
     dd.power_mod = 0.5;
-
     // Is a Basic attack
     base_accuracy -= 0.10;
 
@@ -85,8 +83,25 @@ struct rifle_shot_t : public range_attack_t
       trigger_gcd = timespan_t::zero();
       base_execute_time = from_seconds( 0.75 );
     }
-    else
-      second_strike = new rifle_shot_t( p, n, options_str, true );
+    else if ( ! is_offhand_attack )
+    {
+      second_strike = new rifle_shot_t( p, n, options_str, true, is_offhand_attack );
+    }
+
+    if ( is_offhand_attack )
+    {
+      background                 = true;
+      dual                       = true;
+      trigger_gcd                = timespan_t::zero();
+      weapon                     = &( player -> off_hand_weapon );
+      rank_level_list            = { 0 };
+      dd.power_mod               = 0;
+    }
+      else if ( player -> type == S_GUNSLINGER )
+    {
+      offhand_attack             = new rifle_shot_t( p, n+"_offhand", options_str, is_consequent_strike, true );
+      add_child( offhand_attack );
+    }
   }
 
   virtual void execute()
@@ -94,6 +109,8 @@ struct rifle_shot_t : public range_attack_t
     range_attack_t::execute();
     if ( second_strike )
         second_strike->schedule_execute();
+    if ( offhand_attack )
+       offhand_attack->schedule_execute();
   }
 };
 
@@ -155,17 +172,17 @@ void class_t::init_abilities()
   bool ag = type == IA_SNIPER || type == IA_OPERATIVE;
 
   // ABILITY                      =    ? AGENT LABEL             : SMUGGLER LABEL       ;
-  abilities.adrenaline_probe      = ag ? "adrenaline_probe"      : "cool_head"          ;  
-  abilities.coordination          = ag ? "coordination"          : "lucky_shots"        ;  
-  abilities.corrosive_dart        = ag ? "corrosive_dart"        : "vital_shot"         ;  
-  abilities.corrosive_grenade     = ag ? "corrosive_grenade"     : "shrap_bomb"         ;  
-  abilities.explosive_probe       = ag ? "explosive_probe"       : "sabotage_charge"    ;  
-  abilities.fragmentation_grenade = ag ? "fragmentation_grenade" : "thermal_grenade"    ;  
-  abilities.lethal_purpose        = ag ? "lethal_purpose"        : "fighting_spirit"    ;  
-  abilities.orbital_strike        = ag ? "orbital_strike"        : "xs_freighter_flyby" ;  
-  abilities.overload_shot         = ag ? "overload_shot"         : "quick_shot"         ;  
-  abilities.rifle_shot            = ag ? "rifle_shot"            : "flurry_of_bolts"    ;  
-  abilities.shiv                  = ag ? "shiv"                  : "blaster_whip"       ;  
+  abilities.adrenaline_probe      = ag ? "adrenaline_probe"      : "cool_head"          ;
+  abilities.coordination          = ag ? "coordination"          : "lucky_shots"        ;
+  abilities.corrosive_dart        = ag ? "corrosive_dart"        : "vital_shot"         ;
+  abilities.corrosive_grenade     = ag ? "corrosive_grenade"     : "shrap_bomb"         ;
+  abilities.explosive_probe       = ag ? "explosive_probe"       : "sabotage_charge"    ;
+  abilities.fragmentation_grenade = ag ? "fragmentation_grenade" : "thermal_grenade"    ;
+  abilities.lethal_purpose        = ag ? "lethal_purpose"        : "fighting_spirit"    ;
+  abilities.orbital_strike        = ag ? "orbital_strike"        : "xs_freighter_flyby" ;
+  abilities.overload_shot         = ag ? "overload_shot"         : "quick_shot"         ;
+  abilities.rifle_shot            = ag ? "rifle_shot"            : "flurry_of_bolts"    ;
+  abilities.shiv                  = ag ? "shiv"                  : "blaster_whip"       ;
 }
 
 // class_t::init_talents =======================================

@@ -131,6 +131,7 @@ public:
   } abilities;
 
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
+    // TODO CHECK WTF IA_SNIPER ? IA_SNIPER : S_GUNSLINGER? IA_SNIPER is a constant it will always be true..?
     base_t( sim, pt == IA_SNIPER ? IA_SNIPER : S_GUNSLINGER, name, rt, buffs, gains, benefits, talents, abilities ),
     buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents()
   {
@@ -170,7 +171,11 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
 // Ambush | Aimed Shot ======================================================
 struct ambush_t : public agent_smug::range_attack_t
 {
-  ambush_t( class_t* p, const std::string& n, const std::string& options_str ) :
+  typedef agent_smug::range_attack_t base_t;
+  ambush_t* offhand_attack;
+
+  ambush_t( class_t* p, const std::string& n, const std::string& options_str,
+     bool is_offhand=false ) :
     range_attack_t( n, p )
   {
     // todo: get this list right
@@ -178,16 +183,40 @@ struct ambush_t : public agent_smug::range_attack_t
 
     parse_options( options_str );
 
-    base_cost = 15;
-    base_execute_time = from_seconds( 2.5 );
-    cooldown -> duration = from_seconds( 15 );
-    range = 35.0;
+    base_cost                    = 15;
+    base_execute_time            = from_seconds( 2.5 );
+    cooldown -> duration         = from_seconds( 15 );
+    range                        = 35.0;
+    dd.standardhealthpercentmin  =
+    dd.standardhealthpercentmax  = 0.329;
+    dd.power_mod                 = 3.29;
+    weapon                       = &( player -> main_hand_weapon );
+    weapon_multiplier            = 1.2;
 
-    dd.standardhealthpercentmin = dd.standardhealthpercentmax = 0.329;
-    dd.power_mod = 3.29;
+    if ( is_offhand )
+    {
+      base_cost                  = 0;
+      background                 = true;
+      dual                       = true;
+      base_execute_time          = timespan_t::zero();
+      trigger_gcd                = timespan_t::zero();
+      weapon                     = &( player -> off_hand_weapon );
+      rank_level_list            = { 0 };
+      dd.power_mod               = 0;
+    }
 
-    weapon = &( player -> main_hand_weapon );
-    weapon_multiplier = 1.2;
+    else if ( player -> type == S_GUNSLINGER && &( player -> off_hand_weapon ) )
+    {
+      offhand_attack             = new ambush_t( p, n+"_offhand", options_str, true );
+      add_child( offhand_attack );
+    }
+  }
+
+  virtual void execute()
+  {
+    base_t::execute();
+    if ( offhand_attack )
+      offhand_attack -> schedule_execute();
   }
 };
 
@@ -211,8 +240,8 @@ void class_t::init_abilities()
 
   bool sn = type == IA_SNIPER;
 
-  //               =    ? SNIPER LABEL : GUNSLINGER LABEL ; 
-  abilities.ambush = sn ? "ambush"     : "aimed_shot"     ; 
+  //               =    ? SNIPER LABEL : GUNSLINGER LABEL ;
+  abilities.ambush = sn ? "ambush"     : "aimed_shot"     ;
 
 }
 
