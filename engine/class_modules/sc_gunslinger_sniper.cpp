@@ -178,6 +178,62 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
 
 }
 
+
+struct action_t : public agent_smug::action_t
+{
+  action_t( const std::string& n, class_t* player, attack_policy_t policy, resource_type r, school_type s ) :
+    agent_smug::action_t( n, player, policy, r, s )
+  {}
+
+  targetdata_t* targetdata() const { return static_cast<targetdata_t*>( agent_smug::action_t::targetdata() ); }
+  class_t* p() const { return static_cast<class_t*>( player ); }
+  class_t* cast() const { return static_cast<class_t*>( player ); }
+};
+
+struct attack_t : public agent_smug::attack_t
+{
+  attack_t( const std::string& n, class_t* p, attack_policy_t policy, school_type s ) :
+    agent_smug::attack_t( n, p, policy, s )
+  {}
+
+  targetdata_t* targetdata() const { return static_cast<targetdata_t*>( agent_smug::action_t::targetdata() ); }
+  class_t* p() const { return static_cast<class_t*>( player ); }
+  class_t* cast() const { return static_cast<class_t*>( player ); }
+};
+
+struct tech_attack_t : public agent_smug::tech_attack_t
+{
+  tech_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_KINETIC ) :
+   agent_smug::tech_attack_t( n, p, s )
+  {}
+
+  targetdata_t* targetdata() const { return static_cast<targetdata_t*>( agent_smug::action_t::targetdata() ); }
+  class_t* p() const { return static_cast<class_t*>( player ); }
+  class_t* cast() const { return static_cast<class_t*>( player ); }
+};
+
+struct range_attack_t : public agent_smug::range_attack_t
+{
+  range_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_KINETIC ) :
+    agent_smug::range_attack_t( n, p, s )
+  {}
+
+  targetdata_t* targetdata() const { return static_cast<targetdata_t*>( agent_smug::action_t::targetdata() ); }
+  class_t* p() const { return static_cast<class_t*>( player ); }
+  class_t* cast() const { return static_cast<class_t*>( player ); }
+};
+
+struct poison_attack_t : public agent_smug::poison_attack_t
+{
+  poison_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_INTERNAL ) :
+    agent_smug::poison_attack_t( n, p, s )
+  {}
+
+  targetdata_t* targetdata() const { return static_cast<targetdata_t*>( agent_smug::poison_attack_t::targetdata() ); }
+  class_t* p() const { return static_cast<class_t*>( player ); }
+  class_t* cast() const { return static_cast<class_t*>( player ); }
+};
+
 // ==========================================================================
 // Gunslinger / Sniper Abilities
 // ==========================================================================

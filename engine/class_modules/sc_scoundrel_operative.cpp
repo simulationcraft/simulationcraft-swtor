@@ -198,22 +198,59 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   add( dot_stim_boost             );
 }
 
-class action_t : public ::action_t
+struct action_t : public agent_smug::action_t
 {
-  typedef ::action_t base_t;
-public:
-  action_t( const std::string& n, class_t* player,
-            attack_policy_t policy, resource_type r, school_type s ) :
-  base_t( ACTION_ATTACK, n, player, policy, r, s )
-  {
-    harmful = false;
-  }
+  action_t( const std::string& n, class_t* player, attack_policy_t policy, resource_type r, school_type s ) :
+    agent_smug::action_t( n, player, policy, r, s )
+  {}
 
-  targetdata_t* targetdata() const
-  { return static_cast<targetdata_t*>( base_t::targetdata() ); }
-
+  targetdata_t* targetdata() const { return static_cast<targetdata_t*>( agent_smug::action_t::targetdata() ); }
   class_t* p() const { return static_cast<class_t*>( player ); }
-  class_t* cast() const { return p(); }
+  class_t* cast() const { return static_cast<class_t*>( player ); }
+};
+
+struct attack_t : public agent_smug::attack_t
+{
+  attack_t( const std::string& n, class_t* p, attack_policy_t policy, school_type s ) :
+    agent_smug::attack_t( n, p, policy, s )
+  {}
+
+  targetdata_t* targetdata() const { return static_cast<targetdata_t*>( agent_smug::action_t::targetdata() ); }
+  class_t* p() const { return static_cast<class_t*>( player ); }
+  class_t* cast() const { return static_cast<class_t*>( player ); }
+};
+
+struct tech_attack_t : public agent_smug::tech_attack_t
+{
+  tech_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_KINETIC ) :
+   agent_smug::tech_attack_t( n, p, s )
+  {}
+
+  targetdata_t* targetdata() const { return static_cast<targetdata_t*>( agent_smug::action_t::targetdata() ); }
+  class_t* p() const { return static_cast<class_t*>( player ); }
+  class_t* cast() const { return static_cast<class_t*>( player ); }
+};
+
+struct range_attack_t : public agent_smug::range_attack_t
+{
+  range_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_KINETIC ) :
+    agent_smug::range_attack_t( n, p, s )
+  {}
+
+  targetdata_t* targetdata() const { return static_cast<targetdata_t*>( agent_smug::action_t::targetdata() ); }
+  class_t* p() const { return static_cast<class_t*>( player ); }
+  class_t* cast() const { return static_cast<class_t*>( player ); }
+};
+
+struct poison_attack_t : public agent_smug::poison_attack_t
+{
+  poison_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_INTERNAL ) :
+    agent_smug::poison_attack_t( n, p, s )
+  {}
+
+  targetdata_t* targetdata() const { return static_cast<targetdata_t*>( agent_smug::poison_attack_t::targetdata() ); }
+  class_t* p() const { return static_cast<class_t*>( player ); }
+  class_t* cast() const { return static_cast<class_t*>( player ); }
 };
 
 // ==========================================================================
@@ -242,71 +279,6 @@ public:
 //           - acid_blade
 //           - adrenaline_probe
 //           - stealth
-
-struct attack_t : public action_t
-{
-  attack_t( const std::string& n, class_t* p, attack_policy_t policy, school_type s ) :
-    action_t( n, p, policy, RESOURCE_ENERGY, s )
-  {
-    harmful  = true;
-    may_crit = true;
-    tick_may_crit = true;
-  }
-};
-
-struct tech_attack_t : public attack_t
-{
-  tech_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_KINETIC ) :
-    attack_t( n, p, tech_policy, s )
-  {
-  }
-};
-
-struct range_attack_t : public attack_t
-{
-  range_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_ENERGY ) :
-    attack_t( n, p, range_policy, s )
-  {
-  }
-};
-
-struct poison_attack_t : public tech_attack_t
-{
-  poison_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_INTERNAL ) :
-    tech_attack_t( n, p, s )
-  {
-    may_crit       =  false;
-    base_crit     += .04 * p -> talents.lethal_dose -> rank();
-  }
-
-  void target_debuff( player_t* tgt, dmg_type type )
-  {
-    tech_attack_t::target_debuff( tgt, type );
-
-    class_t& p = *cast();
-
-    if ( unsigned rank = p.talents.devouring_microbes -> rank() )
-    {
-      bool up = tgt -> health_percentage() < 30;
-      p.benefits.devouring_microbes_ticks -> update( up );
-      if ( up )
-        target_multiplier += 0.05 * rank;
-    }
-
-    if ( p.talents.weakening_blast -> rank() )
-    {
-      targetdata_t& td = *targetdata();
-      bool up = td.debuff_weakening_blast -> up();
-      p.benefits.wb_poison_ticks -> update( up );
-      if ( up )
-      {
-        td.debuff_weakening_blast -> decrement();
-        target_multiplier += 0.3;
-      }
-    }
-  }
-};
-
 
 // Consume Acid Blade Poison Attack | ??? ===================================
 
