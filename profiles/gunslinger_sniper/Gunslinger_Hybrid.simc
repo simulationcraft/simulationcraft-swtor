@@ -13,6 +13,7 @@ actions=stim,type=exotech_skill
 actions+=/lucky_shots
 actions+=/snapshot_stats
 actions+=/take_cover,if=buff.cover.down
+actions+=/trickshot,if=buff.trickshot.up
 actions+=/aimed_shot,if=energy>75
 actions+=/xs_freighter_flyby,if=energy>65
 actions+=/sabotage_charge,if=energy>80

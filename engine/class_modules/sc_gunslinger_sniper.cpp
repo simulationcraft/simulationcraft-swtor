@@ -29,6 +29,7 @@ public:
   // Buffs
   struct buffs_t:base_t::buffs_t
   {
+    buff_t* followthrough;
 
   } buffs;
 
@@ -128,6 +129,7 @@ public:
   struct abilities_t:base_t::abilities_t
   {
     std::string ambush;
+    std::string followthrough;
   } abilities;
 
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
@@ -217,8 +219,43 @@ struct ambush_t : public agent_smug::range_attack_t
     base_t::execute();
     if ( offhand_attack )
       offhand_attack -> schedule_execute();
+    else
+      static_cast<class_t*>(p()) -> buffs.followthrough -> trigger();
   }
 };
+
+// Followthrough | Trickshot ================================================
+struct followthrough_t : public agent_smug::range_attack_t
+{
+  typedef agent_smug::range_attack_t base_t;
+
+  followthrough_t( class_t* p, const std::string& n, const std::string& options_str) :
+    range_attack_t( n, p )
+  {
+    // rank_level_list = { ... ,50 };
+
+    parse_options( options_str );
+
+    base_cost                    = 10;
+    cooldown -> duration         = from_seconds( 9 );
+    range                        = 35.0;
+    dd.standardhealthpercentmin  =
+    dd.standardhealthpercentmax  = 0.227;
+    dd.power_mod                 = 2.27;
+    weapon                       = &( player -> main_hand_weapon );
+    weapon_multiplier            = 0.51;
+  }
+
+  virtual bool ready()
+  {
+    if ( static_cast<class_t*>(p())-> buffs.followthrough -> up() )
+      return base_t::ready();
+    else
+      return false;
+  }
+};
+
+// TODO followthorugh buff triggers on agent_smug::snipe
 
 // ==========================================================================
 // Gunslinger / Sniper Character Definition
@@ -228,7 +265,8 @@ struct ambush_t : public agent_smug::range_attack_t
 ::action_t* class_t::create_action( const std::string& name,
                                     const std::string& options_str )
 {
-  if ( name == abilities.ambush ) return new ambush_t( this, name, options_str );
+  if ( name == abilities.ambush        ) return new ambush_t        ( this, name, options_str ) ;
+  if ( name == abilities.followthrough ) return new followthrough_t ( this, name, options_str ) ;
   return base_t::create_action( name, options_str );
 }
 
@@ -240,8 +278,9 @@ void class_t::init_abilities()
 
   bool sn = type == IA_SNIPER;
 
-  //               =    ? SNIPER LABEL : GUNSLINGER LABEL ;
-  abilities.ambush = sn ? "ambush"     : "aimed_shot"     ;
+  //                      =    ? SNIPER LABEL    : GUNSLINGER LABEL ;
+  abilities.ambush        = sn ? "ambush"        : "aimed_shot"     ;
+  abilities.followthrough = sn ? "followthrough" : "trickshot"      ;
 
 }
 
@@ -332,6 +371,8 @@ void class_t::init_benefits()
 void class_t::init_buffs()
 {
   base_t::init_buffs();
+
+  buffs.followthrough = new buff_t( this , abilities.followthrough , 1 ,  from_seconds( 4.5 ) );
 }
 
 // class_t::init_gains ==========================================
@@ -372,6 +413,8 @@ void class_t::init_actions()
       "/snapshot_stats";
 
     action_list_str += sl + abilities.take_cover + ",if=buff." + abilities.cover + ".down";
+    // guessing priority and optimal energy
+    action_list_str += sl + abilities.followthrough + ",if=buff." + abilities.followthrough + ".up";
     action_list_str += sl + abilities.ambush + ",if=energy>75";
     // guessing priority and optimal energy
     action_list_str += sl + abilities.orbital_strike + ",if=energy>65";

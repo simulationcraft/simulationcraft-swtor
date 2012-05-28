@@ -13,6 +13,7 @@ actions=stim,type=exotech_skill
 actions+=/coordination
 actions+=/snapshot_stats
 actions+=/take_cover,if=buff.cover.down
+actions+=/followthrough,if=buff.followthrough.up
 actions+=/ambush,if=energy>75
 actions+=/orbital_strike,if=energy>65
 actions+=/explosive_probe,if=energy>80
