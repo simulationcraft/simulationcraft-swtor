@@ -19,6 +19,8 @@ class targetdata_t : public agent_smug::targetdata_t
 {
 public:
   targetdata_t( class_t& source, player_t& target );
+
+  dot_t dot_interrogation_probe;
 };
 
 class class_t : public agent_smug::class_t
@@ -130,6 +132,7 @@ public:
   {
     std::string ambush;
     std::string followthrough;
+    std::string interrogation_probe;
   } abilities;
 
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
@@ -164,7 +167,15 @@ public:
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   agent_smug::targetdata_t( source, target )
-{}
+{
+  bool is_sn = ( source.type == IA_SNIPER );
+  const char* interrogation_probe = is_sn ? "interrogation_probe" : "shock_charge" ;
+
+  dot_interrogation_probe = dot_t ( interrogation_probe, &source );
+
+  add( dot_interrogation_probe );
+
+}
 
 // ==========================================================================
 // Gunslinger / Sniper Abilities
@@ -253,6 +264,34 @@ struct followthrough_t : public agent_smug::range_attack_t
   }
 };
 
+// Interrogation Probe | Shock Charge =======================================
+struct interrogation_probe_t : public agent_smug::tech_attack_t
+{
+  typedef agent_smug::tech_attack_t base_t;
+
+  interrogation_probe_t( class_t* p, const std::string& n, const std::string& options_str) :
+    tech_attack_t( n, p, SCHOOL_ENERGY )
+  {
+    check_talent( static_cast<class_t*>(p) -> talents.interrogation_probe -> rank() );
+
+    // rank_level_list = { ... ,50 };
+
+    parse_options( options_str );
+
+    base_cost                    = 20;
+    cooldown -> duration         = from_seconds( 18 );
+    range                        = 35.0;
+    td.standardhealthpercentmin  =
+    td.standardhealthpercentmax  = 0.055;
+    td.power_mod                 = 0.55;
+    tick_zero                    = true;
+    num_ticks                    = 6;
+    base_tick_time  = from_seconds( 3.0 );
+  }
+
+  // not implemented: cooldown resets if ends prematurely (target dies, dispelled).
+};
+
 // ==========================================================================
 // Gunslinger / Sniper Callbacks
 // ==========================================================================
@@ -291,8 +330,9 @@ struct followthrough_trigger_callback_t : public action_callback_t
 ::action_t* class_t::create_action( const std::string& name,
                                     const std::string& options_str )
 {
-  if ( name == abilities.ambush        ) return new ambush_t        ( this, name, options_str ) ;
-  if ( name == abilities.followthrough ) return new followthrough_t ( this, name, options_str ) ;
+  if ( name == abilities.ambush              ) return new ambush_t              ( this, name, options_str ) ;
+  if ( name == abilities.followthrough       ) return new followthrough_t       ( this, name, options_str ) ;
+  if ( name == abilities.interrogation_probe ) return new interrogation_probe_t ( this, name, options_str ) ;
   return base_t::create_action( name, options_str );
 }
 
@@ -304,9 +344,10 @@ void class_t::init_abilities()
 
   bool sn = type == IA_SNIPER;
 
-  //                      =    ? SNIPER LABEL    : GUNSLINGER LABEL ;
-  abilities.ambush        = sn ? "ambush"        : "aimed_shot"     ;
-  abilities.followthrough = sn ? "followthrough" : "trickshot"      ;
+  //                            =    ? SNIPER LABEL          : GUNSLINGER LABEL ;
+  abilities.ambush              = sn ? "ambush"              : "aimed_shot"     ;
+  abilities.followthrough       = sn ? "followthrough"       : "trickshot"      ;
+  abilities.interrogation_probe = sn ? "interrogation_probe" : "shock_charge"   ;
 
 }
 
@@ -439,6 +480,9 @@ void class_t::init_actions()
       "/snapshot_stats";
 
     action_list_str += sl + abilities.take_cover + ",if=buff." + abilities.cover + ".down";
+    // guessing priority and optimal energy
+    if ( talents.interrogation_probe -> rank() )
+      action_list_str += sl + abilities.interrogation_probe + ",if=energy>65";
     // guessing priority and optimal energy
     action_list_str += sl + abilities.followthrough + ",if=buff." + abilities.followthrough + ".up";
     action_list_str += sl + abilities.ambush + ",if=energy>75";

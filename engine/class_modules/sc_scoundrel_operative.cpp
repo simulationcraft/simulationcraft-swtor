@@ -301,7 +301,6 @@ struct poison_attack_t : public tech_attack_t
     tech_attack_t( n, p, s )
   {
     may_crit       =  false;
-    tick_may_crit  =  true;
     base_crit     += .04 * p -> talents.lethal_dose -> rank();
   }
 
