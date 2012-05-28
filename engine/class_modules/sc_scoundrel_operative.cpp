@@ -1260,7 +1260,7 @@ void class_t::init_actions()
   }
 
   register_attack_callback( RESULT_ALL_MASK, new all_attack_callback_t( this ) );
-  register_tick_callback( RESULT_ALL_MASK, new poison_tick_crit_callback_t ( this ) );
+  register_tick_callback( RESULT_CRIT_MASK, new poison_tick_crit_callback_t ( this ) );
 
   base_t::init_actions();
 }
