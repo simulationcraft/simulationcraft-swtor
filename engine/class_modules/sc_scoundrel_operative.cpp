@@ -780,29 +780,6 @@ struct cull_t : public range_attack_t
   }
 };
 
-// Overload Shot | ??? ======================================================
-
-struct overload_shot_t : public range_attack_t
-{
-  overload_shot_t( class_t* p, const std::string& n, const std::string& options_str) :
-    range_attack_t( n, p )
-  {
-    rank_level_list = { 8, 12, 16, 22, 31, 40, 50 };
-
-    parse_options( options_str );
-
-    base_cost                   =  17;
-    range                       =  10.0;
-    dd.standardhealthpercentmin =
-    dd.standardhealthpercentmax = 0.124;
-    dd.power_mod                =  1.24;
-    weapon                      =  &( player -> main_hand_weapon );
-    weapon_multiplier           =  -0.17;
-    base_multiplier             += 0.15 // passive: skirmisher
-                                +  .03 * p -> talents.cut_down->rank();
-  }
-};
-
 // Stim Boost | ??? =========================================================
 
 struct stim_boost_t : public action_t
@@ -927,7 +904,6 @@ struct poison_tick_crit_callback_t : public action_callback_t
   if ( name == abilities.fragmentation_grenade ) return new fragmentation_grenade_t ( this, name, options_str ) ;
   if ( name == abilities.hidden_strike         ) return new hidden_strike_t         ( this, name, options_str ) ;
   if ( name == abilities.laceration            ) return new laceration_t            ( this, name, options_str ) ;
-  if ( name == abilities.overload_shot         ) return new overload_shot_t         ( this, name, options_str ) ;
   if ( name == abilities.shiv                  ) return new shiv_t                  ( this, name, options_str ) ;
   if ( name == abilities.stealth               ) return new stealth_t               ( this, name, options_str ) ;
   if ( name == abilities.stim_boost            ) return new stim_boost_t            ( this, name, options_str ) ;

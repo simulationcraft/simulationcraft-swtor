@@ -155,6 +155,29 @@ struct orbital_strike_t : public tech_attack_t
   }
 };
 
+// Overload Shot | ??? ======================================================
+
+struct overload_shot_t : public range_attack_t
+{
+  overload_shot_t( class_t* p, const std::string& n, const std::string& options_str) :
+    range_attack_t( n, p )
+  {
+    rank_level_list = { 8, 12, 16, 22, 31, 40, 50 };
+
+    parse_options( options_str );
+
+    base_cost                   =  17;
+    range                       =  10.0;
+    dd.standardhealthpercentmin =
+    dd.standardhealthpercentmax = 0.124;
+    dd.power_mod                =  1.24;
+    weapon                      =  &( player -> main_hand_weapon );
+    weapon_multiplier           =  -0.17;
+    base_multiplier             += 0.15 // passive: skirmisher
+                                +  .03 * p -> talents.cut_down->rank();
+  }
+};
+
 // Rifle Shot | Flurry Of Bolts =========================================================
 
 struct rifle_shot_t : public range_attack_t
@@ -341,6 +364,7 @@ struct poison_tick_crit_callback_t : public action_callback_t
   if ( name == abilities.coordination     ) return new coordination_t     ( this, name, options_str ) ;
   if ( name == abilities.explosive_probe  ) return new explosive_probe_t  ( this, name, options_str ) ;
   if ( name == abilities.orbital_strike   ) return new orbital_strike_t   ( this, name, options_str ) ;
+  if ( name == abilities.overload_shot    ) return new overload_shot_t    ( this, name, options_str ) ;
   if ( name == abilities.rifle_shot       ) return new rifle_shot_t       ( this, name, options_str ) ;
   if ( name == abilities.snipe            ) return new snipe_t            ( this, name, options_str ) ;
   if ( name == abilities.take_cover       ) return new take_cover_t       ( this, name, options_str ) ;
