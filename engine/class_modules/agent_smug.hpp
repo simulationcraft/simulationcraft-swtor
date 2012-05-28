@@ -207,8 +207,9 @@ struct attack_t : public action_t
   attack_t( const std::string& n, class_t* p, attack_policy_t policy, school_type s ) :
     action_t( n, p, policy, RESOURCE_ENERGY, s )
   {
-    harmful  = true;
-    may_crit = true;
+    harmful       = true;
+    may_crit      = true;
+    tick_may_crit = true;
   }
 };
 

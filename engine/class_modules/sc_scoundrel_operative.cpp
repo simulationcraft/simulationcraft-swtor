@@ -988,8 +988,7 @@ struct poison_tick_crit_callback_t : public action_callback_t
 
   virtual void trigger (::action_t* a, void* /* call_data */)
   {
-    // TODO: fix? what about corrosive grenade, and corrosive dart?
-    if (a->name_str == p()->abilities.acid_blade_poison)
+    if ( dynamic_cast<scoundrel_operative::poison_attack_t*>(a) != NULL )
     {
       p()->resource_gain( RESOURCE_ENERGY, p()->talents.lethal_purpose -> rank(), p()->gains.lethal_purpose );
     }
@@ -1261,7 +1260,7 @@ void class_t::init_actions()
   }
 
   register_attack_callback( RESULT_ALL_MASK, new all_attack_callback_t( this ) );
-  register_tick_callback( RESULT_CRIT_MASK, new poison_tick_crit_callback_t ( this ) );
+  register_tick_callback( RESULT_ALL_MASK, new poison_tick_crit_callback_t ( this ) );
 
   base_t::init_actions();
 }
