@@ -174,6 +174,7 @@ class targetdata_t : public ::targetdata_t
 {
 public:
   dot_t dot_adrenaline_probe;
+  dot_t dot_orbital_strike;
 
   targetdata_t( class_t& source, player_t& target );
 };

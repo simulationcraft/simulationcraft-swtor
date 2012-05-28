@@ -11,8 +11,10 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   ::targetdata_t( source, target )
 {
   dot_adrenaline_probe = dot_t( source.abilities.adrenaline_probe, &source );
+  dot_orbital_strike = dot_t( source.abilities.orbital_strike, &source );
 
   add( dot_adrenaline_probe );
+  add( dot_orbital_strike );
 }
 
 // ==========================================================================
@@ -114,6 +116,29 @@ struct rifle_shot_t : public range_attack_t
   }
 };
 
+// Orbital Strike | XS Freighter Flyby ======================================
+struct orbital_strike_t : public tech_attack_t
+{
+  orbital_strike_t( class_t* p, const std::string& n, const std::string& options_str) :
+      tech_attack_t( n, p, SCHOOL_ELEMENTAL )
+  {
+    parse_options( options_str );
+
+    base_cost                   = 30;
+    range                       = 30.0;
+    cooldown -> duration        = from_seconds( 60 );
+    td.standardhealthpercentmin =
+    td.standardhealthpercentmax = 0.177;
+    td.power_mod                = 1.77;
+    num_ticks                   = 3; // TODO: sniper set bonus? +1 tick
+    base_tick_time              = from_seconds( 3 );
+    base_execute_time           = from_seconds( 3 );
+
+    aoe = 99; // TODO FIX: unlimited. "all targets in area"
+  }
+};
+
+
 // Snipe | Charged Burst ====================================================
 struct snipe_t : public range_attack_t
 {
@@ -175,9 +200,11 @@ struct poison_tick_crit_callback_t : public action_callback_t
 ::action_t* class_t::create_action( const std::string& name,
                                     const std::string& options_str )
 {
-  if ( name == abilities.adrenaline_probe ) return new adrenaline_probe_t ( this, name, options_str );
-  if ( name == abilities.rifle_shot       ) return new rifle_shot_t       ( this, name, options_str );
-  if ( name == abilities.snipe            ) return new snipe_t            ( this, name, options_str );
+  if ( name == abilities.adrenaline_probe ) return new adrenaline_probe_t ( this, name, options_str ) ;
+  if ( name == abilities.orbital_strike   ) return new orbital_strike_t   ( this, name, options_str ) ;
+  if ( name == abilities.rifle_shot       ) return new rifle_shot_t       ( this, name, options_str ) ;
+  if ( name == abilities.snipe            ) return new snipe_t            ( this, name, options_str ) ;
+
 
   return base_t::create_action( name, options_str );
 }

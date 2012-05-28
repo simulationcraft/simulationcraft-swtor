@@ -18,7 +18,6 @@ struct targetdata_t : public agent_smug::targetdata_t
   dot_t dot_corrosive_dart_weak;
   dot_t dot_corrosive_grenade;
   dot_t dot_corrosive_grenade_weak;
-  dot_t dot_orbital_strike;
   dot_t dot_stim_boost;
 
   targetdata_t( class_t& source, player_t& target );
@@ -214,7 +213,6 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   dot_corrosive_dart_weak    = dot_t ( corrosive_dart_weak                , &source ); 
   dot_corrosive_grenade      = dot_t ( corrosive_grenade                  , &source ); 
   dot_corrosive_grenade_weak = dot_t ( corrosive_grenade_weak             , &source ); 
-  dot_orbital_strike         = dot_t ( source.abilities.orbital_strike    , &source ); 
   dot_stim_boost             = dot_t ( stim_boost                         , &source ); 
 
   add( *debuff_weakening_blast    );
@@ -223,7 +221,6 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   add( dot_corrosive_dart_weak    );
   add( dot_corrosive_grenade      );
   add( dot_corrosive_grenade_weak );
-  add( dot_orbital_strike         );
   add( dot_stim_boost             );
 }
 
@@ -941,29 +938,6 @@ struct weakening_blast_t : public range_attack_t
   }
 };
 
-
-// Orbital Strike | ??? =====================================================
-struct orbital_strike_t : public tech_attack_t
-{
-  orbital_strike_t( class_t* p, const std::string& n, const std::string& options_str) :
-      tech_attack_t( n, p, SCHOOL_ELEMENTAL )
-  {
-    parse_options( options_str );
-
-    base_cost                   = 30;
-    range                       = 30.0;
-    cooldown -> duration        = from_seconds( 60 );
-    td.standardhealthpercentmin = 
-    td.standardhealthpercentmax = 0.177;
-    td.power_mod                = 1.77;
-    num_ticks                   = 3; // TODO: sniper set bonus? +1 tick
-    base_tick_time              = from_seconds( 3 );
-    base_execute_time           = from_seconds( 3 );
-
-    aoe = 99; // TODO FIX: unlimited. "all targets in area"
-  }
-};
-
 // Explosive Probe | ??? ====================================================
 struct explosive_probe_t : public tech_attack_t
 {
@@ -1089,7 +1063,6 @@ struct poison_tick_crit_callback_t : public action_callback_t
   if ( name == abilities.fragmentation_grenade ) return new fragmentation_grenade_t ( this, name, options_str ) ;
   if ( name == abilities.hidden_strike         ) return new hidden_strike_t         ( this, name, options_str ) ;
   if ( name == abilities.laceration            ) return new laceration_t            ( this, name, options_str ) ;
-  if ( name == abilities.orbital_strike        ) return new orbital_strike_t        ( this, name, options_str ) ;
   if ( name == abilities.overload_shot         ) return new overload_shot_t         ( this, name, options_str ) ;
   if ( name == abilities.shiv                  ) return new shiv_t                  ( this, name, options_str ) ;
   if ( name == abilities.stealth               ) return new stealth_t               ( this, name, options_str ) ;
