@@ -368,7 +368,9 @@ void class_t::init_actions()
   {
     action_list_default = true;
     action_list_str += sl + abilities.ambush + ",if=energy>75";
+    // guessing priority and optimal energy
     action_list_str += sl + abilities.orbital_strike + ",if=energy>65";
+    // guessing priority and optimal energy
     action_list_str += sl + abilities.snipe + ",if=energy>75";
     action_list_str += sl + abilities.rifle_shot;
   }
