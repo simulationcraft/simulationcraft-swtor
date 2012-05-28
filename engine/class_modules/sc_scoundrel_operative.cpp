@@ -4,8 +4,6 @@
 // ==========================================================================
 
 #include "agent_smug.hpp"
-#include "agent_smug.cpp"
-
 
 namespace scoundrel_operative { // ==========================================
 
