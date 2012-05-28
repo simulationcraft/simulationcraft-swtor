@@ -367,6 +367,12 @@ void class_t::init_actions()
   if ( action_list_str.empty() )
   {
     action_list_default = true;
+    action_list_str += "/stim,type=exotech_skill"
+      // TODO move coordiation from scoundrel_operative into agent_smug
+      //+ sl + abilities.coordination +
+      "/snapshot_stats";
+
+    action_list_str += sl + abilities.take_cover + ",if=buff." + abilities.cover + ".down";
     action_list_str += sl + abilities.ambush + ",if=energy>75";
     // guessing priority and optimal energy
     action_list_str += sl + abilities.orbital_strike + ",if=energy>65";

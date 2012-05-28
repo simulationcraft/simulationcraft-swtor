@@ -26,6 +26,7 @@ public:
   struct buffs_t
   {
     buff_t* adrenaline_probe;
+    buff_t* cover;
   };
   buffs_t& buffs;
 
@@ -89,6 +90,10 @@ public:
     std::string rifle_shot;
     std::string shiv;
     std::string snipe;
+    std::string take_cover;
+
+    // buff names
+    std::string cover;
   };
   abilities_t& abilities;
 

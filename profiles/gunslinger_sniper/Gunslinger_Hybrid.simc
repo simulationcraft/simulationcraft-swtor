@@ -9,7 +9,10 @@ role=dps
 use_pre_potion=0
 professions=armormech
 talents=http://www.torhead.com/skill-calc#700rcrbbkRRZrI0bRoZb.1
-actions=aimed_shot,if=energy>75
+actions=stim,type=exotech_skill
+actions+=/snapshot_stats
+actions+=/take_cover,if=buff.cover.down
+actions+=/aimed_shot,if=energy>75
 actions+=/xs_freighter_flyby,if=energy>65
 actions+=/sabotage_charge,if=energy>80
 actions+=/charged_burst,if=energy>75

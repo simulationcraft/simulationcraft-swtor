@@ -84,7 +84,7 @@ struct explosive_probe_t : public tech_attack_t
   virtual bool ready()
   {
     // TODO only ready if in cover
-    // cover not yet implemented
+    // probably not worth the complication to implement?
     return base_t::ready();
   }
 };
@@ -110,7 +110,6 @@ struct orbital_strike_t : public tech_attack_t
     aoe = 99; // TODO FIX: unlimited. "all targets in area"
   }
 };
-
 
 // Rifle Shot | Flurry Of Bolts =========================================================
 struct rifle_shot_t : public range_attack_t
@@ -200,6 +199,31 @@ struct snipe_t : public range_attack_t
   }
 };
 
+// Take Cover | Take Cover ==================================================
+struct take_cover_t : public action_t
+{
+  typedef action_t base_t;
+  take_cover_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    action_t( n, p, tech_policy, RESOURCE_ENERGY, SCHOOL_NONE )
+  {
+    parse_options( options_str );
+
+    trigger_gcd = timespan_t::zero();
+  }
+
+  void execute()
+  {
+    action_t::execute();
+
+    class_t& p = *cast();
+    if ( p.buffs.cover -> up() )
+      p.buffs.cover -> expire();
+    else
+      p.buffs.cover -> trigger();
+  }
+};
+
+
 // ==========================================================================
 // Smuggler / Agent Callbacks
 // ==========================================================================
@@ -245,6 +269,7 @@ struct poison_tick_crit_callback_t : public action_callback_t
   if ( name == abilities.orbital_strike   ) return new orbital_strike_t   ( this, name, options_str ) ;
   if ( name == abilities.rifle_shot       ) return new rifle_shot_t       ( this, name, options_str ) ;
   if ( name == abilities.snipe            ) return new snipe_t            ( this, name, options_str ) ;
+  if ( name == abilities.take_cover       ) return new take_cover_t       ( this, name, options_str ) ;
 
 
   return base_t::create_action( name, options_str );
@@ -274,6 +299,10 @@ void class_t::init_abilities()
   abilities.rifle_shot            = ag ? "rifle_shot"            : "flurry_of_bolts"    ;
   abilities.shiv                  = ag ? "shiv"                  : "blaster_whip"       ;
   abilities.snipe                 = ag ? "snipe"                 : "charged_burst"      ;
+  abilities.take_cover            = ag ? "take_cover"            : "take_cover"         ;
+
+  // buffs
+  abilities.cover                 = ag ? "cover"                 : "cover"              ;
 }
 
 // class_t::init_talents =======================================
@@ -319,6 +348,7 @@ void class_t::init_buffs()
   base_t::init_buffs();
 
   buffs.adrenaline_probe   = new buff_t( this , abilities.adrenaline_probe   , 1 ,  from_seconds(  3 ) );
+  buffs.cover              = new buff_t( this , abilities.cover              , 1);
 }
 
 // class_t::init_gains ========================================
