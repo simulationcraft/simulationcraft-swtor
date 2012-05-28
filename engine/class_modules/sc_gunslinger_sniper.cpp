@@ -219,8 +219,6 @@ struct ambush_t : public agent_smug::range_attack_t
     base_t::execute();
     if ( offhand_attack )
       offhand_attack -> schedule_execute();
-    else
-      static_cast<class_t*>(p()) -> buffs.followthrough -> trigger();
   }
 };
 
@@ -255,7 +253,35 @@ struct followthrough_t : public agent_smug::range_attack_t
   }
 };
 
-// TODO followthorugh buff triggers on agent_smug::snipe
+// ==========================================================================
+// Gunslinger / Sniper Callbacks
+// ==========================================================================
+
+class action_callback_t : public ::action_callback_t
+{
+public:
+  action_callback_t( class_t* player ) :
+    ::action_callback_t( player )
+  {}
+
+  class_t* p() const { return static_cast<class_t*>( listener ); }
+  class_t* cast() const { return p(); }
+};
+
+struct followthrough_trigger_callback_t : public action_callback_t
+{
+  followthrough_trigger_callback_t( class_t* p ) :
+    action_callback_t( p )
+  {}
+
+  virtual void trigger (::action_t* a, void* /* call_data */)
+  {
+    if ( a -> name_str == p() -> abilities.snipe || a -> name_str == p() -> abilities.ambush )
+    {
+      p() -> buffs.followthrough -> trigger();
+    }
+  }
+};
 
 // ==========================================================================
 // Gunslinger / Sniper Character Definition
@@ -424,6 +450,9 @@ void class_t::init_actions()
     action_list_str += sl + abilities.snipe + ",if=energy>75";
     action_list_str += sl + abilities.rifle_shot;
   }
+
+  // TODO test "on hit"
+  register_attack_callback( RESULT_HIT_MASK, new followthrough_trigger_callback_t( this ) );
 
   base_t::init_actions();
 }

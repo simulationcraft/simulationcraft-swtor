@@ -988,6 +988,7 @@ struct poison_tick_crit_callback_t : public action_callback_t
 
   virtual void trigger (::action_t* a, void* /* call_data */)
   {
+    // TODO: fix? what about corrosive grenade, and corrosive dart?
     if (a->name_str == p()->abilities.acid_blade_poison)
     {
       p()->resource_gain( RESOURCE_ENERGY, p()->talents.lethal_purpose -> rank(), p()->gains.lethal_purpose );
