@@ -59,6 +59,30 @@ struct adrenaline_probe_t : public action_t
   }
 };
 
+// Explosive Probe | Sabotage Charge ========================================
+struct explosive_probe_t : public tech_attack_t
+{
+  explosive_probe_t( class_t* p, const std::string& n, const std::string& options_str) :
+    tech_attack_t( n, p )
+  {
+    // rank_level_list = { 50 };
+
+    parse_options( options_str );
+
+    base_cost                   = 20;
+    range                       = 30.0;
+    cooldown -> duration        = from_seconds( 30 );
+    dd.standardhealthpercentmin = 0.23;
+    dd.standardhealthpercentmax = 0.25;
+    dd.power_mod                = 2.4;
+  }
+  // TODO: explosive probe "attaches" to the target and detonates on damage
+  // (tooltip says damage. game data has text that says blaster damage)
+  // this is not implemented yet.
+  // also this can only be used from cover. Cover is not implemented yet.
+};
+
+
 // Rifle Shot | Flurry Of Bolts =========================================================
 struct rifle_shot_t : public range_attack_t
 {
@@ -201,6 +225,7 @@ struct poison_tick_crit_callback_t : public action_callback_t
                                     const std::string& options_str )
 {
   if ( name == abilities.adrenaline_probe ) return new adrenaline_probe_t ( this, name, options_str ) ;
+  if ( name == abilities.explosive_probe  ) return new explosive_probe_t  ( this, name, options_str ) ;
   if ( name == abilities.orbital_strike   ) return new orbital_strike_t   ( this, name, options_str ) ;
   if ( name == abilities.rifle_shot       ) return new rifle_shot_t       ( this, name, options_str ) ;
   if ( name == abilities.snipe            ) return new snipe_t            ( this, name, options_str ) ;

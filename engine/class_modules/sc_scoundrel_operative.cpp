@@ -938,25 +938,6 @@ struct weakening_blast_t : public range_attack_t
   }
 };
 
-// Explosive Probe | ??? ====================================================
-struct explosive_probe_t : public tech_attack_t
-{
-  explosive_probe_t( class_t* p, const std::string& n, const std::string& options_str) :
-    tech_attack_t( n, p )
-  {
-    // rank_level_list = { 50 };
-
-    parse_options( options_str );
-
-    base_cost                   = 20;
-    range                       = 30.0;
-    cooldown -> duration        = from_seconds( 30 );
-    dd.standardhealthpercentmin = 0.23;
-    dd.standardhealthpercentmax = 0.25;
-    dd.power_mod                = 2.4;
-  }
-};
-
 // Cloaking Screen | ??? ====================================================
 // "vanish" allows reusing hidden strike.
 
@@ -1059,7 +1040,6 @@ struct poison_tick_crit_callback_t : public action_callback_t
   if ( name == abilities.corrosive_dart        ) return new corrosive_dart_t        ( this, name, options_str ) ;
   if ( name == abilities.corrosive_grenade     ) return new corrosive_grenade_t     ( this, name, options_str ) ;
   if ( name == abilities.cull                  ) return new cull_t                  ( this, name, options_str ) ;
-  if ( name == abilities.explosive_probe       ) return new explosive_probe_t       ( this, name, options_str ) ;
   if ( name == abilities.fragmentation_grenade ) return new fragmentation_grenade_t ( this, name, options_str ) ;
   if ( name == abilities.hidden_strike         ) return new hidden_strike_t         ( this, name, options_str ) ;
   if ( name == abilities.laceration            ) return new laceration_t            ( this, name, options_str ) ;

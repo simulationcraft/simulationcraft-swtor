@@ -371,6 +371,8 @@ void class_t::init_actions()
     // guessing priority and optimal energy
     action_list_str += sl + abilities.orbital_strike + ",if=energy>65";
     // guessing priority and optimal energy
+    action_list_str += sl + abilities.explosive_probe + ",if=energy>80";
+    // guessing priority and optimal energy
     action_list_str += sl + abilities.snipe + ",if=energy>75";
     action_list_str += sl + abilities.rifle_shot;
   }
