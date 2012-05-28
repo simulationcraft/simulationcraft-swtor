@@ -37,6 +37,18 @@ public:
   };
   gains_t& gains;
 
+  struct procs_t
+  {
+    proc_t* corrosive_microbes;
+  };
+  procs_t& procs;
+
+  struct rngs_t
+  {
+    rng_t* corrosive_microbes;
+  };
+  rngs_t& rngs;
+
   struct benefits_t
   {
     benefit_t* devouring_microbes_ticks;
@@ -103,8 +115,8 @@ public:
   };
   abilities_t& abilities;
 
-  class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt, buffs_t& buffs, gains_t& gains, benefits_t& benefits, talents_t& talents, abilities_t& abilities ) :
-    player_t( sim, pt, name, rt ), energy_gains(), buffs(buffs), gains(gains), benefits(benefits), talents(talents), abilities(abilities)
+  class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt, buffs_t& buffs, gains_t& gains, procs_t& procs, rngs_t& rngs, benefits_t& benefits, talents_t& talents, abilities_t& abilities ) :
+    player_t( sim, pt, name, rt ), energy_gains(), buffs(buffs), gains(gains), procs(procs), rngs(rngs), benefits(benefits), talents(talents), abilities(abilities)
   {
     primary_attribute   = ATTR_CUNNING;
     secondary_attribute = ATTR_AIM;
@@ -179,6 +191,10 @@ public:
   virtual void init_actions();
 
   virtual void init_gains();
+
+  virtual void init_procs();
+
+  virtual void init_rng();
 
   virtual void create_talents();
 };

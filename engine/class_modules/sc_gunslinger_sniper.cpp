@@ -33,37 +33,31 @@ public:
   struct buffs_t:base_t::buffs_t
   {
     buff_t* followthrough;
-
   } buffs;
 
   // Gains
   struct gains_t:base_t::gains_t
   {
-
   } gains;
 
   // Procs
-  struct procs_t
+  struct procs_t:base_t::procs_t
   {
-
   } procs;
 
   // RNGs
-  struct rngs_t
+  struct rngs_t:base_t::rngs_t
   {
-
   } rngs;
 
   // Benefits
   struct benefits_t:base_t::benefits_t
   {
-
   } benefits;
 
   // Cooldowns
   struct cooldowns_t
   {
-
   } cooldowns;
 
   // Talents
@@ -139,7 +133,7 @@ public:
 
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
     // TODO CHECK WTF IA_SNIPER ? IA_SNIPER : S_GUNSLINGER? IA_SNIPER is a constant it will always be true..?
-    base_t( sim, pt == IA_SNIPER ? IA_SNIPER : S_GUNSLINGER, name, rt, buffs, gains, benefits, talents, abilities ),
+    base_t( sim, pt == IA_SNIPER ? IA_SNIPER : S_GUNSLINGER, name, rt, buffs, gains, procs, rngs, benefits, talents, abilities ),
     buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents()
   {
     tree_type[ IA_SNIPER_MARKSMANSHIP ] = TREE_MARKSMANSHIP;

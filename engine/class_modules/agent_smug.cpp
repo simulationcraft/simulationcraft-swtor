@@ -455,6 +455,30 @@ void class_t::init_gains()
   gains.lethal_purpose   = get_gain( abilities.lethal_purpose );
 }
 
+// class_t::init_procs ========================================
+
+void class_t::init_procs()
+{
+  base_t::init_procs();
+
+  bool is_op = ( type == IA_OPERATIVE );
+  const char* corrosive_microbes = is_op ? "Corrosive Microbes tick" : "Mortal Wounds tick" ;
+
+  procs.corrosive_microbes = get_proc( corrosive_microbes );
+}
+
+// class_t::init_rng ==========================================
+
+void class_t::init_rng()
+{
+  base_t::init_rng();
+
+  bool is_op = ( type == IA_OPERATIVE );
+  const char* corrosive_microbes = is_op ? "corrosive_microbes" : "mortal_wounds" ;
+
+  rngs.corrosive_microbes = get_rng( corrosive_microbes );
+}
+
 // class_t::init_actions ========================================
 
 void class_t::init_actions()

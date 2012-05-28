@@ -49,16 +49,14 @@ struct class_t : public agent_smug::class_t
   } gains;
 
   // Procs
-  struct procs_t
+  struct procs_t:base_t::procs_t
   {
-    proc_t* corrosive_microbes;
   } procs;
 
   // RNGs
-  struct rngs_t
+  struct rngs_t:base_t::rngs_t
   {
     rng_t* collateral_strike;
-    rng_t* corrosive_microbes;
   } rngs;
 
   // Benefits
@@ -154,7 +152,7 @@ struct class_t : public agent_smug::class_t
   action_t* acid_blade_poison;
 
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
-    base_t( sim, pt == IA_OPERATIVE ? IA_OPERATIVE : S_SCOUNDREL, name, rt, buffs, gains, benefits, talents, abilities ),
+    base_t( sim, pt == IA_OPERATIVE ? IA_OPERATIVE : S_SCOUNDREL, name, rt, buffs, gains, procs, rngs, benefits, talents, abilities ),
     buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents(), acid_blade_poison()
   {
     tree_type[ IA_OPERATIVE_MEDICINE    ] = TREE_MEDICINE;
@@ -1069,11 +1067,6 @@ void class_t::init_gains()
 void class_t::init_procs()
 {
   base_t::init_procs();
-
-  bool is_op = ( type == IA_OPERATIVE );
-  const char* corrosive_microbes = is_op ? "Corrosive Microbes tick" : "Mortal Wounds tick" ; 
-
-  procs.corrosive_microbes = get_proc( corrosive_microbes );
 }
 
 // class_t::init_rng ==========================================
@@ -1084,10 +1077,8 @@ void class_t::init_rng()
 
   bool is_op = ( type == IA_OPERATIVE );
   const char* collateral_strike  = is_op ? "collateral_strike"  : "flying_fists"  ; 
-  const char* corrosive_microbes = is_op ? "corrosive_microbes" : "mortal_wounds" ; 
 
   rngs.collateral_strike  = get_rng( collateral_strike  );
-  rngs.corrosive_microbes = get_rng( corrosive_microbes );
 }
 
 // class_t::init_actions ======================================
