@@ -59,6 +59,36 @@ struct adrenaline_probe_t : public action_t
   }
 };
 
+// Coordination | Lucky Shots ===============================================
+struct coordination_t : public action_t
+{
+  coordination_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    action_t( n, p, tech_policy, RESOURCE_NONE, SCHOOL_NONE )
+  {
+    parse_options( options_str );
+    base_cost = 0.0;
+  }
+
+  virtual void execute()
+  {
+    action_t::execute();
+
+    for ( player_t* p : list_range( sim -> player_list ) )
+    {
+      if ( p -> ooc_buffs() )
+        p -> buffs.coordination -> trigger();
+    }
+  }
+
+  virtual bool ready()
+  {
+    if ( player -> buffs.coordination -> check() )
+      return false;
+
+    return action_t::ready();
+  }
+};
+
 // Explosive Probe | Sabotage Charge ========================================
 struct explosive_probe_t : public tech_attack_t
 {
@@ -265,6 +295,7 @@ struct poison_tick_crit_callback_t : public action_callback_t
                                     const std::string& options_str )
 {
   if ( name == abilities.adrenaline_probe ) return new adrenaline_probe_t ( this, name, options_str ) ;
+  if ( name == abilities.coordination     ) return new coordination_t     ( this, name, options_str ) ;
   if ( name == abilities.explosive_probe  ) return new explosive_probe_t  ( this, name, options_str ) ;
   if ( name == abilities.orbital_strike   ) return new orbital_strike_t   ( this, name, options_str ) ;
   if ( name == abilities.rifle_shot       ) return new rifle_shot_t       ( this, name, options_str ) ;

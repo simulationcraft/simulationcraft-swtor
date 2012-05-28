@@ -10,6 +10,7 @@ use_pre_potion=0
 professions=armormech
 talents=http://www.torhead.com/skill-calc#700rcrbbkRRZrI0bRoZb.1
 actions=stim,type=exotech_skill
+actions+=/lucky_shots
 actions+=/snapshot_stats
 actions+=/take_cover,if=buff.cover.down
 actions+=/aimed_shot,if=energy>75

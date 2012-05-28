@@ -368,8 +368,7 @@ void class_t::init_actions()
   {
     action_list_default = true;
     action_list_str += "/stim,type=exotech_skill"
-      // TODO move coordiation from scoundrel_operative into agent_smug
-      //+ sl + abilities.coordination +
+      + sl + abilities.coordination +
       "/snapshot_stats";
 
     action_list_str += sl + abilities.take_cover + ",if=buff." + abilities.cover + ".down";

@@ -952,36 +952,6 @@ struct weakening_blast_t : public range_attack_t
 // aoe cc 5 targets 8 seconds.
 // flash powder talent reduces accuracy for 8 seconds after ends
 
-// Coordination | ??? =======================================================
-
-struct coordination_t : public action_t
-{
-  coordination_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    action_t( n, p, tech_policy, RESOURCE_NONE, SCHOOL_NONE )
-  {
-    parse_options( options_str );
-    base_cost = 0.0;
-  }
-
-  virtual void execute()
-  {
-    action_t::execute();
-
-    for ( player_t* p : list_range( sim -> player_list ) )
-    {
-      if ( p -> ooc_buffs() )
-        p -> buffs.coordination -> trigger();
-    }
-  }
-
-  virtual bool ready()
-  {
-    if ( player -> buffs.coordination -> check() )
-      return false;
-
-    return action_t::ready();
-  }
-};
 
 // ==========================================================================
 // Scoundrel / Operative Callbacks
@@ -1036,7 +1006,6 @@ struct poison_tick_crit_callback_t : public action_callback_t
 {
   if ( name == abilities.acid_blade            ) return new acid_blade_t            ( this, name, options_str ) ;
   if ( name == abilities.backstab              ) return new backstab_t              ( this, name, options_str ) ;
-  if ( name == abilities.coordination          ) return new coordination_t          ( this, name, options_str ) ;
   if ( name == abilities.corrosive_dart        ) return new corrosive_dart_t        ( this, name, options_str ) ;
   if ( name == abilities.corrosive_grenade     ) return new corrosive_grenade_t     ( this, name, options_str ) ;
   if ( name == abilities.cull                  ) return new cull_t                  ( this, name, options_str ) ;
