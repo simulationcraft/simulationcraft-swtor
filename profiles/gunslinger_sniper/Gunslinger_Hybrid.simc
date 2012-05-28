@@ -1,0 +1,41 @@
+#!./simc
+
+gunslinger="Gunslinger_Hybrid"
+origin="http://swtor.askmrrobot.com/character/87c412bc-724f-4727-bbf0-195052bc600e"
+level=50
+race=cyborg
+position=back
+role=dps
+use_pre_potion=0
+professions=armormech
+talents=http://www.torhead.com/skill-calc#700rcrbbkRRZrI0bRoZb.1
+actions=aimed_shot,if=energy>75
+actions+=/flurry_of_bolts
+head=rakata_field_techs_headgear,ilevel=58,quality=artifact,stats=645armor_124endurance_99cunning_57power_51accuracy
+ear=rakata_enforcers_device,ilevel=58,quality=artifact,stats=85endurance_103cunning_51accuracy_44crit
+chest=rakata_field_techs_jacket,ilevel=58,quality=artifact,stats=645armor_105endurance_122cunning_51accuracy_48crit
+waist=rakata_field_medics_belt,ilevel=58,quality=artifact,stats=403armor_71endurance_103cunning_11crit
+legs=rakata_field_techs_leggings,ilevel=58,quality=artifact,stats=645armor_116endurance_112cunning_51accuracy_48crit
+feet=rakata_field_techs_boots,ilevel=58,quality=artifact,stats=403armor_105endurance_122cunning_51accuracy_48crit
+wrists=rakata_enforcers_armguards,ilevel=58,quality=artifact,stats=403armor_71endurance_103cunning_11power
+hands=rakata_field_techs_gloves,ilevel=58,quality=artifact,stats=403armor_124endurance_99cunning_57power_51accuracy
+implant1=rakata_field_medics_enhancer,ilevel=58,quality=artifact,stats=85endurance_103cunning_44crit_51surge
+implant2=rakata_field_medics_enhancer,ilevel=58,quality=artifact,stats=85endurance_103cunning_44crit_51surge
+relic1=rakata_relic_of_boundless_ages,ilevel=58,quality=artifact,stats=77endurance,use=380power_120cd_20dur
+relic2=rakata_relic_of_forbidden_secrets,ilevel=58,quality=artifact,stats=77endurance,use=235crit_235surge_120cd_20dur
+main_hand=old_ironsights,ilevel=58,quality=artifact,stats=105endurance_122cunning_89power_612techpower_51accuracy,weapon=blasterpistol_268min_497max
+off_hand=ace_in_the_hole,ilevel=58,quality=artifact,stats=105endurance_122cunning_89power_612techpower_51accuracy,weapon=blasterpistol_268min_497max
+# Gear Summary
+# gear_cunning=1313
+# gear_endurance=1335
+# gear_accuracy_rating=408
+# gear_crit_rating=287
+# gear_armor=3547
+# gear_power=303
+# gear_techpower=1224
+# gear_surge_rating=102
+# Set Bonuses
+# set_bonus=rakata_field_techs_2pc
+# set_bonus=rakata_field_techs_4pc
+# main_hand=old_ironsights,weapon=blasterpistol_268min_497max
+# off_hand=ace_in_the_hole,weapon=blasterpistol_268min_497max
