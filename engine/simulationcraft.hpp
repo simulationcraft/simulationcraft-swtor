@@ -2704,6 +2704,7 @@ public:
   virtual void init_buffs();
   virtual void init_gains();
   virtual void init_procs();
+  virtual void init_cooldowns();
   virtual void init_uptimes();
   virtual void init_benefits();
   virtual void init_rng();
@@ -3473,6 +3474,11 @@ struct cooldown_t
     return diff;
   }
   const char* name() { return name_str.c_str(); }
+  void reduce( timespan_t amount=timespan_t::zero() )
+  {
+    if ( ready > sim -> current_time )
+      ready = ready - amount;
+  }
 };
 
 // DoT ======================================================================

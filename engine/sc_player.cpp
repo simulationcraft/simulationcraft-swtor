@@ -620,6 +620,7 @@ void player_t::init()
   init_actions();
   init_gains();
   init_procs();
+  init_cooldowns();
   init_uptimes();
   init_benefits();
   init_rng();
@@ -1276,6 +1277,11 @@ void player_t::init_uptimes()
 // player_t::init_benefits ===================================================
 
 void player_t::init_benefits()
+{ }
+
+// player_t::init_cooldowns  =================================================
+
+void player_t::init_cooldowns()
 { }
 
 // player_t::init_rng =======================================================

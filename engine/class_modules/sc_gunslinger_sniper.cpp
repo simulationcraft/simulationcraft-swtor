@@ -49,6 +49,7 @@ public:
   // RNGs
   struct rngs_t:base_t::rngs_t
   {
+    rng_t* reactive_shot;
   } rngs;
 
   // Benefits
@@ -59,6 +60,7 @@ public:
   // Cooldowns
   struct cooldowns_t
   {
+    cooldown_t* ambush;
   } cooldowns;
 
   // Talents
@@ -133,6 +135,8 @@ public:
 
     // buffs
     std::string snap_shot;
+    // rngs from talent
+    std::string reactive_shot;
   } abilities;
 
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
@@ -159,12 +163,15 @@ public:
   void      init_buffs();
   void      init_gains();
   void      init_procs();
+  void      init_cooldowns();
   void      init_rng();
   void      init_actions();
   role_type primary_role() const;
   double    tech_accuracy_chance() const;
   double    range_accuracy_chance() const;
   void      create_talents();
+
+  void      _trigger_reactive_shot();
 };
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
@@ -386,6 +393,13 @@ struct series_of_shots_t : public agent_smug::tech_attack_t
     may_crit                    = false;
     base_multiplier             += 0.03 * p -> talents.steady_shots -> rank();
   }
+
+  virtual void tick( dot_t* d )
+  {
+    base_t::tick( d );
+    if ( result == RESULT_CRIT )
+      dynamic_cast<class_t*>( player ) -> _trigger_reactive_shot();
+  }
 };
 
 // Snipe | Charged Burst ====================================================
@@ -414,8 +428,12 @@ struct snipe_t : public agent_smug::snipe_t
     class_t* p = dynamic_cast<class_t*>( player );
     if ( p -> buffs.snap_shot -> up() )
       p -> buffs.snap_shot -> expire();
+
+    if ( result == RESULT_CRIT )
+      p -> _trigger_reactive_shot();
   }
 };
+
 
 // TODO steady_shots also affects Cull, but we still need to move that from
 // scoundrel to agent
@@ -439,7 +457,13 @@ struct take_cover_t : public agent_smug::take_cover_t
   }
 };
 
-// Series of Shots | Speed Shot =============================================
+
+void class_t::_trigger_reactive_shot()
+{
+  unsigned rank = talents.reactive_shot -> rank();
+    if ( rank && rngs.reactive_shot -> roll ( rank * 0.5 ))
+      cooldowns.ambush -> reduce( from_seconds( 1 ) );
+}
 
 // ==========================================================================
 // Gunslinger / Sniper Callbacks
@@ -470,6 +494,7 @@ struct followthrough_trigger_callback_t : public action_callback_t
     }
   }
 };
+
 
 // ==========================================================================
 // Gunslinger / Sniper Character Definition
@@ -507,6 +532,8 @@ void class_t::init_abilities()
 
   // buffs
   abilities.snap_shot           = sn ? "snap_shot"           : "snap_shot"      ;
+  // rngs
+  abilities.reactive_shot       = sn ? "reactive_shot"       : "quick_aim"      ;
 
 }
 
@@ -620,11 +647,21 @@ void class_t::init_procs()
 
 }
 
+// class_t::init_cooldowns ======================================
+
+void class_t::init_cooldowns()
+{
+  base_t::init_cooldowns();
+
+  cooldowns.ambush = get_cooldown( abilities.ambush );
+}
+
 // class_t::init_rng ============================================
 
 void class_t::init_rng()
 {
   base_t::init_rng();
+  rngs.reactive_shot = get_rng( abilities.reactive_shot );
 
 }
 
@@ -658,7 +695,6 @@ void class_t::init_actions()
 
   // TODO test "on hit"
   register_attack_callback( RESULT_HIT_MASK, new followthrough_trigger_callback_t( this ) );
-
   base_t::init_actions();
 }
 
