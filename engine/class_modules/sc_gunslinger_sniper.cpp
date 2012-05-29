@@ -33,6 +33,7 @@ public:
   struct buffs_t:base_t::buffs_t
   {
     buff_t* followthrough;
+    buff_t* snap_shot;
   } buffs;
 
   // Gains
@@ -129,6 +130,9 @@ public:
     std::string followthrough;
     std::string interrogation_probe;
     std::string series_of_shots;
+
+    // buffs
+    std::string snap_shot;
   } abilities;
 
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
@@ -460,6 +464,9 @@ void class_t::init_abilities()
   abilities.interrogation_probe = sn ? "interrogation_probe" : "shock_charge"   ;
   abilities.series_of_shots     = sn ? "series_of_shots"     : "speed_shot"     ;
 
+  // buffs
+  abilities.snap_shot           = sn ? "snap_shot"           : "snap_shot"      ;
+
 }
 
 // class_t::init_talents ========================================
@@ -550,7 +557,10 @@ void class_t::init_buffs()
 {
   base_t::init_buffs();
 
+// buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
+
   buffs.followthrough = new buff_t( this , abilities.followthrough , 1 ,  from_seconds( 4.5 ) );
+  buffs.snap_shot     = new buff_t( this , abilities.snap_shot     , 1 ,  from_seconds( 10 ), from_seconds( 6 ), 0.5 * talents.snap_shot -> rank() );
 }
 
 // class_t::init_gains ==========================================
