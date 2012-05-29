@@ -9,7 +9,11 @@
 // Gunslinger | Sniper
 // ==========================================================================
 
+// TODO: find out if we need to bother implementing Sector Ranger
+// which reduces Orbital Strike cooldown when coverpulse activated
+
 namespace { // ANONYMOUS ====================================================
+
 
 namespace gunslinger_sniper { // ============================================
 
@@ -39,6 +43,7 @@ public:
   // Gains
   struct gains_t:base_t::gains_t
   {
+    gain_t* snipers_nest;
   } gains;
 
   // Procs
@@ -137,6 +142,8 @@ public:
     std::string snap_shot;
     // rngs from talent
     std::string reactive_shot;
+    // gains from talent
+    std::string snipers_nest;
   } abilities;
 
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
@@ -170,6 +177,9 @@ public:
   double    tech_accuracy_chance() const;
   double    range_accuracy_chance() const;
   void      create_talents();
+
+  double    energy_regen_per_second() const;
+  void      regen( timespan_t periodicity );
 
   void      _trigger_reactive_shot();
 };
@@ -461,6 +471,9 @@ struct take_cover_t : public agent_smug::take_cover_t
 };
 
 
+// ==========================================================================
+// Gunslinger / Sniper Utility
+// ==========================================================================
 void class_t::_trigger_reactive_shot()
 {
   unsigned rank = talents.reactive_shot -> rank();
@@ -537,7 +550,8 @@ void class_t::init_abilities()
   abilities.snap_shot           = sn ? "snap_shot"           : "snap_shot"      ;
   // rngs
   abilities.reactive_shot       = sn ? "reactive_shot"       : "quick_aim"      ;
-
+  // gains
+  abilities.snipers_nest        = sn ? "snipers_nest"        : "fox_hole"       ;
 }
 
 // class_t::init_talents ========================================
@@ -640,6 +654,7 @@ void class_t::init_gains()
 {
   base_t::init_gains();
 
+  gains.snipers_nest = get_gain( abilities.snipers_nest );
 }
 
 // class_t::init_procs ==========================================
@@ -712,6 +727,26 @@ double class_t::range_accuracy_chance() const
 {
   return base_t::range_accuracy_chance() + 0.01 * talents.marksmanship -> rank();
 }
+
+// class_t::energy_regen_per_second =============================
+// MIRROR CHANGES WITH regen BELOW
+double class_t::energy_regen_per_second() const
+{
+  double eps = base_t::energy_regen_per_second();
+  if ( talents.snipers_nest -> rank() && buffs.cover -> up() )
+    eps += 1;
+  return eps;
+}
+
+// class_t::regen ===============================================
+// MIRROR CHANGES WITH energy_regen_per_second ABOVE
+void class_t::regen( timespan_t periodicity )
+{
+  base_t::regen( periodicity );
+  if ( unsigned rank = talents.snipers_nest -> rank() && buffs.cover -> up() )
+    resource_gain( RESOURCE_ENERGY, to_seconds( periodicity ) * 0.1 * rank, gains.snipers_nest );
+}
+
 
 // class_t::primary_role ========================================
 

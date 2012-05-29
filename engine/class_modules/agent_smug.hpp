@@ -157,6 +157,7 @@ public:
 
   std::pair<int,gain_t*> energy_regen_bracket() const
   {
+    // TODO test: do these brackets change with snipers' Energy Tanks talent?
     if ( resource_current[ RESOURCE_ENERGY ] <= 20 )
       return std::make_pair( 2, energy_gains.minimum );
     else if ( resource_current[ RESOURCE_ENERGY ] <= 40 )
@@ -168,7 +169,7 @@ public:
   }
 
   virtual double energy_regen_per_second() const
-  { return energy_regen_bracket().first;; }
+  { return energy_regen_bracket().first; }
 
   virtual void regen( timespan_t periodicity )
   {
