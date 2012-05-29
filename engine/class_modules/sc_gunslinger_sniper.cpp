@@ -338,6 +338,7 @@ struct followthrough_t : public agent_smug::range_attack_t
     weapon                       = &( player -> main_hand_weapon );
     weapon_multiplier            = 0.51;
     base_crit                   += 0.02 * p -> talents.between_the_eyes -> rank();
+    crit_multiplier             += 0.1  * p -> talents.imperial_assassin -> rank();
   }
 
   virtual bool ready()
@@ -401,22 +402,23 @@ struct series_of_shots_t : public agent_smug::tech_attack_t
 
     parse_options( options_str );
 
-    base_cost                   = 20;
-    range                       = 35.0;
-    cooldown -> duration        = from_seconds( 15.0 );
-    channeled                   = true;
-    tick_zero                   = true;
-    num_ticks                   = 3;
-    base_tick_time              = from_seconds( 1 );
-    td.standardhealthpercentmin =
-    td.standardhealthpercentmax = 0.098;
-    td.weapon                   = &( player -> main_hand_weapon );
-    td.power_mod                = 0.98;
-    td.weapon_multiplier        = -0.348;
+    base_cost                    = 20;
+    range                        = 35.0;
+    cooldown -> duration         = from_seconds( 15.0 );
+    channeled                    = true;
+    tick_zero                    = true;
+    num_ticks                    = 3;
+    base_tick_time               = from_seconds( 1 );
+    td.standardhealthpercentmin  =
+    td.standardhealthpercentmax  = 0.098;
+    td.weapon                    = &( player -> main_hand_weapon );
+    td.power_mod                 = 0.98;
+    td.weapon_multiplier         = -0.348;
     // tick crits. the invisible execute hit shouldn't
-    may_crit                    = false;
-    base_multiplier             += 0.03 * p -> talents.steady_shots     -> rank();
-    base_crit                   += 0.02 * p -> talents.between_the_eyes -> rank();
+    may_crit                     = false;
+    base_multiplier             += 0.03 * p -> talents.steady_shots      -> rank();
+    base_crit                   += 0.02 * p -> talents.between_the_eyes  -> rank();
+    crit_multiplier             += 0.1  * p -> talents.imperial_assassin -> rank();
   }
 
   virtual void tick( dot_t* d )
@@ -503,6 +505,7 @@ struct takedown_t : public agent_smug::range_attack_t
     dd.power_mod                 = 2.7;
     weapon                       = &( player -> main_hand_weapon );
     weapon_multiplier            = 0.8;
+    crit_multiplier             += 0.1  * p -> talents.imperial_assassin -> rank();
   }
 
   virtual bool ready()
