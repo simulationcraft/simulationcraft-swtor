@@ -235,9 +235,9 @@ struct poison_attack_t : public agent_smug::poison_attack_t
 // ==========================================================================
 
 // Ambush | Aimed Shot ======================================================
-struct ambush_t : public agent_smug::range_attack_t
+struct ambush_t : public range_attack_t
 {
-  typedef agent_smug::range_attack_t base_t;
+  typedef range_attack_t base_t;
   ambush_t* offhand_attack;
 
   ambush_t( class_t* p, const std::string& n, const std::string& options_str,
@@ -276,6 +276,13 @@ struct ambush_t : public agent_smug::range_attack_t
       offhand_attack             = new ambush_t( p, n+"_offhand", options_str, true );
       add_child( offhand_attack );
     }
+  }
+
+  virtual void player_buff()
+  {
+    base_t::player_buff();
+    if ( p() -> talents.precision_ambush -> rank() )
+      player_armor_penetration -= 0.1;
   }
 
   virtual void execute()
