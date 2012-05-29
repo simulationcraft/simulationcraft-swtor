@@ -158,6 +158,8 @@ public:
   void      init_rng();
   void      init_actions();
   role_type primary_role() const;
+  double    tech_accuracy_chance() const;
+  double    range_accuracy_chance() const;
   void      create_talents();
 };
 
@@ -600,6 +602,18 @@ void class_t::init_actions()
   register_attack_callback( RESULT_HIT_MASK, new followthrough_trigger_callback_t( this ) );
 
   base_t::init_actions();
+}
+
+// class_t::tech_accuracy_chance ================================
+double class_t::tech_accuracy_chance() const
+{
+  return base_t::tech_accuracy_chance() + 0.01 * talents.marksmanship -> rank();
+}
+
+// class_t::range_accuracy_chance ===============================
+double class_t::range_accuracy_chance() const
+{
+  return base_t::range_accuracy_chance() + 0.01 * talents.marksmanship -> rank();
 }
 
 // class_t::primary_role ========================================
