@@ -391,15 +391,53 @@ struct series_of_shots_t : public agent_smug::tech_attack_t
 // Snipe | Charged Burst ====================================================
 struct snipe_t : public agent_smug::snipe_t
 {
+  typedef agent_smug::snipe_t base_t;
   snipe_t( class_t* p, const std::string& n, const std::string& options_str) :
     agent_smug::snipe_t( p, n, options_str )
   {
     base_multiplier             += 0.03 * p -> talents.steady_shots -> rank();
   }
+
+  virtual timespan_t execute_time() const
+  {
+    class_t* p = dynamic_cast<class_t*>( player );
+
+    if ( p -> buffs.snap_shot -> up() )
+      return timespan_t::zero();
+
+    return base_t::execute_time();
+  }
+
+  virtual void execute()
+  {
+    base_t::execute();
+    class_t* p = dynamic_cast<class_t*>( player );
+    if ( p -> buffs.snap_shot -> up() )
+      p -> buffs.snap_shot -> expire();
+  }
 };
 
 // TODO steady_shots also affects Cull, but we still need to move that from
 // scoundrel to agent
+
+// Take Cover | Take Cover ==================================================
+// REVIEW: could possibly do this as a trigger instead, but a trigger seems
+// unwieldy since it would get checked on every action and need to test on name
+struct take_cover_t : public agent_smug::take_cover_t
+{
+  typedef agent_smug::take_cover_t base_t;
+  take_cover_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    agent_smug::take_cover_t( p, n, options_str )
+  { }
+
+  virtual void execute()
+  {
+    base_t::execute();
+    class_t* p = dynamic_cast<class_t*>( player );
+    if ( p -> talents.snap_shot -> rank() && p -> buffs.cover -> up() )
+      p -> buffs.snap_shot -> trigger();
+  }
+};
 
 // Series of Shots | Speed Shot =============================================
 
@@ -445,7 +483,10 @@ struct followthrough_trigger_callback_t : public action_callback_t
   if ( name == abilities.followthrough       ) return new followthrough_t       ( this, name, options_str ) ;
   if ( name == abilities.interrogation_probe ) return new interrogation_probe_t ( this, name, options_str ) ;
   if ( name == abilities.series_of_shots     ) return new series_of_shots_t     ( this, name, options_str ) ;
+
+  // overridden
   if ( name == abilities.snipe               ) return new snipe_t               ( this, name, options_str ) ;
+  if ( name == abilities.take_cover          ) return new take_cover_t          ( this, name, options_str ) ;
 
   return base_t::create_action( name, options_str );
 }

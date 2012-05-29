@@ -324,6 +324,31 @@ struct snipe_t : public range_attack_t
   }
 };
 
+// Take Cover | Take Cover ==================================================
+
+struct take_cover_t : public action_t
+{
+  typedef action_t base_t;
+  take_cover_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    action_t( n, p, tech_policy, RESOURCE_ENERGY, SCHOOL_NONE )
+  {
+    parse_options( options_str );
+
+    trigger_gcd = timespan_t::zero();
+  }
+
+  void execute()
+  {
+    action_t::execute();
+
+    class_t& p = *cast();
+    if ( p.buffs.cover -> up() )
+      p.buffs.cover -> expire();
+    else
+      p.buffs.cover -> trigger();
+  }
+};
+
 
 } // namespace agent_smug ===================================================
 
