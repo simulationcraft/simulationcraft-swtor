@@ -132,7 +132,7 @@ struct explosive_probe_t : public tech_attack_t
   }
 };
 
-// Overload Shot | ??? ======================================================
+// Overload Shot | Quick Shot ===============================================
 
 struct overload_shot_t : public range_attack_t
 {
@@ -151,7 +151,7 @@ struct overload_shot_t : public range_attack_t
     weapon                      =  &( player -> main_hand_weapon );
     weapon_multiplier           =  -0.17;
     // TODO move this tidbit into scoundrel_operative: 15% comes from operative's "skirmisher" passive
-    base_multiplier             += ( player -> type == IA_OPERATIVE || S_SCOUNDREL ? 0.15 : 0 )
+    base_multiplier             += ( player -> type == IA_OPERATIVE || player -> type == S_SCOUNDREL ? 0.15 : 0 )
                                 +  .03 * p -> talents.cut_down->rank();
   }
 };
