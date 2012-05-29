@@ -179,7 +179,6 @@ struct class_t : public bount_troop::class_t
         tree_type[ BH_MERCENARY_BODYGUARD   ] = TREE_BODYGUARD;
         tree_type[ BH_MERCENARY_ARSENAL     ] = TREE_ARSENAL;
         tree_type[ BH_MERCENARY_PYROTECH    ] = TREE_PYROTECH;
-        cooldowns.unload = get_cooldown( "unload" );
       }
       else if ( type == T_COMMANDO )
       {
@@ -205,6 +204,7 @@ struct class_t : public bount_troop::class_t
     virtual void      init_buffs();
     virtual void      init_gains();
     virtual void      init_procs();
+    virtual void      init_cooldowns();
     virtual void      init_rng();
     virtual void      init_actions();
     virtual role_type primary_role() const;
@@ -1029,6 +1029,18 @@ void class_t::init_procs()
   const char* terminal_velocity = is_bh ? "Terminal Velocity" : "Penetrate Armor" ;
 
   procs.terminal_velocity = get_proc( terminal_velocity );
+}
+
+// class_t::init_cooldowns ================================================================
+
+void class_t::init_cooldowns()
+{
+  base_t::init_cooldowns();
+
+  bool is_bh = ( type == BH_MERCENARY );
+  const char* unload = is_bh ? "unload"    : "???" ;
+  cooldowns.unload = get_cooldown( unload );
+
 }
 
 // class_t::init_rng ======================================================================
