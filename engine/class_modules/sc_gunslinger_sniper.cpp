@@ -748,6 +748,8 @@ void class_t::init_base()
 
   default_distance = 3;
   distance = default_distance;
+  if ( unsigned rank = talents.energy_tanks -> rank() )
+    resource_base[ RESOURCE_ENERGY ] += 5 * rank;
 }
 
 // class_t::init_benefits =======================================
