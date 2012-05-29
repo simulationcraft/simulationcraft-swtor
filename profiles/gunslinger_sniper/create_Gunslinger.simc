@@ -1,7 +1,8 @@
 mrrobot=87c412bc-724f-4727-bbf0-195052bc600e
+talents=http://www.torhead.com/skill-calc#700rcrbbkRRZrI0bRoZb.1
 name=Gunslinger_Hybrid
 save=Gunslinger_Hybrid.simc
 
-#copy=Gunslinger_Hybrid,Gunslinger_Sharpshooter
-#talents=http://www.torhead.com/skill-calc#...
-#save=Gunslinger_Sharpshooter.simc
+copy=Gunslinger_Sharpshooter,Gunslinger_Hybrid
+talents=http://www.torhead.com/skill-calc#700rcrbbRsRGoZbcZh.1
+save=Gunslinger_Sharpshooter.simc

@@ -38,6 +38,7 @@ public:
   {
     buff_t* followthrough;
     buff_t* snap_shot;
+    buff_t* rapid_fire;
   } buffs;
 
   // Gains
@@ -66,6 +67,7 @@ public:
   struct cooldowns_t
   {
     cooldown_t* ambush;
+    cooldown_t* series_of_shots;
   } cooldowns;
 
   // Talents
@@ -98,7 +100,7 @@ public:
     talent_t* imperial_assassin;
     talent_t* siege_bunker;
     // t7
-    talent_t* rapid_fie;
+    talent_t* rapid_fire;
 
     // Engineering|Saboteur
     // t1
@@ -136,6 +138,7 @@ public:
     std::string ambush;
     std::string followthrough;
     std::string interrogation_probe;
+    std::string rapid_fire;
     std::string series_of_shots;
     std::string takedown;
 
@@ -378,6 +381,36 @@ struct interrogation_probe_t : public agent_smug::tech_attack_t
   // not implemented: cooldown resets if ends prematurely (target dies, dispelled).
 };
 
+// Rapid Fire | Rapid Fire ==================================================
+
+struct rapid_fire_t : public agent_smug::action_t
+{
+  typedef agent_smug::action_t base_t;
+
+  rapid_fire_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    action_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE )
+  {
+    check_talent( p -> talents.rapid_fire -> rank() );
+
+    parse_options( options_str );
+
+    cooldown -> duration = from_seconds( 90 );
+    // TODO find out if this triggers GCD, and if it can be used off GCD
+    //use_off_gcd = true;
+    //trigger_gcd = timespan_t::zero();
+  }
+
+  void execute()
+  {
+    base_t::execute();
+    class_t* p = dynamic_cast<class_t*>( player );
+
+    p -> buffs.rapid_fire -> trigger();
+    p -> cooldowns.series_of_shots -> reset();
+  }
+};
+
+
 // Orbital Strike | XS Freighter Flyby ======================================
 
 struct orbital_strike_t : public agent_smug::orbital_strike_t
@@ -421,11 +454,29 @@ struct series_of_shots_t : public agent_smug::tech_attack_t
     crit_multiplier             += 0.1  * p -> talents.imperial_assassin -> rank();
   }
 
+  virtual timespan_t execute_time() const
+  {
+
+    if ( dynamic_cast<class_t*>( player ) -> buffs.rapid_fire -> up() )
+      return timespan_t::zero();
+
+    return base_t::execute_time();
+  }
+
   virtual void tick( dot_t* d )
   {
     base_t::tick( d );
     if ( result == RESULT_CRIT )
       dynamic_cast<class_t*>( player ) -> _trigger_reactive_shot();
+  }
+
+  virtual void execute()
+  {
+    base_t::execute();
+
+    buff_t* rapid_fire = dynamic_cast<class_t*>( player ) -> buffs.rapid_fire;
+    if ( rapid_fire -> up() )
+      rapid_fire -> expire();
   }
 };
 
@@ -568,6 +619,7 @@ struct followthrough_trigger_callback_t : public action_callback_t
   if ( name == abilities.ambush              ) return new ambush_t              ( this, name, options_str ) ;
   if ( name == abilities.followthrough       ) return new followthrough_t       ( this, name, options_str ) ;
   if ( name == abilities.interrogation_probe ) return new interrogation_probe_t ( this, name, options_str ) ;
+  if ( name == abilities.rapid_fire          ) return new rapid_fire_t          ( this, name, options_str ) ;
   if ( name == abilities.series_of_shots     ) return new series_of_shots_t     ( this, name, options_str ) ;
   if ( name == abilities.takedown            ) return new takedown_t            ( this, name, options_str ) ;
 
@@ -591,6 +643,7 @@ void class_t::init_abilities()
   abilities.ambush              = sn ? "ambush"              : "aimed_shot"     ;
   abilities.followthrough       = sn ? "followthrough"       : "trickshot"      ;
   abilities.interrogation_probe = sn ? "interrogation_probe" : "shock_charge"   ;
+  abilities.rapid_fire          = sn ? "rapid_fire"          : "rapid_fire"     ;
   abilities.series_of_shots     = sn ? "series_of_shots"     : "speed_shot"     ;
   abilities.takedown            = sn ? "takedown"            : "quickdraw"      ;
 
@@ -635,7 +688,7 @@ void class_t::init_talents()
   talents.imperial_assassin                   = find_talent( "Imperial Assassin"                  );
   talents.siege_bunker                        = find_talent( "Siege Bunker"                       );
   // t7
-  talents.rapid_fie                           = find_talent( "Rapid Fire"                         );
+  talents.rapid_fire                          = find_talent( "Rapid Fire"                         );
 
   // Engineering|Saboteur
   // t1
@@ -694,6 +747,7 @@ void class_t::init_buffs()
 
   buffs.followthrough = new buff_t( this , abilities.followthrough , 1 ,  from_seconds( 4.5 ) );
   buffs.snap_shot     = new buff_t( this , abilities.snap_shot     , 1 ,  from_seconds( 10 ), from_seconds( 6 ), 0.5 * talents.snap_shot -> rank() );
+  buffs.rapid_fire    = new buff_t( this , abilities.rapid_fire    , 1 ,  from_seconds( 10 ) );
 }
 
 // class_t::init_gains ==========================================
@@ -719,7 +773,8 @@ void class_t::init_cooldowns()
 {
   base_t::init_cooldowns();
 
-  cooldowns.ambush = get_cooldown( abilities.ambush );
+  cooldowns.ambush          = get_cooldown( abilities.ambush );
+  cooldowns.series_of_shots = get_cooldown( abilities.series_of_shots );
 }
 
 // class_t::init_rng ============================================
@@ -751,6 +806,8 @@ void class_t::init_actions()
     action_list_str += sl + abilities.orbital_strike + ",if=energy>65";
     action_list_str += sl + abilities.takedown + ",if=energy>75";
     action_list_str += sl + abilities.series_of_shots + ",if=energy>80";
+    if ( talents.rapid_fire -> rank() )
+      action_list_str += sl + abilities.rapid_fire + ",if=cooldown." + abilities.series_of_shots + ".remains";
     if ( talents.followthrough -> rank() )
       action_list_str += sl + abilities.followthrough + ",if=buff." + abilities.followthrough + ".up";
     action_list_str += sl + abilities.explosive_probe + ",if=energy>80";

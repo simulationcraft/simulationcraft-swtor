@@ -1,15 +1,18 @@
 mrrobot=8b20594c-ca50-417d-9376-dd7596dad1d6
+talents=http://www.torhead.com/skill-calc#400rcrbbkRRZrI0bRoZb.1
 name=Sniper_Hybrid
 save=Sniper_Hybrid.simc
 
-#copy=Sniper_Hybrid,Sniper_Marksmanship
-#talents=http://www.torhead.com/skill-calc#...
-#save=Sniper_Marksmanship.simc
+copy=Sniper_Marksmanship,Sniper_Hybrid
+talents=http://www.torhead.com/skill-calc#700rcrbbRsRGoZbcZh.1
+save=Sniper_Marksmanship.simc
 
 #copy=Sniper_Hybrid,Sniper_Lethality
 #talents=http://www.torhead.com/skill-calc#...
+#name=Sniper_Lethality
 #save=Sniper_Lethality.simc
 
 #copy=Sniper_Hybrid,Sniper_Engineer
 #talents=http://www.torhead.com/skill-calc#...
+#name=Sniper_Engineer
 #save=Sniper_Engineer.simc
