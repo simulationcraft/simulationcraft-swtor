@@ -326,6 +326,7 @@ struct followthrough_t : public agent_smug::range_attack_t
     dd.power_mod                 = 2.27;
     weapon                       = &( player -> main_hand_weapon );
     weapon_multiplier            = 0.51;
+    base_crit                   += 0.02 * p -> talents.between_the_eyes -> rank();
   }
 
   virtual bool ready()
@@ -391,7 +392,8 @@ struct series_of_shots_t : public agent_smug::tech_attack_t
     td.weapon_multiplier        = -0.348;
     // tick crits. the invisible execute hit shouldn't
     may_crit                    = false;
-    base_multiplier             += 0.03 * p -> talents.steady_shots -> rank();
+    base_multiplier             += 0.03 * p -> talents.steady_shots     -> rank();
+    base_crit                   += 0.02 * p -> talents.between_the_eyes -> rank();
   }
 
   virtual void tick( dot_t* d )
@@ -410,6 +412,7 @@ struct snipe_t : public agent_smug::snipe_t
     agent_smug::snipe_t( p, n, options_str )
   {
     base_multiplier             += 0.03 * p -> talents.steady_shots -> rank();
+    base_crit                   += 0.02 * p -> talents.between_the_eyes -> rank();
   }
 
   virtual timespan_t execute_time() const
