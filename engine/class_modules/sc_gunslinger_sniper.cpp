@@ -37,14 +37,16 @@ public:
   struct buffs_t:base_t::buffs_t
   {
     buff_t* followthrough;
-    buff_t* snap_shot;
     buff_t* rapid_fire;
+    buff_t* snap_shot;
+    buff_t* sniper_volley;
   } buffs;
 
   // Gains
   struct gains_t:base_t::gains_t
   {
     gain_t* snipers_nest;
+    gain_t* sniper_volley;
   } gains;
 
   // Procs
@@ -144,6 +146,7 @@ public:
 
     // buffs
     std::string snap_shot;
+    std::string sniper_volley;
     // rngs from talent
     std::string reactive_shot;
     // gains from talent
@@ -184,6 +187,7 @@ public:
 
   double    energy_regen_per_second() const;
   void      regen( timespan_t periodicity );
+  double    alacrity() const;
 
   void      _trigger_reactive_shot();
 };
@@ -592,6 +596,7 @@ public:
   class_t* cast() const { return p(); }
 };
 
+// TODO trigger this manually in execute for each ability. too unwieldy for just 2 abilities
 struct followthrough_trigger_callback_t : public action_callback_t
 {
   followthrough_trigger_callback_t( class_t* p ) :
@@ -604,6 +609,20 @@ struct followthrough_trigger_callback_t : public action_callback_t
     {
       p() -> buffs.followthrough -> trigger();
     }
+  }
+};
+
+struct sniper_volley_callback_t : public action_callback_t
+{
+  sniper_volley_callback_t( class_t* p ) :
+    action_callback_t( p )
+  {}
+
+  virtual void trigger (::action_t* a, void* /* call_data */)
+  {
+    // TODO test what constitutes "blaster fire" assuming any weapon attack
+    if ( a -> weapon || a -> td.weapon )
+      p() -> buffs.sniper_volley -> trigger();
   }
 };
 
@@ -649,6 +668,7 @@ void class_t::init_abilities()
 
   // buffs
   abilities.snap_shot           = sn ? "snap_shot"           : "snap_shot"      ;
+  abilities.sniper_volley       = sn ? "sniper_volley"       : "burst_volley"   ;
   // rngs
   abilities.reactive_shot       = sn ? "reactive_shot"       : "quick_aim"      ;
   // gains
@@ -748,6 +768,7 @@ void class_t::init_buffs()
   buffs.followthrough = new buff_t( this , abilities.followthrough , 1 ,  from_seconds( 4.5 ) );
   buffs.snap_shot     = new buff_t( this , abilities.snap_shot     , 1 ,  from_seconds( 10 ), from_seconds( 6 ), 0.5 * talents.snap_shot -> rank() );
   buffs.rapid_fire    = new buff_t( this , abilities.rapid_fire    , 1 ,  from_seconds( 10 ) );
+  buffs.sniper_volley = new buff_t( this , abilities.sniper_volley , 1 ,  from_seconds( 10 ), from_seconds( 30 ), 0.05 * talents.sniper_volley -> rank() );
 }
 
 // class_t::init_gains ==========================================
@@ -756,7 +777,8 @@ void class_t::init_gains()
 {
   base_t::init_gains();
 
-  gains.snipers_nest = get_gain( abilities.snipers_nest );
+  gains.snipers_nest  = get_gain( abilities.snipers_nest  );
+  gains.sniper_volley = get_gain( abilities.sniper_volley );
 }
 
 // class_t::init_procs ==========================================
@@ -818,7 +840,15 @@ void class_t::init_actions()
   }
 
   // TODO test "on hit"
-  register_attack_callback( RESULT_HIT_MASK, new followthrough_trigger_callback_t( this ) );
+  if ( talents.followthrough -> rank() )
+    register_attack_callback( RESULT_HIT_MASK, new followthrough_trigger_callback_t( this ) );
+
+  if ( talents.sniper_volley -> rank() )
+  {
+    register_attack_callback( RESULT_HIT_MASK, new sniper_volley_callback_t( this ) );
+    register_tick_callback( RESULT_HIT_MASK, new sniper_volley_callback_t( this ) );
+  }
+
   base_t::init_actions();
 }
 
@@ -851,6 +881,16 @@ void class_t::regen( timespan_t periodicity )
   base_t::regen( periodicity );
   if ( talents.snipers_nest -> rank() && buffs.cover -> up() )
     resource_gain( RESOURCE_ENERGY, to_seconds( periodicity ) * 1, gains.snipers_nest );
+
+  if ( buffs.sniper_volley -> up() )
+    // using ERPS instead of directly checking gains as a kind of double check that ERPS is maintained
+    resource_gain( RESOURCE_ENERGY, to_seconds( periodicity ) * energy_regen_per_second(), gains.sniper_volley );
+}
+
+// class_t::alacrity ============================================
+double class_t::alacrity() const
+{
+  return base_t::alacrity() - ( buffs.sniper_volley -> up() ? 0.1 : 0 );
 }
 
 
