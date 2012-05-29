@@ -183,6 +183,8 @@ public:
   role_type primary_role() const;
   double    tech_accuracy_chance() const;
   double    range_accuracy_chance() const;
+  double    tech_crit_chance() const;
+  double    range_crit_chance() const;
   void      create_talents();
 
   double    energy_regen_per_second() const;
@@ -748,6 +750,8 @@ void class_t::init_base()
 
   default_distance = 3;
   distance = default_distance;
+  attribute_multiplier_initial[ ATTR_CUNNING ] += 0.03 * talents.gearhead -> rank();
+
   if ( unsigned rank = talents.energy_tanks -> rank() )
     resource_base[ RESOURCE_ENERGY ] += 5 * rank;
 }
@@ -864,6 +868,18 @@ double class_t::tech_accuracy_chance() const
 double class_t::range_accuracy_chance() const
 {
   return base_t::range_accuracy_chance() + 0.01 * talents.marksmanship -> rank();
+}
+
+// class_t::tech_crit_chance ====================================
+double class_t::tech_crit_chance() const
+{
+  return base_t::tech_crit_chance() + 0.01 * talents.lethality -> rank();
+}
+
+// class_t::range_crit_chance ===================================
+double class_t::range_crit_chance() const
+{
+  return base_t::range_crit_chance() + 0.01 * talents.lethality -> rank();
 }
 
 // class_t::energy_regen_per_second =============================
