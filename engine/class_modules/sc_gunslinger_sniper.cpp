@@ -137,6 +137,7 @@ public:
     std::string followthrough;
     std::string interrogation_probe;
     std::string series_of_shots;
+    std::string takedown;
 
     // buffs
     std::string snap_shot;
@@ -482,6 +483,35 @@ struct take_cover_t : public agent_smug::take_cover_t
   }
 };
 
+// Takedown | Quickdraw =====================================================
+struct takedown_t : public agent_smug::range_attack_t
+{
+  typedef agent_smug::range_attack_t base_t;
+
+  takedown_t( class_t* p, const std::string& n, const std::string& options_str) :
+    range_attack_t( n, p )
+  {
+    // rank_level_list = { ... ,50 };
+
+    parse_options( options_str );
+
+    base_cost                    = 15;
+    cooldown -> duration         = from_seconds( 12 );
+    range                        = 35.0;
+    dd.standardhealthpercentmin  =
+    dd.standardhealthpercentmax  = 0.27;
+    dd.power_mod                 = 2.7;
+    weapon                       = &( player -> main_hand_weapon );
+    weapon_multiplier            = 0.8;
+  }
+
+  virtual bool ready()
+  {
+    if ( target->health_percentage() >= 30 )
+      return false;
+    return base_t::ready();
+  }
+};
 
 // ==========================================================================
 // Gunslinger / Sniper Utility
@@ -536,6 +566,7 @@ struct followthrough_trigger_callback_t : public action_callback_t
   if ( name == abilities.followthrough       ) return new followthrough_t       ( this, name, options_str ) ;
   if ( name == abilities.interrogation_probe ) return new interrogation_probe_t ( this, name, options_str ) ;
   if ( name == abilities.series_of_shots     ) return new series_of_shots_t     ( this, name, options_str ) ;
+  if ( name == abilities.takedown            ) return new takedown_t            ( this, name, options_str ) ;
 
   // overridden
   if ( name == abilities.snipe               ) return new snipe_t               ( this, name, options_str ) ;
@@ -558,6 +589,7 @@ void class_t::init_abilities()
   abilities.followthrough       = sn ? "followthrough"       : "trickshot"      ;
   abilities.interrogation_probe = sn ? "interrogation_probe" : "shock_charge"   ;
   abilities.series_of_shots     = sn ? "series_of_shots"     : "speed_shot"     ;
+  abilities.takedown            = sn ? "takedown"            : "quickdraw"      ;
 
   // buffs
   abilities.snap_shot           = sn ? "snap_shot"           : "snap_shot"      ;
@@ -714,6 +746,7 @@ void class_t::init_actions()
     if ( talents.interrogation_probe -> rank() )
       action_list_str += sl + abilities.interrogation_probe + ",if=energy>65";
     action_list_str += sl + abilities.orbital_strike + ",if=energy>65";
+    action_list_str += sl + abilities.takedown + ",if=energy>75";
     action_list_str += sl + abilities.series_of_shots + ",if=energy>80";
     if ( talents.followthrough -> rank() )
       action_list_str += sl + abilities.followthrough + ",if=buff." + abilities.followthrough + ".up";

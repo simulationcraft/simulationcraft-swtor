@@ -15,9 +15,10 @@ actions+=/snapshot_stats
 actions+=/take_cover,if=buff.cover.down
 actions+=/shock_charge,if=energy>65
 actions+=/xs_freighter_flyby,if=energy>65
+actions+=/quickdraw,if=energy>75
 actions+=/speed_shot,if=energy>80
-actions+=/sabotage_charge,if=energy>80
 actions+=/trickshot,if=buff.trickshot.up
+actions+=/sabotage_charge,if=energy>80
 actions+=/aimed_shot,if=energy>75
 actions+=/charged_burst,if=energy>95
 actions+=/flurry_of_bolts

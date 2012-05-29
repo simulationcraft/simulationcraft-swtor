@@ -15,9 +15,10 @@ actions+=/snapshot_stats
 actions+=/take_cover,if=buff.cover.down
 actions+=/interrogation_probe,if=energy>65
 actions+=/orbital_strike,if=energy>65
+actions+=/takedown,if=energy>75
 actions+=/series_of_shots,if=energy>80
-actions+=/explosive_probe,if=energy>80
 actions+=/followthrough,if=buff.followthrough.up
+actions+=/explosive_probe,if=energy>80
 actions+=/ambush,if=energy>75
 actions+=/snipe,if=energy>95
 actions+=/rifle_shot
