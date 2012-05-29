@@ -433,7 +433,7 @@ struct backstab_t : public consume_acid_blade_attack_t
     base_multiplier            += p -> talents.surgical_strikes         -> rank()   * 0.02
                                +  p -> talents.waylay                   -> rank()   * 0.04;
     base_crit                  += p -> talents.concealed_attacks        -> rank()   * 0.08
-                               +  p -> set_bonus.rakata_enforcers       -> two_pc() ? 0.15 : 0;
+                               +  ( p -> set_bonus.rakata_enforcers       -> two_pc() ? 0.15 : 0);
     crit_bonus                 += p -> talents.meticulously_kept_blades -> rank()   * 0.1;
   }
 };
