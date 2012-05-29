@@ -328,8 +328,8 @@ struct followthrough_t : public agent_smug::range_attack_t
 
     parse_options( options_str );
 
-    base_cost                    = 10;
-    cooldown -> duration         = from_seconds( 9 );
+    base_cost                    = 10 - 2 * p -> talents.recoil_control -> rank();
+    cooldown -> duration         = from_seconds( 9 - 1.5 * p -> talents.recoil_control -> rank() );
     range                        = 35.0;
     dd.standardhealthpercentmin  =
     dd.standardhealthpercentmax  = 0.227;
