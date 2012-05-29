@@ -236,36 +236,6 @@ struct rifle_shot_t : public range_attack_t
   }
 };
 
-// Snipe | Charged Burst ====================================================
-
-struct snipe_t : public range_attack_t
-{
-  typedef range_attack_t base_t;
-  snipe_t( class_t* p, const std::string& n, const std::string& options_str) :
-    range_attack_t( n, p )
-  {
-
-    parse_options( options_str );
-
-    range = ( player -> type == IA_SNIPER || player -> type == S_GUNSLINGER ) ? 35 : 30.0;
-
-    base_cost                   = 20;
-    base_execute_time           = from_seconds( 1.5 );
-    dd.power_mod                = 1.85;
-    dd.standardhealthpercentmin =
-    dd.standardhealthpercentmax = 0.185;
-    weapon                      = &( player->main_hand_weapon );
-    weapon_multiplier           = 0.23;
-  }
-
-  virtual bool ready()
-  {
-    // TODO only ready if in cover
-    // cover not yet implemented
-    return base_t::ready();
-  }
-};
-
 // Take Cover | Take Cover ==================================================
 
 struct take_cover_t : public action_t

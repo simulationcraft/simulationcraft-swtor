@@ -371,8 +371,24 @@ struct series_of_shots_t : public agent_smug::tech_attack_t
     td.weapon_multiplier        = -0.348;
     // tick crits. the invisible execute hit shouldn't
     may_crit                    = false;
+    base_multiplier             += 0.03 * p -> talents.steady_shots -> rank();
   }
 };
+
+// Snipe | Charged Burst ====================================================
+struct snipe_t : public agent_smug::snipe_t
+{
+  snipe_t( class_t* p, const std::string& n, const std::string& options_str) :
+    agent_smug::snipe_t( p, n, options_str )
+  {
+    base_multiplier             += 0.03 * p -> talents.steady_shots -> rank();
+  }
+};
+
+// TODO steady_shots also affects Cull, but we still need to move that from
+// scoundrel to agent
+
+// Series of Shots | Speed Shot =============================================
 
 // ==========================================================================
 // Gunslinger / Sniper Callbacks
@@ -416,6 +432,8 @@ struct followthrough_trigger_callback_t : public action_callback_t
   if ( name == abilities.followthrough       ) return new followthrough_t       ( this, name, options_str ) ;
   if ( name == abilities.interrogation_probe ) return new interrogation_probe_t ( this, name, options_str ) ;
   if ( name == abilities.series_of_shots     ) return new series_of_shots_t     ( this, name, options_str ) ;
+  if ( name == abilities.snipe               ) return new snipe_t               ( this, name, options_str ) ;
+
   return base_t::create_action( name, options_str );
 }
 
