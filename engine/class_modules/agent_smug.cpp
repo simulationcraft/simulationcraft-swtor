@@ -173,7 +173,8 @@ struct overload_shot_t : public range_attack_t
     dd.power_mod                =  1.24;
     weapon                      =  &( player -> main_hand_weapon );
     weapon_multiplier           =  -0.17;
-    base_multiplier             += 0.15 // passive: skirmisher
+    // TODO move this tidbit into scoundrel_operative: 15% comes from operative's "skirmisher" passive
+    base_multiplier             += ( player -> type == IA_OPERATIVE || S_SCOUNDREL ? 0.15 : 0 )
                                 +  .03 * p -> talents.cut_down->rank();
   }
 };
