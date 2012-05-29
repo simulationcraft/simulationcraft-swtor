@@ -849,8 +849,8 @@ double class_t::energy_regen_per_second() const
 void class_t::regen( timespan_t periodicity )
 {
   base_t::regen( periodicity );
-  if ( unsigned rank = talents.snipers_nest -> rank() && buffs.cover -> up() )
-    resource_gain( RESOURCE_ENERGY, to_seconds( periodicity ) * 0.1 * rank, gains.snipers_nest );
+  if ( talents.snipers_nest -> rank() && buffs.cover -> up() )
+    resource_gain( RESOURCE_ENERGY, to_seconds( periodicity ) * 1, gains.snipers_nest );
 }
 
 
