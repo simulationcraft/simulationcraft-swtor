@@ -376,6 +376,18 @@ struct interrogation_probe_t : public agent_smug::tech_attack_t
   // not implemented: cooldown resets if ends prematurely (target dies, dispelled).
 };
 
+// Orbital Strike | XS Freighter Flyby ======================================
+
+struct orbital_strike_t : public agent_smug::orbital_strike_t
+{
+  orbital_strike_t( class_t* p, const std::string& n, const std::string& options_str) :
+      agent_smug::orbital_strike_t( p, n, options_str )
+  {
+    if ( unsigned rank = p -> talents.pillbox_sniper -> rank() )
+    cooldown -> duration -= from_seconds( 7.5 * rank );
+  }
+};
+
 // Series of Shots | Speed Shot =============================================
 struct series_of_shots_t : public agent_smug::tech_attack_t
 {
@@ -528,6 +540,7 @@ struct followthrough_trigger_callback_t : public action_callback_t
   // overridden
   if ( name == abilities.snipe               ) return new snipe_t               ( this, name, options_str ) ;
   if ( name == abilities.take_cover          ) return new take_cover_t          ( this, name, options_str ) ;
+  if ( name == abilities.orbital_strike      ) return new orbital_strike_t      ( this, name, options_str ) ;
 
   return base_t::create_action( name, options_str );
 }

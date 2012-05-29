@@ -350,6 +350,28 @@ struct take_cover_t : public action_t
   }
 };
 
+// Orbital Strike | XS Freighter Flyby ======================================
+
+struct orbital_strike_t : public tech_attack_t
+{
+  orbital_strike_t( class_t* p, const std::string& n, const std::string& options_str) :
+      tech_attack_t( n, p, SCHOOL_ELEMENTAL )
+  {
+    parse_options( options_str );
+
+    base_cost                   = 30;
+    range                       = 30.0;
+    cooldown -> duration        = from_seconds( 60 );
+    td.standardhealthpercentmin =
+    td.standardhealthpercentmax = 0.177;
+    td.power_mod                = 1.77;
+    num_ticks                   = 3; // TODO: sniper set bonus? +1 tick
+    base_tick_time              = from_seconds( 3 );
+    base_execute_time           = from_seconds( 3 );
+
+    aoe = 99; // TODO FIX: unlimited. "all targets in area"
+  }
+};
 
 } // namespace agent_smug ===================================================
 
