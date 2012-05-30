@@ -346,8 +346,13 @@ struct ambush_t : public range_attack_t
 struct explosive_probe_t : public agent_smug::explosive_probe_t
 {
   typedef agent_smug::explosive_probe_t base_t;
+
+  targetdata_t* targetdata() const { return static_cast<targetdata_t*>( agent_smug::action_t::targetdata() ); }
+  class_t* p() const { return static_cast<class_t*>( player ); }
+  class_t* cast() const { return static_cast<class_t*>( player ); }
+
   explosive_probe_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    agent_smug::explosive_probe_t( p, n, options_str )
+    base_t( p, n, options_str )
   {
     base_cost       -= 2 * p -> talents.efficient_engineering -> rank();
     base_multiplier += 0.05 * p -> talents.explosive_engineering -> rank();
@@ -359,20 +364,19 @@ struct explosive_probe_t : public agent_smug::explosive_probe_t
 
   virtual double cost() const
   {
-    class_t& p = *dynamic_cast<class_t*>( player );
-    return p.buffs.energy_overrides -> up()
-      ? base_t::cost() * ( 1 - 0.5 * p.talents.energy_overrides -> rank() )
-      : base_t::cost();
+    return p() -> buffs.energy_overrides -> up()
+        ? base_t::cost() * ( 1 - 0.5 * p() -> talents.energy_overrides -> rank() )
+        : base_t::cost();
   }
 
   virtual void execute()
   {
     base_t::execute();
-    class_t& p = *dynamic_cast<class_t*>( player );
-    p.buffs.energy_overrides -> expire();
-    if ( p.talents.cluster_bombs && result_is_hit() )
+
+    p() -> buffs.energy_overrides -> expire();
+    if ( p() -> talents.cluster_bombs && result_is_hit() )
     {
-      buff_t* cluster_bombs = dynamic_cast<gunslinger_sniper::targetdata_t*>( targetdata() ) -> debuff_cluster_bombs;
+      buff_t* cluster_bombs = targetdata() -> debuff_cluster_bombs;
       if ( cluster_bombs -> up() )
         // REVIEW for normal buffs would just use trigger, but this is in reverse. so trigger decrements
         // once it is up. how to best get it up to max stacks?
@@ -384,12 +388,12 @@ struct explosive_probe_t : public agent_smug::explosive_probe_t
 };
 
 // EMP Discharge | Sabotage =================================================
-struct emp_discharge_t : public agent_smug::tech_attack_t
+struct emp_discharge_t : public tech_attack_t
 {
-  typedef agent_smug::tech_attack_t base_t;
+  typedef tech_attack_t base_t;
 
   emp_discharge_t( class_t* p, const std::string& n, const std::string& options_str) :
-    agent_smug::tech_attack_t( n, p, SCHOOL_ENERGY )
+    base_t( n, p, SCHOOL_ENERGY )
   {
     check_talent( p -> talents.emp_discharge -> rank() );
 
@@ -407,32 +411,30 @@ struct emp_discharge_t : public agent_smug::tech_attack_t
 
   virtual bool ready()
   {
-      return dynamic_cast<gunslinger_sniper::targetdata_t*>( targetdata() ) -> dot_interrogation_probe.ticking
-        ? base_t::ready() : false;
+    return targetdata() -> dot_interrogation_probe.ticking ? base_t::ready() : false;
   }
 
   virtual void execute()
   {
-      // REVIEW: or reset()?
-      dynamic_cast<gunslinger_sniper::targetdata_t*>( targetdata() ) -> dot_interrogation_probe.cancel();
-      class_t& p = *dynamic_cast<class_t*>( player );
-      p.cooldowns.interrogation_probe -> reset();
-      p.cooldowns.adrenaline_probe -> reset();
-      if ( p.talents.energy_overrides -> rank() )
-        p.buffs.energy_overrides -> trigger();
+    // REVIEW: or reset()?
+    targetdata() -> dot_interrogation_probe.cancel();
+    p() -> cooldowns.interrogation_probe -> reset();
+    p() -> cooldowns.adrenaline_probe -> reset();
+    if ( p() -> talents.energy_overrides -> rank() )
+      p() -> buffs.energy_overrides -> trigger();
 
-      base_t::execute();
+    base_t::execute();
   }
 };
 
 
 // Followthrough | Trickshot ================================================
-struct followthrough_t : public agent_smug::range_attack_t
+struct followthrough_t : public range_attack_t
 {
-  typedef agent_smug::range_attack_t base_t;
+  typedef range_attack_t base_t;
 
   followthrough_t( class_t* p, const std::string& n, const std::string& options_str) :
-    range_attack_t( n, p )
+    base_t( n, p )
   {
     check_talent( p -> talents.followthrough -> rank() );
 
@@ -454,7 +456,7 @@ struct followthrough_t : public agent_smug::range_attack_t
 
   virtual bool ready()
   {
-    if ( static_cast<class_t*>(p())-> buffs.followthrough -> up() )
+    if ( p()-> buffs.followthrough -> up() )
       return base_t::ready();
     else
       return false;
@@ -462,12 +464,12 @@ struct followthrough_t : public agent_smug::range_attack_t
 };
 
 // Interrogation Probe | Shock Charge =======================================
-struct interrogation_probe_t : public agent_smug::tech_attack_t
+struct interrogation_probe_t : public tech_attack_t
 {
-  typedef agent_smug::tech_attack_t base_t;
+  typedef tech_attack_t base_t;
 
   interrogation_probe_t( class_t* p, const std::string& n, const std::string& options_str) :
-    tech_attack_t( n, p, SCHOOL_ENERGY )
+    base_t( n, p, SCHOOL_ENERGY )
   {
     check_talent( p -> talents.interrogation_probe -> rank() );
 
@@ -490,16 +492,16 @@ struct interrogation_probe_t : public agent_smug::tech_attack_t
 };
 
 // Plasma Probe | Incendiary Grenade ========================================
-struct plasma_probe_t : public agent_smug::tech_attack_t
+struct plasma_probe_t : public tech_attack_t
 {
-  typedef agent_smug::action_t base_t;
+  typedef tech_attack_t base_t;
 
   // 1.2 plasma probe hits hard and fast for 4 ticks, then slow and weaker for remaining 5
   plasma_probe_t* weaker_attack;
 
   plasma_probe_t( class_t* p, const std::string& n, const std::string& options_str,
      bool is_weaker_attack=false ) :
-    agent_smug::tech_attack_t( n, p, SCHOOL_ELEMENTAL ),
+    base_t( n, p, SCHOOL_ELEMENTAL ),
     weaker_attack( 0 )
   {
     check_talent( p -> talents.plasma_probe -> rank() );
@@ -536,16 +538,15 @@ struct plasma_probe_t : public agent_smug::tech_attack_t
 
   virtual double cost() const
   {
-    class_t& p = *dynamic_cast<class_t*>( player );
-    return p.buffs.energy_overrides -> up()
-      ? base_t::cost() * ( 1 - 0.5 * p.talents.energy_overrides -> rank() )
+    return p() -> buffs.energy_overrides -> up()
+      ? base_t::cost() * ( 1 - 0.5 * p() -> talents.energy_overrides -> rank() )
       : base_t::cost();
   }
 
   virtual void execute()
   {
     base_t::execute();
-    dynamic_cast<class_t*>( player ) -> buffs.energy_overrides -> expire();
+    p() -> buffs.energy_overrides -> expire();
   }
 
   virtual void last_tick(dot_t* d)
@@ -558,12 +559,12 @@ struct plasma_probe_t : public agent_smug::tech_attack_t
 
 // Rapid Fire | Rapid Fire ==================================================
 
-struct rapid_fire_t : public agent_smug::action_t
+struct rapid_fire_t : public action_t
 {
-  typedef agent_smug::action_t base_t;
+  typedef action_t base_t;
 
   rapid_fire_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    action_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE )
+    base_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE )
   {
     check_talent( p -> talents.rapid_fire -> rank() );
 
@@ -578,10 +579,9 @@ struct rapid_fire_t : public agent_smug::action_t
   void execute()
   {
     base_t::execute();
-    class_t* p = dynamic_cast<class_t*>( player );
 
-    p -> buffs.rapid_fire -> trigger();
-    p -> cooldowns.series_of_shots -> reset();
+    p() -> buffs.rapid_fire -> trigger();
+    p() -> cooldowns.series_of_shots -> reset();
   }
 };
 
@@ -590,8 +590,10 @@ struct rapid_fire_t : public agent_smug::action_t
 
 struct orbital_strike_t : public agent_smug::orbital_strike_t
 {
+  typedef agent_smug::orbital_strike_t base_t;
+
   orbital_strike_t( class_t* p, const std::string& n, const std::string& options_str) :
-      agent_smug::orbital_strike_t( p, n, options_str )
+      base_t( p, n, options_str )
   {
     cooldown -> duration -= from_seconds( 7.5 * p -> talents.pillbox_sniper -> rank() );
     cooldown -> duration -= from_seconds( 1 * p -> talents.sector_ranger -> rank() );
@@ -601,12 +603,12 @@ struct orbital_strike_t : public agent_smug::orbital_strike_t
 };
 
 // Series of Shots | Speed Shot =============================================
-struct series_of_shots_t : public agent_smug::tech_attack_t
+struct series_of_shots_t : public tech_attack_t
 {
-  typedef agent_smug::tech_attack_t base_t;
+  typedef tech_attack_t base_t;
 
   series_of_shots_t( class_t* p, const std::string& n, const std::string& options_str) :
-    tech_attack_t( n, p, SCHOOL_ENERGY )
+    base_t( n, p, SCHOOL_ENERGY )
   {
     // rank_level_list = { ... , 50 };
 
@@ -634,7 +636,7 @@ struct series_of_shots_t : public agent_smug::tech_attack_t
   virtual timespan_t execute_time() const
   {
 
-    if ( dynamic_cast<class_t*>( player ) -> buffs.rapid_fire -> up() )
+    if ( p() -> buffs.rapid_fire -> up() )
       return timespan_t::zero();
 
     return base_t::execute_time();
@@ -644,14 +646,14 @@ struct series_of_shots_t : public agent_smug::tech_attack_t
   {
     base_t::tick( d );
     if ( result == RESULT_CRIT )
-      dynamic_cast<class_t*>( player ) -> _trigger_reactive_shot();
+      p() -> _trigger_reactive_shot();
   }
 
   virtual void execute()
   {
     base_t::execute();
 
-    buff_t* rapid_fire = dynamic_cast<class_t*>( player ) -> buffs.rapid_fire;
+    buff_t* rapid_fire = p() -> buffs.rapid_fire;
     if ( rapid_fire -> up() )
       rapid_fire -> expire();
   }
@@ -665,8 +667,13 @@ struct series_of_shots_t : public agent_smug::tech_attack_t
 struct snipe_t : public agent_smug::snipe_t
 {
   typedef agent_smug::snipe_t base_t;
+
+  targetdata_t* targetdata() const { return static_cast<targetdata_t*>( agent_smug::action_t::targetdata() ); }
+  class_t* p() const { return static_cast<class_t*>( player ); }
+  class_t* cast() const { return static_cast<class_t*>( player ); }
+
   snipe_t( class_t* p, const std::string& n, const std::string& options_str) :
-    agent_smug::snipe_t( p, n, options_str )
+    base_t( p, n, options_str )
   {
     base_multiplier             += 0.03 * p -> talents.steady_shots -> rank();
     base_crit                   += 0.02 * p -> talents.between_the_eyes -> rank();
@@ -674,9 +681,7 @@ struct snipe_t : public agent_smug::snipe_t
 
   virtual timespan_t execute_time() const
   {
-    class_t* p = dynamic_cast<class_t*>( player );
-
-    if ( p -> buffs.snap_shot -> up() )
+    if ( p() -> buffs.snap_shot -> up() )
       return timespan_t::zero();
 
     return base_t::execute_time();
@@ -685,20 +690,22 @@ struct snipe_t : public agent_smug::snipe_t
   virtual void execute()
   {
     base_t::execute();
-    class_t* p = dynamic_cast<class_t*>( player );
-    if ( p -> buffs.snap_shot -> up() )
-      p -> buffs.snap_shot -> expire();
+
+    if ( p() -> buffs.snap_shot -> up() )
+      p() -> buffs.snap_shot -> expire();
 
     if ( result == RESULT_CRIT )
-      p -> _trigger_reactive_shot();
+      p() -> _trigger_reactive_shot();
   }
 };
 
 // Fragmentation Grenade | Thermal Grenade ==================================
 struct fragmentation_grenade_t : public agent_smug::fragmentation_grenade_t
 {
+  typedef agent_smug::fragmentation_grenade_t base_t;
+
   fragmentation_grenade_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    agent_smug::fragmentation_grenade_t( p, n, options_str )
+    base_t( p, n, options_str )
   {
     cooldown -> duration = from_seconds( 6 - 1.5 * p -> talents.engineers_tool_belt -> rank() );
     base_multiplier += 0.05 * p -> talents.explosive_engineering -> rank();
@@ -718,26 +725,30 @@ struct fragmentation_grenade_t : public agent_smug::fragmentation_grenade_t
 struct take_cover_t : public agent_smug::take_cover_t
 {
   typedef agent_smug::take_cover_t base_t;
+
+  targetdata_t* targetdata() const { return static_cast<targetdata_t*>( agent_smug::action_t::targetdata() ); }
+  class_t* p() const { return static_cast<class_t*>( player ); }
+  class_t* cast() const { return static_cast<class_t*>( player ); }
+
   take_cover_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    agent_smug::take_cover_t( p, n, options_str )
-  { }
+    base_t( p, n, options_str )
+  {}
 
   virtual void execute()
   {
     base_t::execute();
-    class_t* p = dynamic_cast<class_t*>( player );
-    if ( p -> talents.snap_shot -> rank() && p -> buffs.cover -> up() )
-      p -> buffs.snap_shot -> trigger();
+    if ( p() -> talents.snap_shot -> rank() && p() -> buffs.cover -> up() )
+      p() -> buffs.snap_shot -> trigger();
   }
 };
 
 // Takedown | Quickdraw =====================================================
-struct takedown_t : public agent_smug::range_attack_t
+struct takedown_t : public range_attack_t
 {
-  typedef agent_smug::range_attack_t base_t;
+  typedef range_attack_t base_t;
 
   takedown_t( class_t* p, const std::string& n, const std::string& options_str) :
-    range_attack_t( n, p )
+    base_t( n, p )
   {
     // rank_level_list = { ... ,50 };
 
@@ -819,12 +830,12 @@ struct sniper_volley_callback_t : public action_callback_t
 
 struct cluster_bombs_callback_t : public action_callback_t
 {
-  struct cluster_bombs_t : public agent_smug::tech_attack_t
+  struct cluster_bombs_t : public tech_attack_t
   {
-    typedef agent_smug::tech_attack_t base_t;
+    typedef tech_attack_t base_t;
 
     cluster_bombs_t( class_t* p, const std::string& n) :
-      agent_smug::tech_attack_t( n, p )
+      base_t( n, p )
     {
       // rank_level_list = { ... ,50 };
 
@@ -852,8 +863,7 @@ struct cluster_bombs_callback_t : public action_callback_t
     // TODO test what constitutes "blaster fire" assuming any weapon attack
     if ( a -> weapon || a -> td.weapon )
     {
-      buff_t* debuff_cluster_bombs = dynamic_cast<gunslinger_sniper::targetdata_t*>( a -> targetdata() )
-                                     -> debuff_cluster_bombs;
+      buff_t* debuff_cluster_bombs = cluster_bombs -> targetdata() -> debuff_cluster_bombs;
 
       if ( debuff_cluster_bombs -> up() && debuff_cluster_bombs -> trigger() )
       {
