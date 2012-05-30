@@ -21,6 +21,7 @@ actions+=/rapid_fire,if=cooldown.speed_shot.remains
 actions+=/trickshot,if=buff.trickshot.up
 actions+=/sabotage_charge,if=energy>80
 actions+=/aimed_shot,if=energy>75
+actions+=/vital_shot,if=!ticking&energy>80
 actions+=/charged_burst,if=energy>95
 actions+=/flurry_of_bolts
 head=rakata_field_techs_headgear,ilevel=58,quality=artifact,stats=645armor_124endurance_99cunning_57power_51accuracy

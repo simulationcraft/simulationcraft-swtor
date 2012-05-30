@@ -1083,6 +1083,7 @@ void class_t::init_actions()
     action_list_str += sl + abilities.explosive_probe + ",if=energy>80";
     // probably want to prioritise ambush/snipe if followthrough ICD is up
     action_list_str += sl + abilities.ambush + ",if=energy>75";
+    action_list_str += sl + abilities.corrosive_dart + ",if=!ticking&energy>80";
     action_list_str += sl + abilities.snipe + ",if=energy>95";
     action_list_str += sl + abilities.rifle_shot;
   }

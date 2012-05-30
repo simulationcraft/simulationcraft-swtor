@@ -100,6 +100,80 @@ struct coordination_t : public action_t
   }
 };
 
+// Corrosive Dart | Vital Shot ==============================================
+struct corrosive_dart_t : public poison_attack_t
+{
+  corrosive_dart_t* corrosive_dart_weak;
+
+  corrosive_dart_t( class_t* p, const std::string& n, const std::string& options_str, bool weak=false ) :
+    poison_attack_t( n, p ),
+    corrosive_dart_weak()
+  {
+    rank_level_list = { 5, 7, 10, 13, 17, 23, 35, 45, 50 };
+
+    parse_options( options_str );
+
+    range = 30.0;
+    base_tick_time = from_seconds( 3.0 );
+
+    if ( weak )
+    {
+      // infinite?
+      range                       = 30.0;
+      base_cost                   = 0;
+      td.standardhealthpercentmin =
+      td.standardhealthpercentmax = 0.01;
+      td.power_mod                = 0.1;
+      num_ticks                   = 3 + p -> talents.lethal_injectors -> rank();
+      background                  = true;
+      trigger_gcd                 = timespan_t::zero();
+    }
+    else
+    {
+      base_cost                   = 20;
+      td.standardhealthpercentmin =
+      td.standardhealthpercentmax = 0.04;
+      td.power_mod                = 0.4;
+      num_ticks                   = 5 + p -> talents.lethal_injectors -> rank();
+
+      if ( p -> talents.lingering_toxins -> rank() )
+        corrosive_dart_weak = new corrosive_dart_t( p, n + "_weak", options_str, true );
+    }
+  }
+
+  virtual void tick( dot_t* d )
+  {
+    poison_attack_t::tick( d );
+
+    class_t& p = *cast();
+
+    if ( p.talents.corrosive_microbes -> rank()
+         && p.rngs.corrosive_microbes -> roll( 0.125 * p.talents.corrosive_microbes -> rank() ) )
+    {
+      p.procs.corrosive_microbes -> occur();
+      extra_tick();
+    }
+  }
+
+  virtual void last_tick( dot_t* d )
+  {
+    poison_attack_t::last_tick( d );
+
+    if ( corrosive_dart_weak )
+      corrosive_dart_weak -> execute();
+  }
+
+  virtual void execute()
+  {
+    if ( corrosive_dart_weak )
+      targetdata() -> dot_corrosive_dart_weak.cancel();
+
+    poison_attack_t::execute();
+  }
+};
+
+
+
 // Overload Shot | Quick Shot ===============================================
 
 struct overload_shot_t : public range_attack_t
@@ -253,6 +327,7 @@ struct poison_tick_crit_callback_t : public action_callback_t
 {
   if ( name == abilities.adrenaline_probe      ) return new adrenaline_probe_t      ( this, name, options_str ) ;
   if ( name == abilities.coordination          ) return new coordination_t          ( this, name, options_str ) ;
+  if ( name == abilities.corrosive_dart        ) return new corrosive_dart_t        ( this, name, options_str ) ;
   if ( name == abilities.explosive_probe       ) return new explosive_probe_t       ( this, name, options_str ) ;
   if ( name == abilities.fragmentation_grenade ) return new fragmentation_grenade_t ( this, name, options_str ) ;
   if ( name == abilities.orbital_strike        ) return new orbital_strike_t        ( this, name, options_str ) ;

@@ -621,79 +621,6 @@ struct corrosive_grenade_t : public poison_attack_t
   }
 };
 
-// Corrosive Dart | ??? =====================================================
-
-struct corrosive_dart_t : public poison_attack_t
-{
-  corrosive_dart_t* corrosive_dart_weak;
-
-  corrosive_dart_t( class_t* p, const std::string& n, const std::string& options_str, bool weak=false ) :
-    poison_attack_t( n, p ),
-    corrosive_dart_weak()
-  {
-    rank_level_list = { 5, 7, 10, 13, 17, 23, 35, 45, 50 };
-
-    parse_options( options_str );
-
-    range = 30.0;
-    base_tick_time = from_seconds( 3.0 );
-
-    if ( weak )
-    {
-      // infinite?
-      range                       = 30.0;
-      base_cost                   = 0;
-      td.standardhealthpercentmin = 
-      td.standardhealthpercentmax = 0.01;
-      td.power_mod                = 0.1;
-      num_ticks                   = 3 + p -> talents.lethal_injectors -> rank();
-      background                  = true;
-      trigger_gcd                 = timespan_t::zero();
-    }
-    else
-    {
-      base_cost                   = 20;
-      td.standardhealthpercentmin = 
-      td.standardhealthpercentmax = 0.04;
-      td.power_mod                = 0.4;
-      num_ticks                   = 5 + p -> talents.lethal_injectors -> rank();
-
-      if ( p -> talents.lingering_toxins -> rank() )
-        corrosive_dart_weak = new corrosive_dart_t( p, n + "_weak", options_str, true );
-    }
-  }
-
-  virtual void tick( dot_t* d )
-  {
-    poison_attack_t::tick( d );
-
-    class_t& p = *cast();
-
-    if ( p.talents.corrosive_microbes -> rank()
-         && p.rngs.corrosive_microbes -> roll( 0.125 * p.talents.corrosive_microbes -> rank() ) )
-    {
-      p.procs.corrosive_microbes -> occur();
-      extra_tick();
-    }
-  }
-
-  virtual void last_tick( dot_t* d )
-  {
-    poison_attack_t::last_tick( d );
-
-    if ( corrosive_dart_weak )
-      corrosive_dart_weak -> execute();
-  }
-
-  virtual void execute()
-  {
-    if ( corrosive_dart_weak )
-      targetdata() -> dot_corrosive_dart_weak.cancel();
-
-    poison_attack_t::execute();
-  }
-};
-
 // Cull | ??? ===============================================================
 
 struct cull_t : public range_attack_t
@@ -879,7 +806,6 @@ struct poison_tick_crit_callback_t : public action_callback_t
 {
   if ( name == abilities.acid_blade            ) return new acid_blade_t            ( this, name, options_str ) ;
   if ( name == abilities.backstab              ) return new backstab_t              ( this, name, options_str ) ;
-  if ( name == abilities.corrosive_dart        ) return new corrosive_dart_t        ( this, name, options_str ) ;
   if ( name == abilities.corrosive_grenade     ) return new corrosive_grenade_t     ( this, name, options_str ) ;
   if ( name == abilities.cull                  ) return new cull_t                  ( this, name, options_str ) ;
   if ( name == abilities.hidden_strike         ) return new hidden_strike_t         ( this, name, options_str ) ;
