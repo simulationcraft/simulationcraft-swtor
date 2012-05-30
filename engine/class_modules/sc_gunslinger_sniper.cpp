@@ -521,8 +521,8 @@ struct plasma_probe_t : public agent_smug::tech_attack_t
       base_accuracy                = 999;
       background                   = true;
       trigger_gcd                  = timespan_t::zero();
-      td.standardhealthpercentmax  = 0.022;
-      td.power_mod                 = 0.22;
+      td.standardhealthpercentmax  = 0.02;
+      td.power_mod                 = 0.2;
       tick_zero                    = false;
       num_ticks                    = 5;
       base_tick_time               = from_seconds( 3.0 );
