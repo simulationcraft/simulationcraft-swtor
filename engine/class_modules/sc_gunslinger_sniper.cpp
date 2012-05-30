@@ -587,6 +587,10 @@ struct series_of_shots_t : public agent_smug::tech_attack_t
     if ( rapid_fire -> up() )
       rapid_fire -> expire();
   }
+
+  // TODO talent: electrified raligun has 1/3 2/3 3/3 chance on damage to
+  // deal elemental damage over 4 seconds, stacking up to 4 times.
+  // need to determine mechanics of the stack.
 };
 
 // Snipe | Charged Burst ====================================================
