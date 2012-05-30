@@ -26,6 +26,7 @@ public:
 
   buff_t* debuff_cluster_bombs;
   dot_t dot_interrogation_probe;
+  dot_t dot_plasma_probe;
   dot_t dot_series_of_shots;
 };
 
@@ -146,6 +147,7 @@ public:
     std::string emp_discharge;
     std::string followthrough;
     std::string interrogation_probe;
+    std::string plasma_probe;
     std::string rapid_fire;
     std::string series_of_shots;
     std::string takedown;
@@ -210,9 +212,11 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
    debuff_cluster_bombs   = new buff_t ( this, source.abilities.cluster_bombs, 2 + source.talents.imperial_methodology -> rank(), from_seconds ( 0 ), from_seconds( 1.5 ), 100, false, true );
 
   dot_interrogation_probe = dot_t ( source.abilities.interrogation_probe, &source );
+  dot_plasma_probe        = dot_t ( source.abilities.plasma_probe       , &source );
   dot_series_of_shots     = dot_t ( source.abilities.series_of_shots,     &source );
 
   add( dot_interrogation_probe );
+  add( dot_plasma_probe        );
   add( dot_series_of_shots     );
 
 }
@@ -478,15 +482,57 @@ struct interrogation_probe_t : public agent_smug::tech_attack_t
     td.power_mod                 = 0.55;
     tick_zero                    = true;
     num_ticks                    = 6;
-    base_tick_time  = from_seconds( 3.0 );
+    base_tick_time               = from_seconds( 3.0 );
   }
 
   // not implemented: cooldown resets if ends prematurely (target dies, dispelled).
 };
 
 // Plasma Probe | Incendiary Grenade ========================================
+struct plasma_probe_t : public agent_smug::tech_attack_t
+{
+  typedef agent_smug::action_t base_t;
+
+  plasma_probe_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    agent_smug::tech_attack_t( n, p, SCHOOL_ELEMENTAL )
+  {
+    check_talent( p -> talents.plasma_probe -> rank() );
+
+    // rank_level_list = { ... ,50 };
+    parse_options( options_str );
+
+    base_cost                    = 20 - 2 * p -> talents.efficient_engineering -> rank();
+    cooldown -> duration         = from_seconds( 18 );
+    range                        = 35.0;
+    // this one is in torhead too?
+    //td.standardhealthpercentmin  =
+    //td.standardhealthpercentmax  = 0.044;
+    //td.power_mod                 = 0.44;
+    td.standardhealthpercentmin  =
+    td.standardhealthpercentmax  = 0.02;
+    td.power_mod                 = 0.2;
+    tick_zero                    = true; // TODO test
+    num_ticks                    = 18;
+    base_tick_time               = from_seconds( 1.0 );
+    base_multiplier             += 0.05 * p -> talents.explosive_engineering -> rank();
+  }
+
 // TODO efficient engineering also benefits plasma probe (t7 ability)
-// TODO: energy overrides reduces cost like with explosive probe
+
+  virtual double cost() const
+  {
+    class_t& p = *dynamic_cast<class_t*>( player );
+    return p.buffs.energy_overrides -> up()
+      ? base_t::cost() * ( 1 - 0.5 * p.talents.energy_overrides -> rank() )
+      : base_t::cost();
+  }
+
+  virtual void execute()
+  {
+    base_t::execute();
+    dynamic_cast<class_t*>( player ) -> buffs.energy_overrides -> expire();
+  }
+};
 
 // Rapid Fire | Rapid Fire ==================================================
 
@@ -810,6 +856,7 @@ struct cluster_bombs_callback_t : public action_callback_t
   if ( name == abilities.emp_discharge         ) return new emp_discharge_t         ( this, name, options_str ) ;
   if ( name == abilities.followthrough         ) return new followthrough_t         ( this, name, options_str ) ;
   if ( name == abilities.interrogation_probe   ) return new interrogation_probe_t   ( this, name, options_str ) ;
+  if ( name == abilities.plasma_probe          ) return new plasma_probe_t          ( this, name, options_str ) ;
   if ( name == abilities.rapid_fire            ) return new rapid_fire_t            ( this, name, options_str ) ;
   if ( name == abilities.series_of_shots       ) return new series_of_shots_t       ( this, name, options_str ) ;
   if ( name == abilities.takedown              ) return new takedown_t              ( this, name, options_str ) ;
@@ -837,6 +884,7 @@ void class_t::init_abilities()
   abilities.emp_discharge        = sn ? "emp_discharge"        : "sabotage"             ;
   abilities.followthrough        = sn ? "followthrough"        : "trickshot"            ;
   abilities.interrogation_probe  = sn ? "interrogation_probe"  : "shock_charge"         ;
+  abilities.plasma_probe         = sn ? "plasma_probe"         : "incendiary_grenade"   ;
   abilities.rapid_fire           = sn ? "rapid_fire"           : "rapid_fire"           ;
   abilities.series_of_shots      = sn ? "series_of_shots"      : "speed_shot"           ;
   abilities.takedown             = sn ? "takedown"             : "quickdraw"            ;
@@ -1009,9 +1057,14 @@ void class_t::init_actions()
 
     action_list_str += sl + abilities.take_cover + ",if=buff." + abilities.cover + ".down";
     // guessing priority and optimal energy
+    if ( talents.plasma_probe -> rank() )
+      action_list_str += sl + abilities.plasma_probe + ",if=energy>=75";
     if ( unsigned rank = talents.energy_overrides -> rank() )
     {
-      action_list_str += sl + abilities.explosive_probe + ",if=buff.energy_overrides.up";
+      action_list_str += sl + abilities.plasma_probe + ",if=buff." + abilities.energy_overrides + ".up";
+      if ( rank == 1 )
+        action_list_str += "&energy<=70";
+      action_list_str += sl + abilities.explosive_probe + ",if=buff." + abilities.energy_overrides + ".up";
       if ( rank == 1 )
         action_list_str += "&energy<=70";
     }
