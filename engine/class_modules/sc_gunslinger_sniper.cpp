@@ -336,7 +336,10 @@ struct explosive_probe_t : public agent_smug::explosive_probe_t
   typedef agent_smug::explosive_probe_t base_t;
   explosive_probe_t( class_t* p, const std::string& n, const std::string& options_str ) :
     agent_smug::explosive_probe_t( p, n, options_str )
-  { }
+  {
+    base_multiplier += 0.05 * p -> talents.explosive_engineering -> rank();
+  }
+
   // TODO: explosive probe "attaches" to the target and detonates on damage
   // (tooltip says damage. game data has text that says blaster damage)
   // this is not implemented yet.
@@ -456,7 +459,8 @@ struct orbital_strike_t : public agent_smug::orbital_strike_t
       agent_smug::orbital_strike_t( p, n, options_str )
   {
     if ( unsigned rank = p -> talents.pillbox_sniper -> rank() )
-    cooldown -> duration -= from_seconds( 7.5 * rank );
+      cooldown -> duration -= from_seconds( 7.5 * rank );
+    base_multiplier += 0.05 * p -> talents.explosive_engineering -> rank();
   }
 };
 
@@ -557,6 +561,7 @@ struct fragmentation_grenade_t : public agent_smug::fragmentation_grenade_t
     agent_smug::fragmentation_grenade_t( p, n, options_str )
   {
     cooldown -> duration = from_seconds( 6 - 1.5 * p -> talents.engineers_tool_belt -> rank() );
+    base_multiplier += 0.05 * p -> talents.explosive_engineering -> rank();
   }
 };
 
