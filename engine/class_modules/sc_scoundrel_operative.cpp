@@ -282,13 +282,15 @@ struct poison_attack_t : public agent_smug::poison_attack_t
 
 struct consume_acid_blade_attack_t : public tech_attack_t
 {
+  typedef tech_attack_t base_t;
+
   consume_acid_blade_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_KINETIC ) :
-    tech_attack_t( n, p, s )
+    base_t( n, p, s )
   {}
 
   void execute()
   {
-    tech_attack_t::execute();
+    base_t::execute();
 
     class_t* p = cast();
     if ( p -> buffs.acid_blade_coating -> up() )
@@ -307,10 +309,14 @@ struct consume_acid_blade_attack_t : public tech_attack_t
 
 struct acid_blade_t : public action_t
 {
+  typedef action_t base_t;
+
   struct acid_blade_poison_t : public poison_attack_t
   {
+    typedef poison_attack_t base_t;
+
     acid_blade_poison_t( class_t* p, const std::string& n ) :
-      poison_attack_t( n, p )
+      base_t( n, p )
     {
       td.standardhealthpercentmin = td.standardhealthpercentmax = 0.031;
       td.power_mod = 0.31;
@@ -325,7 +331,7 @@ struct acid_blade_t : public action_t
   acid_blade_poison_t* poison;
 
   acid_blade_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    action_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_INTERNAL ),
+    base_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_INTERNAL ),
     poison( new acid_blade_poison_t( p, n + "_poison" ) )
   {
     check_talent( p -> talents.acid_blade -> rank() );
@@ -354,8 +360,10 @@ struct acid_blade_t : public action_t
 
 struct stealth_t : public action_t
 {
+  typedef action_t base_t;
+
   stealth_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    action_t( n, p, tech_policy, RESOURCE_ENERGY, SCHOOL_NONE )
+    base_t( n, p, tech_policy, RESOURCE_ENERGY, SCHOOL_NONE )
   {
     parse_options( options_str );
 
@@ -371,13 +379,13 @@ struct stealth_t : public action_t
     if ( p() -> buffs.stealth -> check() )
       return false;
 
-    return action_t::ready();
+    return base_t::ready();
   }
 
   void execute()
   {
     p() -> buffs.stealth -> trigger();
-    action_t::execute();
+    base_t::execute();
   }
 };
 
@@ -385,8 +393,10 @@ struct stealth_t : public action_t
 
 struct shiv_t : public tech_attack_t
 {
+  typedef tech_attack_t base_t;
+
   shiv_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    tech_attack_t( n, p )
+    base_t( n, p )
   {
     rank_level_list = { 2, 5, 8, 11, 14, 19, 29, 38, 50 };
 
@@ -404,7 +414,7 @@ struct shiv_t : public tech_attack_t
 
   virtual void execute()
   {
-    tech_attack_t::execute();
+    base_t::execute();
 
     // TODO check if granted on misses etc?
     if ( result_is_hit() )
@@ -416,8 +426,10 @@ struct shiv_t : public tech_attack_t
 
 struct backstab_t : public consume_acid_blade_attack_t
 {
+  typedef consume_acid_blade_attack_t base_t;
+
   backstab_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    consume_acid_blade_attack_t( n, p )
+    base_t( n, p )
   {
     rank_level_list = { 10, 13, 17, 23, 35, 47, 50 };
 
@@ -442,10 +454,14 @@ struct backstab_t : public consume_acid_blade_attack_t
 
 struct laceration_t : public tech_attack_t
 {
+  typedef tech_attack_t base_t;
+
   struct collateral_strike_t : public tech_attack_t
   {
+    typedef tech_attack_t base_t;
+
     collateral_strike_t( class_t* p, const std::string& n, const std::string& options_str ) :
-      tech_attack_t( n, p )
+      base_t( n, p )
     {
       parse_options( options_str );
 
@@ -460,7 +476,7 @@ struct laceration_t : public tech_attack_t
 
     virtual void execute()
     {
-      tech_attack_t::execute();
+      base_t::execute();
 
       // if target is poisoned regrant TA
       targetdata_t* td = targetdata();
@@ -472,7 +488,7 @@ struct laceration_t : public tech_attack_t
   collateral_strike_t* collateral_strike;
 
   laceration_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    tech_attack_t( n, p ), collateral_strike( 0 )
+    base_t( n, p ), collateral_strike( 0 )
   {
     check_talent( p -> talents.laceration -> rank() );
 
@@ -497,13 +513,12 @@ struct laceration_t : public tech_attack_t
     if ( ! p() -> buffs.tactical_advantage -> check() )
       return false;
 
-    return tech_attack_t::ready();
+    return base_t::ready();
   }
 
   virtual void execute()
   {
-
-    tech_attack_t::execute();
+    base_t::execute();
 
     class_t* p = cast();
 
@@ -524,8 +539,10 @@ struct laceration_t : public tech_attack_t
 
 struct hidden_strike_t : public consume_acid_blade_attack_t
 {
+  typedef consume_acid_blade_attack_t base_t;
+
   hidden_strike_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    consume_acid_blade_attack_t( n, p )
+    base_t( n, p )
   {
     rank_level_list = { 36, 50 };
 
@@ -546,14 +563,14 @@ struct hidden_strike_t : public consume_acid_blade_attack_t
     if ( ! p() -> buffs.stealth -> check() )
       return false;
 
-    return action_t::ready();
+    return base_t::ready();
   }
 
   virtual void execute()
   {
     class_t& p = *cast();
     p.buffs.stealth -> up();
-    consume_acid_blade_attack_t::execute();
+    base_t::execute();
     p.buffs.tactical_advantage -> trigger();
   }
   // TODO check for talent and trigger knockdown (jarring strike)
@@ -563,10 +580,12 @@ struct hidden_strike_t : public consume_acid_blade_attack_t
 
 struct corrosive_grenade_t : public poison_attack_t
 {
+  typedef poison_attack_t base_t;
+
   corrosive_grenade_t* corrosive_grenade_weak;
 
   corrosive_grenade_t( class_t* p, const std::string& n, const std::string& options_str, bool weak=false ) :
-    poison_attack_t( n, p ), corrosive_grenade_weak()
+    base_t( n, p ), corrosive_grenade_weak()
   {
     check_talent( p -> talents.corrosive_grenade -> rank() );
 
@@ -606,7 +625,7 @@ struct corrosive_grenade_t : public poison_attack_t
 
   virtual void last_tick( dot_t* d )
   {
-    poison_attack_t::last_tick( d );
+    base_t::last_tick( d );
 
     if ( corrosive_grenade_weak )
       corrosive_grenade_weak -> execute();
@@ -617,7 +636,7 @@ struct corrosive_grenade_t : public poison_attack_t
     if ( corrosive_grenade_weak )
       targetdata() -> dot_corrosive_grenade_weak.cancel();
 
-    poison_attack_t::execute();
+    base_t::execute();
   }
 };
 
@@ -625,10 +644,14 @@ struct corrosive_grenade_t : public poison_attack_t
 
 struct cull_t : public range_attack_t
 {
+  typedef range_attack_t base_t;
+
   struct cull_extra_t : public tech_attack_t
   {
+    typedef tech_attack_t base_t;
+
     cull_extra_t( class_t* p, const std::string& n ) :
-      tech_attack_t( n, p, SCHOOL_INTERNAL )
+      base_t( n, p, SCHOOL_INTERNAL )
     {
       dd.standardhealthpercentmin =  
       dd.standardhealthpercentmax =  0.066;
@@ -643,7 +666,7 @@ struct cull_t : public range_attack_t
   cull_extra_t* extra_strike;
 
   cull_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    range_attack_t( n, p ),
+    base_t( n, p ),
     extra_strike( new cull_extra_t( p, n + "_extra" ) )
   {
     check_talent( p -> talents.cull -> rank() );
@@ -667,12 +690,12 @@ struct cull_t : public range_attack_t
     if ( ! p() -> buffs.tactical_advantage -> check() )
       return false;
 
-    return range_attack_t::ready();
+    return base_t::ready();
   }
 
   virtual void execute()
   {
-    range_attack_t::execute();
+    base_t::execute();
 
     if ( result_is_hit() )
     {
@@ -692,11 +715,13 @@ struct cull_t : public range_attack_t
 
 struct stim_boost_t : public action_t
 {
+  typedef action_t base_t;
+
   static double tick_amount( const class_t& op )
   { return 3 + 0.5 * op.talents.culling -> rank(); }
 
   stim_boost_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    action_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE )
+    base_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE )
   {
     parse_options( options_str );
 
@@ -712,12 +737,12 @@ struct stim_boost_t : public action_t
     if ( ! p() -> buffs.tactical_advantage -> check() )
       return false;
 
-    return action_t::ready();
+    return base_t::ready();
   }
 
   virtual void tick( dot_t* d )
   {
-    action_t::tick(d);
+    base_t::tick(d);
 
     class_t& p = *cast();
 
@@ -728,7 +753,7 @@ struct stim_boost_t : public action_t
 
   virtual void execute()
   {
-    action_t::execute();
+    base_t::execute();
 
     class_t& p = *cast();
     p.buffs.stim_boost -> trigger();
