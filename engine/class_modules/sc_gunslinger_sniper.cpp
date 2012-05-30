@@ -24,6 +24,7 @@ class targetdata_t : public agent_smug::targetdata_t
 public:
   targetdata_t( class_t& source, player_t& target );
 
+  buff_t* debuff_cluster_bombs;
   dot_t dot_interrogation_probe;
   dot_t dot_series_of_shots;
 };
@@ -147,6 +148,7 @@ public:
     // buffs
     std::string snap_shot;
     std::string sniper_volley;
+    std::string cluster_bombs;
     // rngs from talent
     std::string reactive_shot;
     // gains from talent
@@ -197,6 +199,9 @@ public:
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   agent_smug::targetdata_t( source, target )
 {
+// buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
+   debuff_cluster_bombs   = new buff_t ( this, source.abilities.cluster_bombs, 2, from_seconds ( 0 ), from_seconds( 1.5 ), 100, false, true );
+
   dot_interrogation_probe = dot_t ( source.abilities.interrogation_probe, &source );
   dot_series_of_shots     = dot_t ( source.abilities.series_of_shots,     &source );
 
@@ -321,6 +326,32 @@ struct ambush_t : public range_attack_t
     base_t::execute();
     if ( offhand_attack )
       offhand_attack -> schedule_execute();
+  }
+};
+
+// Explosive Probe | Sabotage Charge ========================================
+
+struct explosive_probe_t : public agent_smug::explosive_probe_t
+{
+  typedef agent_smug::explosive_probe_t base_t;
+  explosive_probe_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    agent_smug::explosive_probe_t( p, n, options_str )
+  { }
+  // TODO: explosive probe "attaches" to the target and detonates on damage
+  // (tooltip says damage. game data has text that says blaster damage)
+  // this is not implemented yet.
+
+  virtual void execute()
+  {
+    base_t::execute();
+    if ( dynamic_cast<class_t*>( player ) -> talents.cluster_bombs && result_is_hit() )
+    {
+      buff_t* cluster_bombs = dynamic_cast<gunslinger_sniper::targetdata_t*>( targetdata() ) -> debuff_cluster_bombs;
+      if ( cluster_bombs -> up() )
+        cluster_bombs -> refresh(2);
+      else
+        cluster_bombs -> start(2);
+    }
   }
 };
 
@@ -628,6 +659,50 @@ struct sniper_volley_callback_t : public action_callback_t
   }
 };
 
+struct cluster_bombs_callback_t : public action_callback_t
+{
+  struct cluster_bombs_t : public agent_smug::tech_attack_t
+  {
+    typedef agent_smug::tech_attack_t base_t;
+
+    cluster_bombs_t( class_t* p, const std::string& n) :
+      agent_smug::tech_attack_t( n, p )
+    {
+      // rank_level_list = { ... ,50 };
+
+      // unlimited? it will always hit
+      range                        = 99.0;
+      // always hit?
+      base_accuracy                = 999;
+      dd.standardhealthpercentmin  =
+      dd.standardhealthpercentmax  = 0.047;
+      dd.power_mod                 = 0.47;
+      background                   = true;
+      trigger_gcd                  = timespan_t::zero();
+    }
+  };
+
+  cluster_bombs_t* cluster_bombs;
+
+  cluster_bombs_callback_t( class_t* p ) :
+    action_callback_t( p ),
+    cluster_bombs( new cluster_bombs_t( p, p -> abilities.cluster_bombs ) )
+  {}
+
+  virtual void trigger (::action_t* a, void* /* call_data */)
+  {
+    // TODO test what constitutes "blaster fire" assuming any weapon attack
+    if ( a -> weapon || a -> td.weapon )
+    {
+      buff_t* debuff_cluster_bombs = dynamic_cast<gunslinger_sniper::targetdata_t*>( a -> targetdata() )
+                                     -> debuff_cluster_bombs;
+
+      if ( debuff_cluster_bombs -> up() && debuff_cluster_bombs -> trigger() )
+        cluster_bombs -> execute();
+    }
+  }
+};
+
 
 // ==========================================================================
 // Gunslinger / Sniper Character Definition
@@ -645,9 +720,10 @@ struct sniper_volley_callback_t : public action_callback_t
   if ( name == abilities.takedown            ) return new takedown_t            ( this, name, options_str ) ;
 
   // overridden
+  if ( name == abilities.explosive_probe     ) return new explosive_probe_t     ( this, name, options_str ) ;
+  if ( name == abilities.orbital_strike      ) return new orbital_strike_t      ( this, name, options_str ) ;
   if ( name == abilities.snipe               ) return new snipe_t               ( this, name, options_str ) ;
   if ( name == abilities.take_cover          ) return new take_cover_t          ( this, name, options_str ) ;
-  if ( name == abilities.orbital_strike      ) return new orbital_strike_t      ( this, name, options_str ) ;
 
   return base_t::create_action( name, options_str );
 }
@@ -660,21 +736,22 @@ void class_t::init_abilities()
 
   bool sn = type == IA_SNIPER;
 
-  //                            =    ? SNIPER LABEL          : GUNSLINGER LABEL ;
-  abilities.ambush              = sn ? "ambush"              : "aimed_shot"     ;
-  abilities.followthrough       = sn ? "followthrough"       : "trickshot"      ;
-  abilities.interrogation_probe = sn ? "interrogation_probe" : "shock_charge"   ;
-  abilities.rapid_fire          = sn ? "rapid_fire"          : "rapid_fire"     ;
-  abilities.series_of_shots     = sn ? "series_of_shots"     : "speed_shot"     ;
-  abilities.takedown            = sn ? "takedown"            : "quickdraw"      ;
+  //                            =    ? SNIPER LABEL          : GUNSLINGER LABEL        ;
+  abilities.ambush              = sn ? "ambush"              : "aimed_shot"            ;
+  abilities.followthrough       = sn ? "followthrough"       : "trickshot"             ;
+  abilities.interrogation_probe = sn ? "interrogation_probe" : "shock_charge"          ;
+  abilities.rapid_fire          = sn ? "rapid_fire"          : "rapid_fire"            ;
+  abilities.series_of_shots     = sn ? "series_of_shots"     : "speed_shot"            ;
+  abilities.takedown            = sn ? "takedown"            : "quickdraw"             ;
 
   // buffs
-  abilities.snap_shot           = sn ? "snap_shot"           : "snap_shot"      ;
-  abilities.sniper_volley       = sn ? "sniper_volley"       : "burst_volley"   ;
+  abilities.snap_shot           = sn ? "snap_shot"           : "snap_shot"             ;
+  abilities.sniper_volley       = sn ? "sniper_volley"       : "burst_volley"          ;
+  abilities.cluster_bombs       = sn ? "cluster_bombs"       : "contingency_charges"   ;
   // rngs
-  abilities.reactive_shot       = sn ? "reactive_shot"       : "quick_aim"      ;
+  abilities.reactive_shot       = sn ? "reactive_shot"       : "quick_aim"             ;
   // gains
-  abilities.snipers_nest        = sn ? "snipers_nest"        : "fox_hole"       ;
+  abilities.snipers_nest        = sn ? "snipers_nest"        : "fox_hole"              ;
 }
 
 // class_t::init_talents ========================================
@@ -853,6 +930,12 @@ void class_t::init_actions()
   {
     register_attack_callback( RESULT_HIT_MASK, new sniper_volley_callback_t( this ) );
     register_tick_callback( RESULT_HIT_MASK, new sniper_volley_callback_t( this ) );
+  }
+
+  if ( talents.cluster_bombs -> rank() )
+  {
+    register_attack_callback( RESULT_HIT_MASK, new cluster_bombs_callback_t( this ) );
+    register_tick_callback( RESULT_HIT_MASK, new cluster_bombs_callback_t( this ) );
   }
 
   base_t::init_actions();

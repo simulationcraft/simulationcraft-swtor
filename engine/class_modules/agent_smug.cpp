@@ -10,8 +10,7 @@ namespace agent_smug { // ===================================================
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   ::targetdata_t( source, target )
 {
-  debuff_weakening_blast     = new buff_t ( this, source.abilities.weakening_blast, 10, from_seconds (  15 ) );
-
+  debuff_weakening_blast     = new buff_t ( this, source.abilities.weakening_blast, 10, from_seconds (  15 ) ); 
   dot_adrenaline_probe       = dot_t ( source.abilities.adrenaline_probe       , &source );
   dot_corrosive_dart         = dot_t ( source.abilities.corrosive_dart         , &source );
   dot_corrosive_dart_weak    = dot_t ( source.abilities.corrosive_dart_weak    , &source );
@@ -98,37 +97,6 @@ struct coordination_t : public action_t
       return false;
 
     return action_t::ready();
-  }
-};
-
-// Explosive Probe | Sabotage Charge ========================================
-
-struct explosive_probe_t : public tech_attack_t
-{
-  typedef tech_attack_t base_t;
-  explosive_probe_t( class_t* p, const std::string& n, const std::string& options_str) :
-    tech_attack_t( n, p )
-  {
-    // rank_level_list = { 50 };
-
-    parse_options( options_str );
-
-    base_cost                   = 20;
-    range                       = 30.0;
-    cooldown -> duration        = from_seconds( 30 );
-    dd.standardhealthpercentmin = 0.23;
-    dd.standardhealthpercentmax = 0.25;
-    dd.power_mod                = 2.4;
-  }
-  // TODO: explosive probe "attaches" to the target and detonates on damage
-  // (tooltip says damage. game data has text that says blaster damage)
-  // this is not implemented yet.
-
-  virtual bool ready()
-  {
-    // TODO only ready if in cover
-    // probably not worth the complication to implement?
-    return base_t::ready();
   }
 };
 

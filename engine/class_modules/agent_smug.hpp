@@ -295,6 +295,37 @@ struct poison_attack_t : public tech_attack_t
   }
 };
 
+// Explosive Probe | Sabotage Charge ========================================
+
+struct explosive_probe_t : public tech_attack_t
+{
+  typedef tech_attack_t base_t;
+  explosive_probe_t( class_t* p, const std::string& n, const std::string& options_str) :
+    tech_attack_t( n, p )
+  {
+    // rank_level_list = { 50 };
+
+    parse_options( options_str );
+
+    base_cost                   = 20;
+    range                       = 30.0;
+    cooldown -> duration        = from_seconds( 30 );
+    dd.standardhealthpercentmin = 0.23;
+    dd.standardhealthpercentmax = 0.25;
+    dd.power_mod                = 2.4;
+  }
+  // TODO: explosive probe "attaches" to the target and detonates on damage
+  // (tooltip says damage. game data has text that says blaster damage)
+  // this is not implemented yet.
+
+  virtual bool ready()
+  {
+    // TODO only ready if in cover
+    // probably not worth the complication to implement?
+    return base_t::ready();
+  }
+};
+
 // Snipe | Charged Burst ====================================================
 
 struct snipe_t : public range_attack_t
