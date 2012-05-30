@@ -27,6 +27,64 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   add( dot_orbital_strike         );
 }
 
+// Attack ======================================================
+
+attack_t::attack_t( const std::string& n, class_t* p, attack_policy_t policy, school_type s ) :
+  base_t( n, p, policy, RESOURCE_ENERGY, s )
+{
+  harmful       = true;
+  may_crit      = true;
+  tick_may_crit = true;
+}
+
+// Tech Attack =================================================
+
+tech_attack_t::tech_attack_t( const std::string& n, class_t* p, school_type s ) :
+  base_t( n, p, tech_policy, s )
+{}
+
+// Range Attack ================================================
+
+range_attack_t::range_attack_t( const std::string& n, class_t* p, school_type s ) :
+  base_t( n, p, range_policy, s )
+{}
+
+// Poison Attack ===============================================
+
+poison_attack_t::poison_attack_t( const std::string& n, class_t* p, school_type s ) :
+  base_t( n, p, s )
+{
+  may_crit       =  false;
+  base_crit     += .04 * p -> talents.lethal_dose -> rank();
+}
+
+void poison_attack_t::target_debuff( player_t* tgt, dmg_type type )
+{
+  base_t::target_debuff( tgt, type );
+
+  class_t& p = *cast();
+
+  if ( unsigned rank = p.talents.devouring_microbes -> rank() )
+  {
+    bool up = tgt -> health_percentage() < 30;
+    p.benefits.devouring_microbes_ticks -> update( up );
+    if ( up )
+      target_multiplier += 0.05 * rank;
+  }
+
+  if ( p.talents.weakening_blast -> rank() )
+  {
+    targetdata_t& td = *targetdata();
+    bool up = td.debuff_weakening_blast -> up();
+    p.benefits.wb_poison_ticks -> update( up );
+    if ( up )
+    {
+      td.debuff_weakening_blast -> decrement();
+      target_multiplier += 0.3;
+    }
+  }
+}
+
 // ==========================================================================
 // Smuggler / Agent Abilities
 // ==========================================================================
@@ -172,7 +230,68 @@ struct corrosive_dart_t : public poison_attack_t
   }
 };
 
+// Explosive Probe | Sabotage Charge ========================================
 
+explosive_probe_t::explosive_probe_t( class_t* p, const std::string& n, const std::string& options_str) :
+  base_t( n, p )
+{
+  // rank_level_list = { 50 };
+
+  parse_options( options_str );
+
+  base_cost                   = 20;
+  range                       = 30.0;
+  cooldown -> duration        = from_seconds( 30 );
+  dd.standardhealthpercentmin = 0.23;
+  dd.standardhealthpercentmax = 0.25;
+  dd.power_mod                = 2.4;
+}
+// TODO: explosive probe "attaches" to the target and detonates on damage
+// (tooltip says damage. game data has text that says blaster damage)
+// this is not implemented yet.
+
+bool explosive_probe_t::ready()
+{
+  // TODO only ready if in cover
+  // probably not worth the complication to implement?
+  return base_t::ready();
+}
+
+// Fragmentation Grenade | ??? ==============================================
+
+fragmentation_grenade_t::fragmentation_grenade_t( class_t* p, const std::string& n, const std::string& options_str ) :
+  base_t( n, p )
+{
+  parse_options( options_str );
+
+  base_cost                   = 20;
+  cooldown -> duration        = from_seconds( 6.0 );
+  range                       = 30.0;
+  dd.standardhealthpercentmin = 0.109;
+  dd.standardhealthpercentmax = 0.149;
+  dd.power_mod                = 1.29;
+  aoe                         = 4;
+}
+
+// Orbital Strike | XS Freighter Flyby ======================================
+
+orbital_strike_t::orbital_strike_t( class_t* p, const std::string& n, const std::string& options_str) :
+  base_t( n, p, SCHOOL_ELEMENTAL )
+{
+  parse_options( options_str );
+
+  base_cost                   = 30;
+  range                       = 30.0;
+  cooldown -> duration        = from_seconds( 60 );
+  td.standardhealthpercentmin =
+  td.standardhealthpercentmax = 0.177;
+  td.power_mod                = 1.77;
+  num_ticks                   = 3; // TODO: sniper set bonus? +1 tick
+  base_tick_time              = from_seconds( 3 );
+  base_execute_time           = from_seconds( 3 );
+
+  aoe = 99; // TODO FIX: unlimited. "all targets in area"
+}
 
 // Overload Shot | Quick Shot ===============================================
 
@@ -255,6 +374,53 @@ struct rifle_shot_t : public range_attack_t
        offhand_attack->schedule_execute();
   }
 };
+
+// Snipe | Charged Burst ====================================================
+
+snipe_t::snipe_t( class_t* p, const std::string& n, const std::string& options_str) :
+  base_t( n, p )
+{
+
+  parse_options( options_str );
+
+  range = ( player -> type == IA_SNIPER || player -> type == S_GUNSLINGER ) ? 35 : 30.0;
+
+  base_cost                   = 20;
+  base_execute_time           = from_seconds( 1.5 );
+  dd.power_mod                = 1.85;
+  dd.standardhealthpercentmin =
+  dd.standardhealthpercentmax = 0.185;
+  weapon                      = &( player->main_hand_weapon );
+  weapon_multiplier           = 0.23;
+}
+
+bool snipe_t::ready()
+{
+  // TODO only ready if in cover
+  // cover not yet implemented
+  return base_t::ready();
+}
+
+// Take Cover | Take Cover ==================================================
+
+take_cover_t::take_cover_t( class_t* p, const std::string& n, const std::string& options_str ) :
+  base_t( n, p, tech_policy, RESOURCE_ENERGY, SCHOOL_NONE )
+{
+  parse_options( options_str );
+
+  trigger_gcd = timespan_t::zero();
+}
+
+void take_cover_t::execute()
+{
+  action_t::execute();
+
+  class_t& p = *cast();
+  if ( p.buffs.cover -> up() )
+    p.buffs.cover -> expire();
+  else
+    p.buffs.cover -> trigger();
+}
 
 // Weakening Blast | Hemorrhaging Blast =================================================
 

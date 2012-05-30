@@ -231,197 +231,71 @@ public:
   class_t* cast() const { return p(); }
 };
 
-struct attack_t : public action_t
-{
-  attack_t( const std::string& n, class_t* p, attack_policy_t policy, school_type s ) :
-    action_t( n, p, policy, RESOURCE_ENERGY, s )
-  {
-    harmful       = true;
-    may_crit      = true;
-    tick_may_crit = true;
-  }
-};
-
-struct tech_attack_t : public attack_t
-{
-  tech_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_KINETIC ) :
-    attack_t( n, p, tech_policy, s )
-  {
-  }
-};
-
-struct range_attack_t : public attack_t
-{
-  range_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_ENERGY ) :
-    attack_t( n, p, range_policy, s )
-  {
-  }
-};
-
-struct poison_attack_t : public tech_attack_t
-{
-  poison_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_INTERNAL ) :
-    tech_attack_t( n, p, s )
-  {
-    may_crit       =  false;
-    base_crit     += .04 * p -> talents.lethal_dose -> rank();
-  }
-
-  void target_debuff( player_t* tgt, dmg_type type )
-  {
-    tech_attack_t::target_debuff( tgt, type );
-
-    class_t& p = *cast();
-
-    if ( unsigned rank = p.talents.devouring_microbes -> rank() )
-    {
-      bool up = tgt -> health_percentage() < 30;
-      p.benefits.devouring_microbes_ticks -> update( up );
-      if ( up )
-        target_multiplier += 0.05 * rank;
-    }
-
-    if ( p.talents.weakening_blast -> rank() )
-    {
-      targetdata_t& td = *targetdata();
-      bool up = td.debuff_weakening_blast -> up();
-      p.benefits.wb_poison_ticks -> update( up );
-      if ( up )
-      {
-        td.debuff_weakening_blast -> decrement();
-        target_multiplier += 0.3;
-      }
-    }
-  }
-};
-
-// Explosive Probe | Sabotage Charge ========================================
-
-struct explosive_probe_t : public tech_attack_t
-{
-  typedef tech_attack_t base_t;
-  explosive_probe_t( class_t* p, const std::string& n, const std::string& options_str) :
-    tech_attack_t( n, p )
-  {
-    // rank_level_list = { 50 };
-
-    parse_options( options_str );
-
-    base_cost                   = 20;
-    range                       = 30.0;
-    cooldown -> duration        = from_seconds( 30 );
-    dd.standardhealthpercentmin = 0.23;
-    dd.standardhealthpercentmax = 0.25;
-    dd.power_mod                = 2.4;
-  }
-  // TODO: explosive probe "attaches" to the target and detonates on damage
-  // (tooltip says damage. game data has text that says blaster damage)
-  // this is not implemented yet.
-
-  virtual bool ready()
-  {
-    // TODO only ready if in cover
-    // probably not worth the complication to implement?
-    return base_t::ready();
-  }
-};
-
-// Fragmentation Grenade | ??? ==============================================
-
-struct fragmentation_grenade_t : public tech_attack_t
-{
-  fragmentation_grenade_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    tech_attack_t( n, p )
-  {
-    parse_options( options_str );
-
-    base_cost                   = 20;
-    cooldown -> duration        = from_seconds( 6.0 );
-    range                       = 30.0;
-    dd.standardhealthpercentmin = 0.109;
-    dd.standardhealthpercentmax = 0.149;
-    dd.power_mod                = 1.29;
-    aoe                         = 4;
-  }
-};
-
-
-// Snipe | Charged Burst ====================================================
-
-struct snipe_t : public range_attack_t
-{
-  typedef range_attack_t base_t;
-  snipe_t( class_t* p, const std::string& n, const std::string& options_str) :
-    range_attack_t( n, p )
-  {
-
-    parse_options( options_str );
-
-    range = ( player -> type == IA_SNIPER || player -> type == S_GUNSLINGER ) ? 35 : 30.0;
-
-    base_cost                   = 20;
-    base_execute_time           = from_seconds( 1.5 );
-    dd.power_mod                = 1.85;
-    dd.standardhealthpercentmin =
-    dd.standardhealthpercentmax = 0.185;
-    weapon                      = &( player->main_hand_weapon );
-    weapon_multiplier           = 0.23;
-  }
-
-  virtual bool ready()
-  {
-    // TODO only ready if in cover
-    // cover not yet implemented
-    return base_t::ready();
-  }
-};
-
-// Take Cover | Take Cover ==================================================
-
-struct take_cover_t : public action_t
+class attack_t : public action_t
 {
   typedef action_t base_t;
-  take_cover_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    action_t( n, p, tech_policy, RESOURCE_ENERGY, SCHOOL_NONE )
-  {
-    parse_options( options_str );
-
-    trigger_gcd = timespan_t::zero();
-  }
-
-  void execute()
-  {
-    action_t::execute();
-
-    class_t& p = *cast();
-    if ( p.buffs.cover -> up() )
-      p.buffs.cover -> expire();
-    else
-      p.buffs.cover -> trigger();
-  }
+public:
+  attack_t( const std::string& n, class_t* p, attack_policy_t policy, school_type s );
 };
 
-// Orbital Strike | XS Freighter Flyby ======================================
-
-struct orbital_strike_t : public tech_attack_t
+class tech_attack_t : public attack_t
 {
-  orbital_strike_t( class_t* p, const std::string& n, const std::string& options_str) :
-      tech_attack_t( n, p, SCHOOL_ELEMENTAL )
-  {
-    parse_options( options_str );
+  typedef attack_t base_t;
+public:
+  tech_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_KINETIC );
+};
 
-    base_cost                   = 30;
-    range                       = 30.0;
-    cooldown -> duration        = from_seconds( 60 );
-    td.standardhealthpercentmin =
-    td.standardhealthpercentmax = 0.177;
-    td.power_mod                = 1.77;
-    num_ticks                   = 3; // TODO: sniper set bonus? +1 tick
-    base_tick_time              = from_seconds( 3 );
-    base_execute_time           = from_seconds( 3 );
+class range_attack_t : public attack_t
+{
+  typedef attack_t base_t;
+public:
+  range_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_ENERGY );
+};
 
-    aoe = 99; // TODO FIX: unlimited. "all targets in area"
-  }
+class poison_attack_t : public tech_attack_t
+{
+  typedef tech_attack_t base_t;
+public:
+  poison_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_INTERNAL );
+  virtual void target_debuff( player_t* tgt, dmg_type type );
+};
+
+class explosive_probe_t : public tech_attack_t
+{
+  typedef tech_attack_t base_t;
+public:
+  explosive_probe_t( class_t* p, const std::string& n, const std::string& options_str);
+  virtual bool ready();
+};
+
+class fragmentation_grenade_t : public tech_attack_t
+{
+  typedef tech_attack_t base_t;
+public:
+  fragmentation_grenade_t( class_t* p, const std::string& n, const std::string& options_str );
+};
+
+class snipe_t : public range_attack_t
+{
+  typedef range_attack_t base_t;
+public:
+  snipe_t( class_t* p, const std::string& n, const std::string& options_str );
+  virtual bool ready();
+};
+
+class take_cover_t : public action_t
+{
+  typedef action_t base_t;
+public:
+  take_cover_t( class_t* p, const std::string& n, const std::string& options_str );
+  virtual void execute();
+};
+
+class orbital_strike_t : public tech_attack_t
+{
+  typedef tech_attack_t base_t;
+public:
+  orbital_strike_t( class_t* p, const std::string& n, const std::string& options_str);
 };
 
 } // namespace agent_smug ===================================================
