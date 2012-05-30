@@ -288,8 +288,9 @@ struct ambush_t : public range_attack_t
   ambush_t* offhand_attack;
 
   ambush_t( class_t* p, const std::string& n, const std::string& options_str,
-     bool is_offhand=false ) :
-    range_attack_t( n, p )
+            bool is_offhand=false ) :
+    range_attack_t( n, p ),
+    offhand_attack( NULL )
   {
     // todo: get this list right
     rank_level_list = { 8, 12, 16, 22, 31, 40, 50 };
@@ -301,7 +302,7 @@ struct ambush_t : public range_attack_t
     cooldown -> duration         = from_seconds( 15 );
     range                        = 35.0;
     dd.standardhealthpercentmin  =
-    dd.standardhealthpercentmax  = 0.329;
+        dd.standardhealthpercentmax  = 0.329;
     dd.power_mod                 = 3.29;
     weapon                       = &( player -> main_hand_weapon );
     weapon_multiplier            = 1.2;
