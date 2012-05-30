@@ -189,11 +189,11 @@ struct class_t : public agent_smug::class_t
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   agent_smug::targetdata_t( source, target )
 {
-  dot_acid_blade_poison      = dot_t ( source.abilities.acid_blade_poison      , &source );
-  dot_stim_boost             = dot_t ( source.abilities.stim_boost             , &source );
+  dot_acid_blade_poison      = dot_t ( source.abilities.acid_blade_poison , &source );
+  dot_stim_boost             = dot_t ( source.abilities.stim_boost        , &source );
 
-  add( dot_acid_blade_poison      );
-  add( dot_stim_boost             );
+  add( dot_acid_blade_poison );
+  add( dot_stim_boost        );
 }
 
 struct action_t : public agent_smug::action_t
@@ -510,10 +510,7 @@ struct laceration_t : public tech_attack_t
 
   virtual bool ready()
   {
-    if ( ! p() -> buffs.tactical_advantage -> check() )
-      return false;
-
-    return base_t::ready();
+    return p() -> buffs.tactical_advantage -> check() : base_t::ready() : false;
   }
 
   virtual void execute()
