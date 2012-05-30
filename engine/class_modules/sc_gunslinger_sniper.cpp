@@ -466,6 +466,7 @@ struct orbital_strike_t : public agent_smug::orbital_strike_t
     if ( unsigned rank = p -> talents.pillbox_sniper -> rank() )
       cooldown -> duration -= from_seconds( 7.5 * rank );
     base_multiplier += 0.05 * p -> talents.explosive_engineering -> rank();
+    crit_multiplier += 0.15 * p -> talents.experimental_explosives -> rank();
   }
 };
 
@@ -567,6 +568,7 @@ struct fragmentation_grenade_t : public agent_smug::fragmentation_grenade_t
   {
     cooldown -> duration = from_seconds( 6 - 1.5 * p -> talents.engineers_tool_belt -> rank() );
     base_multiplier += 0.05 * p -> talents.explosive_engineering -> rank();
+    crit_multiplier += 0.15 * p -> talents.experimental_explosives -> rank();
   }
 };
 
@@ -574,6 +576,9 @@ struct fragmentation_grenade_t : public agent_smug::fragmentation_grenade_t
 // scoundrel to agent
 
 // TODO efficient engineering also benefits plasma probe (t7 ability)
+
+// TODO explosive engineering also benefits corrosive grenade, but not experimental explosives
+// http://www.swtor.com/community/showthread.php?p=2268473
 
 // Take Cover | Take Cover ==================================================
 // REVIEW: could possibly do this as a trigger instead, but a trigger seems
