@@ -91,144 +91,134 @@ void poison_attack_t::target_debuff( player_t* tgt, dmg_type type )
 
 // Adrenaline Probe | Cool Head =============================================
 
-struct adrenaline_probe_t : public action_t
+adrenaline_probe_t::adrenaline_probe_t( class_t* p, const std::string& n, const std::string& options_str ) :
+  base_t(n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE)
 {
-  adrenaline_probe_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    action_t(n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE)
-  {
-    parse_options( options_str );
+  parse_options( options_str );
 
-    cooldown -> duration = from_seconds( 120 - 15 * p -> talents.lethal_purpose -> rank() );
-    use_off_gcd = true;
-    trigger_gcd = timespan_t::zero();
+  cooldown -> duration = from_seconds( 120 - 15 * p -> talents.lethal_purpose -> rank() );
+  use_off_gcd = true;
+  trigger_gcd = timespan_t::zero();
 
-    num_ticks = 2;
-    base_tick_time = from_seconds( 1.5 );
-  }
+  num_ticks = 2;
+  base_tick_time = from_seconds( 1.5 );
+}
 
-  // the combat log isn't in sync with the game here.
-  // the combat log shows after 1.5 seconds a tick of 8 and 34, and then another tick of 8 1.5s later.
-  // what happens in game is you instantly get 34, and then two ticks of 8.
-  void execute()
-  {
-    action_t::execute();
-    class_t* p = cast();
+// the combat log isn't in sync with the game here.
+// the combat log shows after 1.5 seconds a tick of 8 and 34, and then another tick of 8 1.5s later.
+// what happens in game is you instantly get 34, and then two ticks of 8.
+void adrenaline_probe_t::execute()
+{
+  base_t::execute();
+  class_t* p = cast();
 
-    p -> buffs.adrenaline_probe -> trigger();
-    p -> resource_gain( RESOURCE_ENERGY, 34, p -> gains.adrenaline_probe );
-  }
+  p -> buffs.adrenaline_probe -> trigger();
+  p -> resource_gain( RESOURCE_ENERGY, 34, p -> gains.adrenaline_probe );
+}
 
-  void tick(dot_t* d)
-  {
-    action_t::tick(d);
-    class_t* p = cast();
+void adrenaline_probe_t::tick(dot_t* d)
+{
+  base_t::tick(d);
+  class_t* p = cast();
 
-    p -> resource_gain( RESOURCE_ENERGY, 8, p -> gains.adrenaline_probe );
-  }
-};
+  p -> resource_gain( RESOURCE_ENERGY, 8, p -> gains.adrenaline_probe );
+}
 
 // Coordination | Lucky Shots ===============================================
 
-struct coordination_t : public action_t
+coordination_t::coordination_t( class_t* p, const std::string& n, const std::string& options_str ) :
+  base_t( n, p, tech_policy, RESOURCE_NONE, SCHOOL_NONE )
 {
-  coordination_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    action_t( n, p, tech_policy, RESOURCE_NONE, SCHOOL_NONE )
+  parse_options( options_str );
+  base_cost = 0.0;
+}
+
+void coordination_t::execute()
+{
+  base_t::execute();
+
+  for ( player_t* p : list_range( sim -> player_list ) )
   {
-    parse_options( options_str );
-    base_cost = 0.0;
+    if ( p -> ooc_buffs() )
+      p -> buffs.coordination -> trigger();
   }
+}
 
-  virtual void execute()
-  {
-    action_t::execute();
+bool coordination_t::ready()
+{
+  if ( player -> buffs.coordination -> check() )
+    return false;
 
-    for ( player_t* p : list_range( sim -> player_list ) )
-    {
-      if ( p -> ooc_buffs() )
-        p -> buffs.coordination -> trigger();
-    }
-  }
-
-  virtual bool ready()
-  {
-    if ( player -> buffs.coordination -> check() )
-      return false;
-
-    return action_t::ready();
-  }
-};
+  return base_t::ready();
+}
 
 // Corrosive Dart | Vital Shot ==============================================
-struct corrosive_dart_t : public poison_attack_t
+
+corrosive_dart_t::corrosive_dart_t( class_t* p, const std::string& n, const std::string& options_str, bool weak ) :
+  base_t( n, p ),
+  corrosive_dart_weak()
 {
-  corrosive_dart_t* corrosive_dart_weak;
+  rank_level_list = { 5, 7, 10, 13, 17, 23, 35, 45, 50 };
 
-  corrosive_dart_t( class_t* p, const std::string& n, const std::string& options_str, bool weak=false ) :
-    poison_attack_t( n, p ),
-    corrosive_dart_weak()
+  parse_options( options_str );
+
+  range = 30.0;
+  base_tick_time = from_seconds( 3.0 );
+
+  if ( weak )
   {
-    rank_level_list = { 5, 7, 10, 13, 17, 23, 35, 45, 50 };
-
-    parse_options( options_str );
-
-    range = 30.0;
-    base_tick_time = from_seconds( 3.0 );
-
-    if ( weak )
-    {
-      // infinite?
-      range                       = 30.0;
-      base_cost                   = 0;
-      td.standardhealthpercentmin =
-      td.standardhealthpercentmax = 0.01;
-      td.power_mod                = 0.1;
-      num_ticks                   = 3 + p -> talents.lethal_injectors -> rank();
-      background                  = true;
-      trigger_gcd                 = timespan_t::zero();
-    }
-    else
-    {
-      base_cost                   = 20;
-      td.standardhealthpercentmin =
-      td.standardhealthpercentmax = 0.04;
-      td.power_mod                = 0.4;
-      num_ticks                   = 5 + p -> talents.lethal_injectors -> rank();
-
-      if ( p -> talents.lingering_toxins -> rank() )
-        corrosive_dart_weak = new corrosive_dart_t( p, n + "_weak", options_str, true );
-    }
+    // infinite?
+    range                       = 30.0;
+    base_cost                   = 0;
+    td.standardhealthpercentmin =
+    td.standardhealthpercentmax = 0.01;
+    td.power_mod                = 0.1;
+    num_ticks                   = 3 + p -> talents.lethal_injectors -> rank();
+    background                  = true;
+    trigger_gcd                 = timespan_t::zero();
   }
-
-  virtual void tick( dot_t* d )
+  else
   {
-    poison_attack_t::tick( d );
+    base_cost                   = 20;
+    td.standardhealthpercentmin =
+    td.standardhealthpercentmax = 0.04;
+    td.power_mod                = 0.4;
+    num_ticks                   = 5 + p -> talents.lethal_injectors -> rank();
 
-    class_t& p = *cast();
-
-    if ( p.talents.corrosive_microbes -> rank()
-         && p.rngs.corrosive_microbes -> roll( 0.125 * p.talents.corrosive_microbes -> rank() ) )
-    {
-      p.procs.corrosive_microbes -> occur();
-      extra_tick();
-    }
+    if ( p -> talents.lingering_toxins -> rank() )
+      corrosive_dart_weak = new corrosive_dart_t( p, n + "_weak", options_str, true );
   }
+}
 
-  virtual void last_tick( dot_t* d )
+void corrosive_dart_t::tick( dot_t* d )
+{
+  base_t::tick( d );
+
+  class_t& p = *cast();
+
+  if ( p.talents.corrosive_microbes -> rank()
+       && p.rngs.corrosive_microbes -> roll( 0.125 * p.talents.corrosive_microbes -> rank() ) )
   {
-    poison_attack_t::last_tick( d );
-
-    if ( corrosive_dart_weak )
-      corrosive_dart_weak -> execute();
+    p.procs.corrosive_microbes -> occur();
+    extra_tick();
   }
+}
 
-  virtual void execute()
-  {
-    if ( corrosive_dart_weak )
-      targetdata() -> dot_corrosive_dart_weak.cancel();
+void corrosive_dart_t::last_tick( dot_t* d )
+{
+  base_t::last_tick( d );
 
-    poison_attack_t::execute();
-  }
-};
+  if ( corrosive_dart_weak )
+    corrosive_dart_weak -> execute();
+}
+
+void corrosive_dart_t::execute()
+{
+  if ( corrosive_dart_weak )
+    targetdata() -> dot_corrosive_dart_weak.cancel();
+
+  base_t::execute();
+}
 
 // Explosive Probe | Sabotage Charge ========================================
 
@@ -295,92 +285,81 @@ orbital_strike_t::orbital_strike_t( class_t* p, const std::string& n, const std:
 
 // Overload Shot | Quick Shot ===============================================
 
-struct overload_shot_t : public range_attack_t
+overload_shot_t::overload_shot_t( class_t* p, const std::string& n, const std::string& options_str) :
+  base_t( n, p )
 {
-  overload_shot_t( class_t* p, const std::string& n, const std::string& options_str) :
-    range_attack_t( n, p )
-  {
-    rank_level_list = { 8, 12, 16, 22, 31, 40, 50 };
+  rank_level_list = { 8, 12, 16, 22, 31, 40, 50 };
 
-    parse_options( options_str );
+  parse_options( options_str );
 
-    base_cost                   =  17;
-    range                       =  10.0;
-    dd.standardhealthpercentmin =
-    dd.standardhealthpercentmax = 0.124;
-    dd.power_mod                =  1.24;
-    weapon                      =  &( player -> main_hand_weapon );
-    weapon_multiplier           =  -0.17;
-    // TODO move this tidbit into scoundrel_operative: 15% comes from operative's "skirmisher" passive
-    base_multiplier             += ( player -> type == IA_OPERATIVE || player -> type == S_SCOUNDREL ? 0.15 : 0 )
-                                +  .03 * p -> talents.cut_down->rank();
-  }
-};
+  base_cost                   =  17;
+  range                       =  10.0;
+  dd.standardhealthpercentmin =
+  dd.standardhealthpercentmax = 0.124;
+  dd.power_mod                =  1.24;
+  weapon                      =  &( player -> main_hand_weapon );
+  weapon_multiplier           =  -0.17;
+  // TODO move this tidbit into scoundrel_operative: 15% comes from operative's "skirmisher" passive
+  base_multiplier             += ( player -> type == IA_OPERATIVE || player -> type == S_SCOUNDREL ? 0.15 : 0 )
+      +  .03 * p -> talents.cut_down->rank();
+}
 
 // Rifle Shot | Flurry Of Bolts =========================================================
 
-struct rifle_shot_t : public range_attack_t
+rifle_shot_t::rifle_shot_t( class_t* p, const std::string& n, const std::string& options_str, bool is_consequent_strike, bool is_offhand_attack ) :
+  base_t( n, p ), second_strike( 0 ), offhand_attack( 0 )
 {
-  rifle_shot_t* second_strike;
-  rifle_shot_t* offhand_attack;
+  parse_options( options_str );
 
-  rifle_shot_t( class_t* p, const std::string& n, const std::string& options_str,
-                bool is_consequent_strike = false, bool is_offhand_attack = false ) :
-    range_attack_t( n, p ), second_strike( 0 ), offhand_attack( 0 )
+  base_cost = 0;
+  range = ( player -> type == IA_SNIPER || player -> type == S_GUNSLINGER ) ? 35 : 30.0;
+  weapon = &( player->main_hand_weapon );
+  weapon_multiplier = -0.5;
+  dd.power_mod = 0.5;
+  // Is a Basic attack
+  base_accuracy -= 0.10;
+
+  if ( is_consequent_strike )
   {
-    parse_options( options_str );
-
-    base_cost = 0;
-    range = ( player -> type == IA_SNIPER || player -> type == S_GUNSLINGER ) ? 35 : 30.0;
-    weapon = &( player->main_hand_weapon );
-    weapon_multiplier = -0.5;
-    dd.power_mod = 0.5;
-    // Is a Basic attack
-    base_accuracy -= 0.10;
-
-    if ( is_consequent_strike )
-    {
-      background = dual = true;
-      trigger_gcd = timespan_t::zero();
-      base_execute_time = from_seconds( 0.75 );
-    }
-    else if ( ! is_offhand_attack )
-    {
-      second_strike = new rifle_shot_t( p, n, options_str, true, is_offhand_attack );
-    }
-
-    if ( is_offhand_attack )
-    {
-      background                 = true;
-      dual                       = true;
-      trigger_gcd                = timespan_t::zero();
-      weapon                     = &( player -> off_hand_weapon );
-      rank_level_list            = { 0 };
-      dd.power_mod               = 0;
-    }
-    else if ( player -> type == S_GUNSLINGER )
-    {
-      offhand_attack             = new rifle_shot_t( p, n+"_offhand", options_str, is_consequent_strike, true );
-      add_child( offhand_attack );
-    }
+    background = dual = true;
+    trigger_gcd = timespan_t::zero();
+    base_execute_time = from_seconds( 0.75 );
+  }
+  else if ( ! is_offhand_attack )
+  {
+    second_strike = new rifle_shot_t( p, n, options_str, true, is_offhand_attack );
   }
 
-  virtual void execute()
+  if ( is_offhand_attack )
   {
-    range_attack_t::execute();
-    if ( second_strike )
-        second_strike->schedule_execute();
-    if ( offhand_attack )
-       offhand_attack->schedule_execute();
+    background                 = true;
+    dual                       = true;
+    trigger_gcd                = timespan_t::zero();
+    weapon                     = &( player -> off_hand_weapon );
+    rank_level_list            = { 0 };
+    dd.power_mod               = 0;
   }
-};
+  else if ( player -> type == S_GUNSLINGER )
+  {
+    offhand_attack             = new rifle_shot_t( p, n+"_offhand", options_str, is_consequent_strike, true );
+    add_child( offhand_attack );
+  }
+}
+
+void rifle_shot_t::execute()
+{
+  base_t::execute();
+  if ( second_strike )
+    second_strike->schedule_execute();
+  if ( offhand_attack )
+    offhand_attack->schedule_execute();
+}
 
 // Snipe | Charged Burst ====================================================
 
 snipe_t::snipe_t( class_t* p, const std::string& n, const std::string& options_str) :
   base_t( n, p )
 {
-
   parse_options( options_str );
 
   range = ( player -> type == IA_SNIPER || player -> type == S_GUNSLINGER ) ? 35 : 30.0;
@@ -413,7 +392,7 @@ take_cover_t::take_cover_t( class_t* p, const std::string& n, const std::string&
 
 void take_cover_t::execute()
 {
-  action_t::execute();
+  base_t::execute();
 
   class_t& p = *cast();
   if ( p.buffs.cover -> up() )
@@ -424,32 +403,29 @@ void take_cover_t::execute()
 
 // Weakening Blast | Hemorrhaging Blast =================================================
 
-struct weakening_blast_t : public range_attack_t
+weakening_blast_t::weakening_blast_t( class_t* p, const std::string& n, const std::string& options_str) :
+  base_t( n, p )
 {
-  weakening_blast_t( class_t* p, const std::string& n, const std::string& options_str) :
-    range_attack_t( n, p )
-  {
-    check_talent( p -> talents.weakening_blast -> rank() );
+  check_talent( p -> talents.weakening_blast -> rank() );
 
-    parse_options( options_str );
+  parse_options( options_str );
 
-    range                       = 10.0;
-    cooldown -> duration        = from_seconds( 15 );
-    dd.standardhealthpercentmin =
-    dd.standardhealthpercentmax = 0.087;
-    dd.power_mod                = 0.87;
-    weapon                      = &( player -> main_hand_weapon );
-    weapon_multiplier           = -0.42;
-  }
+  range                       = 10.0;
+  cooldown -> duration        = from_seconds( 15 );
+  dd.standardhealthpercentmin =
+  dd.standardhealthpercentmax = 0.087;
+  dd.power_mod                = 0.87;
+  weapon                      = &( player -> main_hand_weapon );
+  weapon_multiplier           = -0.42;
+}
 
-  virtual void execute()
-  {
-    range_attack_t::execute();
+void weakening_blast_t::execute()
+{
+  base_t::execute();
 
-    if ( result_is_hit() )
-      targetdata() -> debuff_weakening_blast -> trigger( 10 );
-  }
-};
+  if ( result_is_hit() )
+    targetdata() -> debuff_weakening_blast -> trigger( 10 );
+}
 
 // ==========================================================================
 // Smuggler / Agent Callbacks

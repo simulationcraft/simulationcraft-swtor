@@ -260,6 +260,35 @@ public:
   virtual void target_debuff( player_t* tgt, dmg_type type );
 };
 
+class adrenaline_probe_t : public action_t
+{
+  typedef action_t base_t;
+public:
+  adrenaline_probe_t( class_t* p, const std::string& n, const std::string& options_str );
+  virtual void execute();
+  virtual void tick(dot_t* d);
+};
+
+class coordination_t : public action_t
+{
+  typedef action_t base_t;
+public:
+  coordination_t( class_t* p, const std::string& n, const std::string& options_str );
+  virtual void execute();
+  virtual bool ready();
+};
+
+class corrosive_dart_t : public poison_attack_t
+{
+  typedef poison_attack_t base_t;
+public:
+  corrosive_dart_t* corrosive_dart_weak;
+  corrosive_dart_t( class_t* p, const std::string& n, const std::string& options_str, bool weak=false );
+  virtual void tick( dot_t* d );
+  virtual void last_tick( dot_t* d );
+  virtual void execute();
+};
+
 class explosive_probe_t : public tech_attack_t
 {
   typedef tech_attack_t base_t;
@@ -273,6 +302,23 @@ class fragmentation_grenade_t : public tech_attack_t
   typedef tech_attack_t base_t;
 public:
   fragmentation_grenade_t( class_t* p, const std::string& n, const std::string& options_str );
+};
+
+class overload_shot_t : public range_attack_t
+{
+  typedef range_attack_t base_t;
+public:
+  overload_shot_t( class_t* p, const std::string& n, const std::string& options_str);
+};
+
+class rifle_shot_t : public range_attack_t
+{
+  typedef range_attack_t base_t;
+public:
+  rifle_shot_t* second_strike;
+  rifle_shot_t* offhand_attack;
+  rifle_shot_t( class_t* p, const std::string& n, const std::string& options_str, bool is_consequent_strike = false, bool is_offhand_attack = false );
+  virtual void execute();
 };
 
 class snipe_t : public range_attack_t
@@ -296,6 +342,14 @@ class orbital_strike_t : public tech_attack_t
   typedef tech_attack_t base_t;
 public:
   orbital_strike_t( class_t* p, const std::string& n, const std::string& options_str);
+};
+
+class weakening_blast_t : public range_attack_t
+{
+  typedef range_attack_t base_t;
+public:
+  weakening_blast_t( class_t* p, const std::string& n, const std::string& options_str);
+  virtual void execute();
 };
 
 } // namespace agent_smug ===================================================
