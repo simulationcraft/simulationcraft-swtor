@@ -46,6 +46,7 @@ public:
   // Gains
   struct gains_t:base_t::gains_t
   {
+    gain_t* imperial_methodology;
     gain_t* snipers_nest;
     gain_t* sniper_volley;
   } gains;
@@ -152,6 +153,7 @@ public:
     // rngs from talent
     std::string reactive_shot;
     // gains from talent
+    std::string imperial_methodology;
     std::string snipers_nest;
   } abilities;
 
@@ -200,7 +202,7 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   agent_smug::targetdata_t( source, target )
 {
 // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-   debuff_cluster_bombs   = new buff_t ( this, source.abilities.cluster_bombs, 2, from_seconds ( 0 ), from_seconds( 1.5 ), 100, false, true );
+   debuff_cluster_bombs   = new buff_t ( this, source.abilities.cluster_bombs, 2 + source.talents.imperial_methodology -> rank(), from_seconds ( 0 ), from_seconds( 1.5 ), 100, false, true );
 
   dot_interrogation_probe = dot_t ( source.abilities.interrogation_probe, &source );
   dot_series_of_shots     = dot_t ( source.abilities.series_of_shots,     &source );
@@ -352,9 +354,11 @@ struct explosive_probe_t : public agent_smug::explosive_probe_t
     {
       buff_t* cluster_bombs = dynamic_cast<gunslinger_sniper::targetdata_t*>( targetdata() ) -> debuff_cluster_bombs;
       if ( cluster_bombs -> up() )
-        cluster_bombs -> refresh(2);
+        // REVIEW for normal buffs would just use trigger, but this is in reverse. so trigger decrements
+        // once it is up. how to best get it up to max stacks?
+        cluster_bombs -> refresh(cluster_bombs -> max_stack);
       else
-        cluster_bombs -> start(2);
+        cluster_bombs -> start(cluster_bombs -> max_stack);
     }
   }
 };
@@ -715,7 +719,11 @@ struct cluster_bombs_callback_t : public action_callback_t
                                      -> debuff_cluster_bombs;
 
       if ( debuff_cluster_bombs -> up() && debuff_cluster_bombs -> trigger() )
+      {
         cluster_bombs -> execute();
+        if ( p() -> talents.imperial_methodology -> rank() )
+          p() -> resource_gain( RESOURCE_ENERGY, 5, p() -> gains.imperial_methodology );
+      }
     }
   }
 };
@@ -754,22 +762,23 @@ void class_t::init_abilities()
 
   bool sn = type == IA_SNIPER;
 
-  //                            =    ? SNIPER LABEL          : GUNSLINGER LABEL        ;
-  abilities.ambush              = sn ? "ambush"              : "aimed_shot"            ;
-  abilities.followthrough       = sn ? "followthrough"       : "trickshot"             ;
-  abilities.interrogation_probe = sn ? "interrogation_probe" : "shock_charge"          ;
-  abilities.rapid_fire          = sn ? "rapid_fire"          : "rapid_fire"            ;
-  abilities.series_of_shots     = sn ? "series_of_shots"     : "speed_shot"            ;
-  abilities.takedown            = sn ? "takedown"            : "quickdraw"             ;
+  //                             =    ? SNIPER LABEL           : GUNSLINGER LABEL       ;
+  abilities.ambush               = sn ? "ambush"               : "aimed_shot"           ;
+  abilities.followthrough        = sn ? "followthrough"        : "trickshot"            ;
+  abilities.interrogation_probe  = sn ? "interrogation_probe"  : "shock_charge"         ;
+  abilities.rapid_fire           = sn ? "rapid_fire"           : "rapid_fire"           ;
+  abilities.series_of_shots      = sn ? "series_of_shots"      : "speed_shot"           ;
+  abilities.takedown             = sn ? "takedown"             : "quickdraw"            ;
 
   // buffs
-  abilities.snap_shot           = sn ? "snap_shot"           : "snap_shot"             ;
-  abilities.sniper_volley       = sn ? "sniper_volley"       : "burst_volley"          ;
-  abilities.cluster_bombs       = sn ? "cluster_bombs"       : "contingency_charges"   ;
+  abilities.snap_shot            = sn ? "snap_shot"            : "snap_shot"            ;
+  abilities.sniper_volley        = sn ? "sniper_volley"        : "burst_volley"         ;
+  abilities.cluster_bombs        = sn ? "cluster_bombs"        : "contingency_charges"  ;
   // rngs
-  abilities.reactive_shot       = sn ? "reactive_shot"       : "quick_aim"             ;
+  abilities.reactive_shot        = sn ? "reactive_shot"        : "quick_aim"            ;
   // gains
-  abilities.snipers_nest        = sn ? "snipers_nest"        : "fox_hole"              ;
+  abilities.imperial_methodology = sn ? "imperial_methodology" : "imperial_methodology" ;
+  abilities.snipers_nest         = sn ? "snipers_nest"         : "fox_hole"             ;
 }
 
 // class_t::init_talents ========================================
@@ -878,8 +887,9 @@ void class_t::init_gains()
 {
   base_t::init_gains();
 
-  gains.snipers_nest  = get_gain( abilities.snipers_nest  );
-  gains.sniper_volley = get_gain( abilities.sniper_volley );
+  gains.imperial_methodology = get_gain( abilities.imperial_methodology );
+  gains.snipers_nest         = get_gain( abilities.snipers_nest         );
+  gains.sniper_volley        = get_gain( abilities.sniper_volley        );
 }
 
 // class_t::init_procs ==========================================
