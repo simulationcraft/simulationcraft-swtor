@@ -231,7 +231,7 @@ struct tech_attack_t : public agent_smug::tech_attack_t
 
 struct range_attack_t : public agent_smug::range_attack_t
 {
-  range_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_KINETIC ) :
+  range_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_ENERGY ) :
     agent_smug::range_attack_t( n, p, s )
   {}
 

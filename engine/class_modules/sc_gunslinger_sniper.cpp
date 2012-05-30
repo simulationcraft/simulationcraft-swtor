@@ -261,7 +261,7 @@ struct range_attack_t : public agent_smug::range_attack_t
 {
   typedef agent_smug::range_attack_t base_t;
 
-  range_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_KINETIC ) :
+  range_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_ENERGY ) :
     base_t( n, p, s )
   {}
 
