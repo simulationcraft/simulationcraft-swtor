@@ -510,7 +510,7 @@ struct laceration_t : public tech_attack_t
 
   virtual bool ready()
   {
-    return p() -> buffs.tactical_advantage -> check() : base_t::ready() : false;
+    return p() -> buffs.tactical_advantage -> check() ? base_t::ready() : false;
   }
 
   virtual void execute()
