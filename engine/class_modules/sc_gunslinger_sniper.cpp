@@ -571,10 +571,10 @@ struct orbital_strike_t : public agent_smug::orbital_strike_t
   orbital_strike_t( class_t* p, const std::string& n, const std::string& options_str) :
       agent_smug::orbital_strike_t( p, n, options_str )
   {
-    if ( unsigned rank = p -> talents.pillbox_sniper -> rank() )
-      cooldown -> duration -= from_seconds( 7.5 * rank );
-    base_multiplier += 0.05 * p -> talents.explosive_engineering -> rank();
-    crit_multiplier += 0.15 * p -> talents.experimental_explosives -> rank();
+    cooldown -> duration -= from_seconds( 7.5 * p -> talents.pillbox_sniper -> rank() );
+    cooldown -> duration -= from_seconds( 1 * p -> talents.sector_ranger -> rank() );
+    base_multiplier      += 0.05 * p -> talents.explosive_engineering -> rank();
+    crit_multiplier      += 0.15 * p -> talents.experimental_explosives -> rank();
   }
 };
 
