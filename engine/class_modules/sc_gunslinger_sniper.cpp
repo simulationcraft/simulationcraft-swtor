@@ -337,6 +337,7 @@ struct explosive_probe_t : public agent_smug::explosive_probe_t
   explosive_probe_t( class_t* p, const std::string& n, const std::string& options_str ) :
     agent_smug::explosive_probe_t( p, n, options_str )
   {
+    base_cost       -= 2 * p -> talents.efficient_engineering -> rank();
     base_multiplier += 0.05 * p -> talents.explosive_engineering -> rank();
   }
 
@@ -407,7 +408,7 @@ struct interrogation_probe_t : public agent_smug::tech_attack_t
 
     parse_options( options_str );
 
-    base_cost                    = 20;
+    base_cost                    = 20 - 2 * p -> talents.efficient_engineering -> rank();
     cooldown -> duration         = from_seconds( 18 );
     range                        = 35.0;
     td.standardhealthpercentmin  =
@@ -567,6 +568,8 @@ struct fragmentation_grenade_t : public agent_smug::fragmentation_grenade_t
 
 // TODO steady_shots also affects Cull, but we still need to move that from
 // scoundrel to agent
+
+// TODO efficient engineering also benefits plasma probe (t7 ability)
 
 // Take Cover | Take Cover ==================================================
 // REVIEW: could possibly do this as a trigger instead, but a trigger seems
@@ -921,6 +924,7 @@ void class_t::init_actions()
 
     action_list_str += sl + abilities.take_cover + ",if=buff." + abilities.cover + ".down";
     // guessing priority and optimal energy
+    action_list_str += sl + abilities.adrenaline_probe + ",if=energy<=65";
     if ( talents.interrogation_probe -> rank() )
       action_list_str += sl + abilities.interrogation_probe + ",if=energy>65";
     action_list_str += sl + abilities.orbital_strike + ",if=energy>65";
