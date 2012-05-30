@@ -326,6 +326,26 @@ struct explosive_probe_t : public tech_attack_t
   }
 };
 
+// Fragmentation Grenade | ??? ==============================================
+
+struct fragmentation_grenade_t : public tech_attack_t
+{
+  fragmentation_grenade_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    tech_attack_t( n, p )
+  {
+    parse_options( options_str );
+
+    base_cost                   = 20;
+    cooldown -> duration        = from_seconds( 6.0 );
+    range                       = 30.0;
+    dd.standardhealthpercentmin = 0.109;
+    dd.standardhealthpercentmax = 0.149;
+    dd.power_mod                = 1.29;
+    aoe                         = 4;
+  }
+};
+
+
 // Snipe | Charged Burst ====================================================
 
 struct snipe_t : public range_attack_t

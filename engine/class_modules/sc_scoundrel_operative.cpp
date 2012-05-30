@@ -559,25 +559,6 @@ struct hidden_strike_t : public consume_acid_blade_attack_t
   // TODO check for talent and trigger knockdown (jarring strike)
 };
 
-// Fragmentation Grenade | ??? ==============================================
-
-struct fragmentation_grenade_t : public tech_attack_t
-{
-  fragmentation_grenade_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    tech_attack_t( n, p )
-  {
-    parse_options( options_str );
-
-    base_cost                   = 20;
-    cooldown -> duration        = from_seconds( 6.0 );
-    range                       = 30.0;
-    dd.standardhealthpercentmin = 0.109;
-    dd.standardhealthpercentmax = 0.149;
-    dd.power_mod                = 1.29;
-    aoe                         = 4;
-  }
-};
-
 // Corrosive Grenade | ??? ==================================================
 
 struct corrosive_grenade_t : public poison_attack_t
@@ -901,7 +882,6 @@ struct poison_tick_crit_callback_t : public action_callback_t
   if ( name == abilities.corrosive_dart        ) return new corrosive_dart_t        ( this, name, options_str ) ;
   if ( name == abilities.corrosive_grenade     ) return new corrosive_grenade_t     ( this, name, options_str ) ;
   if ( name == abilities.cull                  ) return new cull_t                  ( this, name, options_str ) ;
-  if ( name == abilities.fragmentation_grenade ) return new fragmentation_grenade_t ( this, name, options_str ) ;
   if ( name == abilities.hidden_strike         ) return new hidden_strike_t         ( this, name, options_str ) ;
   if ( name == abilities.laceration            ) return new laceration_t            ( this, name, options_str ) ;
   if ( name == abilities.shiv                  ) return new shiv_t                  ( this, name, options_str ) ;

@@ -251,15 +251,16 @@ struct poison_tick_crit_callback_t : public action_callback_t
 ::action_t* class_t::create_action( const std::string& name,
                                     const std::string& options_str )
 {
-  if ( name == abilities.adrenaline_probe ) return new adrenaline_probe_t ( this, name, options_str ) ;
-  if ( name == abilities.coordination     ) return new coordination_t     ( this, name, options_str ) ;
-  if ( name == abilities.explosive_probe  ) return new explosive_probe_t  ( this, name, options_str ) ;
-  if ( name == abilities.orbital_strike   ) return new orbital_strike_t   ( this, name, options_str ) ;
-  if ( name == abilities.overload_shot    ) return new overload_shot_t    ( this, name, options_str ) ;
-  if ( name == abilities.rifle_shot       ) return new rifle_shot_t       ( this, name, options_str ) ;
-  if ( name == abilities.snipe            ) return new snipe_t            ( this, name, options_str ) ;
-  if ( name == abilities.take_cover       ) return new take_cover_t       ( this, name, options_str ) ;
-  if ( name == abilities.weakening_blast  ) return new weakening_blast_t  ( this, name, options_str ) ;
+  if ( name == abilities.adrenaline_probe      ) return new adrenaline_probe_t      ( this, name, options_str ) ;
+  if ( name == abilities.coordination          ) return new coordination_t          ( this, name, options_str ) ;
+  if ( name == abilities.explosive_probe       ) return new explosive_probe_t       ( this, name, options_str ) ;
+  if ( name == abilities.fragmentation_grenade ) return new fragmentation_grenade_t ( this, name, options_str ) ;
+  if ( name == abilities.orbital_strike        ) return new orbital_strike_t        ( this, name, options_str ) ;
+  if ( name == abilities.overload_shot         ) return new overload_shot_t         ( this, name, options_str ) ;
+  if ( name == abilities.rifle_shot            ) return new rifle_shot_t            ( this, name, options_str ) ;
+  if ( name == abilities.snipe                 ) return new snipe_t                 ( this, name, options_str ) ;
+  if ( name == abilities.take_cover            ) return new take_cover_t            ( this, name, options_str ) ;
+  if ( name == abilities.weakening_blast       ) return new weakening_blast_t       ( this, name, options_str ) ;
 
   return base_t::create_action( name, options_str );
 }
