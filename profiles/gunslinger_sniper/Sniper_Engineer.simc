@@ -13,6 +13,7 @@ actions=stim,type=exotech_skill
 actions+=/coordination
 actions+=/snapshot_stats
 actions+=/take_cover,if=buff.cover.down
+actions+=/emp_discharge,if=dot.interrogation_probe.remains<1.6
 actions+=/adrenaline_probe,if=energy<=65
 actions+=/interrogation_probe,if=energy>65
 actions+=/orbital_strike,if=energy>65

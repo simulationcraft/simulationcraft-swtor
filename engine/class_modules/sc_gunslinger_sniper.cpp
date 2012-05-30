@@ -71,6 +71,8 @@ public:
   struct cooldowns_t
   {
     cooldown_t* ambush;
+    cooldown_t* adrenaline_probe;
+    cooldown_t* interrogation_probe;
     cooldown_t* series_of_shots;
   } cooldowns;
 
@@ -140,6 +142,7 @@ public:
   struct abilities_t:base_t::abilities_t
   {
     std::string ambush;
+    std::string emp_discharge;
     std::string followthrough;
     std::string interrogation_probe;
     std::string rapid_fire;
@@ -362,6 +365,45 @@ struct explosive_probe_t : public agent_smug::explosive_probe_t
     }
   }
 };
+
+// EMP Discharge | Sabotage =================================================
+struct emp_discharge_t : public agent_smug::tech_attack_t
+{
+  typedef agent_smug::tech_attack_t base_t;
+
+  emp_discharge_t( class_t* p, const std::string& n, const std::string& options_str) :
+    agent_smug::tech_attack_t( n, p, SCHOOL_ENERGY )
+  {
+    check_talent( p -> talents.emp_discharge -> rank() );
+
+    // rank_level_list = { ... ,50 };
+
+    parse_options( options_str );
+
+    base_cost                    = 0;
+    cooldown -> duration         = from_seconds( 60 );
+    range                        = 60.0;
+    dd.standardhealthpercentmin  = 0.07;
+    dd.standardhealthpercentmax  = 0.13;
+    dd.power_mod                 = 1;
+  }
+
+  virtual bool ready()
+  {
+      return dynamic_cast<gunslinger_sniper::targetdata_t*>( targetdata() ) -> dot_interrogation_probe.ticking
+        ? base_t::ready() : false;
+  }
+
+  virtual void execute()
+  {
+      // REVIEW: or reset()?
+      dynamic_cast<gunslinger_sniper::targetdata_t*>( targetdata() ) -> dot_interrogation_probe.cancel();
+      dynamic_cast<class_t*>( player ) -> cooldowns.interrogation_probe -> reset();
+      dynamic_cast<class_t*>( player ) -> cooldowns.adrenaline_probe -> reset();
+      base_t::execute();
+  }
+};
+
 
 // Followthrough | Trickshot ================================================
 struct followthrough_t : public agent_smug::range_attack_t
@@ -743,6 +785,7 @@ struct cluster_bombs_callback_t : public action_callback_t
                                     const std::string& options_str )
 {
   if ( name == abilities.ambush                ) return new ambush_t                ( this, name, options_str ) ;
+  if ( name == abilities.emp_discharge         ) return new emp_discharge_t         ( this, name, options_str ) ;
   if ( name == abilities.followthrough         ) return new followthrough_t         ( this, name, options_str ) ;
   if ( name == abilities.interrogation_probe   ) return new interrogation_probe_t   ( this, name, options_str ) ;
   if ( name == abilities.rapid_fire            ) return new rapid_fire_t            ( this, name, options_str ) ;
@@ -769,6 +812,7 @@ void class_t::init_abilities()
 
   //                             =    ? SNIPER LABEL           : GUNSLINGER LABEL       ;
   abilities.ambush               = sn ? "ambush"               : "aimed_shot"           ;
+  abilities.emp_discharge        = sn ? "emp_discharge"        : "sabotage"             ;
   abilities.followthrough        = sn ? "followthrough"        : "trickshot"            ;
   abilities.interrogation_probe  = sn ? "interrogation_probe"  : "shock_charge"         ;
   abilities.rapid_fire           = sn ? "rapid_fire"           : "rapid_fire"           ;
@@ -911,8 +955,10 @@ void class_t::init_cooldowns()
 {
   base_t::init_cooldowns();
 
-  cooldowns.ambush          = get_cooldown( abilities.ambush );
-  cooldowns.series_of_shots = get_cooldown( abilities.series_of_shots );
+  cooldowns.adrenaline_probe    = get_cooldown ( abilities.adrenaline_probe    );
+  cooldowns.ambush              = get_cooldown ( abilities.ambush              );
+  cooldowns.interrogation_probe = get_cooldown ( abilities.interrogation_probe );
+  cooldowns.series_of_shots     = get_cooldown ( abilities.series_of_shots     );
 }
 
 // class_t::init_rng ============================================
@@ -939,6 +985,8 @@ void class_t::init_actions()
 
     action_list_str += sl + abilities.take_cover + ",if=buff." + abilities.cover + ".down";
     // guessing priority and optimal energy
+    if ( talents.emp_discharge -> rank() )
+      action_list_str += sl + abilities.emp_discharge + ",if=dot.interrogation_probe.remains<1.6";
     action_list_str += sl + abilities.adrenaline_probe + ",if=energy<=65";
     if ( talents.interrogation_probe -> rank() )
       action_list_str += sl + abilities.interrogation_probe + ",if=energy>65";
