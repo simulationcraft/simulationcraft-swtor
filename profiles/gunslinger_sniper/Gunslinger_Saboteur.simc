@@ -13,6 +13,7 @@ actions=stim,type=exotech_skill
 actions+=/lucky_shots
 actions+=/snapshot_stats
 actions+=/take_cover,if=buff.cover.down
+actions+=/sabotage_charge,if=buff.energy_overrides.up
 actions+=/sabotage,if=dot.interrogation_probe.remains<1.6
 actions+=/cool_head,if=energy<=65
 actions+=/shock_charge,if=energy>65

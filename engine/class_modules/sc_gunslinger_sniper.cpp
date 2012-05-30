@@ -37,6 +37,7 @@ public:
   // Buffs
   struct buffs_t:base_t::buffs_t
   {
+    buff_t* energy_overrides;
     buff_t* followthrough;
     buff_t* rapid_fire;
     buff_t* snap_shot;
@@ -150,9 +151,10 @@ public:
     std::string takedown;
 
     // buffs
+    std::string cluster_bombs;
+    std::string energy_overrides;
     std::string snap_shot;
     std::string sniper_volley;
-    std::string cluster_bombs;
     // rngs from talent
     std::string reactive_shot;
     // gains from talent
@@ -350,10 +352,20 @@ struct explosive_probe_t : public agent_smug::explosive_probe_t
   // (tooltip says damage. game data has text that says blaster damage)
   // this is not implemented yet.
 
+  virtual double cost() const
+  {
+    class_t& p = *dynamic_cast<class_t*>( player );
+    return p.buffs.energy_overrides -> up()
+      ? base_t::cost() * ( 1 - 0.5 * p.talents.energy_overrides -> rank() )
+      : base_t::cost();
+  }
+
   virtual void execute()
   {
     base_t::execute();
-    if ( dynamic_cast<class_t*>( player ) -> talents.cluster_bombs && result_is_hit() )
+    class_t& p = *dynamic_cast<class_t*>( player );
+    p.buffs.energy_overrides -> expire();
+    if ( p.talents.cluster_bombs && result_is_hit() )
     {
       buff_t* cluster_bombs = dynamic_cast<gunslinger_sniper::targetdata_t*>( targetdata() ) -> debuff_cluster_bombs;
       if ( cluster_bombs -> up() )
@@ -398,8 +410,12 @@ struct emp_discharge_t : public agent_smug::tech_attack_t
   {
       // REVIEW: or reset()?
       dynamic_cast<gunslinger_sniper::targetdata_t*>( targetdata() ) -> dot_interrogation_probe.cancel();
-      dynamic_cast<class_t*>( player ) -> cooldowns.interrogation_probe -> reset();
-      dynamic_cast<class_t*>( player ) -> cooldowns.adrenaline_probe -> reset();
+      class_t& p = *dynamic_cast<class_t*>( player );
+      p.cooldowns.interrogation_probe -> reset();
+      p.cooldowns.adrenaline_probe -> reset();
+      if ( p.talents.energy_overrides -> rank() )
+        p.buffs.energy_overrides -> trigger();
+
       base_t::execute();
   }
 };
@@ -467,6 +483,10 @@ struct interrogation_probe_t : public agent_smug::tech_attack_t
 
   // not implemented: cooldown resets if ends prematurely (target dies, dispelled).
 };
+
+// Plasma Probe | Incendiary Grenade ========================================
+// TODO efficient engineering also benefits plasma probe (t7 ability)
+// TODO: energy overrides reduces cost like with explosive probe
 
 // Rapid Fire | Rapid Fire ==================================================
 
@@ -616,8 +636,6 @@ struct fragmentation_grenade_t : public agent_smug::fragmentation_grenade_t
 
 // TODO steady_shots also affects Cull, but we still need to move that from
 // scoundrel to agent
-
-// TODO efficient engineering also benefits plasma probe (t7 ability)
 
 // TODO explosive engineering also benefits corrosive grenade, but not experimental explosives
 // http://www.swtor.com/community/showthread.php?p=2268473
@@ -820,9 +838,10 @@ void class_t::init_abilities()
   abilities.takedown             = sn ? "takedown"             : "quickdraw"            ;
 
   // buffs
+  abilities.energy_overrides     = sn ? "energy_overrides"     : "seize_the_moment"     ;
+  abilities.cluster_bombs        = sn ? "cluster_bombs"        : "contingency_charges"  ;
   abilities.snap_shot            = sn ? "snap_shot"            : "snap_shot"            ;
   abilities.sniper_volley        = sn ? "sniper_volley"        : "burst_volley"         ;
-  abilities.cluster_bombs        = sn ? "cluster_bombs"        : "contingency_charges"  ;
   // rngs
   abilities.reactive_shot        = sn ? "reactive_shot"        : "quick_aim"            ;
   // gains
@@ -924,10 +943,11 @@ void class_t::init_buffs()
 
 // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
 
-  buffs.followthrough = new buff_t( this , abilities.followthrough , 1 ,  from_seconds( 4.5 ) );
-  buffs.snap_shot     = new buff_t( this , abilities.snap_shot     , 1 ,  from_seconds( 10 ), from_seconds( 6 ), 0.5 * talents.snap_shot -> rank() );
-  buffs.rapid_fire    = new buff_t( this , abilities.rapid_fire    , 1 ,  from_seconds( 10 ) );
-  buffs.sniper_volley = new buff_t( this , abilities.sniper_volley , 1 ,  from_seconds( 10 ), from_seconds( 30 ), 0.05 * talents.sniper_volley -> rank() );
+  buffs.energy_overrides = new buff_t( this , abilities.energy_overrides , 1 ,  from_seconds( 15  ) );
+  buffs.followthrough    = new buff_t( this , abilities.followthrough    , 1 ,  from_seconds( 4.5 ) );
+  buffs.snap_shot        = new buff_t( this , abilities.snap_shot        , 1 ,  from_seconds( 10  ), from_seconds( 6 ), 0.5 * talents.snap_shot -> rank() );
+  buffs.rapid_fire       = new buff_t( this , abilities.rapid_fire       , 1 ,  from_seconds( 10  ) );
+  buffs.sniper_volley    = new buff_t( this , abilities.sniper_volley    , 1 ,  from_seconds( 10  ), from_seconds( 30 ), 0.05 * talents.sniper_volley -> rank() );
 }
 
 // class_t::init_gains ==========================================
@@ -985,6 +1005,12 @@ void class_t::init_actions()
 
     action_list_str += sl + abilities.take_cover + ",if=buff." + abilities.cover + ".down";
     // guessing priority and optimal energy
+    if ( unsigned rank = talents.energy_overrides -> rank() )
+    {
+      action_list_str += sl + abilities.explosive_probe + ",if=buff.energy_overrides.up";
+      if ( rank == 1 )
+        action_list_str += "&energy<=70";
+    }
     if ( talents.emp_discharge -> rank() )
       action_list_str += sl + abilities.emp_discharge + ",if=dot.interrogation_probe.remains<1.6";
     action_list_str += sl + abilities.adrenaline_probe + ",if=energy<=65";
