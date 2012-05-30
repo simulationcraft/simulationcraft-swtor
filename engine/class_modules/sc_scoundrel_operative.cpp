@@ -989,7 +989,7 @@ void class_t::init_actions()
 
     if ( talents.acid_blade -> rank() )
       action_list_str += sl + abilities.acid_blade + ",if=!buff." + abilities.acid_blade + "_coating.up&!cooldown." + abilities.backstab + ".remains";
-    action_list_str += "/use_relics"
+    action_list_str += "/use_relics/power_potion"
                        + sl + abilities.hidden_strike;
 
 

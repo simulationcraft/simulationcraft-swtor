@@ -13,6 +13,8 @@ actions=stim,type=exotech_skill
 actions+=/lucky_shots
 actions+=/snapshot_stats
 actions+=/take_cover,if=buff.cover.down
+actions+=/use_relics
+actions+=/power_potion
 actions+=/incendiary_grenade,if=energy>=75
 actions+=/incendiary_grenade,if=buff.seize_the_moment.up
 actions+=/sabotage_charge,if=buff.seize_the_moment.up

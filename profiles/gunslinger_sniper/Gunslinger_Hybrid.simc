@@ -13,6 +13,8 @@ actions=stim,type=exotech_skill
 actions+=/lucky_shots
 actions+=/snapshot_stats
 actions+=/take_cover,if=buff.cover.down
+actions+=/use_relics
+actions+=/power_potion
 actions+=/cool_head,if=energy<=65
 actions+=/shock_charge,if=energy>65
 actions+=/xs_freighter_flyby,if=energy>65

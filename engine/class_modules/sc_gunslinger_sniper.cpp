@@ -1056,6 +1056,7 @@ void class_t::init_actions()
       "/snapshot_stats";
 
     action_list_str += sl + abilities.take_cover + ",if=buff." + abilities.cover + ".down";
+    action_list_str += "/use_relics/power_potion";
     // guessing priority and optimal energy
     if ( talents.plasma_probe -> rank() )
       action_list_str += sl + abilities.plasma_probe + ",if=energy>=75";

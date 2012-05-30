@@ -16,6 +16,7 @@ actions+=/stealth
 actions+=/cool_head,if=energy<=60
 actions+=/pugnacity,if=buff.upper_hand.stack>=2
 actions+=/use_relics
+actions+=/power_potion
 actions+=/shoot_first
 actions+=/blaster_whip,if=energy>=75&buff.upper_hand.stack<2
 actions+=/vital_shot,if=!ticking&energy>=75

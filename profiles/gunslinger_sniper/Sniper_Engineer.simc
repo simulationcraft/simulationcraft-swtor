@@ -13,6 +13,8 @@ actions=stim,type=exotech_skill
 actions+=/coordination
 actions+=/snapshot_stats
 actions+=/take_cover,if=buff.cover.down
+actions+=/use_relics
+actions+=/power_potion
 actions+=/plasma_probe,if=energy>=75
 actions+=/plasma_probe,if=buff.energy_overrides.up
 actions+=/explosive_probe,if=buff.energy_overrides.up
