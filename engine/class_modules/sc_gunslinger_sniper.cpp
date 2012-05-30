@@ -493,8 +493,13 @@ struct plasma_probe_t : public agent_smug::tech_attack_t
 {
   typedef agent_smug::action_t base_t;
 
-  plasma_probe_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    agent_smug::tech_attack_t( n, p, SCHOOL_ELEMENTAL )
+  // 1.2 plasma probe hits hard and fast for 4 ticks, then slow and weaker for remaining 5
+  plasma_probe_t* weaker_attack;
+
+  plasma_probe_t( class_t* p, const std::string& n, const std::string& options_str,
+     bool is_weaker_attack=false ) :
+    agent_smug::tech_attack_t( n, p, SCHOOL_ELEMENTAL ),
+    weaker_attack( 0 )
   {
     check_talent( p -> talents.plasma_probe -> rank() );
 
@@ -504,17 +509,26 @@ struct plasma_probe_t : public agent_smug::tech_attack_t
     base_cost                    = 20 - 2 * p -> talents.efficient_engineering -> rank();
     cooldown -> duration         = from_seconds( 18 );
     range                        = 35.0;
-    // this one is in torhead too?
-    //td.standardhealthpercentmin  =
-    //td.standardhealthpercentmax  = 0.044;
-    //td.power_mod                 = 0.44;
     td.standardhealthpercentmin  =
-    td.standardhealthpercentmax  = 0.02;
-    td.power_mod                 = 0.2;
-    tick_zero                    = true; // TODO test
-    num_ticks                    = 18;
+    td.standardhealthpercentmax  = 0.044;
+    td.power_mod                 = 0.44;
+    tick_zero                    = true;
+    num_ticks                    = 3;
     base_tick_time               = from_seconds( 1.0 );
     base_multiplier             += 0.05 * p -> talents.explosive_engineering -> rank();
+    if ( is_weaker_attack)
+    {
+      base_accuracy                = 999;
+      background                   = true;
+      trigger_gcd                  = timespan_t::zero();
+      td.standardhealthpercentmax  = 0.02;
+      td.power_mod                 = 0.2;
+      tick_zero                    = false;
+      num_ticks                    = 5;
+      base_tick_time               = from_seconds( 3.0 );
+    }
+    else
+      weaker_attack = new plasma_probe_t(p, n, options_str, true);
   }
 
 // TODO efficient engineering also benefits plasma probe (t7 ability)
@@ -531,6 +545,13 @@ struct plasma_probe_t : public agent_smug::tech_attack_t
   {
     base_t::execute();
     dynamic_cast<class_t*>( player ) -> buffs.energy_overrides -> expire();
+  }
+
+  virtual void last_tick(dot_t* d)
+  {
+    base_t::last_tick( d );
+    if ( weaker_attack )
+      weaker_attack -> execute();
   }
 };
 
