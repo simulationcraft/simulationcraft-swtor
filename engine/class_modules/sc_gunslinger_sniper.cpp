@@ -9,9 +9,6 @@
 // Gunslinger | Sniper
 // ==========================================================================
 
-// TODO: find out if we need to bother implementing Sector Ranger
-// which reduces Orbital Strike cooldown when coverpulse activated
-
 namespace { // ANONYMOUS ====================================================
 
 
@@ -165,7 +162,6 @@ public:
   } abilities;
 
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
-    // TODO CHECK WTF IA_SNIPER ? IA_SNIPER : S_GUNSLINGER? IA_SNIPER is a constant it will always be true..?
     base_t( sim, pt == IA_SNIPER ? IA_SNIPER : S_GUNSLINGER, name, rt, buffs, gains, procs, rngs, benefits, talents, abilities ),
     buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents()
   {
@@ -209,11 +205,11 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   agent_smug::targetdata_t( source, target )
 {
 // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-   debuff_cluster_bombs   = new buff_t ( this, source.abilities.cluster_bombs, 2 + source.talents.imperial_methodology -> rank(), from_seconds ( 0 ), from_seconds( 1.5 ), 100, false, true );
+   debuff_cluster_bombs   = new buff_t ( this, source.abilities.cluster_bombs, 2 + source.talents.imperial_methodology -> rank(), from_seconds ( 0 ), from_seconds( 1.5 ), 100, false, true /*reverse*/ );
 
   dot_interrogation_probe = dot_t ( source.abilities.interrogation_probe, &source );
   dot_plasma_probe        = dot_t ( source.abilities.plasma_probe       , &source );
-  dot_series_of_shots     = dot_t ( source.abilities.series_of_shots,     &source );
+  dot_series_of_shots     = dot_t ( source.abilities.series_of_shots    , &source );
 
   add( dot_interrogation_probe );
   add( dot_plasma_probe        );
@@ -466,10 +462,7 @@ struct followthrough_t : public range_attack_t
 
   virtual bool ready()
   {
-    if ( p()-> buffs.followthrough -> up() )
-      return base_t::ready();
-    else
-      return false;
+    return p()-> buffs.followthrough -> up() ? base_t::ready() : false;
   }
 };
 
@@ -506,7 +499,6 @@ struct plasma_probe_t : public tech_attack_t
 {
   typedef tech_attack_t base_t;
 
-  // 1.2 plasma probe hits hard and fast for 4 ticks, then slow and weaker for remaining 5
   plasma_probe_t* weaker_attack;
 
   plasma_probe_t( class_t* p, const std::string& n, const std::string& options_str,
@@ -543,8 +535,6 @@ struct plasma_probe_t : public tech_attack_t
     else
       weaker_attack = new plasma_probe_t(p, n, options_str, true);
   }
-
-// TODO efficient engineering also benefits plasma probe (t7 ability)
 
   virtual double cost() const
   {
@@ -597,7 +587,6 @@ struct rapid_fire_t : public action_t
 
 
 // Orbital Strike | XS Freighter Flyby ======================================
-
 struct orbital_strike_t : public agent_smug::orbital_strike_t
 {
   typedef agent_smug::orbital_strike_t base_t;
@@ -605,10 +594,10 @@ struct orbital_strike_t : public agent_smug::orbital_strike_t
   orbital_strike_t( class_t* p, const std::string& n, const std::string& options_str) :
       base_t( p, n, options_str )
   {
-    cooldown -> duration -= from_seconds( 7.5 * p -> talents.pillbox_sniper -> rank() );
-    cooldown -> duration -= from_seconds( 1 * p -> talents.sector_ranger -> rank() );
-    base_multiplier      += 0.05 * p -> talents.explosive_engineering -> rank();
-    crit_multiplier      += 0.15 * p -> talents.experimental_explosives -> rank();
+    cooldown -> duration -= from_seconds( 7.5  * p -> talents.pillbox_sniper          -> rank() );
+    cooldown -> duration -= from_seconds( 1    * p -> talents.sector_ranger           -> rank() );
+    base_multiplier      +=               0.05 * p -> talents.explosive_engineering   -> rank();
+    crit_multiplier      +=               0.15 * p -> talents.experimental_explosives -> rank();
   }
 };
 
@@ -685,8 +674,8 @@ struct snipe_t : public agent_smug::snipe_t
   snipe_t( class_t* p, const std::string& n, const std::string& options_str) :
     base_t( p, n, options_str )
   {
-    base_multiplier             += 0.03 * p -> talents.steady_shots -> rank();
-    base_crit                   += 0.02 * p -> talents.between_the_eyes -> rank();
+    base_multiplier += 0.03 * p -> talents.steady_shots     -> rank();
+    base_crit       += 0.02 * p -> talents.between_the_eyes -> rank();
   }
 
   virtual timespan_t execute_time() const
@@ -730,8 +719,6 @@ struct fragmentation_grenade_t : public agent_smug::fragmentation_grenade_t
 // http://www.swtor.com/community/showthread.php?p=2268473
 
 // Take Cover | Take Cover ==================================================
-// REVIEW: could possibly do this as a trigger instead, but a trigger seems
-// unwieldy since it would get checked on every action and need to test on name
 struct take_cover_t : public agent_smug::take_cover_t
 {
   typedef agent_smug::take_cover_t base_t;
@@ -777,9 +764,7 @@ struct takedown_t : public range_attack_t
 
   virtual bool ready()
   {
-    if ( target->health_percentage() >= 30 )
-      return false;
-    return base_t::ready();
+    return target->health_percentage() >= 30 ? false : base_t::ready();
   }
 };
 
@@ -1138,13 +1123,13 @@ void class_t::init_actions()
   if ( talents.sniper_volley -> rank() )
   {
     register_attack_callback( RESULT_HIT_MASK, new sniper_volley_callback_t( this ) );
-    register_tick_callback( RESULT_HIT_MASK, new sniper_volley_callback_t( this ) );
+    register_tick_callback  ( RESULT_HIT_MASK, new sniper_volley_callback_t( this ) );
   }
 
   if ( talents.cluster_bombs -> rank() )
   {
     register_attack_callback( RESULT_HIT_MASK, new cluster_bombs_callback_t( this ) );
-    register_tick_callback( RESULT_HIT_MASK, new cluster_bombs_callback_t( this ) );
+    register_tick_callback  ( RESULT_HIT_MASK, new cluster_bombs_callback_t( this ) );
   }
 
   base_t::init_actions();
@@ -1207,14 +1192,12 @@ double class_t::alacrity() const
 
 
 // class_t::primary_role ========================================
-
 role_type class_t::primary_role() const
 {
   return ROLE_DPS;
 }
 
 // class_t::create_talents ======================================
-
 void class_t::create_talents()
 {
   base_t::create_talents();
