@@ -599,7 +599,7 @@ struct corrosive_grenade_t : public poison_attack_t
       // infinite?
       range                       = 30.0;
       base_cost                   = 0;
-      td.standardhealthpercentmin = 
+      td.standardhealthpercentmin =
       td.standardhealthpercentmax = 0.0065 * p -> talents.lingering_toxins -> rank();
       td.power_mod                = 0.065  * p -> talents.lingering_toxins -> rank();
       num_ticks                   = 3;
@@ -610,7 +610,7 @@ struct corrosive_grenade_t : public poison_attack_t
     {
       base_cost                   = 20;
       cooldown -> duration        = from_seconds( 12.0 );
-      td.standardhealthpercentmin = 
+      td.standardhealthpercentmin =
       td.standardhealthpercentmax = 0.032;
       td.power_mod                = 0.32;
       num_ticks                   = 7;
@@ -653,7 +653,7 @@ struct cull_t : public range_attack_t
     cull_extra_t( class_t* p, const std::string& n ) :
       base_t( n, p, SCHOOL_INTERNAL )
     {
-      dd.standardhealthpercentmin =  
+      dd.standardhealthpercentmin =
       dd.standardhealthpercentmax =  0.066;
       dd.power_mod                =  0.66;
       dual                        =
@@ -677,7 +677,7 @@ struct cull_t : public range_attack_t
     range                       =  10.0;
     weapon                      =  &( player->main_hand_weapon );
     weapon_multiplier           =  -0.1;
-    dd.standardhealthpercentmin =  
+    dd.standardhealthpercentmin =
     dd.standardhealthpercentmax =  0.135;
     dd.power_mod                =  1.35;
     base_multiplier             += .03 * p -> talents.cut_down->rank();
@@ -851,19 +851,19 @@ void class_t::init_abilities()
   bool op = type == IA_OPERATIVE;
 
   // ABILITY                   =    ? OPERATIVE LABEL      : SCOUNDREL LABEL           ;
-  abilities.acid_blade         = op ? "acid_blade"         : "flechette_round"         ; 
-  abilities.acid_blade_arpen   = op ? "acid_blade_arpen"   : "flechette_round_arpen"   ; 
-  abilities.acid_blade_coating = op ? "acid_blade_coating" : "flechette_round_coating" ; 
-  abilities.acid_blade_poison  = op ? "acid_blade_poison"  : "flechette_round_poison"  ; 
-  abilities.backstab           = op ? "backstab"           : "back_blast"              ; 
-  abilities.combat_stims       = op ? "combat_stims"       : "street_tough"            ; 
-  abilities.cull               = op ? "cull"               : "wounding_shot"           ; 
-  abilities.hidden_strike      = op ? "hidden_strike"      : "shoot_first"             ; 
-  abilities.laceration         = op ? "laceration"         : "sucker_punch"            ; 
-  abilities.revitalizers       = op ? "revitalizers"       : "surprise_comeback"       ; 
-  abilities.stealth            = op ? "stealth"            : "stealth"                 ; 
-  abilities.stim_boost         = op ? "stim_boost"         : "pugnacity"               ; 
-  abilities.tactical_advantage = op ? "tactical_advantage" : "upper_hand"              ; 
+  abilities.acid_blade         = op ? "acid_blade"         : "flechette_round"         ;
+  abilities.acid_blade_arpen   = op ? "acid_blade_arpen"   : "flechette_round_arpen"   ;
+  abilities.acid_blade_coating = op ? "acid_blade_coating" : "flechette_round_coating" ;
+  abilities.acid_blade_poison  = op ? "acid_blade_poison"  : "flechette_round_poison"  ;
+  abilities.backstab           = op ? "backstab"           : "back_blast"              ;
+  abilities.combat_stims       = op ? "combat_stims"       : "street_tough"            ;
+  abilities.cull               = op ? "cull"               : "wounding_shot"           ;
+  abilities.hidden_strike      = op ? "hidden_strike"      : "shoot_first"             ;
+  abilities.laceration         = op ? "laceration"         : "sucker_punch"            ;
+  abilities.revitalizers       = op ? "revitalizers"       : "surprise_comeback"       ;
+  abilities.stealth            = op ? "stealth"            : "stealth"                 ;
+  abilities.stim_boost         = op ? "stim_boost"         : "pugnacity"               ;
+  abilities.tactical_advantage = op ? "tactical_advantage" : "upper_hand"              ;
 }
 
 // class_t::init_talents ======================================
@@ -983,7 +983,7 @@ void class_t::init_rng()
   base_t::init_rng();
 
   bool is_op = ( type == IA_OPERATIVE );
-  const char* collateral_strike  = is_op ? "collateral_strike"  : "flying_fists"  ; 
+  const char* collateral_strike  = is_op ? "collateral_strike"  : "flying_fists"  ;
 
   rngs.collateral_strike  = get_rng( collateral_strike  );
 }
