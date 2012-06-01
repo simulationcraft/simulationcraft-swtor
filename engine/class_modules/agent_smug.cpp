@@ -219,68 +219,63 @@ void corrosive_dart_t::execute()
   base_t::execute();
 }
 
-// Corrosive Grenade | ??? ==================================================
-struct corrosive_grenade_t : public poison_attack_t
+//  Corrosive Grenade | Shrap Bomb ===========================================
+corrosive_grenade_t::corrosive_grenade_t( class_t* p, const std::string& n, const std::string& options_str, bool weak ) :
+  base_t( n, p),
+  corrosive_grenade_weak()
 {
-  typedef poison_attack_t base_t;
+  check_talent( p -> talents.corrosive_grenade -> rank() );
 
-  corrosive_grenade_t* corrosive_grenade_weak;
+  parse_options( options_str );
 
-  corrosive_grenade_t( class_t* p, const std::string& n, const std::string& options_str, bool weak=false ) :
-    base_t( n, p ), corrosive_grenade_weak()
+  range = 30.0;
+  base_tick_time = from_seconds( 3 );
+
+  if ( weak )
   {
-    check_talent( p -> talents.corrosive_grenade -> rank() );
-
-    parse_options( options_str );
-
-    range = 30.0;
-    base_tick_time = from_seconds( 3 );
-
-    if ( weak )
-    {
-      // infinite?
-      range                       = 30.0;
-      base_cost                   = 0;
-      td.standardhealthpercentmin =
-      td.standardhealthpercentmax = 0.0065 * p -> talents.lingering_toxins -> rank();
-      td.power_mod                = 0.065  * p -> talents.lingering_toxins -> rank();
-      num_ticks                   = 3;
-      background                  = true;
-      trigger_gcd                 = timespan_t::zero();
-    }
-    else
-    {
-      base_cost                   = 20;
-      cooldown -> duration        = from_seconds( 12.0 );
-      td.standardhealthpercentmin =
-      td.standardhealthpercentmax = 0.032;
-      td.power_mod                = 0.32;
-      num_ticks                   = 7;
-      tick_zero                   = true;
-      // TEST: maybe not limited?
-      aoe                         = 5;
-
-      if ( p -> talents.lingering_toxins -> rank() )
-        corrosive_grenade_weak = new corrosive_grenade_t( p, n + "_weak", options_str, true );
-    }
+    // infinite?
+    range                       = 30.0;
+    base_accuracy               = 999;
+    base_cost                   = 0;
+    td.standardhealthpercentmin =
+    td.standardhealthpercentmax = 0.0065 * p -> talents.lingering_toxins -> rank();
+    td.power_mod                = 0.065  * p -> talents.lingering_toxins -> rank();
+    num_ticks                   = 3;
+    background                  = true;
+    trigger_gcd                 = timespan_t::zero();
   }
-
-  virtual void last_tick( dot_t* d )
+  else
   {
-    base_t::last_tick( d );
+    base_cost                   = 20;
+    cooldown -> duration        = from_seconds( 12.0 );
+    td.standardhealthpercentmin =
+    td.standardhealthpercentmax = 0.032;
+    td.power_mod                = 0.32;
+    num_ticks                   = 7;
+    tick_zero                   = true;
+    // TEST: maybe not limited?
+    aoe                         = 3;
 
-    if ( corrosive_grenade_weak )
-      corrosive_grenade_weak -> execute();
+    if ( p -> talents.lingering_toxins -> rank() )
+      corrosive_grenade_weak = new corrosive_grenade_t( p, n + "_weak", options_str, true );
   }
+}
 
-  virtual void execute()
-  {
-    if ( corrosive_grenade_weak )
-      targetdata() -> dot_corrosive_grenade_weak.cancel();
+void corrosive_grenade_t::last_tick( dot_t* d )
+{
+  base_t::last_tick( d );
 
-    base_t::execute();
-  }
-};
+  if ( corrosive_grenade_weak )
+    corrosive_grenade_weak -> execute();
+}
+
+void corrosive_grenade_t::execute()
+{
+  if ( corrosive_grenade_weak )
+    targetdata() -> dot_corrosive_grenade_weak.cancel();
+
+  base_t::execute();
+}
 
 // Explosive Probe | Sabotage Charge ========================================
 explosive_probe_t::explosive_probe_t( class_t* p, const std::string& n, const std::string& options_str) :

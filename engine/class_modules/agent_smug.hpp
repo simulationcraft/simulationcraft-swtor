@@ -302,6 +302,16 @@ public:
   virtual void execute();
 };
 
+class corrosive_grenade_t : public poison_attack_t
+{
+  typedef poison_attack_t base_t;
+public:
+  corrosive_grenade_t* corrosive_grenade_weak;
+  corrosive_grenade_t( class_t* p, const std::string& n, const std::string& options_str, bool weak=false );
+  virtual void last_tick( dot_t* d );
+  virtual void execute();
+};
+
 class explosive_probe_t : public tech_attack_t
 {
   typedef tech_attack_t base_t;
