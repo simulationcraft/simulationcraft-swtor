@@ -40,6 +40,7 @@ public:
     buff_t* rapid_fire;
     buff_t* snap_shot;
     buff_t* sniper_volley;
+    buff_t* stroke_of_genius;
   } buffs;
 
   // Gains
@@ -141,6 +142,7 @@ public:
   struct abilities_t:base_t::abilities_t
   {
     std::string ambush;
+    std::string cover_pulse;
     std::string emp_discharge;
     std::string followthrough;
     std::string interrogation_probe;
@@ -154,6 +156,7 @@ public:
     std::string energy_overrides;
     std::string snap_shot;
     std::string sniper_volley;
+    std::string stroke_of_genius;
     // rngs from talent
     std::string reactive_shot;
     // gains from talent
@@ -347,6 +350,31 @@ struct ambush_t : public range_attack_t
   }
 };
 
+// Cover Pulse | Pulse Detonator ============================================
+struct cover_pulse_t : public action_t
+{
+  typedef action_t base_t;
+
+  cover_pulse_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    base_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE )
+  {
+    parse_options( options_str );
+
+    cooldown -> duration = from_seconds( 30 );
+    // TODO find out if this triggers GCD, and if it can be used off GCD
+    //use_off_gcd = true;
+    //trigger_gcd = timespan_t::zero();
+  }
+
+  void execute()
+  {
+    base_t::execute();
+
+    if ( p() -> talents.stroke_of_genius -> rank() )
+      p() -> buffs.stroke_of_genius -> trigger();
+  }
+};
+
 // Explosive Probe | Sabotage Charge ========================================
 
 struct explosive_probe_t : public agent_smug::explosive_probe_t
@@ -462,7 +490,7 @@ struct followthrough_t : public range_attack_t
 
   virtual bool ready()
   {
-    return p()-> buffs.followthrough -> up() ? base_t::ready() : false;
+    return p() -> buffs.followthrough -> up() ? base_t::ready() : false;
   }
 };
 
@@ -558,7 +586,6 @@ struct plasma_probe_t : public tech_attack_t
 };
 
 // Rapid Fire | Rapid Fire ==================================================
-
 struct rapid_fire_t : public action_t
 {
   typedef action_t base_t;
@@ -680,7 +707,7 @@ struct snipe_t : public agent_smug::snipe_t
 
   virtual timespan_t execute_time() const
   {
-    if ( p() -> buffs.snap_shot -> up() )
+    if ( p() -> buffs.snap_shot -> up() || p() -> buffs.stroke_of_genius-> up() )
       return timespan_t::zero();
 
     return base_t::execute_time();
@@ -690,8 +717,11 @@ struct snipe_t : public agent_smug::snipe_t
   {
     base_t::execute();
 
+    // TODO test behavior if both snap_shot and stroke_of_genius are up, or can be up, etc
     if ( p() -> buffs.snap_shot -> up() )
       p() -> buffs.snap_shot -> expire();
+    if ( p() -> buffs.stroke_of_genius -> up() )
+      p() -> buffs.stroke_of_genius -> expire();
 
     if ( result == RESULT_CRIT )
       p() -> _trigger_reactive_shot();
@@ -880,6 +910,7 @@ struct cluster_bombs_callback_t : public action_callback_t
                                     const std::string& options_str )
 {
   if ( name == abilities.ambush                ) return new ambush_t                ( this, name, options_str ) ;
+  if ( name == abilities.cover_pulse           ) return new cover_pulse_t           ( this, name, options_str ) ;
   if ( name == abilities.emp_discharge         ) return new emp_discharge_t         ( this, name, options_str ) ;
   if ( name == abilities.followthrough         ) return new followthrough_t         ( this, name, options_str ) ;
   if ( name == abilities.interrogation_probe   ) return new interrogation_probe_t   ( this, name, options_str ) ;
@@ -908,6 +939,7 @@ void class_t::init_abilities()
 
   //                             =    ? SNIPER LABEL           : GUNSLINGER LABEL       ;
   abilities.ambush               = sn ? "ambush"               : "aimed_shot"           ;
+  abilities.cover_pulse          = sn ? "cover_pulse"          : "pulse_detonator"      ;
   abilities.emp_discharge        = sn ? "emp_discharge"        : "sabotage"             ;
   abilities.followthrough        = sn ? "followthrough"        : "trickshot"            ;
   abilities.interrogation_probe  = sn ? "interrogation_probe"  : "shock_charge"         ;
@@ -921,6 +953,7 @@ void class_t::init_abilities()
   abilities.cluster_bombs        = sn ? "cluster_bombs"        : "contingency_charges"  ;
   abilities.snap_shot            = sn ? "snap_shot"            : "snap_shot"            ;
   abilities.sniper_volley        = sn ? "sniper_volley"        : "burst_volley"         ;
+  abilities.stroke_of_genius     = sn ? "stroke_of_genius"     : "pandemonium"          ;
   // rngs
   abilities.reactive_shot        = sn ? "reactive_shot"        : "quick_aim"            ;
   // gains
@@ -1027,6 +1060,7 @@ void class_t::init_buffs()
   buffs.snap_shot        = new buff_t( this , abilities.snap_shot        , 1 ,  from_seconds( 10  ), from_seconds( 6 ), 0.5 * talents.snap_shot -> rank() );
   buffs.rapid_fire       = new buff_t( this , abilities.rapid_fire       , 1 ,  from_seconds( 10  ) );
   buffs.sniper_volley    = new buff_t( this , abilities.sniper_volley    , 1 ,  from_seconds( 10  ), from_seconds( 30 ), 0.05 * talents.sniper_volley -> rank() );
+  buffs.stroke_of_genius = new buff_t( this , abilities.stroke_of_genius , 1 ,  from_seconds( 10  ), timespan_t::zero(), 0.5 * talents.stroke_of_genius -> rank() );
 }
 
 // class_t::init_gains ==========================================
@@ -1112,6 +1146,8 @@ void class_t::init_actions()
     // probably want to prioritise ambush/snipe if followthrough ICD is up
     action_list_str += sl + abilities.ambush + ",if=energy>75";
     action_list_str += sl + abilities.corrosive_dart + ",if=!ticking&energy>80";
+    if ( talents.stroke_of_genius -> rank() )
+      action_list_str += sl + abilities.cover_pulse;
     action_list_str += sl + abilities.snipe + ",if=energy>95";
     action_list_str += sl + abilities.rifle_shot;
   }
