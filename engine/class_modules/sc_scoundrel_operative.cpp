@@ -573,70 +573,6 @@ struct hidden_strike_t : public consume_acid_blade_attack_t
   // TODO check for talent and trigger knockdown (jarring strike)
 };
 
-// Corrosive Grenade | ??? ==================================================
-
-struct corrosive_grenade_t : public poison_attack_t
-{
-  typedef poison_attack_t base_t;
-
-  corrosive_grenade_t* corrosive_grenade_weak;
-
-  corrosive_grenade_t( class_t* p, const std::string& n, const std::string& options_str, bool weak=false ) :
-    base_t( n, p ), corrosive_grenade_weak()
-  {
-    check_talent( p -> talents.corrosive_grenade -> rank() );
-
-    parse_options( options_str );
-
-    range = 30.0;
-    base_tick_time = from_seconds( 3 );
-
-    if ( weak )
-    {
-      // infinite?
-      range                       = 30.0;
-      base_cost                   = 0;
-      td.standardhealthpercentmin =
-      td.standardhealthpercentmax = 0.0065 * p -> talents.lingering_toxins -> rank();
-      td.power_mod                = 0.065  * p -> talents.lingering_toxins -> rank();
-      num_ticks                   = 3;
-      background                  = true;
-      trigger_gcd                 = timespan_t::zero();
-    }
-    else
-    {
-      base_cost                   = 20;
-      cooldown -> duration        = from_seconds( 12.0 );
-      td.standardhealthpercentmin =
-      td.standardhealthpercentmax = 0.032;
-      td.power_mod                = 0.32;
-      num_ticks                   = 7;
-      tick_zero                   = true;
-      // TEST: maybe not limited?
-      aoe                         = 5;
-
-      if ( p -> talents.lingering_toxins -> rank() )
-        corrosive_grenade_weak = new corrosive_grenade_t( p, n + "_weak", options_str, true );
-    }
-  }
-
-  virtual void last_tick( dot_t* d )
-  {
-    base_t::last_tick( d );
-
-    if ( corrosive_grenade_weak )
-      corrosive_grenade_weak -> execute();
-  }
-
-  virtual void execute()
-  {
-    if ( corrosive_grenade_weak )
-      targetdata() -> dot_corrosive_grenade_weak.cancel();
-
-    base_t::execute();
-  }
-};
-
 // Cull | ??? ===============================================================
 
 struct cull_t : public range_attack_t
@@ -810,7 +746,7 @@ struct poison_tick_crit_callback_t : public action_callback_t
 
   virtual void trigger (::action_t* a, void* /* call_data */)
   {
-    if ( dynamic_cast<scoundrel_operative::poison_attack_t*>(a) != NULL )
+    if ( dynamic_cast<agent_smug::poison_attack_t*>(a) != NULL )
     {
       p()->resource_gain( RESOURCE_ENERGY, p()->talents.lethal_purpose -> rank(), p()->gains.lethal_purpose );
     }
@@ -828,7 +764,6 @@ struct poison_tick_crit_callback_t : public action_callback_t
 {
   if ( name == abilities.acid_blade            ) return new acid_blade_t            ( this, name, options_str ) ;
   if ( name == abilities.backstab              ) return new backstab_t              ( this, name, options_str ) ;
-  if ( name == abilities.corrosive_grenade     ) return new corrosive_grenade_t     ( this, name, options_str ) ;
   if ( name == abilities.cull                  ) return new cull_t                  ( this, name, options_str ) ;
   if ( name == abilities.hidden_strike         ) return new hidden_strike_t         ( this, name, options_str ) ;
   if ( name == abilities.laceration            ) return new laceration_t            ( this, name, options_str ) ;

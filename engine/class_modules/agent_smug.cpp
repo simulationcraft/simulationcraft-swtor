@@ -153,7 +153,6 @@ bool coordination_t::ready()
 }
 
 // Corrosive Dart | Vital Shot ==============================================
-
 corrosive_dart_t::corrosive_dart_t( class_t* p, const std::string& n, const std::string& options_str, bool weak ) :
   base_t( n, p ),
   corrosive_dart_weak()
@@ -220,8 +219,70 @@ void corrosive_dart_t::execute()
   base_t::execute();
 }
 
-// Explosive Probe | Sabotage Charge ========================================
+// Corrosive Grenade | ??? ==================================================
+struct corrosive_grenade_t : public poison_attack_t
+{
+  typedef poison_attack_t base_t;
 
+  corrosive_grenade_t* corrosive_grenade_weak;
+
+  corrosive_grenade_t( class_t* p, const std::string& n, const std::string& options_str, bool weak=false ) :
+    base_t( n, p ), corrosive_grenade_weak()
+  {
+    check_talent( p -> talents.corrosive_grenade -> rank() );
+
+    parse_options( options_str );
+
+    range = 30.0;
+    base_tick_time = from_seconds( 3 );
+
+    if ( weak )
+    {
+      // infinite?
+      range                       = 30.0;
+      base_cost                   = 0;
+      td.standardhealthpercentmin =
+      td.standardhealthpercentmax = 0.0065 * p -> talents.lingering_toxins -> rank();
+      td.power_mod                = 0.065  * p -> talents.lingering_toxins -> rank();
+      num_ticks                   = 3;
+      background                  = true;
+      trigger_gcd                 = timespan_t::zero();
+    }
+    else
+    {
+      base_cost                   = 20;
+      cooldown -> duration        = from_seconds( 12.0 );
+      td.standardhealthpercentmin =
+      td.standardhealthpercentmax = 0.032;
+      td.power_mod                = 0.32;
+      num_ticks                   = 7;
+      tick_zero                   = true;
+      // TEST: maybe not limited?
+      aoe                         = 5;
+
+      if ( p -> talents.lingering_toxins -> rank() )
+        corrosive_grenade_weak = new corrosive_grenade_t( p, n + "_weak", options_str, true );
+    }
+  }
+
+  virtual void last_tick( dot_t* d )
+  {
+    base_t::last_tick( d );
+
+    if ( corrosive_grenade_weak )
+      corrosive_grenade_weak -> execute();
+  }
+
+  virtual void execute()
+  {
+    if ( corrosive_grenade_weak )
+      targetdata() -> dot_corrosive_grenade_weak.cancel();
+
+    base_t::execute();
+  }
+};
+
+// Explosive Probe | Sabotage Charge ========================================
 explosive_probe_t::explosive_probe_t( class_t* p, const std::string& n, const std::string& options_str) :
   base_t( n, p )
 {
@@ -470,6 +531,7 @@ struct poison_tick_crit_callback_t : public action_callback_t
   if ( name == abilities.adrenaline_probe      ) return new adrenaline_probe_t      ( this, name, options_str ) ;
   if ( name == abilities.coordination          ) return new coordination_t          ( this, name, options_str ) ;
   if ( name == abilities.corrosive_dart        ) return new corrosive_dart_t        ( this, name, options_str ) ;
+  if ( name == abilities.corrosive_grenade     ) return new corrosive_grenade_t     ( this, name, options_str ) ;
   if ( name == abilities.explosive_probe       ) return new explosive_probe_t       ( this, name, options_str ) ;
   if ( name == abilities.fragmentation_grenade ) return new fragmentation_grenade_t ( this, name, options_str ) ;
   if ( name == abilities.orbital_strike        ) return new orbital_strike_t        ( this, name, options_str ) ;
