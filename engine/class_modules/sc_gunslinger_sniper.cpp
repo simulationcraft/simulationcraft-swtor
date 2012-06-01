@@ -347,6 +347,8 @@ struct ambush_t : public range_attack_t
     base_t::execute();
     if ( offhand_attack )
       offhand_attack -> schedule_execute();
+    else if ( p() -> talents.followthrough -> rank() )
+      p() -> buffs.followthrough -> trigger();
   }
 };
 
@@ -723,6 +725,9 @@ struct snipe_t : public agent_smug::snipe_t
     if ( p() -> buffs.stroke_of_genius -> up() )
       p() -> buffs.stroke_of_genius -> expire();
 
+    if ( p() -> talents.followthrough -> rank() )
+      p() -> buffs.followthrough -> trigger();
+
     if ( result == RESULT_CRIT )
       p() -> _trigger_reactive_shot();
   }
@@ -821,22 +826,6 @@ public:
 
   class_t* p() const { return static_cast<class_t*>( listener ); }
   class_t* cast() const { return p(); }
-};
-
-// TODO trigger this manually in execute for each ability. too unwieldy for just 2 abilities
-struct followthrough_trigger_callback_t : public action_callback_t
-{
-  followthrough_trigger_callback_t( class_t* p ) :
-    action_callback_t( p )
-  {}
-
-  virtual void trigger (::action_t* a, void* /* call_data */)
-  {
-    if ( a -> name_str == p() -> abilities.snipe || a -> name_str == p() -> abilities.ambush )
-    {
-      p() -> buffs.followthrough -> trigger();
-    }
-  }
 };
 
 struct sniper_volley_callback_t : public action_callback_t
@@ -1151,10 +1140,6 @@ void class_t::init_actions()
     action_list_str += sl + abilities.snipe + ",if=energy>95";
     action_list_str += sl + abilities.rifle_shot;
   }
-
-  // TODO test "on hit"
-  if ( talents.followthrough -> rank() )
-    register_attack_callback( RESULT_HIT_MASK, new followthrough_trigger_callback_t( this ) );
 
   if ( talents.sniper_volley -> rank() )
   {
