@@ -157,7 +157,7 @@ struct class_t : public agent_smug::class_t
   {
     tree_type[ IA_OPERATIVE_MEDICINE    ] = TREE_MEDICINE;
     tree_type[ IA_OPERATIVE_CONCEALMENT ] = TREE_CONCEALMENT;
-    tree_type[ IA_LETHALITY             ] = TREE_LETHALITY;
+    tree_type[ IA_OPERATIVE_LETHALITY   ] = TREE_LETHALITY;
 
     create_talents();
     create_options();

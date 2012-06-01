@@ -415,8 +415,8 @@ enum talent_tab_type
   JEDI_SHADOW_KINETIC_COMBAT = 0, JEDI_SHADOW_INFILTRATION,  JEDI_SHADOW_BALANCE,
   SITH_ASSASSIN_DARKNESS = 0,     SITH_ASSASSIN_DECEPTION,   SITH_ASSASSIN_MADNESS,
 
-  IA_OPERATIVE_MEDICINE = 0,      IA_OPERATIVE_CONCEALMENT,  IA_LETHALITY,
-  IA_SNIPER_MARKSMANSHIP = 0,     IA_SNIPER_ENGINEERING,
+  IA_OPERATIVE_MEDICINE = 0,      IA_OPERATIVE_CONCEALMENT,  IA_OPERATIVE_LETHALITY,
+  IA_SNIPER_MARKSMANSHIP = 0,     IA_SNIPER_ENGINEERING,     IA_SNIPER_LETHALITY,
 
   BH_MERCENARY_BODYGUARD = 0,     BH_MERCENARY_ARSENAL,      BH_MERCENARY_PYROTECH
 };
@@ -3474,6 +3474,8 @@ struct cooldown_t
     return diff;
   }
   const char* name() { return name_str.c_str(); }
+
+  // modify cooldown by +- x seconds
   void reduce( timespan_t amount=timespan_t::zero() )
   {
     if ( ready > sim -> current_time )

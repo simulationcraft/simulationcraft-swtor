@@ -70,16 +70,22 @@ public:
     talent_t* lethal_injectors;
     // t3
     talent_t* corrosive_grenade;
+    // snipers get targeted demolition, operatives get combat stims
     talent_t* combat_stims;
+    talent_t* targeted_demolition;
     talent_t* cut_down;
     // t4
     talent_t* lethal_purpose;
     talent_t* adhesive_corrosives;
+    // snipers get hold your ground, operatives get escape plan
     talent_t* escape_plan;
+    talent_t* hold_your_ground;
     talent_t* lethal_dose;
     // t5
     talent_t* cull;
+    // snipers get razor rounds, operatives get license to kill
     talent_t* license_to_kill;
+    talent_t* razor_rounds;
     talent_t* counterstrike;
     // t6
     talent_t* devouring_microbes;
