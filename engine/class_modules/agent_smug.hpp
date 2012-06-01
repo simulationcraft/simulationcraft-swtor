@@ -126,7 +126,7 @@ public:
   { return RESOURCE_ENERGY; }
 
   virtual double range_bonus_stats() const
-{ return cunning() + player_t::range_bonus_stats(); }
+  { return cunning() + player_t::range_bonus_stats(); }
 
   virtual double range_crit_from_stats() const
   { return rating_scaler.crit_from_stat( cunning() ) + player_t::range_crit_from_stats(); }
@@ -153,7 +153,20 @@ public:
     resource_base[ RESOURCE_ENERGY ] += 100;
     if ( set_bonus.rakata_enforcers -> four_pc() )
       resource_base[ RESOURCE_ENERGY ] += 5;
+
+    set_base_alacrity( get_base_alacrity() + 0.02 * talents.deadly_directive -> rank() );
   }
+
+  virtual double tech_crit_chance() const
+  {
+    return base_t::tech_crit_chance() + 0.01 * talents.lethality -> rank();
+  }
+
+  virtual double range_crit_chance() const
+  {
+    return base_t::range_crit_chance() + 0.01 * talents.lethality -> rank();
+  }
+
 
   std::pair<int,gain_t*> energy_regen_bracket() const
   {

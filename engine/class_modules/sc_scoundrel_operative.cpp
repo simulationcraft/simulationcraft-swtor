@@ -863,8 +863,6 @@ void class_t::init_base()
   base_t::init_base();
 
   attribute_multiplier_initial[ ATTR_CUNNING ] += 0.03 * talents.imperial_education -> rank();
-  set_base_crit( get_base_crit() + 0.02 * talents.lethality -> rank() );
-  set_base_alacrity( get_base_alacrity() + 0.02 * talents.deadly_directive -> rank() );
 }
 
 // class_t::init_benefits =====================================
