@@ -375,6 +375,51 @@ struct cover_pulse_t : public action_t
   }
 };
 
+// Cull | Wounding Shot =====================================================
+
+struct cull_extra_t : public agent_smug::cull_extra_t
+{
+  typedef agent_smug::cull_extra_t base_t;
+
+  cull_extra_t( class_t* p, const std::string& n ) :
+    base_t( p, n )
+  {
+    dd.standardhealthpercentmin =
+    dd.standardhealthpercentmax =  0.037;
+    dd.power_mod                =  0.37;
+  }
+};
+
+struct cull_t : public agent_smug::cull_t
+{
+  typedef agent_smug::cull_t base_t;
+
+  targetdata_t* targetdata() const { return static_cast<targetdata_t*>( agent_smug::cull_t::targetdata() ); }
+  class_t* p() const { return static_cast<class_t*>( player ); }
+  class_t* cast() const { return static_cast<class_t*>( player ); }
+
+  cull_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    base_t( p, n, options_str )
+  {
+    // TODO does RR benefit the extra attack as well?
+    cooldown -> duration         = from_seconds( 9 );
+    base_crit                   = 0.4 * p -> talents.razor_rounds -> rank();
+    weapon_multiplier           = -0.64;
+    dd.standardhealthpercentmin =
+    dd.standardhealthpercentmax = 0.053;
+    dd.power_mod                = 0.533;
+    // i want this in the parent class but it gives strange errors
+    extra_strike                = get_extra_strike();
+    add_child(extra_strike);
+  }
+
+
+  virtual agent_smug::cull_extra_t* get_extra_strike()
+  {
+    return new cull_extra_t( p(), name_str + "_extra" );
+  }
+};
+
 // Explosive Probe | Sabotage Charge ========================================
 
 struct explosive_probe_t : public agent_smug::explosive_probe_t
@@ -927,6 +972,7 @@ struct cluster_bombs_callback_t : public action_callback_t
 
   // extended
   if ( name == abilities.corrosive_grenade     ) return new corrosive_grenade_t     ( this, name, options_str ) ;
+  if ( name == abilities.cull                  ) return new cull_t                  ( this, name, options_str ) ;
   if ( name == abilities.explosive_probe       ) return new explosive_probe_t       ( this, name, options_str ) ;
   if ( name == abilities.fragmentation_grenade ) return new fragmentation_grenade_t ( this, name, options_str ) ;
   if ( name == abilities.orbital_strike        ) return new orbital_strike_t        ( this, name, options_str ) ;
@@ -1154,9 +1200,16 @@ void class_t::init_actions()
     action_list_str += sl + abilities.explosive_probe + ",if=energy>80";
     // probably want to prioritise ambush/snipe if followthrough ICD is up
     action_list_str += sl + abilities.ambush + ",if=energy>75";
+
     action_list_str += sl + abilities.corrosive_dart + ",if=!ticking&energy>80";
     if ( talents.stroke_of_genius -> rank() )
       action_list_str += sl + abilities.cover_pulse;
+    if ( talents.followthrough -> rank() )
+      action_list_str += sl + abilities.snipe + ",if=energy>75&!buff." + abilities.followthrough + ".react";
+    if ( talents.cull -> rank() )
+      action_list_str += sl + abilities.cull + ",if=energy>=75"+
+          "&(dot." + abilities.corrosive_dart + ".ticking|dot." + abilities.corrosive_dart + "_weak.ticking)"
+          "&(dot." + abilities.corrosive_grenade + ".ticking|dot." + abilities.corrosive_grenade + "_weak.ticking)";
     action_list_str += sl + abilities.snipe + ",if=energy>95";
     action_list_str += sl + abilities.rifle_shot;
   }

@@ -10,7 +10,7 @@ namespace agent_smug { // ===================================================
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   ::targetdata_t( source, target )
 {
-  debuff_weakening_blast     = new buff_t ( this, source.abilities.weakening_blast, 10, from_seconds (  15 ) ); 
+  debuff_weakening_blast     = new buff_t ( this, source.abilities.weakening_blast, 10, from_seconds (  15 ) );
   dot_adrenaline_probe       = dot_t ( source.abilities.adrenaline_probe       , &source );
   dot_corrosive_dart         = dot_t ( source.abilities.corrosive_dart         , &source );
   dot_corrosive_dart_weak    = dot_t ( source.abilities.corrosive_dart_weak    , &source );
@@ -558,6 +558,7 @@ void class_t::init_abilities()
   abilities.corrosive_grenade_weak  = ag ? "corrosive_grenade_weak" : "shrap_bomb_weak"    ;
   abilities.corrosive_microbes      = ag ? "corrosive_microbes"     : "mortal_wounds"      ;
   abilities.corrosive_microbes_tick = ag ? "corrosive_microbes_tick": "mortal_wounds_tick" ;
+  abilities.cull                    = ag ? "cull"                   : "wounding_shot"      ;
   abilities.explosive_probe         = ag ? "explosive_probe"        : "sabotage_charge"    ;
   abilities.fragmentation_grenade   = ag ? "fragmentation_grenade"  : "thermal_grenade"    ;
   abilities.lethal_purpose          = ag ? "lethal_purpose"         : "fighting_spirit"    ;

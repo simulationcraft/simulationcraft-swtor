@@ -140,7 +140,6 @@ struct class_t : public agent_smug::class_t
     std::string acid_blade_poison;
     std::string backstab;
     std::string combat_stims;
-    std::string cull;
     std::string hidden_strike;
     std::string laceration;
     std::string revitalizers;
@@ -573,74 +572,60 @@ struct hidden_strike_t : public consume_acid_blade_attack_t
   // TODO check for talent and trigger knockdown (jarring strike)
 };
 
-// Cull | ??? ===============================================================
+// Cull | Wounding Shot =====================================================
 
-struct cull_t : public range_attack_t
+struct cull_extra_t : public agent_smug::cull_extra_t
 {
-  typedef range_attack_t base_t;
+  typedef agent_smug::cull_extra_t base_t;
 
-  struct cull_extra_t : public tech_attack_t
+  cull_extra_t( class_t* p, const std::string& n ) :
+    base_t( p, n )
   {
-    typedef tech_attack_t base_t;
+    dd.standardhealthpercentmin =
+    dd.standardhealthpercentmax =  0.066;
+    dd.power_mod                =  0.66;
+  }
+};
 
-    cull_extra_t( class_t* p, const std::string& n ) :
-      base_t( n, p, SCHOOL_INTERNAL )
-    {
-      dd.standardhealthpercentmin =
-      dd.standardhealthpercentmax =  0.066;
-      dd.power_mod                =  0.66;
-      dual                        =
-      background                  = true;
-      trigger_gcd                 =  timespan_t::zero();
-      base_multiplier             += .03 * p -> talents.cut_down->rank();
-    }
-  };
+struct cull_t : public agent_smug::cull_t
+{
+  typedef agent_smug::cull_t base_t;
 
-  cull_extra_t* extra_strike;
+  targetdata_t* targetdata() const { return static_cast<targetdata_t*>( agent_smug::cull_t::targetdata() ); }
+  class_t* p() const { return static_cast<class_t*>( player ); }
+  class_t* cast() const { return static_cast<class_t*>( player ); }
 
   cull_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    base_t( n, p ),
-    extra_strike( new cull_extra_t( p, n + "_extra" ) )
+    base_t( p, n, options_str )
   {
     check_talent( p -> talents.cull -> rank() );
 
     parse_options( options_str );
 
-    base_cost                   =  25 - 3 * p -> talents.license_to_kill -> rank();
-    range                       =  10.0;
-    weapon                      =  &( player->main_hand_weapon );
+    base_cost                  -=  3 * p -> talents.license_to_kill -> rank();
     weapon_multiplier           =  -0.1;
     dd.standardhealthpercentmin =
     dd.standardhealthpercentmax =  0.135;
     dd.power_mod                =  1.35;
-    base_multiplier             += .03 * p -> talents.cut_down->rank();
+    // i want this in the parent class but it gives strange errors
+    extra_strike                = get_extra_strike();
+    add_child(extra_strike);
+  }
 
-    add_child( extra_strike );
+  virtual agent_smug::cull_extra_t* get_extra_strike()
+  {
+    return new cull_extra_t( p(), name_str + "_extra" );
   }
 
   virtual bool ready()
   {
-    if ( ! p() -> buffs.tactical_advantage -> check() )
-      return false;
-
-    return base_t::ready();
+    return p() -> buffs.tactical_advantage -> check() ? base_t::ready() : false;
   }
 
   virtual void execute()
   {
     base_t::execute();
-
-    if ( result_is_hit() )
-    {
-      p() -> buffs.tactical_advantage -> decrement();
-
-      targetdata_t* td = targetdata();
-      assert( ! td -> dot_acid_blade_poison.ticking );
-      if ( td -> dot_corrosive_dart.ticking || td -> dot_corrosive_dart_weak.ticking )
-        extra_strike -> execute();
-      if ( td -> dot_corrosive_grenade.ticking || td -> dot_corrosive_grenade_weak.ticking )
-        extra_strike -> execute();
-    }
+    p() -> buffs.tactical_advantage -> decrement();
   }
 };
 
@@ -749,12 +734,14 @@ struct all_attack_callback_t : public action_callback_t
 {
   if ( name == abilities.acid_blade            ) return new acid_blade_t            ( this, name, options_str ) ;
   if ( name == abilities.backstab              ) return new backstab_t              ( this, name, options_str ) ;
-  if ( name == abilities.cull                  ) return new cull_t                  ( this, name, options_str ) ;
   if ( name == abilities.hidden_strike         ) return new hidden_strike_t         ( this, name, options_str ) ;
   if ( name == abilities.laceration            ) return new laceration_t            ( this, name, options_str ) ;
   if ( name == abilities.shiv                  ) return new shiv_t                  ( this, name, options_str ) ;
   if ( name == abilities.stealth               ) return new stealth_t               ( this, name, options_str ) ;
   if ( name == abilities.stim_boost            ) return new stim_boost_t            ( this, name, options_str ) ;
+
+  // extended
+  if ( name == abilities.cull                  ) return new cull_t                  ( this, name, options_str ) ;
 
   return base_t::create_action( name, options_str );
 }
@@ -774,7 +761,6 @@ void class_t::init_abilities()
   abilities.acid_blade_poison  = op ? "acid_blade_poison"  : "flechette_round_poison"  ;
   abilities.backstab           = op ? "backstab"           : "back_blast"              ;
   abilities.combat_stims       = op ? "combat_stims"       : "street_tough"            ;
-  abilities.cull               = op ? "cull"               : "wounding_shot"           ;
   abilities.hidden_strike      = op ? "hidden_strike"      : "shoot_first"             ;
   abilities.laceration         = op ? "laceration"         : "sucker_punch"            ;
   abilities.revitalizers       = op ? "revitalizers"       : "surprise_comeback"       ;
@@ -951,7 +937,7 @@ void class_t::init_actions()
       action_list_str += sl + abilities.laceration + ",if=energy>=75";
 
     if ( talents.cull -> rank() )
-      action_list_str += sl + abilities.cull + ",if=energy>=50&buff." +abilities. tactical_advantage + ".stack>=2"
+      action_list_str += sl + abilities.cull + ",if=energy>=50&buff." +abilities.tactical_advantage + ".stack>=2"
                          "&(dot." + abilities.corrosive_dart + ".ticking|dot." + abilities.corrosive_dart + "_weak.ticking)"
                          "&(dot." + abilities.corrosive_grenade + ".ticking|dot." + abilities.corrosive_grenade + "_weak.ticking)";
 
