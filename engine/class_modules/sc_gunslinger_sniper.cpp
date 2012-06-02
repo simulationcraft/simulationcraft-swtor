@@ -1192,6 +1192,12 @@ void class_t::init_actions()
     if ( talents.corrosive_grenade -> rank() )
       action_list_str += sl + abilities.corrosive_grenade + ",if=!ticking";
     action_list_str += sl + abilities.takedown + ",if=energy>75";
+    if ( talents.cull -> rank() )
+      action_list_str += sl + abilities.cull + ",if=energy>=75"+
+          "&(dot." + abilities.corrosive_dart + ".ticking|dot." + abilities.corrosive_dart + "_weak.ticking)"
+          "&(dot." + abilities.corrosive_grenade + ".ticking|dot." + abilities.corrosive_grenade + "_weak.ticking)";
+    if ( talents.weakening_blast -> rank() )
+      action_list_str += sl + abilities.weakening_blast;
     action_list_str += sl + abilities.series_of_shots + ",if=energy>80";
     if ( talents.rapid_fire -> rank() )
       action_list_str += sl + abilities.rapid_fire + ",if=cooldown." + abilities.series_of_shots + ".remains";
@@ -1206,10 +1212,6 @@ void class_t::init_actions()
       action_list_str += sl + abilities.cover_pulse;
     if ( talents.followthrough -> rank() )
       action_list_str += sl + abilities.snipe + ",if=energy>75&!buff." + abilities.followthrough + ".react";
-    if ( talents.cull -> rank() )
-      action_list_str += sl + abilities.cull + ",if=energy>=75"+
-          "&(dot." + abilities.corrosive_dart + ".ticking|dot." + abilities.corrosive_dart + "_weak.ticking)"
-          "&(dot." + abilities.corrosive_grenade + ".ticking|dot." + abilities.corrosive_grenade + "_weak.ticking)";
     action_list_str += sl + abilities.snipe + ",if=energy>95";
     action_list_str += sl + abilities.rifle_shot;
   }

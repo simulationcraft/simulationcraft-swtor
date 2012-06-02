@@ -19,11 +19,12 @@ actions+=/cool_head,if=energy<=65
 actions+=/xs_freighter_flyby,if=energy>65
 actions+=/shrap_bomb,if=!ticking
 actions+=/quickdraw,if=energy>75
+actions+=/wounding_shot,if=energy>=75&(dot.vital_shot.ticking|dot.vital_shot_weak.ticking)&(dot.shrap_bomb.ticking|dot.shrap_bomb_weak.ticking)
+actions+=/hemorrhaging_blast
 actions+=/speed_shot,if=energy>80
 actions+=/sabotage_charge,if=energy>80
 actions+=/aimed_shot,if=energy>75
 actions+=/vital_shot,if=!ticking&energy>80
-actions+=/wounding_shot,if=energy>=75&(dot.vital_shot.ticking|dot.vital_shot_weak.ticking)&(dot.shrap_bomb.ticking|dot.shrap_bomb_weak.ticking)
 actions+=/charged_burst,if=energy>95
 actions+=/flurry_of_bolts
 head=rakata_field_techs_headgear,ilevel=58,quality=artifact,stats=645armor_124endurance_99cunning_57power_51accuracy
