@@ -20,6 +20,7 @@ actions+=/plasma_probe,if=buff.energy_overrides.up
 actions+=/explosive_probe,if=buff.energy_overrides.up
 actions+=/emp_discharge,if=dot.interrogation_probe.remains<1.6
 actions+=/adrenaline_probe,if=energy<=65
+actions+=/target_acquired,if=energy<=90
 actions+=/interrogation_probe,if=energy>65
 actions+=/orbital_strike,if=energy>65
 actions+=/takedown,if=energy>75

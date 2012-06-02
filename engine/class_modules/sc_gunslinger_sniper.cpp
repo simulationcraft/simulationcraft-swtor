@@ -41,6 +41,7 @@ public:
     buff_t* snap_shot;
     buff_t* sniper_volley;
     buff_t* stroke_of_genius;
+    buff_t* target_acquired;
   } buffs;
 
   // Gains
@@ -49,6 +50,7 @@ public:
     gain_t* imperial_methodology;
     gain_t* snipers_nest;
     gain_t* sniper_volley;
+    gain_t* target_acquired;
   } gains;
 
   // Procs
@@ -150,6 +152,7 @@ public:
     std::string rapid_fire;
     std::string series_of_shots;
     std::string takedown;
+    std::string target_acquired;
 
     // buffs
     std::string cluster_bombs;
@@ -865,6 +868,29 @@ struct takedown_t : public range_attack_t
   }
 };
 
+// Target Acquired | Illegal Mods ===========================================
+struct target_acquired_t : public action_t
+{
+  typedef action_t base_t;
+
+  target_acquired_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    base_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE )
+  {
+    parse_options( options_str );
+
+    cooldown -> duration = from_seconds( 120 );
+    // TODO find out if this triggers GCD, and if it can be used off GCD
+    //use_off_gcd = true;
+    //trigger_gcd = timespan_t::zero();
+  }
+
+  void execute()
+  {
+    base_t::execute();
+    p() -> buffs.target_acquired -> trigger();
+  }
+};
+
 // ==========================================================================
 // Gunslinger / Sniper Utility
 // ==========================================================================
@@ -969,6 +995,7 @@ struct cluster_bombs_callback_t : public action_callback_t
   if ( name == abilities.rapid_fire            ) return new rapid_fire_t            ( this, name, options_str ) ;
   if ( name == abilities.series_of_shots       ) return new series_of_shots_t       ( this, name, options_str ) ;
   if ( name == abilities.takedown              ) return new takedown_t              ( this, name, options_str ) ;
+  if ( name == abilities.target_acquired       ) return new target_acquired_t       ( this, name, options_str ) ;
 
   // extended
   if ( name == abilities.corrosive_grenade     ) return new corrosive_grenade_t     ( this, name, options_str ) ;
@@ -1000,6 +1027,7 @@ void class_t::init_abilities()
   abilities.rapid_fire           = sn ? "rapid_fire"           : "rapid_fire"           ;
   abilities.series_of_shots      = sn ? "series_of_shots"      : "speed_shot"           ;
   abilities.takedown             = sn ? "takedown"             : "quickdraw"            ;
+  abilities.target_acquired      = sn ? "target_acquired"      : "illegal_mods"         ;
 
   // buffs
   abilities.energy_overrides     = sn ? "energy_overrides"     : "seize_the_moment"     ;
@@ -1114,6 +1142,7 @@ void class_t::init_buffs()
   buffs.rapid_fire       = new buff_t( this , abilities.rapid_fire       , 1 ,  from_seconds( 10  ) );
   buffs.sniper_volley    = new buff_t( this , abilities.sniper_volley    , 1 ,  from_seconds( 10  ), from_seconds( 30 ), 0.05 * talents.sniper_volley -> rank() );
   buffs.stroke_of_genius = new buff_t( this , abilities.stroke_of_genius , 1 ,  from_seconds( 10  ), timespan_t::zero(), 0.5 * talents.stroke_of_genius -> rank() );
+  buffs.target_acquired  = new buff_t( this , abilities.target_acquired  , 1 ,  from_seconds( 10  ));
 }
 
 // class_t::init_gains ==========================================
@@ -1125,6 +1154,7 @@ void class_t::init_gains()
   gains.imperial_methodology = get_gain( abilities.imperial_methodology );
   gains.snipers_nest         = get_gain( abilities.snipers_nest         );
   gains.sniper_volley        = get_gain( abilities.sniper_volley        );
+  gains.target_acquired      = get_gain( abilities.target_acquired      );
 }
 
 // class_t::init_procs ==========================================
@@ -1186,6 +1216,7 @@ void class_t::init_actions()
     if ( talents.emp_discharge -> rank() )
       action_list_str += sl + abilities.emp_discharge + ",if=dot.interrogation_probe.remains<1.6";
     action_list_str += sl + abilities.adrenaline_probe + ",if=energy<=65";
+    action_list_str += sl + abilities.target_acquired + ",if=energy<=90";
     if ( talents.interrogation_probe -> rank() )
       action_list_str += sl + abilities.interrogation_probe + ",if=energy>65";
     action_list_str += sl + abilities.orbital_strike + ",if=energy>65";
@@ -1271,7 +1302,9 @@ void class_t::regen( timespan_t periodicity )
 // class_t::alacrity ============================================
 double class_t::alacrity() const
 {
-  return base_t::alacrity() - ( buffs.sniper_volley -> up() ? 0.1 : 0 );
+  // TODO confirm how these 10% and 20% work/stack
+  // are they a flat 20%, or maybe 20% increase to alacrity rating?
+  return base_t::alacrity() - ( buffs.sniper_volley -> up() ? 0.1 : 0 ) - ( buffs.target_acquired -> up() ? 0.2 : 0 );
 }
 
 

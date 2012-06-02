@@ -20,6 +20,7 @@ actions+=/incendiary_grenade,if=buff.seize_the_moment.up
 actions+=/sabotage_charge,if=buff.seize_the_moment.up
 actions+=/sabotage,if=dot.interrogation_probe.remains<1.6
 actions+=/cool_head,if=energy<=65
+actions+=/illegal_mods,if=energy<=90
 actions+=/shock_charge,if=energy>65
 actions+=/xs_freighter_flyby,if=energy>65
 actions+=/quickdraw,if=energy>75

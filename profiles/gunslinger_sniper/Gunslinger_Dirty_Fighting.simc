@@ -16,6 +16,7 @@ actions+=/take_cover,if=buff.cover.down
 actions+=/use_relics
 actions+=/power_potion
 actions+=/cool_head,if=energy<=65
+actions+=/illegal_mods,if=energy<=90
 actions+=/xs_freighter_flyby,if=energy>65
 actions+=/shrap_bomb,if=!ticking
 actions+=/quickdraw,if=energy>75

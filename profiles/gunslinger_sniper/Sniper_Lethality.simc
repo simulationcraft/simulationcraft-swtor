@@ -16,6 +16,7 @@ actions+=/take_cover,if=buff.cover.down
 actions+=/use_relics
 actions+=/power_potion
 actions+=/adrenaline_probe,if=energy<=65
+actions+=/target_acquired,if=energy<=90
 actions+=/orbital_strike,if=energy>65
 actions+=/corrosive_grenade,if=!ticking
 actions+=/takedown,if=energy>75
