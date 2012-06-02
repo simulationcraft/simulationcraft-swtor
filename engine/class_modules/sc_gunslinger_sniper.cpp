@@ -731,6 +731,22 @@ struct snipe_t : public agent_smug::snipe_t
   }
 };
 
+// Corrosive Grenade | Shrap Bomb ===========================================
+struct corrosive_grenade_t : public agent_smug::corrosive_grenade_t
+{
+  typedef agent_smug::corrosive_grenade_t base_t;
+
+  corrosive_grenade_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    base_t( p, n, options_str )
+  {
+    base_multiplier      +=               0.05    * p -> talents.explosive_engineering   -> rank();
+    base_multiplier      +=               0.04    * p -> talents.targeted_demolition     -> rank();
+    //crit_multiplier      +=               0.15    * p -> talents.experimental_explosives -> rank();
+    // explosive engineering also benefits corrosive grenade, but not experimental explosives
+    // http://www.swtor.com/community/showthread.php?p=2268473
+  }
+};
+
 // Fragmentation Grenade | Thermal Grenade ==================================
 struct fragmentation_grenade_t : public agent_smug::fragmentation_grenade_t
 {
@@ -739,17 +755,16 @@ struct fragmentation_grenade_t : public agent_smug::fragmentation_grenade_t
   fragmentation_grenade_t( class_t* p, const std::string& n, const std::string& options_str ) :
     base_t( p, n, options_str )
   {
-    cooldown -> duration = from_seconds( 6 - 1.5 * p -> talents.engineers_tool_belt -> rank() );
-    base_multiplier += 0.05 * p -> talents.explosive_engineering -> rank();
-    crit_multiplier += 0.15 * p -> talents.experimental_explosives -> rank();
+    cooldown -> duration  = from_seconds( 6 - 1.5 * p -> talents.engineers_tool_belt     -> rank() );
+    base_multiplier      +=               0.05    * p -> talents.explosive_engineering   -> rank();
+    base_multiplier      +=               0.04    * p -> talents.targeted_demolition     -> rank();
+    crit_multiplier      +=               0.15    * p -> talents.experimental_explosives -> rank();
   }
 };
 
 // TODO steady_shots also affects Cull, but we still need to move that from
 // scoundrel to agent
 
-// TODO explosive engineering also benefits corrosive grenade, but not experimental explosives
-// http://www.swtor.com/community/showthread.php?p=2268473
 
 // Take Cover | Take Cover ==================================================
 struct take_cover_t : public agent_smug::take_cover_t
@@ -907,6 +922,7 @@ struct cluster_bombs_callback_t : public action_callback_t
   if ( name == abilities.takedown              ) return new takedown_t              ( this, name, options_str ) ;
 
   // extended
+  if ( name == abilities.corrosive_grenade     ) return new corrosive_grenade_t     ( this, name, options_str ) ;
   if ( name == abilities.explosive_probe       ) return new explosive_probe_t       ( this, name, options_str ) ;
   if ( name == abilities.fragmentation_grenade ) return new fragmentation_grenade_t ( this, name, options_str ) ;
   if ( name == abilities.orbital_strike        ) return new orbital_strike_t        ( this, name, options_str ) ;
@@ -1123,6 +1139,8 @@ void class_t::init_actions()
     if ( talents.interrogation_probe -> rank() )
       action_list_str += sl + abilities.interrogation_probe + ",if=energy>65";
     action_list_str += sl + abilities.orbital_strike + ",if=energy>65";
+    if ( talents.corrosive_grenade -> rank() )
+      action_list_str += sl + abilities.corrosive_grenade + ",if=!ticking";
     action_list_str += sl + abilities.takedown + ",if=energy>75";
     action_list_str += sl + abilities.series_of_shots + ",if=energy>80";
     if ( talents.rapid_fire -> rank() )

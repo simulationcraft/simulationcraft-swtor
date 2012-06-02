@@ -12,8 +12,8 @@ talents=http://www.torhead.com/skill-calc#400bcbZrI0bRorRrsZh.1
 name=Sniper_Engineer
 save=Sniper_Engineer.simc
 
-#copy=Sniper_Lethality,Sniper_Hybrid
-#talents=http://www.torhead.com/skill-calc#...
-#name=Sniper_Lethality
-#save=Sniper_Lethality.simc
+copy=Sniper_Lethality,Sniper_Hybrid
+talents=http://www.torhead.com/skill-calc#400bZbIZGbbkrMGdhR.1
+name=Sniper_Lethality
+save=Sniper_Lethality.simc
 

@@ -303,7 +303,7 @@ bool explosive_probe_t::ready()
   return base_t::ready();
 }
 
-// Fragmentation Grenade | ??? ==============================================
+// Fragmentation Grenade | Thermal Grenade ==================================
 
 fragmentation_grenade_t::fragmentation_grenade_t( class_t* p, const std::string& n, const std::string& options_str ) :
   base_t( n, p )

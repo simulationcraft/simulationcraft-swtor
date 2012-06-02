@@ -10,3 +10,7 @@ save=Gunslinger_Sharpshooter.simc
 copy=Gunslinger_Saboteur,Gunslinger_Hybrid
 talents=http://www.torhead.com/skill-calc#700bcbZrI0bRorRrsZh.1
 save=Gunslinger_Saboteur.simc
+
+copy=Gunslinger_Dirty_Fighting,Gunslinger_Hybrid
+talents=http://www.torhead.com/skill-calc#700bZbcZGbbkrMGdhR.1
+save=Gunslinger_Dirty_Fighting.simc
