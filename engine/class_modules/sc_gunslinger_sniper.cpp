@@ -655,6 +655,7 @@ struct series_of_shots_t : public tech_attack_t
     // tick crits. the invisible execute hit shouldn't
     may_crit                     = false;
     base_multiplier             += 0.03 * p -> talents.steady_shots      -> rank();
+    base_multiplier             += 0.03 * p -> talents.cut_down          -> rank();
     base_crit                   += 0.02 * p -> talents.between_the_eyes  -> rank();
     crit_multiplier             += 0.1  * p -> talents.imperial_assassin -> rank();
   }
