@@ -387,6 +387,7 @@ struct cull_extra_t : public agent_smug::cull_extra_t
   cull_extra_t( class_t* p, const std::string& n ) :
     base_t( p, n )
   {
+    range                       = 30;
     dd.standardhealthpercentmin =
     dd.standardhealthpercentmax =  0.037;
     dd.power_mod                =  0.37;

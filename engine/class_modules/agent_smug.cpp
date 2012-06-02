@@ -348,13 +348,13 @@ overload_shot_t::overload_shot_t( class_t* p, const std::string& n, const std::s
 
   parse_options( options_str );
 
-  base_cost                   =  17;
-  range                       =  10.0;
+  base_cost                   = 17;
+  range                       = ( player -> type == IA_OPERATIVE || player -> type == S_SCOUNDREL ) ? 10 : 30;
   dd.standardhealthpercentmin =
   dd.standardhealthpercentmax = 0.124;
-  dd.power_mod                =  1.24;
-  weapon                      =  &( player -> main_hand_weapon );
-  weapon_multiplier           =  -0.17;
+  dd.power_mod                = 1.24;
+  weapon                      = &( player -> main_hand_weapon );
+  weapon_multiplier           = -0.17;
   // TODO move this tidbit into scoundrel_operative: 15% comes from operative's "skirmisher" passive
   base_multiplier             += ( player -> type == IA_OPERATIVE || player -> type == S_SCOUNDREL ? 0.15 : 0 )
       +  .03 * p -> talents.cut_down->rank();
