@@ -517,6 +517,8 @@ struct interrogation_probe_t : public tech_attack_t
     tick_zero                    = true;
     num_ticks                    = 6;
     base_tick_time               = from_seconds( 3.0 );
+    base_crit                   += 0.04 * p -> talents.lethal_dose -> rank();
+
   }
 
   // not implemented: cooldown resets if ends prematurely (target dies, dispelled).
@@ -549,6 +551,7 @@ struct plasma_probe_t : public tech_attack_t
     num_ticks                    = 3;
     base_tick_time               = from_seconds( 1.0 );
     base_multiplier             += 0.05 * p -> talents.explosive_engineering -> rank();
+    base_crit                   += 0.04 * p -> talents.lethal_dose -> rank();
     if ( is_weaker_attack)
     {
       base_accuracy                = 999;
