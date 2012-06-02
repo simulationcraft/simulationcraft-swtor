@@ -738,21 +738,6 @@ struct all_attack_callback_t : public action_callback_t
   }
 };
 
-struct poison_tick_crit_callback_t : public action_callback_t
-{
-  poison_tick_crit_callback_t( class_t* p ) :
-    action_callback_t( p )
-  {}
-
-  virtual void trigger (::action_t* a, void* /* call_data */)
-  {
-    if ( dynamic_cast<agent_smug::poison_attack_t*>(a) != NULL )
-    {
-      p()->resource_gain( RESOURCE_ENERGY, p()->talents.lethal_purpose -> rank(), p()->gains.lethal_purpose );
-    }
-  }
-};
-
 // ==========================================================================
 // scoundrel_operative Character Definition
 // ==========================================================================
@@ -1000,7 +985,6 @@ void class_t::init_actions()
   }
 
   register_attack_callback( RESULT_ALL_MASK, new all_attack_callback_t( this ) );
-  register_tick_callback( RESULT_CRIT_MASK, new poison_tick_crit_callback_t ( this ) );
 
   base_t::init_actions();
 }

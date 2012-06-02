@@ -506,8 +506,7 @@ struct poison_tick_crit_callback_t : public action_callback_t
 
   virtual void trigger (::action_t* a, void* /* call_data */)
   {
-    if (a->name_str == p()->abilities.corrosive_dart ||
-        a->name_str == p()->abilities.corrosive_grenade)
+    if ( dynamic_cast<agent_smug::poison_attack_t*>(a) != NULL )
     {
       p()->resource_gain( RESOURCE_ENERGY, p()->talents.lethal_purpose -> rank(), p()->gains.lethal_purpose );
     }
