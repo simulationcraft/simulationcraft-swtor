@@ -851,7 +851,7 @@ struct takedown_t : public range_attack_t
 
     parse_options( options_str );
 
-    base_cost                    = 15;
+    base_cost                    = 15 - ( p -> set_bonus.rakata_field_techs -> four_pc() ? 7 : 0 );
     cooldown -> duration         = from_seconds( 12 );
     range                        = 35.0;
     dd.standardhealthpercentmin  =
@@ -888,6 +888,8 @@ struct target_acquired_t : public action_t
   {
     base_t::execute();
     p() -> buffs.target_acquired -> trigger();
+    if ( p() -> set_bonus.rakata_field_techs -> two_pc() )
+      p() -> resource_gain( RESOURCE_ENERGY, 10, p() -> gains.target_acquired );
   }
 };
 
