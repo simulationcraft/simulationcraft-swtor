@@ -360,7 +360,7 @@ struct cover_pulse_t : public action_t
   {
     parse_options( options_str );
 
-    cooldown -> duration = from_seconds( 30 );
+    cooldown -> duration = from_seconds( 30 - 2.5 * p -> talents.hold_your_ground -> rank() );
     // TODO find out if this triggers GCD, and if it can be used off GCD
     //use_off_gcd = true;
     //trigger_gcd = timespan_t::zero();
