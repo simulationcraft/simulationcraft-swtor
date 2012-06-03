@@ -319,67 +319,25 @@ public:
   virtual void execute();
 };
 
-// Cull | Wounding Shot =====================================================
+class cull_extra_t;
 
-// these two are abstract classes:
-// firstly the coefficients for both are different for sniper/agent
-// for that reason, the extra strike member needs to be assigned by the child classes
-// not sure of the syntactic sugar for that in c++
-// in java we'd have all the missing bits populated as abstract methods which are then later implemented
-struct cull_extra_t : public tech_attack_t
-{
-  typedef tech_attack_t base_t;
-
-  cull_extra_t( class_t* p, const std::string& n ) :
-    base_t( n, p, SCHOOL_INTERNAL )
-  {
-    dual                        =
-    background                  = true;
-    trigger_gcd                 =  timespan_t::zero();
-    base_multiplier             += .03 * p -> talents.cut_down->rank();
-  }
-};
-
-struct cull_t : public range_attack_t
+class cull_t : public range_attack_t
 {
   typedef range_attack_t base_t;
-
+public:
   cull_extra_t* extra_strike;
-
-  cull_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    base_t( n, p )
-  {
-    check_talent( p -> talents.cull -> rank() );
-
-    parse_options( options_str );
-
-    base_cost                   = 25;
-    range                       =  10.0;
-    weapon                      =  &( player->main_hand_weapon );
-    base_multiplier             += .03 * p -> talents.cut_down->rank();
-    // can't get this to work. abstract method implemented by child classes
-    //extra_strike                = get_extra_strike();
-    //add_child(extra_strike);
-  }
-
-  cull_extra_t* get_extra_strike();
-
-  virtual void execute()
-  {
-    base_t::execute();
-
-    if ( result_is_hit() )
-    {
-      targetdata_t* td = targetdata();
-      if ( td -> dot_corrosive_dart.ticking || td -> dot_corrosive_dart_weak.ticking )
-        extra_strike -> execute();
-      if ( td -> dot_corrosive_grenade.ticking || td -> dot_corrosive_grenade_weak.ticking )
-        extra_strike -> execute();
-    }
-  }
+  cull_t( class_t* p, const std::string& n, const std::string& options_str );
+  virtual void init();
+  virtual cull_extra_t* get_extra_strike() = 0;
+  virtual void execute();
 };
 
-
+class cull_extra_t : public tech_attack_t
+{
+  typedef tech_attack_t base_t;
+public:
+  cull_extra_t( class_t* p, const std::string& n );
+};
 
 class explosive_probe_t : public tech_attack_t
 {

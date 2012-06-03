@@ -303,6 +303,52 @@ bool explosive_probe_t::ready()
   return base_t::ready();
 }
 
+// Cull | Wounding Shot =====================================================
+
+cull_t::cull_t( class_t* p, const std::string& n, const std::string& options_str ) :
+  base_t( n, p )
+{
+  check_talent( p -> talents.cull -> rank() );
+
+  parse_options( options_str );
+
+  base_cost                   = 25;
+  range                       =  10.0;
+  weapon                      =  &( player->main_hand_weapon );
+  base_multiplier             += .03 * p -> talents.cut_down->rank();
+}
+
+void cull_t::init()
+{
+  base_t::init();
+
+  extra_strike                = get_extra_strike();
+  add_child(extra_strike);
+}
+
+cull_extra_t::cull_extra_t( class_t* p, const std::string& n ) :
+  base_t( n, p, SCHOOL_INTERNAL )
+{
+  dual                        =
+  background                  = true;
+  trigger_gcd                 =  timespan_t::zero();
+  base_multiplier             += .03 * p -> talents.cut_down->rank();
+}
+
+void cull_t::execute()
+{
+  base_t::execute();
+
+  if ( result_is_hit() )
+  {
+    targetdata_t* td = targetdata();
+    if ( td -> dot_corrosive_dart.ticking || td -> dot_corrosive_dart_weak.ticking )
+      extra_strike -> execute();
+    if ( td -> dot_corrosive_grenade.ticking || td -> dot_corrosive_grenade_weak.ticking )
+      extra_strike -> execute();
+  }
+}
+
 // Fragmentation Grenade | Thermal Grenade ==================================
 
 fragmentation_grenade_t::fragmentation_grenade_t( class_t* p, const std::string& n, const std::string& options_str ) :

@@ -412,13 +412,9 @@ struct cull_t : public agent_smug::cull_t
     dd.standardhealthpercentmin =
     dd.standardhealthpercentmax = 0.053;
     dd.power_mod                = 0.533;
-    // i want this in the parent class but it gives strange errors
-    extra_strike                = get_extra_strike();
-    add_child(extra_strike);
   }
 
-
-  virtual agent_smug::cull_extra_t* get_extra_strike()
+  agent_smug::cull_extra_t* get_extra_strike()
   {
     return new cull_extra_t( p(), name_str + "_extra" );
   }
