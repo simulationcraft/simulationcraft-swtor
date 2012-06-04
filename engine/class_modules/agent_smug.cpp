@@ -330,7 +330,6 @@ void cull_t::init()
 cull_extra_t::cull_extra_t( class_t* p, const std::string& n ) :
   base_t( n, p )
 {
-  dual                        =
   background                  = true;
   trigger_gcd                 =  timespan_t::zero();
   base_multiplier             += .03 * p -> talents.cut_down->rank();
