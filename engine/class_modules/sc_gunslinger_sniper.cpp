@@ -22,6 +22,8 @@ public:
   targetdata_t( class_t& source, player_t& target );
 
   buff_t* debuff_cluster_bombs;
+  buff_t* debuff_electrified_railgun;
+  dot_t dot_electrified_railgun;
   dot_t dot_interrogation_probe;
   dot_t dot_plasma_probe;
   dot_t dot_series_of_shots;
@@ -167,6 +169,8 @@ public:
     // gains from talent
     std::string imperial_methodology;
     std::string snipers_nest;
+    // talent dot
+    std::string electrified_railgun;
   } abilities;
 
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
@@ -212,11 +216,14 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
 {
 // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
    debuff_cluster_bombs   = new buff_t ( this, source.abilities.cluster_bombs, 2 + source.talents.imperial_methodology -> rank(), from_seconds ( 0 ), from_seconds( 1.5 ), 100, false, true /*reverse*/ );
+   debuff_electrified_railgun   = new buff_t ( this, source.abilities.electrified_railgun, 4, from_seconds ( 5 ), from_seconds( 0 ), 1 * source.talents.electrified_railgun -> rank() );
 
+  dot_electrified_railgun = dot_t ( source.abilities.electrified_railgun, &source );
   dot_interrogation_probe = dot_t ( source.abilities.interrogation_probe, &source );
   dot_plasma_probe        = dot_t ( source.abilities.plasma_probe       , &source );
   dot_series_of_shots     = dot_t ( source.abilities.series_of_shots    , &source );
 
+  add( dot_electrified_railgun );
   add( dot_interrogation_probe );
   add( dot_plasma_probe        );
   add( dot_series_of_shots     );
@@ -710,9 +717,47 @@ struct orbital_strike_t : public agent_smug::orbital_strike_t
 // Series of Shots | Speed Shot =============================================
 struct series_of_shots_t : public tech_attack_t
 {
-  typedef tech_attack_t base_t;
+  struct electrified_railgun_t : public tech_attack_t
+  {
+    typedef tech_attack_t base_t;
 
-  series_of_shots_t( class_t* p, const std::string& n, const std::string& options_str) :
+    electrified_railgun_t( class_t* p, const std::string& n ) :
+      base_t( n, p, SCHOOL_ELEMENTAL )
+    {
+      background                  = true;
+      trigger_gcd                 = timespan_t::zero();
+      td.standardhealthpercentmin =
+        td.standardhealthpercentmax = 0.005;
+      td.power_mod                = 0.05;
+      // ticks crit, invisible hit not
+      may_crit                    = false;
+      tick_zero                   = true;
+      num_ticks                   = 3;
+      base_tick_time              = from_seconds( 1.1 ); // using 1.1 to avoid tick overlaps while series of shots is going
+    }
+
+    virtual void player_buff()
+    {
+      base_t::player_buff();
+      player_multiplier *= targetdata() -> debuff_electrified_railgun -> stack();
+    }
+
+    virtual void execute()
+    {
+      targetdata() -> debuff_electrified_railgun -> trigger();
+      base_t::execute();
+    }
+
+    virtual void last_tick( dot_t* dot )
+    {
+      base_t::last_tick( dot );
+    }
+  };
+
+  typedef tech_attack_t base_t;
+  electrified_railgun_t* electrified;
+
+  series_of_shots_t( class_t* p, const std::string& n, const std::string& options_str ) :
     base_t( n, p, SCHOOL_ENERGY )
   {
     // rank_level_list = { ... , 50 };
@@ -737,6 +782,8 @@ struct series_of_shots_t : public tech_attack_t
     base_multiplier             += 0.03 * p -> talents.cut_down          -> rank();
     base_crit                   += 0.02 * p -> talents.between_the_eyes  -> rank();
     crit_multiplier             += 0.1  * p -> talents.imperial_assassin -> rank();
+    if ( p -> talents.electrified_railgun -> rank() )
+      electrified = new electrified_railgun_t( p, p -> abilities.electrified_railgun );
   }
 
   virtual timespan_t execute_time() const
@@ -751,6 +798,10 @@ struct series_of_shots_t : public tech_attack_t
   virtual void tick( dot_t* d )
   {
     base_t::tick( d );
+
+    if ( electrified )
+      electrified -> schedule_execute();
+
     if ( result == RESULT_CRIT )
       p() -> _trigger_reactive_shot();
   }
@@ -1081,6 +1132,8 @@ void class_t::init_abilities()
   // gains
   abilities.imperial_methodology = sn ? "imperial_methodology" : "imperial_methodology" ;
   abilities.snipers_nest         = sn ? "snipers_nest"         : "fox_hole"             ;
+  // talent dot
+  abilities.electrified_railgun  = sn ? "electrified_railgun"  : "blazing_speed"        ;
 }
 
 // class_t::init_talents ========================================
