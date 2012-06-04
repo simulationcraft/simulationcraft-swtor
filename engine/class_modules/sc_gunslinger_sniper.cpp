@@ -780,7 +780,10 @@ struct series_of_shots_t : public tech_attack_t
     base_crit                   += 0.02 * p -> talents.between_the_eyes  -> rank();
     crit_multiplier             += 0.1  * p -> talents.imperial_assassin -> rank();
     if ( p -> talents.electrified_railgun -> rank() )
+    {
       electrified = new electrified_railgun_t( p, p -> abilities.electrified_railgun );
+      add_child(electrified);
+    }
   }
 
   virtual timespan_t execute_time() const
