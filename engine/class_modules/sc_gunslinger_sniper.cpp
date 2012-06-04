@@ -739,18 +739,15 @@ struct series_of_shots_t : public tech_attack_t
     virtual void player_buff()
     {
       base_t::player_buff();
-      player_multiplier *= targetdata() -> debuff_electrified_railgun -> stack();
+      int stack = targetdata() -> debuff_electrified_railgun -> stack();
+      assert( stack );
+      player_multiplier *= stack;
     }
 
     virtual void execute()
     {
       targetdata() -> debuff_electrified_railgun -> trigger();
       base_t::execute();
-    }
-
-    virtual void last_tick( dot_t* dot )
-    {
-      base_t::last_tick( dot );
     }
   };
 
