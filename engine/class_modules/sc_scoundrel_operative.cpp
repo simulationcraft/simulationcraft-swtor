@@ -603,6 +603,7 @@ struct cull_t : public agent_smug::cull_t
     parse_options( options_str );
 
     base_cost                  -=  3 * p -> talents.license_to_kill -> rank();
+    weapon                      =  &( player->main_hand_weapon );
     weapon_multiplier           =  -0.1;
     dd.standardhealthpercentmin =
     dd.standardhealthpercentmax =  0.135;

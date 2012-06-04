@@ -230,6 +230,7 @@ public:
   dot_t dot_corrosive_dart_weak;
   dot_t dot_corrosive_grenade;
   dot_t dot_corrosive_grenade_weak;
+  dot_t dot_cull; // sniper is dot, agent is direct
   dot_t dot_orbital_strike;
 
   targetdata_t( class_t& source, player_t& target );
@@ -329,6 +330,7 @@ public:
   virtual void init();
   virtual cull_extra_t* get_extra_strike() = 0;
   virtual void execute();
+  virtual void tick( dot_t* dot );
 };
 
 class cull_extra_t : public poison_attack_t

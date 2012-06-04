@@ -406,12 +406,17 @@ struct cull_t : public agent_smug::cull_t
     base_t( p, n, options_str )
   {
     // TODO does RR benefit the extra attack as well?
-    cooldown -> duration         = from_seconds( 9 );
-    base_crit                   = 0.4 * p -> talents.razor_rounds -> rank();
-    weapon_multiplier           = -0.64;
-    dd.standardhealthpercentmin =
-    dd.standardhealthpercentmax = 0.053;
-    dd.power_mod                = 0.533;
+    range                       = 30; // TODO check or 35?
+    cooldown -> duration        = from_seconds( 9 );
+    base_crit                   = 0.04 * p -> talents.razor_rounds -> rank();
+    td.weapon                   =  &( player->main_hand_weapon );
+    td.weapon_multiplier        = -0.64;
+    td.standardhealthpercentmin =
+    td.standardhealthpercentmax = 0.053;
+    td.power_mod                = 0.533;
+    channeled                   = true;
+    num_ticks                   = 3;
+    base_tick_time              = from_seconds(1);
   }
 
   agent_smug::cull_extra_t* get_extra_strike()

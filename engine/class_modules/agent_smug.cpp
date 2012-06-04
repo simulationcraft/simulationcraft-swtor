@@ -16,6 +16,7 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   dot_corrosive_dart_weak    = dot_t ( source.abilities.corrosive_dart_weak    , &source );
   dot_corrosive_grenade      = dot_t ( source.abilities.corrosive_grenade      , &source );
   dot_corrosive_grenade_weak = dot_t ( source.abilities.corrosive_grenade_weak , &source );
+  dot_cull                   = dot_t ( source.abilities.cull                   , &source );
   dot_orbital_strike         = dot_t ( source.abilities.orbital_strike         , &source );
 
   add( *debuff_weakening_blast    );
@@ -24,6 +25,7 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   add( dot_corrosive_dart_weak    );
   add( dot_corrosive_grenade      );
   add( dot_corrosive_grenade_weak );
+  add( dot_cull                   );
   add( dot_orbital_strike         );
 }
 
@@ -314,7 +316,6 @@ cull_t::cull_t( class_t* p, const std::string& n, const std::string& options_str
 
   base_cost                   = 25;
   range                       =  10.0;
-  weapon                      =  &( player->main_hand_weapon );
   base_multiplier             += .03 * p -> talents.cut_down->rank();
 }
 
@@ -338,6 +339,20 @@ cull_extra_t::cull_extra_t( class_t* p, const std::string& n ) :
 void cull_t::execute()
 {
   base_t::execute();
+
+  if ( ! td.weapon && result_is_hit() )
+  {
+    targetdata_t* td = targetdata();
+    if ( td -> dot_corrosive_dart.ticking || td -> dot_corrosive_dart_weak.ticking )
+      extra_strike -> execute();
+    if ( td -> dot_corrosive_grenade.ticking || td -> dot_corrosive_grenade_weak.ticking )
+      extra_strike -> execute();
+  }
+}
+
+void cull_t::tick( dot_t* dot )
+{
+  base_t::tick( dot );
 
   if ( result_is_hit() )
   {
