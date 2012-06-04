@@ -589,7 +589,7 @@ struct laze_target_t : public action_t
     cooldown -> duration = from_seconds( 60 );
     // TODO find out if this triggers GCD, and if it can be used off GCD
     //use_off_gcd = true;
-    //trigger_gcd = timespan_t::zero();
+    trigger_gcd = timespan_t::zero();
   }
 
   void execute()
