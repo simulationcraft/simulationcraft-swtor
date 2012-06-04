@@ -178,14 +178,22 @@ public:
   std::pair<int,gain_t*> energy_regen_bracket() const
   {
     // TODO test: do these brackets change with snipers' Energy Tanks talent?
-    if ( resource_current[ RESOURCE_ENERGY ] <= 20 )
+    int base = talented_energy();
+    if ( resource_current[ RESOURCE_ENERGY ] <= 0.2 * base )
       return std::make_pair( 2, energy_gains.minimum );
-    else if ( resource_current[ RESOURCE_ENERGY ] <= 40 )
+    else if ( resource_current[ RESOURCE_ENERGY ] <= 0.4 * base )
       return std::make_pair( 3, energy_gains.low );
-    else if ( resource_current[ RESOURCE_ENERGY ] <= 60 )
+    else if ( resource_current[ RESOURCE_ENERGY ] <= 0.6 * base )
       return std::make_pair( 4, energy_gains.medium );
     else
       return std::make_pair( 5, energy_gains.high );
+  }
+
+  // basically here to get energy without the 4pc bonus
+  // so operative will be 100. snipers may be 100, 105, or 110 depending on energy tanks
+  virtual int talented_energy() const
+  {
+    return 100;
   }
 
   virtual double energy_regen_per_second() const

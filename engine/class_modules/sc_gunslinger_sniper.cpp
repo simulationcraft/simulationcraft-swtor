@@ -206,6 +206,7 @@ public:
 
   double    energy_regen_per_second() const;
   void      regen( timespan_t periodicity );
+  int       talented_energy() const;
   double    alacrity() const;
 
   void      _trigger_reactive_shot();
@@ -1370,6 +1371,12 @@ double class_t::range_accuracy_chance() const
   return base_t::range_accuracy_chance() + 0.01 * talents.marksmanship -> rank();
 }
 
+// class_t::talented_energy =====================================
+int class_t::talented_energy() const
+{
+  return base_t::talented_energy() + 5 * talents.energy_tanks -> rank();
+}
+
 // class_t::energy_regen_per_second =============================
 // MIRROR CHANGES WITH regen BELOW
 double class_t::energy_regen_per_second() const
@@ -1381,6 +1388,7 @@ double class_t::energy_regen_per_second() const
     eps *= 2;
   return eps;
 }
+
 
 // class_t::regen ===============================================
 // MIRROR CHANGES WITH energy_regen_per_second ABOVE
