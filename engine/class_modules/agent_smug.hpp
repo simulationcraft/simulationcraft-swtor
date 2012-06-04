@@ -320,10 +320,15 @@ public:
 };
 
 class cull_extra_t;
-
-class cull_t : public poison_attack_t
+class cull_extra_t : public poison_attack_t
 {
   typedef poison_attack_t base_t;
+public:
+  cull_extra_t( class_t* p, const std::string& n );
+};
+class cull_t : public range_attack_t
+{
+  typedef range_attack_t base_t;
 public:
   cull_extra_t* extra_strike;
   cull_t( class_t* p, const std::string& n, const std::string& options_str );
@@ -332,12 +337,6 @@ public:
   virtual void execute();
 };
 
-class cull_extra_t : public tech_attack_t
-{
-  typedef tech_attack_t base_t;
-public:
-  cull_extra_t( class_t* p, const std::string& n );
-};
 
 class explosive_probe_t : public tech_attack_t
 {
