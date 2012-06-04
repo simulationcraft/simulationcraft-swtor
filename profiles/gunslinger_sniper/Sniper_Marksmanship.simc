@@ -25,6 +25,7 @@ actions+=/followthrough,if=buff.followthrough.up
 actions+=/explosive_probe,if=energy>80
 actions+=/ambush,if=energy>75
 actions+=/corrosive_dart,if=!ticking&energy>80
+actions+=/laze_target
 actions+=/snipe,if=energy>75&!buff.followthrough.react
 actions+=/snipe,if=energy>95
 actions+=/rifle_shot

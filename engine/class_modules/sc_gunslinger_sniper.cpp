@@ -37,6 +37,7 @@ public:
   {
     buff_t* energy_overrides;
     buff_t* followthrough;
+    buff_t* laze_target;
     buff_t* rapid_fire;
     buff_t* snap_shot;
     buff_t* sniper_volley;
@@ -148,6 +149,7 @@ public:
     std::string emp_discharge;
     std::string followthrough;
     std::string interrogation_probe;
+    std::string laze_target;
     std::string plasma_probe;
     std::string rapid_fire;
     std::string series_of_shots;
@@ -574,6 +576,30 @@ struct interrogation_probe_t : public tech_attack_t
   // not implemented: cooldown resets if ends prematurely (target dies, dispelled).
 };
 
+// Laze Target | Smugglers Luck =============================================
+struct laze_target_t : public action_t
+{
+  typedef action_t base_t;
+
+  laze_target_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    base_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE )
+  {
+    parse_options( options_str );
+
+    cooldown -> duration = from_seconds( 60 );
+    // TODO find out if this triggers GCD, and if it can be used off GCD
+    //use_off_gcd = true;
+    //trigger_gcd = timespan_t::zero();
+  }
+
+  void execute()
+  {
+    base_t::execute();
+    p() -> buffs.laze_target -> trigger();
+  }
+};
+
+
 // Plasma Probe | Incendiary Grenade ========================================
 struct plasma_probe_t : public tech_attack_t
 {
@@ -767,6 +793,12 @@ struct snipe_t : public agent_smug::snipe_t
     return base_t::execute_time();
   }
 
+  virtual void player_buff()
+  {
+    if ( p() -> buffs.laze_target -> up() )
+      base_crit += 1; // 100% crit
+  }
+
   virtual void execute()
   {
     base_t::execute();
@@ -776,6 +808,9 @@ struct snipe_t : public agent_smug::snipe_t
       p() -> buffs.snap_shot -> expire();
     if ( p() -> buffs.stroke_of_genius -> up() )
       p() -> buffs.stroke_of_genius -> expire();
+
+    if ( p() -> buffs.laze_target -> up() )
+      p() -> buffs.laze_target -> expire();
 
     if ( p() -> talents.followthrough -> rank() )
       p() -> buffs.followthrough -> trigger();
@@ -995,6 +1030,7 @@ struct cluster_bombs_callback_t : public action_callback_t
   if ( name == abilities.emp_discharge         ) return new emp_discharge_t         ( this, name, options_str ) ;
   if ( name == abilities.followthrough         ) return new followthrough_t         ( this, name, options_str ) ;
   if ( name == abilities.interrogation_probe   ) return new interrogation_probe_t   ( this, name, options_str ) ;
+  if ( name == abilities.laze_target           ) return new laze_target_t           ( this, name, options_str ) ;
   if ( name == abilities.plasma_probe          ) return new plasma_probe_t          ( this, name, options_str ) ;
   if ( name == abilities.rapid_fire            ) return new rapid_fire_t            ( this, name, options_str ) ;
   if ( name == abilities.series_of_shots       ) return new series_of_shots_t       ( this, name, options_str ) ;
@@ -1027,6 +1063,7 @@ void class_t::init_abilities()
   abilities.emp_discharge        = sn ? "emp_discharge"        : "sabotage"             ;
   abilities.followthrough        = sn ? "followthrough"        : "trickshot"            ;
   abilities.interrogation_probe  = sn ? "interrogation_probe"  : "shock_charge"         ;
+  abilities.laze_target          = sn ? "laze_target"          : "smugglers_luck"       ;
   abilities.plasma_probe         = sn ? "plasma_probe"         : "incendiary_grenade"   ;
   abilities.rapid_fire           = sn ? "rapid_fire"           : "rapid_fire"           ;
   abilities.series_of_shots      = sn ? "series_of_shots"      : "speed_shot"           ;
@@ -1142,6 +1179,7 @@ void class_t::init_buffs()
 
   buffs.energy_overrides = new buff_t( this , abilities.energy_overrides , 1 ,  from_seconds( 15  ) );
   buffs.followthrough    = new buff_t( this , abilities.followthrough    , 1 ,  from_seconds( 4.5 ) );
+  buffs.laze_target      = new buff_t( this , abilities.laze_target      , 1 ,  from_seconds( 20  ) );
   buffs.snap_shot        = new buff_t( this , abilities.snap_shot        , 1 ,  from_seconds( 10  ), from_seconds( 6 ), 0.5 * talents.snap_shot -> rank() );
   buffs.rapid_fire       = new buff_t( this , abilities.rapid_fire       , 1 ,  from_seconds( 10  ) );
   buffs.sniper_volley    = new buff_t( this , abilities.sniper_volley    , 1 ,  from_seconds( 10  ), from_seconds( 30 ), 0.05 * talents.sniper_volley -> rank() );
@@ -1245,6 +1283,7 @@ void class_t::init_actions()
     action_list_str += sl + abilities.corrosive_dart + ",if=!ticking&energy>80";
     if ( talents.stroke_of_genius -> rank() )
       action_list_str += sl + abilities.cover_pulse;
+    action_list_str += sl + abilities.laze_target;
     if ( talents.followthrough -> rank() )
       action_list_str += sl + abilities.snipe + ",if=energy>75&!buff." + abilities.followthrough + ".react";
     action_list_str += sl + abilities.snipe + ",if=energy>95";
