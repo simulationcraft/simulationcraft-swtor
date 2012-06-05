@@ -13,11 +13,9 @@
 
 OS         =
 
-#CXX        = g++ -std=c++0x
-CXX        = g++ -std=c++0x -pg
+CXX        = g++ -std=c++0x
 CPP_FLAGS  = -Wall -Wextra -Woverloaded-virtual -I.
-#OPTS       = -O3 -fomit-frame-pointer -ffast-math
-OPTS       = -O3  -ffast-math
+OPTS       = -O3 -fomit-frame-pointer -ffast-math
 BITS       = 32
 
 -include ../build.conf
