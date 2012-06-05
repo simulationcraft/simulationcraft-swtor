@@ -186,6 +186,7 @@ public:
   }
 
   // Character Definition
+  double    _tech_range_accuracy;
   targetdata_t* new_targetdata( player_t& target ) // override
   { return new targetdata_t( *this, target ); }
   ::action_t* create_action( const std::string& name, const std::string& options );
@@ -1214,6 +1215,8 @@ void class_t::init_base()
 
   if ( unsigned rank = talents.energy_tanks -> rank() )
     resource_base[ RESOURCE_ENERGY ] += 5 * rank;
+
+  _tech_range_accuracy = 0.01 * talents.marksmanship -> rank();
 }
 
 // class_t::init_benefits =======================================
@@ -1362,13 +1365,13 @@ void class_t::init_actions()
 // class_t::tech_accuracy_chance ================================
 double class_t::tech_accuracy_chance() const
 {
-  return base_t::tech_accuracy_chance() + 0.01 * talents.marksmanship -> rank();
+  return base_t::tech_accuracy_chance() + _tech_range_accuracy;
 }
 
 // class_t::range_accuracy_chance ===============================
 double class_t::range_accuracy_chance() const
 {
-  return base_t::range_accuracy_chance() + 0.01 * talents.marksmanship -> rank();
+  return base_t::range_accuracy_chance() + _tech_range_accuracy;
 }
 
 // class_t::talented_energy =====================================
