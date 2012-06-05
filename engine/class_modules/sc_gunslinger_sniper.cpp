@@ -790,7 +790,7 @@ struct series_of_shots_t : public tech_attack_t
   virtual timespan_t execute_time() const
   {
 
-    if ( p() -> buffs.rapid_fire -> up() )
+    if ( p() -> buffs.rapid_fire -> check() )
       return timespan_t::zero();
 
     return base_t::execute_time();
@@ -839,7 +839,7 @@ struct snipe_t : public agent_smug::snipe_t
 
   virtual timespan_t execute_time() const
   {
-    if ( p() -> buffs.snap_shot -> up() || p() -> buffs.stroke_of_genius-> up() )
+    if ( p() -> buffs.snap_shot -> check() || p() -> buffs.stroke_of_genius-> check() )
       return timespan_t::zero();
 
     return base_t::execute_time();

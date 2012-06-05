@@ -511,7 +511,7 @@ void take_cover_t::execute()
   base_t::execute();
 
   class_t& p = *cast();
-  if ( p.buffs.cover -> up() )
+  if ( p.buffs.cover -> check() )
     p.buffs.cover -> expire();
   else
     p.buffs.cover -> trigger();
