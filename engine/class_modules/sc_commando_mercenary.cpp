@@ -607,7 +607,7 @@ struct rail_shot_t : public attack_t
   {
     double c = attack_t::cost();
     class_t* p = cast();
-    if ( p -> talents.upgraded_arsenal -> rank() && p -> buffs.high_velocity_gas_cylinder -> up() )
+    if ( p -> talents.upgraded_arsenal -> rank() && p -> buffs.high_velocity_gas_cylinder -> check() )
       c -= 8;
 
     return c;
@@ -621,6 +621,7 @@ struct rail_shot_t : public attack_t
 
   bool ignore_thermal_sensor_override()
   {
+    // XXX TODO i think this is only meant to be true if we have both  4pc and upgraded_arsenal and HVGS up
     return true;
   }
 };
@@ -849,23 +850,14 @@ struct vent_heat_t : public action_t
 
 double class_t::alacrity() const
 {
-  double sh = base_t::alacrity();
-
-  if ( buffs.critical_reaction -> up() )
-    sh -= 0.05;
-
-  return sh;
+  return buffs.critical_reaction -> up() ? base_t::alacrity() - 0.05 : base_t::alacrity();
 }
+
 // class_t::armor_penetration ================================================================
 
 double class_t::armor_penetration() const
 {
-  double arpen = base_t::armor_penetration();
-
-  if ( buffs.high_velocity_gas_cylinder -> up() )
-    arpen *= 0.65;
-
-  return arpen;
+  return buffs.high_velocity_gas_cylinder -> up() ? base_t::armor_penetration() * 0.65 : base_t::armor_penetration();
 }
 
 
