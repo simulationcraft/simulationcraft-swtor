@@ -179,11 +179,11 @@ public:
   {
     // TODO test: do these brackets change with snipers' Energy Tanks talent?
     int base = talented_energy();
-    if ( resource_current[ RESOURCE_ENERGY ] <= 0.2 * base )
+    if ( resource_current[ RESOURCE_ENERGY ] < 0.2 * base )
       return std::make_pair( 2, energy_gains.minimum );
-    else if ( resource_current[ RESOURCE_ENERGY ] <= 0.4 * base )
+    else if ( resource_current[ RESOURCE_ENERGY ] < 0.4 * base )
       return std::make_pair( 3, energy_gains.low );
-    else if ( resource_current[ RESOURCE_ENERGY ] <= 0.6 * base )
+    else if ( resource_current[ RESOURCE_ENERGY ] < 0.6 * base )
       return std::make_pair( 4, energy_gains.medium );
     else
       return std::make_pair( 5, energy_gains.high );
