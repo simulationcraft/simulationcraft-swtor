@@ -1046,25 +1046,23 @@ struct cluster_bombs_callback_t : public action_callback_t
   };
 
   cluster_bombs_t* cluster_bombs;
+  buff_t* debuff_cluster_bombs;
 
   cluster_bombs_callback_t( class_t* p ) :
     action_callback_t( p ),
-    cluster_bombs( new cluster_bombs_t( p, p -> abilities.cluster_bombs ) )
+    cluster_bombs( new cluster_bombs_t( p, p -> abilities.cluster_bombs ) ),
+    debuff_cluster_bombs( cluster_bombs -> targetdata() -> debuff_cluster_bombs )
   {}
 
   virtual void trigger (::action_t* a, void* /* call_data */)
   {
-    // TODO test what constitutes "blaster fire" assuming any weapon attack
-    if ( a -> weapon || a -> td.weapon )
+    if ( ( a -> weapon || a -> td.weapon )
+        && debuff_cluster_bombs -> up()
+        && debuff_cluster_bombs -> trigger() )
     {
-      buff_t* debuff_cluster_bombs = cluster_bombs -> targetdata() -> debuff_cluster_bombs;
-
-      if ( debuff_cluster_bombs -> up() && debuff_cluster_bombs -> trigger() )
-      {
-        cluster_bombs -> execute();
-        if ( p() -> talents.imperial_methodology -> rank() )
-          p() -> resource_gain( RESOURCE_ENERGY, 5, p() -> gains.imperial_methodology );
-      }
+      cluster_bombs -> execute();
+      if ( p() -> talents.imperial_methodology -> rank() )
+        p() -> resource_gain( RESOURCE_ENERGY, 5, p() -> gains.imperial_methodology );
     }
   }
 };
