@@ -388,30 +388,22 @@ struct stealth_t : public action_t
   }
 };
 
-// Shiv | ??? ===============================================================
+// Shiv | Blaster Whip ======================================================
 
-struct shiv_t : public tech_attack_t
+struct shiv_t : public agent_smug::shiv_t
 {
-  typedef tech_attack_t base_t;
+  typedef agent_smug::shiv_t base_t;
+
+  class_t* p() const { return static_cast<class_t*>( player ); }
 
   shiv_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    base_t( n, p )
+    base_t( p, n, options_str )
   {
-    rank_level_list = { 2, 5, 8, 11, 14, 19, 29, 38, 50 };
-
-    parse_options( options_str );
-
-    base_cost                    = 15;
-    cooldown -> duration         = from_seconds( 6.0 );
-    range                        = 4.0;
-    dd.standardhealthpercentmin  = 0.148;
-    dd.standardhealthpercentmax  = 0.188;
-    dd.power_mod                 = 1.68;
-    base_multiplier             += p -> talents.surgical_strikes -> rank() * 0.02
-                                 + p -> talents.razor_edge       -> rank() * 0.04;
+    base_multiplier += p -> talents.surgical_strikes -> rank() * 0.02
+                     + p -> talents.razor_edge       -> rank() * 0.04;
   }
 
-  virtual void execute()
+  void execute()
   {
     base_t::execute();
 
@@ -734,7 +726,6 @@ struct all_attack_callback_t : public action_callback_t
   if ( name == abilities.backstab              ) return new backstab_t              ( this, name, options_str ) ;
   if ( name == abilities.hidden_strike         ) return new hidden_strike_t         ( this, name, options_str ) ;
   if ( name == abilities.laceration            ) return new laceration_t            ( this, name, options_str ) ;
-  if ( name == abilities.shiv                  ) return new shiv_t                  ( this, name, options_str ) ;
   if ( name == abilities.stealth               ) return new stealth_t               ( this, name, options_str ) ;
   if ( name == abilities.stim_boost            ) return new stim_boost_t            ( this, name, options_str ) ;
 

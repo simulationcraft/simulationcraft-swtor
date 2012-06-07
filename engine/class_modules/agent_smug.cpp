@@ -471,6 +471,23 @@ void rifle_shot_t::execute()
     offhand_attack->schedule_execute();
 }
 
+// Shiv | Blaster Whip ======================================================
+
+shiv_t::shiv_t( class_t* p, const std::string& n, const std::string& options_str ) :
+  base_t( n, p )
+{
+  rank_level_list = { 2, 5, 8, 11, 14, 19, 29, 38, 50 };
+
+  parse_options( options_str );
+
+  base_cost                    = 15;
+  cooldown -> duration         = from_seconds( 6.0 );
+  range                        = 4.0;
+  dd.standardhealthpercentmin  = 0.148;
+  dd.standardhealthpercentmax  = 0.188;
+  dd.power_mod                 = 1.68;
+}
+
 // Snipe | Charged Burst ====================================================
 
 snipe_t::snipe_t( class_t* p, const std::string& n, const std::string& options_str) :
@@ -593,6 +610,7 @@ struct poison_tick_crit_callback_t : public action_callback_t
   if ( name == abilities.orbital_strike        ) return new orbital_strike_t        ( this, name, options_str ) ;
   if ( name == abilities.overload_shot         ) return new overload_shot_t         ( this, name, options_str ) ;
   if ( name == abilities.rifle_shot            ) return new rifle_shot_t            ( this, name, options_str ) ;
+  if ( name == abilities.shiv                  ) return new shiv_t                  ( this, name, options_str ) ;
   if ( name == abilities.snipe                 ) return new snipe_t                 ( this, name, options_str ) ;
   if ( name == abilities.take_cover            ) return new take_cover_t            ( this, name, options_str ) ;
   if ( name == abilities.weakening_blast       ) return new weakening_blast_t       ( this, name, options_str ) ;

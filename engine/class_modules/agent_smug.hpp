@@ -380,6 +380,13 @@ public:
   virtual void execute();
 };
 
+class shiv_t : public tech_attack_t
+{
+  typedef tech_attack_t base_t;
+public:
+  shiv_t( class_t* p, const std::string& n, const std::string& options_str );
+};
+
 class snipe_t : public range_attack_t
 {
   typedef range_attack_t base_t;
