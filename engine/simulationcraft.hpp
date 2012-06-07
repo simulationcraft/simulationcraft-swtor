@@ -3223,7 +3223,6 @@ struct action_t
     double player_multiplier;
     double target_multiplier;
     double power_mod;
-    // XXX adding in to implement Unload as a channeled dot
     double weapon_multiplier;
     weapon_t* weapon;
 
@@ -3313,8 +3312,7 @@ public:
 
   virtual double calculate_direct_damage( int chain_target = 0 );
   virtual double calculate_tick_damage();
-  virtual double calculate_weapon_damage();
-  virtual double calculate_tick_weapon_damage();
+  virtual double calculate_weapon_damage( weapon_t* weapon );
   virtual double armor() const;
   virtual void   consume_resource();
   virtual void   execute();
