@@ -876,7 +876,7 @@ void action_t::impact( player_t* t, result_type impact_result, double travel_dmg
   target = t;
 
   // hit check each tick of the channeled weapon ability, otherwise a single hit check up front
-  if ( td.weapon && channeled || result_is_hit( impact_result ) )
+  if ( ( td.weapon && channeled ) || result_is_hit( impact_result ) )
   {
     if ( num_ticks > 0 )
     {

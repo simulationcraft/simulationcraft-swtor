@@ -731,6 +731,7 @@ struct all_attack_callback_t : public action_callback_t
 
   // extended
   if ( name == abilities.cull                  ) return new cull_t                  ( this, name, options_str ) ;
+  if ( name == abilities.shiv                  ) return new shiv_t                  ( this, name, options_str ) ;
 
   return base_t::create_action( name, options_str );
 }
