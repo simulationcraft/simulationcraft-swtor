@@ -1248,17 +1248,17 @@ void player_t::init_buffs()
   debuffs.invulnerable      = new debuff_t( this, "invulnerable", -1 );
   debuffs.vulnerable        = new debuff_t( this, "vulnerable",   -1 );
 
-  debuffs.shatter_shot      = new debuff_t( this, "shatter_shot", 1, from_seconds( 45.0 ) ); // TODO: move to player_t extension of correct class
+  debuffs.shatter_shot      = new debuff_t( this, "shatter_shot:1", 1, from_seconds( 45.0 ) ); // TODO: move to player_t extension of correct class
   debuffs.shatter_shot_2      = new debuff_t( this, "shatter_shot:2", 1, from_seconds( 45.0 ) ); // TODO: move to player_t extension of correct class
   debuffs.shatter_shot_3      = new debuff_t( this, "shatter_shot:3", 1, from_seconds( 45.0 ) ); // TODO: move to player_t extension of correct class
   debuffs.shatter_shot_4      = new debuff_t( this, "shatter_shot:4", 1, from_seconds( 45.0 ) ); // TODO: move to player_t extension of correct class
   debuffs.shatter_shot_5      = new debuff_t( this, "shatter_shot:5", 1, from_seconds( 45.0 ) ); // TODO: move to player_t extension of correct class
-  debuffs.sunder            = new debuff_t( this, "sunder", 5, from_seconds( 15.0 ) ); // TODO: move to player_t extension of correct class
+  debuffs.sunder            = new debuff_t( this, "sunder:1", 5, from_seconds( 15.0 ) ); // TODO: move to player_t extension of correct class
   debuffs.sunder_2            = new debuff_t( this, "sunder:2", 5, from_seconds( 15.0 ) ); // TODO: move to player_t extension of correct class
   debuffs.sunder_3            = new debuff_t( this, "sunder:3", 5, from_seconds( 15.0 ) ); // TODO: move to player_t extension of correct class
   debuffs.sunder_4            = new debuff_t( this, "sunder:4", 5, from_seconds( 15.0 ) ); // TODO: move to player_t extension of correct class
   debuffs.sunder_5            = new debuff_t( this, "sunder:5", 5, from_seconds( 15.0 ) ); // TODO: move to player_t extension of correct class
-  debuffs.heat_signature    = new debuff_t( this, "heat_signature", 5, from_seconds( 15.0 ) ); // TODO: move to player_t extension of correct class
+  debuffs.heat_signature    = new debuff_t( this, "heat_signature:1", 5, from_seconds( 15.0 ) ); // TODO: move to player_t extension of correct class
   debuffs.heat_signature_2    = new debuff_t( this, "heat_signature:2", 5, from_seconds( 15.0 ) ); // TODO: move to player_t extension of correct class
   debuffs.heat_signature_3    = new debuff_t( this, "heat_signature:3", 5, from_seconds( 15.0 ) ); // TODO: move to player_t extension of correct class
   debuffs.heat_signature_4    = new debuff_t( this, "heat_signature:4", 5, from_seconds( 15.0 ) ); // TODO: move to player_t extension of correct class
