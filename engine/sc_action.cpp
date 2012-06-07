@@ -876,7 +876,7 @@ void action_t::impact( player_t* t, result_type impact_result, double travel_dmg
   target = t;
 
   // hit check each tick of the channeled weapon ability, otherwise a single hit check up front
-  if ( td.weapon || result_is_hit( impact_result ) )
+  if ( td.weapon && channeled || result_is_hit( impact_result ) )
   {
     if ( num_ticks > 0 )
     {
@@ -908,6 +908,14 @@ void action_t::impact( player_t* t, result_type impact_result, double travel_dmg
         //if ( school == SCHOOL_BLEED ) target -> debuffs.bleeding -> increment();
 
         dot -> schedule_tick();
+
+        if ( sim -> log && ! result_is_hit( impact_result ) )
+        {
+          log_t::output( sim, "%s %s ticks (%d of %d) %s (miss)",
+                         dot -> action -> player -> name(), dot -> action -> name(),
+                         dot -> current_tick, dot -> num_ticks,
+                         dot -> action -> target -> name() );
+        }
       }
       dot -> recalculate_ready();
 
