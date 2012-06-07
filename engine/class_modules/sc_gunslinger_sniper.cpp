@@ -375,9 +375,8 @@ struct cover_pulse_t : public action_t
     parse_options( options_str );
 
     cooldown -> duration = from_seconds( 30 - 2.5 * p -> talents.hold_your_ground -> rank() );
-    // TODO find out if this triggers GCD, and if it can be used off GCD
-    //use_off_gcd = true;
-    //trigger_gcd = timespan_t::zero();
+    use_off_gcd = true;
+    trigger_gcd = timespan_t::zero();
   }
 
   void execute()
@@ -496,12 +495,14 @@ struct emp_discharge_t : public tech_attack_t
 
     parse_options( options_str );
 
-    base_cost                    = 0;
-    cooldown -> duration         = from_seconds( 60 );
-    range                        = 60.0;
-    dd.standardhealthpercentmin  = 0.07;
-    dd.standardhealthpercentmax  = 0.13;
-    dd.power_mod                 = 1;
+    base_cost                   = 0;
+    cooldown -> duration        = from_seconds( 60 );
+    range                       = 60.0;
+    dd.standardhealthpercentmin = 0.07;
+    dd.standardhealthpercentmax = 0.13;
+    dd.power_mod                = 1;
+    use_off_gcd                 = true;
+    trigger_gcd                 = timespan_t::zero();
   }
 
   virtual bool ready()
@@ -597,7 +598,7 @@ struct laze_target_t : public action_t
 
     cooldown -> duration = from_seconds( 60 );
     // TODO find out if this triggers GCD, and if it can be used off GCD
-    //use_off_gcd = true;
+    use_off_gcd = true;
     trigger_gcd = timespan_t::zero();
   }
 
@@ -686,9 +687,8 @@ struct rapid_fire_t : public action_t
     parse_options( options_str );
 
     cooldown -> duration = from_seconds( 90 );
-    // TODO find out if this triggers GCD, and if it can be used off GCD
-    //use_off_gcd = true;
-    //trigger_gcd = timespan_t::zero();
+    use_off_gcd = true;
+    trigger_gcd = timespan_t::zero();
   }
 
   void execute()
@@ -969,9 +969,8 @@ struct target_acquired_t : public action_t
     parse_options( options_str );
 
     cooldown -> duration = from_seconds( 120 );
-    // TODO find out if this triggers GCD, and if it can be used off GCD
-    //use_off_gcd = true;
-    //trigger_gcd = timespan_t::zero();
+    use_off_gcd = true;
+    trigger_gcd = timespan_t::zero();
   }
 
   void execute()

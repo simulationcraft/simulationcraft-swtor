@@ -503,6 +503,8 @@ take_cover_t::take_cover_t( class_t* p, const std::string& n, const std::string&
 {
   parse_options( options_str );
 
+
+  use_off_gcd = true;
   trigger_gcd = timespan_t::zero();
 }
 
