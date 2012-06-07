@@ -23,6 +23,7 @@ public:
 
   buff_t* debuff_cluster_bombs;
   buff_t* debuff_electrified_railgun;
+  buff_t* debuff_shatter_shot;
   dot_t dot_electrified_railgun;
   dot_t dot_interrogation_probe;
   dot_t dot_plasma_probe;
@@ -157,6 +158,7 @@ public:
     std::string series_of_shots;
     std::string takedown;
     std::string target_acquired;
+    std::string shatter_shot;
 
     // buffs
     std::string cluster_bombs;
@@ -219,19 +221,24 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
 // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
    debuff_cluster_bombs   = new buff_t ( this, source.abilities.cluster_bombs, 2 + source.talents.imperial_methodology -> rank(), from_seconds ( 0 ), from_seconds( 1.5 ), 100, false, true /*reverse*/ );
    debuff_electrified_railgun   = new buff_t ( this, source.abilities.electrified_railgun, 4, from_seconds ( 5 ), from_seconds( 0 ), 1 * source.talents.electrified_railgun -> rank() );
+   debuff_shatter_shot   = new buff_t ( this, source.abilities.shatter_shot, 1, from_seconds ( 45 ) );
 
   dot_electrified_railgun = dot_t ( source.abilities.electrified_railgun, &source );
   dot_interrogation_probe = dot_t ( source.abilities.interrogation_probe, &source );
   dot_plasma_probe        = dot_t ( source.abilities.plasma_probe       , &source );
   dot_series_of_shots     = dot_t ( source.abilities.series_of_shots    , &source );
 
-  add( dot_electrified_railgun );
-  add( dot_interrogation_probe );
-  add( dot_plasma_probe        );
-  add( dot_series_of_shots     );
+  add( *debuff_cluster_bombs       );
+  add( *debuff_electrified_railgun );
+  add( *debuff_shatter_shot        );
+  debuff_shatter_shot -> __test = 6;
+
+  add( dot_electrified_railgun     );
+  add( dot_interrogation_probe     );
+  add( dot_plasma_probe            );
+  add( dot_series_of_shots         );
 
 }
-
 
 struct action_t : public agent_smug::action_t
 {
@@ -983,6 +990,38 @@ struct target_acquired_t : public action_t
   }
 };
 
+// Shatter Shot | Flourish Shot =============================================
+struct shatter_shot_t : public range_attack_t
+{
+  typedef range_attack_t base_t;
+
+  shatter_shot_t( class_t* p, const std::string& n, const std::string& options_str) :
+    base_t( n, p )
+  {
+    // rank_level_list = { ... ,50 };
+
+    parse_options( options_str );
+
+    base_cost                    = 10;
+    cooldown -> duration         = from_seconds( 4.5 );
+    range                        = 30.0;
+    dd.standardhealthpercentmin  =
+      dd.standardhealthpercentmax  = 0.056;
+    dd.power_mod                 = 0.56;
+    weapon                       = &( player -> main_hand_weapon );
+    weapon_multiplier            = -0.62;
+  }
+
+  virtual void execute()
+  {
+    base_t::execute();
+    targetdata() -> debuff_shatter_shot -> trigger();
+    std::cout << "XXXshatter_shot_t execute test value: " << targetdata() -> debuff_shatter_shot -> __test << std::endl;
+    targetdata() -> debuff_shatter_shot -> __test = 4;
+    std::cout << "XXXshatter_shot_t execute test value: " << targetdata() -> debuff_shatter_shot -> __test << std::endl;
+  }
+};
+
 // ==========================================================================
 // Gunslinger / Sniper Utility
 // ==========================================================================
@@ -1087,6 +1126,7 @@ struct cluster_bombs_callback_t : public action_callback_t
   if ( name == abilities.series_of_shots       ) return new series_of_shots_t       ( this, name, options_str ) ;
   if ( name == abilities.takedown              ) return new takedown_t              ( this, name, options_str ) ;
   if ( name == abilities.target_acquired       ) return new target_acquired_t       ( this, name, options_str ) ;
+  if ( name == abilities.shatter_shot          ) return new shatter_shot_t          ( this, name, options_str ) ;
 
   // extended
   if ( name == abilities.corrosive_grenade     ) return new corrosive_grenade_t     ( this, name, options_str ) ;
@@ -1120,6 +1160,7 @@ void class_t::init_abilities()
   abilities.series_of_shots      = sn ? "series_of_shots"      : "speed_shot"           ;
   abilities.takedown             = sn ? "takedown"             : "quickdraw"            ;
   abilities.target_acquired      = sn ? "target_acquired"      : "illegal_mods"         ;
+  abilities.shatter_shot         = sn ? "shatter_shot"         : "flourish_shot"        ;
 
   // buffs
   abilities.energy_overrides     = sn ? "energy_overrides"     : "seize_the_moment"     ;
@@ -1297,6 +1338,8 @@ void class_t::init_actions()
       "/snapshot_stats";
 
     action_list_str += sl + abilities.take_cover + ",if=buff." + abilities.cover + ".down";
+    // strictly we would only do this if there weren't already 5 armor debuffs on...
+    action_list_str += sl + abilities.shatter_shot + ",if=buff.shatter_shot.up";
     action_list_str += "/use_relics/power_potion";
     // guessing priority and optimal energy
     if ( talents.plasma_probe -> rank() )
