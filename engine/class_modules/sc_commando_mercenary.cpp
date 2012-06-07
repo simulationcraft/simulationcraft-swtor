@@ -214,12 +214,12 @@ struct class_t : public bount_troop::class_t
 };
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
-  bount_troop::targetdata_t ( source                , target  ), 
-  dot_rapid_shots           ( "rapid_shots"         , &source ), 
-  dot_rapid_shots_offhand   ( "rapid_shots_offhand" , &source ), 
-  dot_unload                ( "unload"              , &source ), 
-  dot_unload_offhand        ( "unload_offhand"      , &source ), 
-  dot_vent_heat             ( "vent_heat"           , &source ), 
+  bount_troop::targetdata_t ( source                , target  ),
+  dot_rapid_shots           ( "rapid_shots"         , &source ),
+  dot_rapid_shots_offhand   ( "rapid_shots_offhand" , &source ),
+  dot_unload                ( "unload"              , &source ),
+  dot_unload_offhand        ( "unload_offhand"      , &source ),
+  dot_vent_heat             ( "vent_heat"           , &source ),
   debuff_heat_signature( new buff_t( this, "heat_signature", 5, from_seconds( 15 ) ) )
 {
   add ( dot_rapid_shots         );

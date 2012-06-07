@@ -2618,8 +2618,20 @@ public:
     debuff_t* flying;
     debuff_t* invulnerable;
     debuff_t* shatter_shot;
+    debuff_t* shatter_shot_2;
+    debuff_t* shatter_shot_3;
+    debuff_t* shatter_shot_4;
+    debuff_t* shatter_shot_5;
     debuff_t* sunder;
+    debuff_t* sunder_2;
+    debuff_t* sunder_3;
+    debuff_t* sunder_4;
+    debuff_t* sunder_5;
     debuff_t* heat_signature;
+    debuff_t* heat_signature_2;
+    debuff_t* heat_signature_3;
+    debuff_t* heat_signature_4;
+    debuff_t* heat_signature_5;
     debuff_t* vulnerable;
 
     bool snared();

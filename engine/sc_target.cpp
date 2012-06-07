@@ -579,10 +579,36 @@ void player_t::enemy_combat_begin( sim_t* sim )
   for ( player_t* p = sim -> target_list; p; p = p -> next )
   {
       if ( sim -> overrides.shatter_shot )
-        p -> debuffs.shatter_shot -> override(); // move to correct class
+        p -> debuffs.shatter_shot -> override(1, -1); // move to correct class
+      if ( sim -> overrides.shatter_shot >= 2 )
+        p -> debuffs.shatter_shot_2 -> override(1, -1); // move to correct class
+      if ( sim -> overrides.shatter_shot >= 3 )
+        p -> debuffs.shatter_shot_3 -> override(1, -1); // move to correct class
+      if ( sim -> overrides.shatter_shot >= 4 )
+        p -> debuffs.shatter_shot_4 -> override(1, -1); // move to correct class
+      if ( sim -> overrides.shatter_shot >= 5 )
+        p -> debuffs.shatter_shot_5 -> override(1, -1); // move to correct class
+
       if ( sim -> overrides.sunder )
-        p -> debuffs.sunder -> override( 5, -1); // move to correct class
+        p -> debuffs.sunder -> override(5, -1); // move to correct class
+      if ( sim -> overrides.sunder >= 2 )
+        p -> debuffs.sunder_2 -> override(5, -1); // move to correct class
+      if ( sim -> overrides.sunder >= 3 )
+        p -> debuffs.sunder_3 -> override(5, -1); // move to correct class
+      if ( sim -> overrides.sunder >= 4 )
+        p -> debuffs.sunder_4 -> override(5, -1); // move to correct class
+      if ( sim -> overrides.sunder >= 5 )
+        p -> debuffs.sunder_5 -> override(5, -1); // move to correct class
+
       if ( sim -> overrides.heat_signature )
+        p -> debuffs.heat_signature -> override(5, -1); // move to correct class
+      if ( sim -> overrides.heat_signature >= 2 )
+        p -> debuffs.heat_signature_2 -> override(5, -1); // move to correct class
+      if ( sim -> overrides.heat_signature >= 3 )
+        p -> debuffs.heat_signature_3 -> override(5, -1); // move to correct class
+      if ( sim -> overrides.heat_signature >= 4 )
+        p -> debuffs.heat_signature_4 -> override(5, -1); // move to correct class
+      if ( sim -> overrides.heat_signature >= 5 )
         p -> debuffs.heat_signature -> override(5, -1); // move to correct class
   }
 }

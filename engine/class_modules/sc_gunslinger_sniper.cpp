@@ -757,7 +757,8 @@ struct series_of_shots_t : public tech_attack_t
   electrified_railgun_t* electrified;
 
   series_of_shots_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    base_t( n, p, SCHOOL_ENERGY )
+    base_t( n, p, SCHOOL_ENERGY ),
+    electrified( 0 )
   {
     // rank_level_list = { ... , 50 };
 
