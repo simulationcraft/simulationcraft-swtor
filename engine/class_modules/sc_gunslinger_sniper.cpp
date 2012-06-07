@@ -209,6 +209,7 @@ public:
   void      regen( timespan_t periodicity );
   int       talented_energy() const;
   double    alacrity() const;
+  double    armor_penetration() const;
 
   void      _trigger_reactive_shot();
 };
@@ -789,15 +790,6 @@ struct series_of_shots_t : public tech_attack_t
     }
   }
 
-  virtual timespan_t execute_time() const
-  {
-
-    if ( p() -> buffs.rapid_fire -> check() )
-      return timespan_t::zero();
-
-    return base_t::execute_time();
-  }
-
   virtual void tick( dot_t* d )
   {
     base_t::tick( d );
@@ -815,7 +807,10 @@ struct series_of_shots_t : public tech_attack_t
 
     buff_t* rapid_fire = p() -> buffs.rapid_fire;
     if ( rapid_fire -> up() )
+    {
       rapid_fire -> expire();
+      cooldown -> reset();
+    }
   }
 
   // TODO talent: electrified raligun has 1/3 2/3 3/3 chance on damage to
@@ -1363,13 +1358,15 @@ void class_t::init_actions()
 // class_t::tech_accuracy_chance ================================
 double class_t::tech_accuracy_chance() const
 {
-  return base_t::tech_accuracy_chance() + _tech_range_accuracy;
+  return base_t::tech_accuracy_chance() + _tech_range_accuracy
+    + ( (sim -> ptr && buffs.target_acquired -> up()) ? 0.3 : 0 );
 }
 
 // class_t::range_accuracy_chance ===============================
 double class_t::range_accuracy_chance() const
 {
-  return base_t::range_accuracy_chance() + _tech_range_accuracy;
+  return base_t::range_accuracy_chance() + _tech_range_accuracy
+    + ( (sim -> ptr && buffs.target_acquired -> up()) ? 0.3 : 0 );
 }
 
 // class_t::talented_energy =====================================
@@ -1409,9 +1406,22 @@ double class_t::alacrity() const
 {
   // TODO confirm how these 10% and 20% work/stack
   // are they a flat 20%, or maybe 20% increase to alacrity rating?
-  return base_t::alacrity() - ( buffs.sniper_volley -> up() ? 0.1 : 0 ) - ( buffs.target_acquired -> up() ? 0.2 : 0 );
+  return base_t::alacrity() - ( buffs.sniper_volley -> up() ? 0.1 : 0 ) -
+    ( sim -> ptr                   ? 0   :
+     buffs.target_acquired -> up() ? 0.2 : 0 );
 }
 
+// class_t::armor_penetration =================================
+
+double class_t::armor_penetration() const
+{
+  double arpen = base_t::armor_penetration();
+
+  if ( sim -> ptr && buffs.target_acquired -> up() )
+    arpen *= ( 1 - 0.15 );
+
+  return arpen;
+}
 
 // class_t::primary_role ========================================
 role_type class_t::primary_role() const
