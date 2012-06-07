@@ -178,7 +178,12 @@ void dot_t::schedule_tick()
     if ( action -> tick_zero )
     {
       time_to_tick = timespan_t::zero();
-      action -> tick( this );
+
+      // channeled weapon abilities need a hit check each tick
+      if ( action -> result_is_hit() )
+      {
+        action -> tick( this );
+      }
     }
   }
 
