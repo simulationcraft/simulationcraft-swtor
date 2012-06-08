@@ -27,12 +27,12 @@ static OptionEntry* getBuffOptions()
 {
   static OptionEntry options[] =
   {
-    { "Toggle All Buffs", "",                         "Toggle all buffs on/off"                           },
-    { "Crit",             "override.coordination",    "+5% Crit"                                          },
-    { "Stats",            "override.force_valor",     "+5% Stat Buff ( Str, Aim, Cunning, Willpower )"    },
-    { "Endurance",        "override.fortification_hunters_boon","+5% Endurance"                                    },
-    { "Damage Bonus",     "override.unnatural_might", "+5% Damage Bonus"                                  },
-    { NULL, NULL, NULL }
+     { "Toggle All Buffs" , ""                                    , "Toggle all buffs on/off"                      },
+     { "Crit"             , "override.coordination"               , "+5% Crit"                                     },
+     { "Stats"            , "override.force_valor"                , "+5% Stat Buff (Str, Aim, Cunning, Willpower)" },
+     { "Endurance"        , "override.fortification_hunters_boon" , "+5% Endurance"                                },
+     { "Damage Bonus"     , "override.unnatural_might"            , "+5% Damage Bonus"                             },
+     { NULL, NULL, NULL }
   };
   return options;
 }
@@ -59,10 +59,10 @@ static OptionEntry* getDebuffOptions()
 {
   static OptionEntry options[] =
   {
-    { "Toggle All Debuffs",     "",                        "Toggle all debuffs on/off"     },
-    { "Armor Reduction SH",     "override.shatter_shot",   "-20% Armor Shatter Shot"       },
-    { "Armor Reduction SU",     "override.sunder",         "-20% Armor Sundering Strike"   },
-    { "Armor Reduction HS",     "override.heat_signature", "-20% Armor Heat Signature"     },
+     { "Toggle All Debuffs"          , ""                        , "Toggle all debuffs on/off"    },
+     { "Shatter Shot"                , "override.shatter_shot"   , "-20% Armor Shatter Shot"      },
+     { "Sundering Assault(x5stacks)" , "override.sunder"         , "-20% Armor Sundering Assault" },
+     { "Heat Signature(x5stacks)"    , "override.heat_signature" , "-20% Armor Heat Signature"    },
     { NULL, NULL, NULL }
   };
   return options;
@@ -288,13 +288,16 @@ QString SimulationCraftWindow::encodeOptions()
        << ( buttons.at( i ) -> isChecked() ? '1' : '0' );
   }
 
-  buttons = debuffsButtonGroup->buttons();
+//  buttons = debuffsButtonGroup->buttons();
   OptionEntry* debuffs = getDebuffOptions();
-  for ( int i=1; debuffs[ i ].label; i++ )
-  {
-    ss << " debuff:" << debuffs[ i ].option << '='
-       << ( buttons.at( i ) -> isChecked() ? '1' : '0' );
-  }
+  ss << " debuff:" << debuffs[ 1 ].option << '=' << shatterChoice -> currentText();
+  ss << " debuff:" << debuffs[ 2 ].option << '=' << sunderChoice  -> currentText();
+  ss << " debuff:" << debuffs[ 3 ].option << '=' << heatsigChoice -> currentText();
+//  for ( int i=1; debuffs[ i ].label; i++ )
+//  {
+//    ss << " debuff:" << debuffs[ i ].option << '='
+//       << ( buttons.at( i ) -> isChecked() ? '1' : '0' );
+//  }
 
   buttons = scalingButtonGroup->buttons();
   OptionEntry* scaling = getScalingOptions();
@@ -607,6 +610,7 @@ void SimulationCraftWindow::createBuffsTab()
 
 void SimulationCraftWindow::createDebuffsTab()
 {
+  //QVBoxLayout* debuffsLayout = new QVBoxLayout();
   QVBoxLayout* debuffsLayout = new QVBoxLayout();
   debuffsButtonGroup = new QButtonGroup();
   debuffsButtonGroup->setExclusive( false );
@@ -620,8 +624,30 @@ void SimulationCraftWindow::createDebuffsTab()
     debuffsLayout->addWidget( checkBox );
   }
   debuffsLayout->addStretch( 1 );
+
+  // XXX changing debuffs to dropdowns
+
+  QFormLayout* debuffsLayout2 = new QFormLayout();
+  debuffsLayout2 -> setFieldGrowthPolicy( QFormLayout::FieldsStayAtSizeHint );
+
+  shatterChoice = createChoice( 6, "0", "1", "2", "3", "4", "5" );
+  shatterChoice -> setToolTip( debuffs[ 1 ].tooltip );
+  shatterChoice -> setCurrentIndex( 3 );
+  debuffsLayout2 -> addRow( debuffs[ 1 ].label, shatterChoice );
+
+  sunderChoice = createChoice( 6, "0", "1", "2", "3", "4", "5" );
+  sunderChoice -> setToolTip( debuffs[ 2 ].tooltip );
+  sunderChoice -> setCurrentIndex( 1 );
+  debuffsLayout2 -> addRow( debuffs[ 2 ].label, sunderChoice );
+
+  heatsigChoice = createChoice( 6, "0", "1", "2", "3", "4", "5" );
+  heatsigChoice -> setToolTip( debuffs[ 3 ].tooltip );
+  heatsigChoice -> setCurrentIndex( 1 );
+  debuffsLayout2 -> addRow( debuffs[ 3 ].label, heatsigChoice );
+
   QGroupBox* debuffsGroupBox = new QGroupBox();
-  debuffsGroupBox->setLayout( debuffsLayout );
+  //debuffsGroupBox->setLayout( debuffsLayout );
+  debuffsGroupBox->setLayout( debuffsLayout2 );
 
   optionsTab->addTab( debuffsGroupBox, "Debuffs" );
 }
@@ -1326,15 +1352,19 @@ QString SimulationCraftWindow::mergeOptions()
     options += buttons.at( i )->isChecked() ? "1" : "0";
     options += "\n";
   }
-  buttons = debuffsButtonGroup->buttons();
+//  buttons = debuffsButtonGroup->buttons();
   OptionEntry* debuffs = getDebuffOptions();
-  for ( int i=1; debuffs[ i ].label; i++ )
-  {
-    options += debuffs[ i ].option;
-    options += "=";
-    options += buttons.at( i )->isChecked() ? "1" : "0";
-    options += "\n";
-  }
+  options += debuffs[ 1 ].option; options += "=" + shatterChoice -> currentText() + "\n";
+  options += debuffs[ 2 ].option; options += "=" + sunderChoice  -> currentText() + "\n";
+  options += debuffs[ 3 ].option; options += "=" + heatsigChoice -> currentText() + "\n";
+//  for ( int i=1; debuffs[ i ].label; i++ )
+//  {
+//    options += debuffs[ i ].option;
+//    options += "=";
+//    options += buttons.at( i )->isChecked() ? "1" : "0";
+//    options += "\n";
+//  }
+
   buttons = scalingButtonGroup->buttons();
   OptionEntry* scaling = getScalingOptions();
   for ( int i=2; scaling[ i ].label; i++ )
