@@ -40,6 +40,7 @@ DEPENDPATH += engine
 HEADERS += engine/simulationcraft.hpp
 HEADERS += engine/class_modules/agent_smug.hpp
 HEADERS += engine/class_modules/cons_inq.hpp
+HEADERS += engine/class_modules/bount_troop.hpp
 HEADERS += engine/utf8.h
 HEADERS += engine/utf8/core.h
 HEADERS += engine/utf8/checked.h
@@ -47,8 +48,7 @@ HEADERS += engine/utf8/unchecked.h
 HEADERS += qt/sc_autoupdate.h
 HEADERS += qt/simulationcraftqt.hpp
 
-SOURCES += engine/sc_action.cpp \
-    engine/class_modules/agent_smug.cpp
+SOURCES += engine/sc_action.cpp
 SOURCES += engine/sc_buff.cpp
 SOURCES += engine/sc_chart.cpp
 SOURCES += engine/sc_consumable.cpp
@@ -91,6 +91,7 @@ SOURCES += engine/sc_unique_gear.cpp
 SOURCES += engine/sc_util.cpp
 SOURCES += engine/sc_weapon.cpp
 SOURCES += engine/sc_xml.cpp
+SOURCES += engine/class_modules/sc_agent_smug.cpp
 SOURCES += engine/class_modules/sc_commando_mercenary.cpp
 SOURCES += engine/class_modules/sc_gunslinger_sniper.cpp
 SOURCES += engine/class_modules/sc_juggernaut_guardian.cpp
