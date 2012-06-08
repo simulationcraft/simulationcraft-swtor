@@ -15,7 +15,6 @@ namespace { // ANONYMOUS ====================================================
 namespace gunslinger_sniper { // ============================================
 
 class class_t;
-buff_t* _shatter_shot_workaround;
 
 class targetdata_t : public agent_smug::targetdata_t
 {
@@ -34,6 +33,9 @@ public:
 class class_t : public agent_smug::class_t
 {
 public:
+
+  buff_t* _shatter_shot_workaround;
+
   typedef agent_smug::class_t base_t;
 
   // Buffs
@@ -233,7 +235,7 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   add( *debuff_cluster_bombs       );
   add( *debuff_electrified_railgun );
   add( *debuff_shatter_shot        );
-  _shatter_shot_workaround = debuff_shatter_shot;
+  source._shatter_shot_workaround = debuff_shatter_shot;
 
   add( dot_electrified_railgun     );
   add( dot_interrogation_probe     );
@@ -1014,7 +1016,8 @@ struct shatter_shot_t : public range_attack_t
     // XXX TODO FIX this is bugged but shouldn't be
     // branch sniper_shattershot created to work out why, with debugging statements
     //buff_t* shatter = targetdata() -> debuff_shatter_shot;
-    buff_t* shatter = _shatter_shot_workaround;
+    assert( p() -> _shatter_shot_workaround );
+    buff_t* shatter = p() -> _shatter_shot_workaround;
     shatter -> trigger();
   }
 };
