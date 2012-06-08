@@ -1212,16 +1212,18 @@ struct maul_t : public attack_t
   }
 };
 
+#if 1
+typedef cons_inq::saber_strike_t<attack_t> saber_strike_t;
+#else
 // Saber Strike ==================================
 
 struct saber_strike_t : public attack_t
 {
-
   saber_strike_t* second_strike;
   saber_strike_t* third_strike;
 
   saber_strike_t( class_t* p, const std::string& options_str, bool is_consequent_strike = false ) :
-      attack_t( "saber_strike", p ), second_strike( 0 ), third_strike( 0 )
+    attack_t( "saber_strike", p ), second_strike( 0 ), third_strike( 0 )
   {
     parse_options( options_str );
 
@@ -1253,21 +1255,20 @@ struct saber_strike_t : public attack_t
   {
     attack_t::execute();
 
-    class_t* p = cast();
-
-    if ( player->set_bonus.rakata_stalkers->two_pc() )
-      p->resource_gain( RESOURCE_FORCE, 1, p->gains.rakata_stalker_2pc );
-
     if ( second_strike )
     {
-      second_strike->schedule_execute();
+      second_strike -> schedule_execute();
+      assert( third_strike );
+      third_strike -> schedule_execute();
     }
-    if ( third_strike )
-    {
-      third_strike->schedule_execute();
-    }
+
+    class_t& p = *cast();
+
+    if ( p.set_bonus.rakata_stalkers -> two_pc() )
+      p.resource_gain( RESOURCE_FORCE, 1, p.gains.rakata_stalker_2pc );
   }
 };
+#endif
 
 // Thrash | Double Strike ==================================
 
