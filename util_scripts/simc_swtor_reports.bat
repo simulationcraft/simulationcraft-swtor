@@ -5,16 +5,21 @@ set iterations=100000
 set calculate_scale_factors=1
 set threads=4
 set center_scale_delta=1
-set statistics_level=3
+set statistics_level=1
 :: set ptr=0
 
 call :runsim Sage_Sorcerer_Raid
 call :runsim Sage_Sorcerer_Raid -HelterSkelter "fight_style=HelterSkelter"
 call :runsim Sage_Sorcerer_Raid -HeavyMovement "fight_style=HeavyMovement"
 call :runsim Assassin_Raid
-call :runsim Mercenary_Raid
 REM call :runsim Assassin_Raid -HelterSkelter "fight_style=HelterSkelter"
 REM call :runsim Assassin_Raid -HeavyMovement "fight_style=HeavyMovement"
+call :runsim Mercenary_Raid
+REM call :runsim Mercenary_Raid -HelterSkelter "fight_style=HelterSkelter"
+REM call :runsim Mercenary_Raid -HeavyMovement "fight_style=HeavyMovement"
+call :runsim Gunslinger_Sniper_Raid
+REM call :runsim Gunslinger_Sniper -HelterSkelter "fight_style=HelterSkelter"
+REM call :runsim Gunslinger_Sniper -HeavyMovement "fight_style=HeavyMovement"
 
 goto :eof
 
