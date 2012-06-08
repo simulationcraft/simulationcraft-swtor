@@ -15,10 +15,14 @@ class class_t : public player_t
 public:
   static constexpr double base_regen_per_second = 8;
 
-  gain_t* gains_force_regen;
+  struct gains_t
+  {
+    gain_t* force_regen;
+    gain_t* rakata_stalker_2pc;
+  } gains;
 
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
-    player_t( sim, pt, name, rt ), gains_force_regen()
+    player_t( sim, pt, name, rt ), gains()
   {
     primary_attribute   = ATTR_WILLPOWER;
     secondary_attribute = ATTR_STRENGTH;
@@ -39,7 +43,9 @@ public:
   virtual void init_gains()
   {
     player_t::init_gains();
-    gains_force_regen = get_gain( "force_regen" );
+
+    gains.force_regen = get_gain( "force_regen" );
+    gains.rakata_stalker_2pc = get_gain( "rakata_stalker_2pc" );
   }
 
   virtual resource_type primary_resource() const
@@ -50,7 +56,7 @@ public:
 
   virtual void regen( timespan_t periodicity )
   {
-    resource_gain( RESOURCE_FORCE, base_regen_per_second * to_seconds( periodicity ), gains_force_regen );
+    resource_gain( RESOURCE_FORCE, base_regen_per_second * to_seconds( periodicity ), gains.force_regen );
     player_t::regen( periodicity );
   }
 };
@@ -78,6 +84,65 @@ public:
 
     add( dot_sever_force );
     alias( dot_sever_force, "creeping_terror" );
+  }
+};
+
+// Saber Strike ==================================
+
+template <class Base>
+class saber_strike_t : public Base
+{
+  saber_strike_t* second_strike;
+  saber_strike_t* third_strike;
+
+public:
+  typedef Base base_t;
+  typedef typename std::remove_pointer<decltype( static_cast<base_t*>( 0 ) -> cast() )>::type class_t;
+
+  saber_strike_t( class_t* p, const std::string& options_str, bool is_consequent_strike = false ) :
+    base_t( "saber_strike", p ), second_strike(), third_strike()
+  {
+    base_t::parse_options( options_str );
+
+    base_t::base_cost = 0;
+    base_t::range = 4.0;
+
+    base_t::weapon = &( p -> main_hand_weapon );
+    base_t::weapon_multiplier = -.066;
+    base_t::dd.power_mod = .33;
+
+    // Is a Basic attack
+    base_t::base_accuracy -= 0.10;
+
+    if ( is_consequent_strike )
+    {
+      base_t::background = true;
+      base_t::dual = true;
+    }
+    else
+    {
+      second_strike = new saber_strike_t( p, options_str, true );
+      second_strike -> base_execute_time = from_seconds( 0.5 );
+      third_strike = new saber_strike_t( p, options_str, true );
+      third_strike -> base_execute_time = from_seconds( 1.0 );
+    }
+  }
+
+  void execute() // override
+  {
+    base_t::execute();
+
+    if ( second_strike )
+    {
+      second_strike -> schedule_execute();
+      assert( third_strike );
+      third_strike -> schedule_execute();
+    }
+
+    class_t& p = *base_t::cast();
+
+    if ( p.set_bonus.rakata_stalkers -> two_pc() )
+      p.resource_gain( RESOURCE_FORCE, 1, p.cons_inq::class_t::gains.rakata_stalker_2pc );
   }
 };
 
