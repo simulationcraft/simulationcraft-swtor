@@ -137,6 +137,9 @@ public:
   QListWidget* itemDbOrder;
   QButtonGroup* buffsButtonGroup;
   QButtonGroup* debuffsButtonGroup;
+  QComboBox* shatterChoice;
+  QComboBox* sunderChoice;
+  QComboBox* heatsigChoice;
   QButtonGroup* scalingButtonGroup;
   QComboBox* plotsPointsChoice;
   QComboBox* plotsStepChoice;
