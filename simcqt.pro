@@ -47,7 +47,8 @@ HEADERS += engine/utf8/unchecked.h
 HEADERS += qt/sc_autoupdate.h
 HEADERS += qt/simulationcraftqt.hpp
 
-SOURCES += engine/sc_action.cpp
+SOURCES += engine/sc_action.cpp \
+    engine/class_modules/agent_smug.cpp
 SOURCES += engine/sc_buff.cpp
 SOURCES += engine/sc_chart.cpp
 SOURCES += engine/sc_consumable.cpp

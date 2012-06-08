@@ -255,16 +255,37 @@ void dot_tick_event_t::execute()
   dot -> tick_event = nullptr;
   dot -> current_tick++;
 
+  bool do_tick = false;
   if ( dot -> action -> player -> skill < 1.0 &&
        dot -> action -> channeled &&
        dot -> current_tick == dot -> num_ticks )
   {
     if ( sim -> roll( dot -> action -> player -> skill ) )
     {
-      dot -> action -> tick( dot );
+      do_tick = true;
     }
   }
   else // No skill-check required
+  {
+    do_tick = true;
+  }
+
+  if ( do_tick && dot -> action -> td.weapon && dot -> action -> channeled )
+  {
+    // do a hit check each time chanelling a weapon skill
+    dot -> action -> calculate_result();
+    do_tick = dot -> action -> result_is_hit();
+
+    if ( ! do_tick && sim -> log )
+    {
+      log_t::output( sim, "%s %s ticks (%d of %d) %s (miss)",
+                     dot -> action -> player -> name(), dot -> action -> name(),
+                     dot -> current_tick, dot -> num_ticks,
+                     dot -> action -> target -> name() );
+    }
+  }
+
+  if ( do_tick )
   {
     dot -> action -> tick( dot );
   }

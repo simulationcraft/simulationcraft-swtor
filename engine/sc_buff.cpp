@@ -58,6 +58,7 @@ struct buff_delay_t : public buff_event_t
 
 // buff_t::buff_t ===========================================================
 
+int __test = 9;
 buff_t::buff_t( sim_t*             s,
                 const std::string& n,
                 int                ms,

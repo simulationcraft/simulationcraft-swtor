@@ -17,6 +17,7 @@ actions+=/cool_head,if=energy<=60
 actions+=/pugnacity,if=buff.upper_hand.stack>=2
 actions+=/flechette_round,if=!buff.flechette_round_coating.up&!cooldown.back_blast.remains
 actions+=/use_relics
+actions+=/power_potion
 actions+=/shoot_first
 actions+=/back_blast,if=energy>=65,if=buff.flechette_round_coating.up
 actions+=/blaster_whip,if=energy>=75&buff.upper_hand.stack<2

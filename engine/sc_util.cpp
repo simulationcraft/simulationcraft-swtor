@@ -556,6 +556,15 @@ talent_tree_type util_t::talent_tree( talent_tab_type tree, player_type ptype )
       default: break;
       }
     break;
+    case IA_SNIPER:
+      switch ( tree )
+      {
+      case IA_SNIPER_MARKSMANSHIP:    return TREE_MARKSMANSHIP;
+      case IA_SNIPER_ENGINEERING:     return TREE_ENGINEERING;
+      case IA_SNIPER_LETHALITY:       return TREE_LETHALITY;
+      default: break;
+      }
+    break;
     case BH_MERCENARY:
       switch ( tree )
       {
@@ -594,10 +603,14 @@ const char* util_t::talent_tree_string( talent_tree_type tree, bool armory_forma
     // SITH_ASSASSIN
     case TREE_DARKNESS:       return "darkness";
     case TREE_DECEPTION:      return "deception";
+    // IA
+    case TREE_LETHALITY:      return "lethality";
     // IA_OPERATIVE
     case TREE_MEDICINE:       return "medicine";
     case TREE_CONCEALMENT:    return "concealment";
-    case TREE_LETHALITY:      return "lethality";
+    // IA_SNIPER
+    case TREE_MARKSMANSHIP:   return "marksmanship";
+    case TREE_ENGINEERING:    return "engineering";
     // BH_MERCENARY
     case TREE_BODYGUARD:      return "bodyguard";
     case TREE_ARSENAL:        return "arsenal";
@@ -623,10 +636,14 @@ const char* util_t::talent_tree_string( talent_tree_type tree, bool armory_forma
     // SITH_ASSASSIN
     case TREE_DARKNESS:       return "Darkness";
     case TREE_DECEPTION:      return "Deception";
+    // IA
+    case TREE_LETHALITY:      return "Lethality";
     // IA_OPERATIVE
     case TREE_MEDICINE:       return "Medicine";
     case TREE_CONCEALMENT:    return "Concealment";
-    case TREE_LETHALITY:      return "Lethality";
+    // IA_SNIPER
+    case TREE_MARKSMANSHIP:   return "Marksmanship";
+    case TREE_ENGINEERING:    return "Engineering";
     // BH_MERCENARY
     case TREE_BODYGUARD:      return "Bodyguard";
     case TREE_ARSENAL:        return "Arsenal";

@@ -16,6 +16,7 @@ actions+=/stealth
 actions+=/adrenaline_probe,if=energy<=60
 actions+=/stim_boost,if=buff.tactical_advantage.stack>=2
 actions+=/use_relics
+actions+=/power_potion
 actions+=/hidden_strike
 actions+=/weakening_blast
 actions+=/shiv,if=energy>=75&buff.tactical_advantage.stack<2

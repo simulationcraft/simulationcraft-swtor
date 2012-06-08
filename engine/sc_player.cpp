@@ -599,6 +599,7 @@ void player_t::init()
   init_items();
   init_weapon( &main_hand_weapon );
   init_weapon( &off_hand_weapon );
+  init_abilities();
   init_talents();
   init_spells();
   init_race();
@@ -619,6 +620,7 @@ void player_t::init()
   init_actions();
   init_gains();
   init_procs();
+  init_cooldowns();
   init_uptimes();
   init_benefits();
   init_rng();
@@ -1197,6 +1199,11 @@ void player_t::init_actions()
   action_sequence.reserve( capacity );
 }
 
+// player_t::init_abilities ===================================================
+
+void player_t::init_abilities()
+{}
+
 // player_t::init_talents ===================================================
 
 void player_t::init_talents()
@@ -1241,9 +1248,21 @@ void player_t::init_buffs()
   debuffs.invulnerable      = new debuff_t( this, "invulnerable", -1 );
   debuffs.vulnerable        = new debuff_t( this, "vulnerable",   -1 );
 
-  debuffs.shatter_shot      = new debuff_t( this, "shatter_shot", 1, from_seconds( 45.0 ) ); // TODO: move to player_t extension of correct class
-  debuffs.sunder            = new debuff_t( this, "sunder", 5, from_seconds( 15.0 ) ); // TODO: move to player_t extension of correct class
-  debuffs.heat_signature    = new debuff_t( this, "heat_signature", 5, from_seconds( 15.0 ) ); // TODO: move to player_t extension of correct class
+  debuffs.shatter_shot      = new debuff_t( this, "shatter_shot:1", 1, from_seconds( 45.0 ) ); // TODO: move to player_t extension of correct class
+  debuffs.shatter_shot_2      = new debuff_t( this, "shatter_shot:2", 1, from_seconds( 45.0 ) ); // TODO: move to player_t extension of correct class
+  debuffs.shatter_shot_3      = new debuff_t( this, "shatter_shot:3", 1, from_seconds( 45.0 ) ); // TODO: move to player_t extension of correct class
+  debuffs.shatter_shot_4      = new debuff_t( this, "shatter_shot:4", 1, from_seconds( 45.0 ) ); // TODO: move to player_t extension of correct class
+  debuffs.shatter_shot_5      = new debuff_t( this, "shatter_shot:5", 1, from_seconds( 45.0 ) ); // TODO: move to player_t extension of correct class
+  debuffs.sunder            = new debuff_t( this, "sunder:1", 5, from_seconds( 15.0 ) ); // TODO: move to player_t extension of correct class
+  debuffs.sunder_2            = new debuff_t( this, "sunder:2", 5, from_seconds( 15.0 ) ); // TODO: move to player_t extension of correct class
+  debuffs.sunder_3            = new debuff_t( this, "sunder:3", 5, from_seconds( 15.0 ) ); // TODO: move to player_t extension of correct class
+  debuffs.sunder_4            = new debuff_t( this, "sunder:4", 5, from_seconds( 15.0 ) ); // TODO: move to player_t extension of correct class
+  debuffs.sunder_5            = new debuff_t( this, "sunder:5", 5, from_seconds( 15.0 ) ); // TODO: move to player_t extension of correct class
+  debuffs.heat_signature    = new debuff_t( this, "heat_signature:1", 5, from_seconds( 15.0 ) ); // TODO: move to player_t extension of correct class
+  debuffs.heat_signature_2    = new debuff_t( this, "heat_signature:2", 5, from_seconds( 15.0 ) ); // TODO: move to player_t extension of correct class
+  debuffs.heat_signature_3    = new debuff_t( this, "heat_signature:3", 5, from_seconds( 15.0 ) ); // TODO: move to player_t extension of correct class
+  debuffs.heat_signature_4    = new debuff_t( this, "heat_signature:4", 5, from_seconds( 15.0 ) ); // TODO: move to player_t extension of correct class
+  debuffs.heat_signature_5    = new debuff_t( this, "heat_signature:5", 5, from_seconds( 15.0 ) ); // TODO: move to player_t extension of correct class
   debuffs.flying            = new debuff_t( this, "flying",   -1 );
 }
 
@@ -1270,6 +1289,11 @@ void player_t::init_uptimes()
 // player_t::init_benefits ===================================================
 
 void player_t::init_benefits()
+{ }
+
+// player_t::init_cooldowns  =================================================
+
+void player_t::init_cooldowns()
 { }
 
 // player_t::init_rng =======================================================
@@ -1477,12 +1501,24 @@ double player_t::armor_penetration() const
 double player_t::armor_penetration_debuff() const
 {
   // assuming these are additive
-  double arpen = 1.0 - (
-    + 0.20 * debuffs.shatter_shot -> stack()
-    + 0.04 * debuffs.sunder -> stack()
-    + 0.04 * debuffs.heat_signature -> stack()
-  );
-  return arpen;
+  double arpen = 0;
+  // TODO: update these with republic names as needed
+  const std::string shatter_shot = "shatter_shot";
+  const std::string flourish_shot = "flourish_shot";
+  const std::string sunder = "sunder";
+  const std::string heat_signature = "heat_signature";
+  for ( buff_t* b = buff_list; b; b = b -> next )
+  {
+    if ( b -> name_str.compare( 0, shatter_shot.length(), shatter_shot ) == 0
+        || b -> name_str.compare( 0, flourish_shot.length(), flourish_shot ) == 0 )
+    {
+      arpen += 0.2 * b -> stack();
+    }
+    if ( b -> name_str.compare( 0, sunder.length(), sunder ) == 0
+        || b -> name_str.compare( 0, heat_signature.length(), heat_signature ) == 0 )
+      arpen += 0.04 * b -> stack();
+  }
+  return arpen >= 1 ? 0 : 1 - arpen;
 }
 
 // player_t::kinetic_damage_reduction =======================================

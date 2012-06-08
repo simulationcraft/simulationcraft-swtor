@@ -179,7 +179,6 @@ struct class_t : public bount_troop::class_t
         tree_type[ BH_MERCENARY_BODYGUARD   ] = TREE_BODYGUARD;
         tree_type[ BH_MERCENARY_ARSENAL     ] = TREE_ARSENAL;
         tree_type[ BH_MERCENARY_PYROTECH    ] = TREE_PYROTECH;
-        cooldowns.unload = get_cooldown( "unload" );
       }
       else if ( type == T_COMMANDO )
       {
@@ -205,6 +204,7 @@ struct class_t : public bount_troop::class_t
     virtual void      init_buffs();
     virtual void      init_gains();
     virtual void      init_procs();
+    virtual void      init_cooldowns();
     virtual void      init_rng();
     virtual void      init_actions();
     virtual role_type primary_role() const;
@@ -214,12 +214,12 @@ struct class_t : public bount_troop::class_t
 };
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
-  bount_troop::targetdata_t ( source                , target  ), 
-  dot_rapid_shots           ( "rapid_shots"         , &source ), 
-  dot_rapid_shots_offhand   ( "rapid_shots_offhand" , &source ), 
-  dot_unload                ( "unload"              , &source ), 
-  dot_unload_offhand        ( "unload_offhand"      , &source ), 
-  dot_vent_heat             ( "vent_heat"           , &source ), 
+  bount_troop::targetdata_t ( source                , target  ),
+  dot_rapid_shots           ( "rapid_shots"         , &source ),
+  dot_rapid_shots_offhand   ( "rapid_shots_offhand" , &source ),
+  dot_unload                ( "unload"              , &source ),
+  dot_unload_offhand        ( "unload_offhand"      , &source ),
+  dot_vent_heat             ( "vent_heat"           , &source ),
   debuff_heat_signature( new buff_t( this, "heat_signature", 5, from_seconds( 15 ) ) )
 {
   add ( dot_rapid_shots         );
@@ -607,7 +607,7 @@ struct rail_shot_t : public attack_t
   {
     double c = attack_t::cost();
     class_t* p = cast();
-    if ( p -> talents.upgraded_arsenal -> rank() && p -> buffs.high_velocity_gas_cylinder -> up() )
+    if ( p -> talents.upgraded_arsenal -> rank() && p -> buffs.high_velocity_gas_cylinder -> check() )
       c -= 8;
 
     return c;
@@ -621,6 +621,7 @@ struct rail_shot_t : public attack_t
 
   bool ignore_thermal_sensor_override()
   {
+    // XXX TODO i think this is only meant to be true if we have both  4pc and upgraded_arsenal and HVGS up
     return true;
   }
 };
@@ -849,23 +850,14 @@ struct vent_heat_t : public action_t
 
 double class_t::alacrity() const
 {
-  double sh = base_t::alacrity();
-
-  if ( buffs.critical_reaction -> up() )
-    sh -= 0.05;
-
-  return sh;
+  return buffs.critical_reaction -> up() ? base_t::alacrity() - 0.05 : base_t::alacrity();
 }
+
 // class_t::armor_penetration ================================================================
 
 double class_t::armor_penetration() const
 {
-  double arpen = base_t::armor_penetration();
-
-  if ( buffs.high_velocity_gas_cylinder -> up() )
-    arpen *= 0.65;
-
-  return arpen;
+  return buffs.high_velocity_gas_cylinder -> up() ? base_t::armor_penetration() * 0.65 : base_t::armor_penetration();
 }
 
 
@@ -1029,6 +1021,18 @@ void class_t::init_procs()
   const char* terminal_velocity = is_bh ? "Terminal Velocity" : "Penetrate Armor" ;
 
   procs.terminal_velocity = get_proc( terminal_velocity );
+}
+
+// class_t::init_cooldowns ================================================================
+
+void class_t::init_cooldowns()
+{
+  base_t::init_cooldowns();
+
+  bool is_bh = ( type == BH_MERCENARY );
+  const char* unload = is_bh ? "unload"    : "???" ;
+  cooldowns.unload = get_cooldown( unload );
+
 }
 
 // class_t::init_rng ======================================================================

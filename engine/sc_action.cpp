@@ -523,7 +523,7 @@ double action_t::total_power() const
 
 // action_t::calculate_weapon_damage ========================================
 
-double action_t::calculate_weapon_damage()
+double action_t::calculate_weapon_damage( weapon_t* weapon )
 {
   if ( ! weapon ) return 0;
 
@@ -537,24 +537,6 @@ double action_t::calculate_weapon_damage()
   {
     log_t::output( sim, "%s weapon damage for %s: dmg=%.3f bd=%.3f",
                    player -> name(), name(), dmg, weapon -> bonus_dmg );
-  }
-
-  return dmg;
-}
-double action_t::calculate_tick_weapon_damage()
-{
-  if ( ! td.weapon ) return 0;
-
-  double dmg = sim -> range( td.weapon -> min_dmg, td.weapon -> max_dmg ) + td.weapon -> bonus_dmg;
-
-  // OH penalty
-  if ( td.weapon -> slot == SLOT_OFF_HAND )
-    dmg *= 0.3; // FIXME: check this multiplier for SWTOR, Marauder talent will increase it.
-
-  if ( sim -> debug )
-  {
-    log_t::output( sim, "%s tick weapon damage for %s: dmg=%.3f bd=%.3f",
-                   player -> name(), name(), dmg, td.weapon -> bonus_dmg );
   }
 
   return dmg;
@@ -575,14 +557,11 @@ double action_t::calculate_tick_damage()
   dmg += total_power() * td.power_mod;
 
   double weapon_dmg = 0;
-  // XXX hack test for mercenaries unload
-  assert( ( td.weapon == nullptr ) == ( td.weapon_multiplier == std::numeric_limits<decltype( td.weapon_multiplier )>::lowest() ) );
   if ( td.weapon )
   {
     // x% weapon damage + Y
     // e.g. Obliterate, Shred, Backstab
-    // XXX hack temp
-    weapon_dmg = calculate_tick_weapon_damage() * ( 1 + td.weapon_multiplier );
+    weapon_dmg = calculate_weapon_damage( td.weapon ) * ( 1 + td.weapon_multiplier );
     dmg += weapon_dmg;
   }
 
@@ -629,7 +608,7 @@ double action_t::calculate_direct_damage( int chain_target )
   {
     // x% weapon damage + Y
     // e.g. Obliterate, Shred, Backstab
-    weapon_dmg = calculate_weapon_damage() * ( 1 + weapon_multiplier );
+    weapon_dmg = calculate_weapon_damage( weapon ) * ( 1 + weapon_multiplier );
     dmg += weapon_dmg;
   }
 
@@ -896,7 +875,8 @@ void action_t::impact( player_t* t, result_type impact_result, double travel_dmg
   player_t* orig_target = target;
   target = t;
 
-  if ( result_is_hit( impact_result ) )
+  // hit check each tick of the channeled weapon ability, otherwise a single hit check up front
+  if ( ( td.weapon && channeled ) || result_is_hit( impact_result ) )
   {
     if ( num_ticks > 0 )
     {
@@ -928,6 +908,14 @@ void action_t::impact( player_t* t, result_type impact_result, double travel_dmg
         //if ( school == SCHOOL_BLEED ) target -> debuffs.bleeding -> increment();
 
         dot -> schedule_tick();
+
+        if ( sim -> log && ! result_is_hit( impact_result ) )
+        {
+          log_t::output( sim, "%s %s ticks (%d of %d) %s (miss)",
+                         dot -> action -> player -> name(), dot -> action -> name(),
+                         dot -> current_tick, dot -> num_ticks,
+                         dot -> action -> target -> name() );
+        }
       }
       dot -> recalculate_ready();
 

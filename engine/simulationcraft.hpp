@@ -83,8 +83,8 @@
 #define SC_MAJOR_VERSION "120"
 #define SC_MINOR_VERSION "3"
 #define SWTOR_VERSION_LIVE "1.2.0"
-#define SWTOR_VERSION_PTR "1.2.0"
-#define SC_USE_PTR ( 0 )
+#define SWTOR_VERSION_PTR "1.3.0"
+#define SC_USE_PTR ( 1 )
 #define SC_BETA ( 0 )
 #define SC_EPSILON ( 0.000001 )
 #ifndef M_PI
@@ -400,6 +400,7 @@ enum talent_tree_type
   TREE_KINETIC_COMBAT, TREE_INFILTRATION,
   TREE_DARKNESS,       TREE_DECEPTION,
   TREE_MEDICINE,       TREE_CONCEALMENT,    TREE_LETHALITY,
+  TREE_MARKSMANSHIP,   TREE_ENGINEERING,
   TREE_BODYGUARD,      TREE_ARSENAL,        TREE_PYROTECH,
   TALENT_TREE_MAX
 };
@@ -415,8 +416,9 @@ enum talent_tab_type
   SITH_ASSASSIN_DARKNESS = 0,     SITH_ASSASSIN_DECEPTION,   SITH_ASSASSIN_MADNESS,
 
   IA_OPERATIVE_MEDICINE = 0,      IA_OPERATIVE_CONCEALMENT,  IA_OPERATIVE_LETHALITY,
+  IA_SNIPER_MARKSMANSHIP = 0,     IA_SNIPER_ENGINEERING,     IA_SNIPER_LETHALITY,
 
-  BH_MERCENARY_BODYGUARD = 0,     BH_MERCENARY_ARSENAL,      BH_MERCENARY_PYROTECH,
+  BH_MERCENARY_BODYGUARD = 0,     BH_MERCENARY_ARSENAL,      BH_MERCENARY_PYROTECH
 };
 
 enum weapon_type
@@ -1377,6 +1379,7 @@ struct buff_t
     actor_pair_t( targetdata_t* td );
   };
 
+  int __test;
   double current_value, react;
   timespan_t buff_duration, buff_cooldown;
   double default_chance;
@@ -2616,8 +2619,20 @@ public:
     debuff_t* flying;
     debuff_t* invulnerable;
     debuff_t* shatter_shot;
+    debuff_t* shatter_shot_2;
+    debuff_t* shatter_shot_3;
+    debuff_t* shatter_shot_4;
+    debuff_t* shatter_shot_5;
     debuff_t* sunder;
+    debuff_t* sunder_2;
+    debuff_t* sunder_3;
+    debuff_t* sunder_4;
+    debuff_t* sunder_5;
     debuff_t* heat_signature;
+    debuff_t* heat_signature_2;
+    debuff_t* heat_signature_3;
+    debuff_t* heat_signature_4;
+    debuff_t* heat_signature_5;
     debuff_t* vulnerable;
 
     bool snared();
@@ -2696,11 +2711,13 @@ public:
   virtual std::string init_use_racial_actions( const std::string& append = std::string() );
   virtual void init_actions();
   virtual void init_scaling();
+  virtual void init_abilities();
   virtual void init_talents();
   virtual void init_spells();
   virtual void init_buffs();
   virtual void init_gains();
   virtual void init_procs();
+  virtual void init_cooldowns();
   virtual void init_uptimes();
   virtual void init_benefits();
   virtual void init_rng();
@@ -3207,7 +3224,6 @@ struct action_t
     double player_multiplier;
     double target_multiplier;
     double power_mod;
-    // XXX adding in to implement Unload as a channeled dot
     double weapon_multiplier;
     weapon_t* weapon;
 
@@ -3297,8 +3313,7 @@ public:
 
   virtual double calculate_direct_damage( int chain_target = 0 );
   virtual double calculate_tick_damage();
-  virtual double calculate_weapon_damage();
-  virtual double calculate_tick_weapon_damage();
+  virtual double calculate_weapon_damage( weapon_t* weapon );
   virtual double armor() const;
   virtual void   consume_resource();
   virtual void   execute();
@@ -3470,6 +3485,13 @@ struct cooldown_t
     return diff;
   }
   const char* name() { return name_str.c_str(); }
+
+  // modify cooldown by +- x seconds
+  void reduce( timespan_t amount=timespan_t::zero() )
+  {
+    if ( ready > sim -> current_time )
+      ready = ready - amount;
+  }
 };
 
 // DoT ======================================================================
