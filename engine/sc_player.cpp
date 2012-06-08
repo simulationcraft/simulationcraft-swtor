@@ -1504,11 +1504,13 @@ double player_t::armor_penetration_debuff() const
   double arpen = 0;
   // TODO: update these with republic names as needed
   const std::string shatter_shot = "shatter_shot";
+  const std::string flourish_shot = "flourish_shot";
   const std::string sunder = "sunder";
   const std::string heat_signature = "heat_signature";
   for ( buff_t* b = buff_list; b; b = b -> next )
   {
-    if ( b -> name_str.compare( 0, shatter_shot.length(), shatter_shot ) == 0 )
+    if ( b -> name_str.compare( 0, shatter_shot.length(), shatter_shot ) == 0
+        || b -> name_str.compare( 0, flourish_shot.length(), flourish_shot ) == 0 )
     {
       arpen += 0.2 * b -> stack();
     }
@@ -4659,10 +4661,12 @@ expr_ptr player_t::create_expression( action_t* a,
   {
     if ( splits[ 0 ] == "buff" || splits[ 0 ] == "debuff" || splits[ 0 ] == "aura" )
     {
+      std::cout << "XXX sc_player buff. expression:" << splits[ 0 ] << "." << splits[ 1 ] << std::endl;
       buff_t* buff = get_targetdata( this ) -> get_buff( splits[ 1 ] );
       if ( ! buff ) buff = buff_t::find( this, splits[ 1 ] );
       if ( ! buff ) buff = buff_t::find( sim, splits[ 1 ] );
       if ( ! buff ) return 0;
+      std::cout << buff -> name() << " - " << buff -> source -> name() << std::endl;
       return buff -> create_expression( splits[ 2 ] );
     }
     else if ( splits[ 0 ] == "cooldown" )

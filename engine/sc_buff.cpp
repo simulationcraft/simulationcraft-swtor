@@ -58,6 +58,7 @@ struct buff_delay_t : public buff_event_t
 
 // buff_t::buff_t ===========================================================
 
+int __test = 9;
 buff_t::buff_t( sim_t*             s,
                 const std::string& n,
                 int                ms,
@@ -735,7 +736,7 @@ expr_ptr buff_t::create_expression( const std::string& type )
     return make_expr( "buff_" + type, [this]{ return check() <= 0; } );
 
   if ( type == "stack" )
-    return make_expr( "buff_" + type, [this]{ return check(); });
+    return make_expr( "buff_" + type, [this]{ std::cout << "XXXstack() expression test value:" << __test << std::endl; return check(); });
 
   if ( type == "value" )
     return make_expr( "buff_" + type, [this]{ return value(); });
