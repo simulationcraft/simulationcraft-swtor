@@ -4661,12 +4661,10 @@ expr_ptr player_t::create_expression( action_t* a,
   {
     if ( splits[ 0 ] == "buff" || splits[ 0 ] == "debuff" || splits[ 0 ] == "aura" )
     {
-      std::cout << "XXX sc_player buff. expression:" << splits[ 0 ] << "." << splits[ 1 ] << std::endl;
       buff_t* buff = get_targetdata( this ) -> get_buff( splits[ 1 ] );
       if ( ! buff ) buff = buff_t::find( this, splits[ 1 ] );
       if ( ! buff ) buff = buff_t::find( sim, splits[ 1 ] );
       if ( ! buff ) return 0;
-      std::cout << buff -> name() << " - " << buff -> source -> name() << std::endl;
       return buff -> create_expression( splits[ 2 ] );
     }
     else if ( splits[ 0 ] == "cooldown" )

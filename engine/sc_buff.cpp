@@ -736,7 +736,7 @@ expr_ptr buff_t::create_expression( const std::string& type )
     return make_expr( "buff_" + type, [this]{ return check() <= 0; } );
 
   if ( type == "stack" )
-    return make_expr( "buff_" + type, [this]{ std::cout << "XXXstack() expression test value:" << __test << std::endl; return check(); });
+    return make_expr( "buff_" + type, [this]{ return check(); });
 
   if ( type == "value" )
     return make_expr( "buff_" + type, [this]{ return value(); });

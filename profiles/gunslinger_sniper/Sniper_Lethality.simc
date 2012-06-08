@@ -13,6 +13,7 @@ actions=stim,type=exotech_skill
 actions+=/coordination
 actions+=/snapshot_stats
 actions+=/take_cover,if=buff.cover.down
+actions+=/shatter_shot,if=buff.shatter_shot.remains<1.5
 actions+=/use_relics
 actions+=/power_potion
 actions+=/adrenaline_probe,if=energy<=65

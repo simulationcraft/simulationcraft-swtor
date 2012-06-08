@@ -13,6 +13,7 @@ actions=stim,type=exotech_skill
 actions+=/lucky_shots
 actions+=/snapshot_stats
 actions+=/take_cover,if=buff.cover.down
+actions+=/flourish_shot,if=buff.flourish_shot.remains<1.5
 actions+=/use_relics
 actions+=/power_potion
 actions+=/incendiary_grenade,if=energy>=75

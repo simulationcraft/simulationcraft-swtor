@@ -15,7 +15,7 @@ namespace { // ANONYMOUS ====================================================
 namespace gunslinger_sniper { // ============================================
 
 class class_t;
-buff_t* _test;
+buff_t* _shatter_shot_workaround;
 
 class targetdata_t : public agent_smug::targetdata_t
 {
@@ -233,8 +233,7 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   add( *debuff_cluster_bombs       );
   add( *debuff_electrified_railgun );
   add( *debuff_shatter_shot        );
-  _test = debuff_shatter_shot;
-  debuff_shatter_shot -> __test = 6;
+  _shatter_shot_workaround = debuff_shatter_shot;
 
   add( dot_electrified_railgun     );
   add( dot_interrogation_probe     );
@@ -1012,12 +1011,11 @@ struct shatter_shot_t : public range_attack_t
   virtual void execute()
   {
     base_t::execute();
+    // XXX TODO FIX this is bugged but shouldn't be
+    // branch sniper_shattershot created to work out why, with debugging statements
     //buff_t* shatter = targetdata() -> debuff_shatter_shot;
-    buff_t* shatter = _test;
+    buff_t* shatter = _shatter_shot_workaround;
     shatter -> trigger();
-    shatter -> __test = 4;
-    std::cout << "XXXshatter_shot_t execute direct test value: " << shatter -> __test << std::endl;
-    std::cout << "XXXshatter_shot_t execute targetdata test value: " << targetdata() -> debuff_shatter_shot -> __test << std::endl;
   }
 };
 
@@ -1338,7 +1336,7 @@ void class_t::init_actions()
 
     action_list_str += sl + abilities.take_cover + ",if=buff." + abilities.cover + ".down";
     // strictly we would only do this if there weren't already 5 armor debuffs on...
-    action_list_str += sl + abilities.shatter_shot + ",if=!buff.shatter_shot.stack";
+    action_list_str += sl + abilities.shatter_shot + ",if=buff." + abilities.shatter_shot + ".remains<1.5";
     action_list_str += "/use_relics/power_potion";
     // guessing priority and optimal energy
     if ( talents.plasma_probe -> rank() )
