@@ -105,6 +105,10 @@ adrenaline_probe_t::adrenaline_probe_t( class_t* p, const std::string& n, const 
   base_tick_time = from_seconds( 1.5 );
 }
 
+int adrenaline_probe_t::energy_returned_initial() { return 34; }
+
+int adrenaline_probe_t::energy_returned_tick() { return 8; }
+
 // the combat log isn't in sync with the game here.
 // the combat log shows after 1.5 seconds a tick of 8 and 34, and then another tick of 8 1.5s later.
 // what happens in game is you instantly get 34, and then two ticks of 8.
@@ -114,7 +118,7 @@ void adrenaline_probe_t::execute()
   class_t* p = cast();
 
   p -> buffs.adrenaline_probe -> trigger();
-  p -> resource_gain( RESOURCE_ENERGY, 34, p -> gains.adrenaline_probe );
+  p -> resource_gain( RESOURCE_ENERGY, energy_returned_initial(), p -> gains.adrenaline_probe );
 }
 
 void adrenaline_probe_t::tick(dot_t* d)
@@ -122,7 +126,7 @@ void adrenaline_probe_t::tick(dot_t* d)
   base_t::tick(d);
   class_t* p = cast();
 
-  p -> resource_gain( RESOURCE_ENERGY, 8, p -> gains.adrenaline_probe );
+  p -> resource_gain( RESOURCE_ENERGY, energy_returned_tick(), p -> gains.adrenaline_probe );
 }
 
 // Coordination | Lucky Shots ===============================================
@@ -179,7 +183,7 @@ corrosive_dart_t::corrosive_dart_t( class_t* p, const std::string& n, const std:
   }
   else
   {
-    base_cost                   = 20;
+    base_cost                   = energy_cost();
     td.standardhealthpercentmin =
     td.standardhealthpercentmax = 0.04;
     td.power_mod                = 0.4;
@@ -189,6 +193,8 @@ corrosive_dart_t::corrosive_dart_t( class_t* p, const std::string& n, const std:
       corrosive_dart_weak = new corrosive_dart_t( p, n + "_weak", options_str, true );
   }
 }
+
+int corrosive_dart_t::energy_cost() { return 20; }
 
 void corrosive_dart_t::tick( dot_t* d )
 {
@@ -286,7 +292,7 @@ explosive_probe_t::explosive_probe_t( class_t* p, const std::string& n, const st
 
   parse_options( options_str );
 
-  base_cost                   = 20;
+  base_cost                   = energy_cost();
   range                       = 30.0;
   cooldown -> duration        = from_seconds( 30 );
   dd.standardhealthpercentmin = 0.23;
@@ -296,6 +302,8 @@ explosive_probe_t::explosive_probe_t( class_t* p, const std::string& n, const st
 // TODO: explosive probe "attaches" to the target and detonates on damage
 // (tooltip says damage. game data has text that says blaster damage)
 // this is not implemented yet.
+
+int explosive_probe_t::energy_cost() { return 20; }
 
 bool explosive_probe_t::ready()
 {
@@ -313,10 +321,12 @@ cull_t::cull_t( class_t* p, const std::string& n, const std::string& options_str
 
   parse_options( options_str );
 
-  base_cost                   = 25;
+  base_cost                   = energy_cost();
   range                       =  10.0;
   base_multiplier             += .03 * p -> talents.cut_down->rank();
 }
+
+int cull_t::energy_cost() { return 25; }
 
 void cull_t::init()
 {
@@ -379,13 +389,12 @@ fragmentation_grenade_t::fragmentation_grenade_t( class_t* p, const std::string&
 }
 
 // Orbital Strike | XS Freighter Flyby ======================================
-
 orbital_strike_t::orbital_strike_t( class_t* p, const std::string& n, const std::string& options_str) :
   base_t( n, p, SCHOOL_ELEMENTAL )
 {
   parse_options( options_str );
 
-  base_cost                   = 30;
+  base_cost                   = energy_cost();
   range                       = 30.0;
   cooldown -> duration        = from_seconds( 60 );
   td.standardhealthpercentmin =
@@ -397,6 +406,8 @@ orbital_strike_t::orbital_strike_t( class_t* p, const std::string& n, const std:
 
   aoe = 99; // TODO FIX: unlimited. "all targets in area"
 }
+
+int orbital_strike_t::energy_cost() { return 30; }
 
 // Overload Shot | Quick Shot ===============================================
 
@@ -496,7 +507,7 @@ snipe_t::snipe_t( class_t* p, const std::string& n, const std::string& options_s
 
   range = ( player -> type == IA_SNIPER || player -> type == S_GUNSLINGER ) ? 35 : 30.0;
 
-  base_cost                   = 20;
+  base_cost                   = energy_cost();
   base_execute_time           = from_seconds( 1.5 );
   dd.power_mod                = 1.85;
   dd.standardhealthpercentmin =
@@ -504,6 +515,8 @@ snipe_t::snipe_t( class_t* p, const std::string& n, const std::string& options_s
   weapon                      = &( player->main_hand_weapon );
   weapon_multiplier           = 0.23;
 }
+
+int snipe_t::energy_cost() { return 20; }
 
 bool snipe_t::ready()
 {
