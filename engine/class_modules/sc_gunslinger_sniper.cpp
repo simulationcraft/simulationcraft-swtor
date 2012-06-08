@@ -44,6 +44,7 @@ public:
     buff_t* followthrough;
     buff_t* laze_target;
     buff_t* rapid_fire;
+    buff_t* reactive_shot;
     buff_t* snap_shot;
     buff_t* sniper_volley;
     buff_t* stroke_of_genius;
@@ -354,6 +355,14 @@ struct ambush_t : public range_attack_t
     }
   }
 
+  virtual timespan_t execute_time() const
+  {
+    if ( p() -> buffs.reactive_shot -> check() )
+      return base_execute_time - from_seconds( 1.0 );
+    else
+      return base_execute_time;
+  }
+
   virtual void player_buff()
   {
     base_t::player_buff();
@@ -364,10 +373,13 @@ struct ambush_t : public range_attack_t
   virtual void execute()
   {
     base_t::execute();
+
     if ( offhand_attack )
       offhand_attack -> schedule_execute();
     else if ( p() -> talents.followthrough -> rank() )
       p() -> buffs.followthrough -> trigger();
+
+    p() -> buffs.reactive_shot -> expire();
   }
 };
 
@@ -1037,7 +1049,7 @@ void class_t::_trigger_reactive_shot()
 {
   unsigned rank = talents.reactive_shot -> rank();
     if ( rank && rngs.reactive_shot -> roll ( rank * 0.5 ))
-      cooldowns.ambush -> reduce( from_seconds( 1 ) );
+      buffs.reactive_shot -> trigger();
 }
 
 // ==========================================================================
@@ -1286,6 +1298,7 @@ void class_t::init_buffs()
   buffs.laze_target      = new buff_t( this , abilities.laze_target      , 1 ,  from_seconds( 20  ) );
   buffs.snap_shot        = new buff_t( this , abilities.snap_shot        , 1 ,  from_seconds( 10  ), from_seconds( 6 ), 0.5 * talents.snap_shot -> rank() );
   buffs.rapid_fire       = new buff_t( this , abilities.rapid_fire       , 1 ,  from_seconds( 10  ) );
+  buffs.reactive_shot    = new buff_t( this , abilities.reactive_shot    , 1 ,  from_seconds( 10  ) );
   buffs.sniper_volley    = new buff_t( this , abilities.sniper_volley    , 1 ,  from_seconds( 10  ), from_seconds( 30 ), 0.05 * talents.sniper_volley -> rank() );
   buffs.stroke_of_genius = new buff_t( this , abilities.stroke_of_genius , 1 ,  from_seconds( 10  ), timespan_t::zero(), 0.5 * talents.stroke_of_genius -> rank() );
   buffs.target_acquired  = new buff_t( this , abilities.target_acquired  , 1 ,  from_seconds( 10  ));
@@ -1356,10 +1369,41 @@ void class_t::init_actions()
 
     list << sl << abilities.shatter_shot << ",if=buff." << abilities.shatter_shot << ".remains<1.5";
 
-    list << "/use_relics/power_potion";
+    list << "/use_relics";
+
+    list << "/power_potion";
+
+    list << sl << abilities.adrenaline_probe << ",if=energy<=" << energy_ceil - agent_smug::adrenaline_probe_t::energy_returned_initial();
+
+    list << sl << abilities.target_acquired << ",if=energy<=" << energy_ceil - target_acquired_t::energy_returned();
+
+    list << sl << abilities.laze_target;
+
+    list << sl << abilities.explosive_probe << ",if=energy>=" << energy_floor + explosive_probe_t::energy_cost( this );
+
+    if ( talents.followthrough -> rank() )
+      list << sl << abilities.followthrough << ",if=buff." << abilities.followthrough << ".up&energy>=" << energy_floor + followthrough_t::energy_cost( this );
+
+    list << sl << abilities.takedown << ",if=energy>=" << energy_floor + takedown_t::energy_cost( this );
+
+    list << sl << abilities.ambush << ",if=buff.reactive_shot.up&energy>=" << energy_floor + ambush_t::energy_cost();
+
+    list << sl << abilities.series_of_shots << ",if=energy>" << energy_floor + series_of_shots_t::energy_cost();
+
+    list << sl << abilities.orbital_strike << ",if=energy>=" << energy_floor + agent_smug::orbital_strike_t::energy_cost();
+
+    if ( talents.interrogation_probe -> rank() )
+      list << sl << abilities.interrogation_probe << ",if=energy>=" << energy_floor + interrogation_probe_t::energy_cost( this );
+
+    list << sl << abilities.snipe << ",if=energy>" << energy_floor + snipe_t::energy_cost();
+
+    list << sl << abilities.rifle_shot;
 
     if ( talents.plasma_probe -> rank() )
       list << sl << abilities.plasma_probe << ",if=energy>=" << energy_floor + plasma_probe_t::energy_cost( this );
+
+    if ( talents.lethal_injectors -> rank() )
+      list << sl << abilities.corrosive_dart << ",if=!ticking&energy>=" << energy_floor + agent_smug::corrosive_dart_t::energy_cost();
 
     if ( unsigned rank = talents.energy_overrides -> rank() )
     {
@@ -1374,51 +1418,22 @@ void class_t::init_actions()
     if ( talents.emp_discharge -> rank() )
       list << sl << abilities.emp_discharge << ",if=dot.interrogation_probe.remains<1.6";
 
-    list << sl << abilities.adrenaline_probe << ",if=energy<=" << energy_ceil - agent_smug::adrenaline_probe_t::energy_returned_initial();
-
-    list << sl << abilities.target_acquired << ",if=energy<=" << energy_ceil - target_acquired_t::energy_returned();
-
-    if ( talents.interrogation_probe -> rank() )
-      list << sl << abilities.interrogation_probe << ",if=energy>=" << energy_floor + interrogation_probe_t::energy_cost( this );
-
-    list << sl << abilities.orbital_strike << ",if=energy>=" << energy_floor + agent_smug::orbital_strike_t::energy_cost();
-
     if ( talents.corrosive_grenade -> rank() )
       list << sl << abilities.corrosive_grenade << ",if=!ticking";
 
-    list << sl << abilities.takedown << ",if=energy>=" << energy_floor + takedown_t::energy_cost( this );
-
     if ( talents.cull -> rank() )
       list << sl << abilities.cull << ",if=energy>=" << energy_floor + cull_t::energy_cost() <<
-          "&(dot." << abilities.corrosive_dart << ".ticking|dot." << abilities.corrosive_dart << "_weak.ticking)"
-          "&(dot." << abilities.corrosive_grenade << ".ticking|dot." << abilities.corrosive_grenade << "_weak.ticking)";
+              "&(dot." << abilities.corrosive_dart << ".ticking|dot." << abilities.corrosive_dart << "_weak.ticking)"
+              "&(dot." << abilities.corrosive_grenade << ".ticking|dot." << abilities.corrosive_grenade << "_weak.ticking)";
 
     if ( talents.weakening_blast -> rank() )
       list << sl << abilities.weakening_blast;
 
-    list << sl << abilities.series_of_shots << ",if=energy>" << energy_floor + series_of_shots_t::energy_cost();
-
     if ( talents.rapid_fire -> rank() )
       list << sl << abilities.rapid_fire << ",if=cooldown." << abilities.series_of_shots << ".remains";
 
-    if ( talents.followthrough -> rank() )
-      list << sl << abilities.followthrough << ",if=buff." << abilities.followthrough << ".up&energy>=" << energy_floor + followthrough_t::energy_cost( this );
-
-    list << sl << abilities.explosive_probe << ",if=energy>=" << energy_floor + explosive_probe_t::energy_cost( this );
-
-    list << sl << abilities.ambush << ",if=energy>=" << energy_floor + ambush_t::energy_cost();
-
-    list << sl << abilities.corrosive_dart << ",if=!ticking&energy>=" << energy_floor + agent_smug::corrosive_dart_t::energy_cost();
-
     if ( talents.stroke_of_genius -> rank() )
       list << sl << abilities.cover_pulse;
-
-    list << sl << abilities.laze_target;
-
-    if ( talents.followthrough -> rank() )
-      list << sl << abilities.snipe << ",if=energy>" << energy_floor + snipe_t::energy_cost();
-
-    list << sl << abilities.rifle_shot;
 
     action_list_str = list.str();
   }
