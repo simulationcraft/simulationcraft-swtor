@@ -14,7 +14,7 @@ actions+=/coordination
 actions+=/snapshot_stats
 actions+=/stealth
 actions+=/adrenaline_probe,if=energy<=60
-actions+=/stim_boost,if=buff.tactical_advantage.stack>=2
+actions+=/stim_boost,if=buff.tactical_advantage.stack>1
 actions+=/use_relics
 actions+=/power_potion
 actions+=/hidden_strike
@@ -22,7 +22,8 @@ actions+=/shiv,if=energy>=75&buff.tactical_advantage.stack<2
 actions+=/corrosive_dart,if=!ticking&energy>=75
 actions+=/backstab,if=energy>=70
 actions+=/orbital_strike,if=energy>65
-actions+=/overload_shot,if=energy>100
+actions+=/explosive_probe,if=energy>100&cooldown.shiv.remains>2
+actions+=/overload_shot,if=energy>100&cooldown.shiv.remains>2
 actions+=/rifle_shot
 head=rakata_enforcers_headgear,ilevel=58,quality=artifact,stats=645armor_105endurance_122cunning_48power_51accuracy
 ear=rakata_enforcers_device,ilevel=58,quality=artifact,stats=85endurance_103cunning_51accuracy_44crit

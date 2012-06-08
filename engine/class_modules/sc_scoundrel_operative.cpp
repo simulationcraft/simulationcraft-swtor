@@ -895,12 +895,11 @@ void class_t::init_actions()
     action_list_default = true;
 
     action_list_str += "/stim,type=exotech_skill"
-                       + sl + abilities.coordination +
-                       "/snapshot_stats";
-
-    action_list_str += "/stealth"
+                       + sl + abilities.coordination
+                       + "/snapshot_stats"
+                       + "/stealth"
                        + sl + abilities.adrenaline_probe + ",if=energy<=60"
-                       + sl + abilities.stim_boost + ",if=buff." + abilities.tactical_advantage + ".stack>=2";
+                       + sl + abilities.stim_boost + ",if=buff." + abilities.tactical_advantage + ".stack>1";
 
     if ( talents.acid_blade -> rank() )
       action_list_str += sl + abilities.acid_blade + ",if=!buff." + abilities.acid_blade + "_coating.up&!cooldown." + abilities.backstab + ".remains";
@@ -923,7 +922,13 @@ void class_t::init_actions()
     action_list_str += sl + abilities.corrosive_grenade + ",if=!ticking&energy>=80";
 
     if ( talents.laceration -> rank() )
-      action_list_str += sl + abilities.laceration + ",if=energy>=75";
+    {
+      action_list_str += sl + abilities.laceration + ",if=energy>=75&buff." + abilities.tactical_advantage + ".stack>1";
+      action_list_str += sl + abilities.laceration + ",if=energy>=75&cooldown." + abilities.shiv + ".remains<2";
+    }
+
+    if ( talents.acid_blade -> rank() )
+      action_list_str += sl + abilities.acid_blade + ",if=!buff." + abilities.acid_blade + "_coating.up&energy>75";
 
     if ( talents.cull -> rank() )
       action_list_str += sl + abilities.cull + ",if=energy>=50&buff." +abilities.tactical_advantage + ".stack>=2"
@@ -934,11 +939,19 @@ void class_t::init_actions()
       action_list_str += sl + abilities.backstab + ",if=energy>=70";
 
     action_list_str += sl + abilities.orbital_strike + ",if=energy>65";
+    // energy dumps
+    action_list_str += sl + abilities.explosive_probe + ",if=energy>"; // should use cover before, but not enforcing cover yet
+    if ( set_bonus.rakata_enforcers -> four_pc() )
+      action_list_str += "100";
+    else
+      action_list_str += "95";
+    action_list_str += "&cooldown." + abilities.shiv + ".remains>2";
     action_list_str += sl + abilities.overload_shot + ",if=energy>";
     if ( set_bonus.rakata_enforcers -> four_pc() )
       action_list_str += "100";
     else
       action_list_str += "95";
+    action_list_str += "&cooldown." + abilities.shiv + ".remains>2";
     action_list_str += sl + abilities.rifle_shot;
 
     if ( false )

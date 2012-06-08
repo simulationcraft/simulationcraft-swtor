@@ -14,7 +14,7 @@ actions+=/lucky_shots
 actions+=/snapshot_stats
 actions+=/stealth
 actions+=/cool_head,if=energy<=60
-actions+=/pugnacity,if=buff.upper_hand.stack>=2
+actions+=/pugnacity,if=buff.upper_hand.stack>1
 actions+=/use_relics
 actions+=/power_potion
 actions+=/shoot_first
@@ -25,7 +25,8 @@ actions+=/shrap_bomb,if=!ticking&energy>=80
 actions+=/wounding_shot,if=energy>=50&buff.upper_hand.stack>=2&(dot.vital_shot.ticking|dot.vital_shot_weak.ticking)&(dot.shrap_bomb.ticking|dot.shrap_bomb_weak.ticking)
 actions+=/back_blast,if=energy>=70
 actions+=/xs_freighter_flyby,if=energy>65
-actions+=/quick_shot,if=energy>100
+actions+=/sabotage_charge,if=energy>100&cooldown.blaster_whip.remains>2
+actions+=/quick_shot,if=energy>100&cooldown.blaster_whip.remains>2
 actions+=/flurry_of_bolts
 head=rakata_enforcers_headgear,ilevel=58,quality=artifact,stats=645armor_105endurance_122cunning_48power_51accuracy
 ear=rakata_enforcers_device,ilevel=58,quality=artifact,stats=85endurance_103cunning_51accuracy_44crit

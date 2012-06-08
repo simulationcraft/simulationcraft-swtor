@@ -14,7 +14,7 @@ actions+=/lucky_shots
 actions+=/snapshot_stats
 actions+=/stealth
 actions+=/cool_head,if=energy<=60
-actions+=/pugnacity,if=buff.upper_hand.stack>=2
+actions+=/pugnacity,if=buff.upper_hand.stack>1
 actions+=/flechette_round,if=!buff.flechette_round_coating.up&!cooldown.back_blast.remains
 actions+=/use_relics
 actions+=/power_potion
@@ -22,9 +22,12 @@ actions+=/shoot_first
 actions+=/back_blast,if=energy>=65,if=buff.flechette_round_coating.up
 actions+=/blaster_whip,if=energy>=75&buff.upper_hand.stack<2
 actions+=/vital_shot,if=!ticking&energy>=75
-actions+=/sucker_punch,if=energy>=75
+actions+=/sucker_punch,if=energy>=75&buff.upper_hand.stack>1
+actions+=/sucker_punch,if=energy>=75&cooldown.blaster_whip.remains<2
+actions+=/flechette_round,if=!buff.flechette_round_coating.up&energy>75
 actions+=/xs_freighter_flyby,if=energy>65
-actions+=/quick_shot,if=energy>100
+actions+=/sabotage_charge,if=energy>100&cooldown.blaster_whip.remains>2
+actions+=/quick_shot,if=energy>100&cooldown.blaster_whip.remains>2
 actions+=/flurry_of_bolts
 head=rakata_enforcers_headgear,ilevel=58,quality=artifact,stats=645armor_105endurance_122cunning_48power_51accuracy
 ear=rakata_enforcers_device,ilevel=58,quality=artifact,stats=85endurance_103cunning_51accuracy_44crit
