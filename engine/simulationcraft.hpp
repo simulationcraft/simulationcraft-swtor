@@ -82,7 +82,7 @@
 
 #define SC_MAJOR_VERSION "120"
 #define SC_MINOR_VERSION "3"
-#define SWTOR_VERSION_LIVE "1.2.0"
+#define SWTOR_VERSION_LIVE "1.2.6a"
 #define SWTOR_VERSION_PTR "1.3.0"
 #define SC_USE_PTR ( 1 )
 #define SC_BETA ( 0 )
