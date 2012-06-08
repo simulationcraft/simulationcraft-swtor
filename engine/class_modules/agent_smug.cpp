@@ -8,17 +8,16 @@
 namespace agent_smug { // ===================================================
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
-  ::targetdata_t( source, target )
+  ::targetdata_t( source, target ),
+  debuff_weakening_blast  ( new debuff_t ( this, source.abilities.weakening_blast, 10, from_seconds (  15 ) ) ),
+  dot_adrenaline_probe       ( source.abilities.adrenaline_probe       , &source ),
+  dot_corrosive_dart         ( source.abilities.corrosive_dart         , &source ),
+  dot_corrosive_dart_weak    ( source.abilities.corrosive_dart_weak    , &source ),
+  dot_corrosive_grenade      ( source.abilities.corrosive_grenade      , &source ),
+  dot_corrosive_grenade_weak ( source.abilities.corrosive_grenade_weak , &source ),
+  dot_cull                   ( source.abilities.cull                   , &source ),
+  dot_orbital_strike         ( source.abilities.orbital_strike         , &source )
 {
-  debuff_weakening_blast     = new buff_t ( this, source.abilities.weakening_blast, 10, from_seconds (  15 ) );
-  dot_adrenaline_probe       = dot_t ( source.abilities.adrenaline_probe       , &source );
-  dot_corrosive_dart         = dot_t ( source.abilities.corrosive_dart         , &source );
-  dot_corrosive_dart_weak    = dot_t ( source.abilities.corrosive_dart_weak    , &source );
-  dot_corrosive_grenade      = dot_t ( source.abilities.corrosive_grenade      , &source );
-  dot_corrosive_grenade_weak = dot_t ( source.abilities.corrosive_grenade_weak , &source );
-  dot_cull                   = dot_t ( source.abilities.cull                   , &source );
-  dot_orbital_strike         = dot_t ( source.abilities.orbital_strike         , &source );
-
   add( *debuff_weakening_blast    );
   add( dot_adrenaline_probe       );
   add( dot_corrosive_dart         );

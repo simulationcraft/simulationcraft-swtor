@@ -1439,7 +1439,22 @@ expr_ptr action_t::create_expression( const std::string& name_str )
                player -> last_foreground_action -> name_str == prev; } );
   }
 
-  if ( num_splits == 3 && ( splits[0] == "buff" || splits[0] == "debuff" || splits[0] == "aura" ) )
+  if ( num_splits == 3 && ( splits[0] == "buff" || splits[0] == "debuff" ) )
+  {
+    if ( targetdata_t* td = player -> get_targetdata( target ) )
+    {
+      buff_t* buff;
+      if ( player == target )
+        buff = td -> get_buff( splits[ 1 ] );
+      else
+        buff = td -> get_buff( splits[ 1 ] + ':' + player->name() );
+
+      if ( buff )
+        return buff -> create_expression( splits[ 2 ] );
+    }
+  }
+
+  if ( num_splits == 3 && splits[0] == "aura" )
   {
     if ( targetdata_t* td = player -> get_targetdata( target ) )
     {

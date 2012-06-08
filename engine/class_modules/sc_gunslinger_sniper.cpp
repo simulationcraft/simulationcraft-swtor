@@ -21,9 +21,9 @@ class targetdata_t : public agent_smug::targetdata_t
 public:
   targetdata_t( class_t& source, player_t& target );
 
-  buff_t* debuff_cluster_bombs;
-  buff_t* debuff_electrified_railgun;
-  buff_t* debuff_shatter_shot;
+  debuff_t* debuff_cluster_bombs;
+  debuff_t* debuff_electrified_railgun;
+  debuff_t* debuff_shatter_shot;
   dot_t dot_electrified_railgun;
   dot_t dot_interrogation_probe;
   dot_t dot_plasma_probe;
@@ -34,7 +34,6 @@ class class_t : public agent_smug::class_t
 {
 public:
 
-  buff_t* _shatter_shot_workaround;
 
   typedef agent_smug::class_t base_t;
 
@@ -220,28 +219,24 @@ public:
 };
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
-  agent_smug::targetdata_t( source, target )
+  agent_smug::targetdata_t( source, target ),
+  debuff_cluster_bombs        ( new debuff_t ( this, source.abilities.cluster_bombs, 2 + source.talents.imperial_methodology -> rank(), from_seconds ( 0 ), from_seconds( 1.5 ), 100, false, true /*reverse*/ ) ),
+  debuff_electrified_railgun  ( new debuff_t ( this, source.abilities.electrified_railgun, 4, from_seconds ( 5 ), from_seconds( 0 ), 1 * source.talents.electrified_railgun -> rank() ) ),
+  debuff_shatter_shot         ( new debuff_t ( this, source.abilities.shatter_shot, 1, from_seconds ( 45 ) ) ),
+  dot_electrified_railgun ( source.abilities.electrified_railgun, &source ),
+  dot_interrogation_probe ( source.abilities.interrogation_probe, &source ),
+  dot_plasma_probe        ( source.abilities.plasma_probe       , &source ),
+  dot_series_of_shots     ( source.abilities.series_of_shots    , &source )
+
 {
-// buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-   debuff_cluster_bombs   = new buff_t ( this, source.abilities.cluster_bombs, 2 + source.talents.imperial_methodology -> rank(), from_seconds ( 0 ), from_seconds( 1.5 ), 100, false, true /*reverse*/ );
-   debuff_electrified_railgun   = new buff_t ( this, source.abilities.electrified_railgun, 4, from_seconds ( 5 ), from_seconds( 0 ), 1 * source.talents.electrified_railgun -> rank() );
-   debuff_shatter_shot   = new buff_t ( this, source.abilities.shatter_shot, 1, from_seconds ( 45 ) );
-
-  dot_electrified_railgun = dot_t ( source.abilities.electrified_railgun, &source );
-  dot_interrogation_probe = dot_t ( source.abilities.interrogation_probe, &source );
-  dot_plasma_probe        = dot_t ( source.abilities.plasma_probe       , &source );
-  dot_series_of_shots     = dot_t ( source.abilities.series_of_shots    , &source );
-
   add( *debuff_cluster_bombs       );
   add( *debuff_electrified_railgun );
   add( *debuff_shatter_shot        );
-  source._shatter_shot_workaround = debuff_shatter_shot;
 
   add( dot_electrified_railgun     );
   add( dot_interrogation_probe     );
   add( dot_plasma_probe            );
   add( dot_series_of_shots         );
-
 }
 
 struct action_t : public agent_smug::action_t
@@ -1013,12 +1008,8 @@ struct shatter_shot_t : public range_attack_t
   virtual void execute()
   {
     base_t::execute();
-    // XXX TODO FIX this is bugged but shouldn't be
-    // branch sniper_shattershot created to work out why, with debugging statements
-    //buff_t* shatter = targetdata() -> debuff_shatter_shot;
-    assert( p() -> _shatter_shot_workaround );
-    buff_t* shatter = p() -> _shatter_shot_workaround;
-    shatter -> trigger();
+    targetdata_t *t = targetdata();
+    t -> debuff_shatter_shot ->trigger();
   }
 };
 

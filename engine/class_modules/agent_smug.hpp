@@ -231,7 +231,7 @@ public:
 class targetdata_t : public ::targetdata_t
 {
 public:
-  buff_t* debuff_weakening_blast;
+  debuff_t* debuff_weakening_blast;
 
   dot_t dot_adrenaline_probe;
   dot_t dot_corrosive_dart;

@@ -1507,6 +1507,11 @@ struct debuff_t : public buff_t
   debuff_t( player_t*, const std::string& name,
             int max_stack=1, timespan_t buff_duration=timespan_t::zero(), timespan_t buff_cooldown=timespan_t::zero(),
             double chance=1.0, bool quiet=false, bool reverse=false, rng_type=RNG_CYCLIC, int aura_id=0 );
+
+  // Target De-Buff
+  debuff_t( actor_pair_t pair, const std::string& name,
+            int max_stack=1, timespan_t buff_duration=timespan_t::zero(), timespan_t buff_cooldown=timespan_t::zero(),
+            double chance=1.0, bool quiet=false, bool reverse=false, rng_type=RNG_CYCLIC, int aura_id=0, bool activated=true );
 };
 
 typedef struct buff_t aura_t;
