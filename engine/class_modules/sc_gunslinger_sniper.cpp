@@ -1506,7 +1506,7 @@ double class_t::energy_regen_per_second() const
   if ( talents.snipers_nest -> rank() && buffs.cover -> up() )
     eps += 1;
   if ( buffs.sniper_volley -> up() )
-    eps *= 2;
+    eps *= 1.5;
   return eps;
 }
 
@@ -1521,7 +1521,7 @@ void class_t::regen( timespan_t periodicity )
 
   if ( buffs.sniper_volley -> up() )
     // using ERPS instead of directly checking gains as a kind of double check that ERPS is maintained
-    resource_gain( RESOURCE_ENERGY, to_seconds( periodicity ) * energy_regen_per_second() / 2, gains.sniper_volley );
+    resource_gain( RESOURCE_ENERGY, to_seconds( periodicity ) * energy_regen_per_second() / 3, gains.sniper_volley );
 }
 
 // class_t::alacrity ============================================
