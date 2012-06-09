@@ -27,8 +27,8 @@ actions+=/orbital_strike,if=energy>=96
 actions+=/takedown,if=energy>=74
 actions+=/series_of_shots,if=energy>86
 actions+=/plasma_probe,if=energy>=82
-actions+=/interrogation_probe,if=energy>=82
 actions+=/ambush,if=energy>=81
+actions+=/interrogation_probe,if=energy>=82
 actions+=/snipe,if=energy>=86
 actions+=/rifle_shot
 head=rakata_field_techs_headgear,ilevel=58,quality=artifact,stats=645armor_124endurance_99cunning_57power_51accuracy

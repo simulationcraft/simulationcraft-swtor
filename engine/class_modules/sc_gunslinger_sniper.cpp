@@ -1437,6 +1437,9 @@ void class_t::init_actions()
     if ( !talents.experimental_explosives -> rank() && !talents.cull -> rank() )
       list << sl << abilities.orbital_strike << ",if=energy>=" << energy_floor + agent_smug::orbital_strike_t::energy_cost();
 
+    if ( !talents.reactive_shot -> rank() && talents.precision_ambush -> rank() )
+      list << sl << abilities.ambush << ",if=energy>=" << energy_floor + ambush_t::energy_cost();
+
     if ( talents.interrogation_probe -> rank() )
       list << sl << abilities.interrogation_probe << ",if=energy>=" << energy_floor + interrogation_probe_t::energy_cost( this );
 
@@ -1446,7 +1449,7 @@ void class_t::init_actions()
     if ( !talents.imperial_methodology -> rank() )
       list << sl << abilities.explosive_probe << ",if=energy>=" << energy_floor + explosive_probe_t::energy_cost( this );
 
-    if ( !talents.reactive_shot -> rank() )
+    if ( !talents.reactive_shot -> rank() && !talents.precision_ambush -> rank() )
       list << sl << abilities.ambush << ",if=energy>=" << energy_floor + ambush_t::energy_cost();
 
     if ( !talents.cull -> rank() )
