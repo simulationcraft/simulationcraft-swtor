@@ -327,6 +327,7 @@ class corrosive_grenade_t : public poison_attack_t
 public:
   corrosive_grenade_t* corrosive_grenade_weak;
   corrosive_grenade_t( class_t* p, const std::string& n, const std::string& options_str, bool weak=false );
+  static int energy_cost();
   virtual void last_tick( dot_t* d );
   virtual void execute();
 };

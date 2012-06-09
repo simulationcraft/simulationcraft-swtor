@@ -253,7 +253,7 @@ corrosive_grenade_t::corrosive_grenade_t( class_t* p, const std::string& n, cons
   }
   else
   {
-    base_cost                   = 20;
+    base_cost                   = energy_cost();
     cooldown -> duration        = from_seconds( 12.0 );
     td.standardhealthpercentmin =
     td.standardhealthpercentmax = 0.032;
@@ -267,6 +267,8 @@ corrosive_grenade_t::corrosive_grenade_t( class_t* p, const std::string& n, cons
       corrosive_grenade_weak = new corrosive_grenade_t( p, n + "_weak", options_str, true );
   }
 }
+
+int corrosive_grenade_t::energy_cost() { return 20; }
 
 void corrosive_grenade_t::last_tick( dot_t* d )
 {

@@ -1402,21 +1402,39 @@ void class_t::init_actions()
     if ( talents.followthrough -> rank() )
       list << sl << abilities.followthrough << ",if=buff." << abilities.followthrough << ".up&energy>=" << energy_floor + followthrough_t::energy_cost( this );
 
-    if ( talents.experimental_explosives -> rank() )
+    if ( talents.experimental_explosives -> rank() || talents.cull -> rank() )
       list << sl << abilities.orbital_strike << ",if=energy>=" << energy_floor + agent_smug::orbital_strike_t::energy_cost();
+
+    if ( talents.corrosive_grenade -> rank() )
+      list << sl << abilities.corrosive_grenade << ",if=!ticking&energy>=" << energy_floor + corrosive_grenade_t::energy_cost();
+
+    if ( talents.corrosive_microbes -> rank() )
+      list << sl << abilities.corrosive_dart << ",if=!ticking&energy>=" << energy_floor + agent_smug::corrosive_dart_t::energy_cost();
+
+    if ( talents.cut_down -> rank() )
+      list << sl << abilities.series_of_shots << ",if=energy>" << energy_floor + series_of_shots_t::energy_cost();
 
     if ( set_bonus.rakata_field_techs -> four_pc() )
       list << sl << abilities.takedown << ",if=energy>=" << energy_floor + takedown_t::energy_cost( this );
 
+    if ( talents.weakening_blast -> rank() )
+      list << sl << abilities.weakening_blast;
+
+    if ( talents.cull -> rank() )
+      list << sl << abilities.cull << ",if=energy>=" << energy_floor + cull_t::energy_cost() <<
+              "&(dot." << abilities.corrosive_dart << ".ticking|dot." << abilities.corrosive_dart << "_weak.ticking)"
+              "&(dot." << abilities.corrosive_grenade << ".ticking|dot." << abilities.corrosive_grenade << "_weak.ticking)";
+
     if ( talents.reactive_shot -> rank() )
       list << sl << abilities.ambush << ",if=buff.reactive_shot.up&energy>=" << energy_floor + ambush_t::energy_cost();
 
-    list << sl << abilities.series_of_shots << ",if=energy>" << energy_floor + series_of_shots_t::energy_cost();
+    if ( !talents.cut_down -> rank() )
+      list << sl << abilities.series_of_shots << ",if=energy>" << energy_floor + series_of_shots_t::energy_cost();
 
     if ( talents.plasma_probe -> rank() )
       list << sl << abilities.plasma_probe << ",if=energy>=" << energy_floor + plasma_probe_t::energy_cost( this );
 
-    if ( !talents.experimental_explosives -> rank() )
+    if ( !talents.experimental_explosives -> rank() && !talents.cull -> rank() )
       list << sl << abilities.orbital_strike << ",if=energy>=" << energy_floor + agent_smug::orbital_strike_t::energy_cost();
 
     if ( talents.interrogation_probe -> rank() )
@@ -1431,23 +1449,10 @@ void class_t::init_actions()
     if ( !talents.reactive_shot -> rank() )
       list << sl << abilities.ambush << ",if=energy>=" << energy_floor + ambush_t::energy_cost();
 
-    list << sl << abilities.snipe << ",if=energy>=" << energy_floor + snipe_t::energy_cost();
+    if ( !talents.cull -> rank() )
+      list << sl << abilities.snipe << ",if=energy>=" << energy_floor + snipe_t::energy_cost();
 
     list << sl << abilities.rifle_shot;
-
-    if ( talents.lethal_injectors -> rank() )
-      list << sl << abilities.corrosive_dart << ",if=!ticking&energy>=" << energy_floor + agent_smug::corrosive_dart_t::energy_cost();
-
-    if ( talents.corrosive_grenade -> rank() )
-      list << sl << abilities.corrosive_grenade << ",if=!ticking";
-
-    if ( talents.cull -> rank() )
-      list << sl << abilities.cull << ",if=energy>=" << energy_floor + cull_t::energy_cost() <<
-              "&(dot." << abilities.corrosive_dart << ".ticking|dot." << abilities.corrosive_dart << "_weak.ticking)"
-              "&(dot." << abilities.corrosive_grenade << ".ticking|dot." << abilities.corrosive_grenade << "_weak.ticking)";
-
-    if ( talents.weakening_blast -> rank() )
-      list << sl << abilities.weakening_blast;
 
     if ( talents.stroke_of_genius -> rank() )
       list << sl << abilities.cover_pulse;
