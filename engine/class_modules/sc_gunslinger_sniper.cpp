@@ -328,6 +328,7 @@ struct ambush_t : public range_attack_t
 
     base_cost                    = energy_cost();
     base_execute_time            = from_seconds( 2.5 );
+    // XXX ptr change here we reference the talent position rapid_fire, which is actually sniper_volley now
     cooldown -> duration         = from_seconds( ( 15 - ( sim -> ptr ? 1 * p -> talents.rapid_fire -> rank() : 0 ) ) );
     range                        = 35.0;
     dd.standardhealthpercentmin  =
@@ -712,6 +713,7 @@ struct rapid_fire_t : public action_t
   rapid_fire_t( class_t* p, const std::string& n, const std::string& options_str ) :
     base_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE )
   {
+    // passive in PTR
     check_talent( sim -> ptr ? 0 : p -> talents.rapid_fire -> rank() );
 
     parse_options( options_str );
