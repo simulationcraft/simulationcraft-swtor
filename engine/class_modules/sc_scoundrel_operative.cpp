@@ -186,11 +186,10 @@ struct class_t : public agent_smug::class_t
 
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
-  agent_smug::targetdata_t( source, target )
+  agent_smug::targetdata_t( source, target ),
+  dot_acid_blade_poison ( source.abilities.acid_blade_poison , &source ),
+  dot_stim_boost        ( source.abilities.stim_boost        , &source )
 {
-  dot_acid_blade_poison      = dot_t ( source.abilities.acid_blade_poison , &source );
-  dot_stim_boost             = dot_t ( source.abilities.stim_boost        , &source );
-
   add( dot_acid_blade_poison );
   add( dot_stim_boost        );
 }

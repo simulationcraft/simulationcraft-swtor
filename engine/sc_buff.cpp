@@ -935,3 +935,18 @@ debuff_t::debuff_t( player_t*          p,
   buff_t( p, n, ms, d, cd, ch, q, r, rt, id )
 {
 }
+
+debuff_t::debuff_t( actor_pair_t       act,
+                    const std::string& n,
+                    int                ms,
+                    timespan_t         d,
+                    timespan_t         cd,
+                    double             ch,
+                    bool               q,
+                    bool               r,
+                    rng_type           rt,
+                    int                id,
+                    bool               au) :
+  buff_t( act, n, ms, d, cd, ch, q, r, rt, id, au )
+{
+}
