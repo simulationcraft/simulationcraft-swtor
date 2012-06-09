@@ -503,7 +503,7 @@ struct explosive_probe_t : public agent_smug::explosive_probe_t
     base_t::execute();
 
     p() -> buffs.energy_overrides -> expire();
-    if ( p() -> talents.cluster_bombs && result_is_hit() )
+    if ( p() -> talents.cluster_bombs -> rank() && result_is_hit() )
     {
       buff_t* cluster_bombs = targetdata() -> debuff_cluster_bombs;
       if ( cluster_bombs -> up() )
