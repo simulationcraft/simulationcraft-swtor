@@ -1741,9 +1741,7 @@ void sim_t::use_optimal_buffs_and_debuffs( int value )
   overrides.coordination                = optimal_raid;
   overrides.force_valor                 = optimal_raid;
   overrides.fortification_hunters_boon  = optimal_raid;
-  // current understanding is optimal raid is 5x any armor debuf as they all stack with each other
-  // picking snipers for no particular reason.
-  overrides.shatter_shot                = optimal_raid * 3;
+  overrides.shatter_shot                = optimal_raid;
   overrides.sunder                      = optimal_raid;
   overrides.heat_signature              = optimal_raid;
   overrides.unnatural_might             = optimal_raid;
