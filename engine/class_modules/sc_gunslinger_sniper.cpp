@@ -1381,7 +1381,7 @@ void class_t::init_actions()
     list << sl << abilities.laze_target;
 
     if ( talents.emp_discharge -> rank() )
-      list << sl << abilities.emp_discharge << ",if=dot.interrogation_probe.remains";
+      list << sl << abilities.emp_discharge << ",if=dot." << abilities.interrogation_probe  << ".remains";
 
     if ( unsigned rank = talents.energy_overrides -> rank() )
     {
@@ -1426,7 +1426,7 @@ void class_t::init_actions()
               "&(dot." << abilities.corrosive_grenade << ".ticking|dot." << abilities.corrosive_grenade << "_weak.ticking)";
 
     if ( talents.reactive_shot -> rank() )
-      list << sl << abilities.ambush << ",if=buff.reactive_shot.up&energy>=" << energy_floor + ambush_t::energy_cost();
+      list << sl << abilities.ambush << ",if=buff." << abilities.reactive_shot << ".up&energy>=" << energy_floor + ambush_t::energy_cost();
 
     if ( !talents.cut_down -> rank() )
       list << sl << abilities.series_of_shots << ",if=energy>" << energy_floor + series_of_shots_t::energy_cost();
