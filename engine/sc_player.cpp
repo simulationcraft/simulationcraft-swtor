@@ -1509,6 +1509,8 @@ double player_t::armor_penetration_debuff() const
   const std::string heat_signature = "heat_signature";
   for ( buff_t* b = buff_list; b; b = b -> next )
   {
+    if ( sim -> overrides.ignore_player_arpen_debuffs && b -> source )
+      continue;
     if ( b -> name_str.compare( 0, shatter_shot.length(), shatter_shot ) == 0
         || b -> name_str.compare( 0, flourish_shot.length(), flourish_shot ) == 0 )
     {

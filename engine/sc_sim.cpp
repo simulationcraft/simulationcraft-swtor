@@ -2007,6 +2007,7 @@ void sim_t::create_options()
     { "override.sunder",                  OPT_INT,    &( overrides.sunder                          ) },
     { "override.heat_signature",          OPT_INT,    &( overrides.heat_signature                  ) },
     { "override.unnatural_might",         OPT_BOOL,   &( overrides.unnatural_might                 ) },
+    { "override.ignore_player_arpen_debuffs", OPT_BOOL, &( overrides.ignore_player_arpen_debuffs   ) },
     // Stat Enchants
     { "default_enchant_strength",                 OPT_FLT,  &( enchant.attribute[ ATTR_STRENGTH  ] ) },
     { "default_enchant_aim",                      OPT_FLT,  &( enchant.attribute[ ATTR_AIM       ] ) },
