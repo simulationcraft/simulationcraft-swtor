@@ -144,6 +144,7 @@ static bool parse_optimal_raid( sim_t*             sim,
   return true;
 }
 
+
 // parse_player =============================================================
 
 static bool parse_player( sim_t*             sim,
@@ -1745,8 +1746,15 @@ void sim_t::use_optimal_buffs_and_debuffs( int value )
   overrides.sunder                      = optimal_raid;
   overrides.heat_signature              = optimal_raid;
   overrides.unnatural_might             = optimal_raid;
-  overrides.ignore_player_arpen_debuffs = optimal_raid;
 }
+
+// post_parse ===============================================================
+void sim_t::post_parse()
+{
+  if ( overrides.ignore_player_arpen_debuffs == -1 )
+    overrides.ignore_player_arpen_debuffs = ( overrides.shatter_shot | overrides.sunder | overrides.heat_signature ) ? 1 : 0;
+}
+
 
 // sim_t::aura_gain =========================================================
 
@@ -2072,11 +2080,13 @@ bool sim_t::parse_options( int    _argc,
   if ( ! parent )
     cache::advance_era();
 
+  overrides.ignore_player_arpen_debuffs = -1; // XXX cough hack hack
   for ( int i=1; i < argc; i++ )
   {
     if ( ! option_t::parse_line( this, argv[ i ] ) )
       return false;
   }
+  sim_t::post_parse();
 
   if ( player_list == NULL )
   {

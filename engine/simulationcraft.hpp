@@ -1896,6 +1896,7 @@ public:
   player_t* find_player( int index );
   cooldown_t* get_cooldown( const std::string& name );
   void      use_optimal_buffs_and_debuffs( int value );
+  void      post_parse();
   void      aura_gain( const std::string& name, int aura_id=0 );
   void      aura_loss( const std::string& name, int aura_id=0 );
   expr_ptr  create_expression( action_t*, const std::string& name );
