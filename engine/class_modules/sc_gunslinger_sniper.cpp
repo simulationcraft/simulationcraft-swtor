@@ -1388,7 +1388,8 @@ void class_t::init_actions()
     if ( talents.followthrough -> rank() )
       list << sl << abilities.followthrough << ",if=buff." << abilities.followthrough << ".up&energy>=" << energy_floor + followthrough_t::energy_cost( this );
 
-    list << sl << abilities.takedown << ",if=energy>=" << energy_floor + takedown_t::energy_cost( this );
+    if ( set_bonus.rakata_field_techs -> four_pc() )
+      list << sl << abilities.takedown << ",if=energy>=" << energy_floor + takedown_t::energy_cost( this );
 
     list << sl << abilities.ambush << ",if=buff.reactive_shot.up&energy>=" << energy_floor + ambush_t::energy_cost();
 
@@ -1396,11 +1397,14 @@ void class_t::init_actions()
 
     list << sl << abilities.orbital_strike << ",if=energy>=" << energy_floor + agent_smug::orbital_strike_t::energy_cost();
 
-    if ( !talents.imperial_methodology -> rank() )
-      list << sl << abilities.explosive_probe << ",if=energy>=" << energy_floor + explosive_probe_t::energy_cost( this );
-
     if ( talents.interrogation_probe -> rank() )
       list << sl << abilities.interrogation_probe << ",if=energy>=" << energy_floor + interrogation_probe_t::energy_cost( this );
+
+    if ( !set_bonus.rakata_field_techs -> four_pc() )
+      list << sl << abilities.takedown << ",if=energy>=" << energy_floor + takedown_t::energy_cost( this );
+
+    if ( !talents.imperial_methodology -> rank() )
+      list << sl << abilities.explosive_probe << ",if=energy>=" << energy_floor + explosive_probe_t::energy_cost( this );
 
     list << sl << abilities.snipe << ",if=energy>" << energy_floor + snipe_t::energy_cost();
 
