@@ -3352,7 +3352,11 @@ public:
   double total_crit() const       { return base_crit       + player_crit       + target_crit;       }
   double total_crit_bonus() const;
   double total_armor_penetration() const
+  // jon (freehugs) thinks these are multiplicative, and only within the same type are they additive
   { return base_armor_penetration * player_armor_penetration * target_armor_penetration; }
+  // if they are simply additive, then go with this one: it essentially boosts concealment and arsenal dps a fair chunk
+  // { return 1 - ( ( 1 - base_armor_penetration ) + ( 1 - player_armor_penetration )  +  ( 1 - target_armor_penetration ) );      }
+
 
   virtual double total_power() const;
 

@@ -1745,6 +1745,7 @@ void sim_t::use_optimal_buffs_and_debuffs( int value )
   overrides.sunder                      = optimal_raid;
   overrides.heat_signature              = optimal_raid;
   overrides.unnatural_might             = optimal_raid;
+  overrides.ignore_player_arpen_debuffs = optimal_raid;
 }
 
 // sim_t::aura_gain =========================================================

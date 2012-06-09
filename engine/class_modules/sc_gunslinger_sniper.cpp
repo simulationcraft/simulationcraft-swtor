@@ -1580,7 +1580,7 @@ double class_t::armor_penetration() const
   double arpen = base_t::armor_penetration();
 
   if ( sim -> ptr && buffs.target_acquired -> up() )
-    arpen *= ( 1 - 0.15 );
+    arpen -= 0.15;
 
   return arpen;
 }

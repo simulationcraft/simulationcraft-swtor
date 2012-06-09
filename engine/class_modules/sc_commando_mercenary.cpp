@@ -772,10 +772,6 @@ struct unload_t : public terminal_velocity_attack_t
     benefit_from_barrage = false;
   }
 
-  // TODO FIX BUG:
-  // using a dot for unload is wrong. Dots have a hit/miss on execute, and if hits all ticks will hit,
-  // or if miss, no ticks will hit. Unload is hit/miss per tick. Either need to modify sc_action to
-  // support "repeating" attacks, or change this to instantiate 6(!) unload actions and execute them manually
   virtual void execute()
   {
     if ( p() -> buffs.barrage -> up() )
@@ -867,7 +863,7 @@ double class_t::alacrity() const
 
 double class_t::armor_penetration() const
 {
-  return buffs.high_velocity_gas_cylinder -> up() ? base_t::armor_penetration() * 0.65 : base_t::armor_penetration();
+  return buffs.high_velocity_gas_cylinder -> up() ? base_t::armor_penetration() - 0.35 : base_t::armor_penetration();
 }
 
 
@@ -1092,19 +1088,20 @@ void class_t::init_actions()
             action_list_str += "/snapshot_stats";
             // ARSENAL
             action_list_str += "/high_velocity_gas_cylinder,if=!buff.high_velocity_gas_cylinder.up";
-            action_list_str += "/vent_heat,if=heat<=66";
+            action_list_str += "/vent_heat,if=heat<=40";
+            action_list_str += "thermal_sensor_override,if=heat<77";
             action_list_str += "/use_relics";
-            action_list_str += "/unload,if=heat>76";
-            if ( talents.heatseeker_missiles)
-              action_list_str += "/heatseeker_missiles,if=heat>76";
+            action_list_str += "/power_potion";
             if ( set_bonus.rakata_eliminators -> four_pc() )
-              action_list_str += "/rail_shot,if=buff.tracer_lock.stack>=5&buff.high_velocity_gas_cylinder.up";
-            action_list_str += "/rail_shot,if=heat>75&buff.tracer_lock.stack>=5";
+              action_list_str += "/rail_shot,if=buff.high_velocity_gas_cylinder.up";
+            action_list_str += "/rail_shot,if=heat>77";
+            if ( talents.heatseeker_missiles)
+              action_list_str += "/heatseeker_missiles,if=heat>77|cooldown.vent_heat.remains<10|buff.thermal_sensor_override.up";
+            action_list_str += "/unload,if=heat>77|cooldown.vent_heat.remains<10|buff.thermal_sensor_override.up";
             if ( talents.tracer_missile )
-              action_list_str += "/tracer_missile,if=heat>71";
+              action_list_str += "/tracer_missile,if=heat>77|cooldown.vent_heat.remains<10|buff.thermal_sensor_override.up|(heat>=70&cooldown.heatseeker_missiles.remains>1.5&cooldown.unload.remains>1.5)";
             else
               action_list_str += "/power_shot,if=heat>75";
-            action_list_str += "/thermal_sensor_override";
             action_list_str += "/rapid_shots";
 
             switch ( primary_tree() )
