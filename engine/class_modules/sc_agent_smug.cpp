@@ -15,7 +15,6 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   dot_corrosive_dart_weak    ( source.abilities.corrosive_dart_weak    , &source ),
   dot_corrosive_grenade      ( source.abilities.corrosive_grenade      , &source ),
   dot_corrosive_grenade_weak ( source.abilities.corrosive_grenade_weak , &source ),
-  dot_cull                   ( source.abilities.cull                   , &source ),
   dot_orbital_strike         ( source.abilities.orbital_strike         , &source )
 {
   add( *debuff_weakening_blast    );
@@ -24,7 +23,6 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   add( dot_corrosive_dart_weak    );
   add( dot_corrosive_grenade      );
   add( dot_corrosive_grenade_weak );
-  add( dot_cull                   );
   add( dot_orbital_strike         );
 }
 
@@ -402,7 +400,7 @@ orbital_strike_t::orbital_strike_t( class_t* p, const std::string& n, const std:
   td.standardhealthpercentmin =
   td.standardhealthpercentmax = 0.177;
   td.power_mod                = 1.77;
-  num_ticks                   = 3; // TODO: sniper set bonus? +1 tick
+  num_ticks                   = 3;
   base_tick_time              = from_seconds( 3 );
   base_execute_time           = from_seconds( 3 );
 
@@ -421,15 +419,12 @@ overload_shot_t::overload_shot_t( class_t* p, const std::string& n, const std::s
   parse_options( options_str );
 
   base_cost                   = 17;
-  range                       = ( player -> type == IA_OPERATIVE || player -> type == S_SCOUNDREL ) ? 10 : 30;
   dd.standardhealthpercentmin =
   dd.standardhealthpercentmax = 0.124;
   dd.power_mod                = 1.24;
   weapon                      = &( player -> main_hand_weapon );
   weapon_multiplier           = -0.17;
-  // TODO move this tidbit into scoundrel_operative: 15% comes from operative's "skirmisher" passive
-  base_multiplier             += ( player -> type == IA_OPERATIVE || player -> type == S_SCOUNDREL ? 0.15 : 0 )
-      +  .03 * p -> talents.cut_down->rank();
+  base_multiplier             += .03 * p -> talents.cut_down->rank();
 }
 
 // Rifle Shot | Flurry Of Bolts =========================================================
@@ -686,30 +681,13 @@ void class_t::init_talents()
   talents.lethal_injectors     = find_talent( "Lethal Injectors"     );
   // t3
   talents.corrosive_grenade    = find_talent( "Corrosive Grenade"    );
-  // snipers get targeted demolition, operatives get combat stims
-  if ( type == IA_OPERATIVE || type == S_SCOUNDREL )
-    talents.combat_stims         = find_talent( "Combat Stims"         );
-  else
-    talents.targeted_demolition  = find_talent( "Targeted Demolition"  );
   talents.cut_down             = find_talent( "Cut Down"             );
   // t4
   talents.lethal_purpose       = find_talent( "Lethal Purpose"       );
   talents.adhesive_corrosives  = find_talent( "Adhesive Corrosives"  );
-  // snipers get hold your ground, operatives get escape plan
-  if ( type == IA_OPERATIVE || type == S_SCOUNDREL )
-    talents.escape_plan          = find_talent( "Escape Plan"          );
-  else
-  {
-    talents.hold_your_ground     = find_talent( "Hold Your Ground"     );
-  }
   talents.lethal_dose          = find_talent( "Lethal Dose"          );
   // t5
   talents.cull                 = find_talent( "Cull"                 );
-  // snipers get razor rounds, operatives get license to kill
-  if ( type == IA_OPERATIVE || type == S_SCOUNDREL )
-    talents.license_to_kill      = find_talent( "License to Kill"      );
-  else
-    talents.razor_rounds         = find_talent( "Razor Rounds"         );
   talents.counterstrike        = find_talent( "Counterstrike"        );
   // t6
   talents.devouring_microbes   = find_talent( "Devouring Microbes"   );

@@ -72,6 +72,14 @@ struct class_t : public agent_smug::class_t
   // Talents
   struct talents_t:base_t::talents_t
   {
+    // Lethality|Dirty Fighting
+    // t3
+    talent_t* combat_stims;
+    // t4
+    talent_t* escape_plan;
+    // t5
+    talent_t* license_to_kill;
+
     // Medicine|Sawbones
     // t1
     talent_t* incisive_action;
@@ -351,6 +359,20 @@ struct acid_blade_t : public action_t
     class_t* p = cast();
     p -> buffs.acid_blade_coating -> trigger();
     p -> acid_blade_poison = poison;
+  }
+};
+
+// Overload Shot | Quick Shot ===============================================
+
+struct overload_shot_t : public agent_smug::overload_shot_t
+{
+  typedef agent_smug::overload_shot_t base_t;
+
+  overload_shot_t( class_t* p, const std::string& n, const std::string& options_str) :
+    base_t( p, n, options_str )
+  {
+    range = 10;
+    base_multiplier += 0.15;
   }
 };
 
@@ -730,6 +752,7 @@ struct all_attack_callback_t : public action_callback_t
 
   // extended
   if ( name == abilities.cull                  ) return new cull_t                  ( this, name, options_str ) ;
+  if ( name == abilities.overload_shot         ) return new overload_shot_t         ( this, name, options_str ) ;
   if ( name == abilities.shiv                  ) return new shiv_t                  ( this, name, options_str ) ;
 
   return base_t::create_action( name, options_str );
@@ -763,6 +786,14 @@ void class_t::init_abilities()
 void class_t::init_talents()
 {
   base_t::init_talents();
+
+  // Lethality
+  // t3
+  talents.combat_stims              = find_talent( "Combat Stims"             );
+  // t4
+  talents.escape_plan               = find_talent( "Escape Plan"              );
+  // t5
+  talents.license_to_kill           = find_talent( "License to Kill"          );
 
   // Medicine|Sawbones
   // t1

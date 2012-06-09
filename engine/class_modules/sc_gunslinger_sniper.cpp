@@ -24,6 +24,7 @@ public:
   debuff_t* debuff_cluster_bombs;
   debuff_t* debuff_electrified_railgun;
   debuff_t* debuff_shatter_shot;
+  dot_t dot_cull;
   dot_t dot_electrified_railgun;
   dot_t dot_interrogation_probe;
   dot_t dot_plasma_probe;
@@ -88,6 +89,14 @@ public:
   // Talents
   struct talents_t:base_t::talents_t
   {
+    // Lethality|Dirty Fighting
+    // t3
+    talent_t* targeted_demolition;
+    // t4
+    talent_t* hold_your_ground;
+    // t5
+    talent_t* razor_rounds;
+
     // Marksmanship|Sharpshooter
     // t1
     talent_t* cover_screen;
@@ -224,6 +233,7 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   debuff_cluster_bombs        ( new debuff_t ( this, source.abilities.cluster_bombs, 2 + source.talents.imperial_methodology -> rank(), from_seconds ( 0 ), from_seconds( 1.5 ), 100, false, true /*reverse*/ ) ),
   debuff_electrified_railgun  ( new debuff_t ( this, source.abilities.electrified_railgun, 4, from_seconds ( 5 ), from_seconds( 0 ), 1 * source.talents.electrified_railgun -> rank() ) ),
   debuff_shatter_shot         ( new debuff_t ( this, source.abilities.shatter_shot, 1, from_seconds ( 45 ) ) ),
+  dot_cull                ( source.abilities.cull               , &source ),
   dot_electrified_railgun ( source.abilities.electrified_railgun, &source ),
   dot_interrogation_probe ( source.abilities.interrogation_probe, &source ),
   dot_plasma_probe        ( source.abilities.plasma_probe       , &source ),
@@ -233,6 +243,7 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   add( *debuff_electrified_railgun );
   add( *debuff_shatter_shot        );
 
+  add( dot_cull                    );
   add( dot_electrified_railgun     );
   add( dot_interrogation_probe     );
   add( dot_plasma_probe            );
@@ -880,6 +891,19 @@ struct series_of_shots_t : public tech_attack_t
   // need to determine mechanics of the stack.
 };
 
+// Overload Shot | Quick Shot ===============================================
+
+struct overload_shot_t : public agent_smug::overload_shot_t
+{
+  typedef agent_smug::overload_shot_t base_t;
+
+  overload_shot_t( class_t* p, const std::string& n, const std::string& options_str) :
+    base_t( p, n, options_str )
+  {
+    range = 30;
+  }
+};
+
 // Snipe | Charged Burst ====================================================
 struct snipe_t : public agent_smug::snipe_t
 {
@@ -1190,6 +1214,7 @@ struct cluster_bombs_callback_t : public action_callback_t
   if ( name == abilities.explosive_probe       ) return new explosive_probe_t       ( this, name, options_str ) ;
   if ( name == abilities.fragmentation_grenade ) return new fragmentation_grenade_t ( this, name, options_str ) ;
   if ( name == abilities.orbital_strike        ) return new orbital_strike_t        ( this, name, options_str ) ;
+  if ( name == abilities.overload_shot         ) return new overload_shot_t         ( this, name, options_str ) ;
   if ( name == abilities.snipe                 ) return new snipe_t                 ( this, name, options_str ) ;
   if ( name == abilities.take_cover            ) return new take_cover_t            ( this, name, options_str ) ;
 
@@ -1238,6 +1263,14 @@ void class_t::init_abilities()
 void class_t::init_talents()
 {
   base_t::init_talents();
+
+  // Lethality
+  // t3
+  talents.targeted_demolition                 = find_talent( "Targeted Demolition"                );
+  // t4
+  talents.hold_your_ground                    = find_talent( "Hold Your Ground"                   );
+  // t5
+  talents.razor_rounds                        = find_talent( "Razor Rounds"                       );
 
   // Marksmanship|Sharpshooter
   // t1
