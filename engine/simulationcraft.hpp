@@ -1379,7 +1379,6 @@ struct buff_t
     actor_pair_t( targetdata_t* td );
   };
 
-  int __test;
   double current_value, react;
   timespan_t buff_duration, buff_cooldown;
   double default_chance;
@@ -1507,6 +1506,11 @@ struct debuff_t : public buff_t
   debuff_t( player_t*, const std::string& name,
             int max_stack=1, timespan_t buff_duration=timespan_t::zero(), timespan_t buff_cooldown=timespan_t::zero(),
             double chance=1.0, bool quiet=false, bool reverse=false, rng_type=RNG_CYCLIC, int aura_id=0 );
+
+  // Target De-Buff
+  debuff_t( actor_pair_t pair, const std::string& name,
+            int max_stack=1, timespan_t buff_duration=timespan_t::zero(), timespan_t buff_cooldown=timespan_t::zero(),
+            double chance=1.0, bool quiet=false, bool reverse=false, rng_type=RNG_CYCLIC, int aura_id=0, bool activated=true );
 };
 
 typedef struct buff_t aura_t;
@@ -1793,6 +1797,7 @@ public:
     int heat_signature; // -20% target armor. (4%x5) implement as buff, also add equal buffs
     int unnatural_might;// 5% damage bonus. implement as buff, also add equal republic buffs
     int fortification_hunters_boon; // 5% endurance
+    int ignore_player_arpen_debuffs; // rely purely on the overrides settings
   };
   overrides_t overrides;
 
@@ -1891,6 +1896,7 @@ public:
   player_t* find_player( int index );
   cooldown_t* get_cooldown( const std::string& name );
   void      use_optimal_buffs_and_debuffs( int value );
+  void      post_parse();
   void      aura_gain( const std::string& name, int aura_id=0 );
   void      aura_loss( const std::string& name, int aura_id=0 );
   expr_ptr  create_expression( action_t*, const std::string& name );
@@ -3347,7 +3353,11 @@ public:
   double total_crit() const       { return base_crit       + player_crit       + target_crit;       }
   double total_crit_bonus() const;
   double total_armor_penetration() const
+  // jon (freehugs) thinks these are multiplicative, and only within the same type are they additive
   { return base_armor_penetration * player_armor_penetration * target_armor_penetration; }
+  // if they are simply additive, then go with this one: it essentially boosts concealment and arsenal dps a fair chunk
+  // { return 1 - ( ( 1 - base_armor_penetration ) + ( 1 - player_armor_penetration )  +  ( 1 - target_armor_penetration ) );      }
+
 
   virtual double total_power() const;
 

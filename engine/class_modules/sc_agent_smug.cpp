@@ -8,24 +8,21 @@
 namespace agent_smug { // ===================================================
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
-  ::targetdata_t( source, target )
+  ::targetdata_t( source, target ),
+  debuff_weakening_blast  ( new debuff_t ( this, source.abilities.weakening_blast, 10, from_seconds (  15 ) ) ),
+  dot_adrenaline_probe       ( source.abilities.adrenaline_probe       , &source ),
+  dot_corrosive_dart         ( source.abilities.corrosive_dart         , &source ),
+  dot_corrosive_dart_weak    ( source.abilities.corrosive_dart_weak    , &source ),
+  dot_corrosive_grenade      ( source.abilities.corrosive_grenade      , &source ),
+  dot_corrosive_grenade_weak ( source.abilities.corrosive_grenade_weak , &source ),
+  dot_orbital_strike         ( source.abilities.orbital_strike         , &source )
 {
-  debuff_weakening_blast     = new buff_t ( this, source.abilities.weakening_blast, 10, from_seconds (  15 ) );
-  dot_adrenaline_probe       = dot_t ( source.abilities.adrenaline_probe       , &source );
-  dot_corrosive_dart         = dot_t ( source.abilities.corrosive_dart         , &source );
-  dot_corrosive_dart_weak    = dot_t ( source.abilities.corrosive_dart_weak    , &source );
-  dot_corrosive_grenade      = dot_t ( source.abilities.corrosive_grenade      , &source );
-  dot_corrosive_grenade_weak = dot_t ( source.abilities.corrosive_grenade_weak , &source );
-  dot_cull                   = dot_t ( source.abilities.cull                   , &source );
-  dot_orbital_strike         = dot_t ( source.abilities.orbital_strike         , &source );
-
   add( *debuff_weakening_blast    );
   add( dot_adrenaline_probe       );
   add( dot_corrosive_dart         );
   add( dot_corrosive_dart_weak    );
   add( dot_corrosive_grenade      );
   add( dot_corrosive_grenade_weak );
-  add( dot_cull                   );
   add( dot_orbital_strike         );
 }
 
@@ -106,6 +103,10 @@ adrenaline_probe_t::adrenaline_probe_t( class_t* p, const std::string& n, const 
   base_tick_time = from_seconds( 1.5 );
 }
 
+int adrenaline_probe_t::energy_returned_initial() { return 34; }
+
+int adrenaline_probe_t::energy_returned_tick() { return 8; }
+
 // the combat log isn't in sync with the game here.
 // the combat log shows after 1.5 seconds a tick of 8 and 34, and then another tick of 8 1.5s later.
 // what happens in game is you instantly get 34, and then two ticks of 8.
@@ -115,7 +116,7 @@ void adrenaline_probe_t::execute()
   class_t* p = cast();
 
   p -> buffs.adrenaline_probe -> trigger();
-  p -> resource_gain( RESOURCE_ENERGY, 34, p -> gains.adrenaline_probe );
+  p -> resource_gain( RESOURCE_ENERGY, energy_returned_initial(), p -> gains.adrenaline_probe );
 }
 
 void adrenaline_probe_t::tick(dot_t* d)
@@ -123,7 +124,7 @@ void adrenaline_probe_t::tick(dot_t* d)
   base_t::tick(d);
   class_t* p = cast();
 
-  p -> resource_gain( RESOURCE_ENERGY, 8, p -> gains.adrenaline_probe );
+  p -> resource_gain( RESOURCE_ENERGY, energy_returned_tick(), p -> gains.adrenaline_probe );
 }
 
 // Coordination | Lucky Shots ===============================================
@@ -180,7 +181,7 @@ corrosive_dart_t::corrosive_dart_t( class_t* p, const std::string& n, const std:
   }
   else
   {
-    base_cost                   = 20;
+    base_cost                   = energy_cost();
     td.standardhealthpercentmin =
     td.standardhealthpercentmax = 0.04;
     td.power_mod                = 0.4;
@@ -190,6 +191,8 @@ corrosive_dart_t::corrosive_dart_t( class_t* p, const std::string& n, const std:
       corrosive_dart_weak = new corrosive_dart_t( p, n + "_weak", options_str, true );
   }
 }
+
+int corrosive_dart_t::energy_cost() { return 20; }
 
 void corrosive_dart_t::tick( dot_t* d )
 {
@@ -248,7 +251,7 @@ corrosive_grenade_t::corrosive_grenade_t( class_t* p, const std::string& n, cons
   }
   else
   {
-    base_cost                   = 20;
+    base_cost                   = energy_cost();
     cooldown -> duration        = from_seconds( 12.0 );
     td.standardhealthpercentmin =
     td.standardhealthpercentmax = 0.032;
@@ -262,6 +265,8 @@ corrosive_grenade_t::corrosive_grenade_t( class_t* p, const std::string& n, cons
       corrosive_grenade_weak = new corrosive_grenade_t( p, n + "_weak", options_str, true );
   }
 }
+
+int corrosive_grenade_t::energy_cost() { return 20; }
 
 void corrosive_grenade_t::last_tick( dot_t* d )
 {
@@ -287,7 +292,7 @@ explosive_probe_t::explosive_probe_t( class_t* p, const std::string& n, const st
 
   parse_options( options_str );
 
-  base_cost                   = 20;
+  base_cost                   = energy_cost();
   range                       = 30.0;
   cooldown -> duration        = from_seconds( 30 );
   dd.standardhealthpercentmin = 0.23;
@@ -297,6 +302,8 @@ explosive_probe_t::explosive_probe_t( class_t* p, const std::string& n, const st
 // TODO: explosive probe "attaches" to the target and detonates on damage
 // (tooltip says damage. game data has text that says blaster damage)
 // this is not implemented yet.
+
+int explosive_probe_t::energy_cost() { return 20; }
 
 bool explosive_probe_t::ready()
 {
@@ -314,10 +321,12 @@ cull_t::cull_t( class_t* p, const std::string& n, const std::string& options_str
 
   parse_options( options_str );
 
-  base_cost                   = 25;
+  base_cost                   = energy_cost();
   range                       =  10.0;
   base_multiplier             += .03 * p -> talents.cut_down->rank();
 }
+
+int cull_t::energy_cost() { return 25; }
 
 void cull_t::init()
 {
@@ -380,24 +389,25 @@ fragmentation_grenade_t::fragmentation_grenade_t( class_t* p, const std::string&
 }
 
 // Orbital Strike | XS Freighter Flyby ======================================
-
 orbital_strike_t::orbital_strike_t( class_t* p, const std::string& n, const std::string& options_str) :
   base_t( n, p, SCHOOL_ELEMENTAL )
 {
   parse_options( options_str );
 
-  base_cost                   = 30;
+  base_cost                   = energy_cost();
   range                       = 30.0;
   cooldown -> duration        = from_seconds( 60 );
   td.standardhealthpercentmin =
   td.standardhealthpercentmax = 0.177;
   td.power_mod                = 1.77;
-  num_ticks                   = 3; // TODO: sniper set bonus? +1 tick
+  num_ticks                   = 3;
   base_tick_time              = from_seconds( 3 );
   base_execute_time           = from_seconds( 3 );
 
   aoe = 99; // TODO FIX: unlimited. "all targets in area"
 }
+
+int orbital_strike_t::energy_cost() { return 30; }
 
 // Overload Shot | Quick Shot ===============================================
 
@@ -409,15 +419,12 @@ overload_shot_t::overload_shot_t( class_t* p, const std::string& n, const std::s
   parse_options( options_str );
 
   base_cost                   = 17;
-  range                       = ( player -> type == IA_OPERATIVE || player -> type == S_SCOUNDREL ) ? 10 : 30;
   dd.standardhealthpercentmin =
   dd.standardhealthpercentmax = 0.124;
   dd.power_mod                = 1.24;
   weapon                      = &( player -> main_hand_weapon );
   weapon_multiplier           = -0.17;
-  // TODO move this tidbit into scoundrel_operative: 15% comes from operative's "skirmisher" passive
-  base_multiplier             += ( player -> type == IA_OPERATIVE || player -> type == S_SCOUNDREL ? 0.15 : 0 )
-      +  .03 * p -> talents.cut_down->rank();
+  base_multiplier             += .03 * p -> talents.cut_down->rank();
 }
 
 // Rifle Shot | Flurry Of Bolts =========================================================
@@ -497,7 +504,7 @@ snipe_t::snipe_t( class_t* p, const std::string& n, const std::string& options_s
 
   range = ( player -> type == IA_SNIPER || player -> type == S_GUNSLINGER ) ? 35 : 30.0;
 
-  base_cost                   = 20;
+  base_cost                   = energy_cost();
   base_execute_time           = from_seconds( 1.5 );
   dd.power_mod                = 1.85;
   dd.standardhealthpercentmin =
@@ -505,6 +512,8 @@ snipe_t::snipe_t( class_t* p, const std::string& n, const std::string& options_s
   weapon                      = &( player->main_hand_weapon );
   weapon_multiplier           = 0.23;
 }
+
+int snipe_t::energy_cost() { return 20; }
 
 bool snipe_t::ready()
 {
@@ -672,30 +681,13 @@ void class_t::init_talents()
   talents.lethal_injectors     = find_talent( "Lethal Injectors"     );
   // t3
   talents.corrosive_grenade    = find_talent( "Corrosive Grenade"    );
-  // snipers get targeted demolition, operatives get combat stims
-  if ( type == IA_OPERATIVE || type == S_SCOUNDREL )
-    talents.combat_stims         = find_talent( "Combat Stims"         );
-  else
-    talents.targeted_demolition  = find_talent( "Targeted Demolition"  );
   talents.cut_down             = find_talent( "Cut Down"             );
   // t4
   talents.lethal_purpose       = find_talent( "Lethal Purpose"       );
   talents.adhesive_corrosives  = find_talent( "Adhesive Corrosives"  );
-  // snipers get hold your ground, operatives get escape plan
-  if ( type == IA_OPERATIVE || type == S_SCOUNDREL )
-    talents.escape_plan          = find_talent( "Escape Plan"          );
-  else
-  {
-    talents.hold_your_ground     = find_talent( "Hold Your Ground"     );
-  }
   talents.lethal_dose          = find_talent( "Lethal Dose"          );
   // t5
   talents.cull                 = find_talent( "Cull"                 );
-  // snipers get razor rounds, operatives get license to kill
-  if ( type == IA_OPERATIVE || type == S_SCOUNDREL )
-    talents.license_to_kill      = find_talent( "License to Kill"      );
-  else
-    talents.razor_rounds         = find_talent( "Razor Rounds"         );
   talents.counterstrike        = find_talent( "Counterstrike"        );
   // t6
   talents.devouring_microbes   = find_talent( "Devouring Microbes"   );

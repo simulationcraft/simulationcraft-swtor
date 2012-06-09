@@ -339,7 +339,8 @@ struct terminal_velocity_attack_t : public attack_t
   {
     class_t* p = cast();
     if (
-        result == RESULT_CRIT && ( direct_dmg > 0 || tick_dmg > 0 )
+        ( p -> ptr || result == RESULT_CRIT ) && ( ! p -> ptr || result_is_hit() )
+        && ( direct_dmg > 0 || tick_dmg > 0 )
         && p -> rngs.terminal_velocity -> roll ( p -> talents.terminal_velocity -> rank() * 0.5 )
         // XXX can't do this. it stops working after the first iteration??
         // using a class var instead for now, which resets in ::reset
@@ -348,7 +349,7 @@ struct terminal_velocity_attack_t : public attack_t
     {
       if (
           p -> last_terminal_velocity_proc == timespan_t::zero()
-          || sim -> current_time - p -> last_terminal_velocity_proc > from_seconds( 3.0 )
+          || sim -> current_time - p -> last_terminal_velocity_proc > from_seconds( p -> ptr ? 6.0 : 3.0 )
          )
       {
         p -> last_terminal_velocity_proc = sim -> current_time;
@@ -550,7 +551,7 @@ struct tracer_missile_t : public missile_attack_t
       targetdata() -> debuff_heat_signature -> trigger( p.talents.light_em_up -> rank() ? 2 : 1 );
 
       if ( p.talents.tracer_lock -> rank() )
-        p.buffs.tracer_lock -> trigger();
+        p.buffs.tracer_lock -> trigger( ( p.ptr && p.talents.light_em_up -> rank() ) ? 2 : 1 );
 
       if ( p.talents.barrage -> rank() && !p.buffs.barrage -> up() )
       {
@@ -601,6 +602,10 @@ struct rail_shot_t : public attack_t
 
     if ( p -> talents.tracer_lock -> rank() )
       player_multiplier += 0.06 * p -> buffs.tracer_lock -> stack();
+
+    if ( p -> ptr )
+      if ( unsigned rank = p -> talents.advanced_targeting -> rank () )
+        player_armor_penetration -= 0.1 * rank;
   }
 
   virtual double cost() const
@@ -751,6 +756,11 @@ struct unload_t : public terminal_velocity_attack_t
     terminal_velocity_attack_t::player_buff();
     if ( benefit_from_barrage )
       player_multiplier += 0.25;
+
+    if ( p() -> ptr )
+      if ( unsigned rank = p() -> talents.advanced_targeting -> rank () )
+        player_armor_penetration -= 0.1 * rank;
+
   }
 
   virtual void last_tick(dot_t* d)
@@ -762,10 +772,6 @@ struct unload_t : public terminal_velocity_attack_t
     benefit_from_barrage = false;
   }
 
-  // TODO FIX BUG:
-  // using a dot for unload is wrong. Dots have a hit/miss on execute, and if hits all ticks will hit,
-  // or if miss, no ticks will hit. Unload is hit/miss per tick. Either need to modify sc_action to
-  // support "repeating" attacks, or change this to instantiate 6(!) unload actions and execute them manually
   virtual void execute()
   {
     if ( p() -> buffs.barrage -> up() )
@@ -857,7 +863,7 @@ double class_t::alacrity() const
 
 double class_t::armor_penetration() const
 {
-  return buffs.high_velocity_gas_cylinder -> up() ? base_t::armor_penetration() * 0.65 : base_t::armor_penetration();
+  return buffs.high_velocity_gas_cylinder -> up() ? base_t::armor_penetration() - 0.35 : base_t::armor_penetration();
 }
 
 
@@ -965,7 +971,7 @@ void class_t::init_base()
   distance = default_distance;
 
   attribute_multiplier_initial[ ATTR_AIM ] += 0.03 * talents.ironsights          -> rank();
-  set_base_accuracy( get_base_accuracy()   +  0.01 * talents.advanced_targeting  -> rank() );
+  set_base_accuracy( get_base_accuracy()   +  0.01 * ( ptr ? 0 : talents.advanced_targeting -> rank() ));
   set_base_alacrity( get_base_alacrity()   +  0.02 * talents.system_calibrations -> rank() );
   set_base_crit( get_base_crit()           +  0.01 *  talents.hired_muscle       -> rank() );
 }
@@ -1082,19 +1088,20 @@ void class_t::init_actions()
             action_list_str += "/snapshot_stats";
             // ARSENAL
             action_list_str += "/high_velocity_gas_cylinder,if=!buff.high_velocity_gas_cylinder.up";
-            action_list_str += "/vent_heat,if=heat<=66";
+            action_list_str += "/vent_heat,if=heat<=40";
+            action_list_str += "/thermal_sensor_override,if=heat<77";
             action_list_str += "/use_relics";
-            action_list_str += "/unload,if=heat>76";
-            if ( talents.heatseeker_missiles)
-              action_list_str += "/heatseeker_missiles,if=heat>76";
+            action_list_str += "/power_potion";
             if ( set_bonus.rakata_eliminators -> four_pc() )
-              action_list_str += "/rail_shot,if=buff.tracer_lock.stack>=5&buff.high_velocity_gas_cylinder.up";
-            action_list_str += "/rail_shot,if=heat>75&buff.tracer_lock.stack>=5";
+              action_list_str += "/rail_shot,if=buff.high_velocity_gas_cylinder.up";
+            action_list_str += "/rail_shot,if=heat>77";
+            if ( talents.heatseeker_missiles)
+              action_list_str += "/heatseeker_missiles,if=heat>77|cooldown.vent_heat.remains<10|buff.thermal_sensor_override.up";
+            action_list_str += "/unload,if=heat>77|cooldown.vent_heat.remains<10|buff.thermal_sensor_override.up";
             if ( talents.tracer_missile )
-              action_list_str += "/tracer_missile,if=heat>71";
+              action_list_str += "/tracer_missile,if=heat>77|cooldown.vent_heat.remains<10|buff.thermal_sensor_override.up|(heat>=70&cooldown.heatseeker_missiles.remains>1.5&cooldown.unload.remains>1.5)";
             else
               action_list_str += "/power_shot,if=heat>75";
-            action_list_str += "/thermal_sensor_override";
             action_list_str += "/rapid_shots";
 
             switch ( primary_tree() )

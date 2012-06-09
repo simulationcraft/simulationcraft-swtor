@@ -70,22 +70,13 @@ public:
     talent_t* lethal_injectors;
     // t3
     talent_t* corrosive_grenade;
-    // snipers get targeted demolition, operatives get combat stims
-    talent_t* combat_stims;
-    talent_t* targeted_demolition;
     talent_t* cut_down;
     // t4
     talent_t* lethal_purpose;
     talent_t* adhesive_corrosives;
-    // snipers get hold your ground, operatives get escape plan
-    talent_t* escape_plan;
-    talent_t* hold_your_ground;
     talent_t* lethal_dose;
     // t5
     talent_t* cull;
-    // snipers get razor rounds, operatives get license to kill
-    talent_t* license_to_kill;
-    talent_t* razor_rounds;
     talent_t* counterstrike;
     // t6
     talent_t* devouring_microbes;
@@ -231,14 +222,13 @@ public:
 class targetdata_t : public ::targetdata_t
 {
 public:
-  buff_t* debuff_weakening_blast;
+  debuff_t* debuff_weakening_blast;
 
   dot_t dot_adrenaline_probe;
   dot_t dot_corrosive_dart;
   dot_t dot_corrosive_dart_weak;
   dot_t dot_corrosive_grenade;
   dot_t dot_corrosive_grenade_weak;
-  dot_t dot_cull; // sniper is dot, agent is direct
   dot_t dot_orbital_strike;
 
   targetdata_t( class_t& source, player_t& target );
@@ -294,6 +284,8 @@ class adrenaline_probe_t : public action_t
   typedef action_t base_t;
 public:
   adrenaline_probe_t( class_t* p, const std::string& n, const std::string& options_str );
+  static int energy_returned_initial();
+  static int energy_returned_tick();
   virtual void execute();
   virtual void tick(dot_t* d);
 };
@@ -313,6 +305,7 @@ class corrosive_dart_t : public poison_attack_t
 public:
   corrosive_dart_t* corrosive_dart_weak;
   corrosive_dart_t( class_t* p, const std::string& n, const std::string& options_str, bool weak=false );
+  static int energy_cost();
   virtual void tick( dot_t* d );
   virtual void last_tick( dot_t* d );
   virtual void execute();
@@ -324,6 +317,7 @@ class corrosive_grenade_t : public poison_attack_t
 public:
   corrosive_grenade_t* corrosive_grenade_weak;
   corrosive_grenade_t( class_t* p, const std::string& n, const std::string& options_str, bool weak=false );
+  static int energy_cost();
   virtual void last_tick( dot_t* d );
   virtual void execute();
 };
@@ -335,6 +329,7 @@ class cull_t : public range_attack_t
 public:
   cull_extra_t* extra_strike;
   cull_t( class_t* p, const std::string& n, const std::string& options_str );
+  static int energy_cost();
   virtual void init();
   virtual cull_extra_t* get_extra_strike() = 0;
   virtual void execute();
@@ -353,6 +348,7 @@ class explosive_probe_t : public tech_attack_t
   typedef tech_attack_t base_t;
 public:
   explosive_probe_t( class_t* p, const std::string& n, const std::string& options_str);
+  static int energy_cost();
   virtual bool ready();
 };
 
@@ -392,6 +388,7 @@ class snipe_t : public range_attack_t
   typedef range_attack_t base_t;
 public:
   snipe_t( class_t* p, const std::string& n, const std::string& options_str );
+  static int energy_cost();
   virtual bool ready();
 };
 
@@ -408,6 +405,7 @@ class orbital_strike_t : public tech_attack_t
   typedef tech_attack_t base_t;
 public:
   orbital_strike_t( class_t* p, const std::string& n, const std::string& options_str);
+  static int energy_cost();
 };
 
 class weakening_blast_t : public range_attack_t

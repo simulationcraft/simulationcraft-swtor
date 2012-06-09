@@ -72,6 +72,14 @@ struct class_t : public agent_smug::class_t
   // Talents
   struct talents_t:base_t::talents_t
   {
+    // Lethality|Dirty Fighting
+    // t3
+    talent_t* combat_stims;
+    // t4
+    talent_t* escape_plan;
+    // t5
+    talent_t* license_to_kill;
+
     // Medicine|Sawbones
     // t1
     talent_t* incisive_action;
@@ -186,11 +194,10 @@ struct class_t : public agent_smug::class_t
 
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
-  agent_smug::targetdata_t( source, target )
+  agent_smug::targetdata_t( source, target ),
+  dot_acid_blade_poison ( source.abilities.acid_blade_poison , &source ),
+  dot_stim_boost        ( source.abilities.stim_boost        , &source )
 {
-  dot_acid_blade_poison      = dot_t ( source.abilities.acid_blade_poison , &source );
-  dot_stim_boost             = dot_t ( source.abilities.stim_boost        , &source );
-
   add( dot_acid_blade_poison );
   add( dot_stim_boost        );
 }
@@ -352,6 +359,20 @@ struct acid_blade_t : public action_t
     class_t* p = cast();
     p -> buffs.acid_blade_coating -> trigger();
     p -> acid_blade_poison = poison;
+  }
+};
+
+// Overload Shot | Quick Shot ===============================================
+
+struct overload_shot_t : public agent_smug::overload_shot_t
+{
+  typedef agent_smug::overload_shot_t base_t;
+
+  overload_shot_t( class_t* p, const std::string& n, const std::string& options_str) :
+    base_t( p, n, options_str )
+  {
+    range = 10;
+    base_multiplier += 0.15;
   }
 };
 
@@ -731,6 +752,7 @@ struct all_attack_callback_t : public action_callback_t
 
   // extended
   if ( name == abilities.cull                  ) return new cull_t                  ( this, name, options_str ) ;
+  if ( name == abilities.overload_shot         ) return new overload_shot_t         ( this, name, options_str ) ;
   if ( name == abilities.shiv                  ) return new shiv_t                  ( this, name, options_str ) ;
 
   return base_t::create_action( name, options_str );
@@ -764,6 +786,14 @@ void class_t::init_abilities()
 void class_t::init_talents()
 {
   base_t::init_talents();
+
+  // Lethality
+  // t3
+  talents.combat_stims              = find_talent( "Combat Stims"             );
+  // t4
+  talents.escape_plan               = find_talent( "Escape Plan"              );
+  // t5
+  talents.license_to_kill           = find_talent( "License to Kill"          );
 
   // Medicine|Sawbones
   // t1
@@ -896,12 +926,11 @@ void class_t::init_actions()
     action_list_default = true;
 
     action_list_str += "/stim,type=exotech_skill"
-                       + sl + abilities.coordination +
-                       "/snapshot_stats";
-
-    action_list_str += "/stealth"
+                       + sl + abilities.coordination
+                       + "/snapshot_stats"
+                       + "/stealth"
                        + sl + abilities.adrenaline_probe + ",if=energy<=60"
-                       + sl + abilities.stim_boost + ",if=buff." + abilities.tactical_advantage + ".stack>=2";
+                       + sl + abilities.stim_boost + ",if=buff." + abilities.tactical_advantage + ".stack>1";
 
     if ( talents.acid_blade -> rank() )
       action_list_str += sl + abilities.acid_blade + ",if=!buff." + abilities.acid_blade + "_coating.up&!cooldown." + abilities.backstab + ".remains";
@@ -924,7 +953,13 @@ void class_t::init_actions()
     action_list_str += sl + abilities.corrosive_grenade + ",if=!ticking&energy>=80";
 
     if ( talents.laceration -> rank() )
-      action_list_str += sl + abilities.laceration + ",if=energy>=75";
+    {
+      action_list_str += sl + abilities.laceration + ",if=energy>=75&buff." + abilities.tactical_advantage + ".stack>1";
+      action_list_str += sl + abilities.laceration + ",if=energy>=75&cooldown." + abilities.shiv + ".remains<2";
+    }
+
+    if ( talents.acid_blade -> rank() )
+      action_list_str += sl + abilities.acid_blade + ",if=!buff." + abilities.acid_blade + "_coating.up&energy>75";
 
     if ( talents.cull -> rank() )
       action_list_str += sl + abilities.cull + ",if=energy>=50&buff." +abilities.tactical_advantage + ".stack>=2"
@@ -935,11 +970,19 @@ void class_t::init_actions()
       action_list_str += sl + abilities.backstab + ",if=energy>=70";
 
     action_list_str += sl + abilities.orbital_strike + ",if=energy>65";
+    // energy dumps
+    action_list_str += sl + abilities.explosive_probe + ",if=energy>"; // should use cover before, but not enforcing cover yet
+    if ( set_bonus.rakata_enforcers -> four_pc() )
+      action_list_str += "100";
+    else
+      action_list_str += "95";
+    action_list_str += "&cooldown." + abilities.shiv + ".remains>2";
     action_list_str += sl + abilities.overload_shot + ",if=energy>";
     if ( set_bonus.rakata_enforcers -> four_pc() )
       action_list_str += "100";
     else
       action_list_str += "95";
+    action_list_str += "&cooldown." + abilities.shiv + ".remains>2";
     action_list_str += sl + abilities.rifle_shot;
 
     if ( false )

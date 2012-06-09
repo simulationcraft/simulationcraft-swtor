@@ -144,6 +144,7 @@ static bool parse_optimal_raid( sim_t*             sim,
   return true;
 }
 
+
 // parse_player =============================================================
 
 static bool parse_player( sim_t*             sim,
@@ -1640,6 +1641,7 @@ void sim_t::partition()
   exit( 0 );
 #endif
 
+  int remainder = iterations % threads;
   iterations /= threads;
 
   int num_children = threads - 1;
@@ -1649,6 +1651,11 @@ void sim_t::partition()
   {
     sim_t* child = children[ i ] = new sim_t( this, i+1 );
     child -> iterations /= threads;
+    if ( remainder )
+    {
+      remainder--;
+      child -> iterations += 1;
+    }
     child -> report_progress = 0;
   }
 
@@ -1735,13 +1742,19 @@ void sim_t::use_optimal_buffs_and_debuffs( int value )
   overrides.coordination                = optimal_raid;
   overrides.force_valor                 = optimal_raid;
   overrides.fortification_hunters_boon  = optimal_raid;
-  // current understanding is optimal raid is 5x any armor debuf as they all stack with each other
-  // picking snipers for no particular reason.
-  overrides.shatter_shot                = optimal_raid * 3;
+  overrides.shatter_shot                = optimal_raid;
   overrides.sunder                      = optimal_raid;
   overrides.heat_signature              = optimal_raid;
   overrides.unnatural_might             = optimal_raid;
 }
+
+// post_parse ===============================================================
+void sim_t::post_parse()
+{
+  if ( overrides.ignore_player_arpen_debuffs == -1 )
+    overrides.ignore_player_arpen_debuffs = ( overrides.shatter_shot | overrides.sunder | overrides.heat_signature ) ? 1 : 0;
+}
+
 
 // sim_t::aura_gain =========================================================
 
@@ -2003,6 +2016,7 @@ void sim_t::create_options()
     { "override.sunder",                  OPT_INT,    &( overrides.sunder                          ) },
     { "override.heat_signature",          OPT_INT,    &( overrides.heat_signature                  ) },
     { "override.unnatural_might",         OPT_BOOL,   &( overrides.unnatural_might                 ) },
+    { "override.ignore_player_arpen_debuffs", OPT_BOOL, &( overrides.ignore_player_arpen_debuffs   ) },
     // Stat Enchants
     { "default_enchant_strength",                 OPT_FLT,  &( enchant.attribute[ ATTR_STRENGTH  ] ) },
     { "default_enchant_aim",                      OPT_FLT,  &( enchant.attribute[ ATTR_AIM       ] ) },
@@ -2066,11 +2080,13 @@ bool sim_t::parse_options( int    _argc,
   if ( ! parent )
     cache::advance_era();
 
+  overrides.ignore_player_arpen_debuffs = -1; // XXX cough hack hack
   for ( int i=1; i < argc; i++ )
   {
     if ( ! option_t::parse_line( this, argv[ i ] ) )
       return false;
   }
+  sim_t::post_parse();
 
   if ( player_list == NULL )
   {

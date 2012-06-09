@@ -632,7 +632,7 @@ void SimulationCraftWindow::createDebuffsTab()
 
   shatterChoice = createChoice( 6, "0", "1", "2", "3", "4", "5" );
   shatterChoice -> setToolTip( debuffs[ 1 ].tooltip );
-  shatterChoice -> setCurrentIndex( 3 );
+  shatterChoice -> setCurrentIndex( 1 );
   debuffsLayout2 -> addRow( debuffs[ 1 ].label, shatterChoice );
 
   sunderChoice = createChoice( 6, "0", "1", "2", "3", "4", "5" );

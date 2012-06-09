@@ -1,16 +1,19 @@
 mrrobot=87c412bc-724f-4727-bbf0-195052bc600e
-talents=http://www.torhead.com/skill-calc#700rcrbbkRRZrI0bRoZb.1
-name=Gunslinger_Hybrid
-save=Gunslinger_Hybrid.simc
-
-copy=Gunslinger_Sharpshooter,Gunslinger_Hybrid
 talents=http://www.torhead.com/skill-calc#700rcrbbRsRGoZbcZh.1
+name=Gunslinger_Sharpshooter
 save=Gunslinger_Sharpshooter.simc
 
-copy=Gunslinger_Saboteur,Gunslinger_Hybrid
+copy=Gunslinger_Sharp_Sabo,Gunslinger_Sharpshooter
+talents=http://www.torhead.com/skill-calc#700rcrbbkRRZrI0bRoZb.1
+name=Gunslinger_Sharp_Sabo
+save=Gunslinger_Sharp_Sabo.simc
+
+copy=Gunslinger_Saboteur,Gunslinger_Sharpshooter
 talents=http://www.torhead.com/skill-calc#700bcbZrI0bRorRrsZh.1
+name=Gunslinger_Saboteur
 save=Gunslinger_Saboteur.simc
 
-copy=Gunslinger_Dirty_Fighting,Gunslinger_Hybrid
-talents=http://www.torhead.com/skill-calc#700bZbcZGbbkrMGdhR.1
+copy=Gunslinger_Dirty_Fighting,Gunslinger_Sharpshooter
+talents=http://www.torhead.com/skill-calc#700bZbIZGbbkrMGdhR.1
+name=Gunslinger_Dirty_Fighting
 save=Gunslinger_Dirty_Fighting.simc

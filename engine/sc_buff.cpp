@@ -58,7 +58,6 @@ struct buff_delay_t : public buff_event_t
 
 // buff_t::buff_t ===========================================================
 
-int __test = 9;
 buff_t::buff_t( sim_t*             s,
                 const std::string& n,
                 int                ms,
@@ -933,5 +932,20 @@ debuff_t::debuff_t( player_t*          p,
                     rng_type           rt,
                     int                id ) :
   buff_t( p, n, ms, d, cd, ch, q, r, rt, id )
+{
+}
+
+debuff_t::debuff_t( actor_pair_t       act,
+                    const std::string& n,
+                    int                ms,
+                    timespan_t         d,
+                    timespan_t         cd,
+                    double             ch,
+                    bool               q,
+                    bool               r,
+                    rng_type           rt,
+                    int                id,
+                    bool               au) :
+  buff_t( act, n, ms, d, cd, ch, q, r, rt, id, au )
 {
 }
