@@ -1089,7 +1089,7 @@ void class_t::init_actions()
             // ARSENAL
             action_list_str += "/high_velocity_gas_cylinder,if=!buff.high_velocity_gas_cylinder.up";
             action_list_str += "/vent_heat,if=heat<=40";
-            action_list_str += "thermal_sensor_override,if=heat<77";
+            action_list_str += "/thermal_sensor_override,if=heat<77";
             action_list_str += "/use_relics";
             action_list_str += "/power_potion";
             if ( set_bonus.rakata_eliminators -> four_pc() )

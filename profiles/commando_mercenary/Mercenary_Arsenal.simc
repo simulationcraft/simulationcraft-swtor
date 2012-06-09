@@ -12,7 +12,8 @@ talents=http://www.torhead.com/skill-calc#300Mc0MZMIkroMdRkfzZd.1
 actions=stim,type=exotech_reflex
 actions+=/snapshot_stats
 actions+=/high_velocity_gas_cylinder,if=!buff.high_velocity_gas_cylinder.up
-actions+=/vent_heat,if=heat<=40thermal_sensor_override,if=heat<77
+actions+=/vent_heat,if=heat<=40
+actions+=/thermal_sensor_override,if=heat<77
 actions+=/use_relics
 actions+=/power_potion
 actions+=/rail_shot,if=buff.high_velocity_gas_cylinder.up
