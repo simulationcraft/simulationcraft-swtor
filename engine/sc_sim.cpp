@@ -1741,9 +1741,7 @@ void sim_t::use_optimal_buffs_and_debuffs( int value )
   overrides.coordination                = optimal_raid;
   overrides.force_valor                 = optimal_raid;
   overrides.fortification_hunters_boon  = optimal_raid;
-  // current understanding is optimal raid is 5x any armor debuf as they all stack with each other
-  // picking snipers for no particular reason.
-  overrides.shatter_shot                = optimal_raid * 3;
+  overrides.shatter_shot                = optimal_raid;
   overrides.sunder                      = optimal_raid;
   overrides.heat_signature              = optimal_raid;
   overrides.unnatural_might             = optimal_raid;
@@ -2009,6 +2007,7 @@ void sim_t::create_options()
     { "override.sunder",                  OPT_INT,    &( overrides.sunder                          ) },
     { "override.heat_signature",          OPT_INT,    &( overrides.heat_signature                  ) },
     { "override.unnatural_might",         OPT_BOOL,   &( overrides.unnatural_might                 ) },
+    { "override.ignore_player_arpen_debuffs", OPT_BOOL, &( overrides.ignore_player_arpen_debuffs   ) },
     // Stat Enchants
     { "default_enchant_strength",                 OPT_FLT,  &( enchant.attribute[ ATTR_STRENGTH  ] ) },
     { "default_enchant_aim",                      OPT_FLT,  &( enchant.attribute[ ATTR_AIM       ] ) },

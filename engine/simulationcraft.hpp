@@ -1379,7 +1379,6 @@ struct buff_t
     actor_pair_t( targetdata_t* td );
   };
 
-  int __test;
   double current_value, react;
   timespan_t buff_duration, buff_cooldown;
   double default_chance;
@@ -1798,6 +1797,7 @@ public:
     int heat_signature; // -20% target armor. (4%x5) implement as buff, also add equal buffs
     int unnatural_might;// 5% damage bonus. implement as buff, also add equal republic buffs
     int fortification_hunters_boon; // 5% endurance
+    int ignore_player_arpen_debuffs; // rely purely on the overrides settings
   };
   overrides_t overrides;
 

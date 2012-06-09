@@ -168,6 +168,7 @@ public:
     std::string plasma_probe;
     std::string rapid_fire;
     std::string series_of_shots;
+    std::string sniper_volley;
     std::string takedown;
     std::string target_acquired;
     std::string shatter_shot;
@@ -176,7 +177,6 @@ public:
     std::string cluster_bombs;
     std::string energy_overrides;
     std::string snap_shot;
-    std::string sniper_volley;
     std::string stroke_of_genius;
     // rngs from talent
     std::string reactive_shot;
@@ -339,7 +339,8 @@ struct ambush_t : public range_attack_t
 
     base_cost                    = energy_cost();
     base_execute_time            = from_seconds( 2.5 );
-    cooldown -> duration         = from_seconds( 15 );
+    // XXX ptr change here we reference the talent position rapid_fire, which is actually sniper_volley now
+    cooldown -> duration         = from_seconds( ( 15 - ( sim -> ptr ? 1 * p -> talents.rapid_fire -> rank() : 0 ) ) );
     range                        = 35.0;
     dd.standardhealthpercentmin  =
         dd.standardhealthpercentmax  = 0.329;
@@ -723,7 +724,8 @@ struct rapid_fire_t : public action_t
   rapid_fire_t( class_t* p, const std::string& n, const std::string& options_str ) :
     base_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE )
   {
-    check_talent( p -> talents.rapid_fire -> rank() );
+    // passive in PTR
+    check_talent( sim -> ptr ? 0 : p -> talents.rapid_fire -> rank() );
 
     parse_options( options_str );
 
@@ -741,6 +743,35 @@ struct rapid_fire_t : public action_t
   }
 };
 
+// Sniper Volley | Burst Volley =============================================
+struct sniper_volley_t : public action_t
+{
+  typedef action_t base_t;
+
+  sniper_volley_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    base_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE )
+  {
+    // XXX checking talents.rapid_fire because it swapped places with sniper volley!
+    // until we reference some ptr talents hacking it in
+    // check_talent( sim -> ptr ? p -> talents.sniper_volley -> rank() : 0 );
+    check_talent( sim -> ptr ? p -> talents.rapid_fire -> rank() : 0 );
+
+    parse_options( options_str );
+
+    cooldown -> duration = from_seconds( 45 );
+    use_off_gcd = true;
+    trigger_gcd = timespan_t::zero();
+  }
+
+  void execute()
+  {
+    base_t::execute();
+    p() -> buffs.sniper_volley -> trigger();
+    p() -> cooldowns.series_of_shots -> reset();
+  }
+};
+
+
 
 // Orbital Strike | XS Freighter Flyby ======================================
 struct orbital_strike_t : public agent_smug::orbital_strike_t
@@ -748,7 +779,7 @@ struct orbital_strike_t : public agent_smug::orbital_strike_t
   typedef agent_smug::orbital_strike_t base_t;
 
   orbital_strike_t( class_t* p, const std::string& n, const std::string& options_str) :
-      base_t( p, n, options_str )
+        base_t( p, n, options_str )
   {
     cooldown -> duration -= from_seconds( 7.5  * p -> talents.pillbox_sniper          -> rank() );
     cooldown -> duration -= from_seconds( 1    * p -> talents.sector_ranger           -> rank() );
@@ -809,7 +840,7 @@ struct series_of_shots_t : public tech_attack_t
 
     base_cost                    = energy_cost();
     range                        = 35.0;
-    cooldown -> duration         = from_seconds( 15.0 );
+    cooldown -> duration         = from_seconds( ( 15 - ( sim -> ptr ? 1 * p -> talents.rapid_fire -> rank() : 0 ) ) );
     channeled                    = true;
     tick_zero                    = true;
     num_ticks                    = 3;
@@ -1167,8 +1198,12 @@ struct cluster_bombs_callback_t : public action_callback_t
   if ( name == abilities.interrogation_probe   ) return new interrogation_probe_t   ( this, name, options_str ) ;
   if ( name == abilities.laze_target           ) return new laze_target_t           ( this, name, options_str ) ;
   if ( name == abilities.plasma_probe          ) return new plasma_probe_t          ( this, name, options_str ) ;
-  if ( name == abilities.rapid_fire            ) return new rapid_fire_t            ( this, name, options_str ) ;
+  // since profiles aren't often generated with ptr flag, we'll toggle the ability here too
+  if ( !sim -> ptr && name == abilities.rapid_fire            ) return new rapid_fire_t            ( this, name, options_str ) ;
+  if ( sim -> ptr && name == abilities.rapid_fire            ) return new sniper_volley_t            ( this, abilities.sniper_volley, options_str ) ;
   if ( name == abilities.series_of_shots       ) return new series_of_shots_t       ( this, name, options_str ) ;
+  if ( !sim -> ptr && name == abilities.sniper_volley         ) return new rapid_fire_t         ( this, abilities.rapid_fire, options_str ) ;
+  if ( sim -> ptr && name == abilities.sniper_volley         ) return new sniper_volley_t         ( this, name, options_str ) ;
   if ( name == abilities.takedown              ) return new takedown_t              ( this, name, options_str ) ;
   if ( name == abilities.target_acquired       ) return new target_acquired_t       ( this, name, options_str ) ;
   if ( name == abilities.shatter_shot          ) return new shatter_shot_t          ( this, name, options_str ) ;
@@ -1333,7 +1368,9 @@ void class_t::init_buffs()
   buffs.snap_shot        = new buff_t( this , abilities.snap_shot        , 1 ,  from_seconds( 10  ), from_seconds( 6 ), 0.5 * talents.snap_shot -> rank() );
   buffs.rapid_fire       = new buff_t( this , abilities.rapid_fire       , 1 ,  from_seconds( 10  ) );
   buffs.reactive_shot    = new buff_t( this , abilities.reactive_shot    , 1 ,  from_seconds( 10  ) );
-  buffs.sniper_volley    = new buff_t( this , abilities.sniper_volley    , 1 ,  from_seconds( 10  ), from_seconds( 30 ), 0.05 * talents.sniper_volley -> rank() );
+  // checking talents.rapid_fire rank because it position changed with sniper volley but we aren't referencing ptr
+  // talent builds yet
+  buffs.sniper_volley    = new buff_t( this , abilities.sniper_volley    , 1 ,  from_seconds( 10  ), from_seconds( ( sim -> ptr ? 0 : 30 ) ), 0.05 * ( sim -> ptr ? talents.sniper_volley -> rank() : talents.rapid_fire -> rank() ) );
   buffs.stroke_of_genius = new buff_t( this , abilities.stroke_of_genius , 1 ,  from_seconds( 10  ), timespan_t::zero(), 0.5 * talents.stroke_of_genius -> rank() );
   buffs.target_acquired  = new buff_t( this , abilities.target_acquired  , 1 ,  from_seconds( 10  ));
 }
@@ -1426,8 +1463,10 @@ void class_t::init_actions()
         list << "&energy>=" << energy_floor + explosive_probe_t::energy_cost( this ) / 2;
     }
 
-    if ( talents.rapid_fire -> rank() )
+    if ( ! sim -> ptr && talents.rapid_fire -> rank() )
       list << sl << abilities.rapid_fire << ",if=cooldown." << abilities.series_of_shots << ".remains";
+    if ( sim -> ptr && talents.rapid_fire -> rank() )
+      list << sl << abilities.sniper_volley << ",if=cooldown." << abilities.series_of_shots << ".remains";
 
     if ( talents.imperial_methodology -> rank() )
       list << sl << abilities.explosive_probe << ",if=energy>=" << energy_floor + explosive_probe_t::energy_cost( this );
@@ -1496,7 +1535,7 @@ void class_t::init_actions()
     action_list_str = list.str();
   }
 
-  if ( talents.sniper_volley -> rank() )
+  if ( !sim -> ptr && talents.sniper_volley -> rank() )
   {
     register_attack_callback( RESULT_HIT_MASK, new sniper_volley_callback_t( this ) );
     register_tick_callback  ( RESULT_HIT_MASK, new sniper_volley_callback_t( this ) );
