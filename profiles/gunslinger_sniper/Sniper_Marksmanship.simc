@@ -22,7 +22,7 @@ actions+=/laze_target
 actions+=/rapid_fire,if=cooldown.series_of_shots.remains
 actions+=/followthrough,if=buff.followthrough.up&energy>=72
 actions+=/takedown,if=energy>=74
-actions+=/ambush,if=energy>=81
+actions+=/ambush,if=buff.reactive_shot.up&energy>=81
 actions+=/series_of_shots,if=energy>86
 actions+=/orbital_strike,if=energy>=96
 actions+=/explosive_probe,if=energy>=86
