@@ -1379,7 +1379,6 @@ struct buff_t
     actor_pair_t( targetdata_t* td );
   };
 
-  int __test;
   double current_value, react;
   timespan_t buff_duration, buff_cooldown;
   double default_chance;
