@@ -340,7 +340,7 @@ struct ambush_t : public range_attack_t
     base_cost                    = energy_cost();
     base_execute_time            = from_seconds( 2.5 );
     // XXX ptr change here we reference the talent position rapid_fire, which is actually sniper_volley now
-    cooldown -> duration         = from_seconds( ( 15 - ( sim -> ptr ? 1 * p -> talents.rapid_fire -> rank() : 0 ) ) );
+    cooldown -> duration         = from_seconds( ( 15 - ( p -> ptr ? 1 * p -> talents.rapid_fire -> rank() : 0 ) ) );
     range                        = 35.0;
     dd.standardhealthpercentmin  =
         dd.standardhealthpercentmax  = 0.329;
@@ -725,7 +725,7 @@ struct rapid_fire_t : public action_t
     base_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE )
   {
     // passive in PTR
-    check_talent( sim -> ptr ? 0 : p -> talents.rapid_fire -> rank() );
+    check_talent( p -> ptr ? 0 : p -> talents.rapid_fire -> rank() );
 
     parse_options( options_str );
 
@@ -754,7 +754,7 @@ struct sniper_volley_t : public action_t
     // XXX checking talents.rapid_fire because it swapped places with sniper volley!
     // until we reference some ptr talents hacking it in
     // check_talent( sim -> ptr ? p -> talents.sniper_volley -> rank() : 0 );
-    check_talent( sim -> ptr ? p -> talents.rapid_fire -> rank() : 0 );
+    check_talent( p -> ptr ? p -> talents.rapid_fire -> rank() : 0 );
 
     parse_options( options_str );
 
@@ -840,7 +840,7 @@ struct series_of_shots_t : public tech_attack_t
 
     base_cost                    = energy_cost();
     range                        = 35.0;
-    cooldown -> duration         = from_seconds( ( 15 - ( sim -> ptr ? 1 * p -> talents.rapid_fire -> rank() : 0 ) ) );
+    cooldown -> duration         = from_seconds( ( 15 - ( p -> ptr ? 1 * p -> talents.rapid_fire -> rank() : 0 ) ) );
     channeled                    = true;
     tick_zero                    = true;
     num_ticks                    = 3;
@@ -1199,11 +1199,11 @@ struct cluster_bombs_callback_t : public action_callback_t
   if ( name == abilities.laze_target           ) return new laze_target_t           ( this, name, options_str ) ;
   if ( name == abilities.plasma_probe          ) return new plasma_probe_t          ( this, name, options_str ) ;
   // since profiles aren't often generated with ptr flag, we'll toggle the ability here too
-  if ( !sim -> ptr && name == abilities.rapid_fire            ) return new rapid_fire_t            ( this, name, options_str ) ;
-  if ( sim -> ptr && name == abilities.rapid_fire            ) return new sniper_volley_t            ( this, abilities.sniper_volley, options_str ) ;
+  if ( !ptr && name == abilities.rapid_fire            ) return new rapid_fire_t            ( this, name, options_str ) ;
+  if ( ptr && name == abilities.rapid_fire            ) return new sniper_volley_t            ( this, abilities.sniper_volley, options_str ) ;
   if ( name == abilities.series_of_shots       ) return new series_of_shots_t       ( this, name, options_str ) ;
-  if ( !sim -> ptr && name == abilities.sniper_volley         ) return new rapid_fire_t         ( this, abilities.rapid_fire, options_str ) ;
-  if ( sim -> ptr && name == abilities.sniper_volley         ) return new sniper_volley_t         ( this, name, options_str ) ;
+  if ( !ptr && name == abilities.sniper_volley         ) return new rapid_fire_t         ( this, abilities.rapid_fire, options_str ) ;
+  if ( ptr && name == abilities.sniper_volley         ) return new sniper_volley_t         ( this, name, options_str ) ;
   if ( name == abilities.takedown              ) return new takedown_t              ( this, name, options_str ) ;
   if ( name == abilities.target_acquired       ) return new target_acquired_t       ( this, name, options_str ) ;
   if ( name == abilities.shatter_shot          ) return new shatter_shot_t          ( this, name, options_str ) ;
@@ -1370,7 +1370,7 @@ void class_t::init_buffs()
   buffs.reactive_shot    = new buff_t( this , abilities.reactive_shot    , 1 ,  from_seconds( 10  ) );
   // checking talents.rapid_fire rank because it position changed with sniper volley but we aren't referencing ptr
   // talent builds yet
-  buffs.sniper_volley    = new buff_t( this , abilities.sniper_volley    , 1 ,  from_seconds( 10  ), from_seconds( ( sim -> ptr ? 0 : 30 ) ), 0.05 * ( sim -> ptr ? talents.sniper_volley -> rank() : talents.rapid_fire -> rank() ) );
+  buffs.sniper_volley    = new buff_t( this , abilities.sniper_volley    , 1 ,  from_seconds( 10  ), from_seconds( ( ptr ? 0 : 30 ) ), 0.05 * ( ptr ? talents.sniper_volley -> rank() : talents.rapid_fire -> rank() ) );
   buffs.stroke_of_genius = new buff_t( this , abilities.stroke_of_genius , 1 ,  from_seconds( 10  ), timespan_t::zero(), 0.5 * talents.stroke_of_genius -> rank() );
   buffs.target_acquired  = new buff_t( this , abilities.target_acquired  , 1 ,  from_seconds( 10  ));
 }
@@ -1463,9 +1463,9 @@ void class_t::init_actions()
         list << "&energy>=" << energy_floor + explosive_probe_t::energy_cost( this ) / 2;
     }
 
-    if ( ! sim -> ptr && talents.rapid_fire -> rank() )
+    if ( ! ptr && talents.rapid_fire -> rank() )
       list << sl << abilities.rapid_fire << ",if=cooldown." << abilities.series_of_shots << ".remains";
-    if ( sim -> ptr && talents.rapid_fire -> rank() )
+    if ( ptr && talents.rapid_fire -> rank() )
       list << sl << abilities.sniper_volley << ",if=cooldown." << abilities.series_of_shots << ".remains";
 
     if ( talents.imperial_methodology -> rank() )
@@ -1535,7 +1535,7 @@ void class_t::init_actions()
     action_list_str = list.str();
   }
 
-  if ( !sim -> ptr && talents.sniper_volley -> rank() )
+  if ( !ptr && talents.sniper_volley -> rank() )
   {
     register_attack_callback( RESULT_HIT_MASK, new sniper_volley_callback_t( this ) );
     register_tick_callback  ( RESULT_HIT_MASK, new sniper_volley_callback_t( this ) );
@@ -1554,14 +1554,14 @@ void class_t::init_actions()
 double class_t::tech_accuracy_chance() const
 {
   return base_t::tech_accuracy_chance() + _tech_range_accuracy
-    + ( (sim -> ptr && buffs.target_acquired -> up()) ? 0.3 : 0 );
+    + ( (ptr && buffs.target_acquired -> up()) ? 0.3 : 0 );
 }
 
 // class_t::range_accuracy_chance ===============================
 double class_t::range_accuracy_chance() const
 {
   return base_t::range_accuracy_chance() + _tech_range_accuracy
-    + ( (sim -> ptr && buffs.target_acquired -> up()) ? 0.3 : 0 );
+    + ( (ptr && buffs.target_acquired -> up()) ? 0.3 : 0 );
 }
 
 // class_t::talented_energy =====================================
@@ -1602,7 +1602,7 @@ double class_t::alacrity() const
   // TODO confirm how these 10% and 20% work/stack
   // are they a flat 20%, or maybe 20% increase to alacrity rating?
   return base_t::alacrity() - ( buffs.sniper_volley -> up() ? 0.1 : 0 ) -
-    ( sim -> ptr                   ? 0   :
+    ( ptr                          ? 0   :
      buffs.target_acquired -> up() ? 0.2 : 0 );
 }
 
@@ -1612,7 +1612,7 @@ double class_t::armor_penetration() const
 {
   double arpen = base_t::armor_penetration();
 
-  if ( sim -> ptr && buffs.target_acquired -> up() )
+  if ( ptr && buffs.target_acquired -> up() )
     arpen -= 0.15;
 
   return arpen;

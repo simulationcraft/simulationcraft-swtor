@@ -339,7 +339,7 @@ struct terminal_velocity_attack_t : public attack_t
   {
     class_t* p = cast();
     if (
-        ( sim -> ptr || result == RESULT_CRIT ) && ( ! sim -> ptr || result_is_hit() )
+        ( p -> ptr || result == RESULT_CRIT ) && ( ! p -> ptr || result_is_hit() )
         && ( direct_dmg > 0 || tick_dmg > 0 )
         && p -> rngs.terminal_velocity -> roll ( p -> talents.terminal_velocity -> rank() * 0.5 )
         // XXX can't do this. it stops working after the first iteration??
@@ -349,7 +349,7 @@ struct terminal_velocity_attack_t : public attack_t
     {
       if (
           p -> last_terminal_velocity_proc == timespan_t::zero()
-          || sim -> current_time - p -> last_terminal_velocity_proc > from_seconds( sim -> ptr ? 6.0 : 3.0 )
+          || sim -> current_time - p -> last_terminal_velocity_proc > from_seconds( p -> ptr ? 6.0 : 3.0 )
          )
       {
         p -> last_terminal_velocity_proc = sim -> current_time;
@@ -551,7 +551,7 @@ struct tracer_missile_t : public missile_attack_t
       targetdata() -> debuff_heat_signature -> trigger( p.talents.light_em_up -> rank() ? 2 : 1 );
 
       if ( p.talents.tracer_lock -> rank() )
-        p.buffs.tracer_lock -> trigger( ( sim -> ptr && p.talents.light_em_up -> rank() ) ? 2 : 1 );
+        p.buffs.tracer_lock -> trigger( ( p.ptr && p.talents.light_em_up -> rank() ) ? 2 : 1 );
 
       if ( p.talents.barrage -> rank() && !p.buffs.barrage -> up() )
       {
@@ -603,7 +603,7 @@ struct rail_shot_t : public attack_t
     if ( p -> talents.tracer_lock -> rank() )
       player_multiplier += 0.06 * p -> buffs.tracer_lock -> stack();
 
-    if ( sim -> ptr )
+    if ( p -> ptr )
       if ( unsigned rank = p -> talents.advanced_targeting -> rank () )
         player_armor_penetration -= 0.1 * rank;
   }
@@ -757,7 +757,7 @@ struct unload_t : public terminal_velocity_attack_t
     if ( benefit_from_barrage )
       player_multiplier += 0.25;
 
-    if ( sim -> ptr )
+    if ( p() -> ptr )
       if ( unsigned rank = p() -> talents.advanced_targeting -> rank () )
         player_armor_penetration -= 0.1 * rank;
 
@@ -971,7 +971,7 @@ void class_t::init_base()
   distance = default_distance;
 
   attribute_multiplier_initial[ ATTR_AIM ] += 0.03 * talents.ironsights          -> rank();
-  set_base_accuracy( get_base_accuracy()   +  0.01 * ( sim -> ptr ? 0 : talents.advanced_targeting -> rank() ));
+  set_base_accuracy( get_base_accuracy()   +  0.01 * ( ptr ? 0 : talents.advanced_targeting -> rank() ));
   set_base_alacrity( get_base_alacrity()   +  0.02 * talents.system_calibrations -> rank() );
   set_base_crit( get_base_crit()           +  0.01 *  talents.hired_muscle       -> rank() );
 }
