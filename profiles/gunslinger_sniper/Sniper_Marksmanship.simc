@@ -26,7 +26,7 @@ actions+=/ambush,if=buff.reactive_shot.up&energy>=81
 actions+=/series_of_shots,if=energy>86
 actions+=/orbital_strike,if=energy>=96
 actions+=/explosive_probe,if=energy>=86
-actions+=/snipe,if=energy>86
+actions+=/snipe,if=energy>=86
 actions+=/rifle_shot
 head=rakata_field_techs_headgear,ilevel=58,quality=artifact,stats=645armor_124endurance_99cunning_57power_51accuracy
 ear=rakata_enforcers_device,ilevel=58,quality=artifact,stats=85endurance_103cunning_51accuracy_44crit

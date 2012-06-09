@@ -1431,7 +1431,7 @@ void class_t::init_actions()
     if ( !talents.reactive_shot -> rank() )
       list << sl << abilities.ambush << ",if=energy>=" << energy_floor + ambush_t::energy_cost();
 
-    list << sl << abilities.snipe << ",if=energy>" << energy_floor + snipe_t::energy_cost();
+    list << sl << abilities.snipe << ",if=energy>=" << energy_floor + snipe_t::energy_cost();
 
     list << sl << abilities.rifle_shot;
 
