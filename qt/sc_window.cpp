@@ -558,7 +558,7 @@ void SimulationCraftWindow::createGlobalsTab()
   QFormLayout* globalsLayout = new QFormLayout();
   globalsLayout->setFieldGrowthPolicy( QFormLayout::FieldsStayAtSizeHint );
   globalsLayout->addRow(        "Version",       versionChoice = createChoice( 3, "Live", "PTR", "Both" ) );
-  globalsLayout->addRow(     "Iterations",    iterationsChoice = createChoice( 5, "100", "1000", "10000", "25000", "50000" ) );
+  globalsLayout->addRow(     "Iterations",    iterationsChoice = createChoice( 6, "100", "1000", "10000", "25000", "50000", "100000" ) );
   globalsLayout->addRow(      "World Lag",       latencyChoice = createChoice( 3, "Low", "Medium", "High" ) );
   globalsLayout->addRow(   "Length (sec)",   fightLengthChoice = createChoice( 9, "100", "150", "200", "250", "300", "350", "400", "450", "500" ) );
   globalsLayout->addRow(    "Vary Length", fightVarianceChoice = createChoice( 3, "0%", "10%", "20%" ) );
@@ -566,7 +566,7 @@ void SimulationCraftWindow::createGlobalsTab()
   //globalsLayout->addRow(   "Target Level",   targetLevelChoice = createChoice( 3, "Raid Boss", "5-man heroic", "5-man normal" ) );
   globalsLayout->addRow(    "Target Race",    targetRaceChoice = createChoice( 7, "humanoid", "beast", "demon", "dragonkin", "elemental", "giant", "undead" ) );
   globalsLayout->addRow(   "Player Skill",   playerSkillChoice = createChoice( 4, "Elite", "Good", "Average", "Ouch! Fire is hot!" ) );
-  globalsLayout->addRow(        "Threads",       threadsChoice = createChoice( 4, "1", "2", "4", "8" ) );
+  globalsLayout->addRow(        "Threads",       threadsChoice = createChoice( 5, "1", "2", "4", "8", "12" ) );
   //globalsLayout->addRow(  "Armory Region",  armoryRegionChoice = createChoice( 5, "us", "eu", "tw", "cn", "kr" ) );
   //globalsLayout->addRow(    "Armory Spec",    armorySpecChoice = createChoice( 2, "active", "inactive" ) );
   globalsLayout->addRow(   "Default Role",   defaultRoleChoice = createChoice( 4, "auto", "dps", "heal", "tank" ) );
@@ -954,11 +954,12 @@ void SimulationCraftWindow::createToolTips()
                              "PTR:  Use mechanics on PTR server"
                              "Both: Create Evil Twin with PTR mechanics" );
 
-  iterationsChoice->setToolTip( "100:   Fast and Rough\n"
-                                "1000:  Sufficient for DPS Analysis\n"
-                                "10000: Recommended for Scale Factor Generation\n"
-                                "25000: Use if 10,000 isn't enough for Scale Factors\n"
-                                "50000: If you're patient" );
+  iterationsChoice->setToolTip( "100:    Fast and Rough\n"
+                                "1000:   Sufficient for DPS Analysis\n"
+                                "10000:  Recommended for Scale Factor Generation\n"
+                                "25000:  Use if 10,000 isn't enough for Scale Factors\n"
+                                "50000:  If you're patient"
+                                "100000: Showing off" );
 
   fightLengthChoice->setToolTip( "For custom fight lengths use max_time=seconds." );
 
