@@ -1,3 +1,11 @@
+:: ###########################################
+:: #                                         #
+:: # A COPY OF simc_swtor_reports.bash       #
+:: #                                         #
+:: # CHECK FOR ANY CHANGES BEFORE RERUNNING  #
+:: #                                         #
+:: ###########################################
+
 @echo off
 setlocal
 set PATH=..\engine;engine;%PATH%
@@ -12,9 +20,12 @@ call :runsim Sage_Sorcerer_Raid
 call :runsim Sage_Sorcerer_Raid -HelterSkelter "fight_style=HelterSkelter"
 call :runsim Sage_Sorcerer_Raid -HeavyMovement "fight_style=HeavyMovement"
 call :runsim Assassin_Raid
-call :runsim Mercenary_Raid
 REM call :runsim Assassin_Raid -HelterSkelter "fight_style=HelterSkelter"
 REM call :runsim Assassin_Raid -HeavyMovement "fight_style=HeavyMovement"
+call :runsim Mercenary_Raid
+call :runsim Scoundrel_Operative_Raid
+call :runsim Gunslinger_Sniper_Raid
+
 
 goto :eof
 
