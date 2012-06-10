@@ -25,9 +25,9 @@ runsim ()
 runsim Sage_Sorcerer_Raid
 runsim Sage_Sorcerer_Raid -HelterSkelter "fight_style=HelterSkelter"
 runsim Sage_Sorcerer_Raid -HeavyMovement "fight_style=HeavyMovement"
-runsim Assassin_Raid
-#runsim Assassin_Raid -HelterSkelter "fight_style=HelterSkelter"
-#runsim Assassin_Raid -HeavyMovement "fight_style=HeavyMovement"
+runsim Shadow_Assassin_Raid
+## runsim Assassin_Raid -HelterSkelter "fight_style=HelterSkelter"
+## runsim Assassin_Raid -HeavyMovement "fight_style=HeavyMovement"
 runsim Mercenary_Raid
 runsim Scoundrel_Operative_Raid
 runsim Gunslinger_Sniper_Raid

@@ -19,7 +19,7 @@ set statistics_level=3
 call :runsim Sage_Sorcerer_Raid
 call :runsim Sage_Sorcerer_Raid -HelterSkelter "fight_style=HelterSkelter"
 call :runsim Sage_Sorcerer_Raid -HeavyMovement "fight_style=HeavyMovement"
-call :runsim Assassin_Raid
+call :runsim Jedi_Assassin_Raid
 REM call :runsim Assassin_Raid -HelterSkelter "fight_style=HelterSkelter"
 REM call :runsim Assassin_Raid -HeavyMovement "fight_style=HeavyMovement"
 call :runsim Mercenary_Raid
