@@ -432,6 +432,7 @@ struct cull_extra_t : public agent_smug::cull_extra_t
     dd.standardhealthpercentmin =
     dd.standardhealthpercentmax =  0.037;
     dd.power_mod                =  0.37;
+    // TODO CHECK do razor_rounds and steady_shot benefit the extra attack as well?
   }
 };
 
@@ -448,7 +449,6 @@ struct cull_t : public agent_smug::cull_t
   cull_t( class_t* p, const std::string& n, const std::string& options_str ) :
     base_t( p, n, options_str )
   {
-    // TODO does RR benefit the extra attack as well?
     range                       = 30; // TODO check or 35?
     cooldown -> duration        = from_seconds( 9 );
     base_crit                   = 0.04 * p -> talents.razor_rounds -> rank();
