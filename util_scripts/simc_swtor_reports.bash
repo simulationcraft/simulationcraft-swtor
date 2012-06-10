@@ -1,3 +1,4 @@
+#!/bin/bash
 ###########################################
 #                                         #
 # A COPY OF simc_swtor_reports.bat        #
