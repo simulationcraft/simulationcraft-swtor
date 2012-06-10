@@ -460,6 +460,7 @@ struct cull_t : public agent_smug::cull_t
     channeled                   = true;
     num_ticks                   = 3;
     base_tick_time              = from_seconds(1);
+    base_multiplier            += 0.03 * p -> talents.steady_shots -> rank();
   }
 
   agent_smug::cull_extra_t* get_extra_strike()
@@ -636,7 +637,6 @@ struct laze_target_t : public action_t
     parse_options( options_str );
 
     cooldown -> duration = from_seconds( 60 );
-    // TODO find out if this triggers GCD, and if it can be used off GCD
     use_off_gcd = true;
     trigger_gcd = timespan_t::zero();
   }
@@ -886,9 +886,6 @@ struct series_of_shots_t : public tech_attack_t
     }
   }
 
-  // TODO talent: electrified raligun has 1/3 2/3 3/3 chance on damage to
-  // deal elemental damage over 4 seconds, stacking up to 4 times.
-  // need to determine mechanics of the stack.
 };
 
 // Overload Shot | Quick Shot ===============================================
@@ -985,10 +982,6 @@ struct fragmentation_grenade_t : public agent_smug::fragmentation_grenade_t
     crit_multiplier      +=               0.15    * p -> talents.experimental_explosives -> rank();
   }
 };
-
-// TODO steady_shots also affects Cull, but we still need to move that from
-// scoundrel to agent
-
 
 // Take Cover | Take Cover ==================================================
 struct take_cover_t : public agent_smug::take_cover_t
@@ -1599,8 +1592,6 @@ void class_t::regen( timespan_t periodicity )
 // class_t::alacrity ============================================
 double class_t::alacrity() const
 {
-  // TODO confirm how these 10% and 20% work/stack
-  // are they a flat 20%, or maybe 20% increase to alacrity rating?
   return base_t::alacrity() - ( buffs.sniper_volley -> up() ? 0.1 : 0 ) -
     ( ptr                          ? 0   :
      buffs.target_acquired -> up() ? 0.2 : 0 );
