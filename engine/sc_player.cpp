@@ -1630,7 +1630,6 @@ double player_t::default_bonus_multiplier() const
 double player_t::default_crit_chance() const
 {
   double c = base_crit_chance_ + crit_from_rating + ( (double) bonus_crit_pc_ / 100 );
-  //std::cout << "XXX bonus:" << bonus_crit_pc_ << std::endl;
 
   if ( buffs.coordination -> up() )
     c += 0.05;
