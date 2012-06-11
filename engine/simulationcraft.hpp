@@ -2386,6 +2386,9 @@ private:
   double initial_accuracy_rating, accuracy_rating_, base_accuracy_, computed_accuracy;
   double initial_alacrity_rating, alacrity_rating_, base_alacrity_, computed_alacrity;
   double initial_crit_rating, crit_rating, base_crit_chance_;
+  // XXX TODO unsure how companion bonus health works. %? set amount?
+  int bonus_accuracy_pc_, bonus_crit_pc_, bonus_surge_pc_, bonus_health_;
+
   double initial_surge_rating, surge_rating;
   double initial_defense_rating, defense_rating;
   double initial_shield_rating, shield_rating;

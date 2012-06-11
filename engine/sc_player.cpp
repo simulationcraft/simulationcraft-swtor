@@ -263,6 +263,8 @@ player_t::player_t( sim_t*             s,
   initial_accuracy_rating( 0 ), accuracy_rating_( 0 ), base_accuracy_( 0 ), computed_accuracy( 0 ),
   initial_alacrity_rating( 0 ), alacrity_rating_( 0 ), base_alacrity_( 0 ), computed_alacrity( 0 ),
   initial_crit_rating( 0 ), crit_rating( 0 ), base_crit_chance_( 0.05 ),
+  // for companion bonuses
+  bonus_accuracy_pc_( 0 ), bonus_crit_pc_( 0 ), bonus_surge_pc_( 0 ), bonus_health_( 0 ),
   initial_surge_rating( 0 ), surge_rating( 0 ),
   initial_defense_rating( 0 ), defense_rating( 0 ),
   initial_shield_rating( 0 ), shield_rating( 0 ),
@@ -739,7 +741,7 @@ void player_t::init_core()
   initial_stats.alacrity_rating = gear.alacrity_rating  + enchant.alacrity_rating   + ( is_pet() ? 0 : sim -> enchant.alacrity_rating );
   initial_stats.surge_rating    = gear.surge_rating     + enchant.surge_rating      + ( is_pet() ? 0 : sim -> enchant.surge_rating );
 
-  initial_alacrity_rating    = initial_stats.alacrity_rating;
+  initial_alacrity_rating = initial_stats.alacrity_rating;
   initial_crit_rating     = initial_stats.crit_rating;
   initial_accuracy_rating = initial_stats.accuracy_rating;
   initial_surge_rating    = initial_stats.surge_rating;
@@ -1627,7 +1629,8 @@ double player_t::default_bonus_multiplier() const
 
 double player_t::default_crit_chance() const
 {
-  double c = base_crit_chance_ + crit_from_rating;
+  double c = base_crit_chance_ + crit_from_rating + ( (double) bonus_crit_pc_ / 100 );
+  //std::cout << "XXX bonus:" << bonus_crit_pc_ << std::endl;
 
   if ( buffs.coordination -> up() )
     c += 0.05;
@@ -2974,10 +2977,10 @@ void player_t::recalculate_crit_from_rating()
 { crit_from_rating = rating_scaler.crit( crit_rating ); }
 
 void player_t::recalculate_accuracy()
-{ computed_accuracy = get_base_accuracy() + rating_scaler.accuracy( get_accuracy_rating() ); }
+{ computed_accuracy = get_base_accuracy() + rating_scaler.accuracy( get_accuracy_rating() ) + ( (double) bonus_accuracy_pc_ / 100 ); }
 
 void player_t::recalculate_surge_from_rating()
-{ surge_bonus = rating_scaler.surge( surge_rating ); }
+{ surge_bonus = rating_scaler.surge( surge_rating ) + ( (double) bonus_surge_pc_ / 100 ); }
 
 void player_t::recalculate_defense_from_rating()
 { defense_from_rating = rating_scaler.defense( defense_rating ); }
@@ -5106,7 +5109,14 @@ void player_t::create_options()
     { "reaction_time_mean",                   OPT_TIMESPAN, &( reaction_mean                          ) },
     { "reaction_time_stddev",                 OPT_TIMESPAN, &( reaction_stddev                        ) },
     { "reaction_time_nu",                     OPT_TIMESPAN, &( reaction_nu                            ) },
-    { NULL, OPT_UNKNOWN, NULL }
+    // stat bonuses- outside dr, for companions
+    { "bonus_crit_pc",                        OPT_INT,    &( bonus_crit_pc_                           ) },
+    { "bonus_accuracy_pc",                    OPT_INT,    &( bonus_accuracy_pc_                       ) },
+    { "bonus_surge_pc",                       OPT_INT,    &( bonus_surge_pc_                          ) },
+    // XXX FIX how does companion health bonus work. % or set amount?
+    //{ "bonus_health_",                       OPT_INT,    &( bonus_health_                          ) },
+    { NULL, OPT_UNKNOWN, NULL },
+
   };
 
   option_t::copy( options, player_options );
