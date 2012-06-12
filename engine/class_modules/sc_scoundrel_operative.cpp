@@ -43,9 +43,10 @@ struct class_t : public agent_smug::class_t
   // Gains
   struct gains_t:base_t::gains_t
   {
-    gain_t* stim_boost;
-    gain_t* revitalizers;
+    gain_t* endorphin_rush;
     gain_t* combat_stims;
+    gain_t* revitalizers;
+    gain_t* stim_boost;
   } gains;
 
   // Procs
@@ -154,6 +155,10 @@ struct class_t : public agent_smug::class_t
     std::string stealth;
     std::string stim_boost;
     std::string tactical_advantage;
+
+    // gains
+    std::string endorphin_rush;
+
   } abilities;
 
   action_t* acid_blade_poison;
@@ -361,6 +366,31 @@ struct acid_blade_t : public action_t
     p -> acid_blade_poison = poison;
   }
 };
+
+// Adrenaline Probe | Cool Head =============================================
+struct adrenaline_probe_t : public agent_smug::adrenaline_probe_t
+{
+  typedef agent_smug::adrenaline_probe_t base_t;
+
+  class_t* p() const { return static_cast<class_t*>( player ); }
+
+  adrenaline_probe_t( class_t* p, const std::string& n, const std::string& options_str) :
+    base_t( p, n, options_str )
+  { }
+
+  static int energy_returned_endorphin_rush( class_t* p )
+  {
+    return 8 * p -> talents.endorphin_rush -> rank();
+  }
+
+  void execute()
+  {
+    base_t::execute();
+    if ( int energy = energy_returned_endorphin_rush( p() ) )
+      p() -> resource_gain( RESOURCE_ENERGY, energy, p() -> gains.endorphin_rush );
+  }
+};
+
 
 // Overload Shot | Quick Shot ===============================================
 
@@ -751,6 +781,7 @@ struct all_attack_callback_t : public action_callback_t
   if ( name == abilities.stim_boost            ) return new stim_boost_t            ( this, name, options_str ) ;
 
   // extended
+  if ( name == abilities.adrenaline_probe      ) return new adrenaline_probe_t      ( this, name, options_str ) ;
   if ( name == abilities.cull                  ) return new cull_t                  ( this, name, options_str ) ;
   if ( name == abilities.overload_shot         ) return new overload_shot_t         ( this, name, options_str ) ;
   if ( name == abilities.shiv                  ) return new shiv_t                  ( this, name, options_str ) ;
@@ -779,6 +810,9 @@ void class_t::init_abilities()
   abilities.stealth            = op ? "stealth"            : "stealth"                 ;
   abilities.stim_boost         = op ? "stim_boost"         : "pugnacity"               ;
   abilities.tactical_advantage = op ? "tactical_advantage" : "upper_hand"              ;
+
+  // gains
+  abilities.endorphin_rush    = op  ? "endorphin_rush"     : "Keep Cool"               ;
 }
 
 // class_t::init_talents ======================================
@@ -885,9 +919,10 @@ void class_t::init_gains()
 {
   base_t::init_gains();
 
-  gains.combat_stims = get_gain( abilities.combat_stims );
-  gains.revitalizers = get_gain( abilities.revitalizers );
-  gains.stim_boost   = get_gain( abilities.stim_boost   );
+  gains.endorphin_rush = get_gain( abilities.endorphin_rush );
+  gains.combat_stims   = get_gain( abilities.combat_stims   );
+  gains.revitalizers   = get_gain( abilities.revitalizers   );
+  gains.stim_boost     = get_gain( abilities.stim_boost     );
 }
 
 // class_t::init_procs ========================================

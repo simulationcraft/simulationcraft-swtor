@@ -258,7 +258,6 @@ corrosive_grenade_t::corrosive_grenade_t( class_t* p, const std::string& n, cons
     td.power_mod                = 0.32;
     num_ticks                   = 7;
     tick_zero                   = true;
-    // TEST: maybe not limited?
     aoe                         = 3;
 
     if ( p -> talents.lingering_toxins -> rank() )
