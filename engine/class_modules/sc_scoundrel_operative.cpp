@@ -812,7 +812,7 @@ void class_t::init_abilities()
   abilities.tactical_advantage = op ? "tactical_advantage" : "upper_hand"              ;
 
   // gains
-  abilities.endorphin_rush    = op  ? "endorphin_rush"     : "Keep Cool"               ;
+  abilities.endorphin_rush    = op  ? "endorphin_rush"     : "keep_cool"               ;
 }
 
 // class_t::init_talents ======================================
