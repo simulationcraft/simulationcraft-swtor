@@ -71,7 +71,7 @@ void poison_attack_t::target_debuff( player_t* tgt, dmg_type type )
       target_multiplier += 0.05 * rank;
   }
 
-  if ( p.talents.weakening_blast -> rank() )
+  if ( type == DMG_OVER_TIME && p.talents.weakening_blast -> rank() )
   {
     targetdata_t& td = *targetdata();
     bool up = td.debuff_weakening_blast -> up();
