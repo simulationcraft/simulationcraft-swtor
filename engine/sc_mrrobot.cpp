@@ -252,6 +252,49 @@ void parse_items( player_t* p, js::node_t* items )
   }
 }
 
+// parse_companion_bonuses ==================================================
+void parse_companion_bonuses( player_t* p, js::node_t* profile )
+{
+  std::string has_human;
+  profile -> get( "LegacyHasHuman", has_human );
+  //std::cout << "has human" << has_human;
+  //std::stringstream ss;
+  if ( js::node_t* bonuses = profile -> get_child("LegacyCompanionBonuses") )
+  {
+    std::string bonus;
+
+    for ( js::node_t* node : *bonuses )
+    {
+      node -> get ( bonus );
+      if ( util_t::str_compare_ci ( "MeleeDamage", bonus ) )
+      {
+        p -> bonus_surge_pc_ = 1;
+        //ss << "bonus_surge_pc=1\n";
+      }
+      else if ( util_t::str_compare_ci ( "RangedTank", bonus ) )
+      {
+        p -> bonus_health_pc_ = 1;
+        //ss << "bonus_health_pc=1\n";
+      }
+      else if ( util_t::str_compare_ci ( "RangedDamage", bonus ) )
+      {
+        p -> bonus_crit_pc_ = 1;
+        //ss << "bonus_crit_pc=1\n";
+      }
+      else if ( util_t::str_compare_ci ( "MeleeTank", bonus ) )
+      {
+        p -> bonus_accuracy_pc_ = 1;
+        //ss << "bonus_accuracy_pc=1\n";
+      }
+      else if ( util_t::str_compare_ci ( "Healer", bonus ) )
+      {
+        //ss << "bonus_heal_pc=1\n";
+      }
+    }
+  }
+  //std::cout << ss.str() << std::endl;
+}
+
 // parse_datacrons ==========================================================
 
 void parse_datacrons( player_t* p, js::node_t* datacrons )
@@ -691,6 +734,8 @@ player_t* download_player( sim_t*             sim,
   parse_items( p, profile -> get_child( "GearSet" ) );
 
   parse_datacrons( p, profile -> get_child( "Datacrons" ) );
+
+  parse_companion_bonuses( p, profile );
 
   return p;
 }

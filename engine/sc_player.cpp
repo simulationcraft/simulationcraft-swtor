@@ -259,12 +259,13 @@ player_t::player_t( sim_t*             s,
   events( 0 ),
   race( r == RACE_NONE ? RACE_HUMAN : r ),
 
+  // for companion bonuses
+  bonus_accuracy_pc_( 0 ), bonus_crit_pc_( 0 ), bonus_surge_pc_( 0 ), bonus_health_pc_( 0 ),
+
   // Ratings
   initial_accuracy_rating( 0 ), accuracy_rating_( 0 ), base_accuracy_( 0 ), computed_accuracy( 0 ),
   initial_alacrity_rating( 0 ), alacrity_rating_( 0 ), base_alacrity_( 0 ), computed_alacrity( 0 ),
   initial_crit_rating( 0 ), crit_rating( 0 ), base_crit_chance_( 0.05 ),
-  // for companion bonuses
-  bonus_accuracy_pc_( 0 ), bonus_crit_pc_( 0 ), bonus_surge_pc_( 0 ), bonus_health_( 0 ),
   initial_surge_rating( 0 ), surge_rating( 0 ),
   initial_defense_rating( 0 ), defense_rating( 0 ),
   initial_shield_rating( 0 ), shield_rating( 0 ),
@@ -4854,6 +4855,10 @@ void player_t::create_profile( std::ostream& os, save_type savetype )
     if ( enchant.resource[ RESOURCE_ENERGY ] != 0 )  os << "enchant_energy="           << enchant.resource[ RESOURCE_ENERGY ] << '\n';
     if ( enchant.resource[ RESOURCE_AMMO   ] != 0 )  os << "enchant_ammo="             << enchant.resource[ RESOURCE_AMMO   ] << '\n';
     if ( enchant.resource[ RESOURCE_HEAT   ] != 0 )  os << "enchant_heat="             << enchant.resource[ RESOURCE_HEAT   ] << '\n';
+    if ( bonus_surge_pc_ != 0 )  os << "bonus_surge_pc="             << bonus_surge_pc_ << '\n';
+    if ( bonus_crit_pc_ != 0 )  os << "bonus_crit_pc="             << bonus_crit_pc_ << '\n';
+    if ( bonus_accuracy_pc_ != 0 )  os << "bonus_accuracy_pc="             << bonus_accuracy_pc_ << '\n';
+    if ( bonus_health_pc_ != 0 )  os << "bonus_health_pc="             << bonus_health_pc_ << '\n';
   }
 }
 
@@ -5113,7 +5118,7 @@ void player_t::create_options()
     { "bonus_accuracy_pc",                    OPT_INT,    &( bonus_accuracy_pc_                       ) },
     { "bonus_surge_pc",                       OPT_INT,    &( bonus_surge_pc_                          ) },
     // XXX FIX how does companion health bonus work. % or set amount?
-    //{ "bonus_health_",                       OPT_INT,    &( bonus_health_                          ) },
+    { "bonus_health_pc",                     OPT_INT,    &( bonus_health_pc_                          ) },
     { NULL, OPT_UNKNOWN, NULL },
 
   };
