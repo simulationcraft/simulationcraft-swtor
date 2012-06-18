@@ -1,16 +1,16 @@
-jedi_shadow=Shadow_Balance
+jedi_shadow=Shadow_Balance_Rakata
 Assassin_Gear-1.1.5.simc
 talents=http://www.torhead.com/skill-calc#601McZhMZfrbRrRkMfz.1
 position=back
-save=Shadow_Balance.simc
+save=Shadow_Balance_Rakata.simc
 
-copy=Shadow_Infiltration,Shadow_Balance
+copy=Shadow_Infiltration_Rakata,Shadow_Balance_Rakata
 talents=http://www.torhead.com/skill-calc#6010MZhGMRkhMrtzZf0c.1
-save=Shadow_Infiltration.simc
+save=Shadow_Infiltration_Rakata.simc
 
-copy=Shadow_One,Shadow_Balance
+copy=Shadow_One_Rakata,Shadow_Balance_Rakata
 talents=http://www.torhead.com/skill-calc#601RIMs00cZZfMfRr0kM.1
-save=Shadow_One.simc
+save=Shadow_One_Rakata.simc
 
 
 mrrobot=282b3033-6a03-4d9a-a96f-967fd6f76bb3

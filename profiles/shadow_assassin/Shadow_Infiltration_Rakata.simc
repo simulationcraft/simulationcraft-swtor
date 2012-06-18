@@ -1,6 +1,6 @@
 #!./simc
 
-jedi_shadow="Jedi_Shadow_Infiltration"
+jedi_shadow="Shadow_Infiltration_Rakata"
 origin="create_Jedi_Shadow.simc"
 level=50
 race=human
