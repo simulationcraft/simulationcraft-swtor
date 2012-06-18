@@ -1,0 +1,53 @@
+#!./simc
+
+sith_sorcerer="Sorcerer_Hybrid_Campaign"
+origin="http://swtor.askmrrobot.com/character/daf7aadb-6790-423b-97c9-900938931f19"
+level=50
+race=human
+position=ranged_front
+role=spell
+use_pre_potion=0
+professions=artifice
+talents=http://www.torhead.com/skill-calc#201oZfcM0bZfMfRs0krc.1
+actions=stim,type=exotech_resolve
+actions+=/mark_of_power
+actions+=/snapshot_stats
+actions+=/force_lightning,if=buff.lightning_barrage_dd.up
+actions+=/power_potion
+actions+=/recklessness
+actions+=/use_relics
+actions+=/affliction,if=!ticking
+actions+=/death_field,if=force>80
+actions+=/crushing_darkness,if=buff.wrath.react
+actions+=/force_lightning
+actions+=/shock,moving=1,if=force>120
+head=campaign_force_masters_headgear,ilevel=61,quality=artifact,stats=475armor_117endurance_136willpower_53power_57alacrity
+ear=black_hole_force_lords_mk_1_relay,ilevel=61,quality=artifact,stats=121endurance_84willpower_49crit_57alacrity
+shirt=datacrons,stats=40strength_40aim_40cunning_40willpower_40endurance_40presence
+chest=campaign_force_masters_vestments,ilevel=61,quality=artifact,stats=475armor_117endurance_136willpower_53crit_57surge
+waist=campaign_force_masters_sash,ilevel=61,quality=artifact,stats=297armor_81endurance_93willpower_41crit
+legs=campaign_force_masters_lower_robe,ilevel=61,quality=artifact,stats=475armor_117endurance_136willpower_53crit_57alacrity
+feet=campaign_force_masters_boots,ilevel=61,quality=artifact,stats=297armor_137endurance_110willpower_63power_57surge
+wrists=campaign_force_masters_bracers,ilevel=61,quality=artifact,stats=297armor_81endurance_93willpower_41power
+hands=campaign_force_masters_gloves,ilevel=61,quality=artifact,stats=297armor_137endurance_110willpower_63crit_57alacrity
+implant1=black_hole_force_lords_mk_1_system,ilevel=61,quality=artifact,stats=87endurance_102willpower_71power_57alacrity
+implant2=black_hole_force_lords_mk_1_system,ilevel=61,quality=artifact,stats=87endurance_102willpower_71power_57alacrity
+relic1=campaign_relic_of_boundless_ages,ilevel=61,quality=artifact,stats=84endurance,use=405power_120cd_20dur
+relic2=campaign_relic_of_elemental_transcendance,ilevel=61,quality=artifact,stats=84endurance,equip=ondamage_184elemental_30%_4.5cd
+main_hand=campaign_force_masters_lightsaber,ilevel=61,quality=artifact,stats=158endurance_98willpower_649forcepower_95crit_57alacrity,weapon=lightsaber_324min_486max
+off_hand=campaign_force_masters_focus,ilevel=61,quality=artifact,stats=108endurance_93willpower_90power_649forcepower_57surge
+# Gear Summary
+# gear_strength=40
+# gear_aim=40
+# gear_cunning=40
+# gear_willpower=1333
+# gear_endurance=1556
+# gear_presence=40
+# gear_crit_rating=354
+# gear_alacrity_rating=399
+# gear_armor=2613
+# gear_power=389
+# gear_forcepower=1298
+# gear_surge_rating=171
+# Set Bonuses
+# main_hand=campaign_force_masters_lightsaber,weapon=lightsaber_324min_486max
