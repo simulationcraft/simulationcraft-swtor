@@ -1,6 +1,6 @@
 #!./simc
 
-operative="Operative_Medicine"
+operative="Operative_Concealment_Rakata"
 origin="http://swtor.askmrrobot.com/character/0236c2a6-bee0-4dc0-b4eb-9a42da54027f"
 level=50
 race=cyborg
@@ -8,19 +8,23 @@ position=back
 role=hybrid
 use_pre_potion=0
 professions=armormech
-talents=http://www.torhead.com/skill-calc#401MffrzGoRdsZ0cZG.1
+talents=http://www.torhead.com/skill-calc#4010cZGIRodzRdGoZhMoz.1
 actions=stim,type=exotech_skill
 actions+=/coordination
 actions+=/snapshot_stats
 actions+=/stealth
 actions+=/adrenaline_probe,if=energy<=60
 actions+=/stim_boost,if=buff.tactical_advantage.stack>1
+actions+=/acid_blade,if=!buff.acid_blade_coating.up&!cooldown.backstab.remains
 actions+=/use_relics
 actions+=/power_potion
 actions+=/hidden_strike
+actions+=/backstab,if=energy>=65,if=buff.acid_blade_coating.up
 actions+=/shiv,if=energy>=75&buff.tactical_advantage.stack<2
 actions+=/corrosive_dart,if=!ticking&energy>=75
-actions+=/backstab,if=energy>=70
+actions+=/laceration,if=energy>=75&buff.tactical_advantage.stack>1
+actions+=/laceration,if=energy>=75&cooldown.shiv.remains<2
+actions+=/acid_blade,if=!buff.acid_blade_coating.up&energy>75
 actions+=/orbital_strike,if=energy>65
 actions+=/explosive_probe,if=energy>100&cooldown.shiv.remains>2
 actions+=/overload_shot,if=energy>100&cooldown.shiv.remains>2
@@ -58,3 +62,7 @@ off_hand=ghost,ilevel=58,quality=artifact,stats=98endurance_85cunning_82power_61
 # set_bonus=rakata_enforcers_4pc
 # main_hand=scorekeeper,weapon=blasterrifle_306min_459max
 # off_hand=ghost,weapon=vibroknife_330min_494max
+bonus_surge_pc=1
+bonus_crit_pc=1
+bonus_accuracy_pc=1
+bonus_health_pc=1
