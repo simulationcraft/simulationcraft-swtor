@@ -1,0 +1,63 @@
+#!./simc
+
+jedi_shadow="Shadow_Balance_Campaign"
+origin="http://swtor.askmrrobot.com/character/282b3033-6a03-4d9a-a96f-967fd6f76bb3"
+level=50
+race=human
+position=back
+role=hybrid
+use_pre_potion=0
+professions=none
+talents=http://www.torhead.com/skill-calc#601McZhMZfrbRrRkMfz.1
+actions=stim,type=exotech_resolve
+actions+=/force_valor
+actions+=/force_technique
+actions+=/snapshot_stats
+actions+=/stealth
+actions+=/power_potion
+actions+=/use_relics
+actions+=/force_potency
+actions+=/force_cloak,if=buff.shadows_respite.down
+actions+=/battle_readiness
+actions+=/force_in_balance
+actions+=/mind_crush,if=buff.force_strike.react
+actions+=/force_breach,if=!dot.force_technique.ticking
+actions+=/spinning_strike
+actions+=/sever_force,if=!ticking
+actions+=/shadow_strike,if=buff.find_weakness.react
+actions+=/double_strike,if=force>45
+actions+=/saber_strike
+head=campaign_stalkers_headgear,ilevel=61,quality=artifact,stats=475armor_137endurance_110willpower_57accuracy_63crit
+ear=black_hole_strikers_mk_1_chip,ilevel=61,quality=artifact,stats=87endurance_102willpower_57accuracy_71crit
+shirt=datacrons,stats=40strength_40aim_40cunning_40willpower_40endurance_40presence
+chest=campaign_stalkers_robe,ilevel=61,quality=artifact,stats=475armor_117endurance_136willpower_53power_57surge
+waist=campaign_stalkers_waistwrap,ilevel=61,quality=artifact,stats=297armor_81endurance_93willpower_41power
+legs=campaign_stalkers_legwraps,ilevel=61,quality=artifact,stats=475armor_117endurance_136willpower_57accuracy_53crit
+feet=campaign_stalkers_boots,ilevel=61,quality=artifact,stats=297armor_137endurance_110willpower_63crit_57surge
+wrists=campaign_stalkers_bracers,ilevel=61,quality=artifact,stats=297armor_81endurance_93willpower_41crit
+hands=campaign_stalkers_handwraps,ilevel=61,quality=artifact,stats=297armor_117endurance_136willpower_53power_57accuracy
+implant1=black_hole_strikers_mk_1_motivator,ilevel=61,quality=artifact,stats=87endurance_102willpower_71power_57accuracy
+implant2=black_hole_strikers_mk_1_motivator,ilevel=61,quality=artifact,stats=87endurance_102willpower_71power_57accuracy
+relic1=campaign_relic_of_boundless_ages,ilevel=61,quality=artifact,stats=84endurance,use=405power_120cd_20dur
+relic2=campaign_relic_of_dark_radiance,ilevel=61,quality=artifact,stats=84endurance,equip=ondamage_184internal_30%_4.5cd
+main_hand=campaign_stalkers_saberstaff,ilevel=61,quality=artifact,stats=158endurance_98willpower_649forcepower_57accuracy_95crit,weapon=doublebladedlightsaber_389min_584max
+off_hand=campaign_stalkers_generator,ilevel=61,quality=artifact,stats=108endurance_93willpower_649forcepower_90crit_57surge
+# Gear Summary
+# gear_strength=40
+# gear_aim=40
+# gear_cunning=40
+# gear_willpower=1351
+# gear_endurance=1522
+# gear_presence=40
+# gear_accuracy_rating=399
+# gear_crit_rating=476
+# gear_armor=2613
+# gear_power=289
+# gear_forcepower=1298
+# gear_surge_rating=171
+# Set Bonuses
+# main_hand=campaign_stalkers_saberstaff,weapon=doublebladedlightsaber_389min_584max
+bonus_surge_pc=1
+bonus_crit_pc=1
+bonus_accuracy_pc=1
+bonus_health_pc=1

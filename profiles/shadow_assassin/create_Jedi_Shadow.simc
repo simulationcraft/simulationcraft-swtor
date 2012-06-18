@@ -1,13 +1,28 @@
-jedi_shadow=Jedi_Shadow_Balance
+jedi_shadow=Shadow_Balance
 Assassin_Gear-1.1.5.simc
 talents=http://www.torhead.com/skill-calc#601McZhMZfrbRrRkMfz.1
 position=back
-save=Jedi_Shadow_Balance.simc
+save=Shadow_Balance.simc
 
-copy=Jedi_Shadow_Infiltration,Jedi_Shadow_Balance
+copy=Shadow_Infiltration,Shadow_Balance
 talents=http://www.torhead.com/skill-calc#6010MZhGMRkhMrtzZf0c.1
-save=Jedi_Shadow_Infiltration.simc
+save=Shadow_Infiltration.simc
 
-copy=Jedi_Shadow_One,Jedi_Shadow_Balance
+copy=Shadow_One,Shadow_Balance
 talents=http://www.torhead.com/skill-calc#601RIMs00cZZfMfRr0kM.1
-save=Jedi_Shadow_One.simc
+save=Shadow_One.simc
+
+
+mrrobot=282b3033-6a03-4d9a-a96f-967fd6f76bb3
+name=Shadow_Balance_Campaign
+talents=http://www.torhead.com/skill-calc#601McZhMZfrbRrRkMfz.1
+position=back
+save=Shadow_Balance_Campaign.simc
+
+copy=Shadow_Infiltration_Campaign,Shadow_Balance_Campaign
+talents=http://www.torhead.com/skill-calc#6010MZhGMRkhMrtzZf0c.1
+save=Shadow_Infiltration_Campaign.simc
+
+copy=Shadow_One_Campaign,Shadow_Balance_Campaign
+talents=http://www.torhead.com/skill-calc#601RIMs00cZZfMfRr0kM.1
+save=Shadow_One_Campaign.simc

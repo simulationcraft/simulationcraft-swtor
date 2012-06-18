@@ -1,6 +1,6 @@
 #!./simc
 
-jedi_shadow="Jedi_Shadow_One"
+jedi_shadow="Jedi_Shadow_Infiltration"
 origin="create_Jedi_Shadow.simc"
 level=50
 race=human
@@ -8,19 +8,23 @@ position=back
 role=hybrid
 use_pre_potion=0
 professions=synthweaving
-talents=http://www.torhead.com/skill-calc#601RIMs00cZZfMfRr0kM.1
+talents=http://www.torhead.com/skill-calc#6010MZhGMRkhMrtzZf0c.1
 actions=stim,type=exotech_resolve
 actions+=/force_valor
-actions+=/force_technique
+actions+=/shadow_technique
 actions+=/snapshot_stats
+actions+=/stealth
 actions+=/power_potion
+actions+=/use_relics
 actions+=/force_potency
+actions+=/blackout,if=buff.shadows_respite.down&force<90
+actions+=/force_cloak,if=buff.shadows_respite.down
 actions+=/battle_readiness
-actions+=/force_in_balance
-actions+=/mind_crush,if=buff.force_strike.react
-actions+=/force_breach,if=!dot.force_technique.ticking
+actions+=/project,if=buff.circling_shadows.stack=2
 actions+=/spinning_strike
-actions+=/double_strike,if=force>45
+actions+=/shadow_strike,if=buff.find_weakness.react
+actions+=/force_breach,if=buff.exit_strategy.stack>0
+actions+=/clairvoyant_strike,if=force>45
 actions+=/saber_strike
 head=rakata_stalkers_headgear,ilevel=58,quality=artifact,stats=456armor_108endurance_99willpower_74power_51accuracy
 ear=columi_stalkers_chip,ilevel=56,quality=artifact,stats=93endurance_108willpower_48power_48accuracy
