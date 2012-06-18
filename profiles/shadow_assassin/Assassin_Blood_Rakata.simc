@@ -1,6 +1,6 @@
 #!./simc
 
-sith_assassin="Sith_Assassin_Blood"
+sith_assassin="Assassin_Blood_Rakata"
 origin="create_Sith_Assassin.simc"
 level=50
 race=human
@@ -14,6 +14,7 @@ actions+=/mark_of_power
 actions+=/lightning_charge
 actions+=/snapshot_stats
 actions+=/power_potion
+actions+=/use_relics
 actions+=/recklessness
 actions+=/overcharge_saber
 actions+=/death_field
