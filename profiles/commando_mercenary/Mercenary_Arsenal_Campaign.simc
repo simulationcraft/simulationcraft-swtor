@@ -1,0 +1,58 @@
+#!./simc
+
+mercenary="Mercenary_Arsenal_Campaign"
+origin="http://swtor.askmrrobot.com/character/7d9b4a17-1eaa-41b5-b5cc-52eb165b0946"
+level=50
+race=chiss
+position=back
+role=hybrid
+use_pre_potion=0
+professions=none
+talents=http://www.torhead.com/skill-calc#300Mc0MZMIkroMdRkfzZd.1
+actions=stim,type=exotech_reflex
+actions+=/snapshot_stats
+actions+=/high_velocity_gas_cylinder,if=!buff.high_velocity_gas_cylinder.up
+actions+=/vent_heat,if=heat<=40
+actions+=/thermal_sensor_override,if=heat<77
+actions+=/use_relics
+actions+=/power_potion
+actions+=/rail_shot,if=heat>77
+actions+=/heatseeker_missiles,if=heat>77|cooldown.vent_heat.remains<10|buff.thermal_sensor_override.up
+actions+=/unload,if=heat>77|cooldown.vent_heat.remains<10|buff.thermal_sensor_override.up
+actions+=/tracer_missile,if=heat>77|cooldown.vent_heat.remains<10|buff.thermal_sensor_override.up|(heat>=70&cooldown.heatseeker_missiles.remains>1.5&cooldown.unload.remains>1.5)
+actions+=/rapid_shots
+head=campaign_eliminators_helmet,ilevel=61,quality=artifact,stats=897armor_137endurance_110aim_63power_57accuracy
+ear=black_hole_boltblasters_mk_1_device,ilevel=61,quality=artifact,stats=87endurance_102aim_71crit_57surge
+shirt=datacrons,stats=40strength_40aim_40cunning_40willpower_40endurance_40presence
+chest=campaign_eliminators_chestguard,ilevel=61,quality=artifact,stats=897armor_137endurance_110aim_63crit_57surge
+waist=campaign_eliminators_belt,ilevel=61,quality=artifact,stats=561armor_81endurance_93aim_41crit
+legs=campaign_eliminators_greaves,ilevel=61,quality=artifact,stats=897armor_137endurance_110aim_57accuracy_63crit
+feet=campaign_eliminators_boots,ilevel=61,quality=artifact,stats=561armor_117endurance_136aim_53power_57surge
+wrists=campaign_eliminators_vambraces,ilevel=61,quality=artifact,stats=561armor_78endurance_113aim_12power
+hands=campaign_eliminators_gauntlets,ilevel=61,quality=artifact,stats=561armor_117endurance_136aim_57accuracy_53crit
+implant1=black_hole_annihilators_mk_1_enhancer,ilevel=61,quality=artifact,stats=87endurance_102aim_71power_57accuracy
+implant2=black_hole_annihilators_mk_3_enhancer,ilevel=61,quality=artifact,stats=87endurance_102aim_57accuracy_71crit
+relic1=campaign_relic_of_boundless_ages,ilevel=61,quality=artifact,stats=84endurance,use=405power_120cd_20dur
+relic2=campaign_relic_of_the_kinetic_tempest,ilevel=61,quality=artifact,stats=84endurance,equip=ondamage_246kinetic_30%_4.5cd
+main_hand=campaign_eliminators_blaster_pistol,ilevel=61,quality=artifact,stats=108endurance_121aim_649techpower_57accuracy_123crit,weapon=blasterpistol_284min_527max
+off_hand=campaign_eliminators_offhand_blaster,ilevel=61,quality=artifact,stats=108endurance_121aim_649techpower_57accuracy_123crit,weapon=blasterpistol_284min_527max
+# Gear Summary
+# gear_strength=40
+# gear_aim=1396
+# gear_cunning=40
+# gear_willpower=40
+# gear_endurance=1489
+# gear_presence=40
+# gear_accuracy_rating=399
+# gear_crit_rating=608
+# gear_armor=4935
+# gear_power=199
+# gear_techpower=1298
+# gear_surge_rating=171
+# Set Bonuses
+# main_hand=campaign_eliminators_blaster_pistol,weapon=blasterpistol_284min_527max
+# off_hand=campaign_eliminators_offhand_blaster,weapon=blasterpistol_284min_527max
+bonus_surge_pc=1
+bonus_crit_pc=1
+bonus_accuracy_pc=1
+bonus_health_pc=1
