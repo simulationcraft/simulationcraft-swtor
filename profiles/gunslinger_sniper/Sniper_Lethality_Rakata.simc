@@ -1,6 +1,6 @@
 #!./simc
 
-sniper="Sniper_Lethality"
+sniper="Sniper_Lethality_Rakata"
 origin="http://swtor.askmrrobot.com/character/8b20594c-ca50-417d-9376-dd7596dad1d6"
 level=50
 race=chiss
@@ -23,42 +23,40 @@ actions+=/orbital_strike,if=energy>=96
 actions+=/corrosive_grenade,if=!ticking&energy>=86
 actions+=/corrosive_dart,if=!ticking&energy>=86
 actions+=/series_of_shots,if=energy>86
-actions+=/takedown,if=energy>=74
 actions+=/weakening_blast
 actions+=/cull,if=energy>=91&(dot.corrosive_dart.ticking|dot.corrosive_dart_weak.ticking)&(dot.corrosive_grenade.ticking|dot.corrosive_grenade_weak.ticking)
+actions+=/takedown,if=energy>=81
 actions+=/explosive_probe,if=energy>=86
 actions+=/ambush,if=energy>=81
 actions+=/rifle_shot
-head=rakata_field_techs_headgear,ilevel=58,quality=artifact,stats=645armor_124endurance_99cunning_57power_51accuracy
-ear=rakata_enforcers_device,ilevel=58,quality=artifact,stats=85endurance_103cunning_51accuracy_44crit
+head=campaign_field_techs_headgear,ilevel=61,quality=artifact,stats=673armor_137endurance_110cunning_63crit_57surge
+ear=black_hole_trappers_mk_1_device,ilevel=61,quality=artifact,stats=87endurance_102cunning_71crit_57surge
 shirt=datacrons,stats=40strength_40aim_40cunning_40willpower_40endurance_40presence
-chest=rakata_field_techs_jacket,ilevel=58,quality=artifact,stats=645armor_105endurance_122cunning_51accuracy_48crit
-waist=rakata_enforcers_belt,ilevel=58,quality=artifact,stats=403armor_74endurance_85cunning_37crit
-legs=rakata_field_techs_leggings,ilevel=58,quality=artifact,stats=645armor_116endurance_112cunning_51accuracy_48crit
-feet=rakata_field_techs_boots,ilevel=58,quality=artifact,stats=403armor_105endurance_122cunning_51accuracy_48crit
-wrists=rakata_enforcers_armguards,ilevel=58,quality=artifact,stats=403armor_71endurance_103cunning_11power
-hands=rakata_field_techs_gloves,ilevel=58,quality=artifact,stats=403armor_124endurance_99cunning_57power_51accuracy
-implant1=rakata_enforcers_implant,ilevel=58,quality=artifact,stats=98endurance_85cunning_51power_51surge
-implant2=rakata_enforcers_implant,ilevel=58,quality=artifact,stats=98endurance_85cunning_51power_51surge
+chest=campaign_field_techs_jacket,ilevel=61,quality=artifact,stats=673armor_137endurance_110cunning_63crit_57surge
+waist=campaign_field_techs_belt,ilevel=61,quality=artifact,stats=420armor_78endurance_113cunning_12power
+legs=campaign_field_techs_leggings,ilevel=61,quality=artifact,stats=673armor_137endurance_110cunning_63power_57accuracy
+feet=campaign_field_techs_boots,ilevel=61,quality=artifact,stats=420armor_117endurance_136cunning_53power_57surge
+wrists=campaign_field_techs_bracers,ilevel=61,quality=artifact,stats=420armor_78endurance_113cunning_12crit
+hands=campaign_field_techs_gloves,ilevel=61,quality=artifact,stats=420armor_137endurance_110cunning_57accuracy_63crit
+implant1=black_hole_targeters_mk_1_enhancer,ilevel=61,quality=artifact,stats=87endurance_102cunning_57accuracy_71crit
+implant2=black_hole_targeters_mk_1_enhancer,ilevel=61,quality=artifact,stats=87endurance_102cunning_57accuracy_71crit
 relic1=rakata_relic_of_boundless_ages,ilevel=58,quality=artifact,stats=77endurance,use=380power_120cd_20dur
-relic2=energy_surge_device,ilevel=58,quality=artifact,stats=77endurance,equip=ondamage_224energy_30%_4.5cd
-main_hand=the_headhunter,ilevel=58,quality=artifact,stats=105endurance_122cunning_612techpower_51accuracy_89crit,weapon=sniperrifle_413min_505max
-off_hand=ghost,ilevel=58,quality=artifact,stats=98endurance_85cunning_82power_612techpower_51accuracy,weapon=vibroknife_330min_494max
+relic2=campaign_relic_of_elemental_transcendance,ilevel=61,quality=artifact,stats=84endurance,equip=ondamage_184elemental_30%_4.5cd
+main_hand=campaign_field_techs_sniper_rifle,ilevel=61,quality=artifact,stats=108endurance_121cunning_123power_649techpower_57surge,weapon=sniperrifle_438min_535max
+off_hand=campaign_field_techs_vibroknife,ilevel=61,quality=artifact,stats=93endurance_113cunning_84power_649techpower_57accuracy,weapon=vibroknife_349min_524max
 # Gear Summary
 # gear_strength=40
 # gear_aim=40
-# gear_cunning=1262
+# gear_cunning=1382
 # gear_willpower=40
-# gear_endurance=1397
+# gear_endurance=1484
 # gear_presence=40
-# gear_accuracy_rating=408
-# gear_crit_rating=314
-# gear_armor=3547
-# gear_power=309
-# gear_techpower=1224
-# gear_surge_rating=102
+# gear_accuracy_rating=285
+# gear_crit_rating=414
+# gear_armor=3699
+# gear_power=335
+# gear_techpower=1298
+# gear_surge_rating=285
 # Set Bonuses
-# set_bonus=rakata_field_techs_2pc
-# set_bonus=rakata_field_techs_4pc
-# main_hand=the_headhunter,weapon=sniperrifle_413min_505max
-# off_hand=ghost,weapon=vibroknife_330min_494max
+# main_hand=campaign_field_techs_sniper_rifle,weapon=sniperrifle_438min_535max
+# off_hand=campaign_field_techs_vibroknife,weapon=vibroknife_349min_524max
