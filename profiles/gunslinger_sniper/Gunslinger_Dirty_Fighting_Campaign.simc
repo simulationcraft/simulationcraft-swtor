@@ -1,0 +1,62 @@
+#!./simc
+
+gunslinger="Gunslinger_Dirty_Fighting_Campaign"
+origin="http://swtor.askmrrobot.com/character/6ee48e95-2381-4940-9ab8-cfaa37e0cd38"
+level=50
+race=cyborg
+position=back
+role=dps
+use_pre_potion=0
+professions=none
+talents=http://www.torhead.com/skill-calc#700bZbIZGbbkrMGdhR.1
+actions=stim,type=exotech_skill
+actions+=/lucky_shots
+actions+=/snapshot_stats
+actions+=/take_cover,if=buff.cover.down
+actions+=/flourish_shot,if=buff.flourish_shot.remains<1.5
+actions+=/use_relics
+actions+=/power_potion
+actions+=/cool_head,if=energy<=76
+actions+=/illegal_mods,if=energy<=100
+actions+=/smugglers_luck
+actions+=/xs_freighter_flyby,if=energy>=96
+actions+=/shrap_bomb,if=!ticking&energy>=86
+actions+=/vital_shot,if=!ticking&energy>=86
+actions+=/speed_shot,if=energy>86
+actions+=/hemorrhaging_blast
+actions+=/wounding_shot,if=energy>=91&(dot.vital_shot.ticking|dot.vital_shot_weak.ticking)&(dot.shrap_bomb.ticking|dot.shrap_bomb_weak.ticking)
+actions+=/quickdraw,if=energy>=81
+actions+=/sabotage_charge,if=energy>=86
+actions+=/aimed_shot,if=energy>=81
+actions+=/flurry_of_bolts
+head=campaign_field_techs_headgear,ilevel=61,quality=artifact,stats=673armor_137endurance_110cunning_63crit_57surge
+ear=black_hole_trappers_mk_1_device,ilevel=61,quality=artifact,stats=87endurance_102cunning_71crit_57surge
+shirt=datacrons,stats=40strength_40aim_40cunning_40willpower_40endurance_40presence
+chest=campaign_field_techs_jacket,ilevel=61,quality=artifact,stats=673armor_137endurance_110cunning_63crit_57surge
+waist=campaign_field_techs_belt,ilevel=61,quality=artifact,stats=420armor_78endurance_113cunning_12power
+legs=campaign_field_techs_leggings,ilevel=61,quality=artifact,stats=673armor_137endurance_110cunning_63power_57accuracy
+feet=campaign_field_techs_boots,ilevel=61,quality=artifact,stats=420armor_117endurance_136cunning_53power_57surge
+wrists=campaign_field_techs_bracers,ilevel=61,quality=artifact,stats=420armor_78endurance_113cunning_12crit
+hands=campaign_field_techs_gloves,ilevel=61,quality=artifact,stats=420armor_137endurance_110cunning_57accuracy_63crit
+implant1=black_hole_targeters_mk_1_enhancer,ilevel=61,quality=artifact,stats=87endurance_102cunning_57accuracy_71crit
+implant2=black_hole_targeters_mk_1_enhancer,ilevel=61,quality=artifact,stats=87endurance_102cunning_57accuracy_71crit
+relic1=campaign_relic_of_boundless_ages,ilevel=61,quality=artifact,stats=84endurance,use=405power_120cd_20dur
+relic2=campaign_relic_of_the_cerulean_nova,ilevel=61,quality=artifact,stats=84endurance,equip=ondamage_246energy_30%_4.5cd
+main_hand=campaign_field_techs_blaster_pistol,ilevel=61,quality=artifact,stats=158endurance_98cunning_649techpower_57accuracy_95crit,weapon=blasterpistol_284min_527max
+off_hand=campaign_field_techs_offhand_blaster,ilevel=61,quality=artifact,stats=158endurance_98cunning_649techpower_57accuracy_95crit,weapon=blasterpistol_284min_527max
+# Gear Summary
+# gear_strength=40
+# gear_aim=40
+# gear_cunning=1344
+# gear_willpower=40
+# gear_endurance=1606
+# gear_presence=40
+# gear_accuracy_rating=342
+# gear_crit_rating=604
+# gear_armor=3699
+# gear_power=128
+# gear_techpower=1298
+# gear_surge_rating=228
+# Set Bonuses
+# main_hand=campaign_field_techs_blaster_pistol,weapon=blasterpistol_284min_527max
+# off_hand=campaign_field_techs_offhand_blaster,weapon=blasterpistol_284min_527max
