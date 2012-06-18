@@ -1805,6 +1805,7 @@ void class_t::init_actions()
         action_list_str += "/stealth";
 
       action_list_str += "/power_potion"
+                         "/use_relics"
                          "/force_potency";
 
       if ( talents.dark_embrace->rank() )
@@ -1871,6 +1872,7 @@ void class_t::init_actions()
         action_list_str += "/stealth";
 
       action_list_str += "/power_potion"
+                         "/use_relics"
                          "/recklessness";
 
       if ( talents.dark_embrace->rank() )
