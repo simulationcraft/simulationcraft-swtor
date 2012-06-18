@@ -1,19 +1,19 @@
 mrrobot=87c412bc-724f-4727-bbf0-195052bc600e
 talents=http://www.torhead.com/skill-calc#700rcrbbRsRGoZbcZh.1
-name=Gunslinger_Sharpshooter
-save=Gunslinger_Sharpshooter.simc
+name=Gunslinger_Sharpshooter_Rakata
+save=Gunslinger_Sharpshooter_Rakata.simc
 
-copy=Gunslinger_Sharp_Sabo,Gunslinger_Sharpshooter
+copy=Gunslinger_Sharp_Sabo_Rakata,Gunslinger_Sharpshooter_Rakata
 talents=http://www.torhead.com/skill-calc#700rcrbbkRRZrI0bRoZb.1
-name=Gunslinger_Sharp_Sabo
-save=Gunslinger_Sharp_Sabo.simc
+name=Gunslinger_Sharp_Sabo_Rakata
+save=Gunslinger_Sharp_Sabo_Rakata.simc
 
-copy=Gunslinger_Saboteur,Gunslinger_Sharpshooter
+copy=Gunslinger_Saboteur_Rakata,Gunslinger_Sharpshooter_Rakata
 talents=http://www.torhead.com/skill-calc#700bcbZrI0bRorRrsZh.1
-name=Gunslinger_Saboteur
-save=Gunslinger_Saboteur.simc
+name=Gunslinger_Saboteur_Rakata
+save=Gunslinger_Saboteur_Rakata.simc
 
-copy=Gunslinger_Dirty_Fighting,Gunslinger_Sharpshooter
+copy=Gunslinger_Dirty_Fighting_Rakata,Gunslinger_Sharpshooter_Rakata
 talents=http://www.torhead.com/skill-calc#700bZbIZGbbkrMGdhR.1
-name=Gunslinger_Dirty_Fighting
-save=Gunslinger_Dirty_Fighting.simc
+name=Gunslinger_Dirty_Fighting_Rakata
+save=Gunslinger_Dirty_Fighting_Rakata.simc

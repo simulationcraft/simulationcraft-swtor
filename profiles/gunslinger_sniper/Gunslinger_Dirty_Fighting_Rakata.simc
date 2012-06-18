@@ -1,6 +1,6 @@
 #!./simc
 
-gunslinger="Gunslinger_Sharp_Sabo"
+gunslinger="Gunslinger_Dirty_Fighting_Rakata"
 origin="http://swtor.askmrrobot.com/character/87c412bc-724f-4727-bbf0-195052bc600e"
 level=50
 race=cyborg
@@ -8,7 +8,7 @@ position=back
 role=dps
 use_pre_potion=0
 professions=armormech
-talents=http://www.torhead.com/skill-calc#700rcrbbkRRZrI0bRoZb.1
+talents=http://www.torhead.com/skill-calc#700bZbIZGbbkrMGdhR.1
 actions=stim,type=exotech_skill
 actions+=/lucky_shots
 actions+=/snapshot_stats
@@ -19,14 +19,15 @@ actions+=/power_potion
 actions+=/cool_head,if=energy<=76
 actions+=/illegal_mods,if=energy<=100
 actions+=/smugglers_luck
-actions+=/sabotage_charge,if=energy>=82
-actions+=/trickshot,if=buff.trickshot.up&energy>=72
-actions+=/quickdraw,if=energy>=74
-actions+=/aimed_shot,if=buff.quick_aim.up&energy>=81
-actions+=/speed_shot,if=energy>86
 actions+=/xs_freighter_flyby,if=energy>=96
-actions+=/shock_charge,if=energy>=82
-actions+=/charged_burst,if=energy>=86
+actions+=/shrap_bomb,if=!ticking&energy>=86
+actions+=/vital_shot,if=!ticking&energy>=86
+actions+=/speed_shot,if=energy>86
+actions+=/quickdraw,if=energy>=74
+actions+=/hemorrhaging_blast
+actions+=/wounding_shot,if=energy>=91&(dot.vital_shot.ticking|dot.vital_shot_weak.ticking)&(dot.shrap_bomb.ticking|dot.shrap_bomb_weak.ticking)
+actions+=/sabotage_charge,if=energy>=86
+actions+=/aimed_shot,if=energy>=81
 actions+=/flurry_of_bolts
 head=rakata_field_techs_headgear,ilevel=58,quality=artifact,stats=645armor_124endurance_99cunning_57power_51accuracy
 ear=rakata_enforcers_device,ilevel=58,quality=artifact,stats=85endurance_103cunning_51accuracy_44crit
