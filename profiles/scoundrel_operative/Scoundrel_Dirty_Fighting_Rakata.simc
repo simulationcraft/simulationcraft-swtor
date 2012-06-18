@@ -1,6 +1,6 @@
 #!./simc
 
-scoundrel="Scoundrel_Scrapper"
+scoundrel="Scoundrel_Dirty_Fighting_Rakata"
 origin="http://swtor.askmrrobot.com/character/dc7edc33-2adb-4e6d-8655-5b98dbfb4a26"
 level=50
 race=cyborg
@@ -8,23 +8,22 @@ position=back
 role=hybrid
 use_pre_potion=0
 professions=armormech
-talents=http://www.torhead.com/skill-calc#7010cZGIRodzRdGoZhM0z.1
+talents=http://www.torhead.com/skill-calc#7010cZG0MZGMbkrMGdhR.1
 actions=stim,type=exotech_skill
 actions+=/lucky_shots
 actions+=/snapshot_stats
 actions+=/stealth
 actions+=/cool_head,if=energy<=60
 actions+=/pugnacity,if=buff.upper_hand.stack>1
-actions+=/flechette_round,if=!buff.flechette_round_coating.up&!cooldown.back_blast.remains
 actions+=/use_relics
 actions+=/power_potion
 actions+=/shoot_first
-actions+=/back_blast,if=energy>=65,if=buff.flechette_round_coating.up
+actions+=/hemorrhaging_blast
 actions+=/blaster_whip,if=energy>=75&buff.upper_hand.stack<2
 actions+=/vital_shot,if=!ticking&energy>=75
-actions+=/sucker_punch,if=energy>=75&buff.upper_hand.stack>1
-actions+=/sucker_punch,if=energy>=75&cooldown.blaster_whip.remains<2
-actions+=/flechette_round,if=!buff.flechette_round_coating.up&energy>75
+actions+=/shrap_bomb,if=!ticking&energy>=80
+actions+=/wounding_shot,if=energy>=50&buff.upper_hand.stack>=2&(dot.vital_shot.ticking|dot.vital_shot_weak.ticking)&(dot.shrap_bomb.ticking|dot.shrap_bomb_weak.ticking)
+actions+=/back_blast,if=energy>=70
 actions+=/xs_freighter_flyby,if=energy>65
 actions+=/sabotage_charge,if=energy>100&cooldown.blaster_whip.remains>2
 actions+=/quick_shot,if=energy>100&cooldown.blaster_whip.remains>2
