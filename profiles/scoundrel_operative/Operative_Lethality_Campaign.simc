@@ -29,7 +29,7 @@ actions+=/explosive_probe,if=energy>95&cooldown.shiv.remains>2
 actions+=/overload_shot,if=energy>95&cooldown.shiv.remains>2
 actions+=/rifle_shot
 head=campaign_enforcers_headgear,ilevel=61,quality=artifact,stats=673armor_117endurance_136cunning_53power_57accuracy
-ear=black_hole_targeters_mk_4_adaptor,ilevel=61,quality=artifact,stats=87endurance_102cunning_71power_57surge
+ear=black_hole_trappers_mk_1_device,ilevel=61,quality=artifact,stats=87endurance_102cunning_71crit_57surge
 shirt=datacrons,stats=40strength_40aim_40cunning_40willpower_40endurance_40presence
 chest=campaign_enforcers_jacket,ilevel=61,quality=artifact,stats=673armor_117endurance_136cunning_53power_57surge
 waist=campaign_enforcers_belt,ilevel=61,quality=artifact,stats=420armor_81endurance_93cunning_41power
@@ -51,9 +51,9 @@ off_hand=campaign_enforcers_vibroknife,ilevel=61,quality=artifact,stats=93endura
 # gear_endurance=1457
 # gear_presence=40
 # gear_accuracy_rating=342
-# gear_crit_rating=405
+# gear_crit_rating=476
 # gear_armor=3699
-# gear_power=382
+# gear_power=311
 # gear_techpower=1298
 # gear_surge_rating=228
 # Set Bonuses

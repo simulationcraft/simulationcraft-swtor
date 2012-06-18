@@ -1,34 +1,34 @@
 #!./simc
 
-operative="Operative_Concealment_Campaign"
-origin="http://swtor.askmrrobot.com/character/862772dd-b798-401e-974f-3343d98f3f99"
+scoundrel="Scoundrel_Scrapper_Campaign"
+origin="http://swtor.askmrrobot.com/character/61abecbc-fbdd-4df4-ab8b-8f6e699899e3"
 level=50
 race=cyborg
 position=back
 role=hybrid
 use_pre_potion=0
-professions=armormech
-talents=http://www.torhead.com/skill-calc#4010cZGIRodzRdGoZhMoz.1
+professions=none
+talents=http://www.torhead.com/skill-calc#7010cZGIRodzRdGoZhM0z.1
 actions=stim,type=exotech_skill
-actions+=/coordination
+actions+=/lucky_shots
 actions+=/snapshot_stats
 actions+=/stealth
-actions+=/adrenaline_probe,if=energy<=60
-actions+=/stim_boost,if=buff.tactical_advantage.stack>1
-actions+=/acid_blade,if=!buff.acid_blade_coating.up&!cooldown.backstab.remains
+actions+=/cool_head,if=energy<=60
+actions+=/pugnacity,if=buff.upper_hand.stack>1
+actions+=/flechette_round,if=!buff.flechette_round_coating.up&!cooldown.back_blast.remains
 actions+=/use_relics
 actions+=/power_potion
-actions+=/hidden_strike
-actions+=/backstab,if=energy>=65,if=buff.acid_blade_coating.up
-actions+=/shiv,if=energy>=75&buff.tactical_advantage.stack<2
-actions+=/corrosive_dart,if=!ticking&energy>=75
-actions+=/laceration,if=energy>=75&buff.tactical_advantage.stack>1
-actions+=/laceration,if=energy>=75&cooldown.shiv.remains<2
-actions+=/acid_blade,if=!buff.acid_blade_coating.up&energy>75
-actions+=/orbital_strike,if=energy>65
-actions+=/explosive_probe,if=energy>95&cooldown.shiv.remains>2
-actions+=/overload_shot,if=energy>95&cooldown.shiv.remains>2
-actions+=/rifle_shot
+actions+=/shoot_first
+actions+=/back_blast,if=energy>=65,if=buff.flechette_round_coating.up
+actions+=/blaster_whip,if=energy>=75&buff.upper_hand.stack<2
+actions+=/vital_shot,if=!ticking&energy>=75
+actions+=/sucker_punch,if=energy>=75&buff.upper_hand.stack>1
+actions+=/sucker_punch,if=energy>=75&cooldown.blaster_whip.remains<2
+actions+=/flechette_round,if=!buff.flechette_round_coating.up&energy>75
+actions+=/xs_freighter_flyby,if=energy>65
+actions+=/sabotage_charge,if=energy>95&cooldown.blaster_whip.remains>2
+actions+=/quick_shot,if=energy>95&cooldown.blaster_whip.remains>2
+actions+=/flurry_of_bolts
 head=campaign_enforcers_headgear,ilevel=61,quality=artifact,stats=673armor_117endurance_136cunning_53power_57accuracy
 ear=black_hole_trappers_mk_1_device,ilevel=61,quality=artifact,stats=87endurance_102cunning_71crit_57surge
 shirt=datacrons,stats=40strength_40aim_40cunning_40willpower_40endurance_40presence
@@ -42,24 +42,24 @@ implant1=black_hole_targeters_mk_1_enhancer,ilevel=61,quality=artifact,stats=87e
 implant2=black_hole_targeters_mk_1_enhancer,ilevel=61,quality=artifact,stats=87endurance_102cunning_57accuracy_71crit
 relic1=campaign_relic_of_boundless_ages,ilevel=61,quality=artifact,stats=84endurance,use=405power_120cd_20dur
 relic2=campaign_relic_of_the_kinetic_tempest,ilevel=61,quality=artifact,stats=84endurance,equip=ondamage_246kinetic_30%_4.5cd
-main_hand=campaign_enforcers_blaster_rifle,ilevel=61,quality=artifact,stats=108endurance_121cunning_123power_649techpower_57accuracy,weapon=blasterrifle_324min_486max
-off_hand=campaign_enforcers_vibroknife,ilevel=61,quality=artifact,stats=93endurance_113cunning_649techpower_84crit_57surge,weapon=vibroknife_349min_524max
+main_hand=campaign_enforcers_blaster_pistol,ilevel=61,quality=artifact,stats=158endurance_98cunning_649techpower_57accuracy_95crit,weapon=blasterpistol_284min_527max
+off_hand=campaign_enforcers_shotgun,ilevel=61,quality=artifact,stats=93endurance_113cunning_649techpower_84crit_57surge,weapon=scattergun_327min_546max
 # Gear Summary
 # gear_strength=40
 # gear_aim=40
-# gear_cunning=1394
+# gear_cunning=1371
 # gear_willpower=40
-# gear_endurance=1457
+# gear_endurance=1507
 # gear_presence=40
 # gear_accuracy_rating=342
-# gear_crit_rating=476
+# gear_crit_rating=571
 # gear_armor=3699
-# gear_power=311
+# gear_power=188
 # gear_techpower=1298
 # gear_surge_rating=228
 # Set Bonuses
-# main_hand=campaign_enforcers_blaster_rifle,weapon=blasterrifle_324min_486max
-# off_hand=campaign_enforcers_vibroknife,weapon=vibroknife_349min_524max
+# main_hand=campaign_enforcers_blaster_pistol,weapon=blasterpistol_284min_527max
+# off_hand=campaign_enforcers_shotgun,weapon=scattergun_327min_546max
 bonus_surge_pc=1
 bonus_crit_pc=1
 bonus_accuracy_pc=1
