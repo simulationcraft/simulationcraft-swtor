@@ -1523,7 +1523,10 @@ double player_t::armor_penetration_debuff() const
         || b -> name_str.compare( 0, heat_signature.length(), heat_signature ) == 0 )
       arpen += 0.04 * b -> stack();
   }
-  return arpen >= 1 ? 0 : 1 - arpen;
+  return
+    sim -> ptr && arpen != 0 ? 0.8 :
+    sim -> ptr               ? 0   :
+    arpen >= 1               ? 0   : 1 - arpen;
 }
 
 // player_t::kinetic_damage_reduction =======================================
