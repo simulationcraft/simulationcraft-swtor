@@ -768,6 +768,7 @@ struct unload_t : public terminal_velocity_attack_t
     terminal_velocity_attack_t::last_tick( d );
     if ( offhand_attack )
       // XXX TODO check last tick will happen on a miss now that individual weapon ticks can miss
+      // and also, with the same change made, should be able to move this to the offhand.
       p() -> buffs.barrage -> expire();
   }
 
