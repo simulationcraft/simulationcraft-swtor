@@ -767,19 +767,18 @@ struct unload_t : public terminal_velocity_attack_t
   {
     terminal_velocity_attack_t::last_tick( d );
     if ( offhand_attack )
+      // XXX TODO check last tick will happen on a miss now that individual weapon ticks can miss
       p() -> buffs.barrage -> expire();
-
-    benefit_from_barrage = false;
   }
 
   virtual void execute()
   {
     if ( p() -> buffs.barrage -> up() )
       benefit_from_barrage = true;
+    else
+      benefit_from_barrage = false; // to be safe
 
     terminal_velocity_attack_t::execute();
-    if ( ! RESULT_HIT )
-      benefit_from_barrage = false;
 
     if ( offhand_attack )
       offhand_attack->schedule_execute();
