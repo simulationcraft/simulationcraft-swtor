@@ -22,7 +22,7 @@ actions+=/hemorrhaging_blast
 actions+=/blaster_whip,if=energy>=75&buff.upper_hand.stack<2
 actions+=/vital_shot,if=!ticking&energy>=75
 actions+=/shrap_bomb,if=!ticking&energy>=80
-actions+=/wounding_shot,if=energy>=50&buff.upper_hand.stack>=2&(dot.vital_shot.ticking|dot.vital_shot_weak.ticking)&(dot.shrap_bomb.ticking|dot.shrap_bomb_weak.ticking)
+actions+=/wounding_shots,if=energy>=50&buff.upper_hand.stack>=2&(dot.vital_shot.ticking|dot.vital_shot_weak.ticking)&(dot.shrap_bomb.ticking|dot.shrap_bomb_weak.ticking)
 actions+=/back_blast,if=energy>=70
 actions+=/xs_freighter_flyby,if=energy>65
 actions+=/sabotage_charge,if=energy>100&cooldown.blaster_whip.remains>2

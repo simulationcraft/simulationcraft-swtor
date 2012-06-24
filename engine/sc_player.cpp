@@ -602,7 +602,6 @@ void player_t::init()
   init_items();
   init_weapon( &main_hand_weapon );
   init_weapon( &off_hand_weapon );
-  init_abilities();
   init_talents();
   init_spells();
   init_race();
@@ -1201,11 +1200,6 @@ void player_t::init_actions()
   action_sequence.clear();
   action_sequence.reserve( capacity );
 }
-
-// player_t::init_abilities ===================================================
-
-void player_t::init_abilities()
-{}
 
 // player_t::init_talents ===================================================
 
@@ -4465,7 +4459,7 @@ talent_t* player_t::find_talent( const std::string& n,
     {
       talent_t* t = talent_trees[ i ][ j ];
 
-      if ( n == t -> name_cstr() )
+      if ( n == t -> name() )
       {
         return t;
       }
@@ -4965,7 +4959,7 @@ void player_t::copy_from( const player_t& source )
       {
         talent_t* t = talent_trees[ i ][ j ];
         int rank = 0;
-        if ( const talent_t* source_t = source.find_talent( t -> name_cstr() ) )
+        if ( const talent_t* source_t = source.find_talent( t -> name() ) )
         {
           rank = source_t -> rank();
           t -> set_rank( rank );
