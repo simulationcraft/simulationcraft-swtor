@@ -1299,7 +1299,7 @@ EnchantDataModel::data( const QModelIndex& index, int role ) const
     if ( m_enchants[ index.row() ].item )
       return QVariant( QString( "%1%2" ).arg( m_enchants[ index.row() ].item -> name ).arg( enchant_stats_str ) );
     else
-      return QVariant( QString( "%1%2" ).arg( m_enchants[ index.row() ].enchant -> name_cstr() ).arg( enchant_stats_str ) );
+      return QVariant( QString( "%1%2" ).arg( m_enchants[ index.row() ].enchant -> name() ).arg( enchant_stats_str ) );
   }
   else if ( role == Qt::UserRole )
     return QVariant::fromValue( m_enchants[ index.row() ] );
@@ -1366,8 +1366,8 @@ EnchantFilterProxyModel::lessThan( const QModelIndex& left, const QModelIndex& r
   const EnchantData e_left  = left.data( Qt::UserRole ).value< EnchantData >(),
                     e_right = right.data( Qt::UserRole ).value< EnchantData >();
 
-  return QString::compare( e_left.item ? e_left.item -> name : e_left.enchant -> name_cstr(),
-                           e_right.item ? e_right.item -> name : e_right.enchant -> name_cstr() ) < 0;
+  return QString::compare( e_left.item ? e_left.item -> name : e_left.enchant -> name(),
+                           e_right.item ? e_right.item -> name : e_right.enchant -> name() ) < 0;
 }
 
 bool

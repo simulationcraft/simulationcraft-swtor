@@ -1196,7 +1196,7 @@ class talent_t
 private:
   unsigned    _rank;
   unsigned    _tab_page;    // Talent tab page
-  const char* _name;        // Talent name
+  std::string _name;        // Talent name
   //unsigned    _col;         // Talent column
   //unsigned    _row;         // Talent row
   unsigned    _max_rank;
@@ -1204,7 +1204,7 @@ private:
 
 public:
   // Careful: name needs
-  talent_t( player_t* p, const char* name, unsigned tab_page, unsigned max_rank );
+  talent_t( player_t* p, const std::string name, unsigned tab_page, unsigned max_rank );
 
   bool set_rank( unsigned value );
   bool ok() const { return ( _rank > 0 ); }
@@ -1214,7 +1214,7 @@ public:
 
   unsigned tab_page() const { return _tab_page; }
 
-  const char* name_cstr() const { return _name; }
+  std::string name() const { return _name; }
 };
 
 // Raid Event
@@ -2364,7 +2364,7 @@ struct player_t : public noncopyable
 
   struct talentinfo_t
   {
-    const char* name;
+    std::string name;
     unsigned points;
   };
 
@@ -2724,7 +2724,6 @@ public:
   virtual std::string init_use_racial_actions( const std::string& append = std::string() );
   virtual void init_actions();
   virtual void init_scaling();
-  virtual void init_abilities();
   virtual void init_talents();
   virtual void init_spells();
   virtual void init_buffs();
