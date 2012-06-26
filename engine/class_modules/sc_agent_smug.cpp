@@ -792,7 +792,7 @@ void class_t::create_talents()
     { m.t_devouring_microbes  , 3 }, { m.t_lingering_toxins     , 2 },
     { m.t_weakening_blast     , 1 }
   };
-  init_talent_tree( type == IA_OPERATIVE ? IA_OPERATIVE_LETHALITY : IA_SNIPER_LETHALITY, lethality_tree );
+  init_talent_tree( IA_LETHALITY, lethality_tree );
 }
 
 } // namespace agent_smug ===================================================
