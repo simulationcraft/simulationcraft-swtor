@@ -261,9 +261,9 @@ public:
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   agent_smug::targetdata_t( source, target ),
-  debuff_cluster_bombs        ( new debuff_t ( this, source.m.t_cluster_bombs       , 2 + source.talents.imperial_methodology -> rank() , from_seconds ( 0 ), from_seconds( 1.5 ) , 100                                             , false, true /*reverse*/ ) ),
-  debuff_electrified_railgun  ( new debuff_t ( this, source.m.t_electrified_railgun , 4                                                 , from_seconds ( 5 ), from_seconds( 0 )   , 1 * source.talents.electrified_railgun -> rank() ) ),
-  debuff_shatter_shot         ( new debuff_t ( this, source.m.a_shatter_shot        , 1                                                 , from_seconds ( 45 ) ) ),
+  debuff_cluster_bombs        ( new debuff_t ( this, source.m.t_cluster_bombs       , 2 + ( 2 * source.talents.imperial_methodology -> rank() ) , from_seconds ( 20 ), from_seconds( 1 ) , 100, false, true /*reverse*/ ) ),
+  debuff_electrified_railgun  ( new debuff_t ( this, source.m.t_electrified_railgun , 4, from_seconds ( 5 ), from_seconds( 0 )   , 1 * source.talents.electrified_railgun -> rank() ) ),
+  debuff_shatter_shot         ( new debuff_t ( this, source.m.a_shatter_shot        , 1, from_seconds ( 45 ) ) ),
   dot_cull                ( source.m.t_cull                 , &source ),
   dot_electrified_railgun ( source.m.t_electrified_railgun  , &source ),
   dot_interrogation_probe ( source.m.t_interrogation_probe  , &source ),
