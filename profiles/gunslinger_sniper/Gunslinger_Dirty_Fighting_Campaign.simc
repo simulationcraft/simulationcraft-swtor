@@ -23,9 +23,9 @@ actions+=/xs_freighter_flyby,if=energy>=96
 actions+=/shrap_bomb,if=!ticking&energy>=86
 actions+=/vital_shot,if=!ticking&energy>=86
 actions+=/speed_shot,if=energy>86
+actions+=/quickdraw,if=energy>=74
 actions+=/hemorrhaging_blast
 actions+=/wounding_shots,if=energy>=91&(dot.vital_shot.ticking|dot.vital_shot_weak.ticking)&(dot.shrap_bomb.ticking|dot.shrap_bomb_weak.ticking)
-actions+=/quickdraw,if=energy>=81
 actions+=/sabotage_charge,if=energy>=86
 actions+=/aimed_shot,if=energy>=81
 actions+=/flurry_of_bolts
@@ -41,7 +41,7 @@ hands=campaign_field_techs_gloves,ilevel=61,quality=artifact,stats=420armor_137e
 implant1=black_hole_targeters_mk_1_enhancer,ilevel=61,quality=artifact,stats=87endurance_102cunning_57accuracy_71crit
 implant2=black_hole_targeters_mk_1_enhancer,ilevel=61,quality=artifact,stats=87endurance_102cunning_57accuracy_71crit
 relic1=campaign_relic_of_boundless_ages,ilevel=61,quality=artifact,stats=84endurance,use=405power_120cd_20dur
-relic2=campaign_relic_of_the_cerulean_nova,ilevel=61,quality=artifact,stats=84endurance,equip=ondamage_246energy_30%_4.5cd
+relic2=campaign_relic_of_elemental_transcendance,ilevel=61,quality=artifact,stats=84endurance,equip=ondamage_184elemental_30%_4.5cd
 main_hand=campaign_field_techs_blaster_pistol,ilevel=61,quality=artifact,stats=158endurance_98cunning_649techpower_57accuracy_95crit,weapon=blasterpistol_284min_527max
 off_hand=campaign_field_techs_offhand_blaster,ilevel=61,quality=artifact,stats=158endurance_98cunning_649techpower_57accuracy_95crit,weapon=blasterpistol_284min_527max
 # Gear Summary
@@ -58,5 +58,7 @@ off_hand=campaign_field_techs_offhand_blaster,ilevel=61,quality=artifact,stats=1
 # gear_techpower=1298
 # gear_surge_rating=228
 # Set Bonuses
+# set_bonus=rakata_field_techs_2pc
+# set_bonus=rakata_field_techs_4pc
 # main_hand=campaign_field_techs_blaster_pistol,weapon=blasterpistol_284min_527max
 # off_hand=campaign_field_techs_offhand_blaster,weapon=blasterpistol_284min_527max

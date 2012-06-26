@@ -50,4 +50,6 @@ off_hand=campaign_force_masters_focus,ilevel=61,quality=artifact,stats=108endura
 # gear_forcepower=1298
 # gear_surge_rating=171
 # Set Bonuses
+# set_bonus=rakata_force_masters_2pc
+# set_bonus=rakata_force_masters_4pc
 # main_hand=campaign_force_masters_lightsaber,weapon=lightsaber_324min_486max

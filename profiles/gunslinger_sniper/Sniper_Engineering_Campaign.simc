@@ -24,11 +24,11 @@ actions+=/plasma_probe,if=buff.energy_overrides.up
 actions+=/explosive_probe,if=buff.energy_overrides.up
 actions+=/explosive_probe,if=energy>=82
 actions+=/orbital_strike,if=energy>=96
+actions+=/takedown,if=energy>=74
 actions+=/series_of_shots,if=energy>86
 actions+=/plasma_probe,if=energy>=82
 actions+=/ambush,if=energy>=81
 actions+=/interrogation_probe,if=energy>=82
-actions+=/takedown,if=energy>=81
 actions+=/snipe,if=energy>=86
 actions+=/rifle_shot
 head=campaign_field_techs_headgear,ilevel=61,quality=artifact,stats=673armor_137endurance_110cunning_63crit_57surge
@@ -60,5 +60,7 @@ off_hand=campaign_field_techs_vibroknife,ilevel=61,quality=artifact,stats=93endu
 # gear_techpower=1298
 # gear_surge_rating=285
 # Set Bonuses
+# set_bonus=rakata_field_techs_2pc
+# set_bonus=rakata_field_techs_4pc
 # main_hand=campaign_field_techs_sniper_rifle,weapon=sniperrifle_438min_535max
 # off_hand=campaign_field_techs_vibroknife,weapon=vibroknife_349min_524max

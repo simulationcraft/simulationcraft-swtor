@@ -26,8 +26,8 @@ actions+=/laceration,if=energy>=75&buff.tactical_advantage.stack>1
 actions+=/laceration,if=energy>=75&cooldown.shiv.remains<2
 actions+=/acid_blade,if=!buff.acid_blade_coating.up&energy>75
 actions+=/orbital_strike,if=energy>65
-actions+=/explosive_probe,if=energy>95&cooldown.shiv.remains>2
-actions+=/overload_shot,if=energy>95&cooldown.shiv.remains>2
+actions+=/explosive_probe,if=energy>100&cooldown.shiv.remains>2
+actions+=/overload_shot,if=energy>100&cooldown.shiv.remains>2
 actions+=/rifle_shot
 head=campaign_enforcers_headgear,ilevel=61,quality=artifact,stats=673armor_117endurance_136cunning_53power_57accuracy
 ear=black_hole_trappers_mk_1_device,ilevel=61,quality=artifact,stats=87endurance_102cunning_71crit_57surge
@@ -58,6 +58,8 @@ off_hand=campaign_enforcers_vibroknife,ilevel=61,quality=artifact,stats=93endura
 # gear_techpower=1298
 # gear_surge_rating=228
 # Set Bonuses
+# set_bonus=rakata_enforcers_2pc
+# set_bonus=rakata_enforcers_4pc
 # main_hand=campaign_enforcers_blaster_rifle,weapon=blasterrifle_324min_486max
 # off_hand=campaign_enforcers_vibroknife,weapon=vibroknife_349min_524max
 bonus_surge_pc=1

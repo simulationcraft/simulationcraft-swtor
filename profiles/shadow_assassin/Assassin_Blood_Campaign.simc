@@ -52,4 +52,6 @@ off_hand=campaign_stalkers_generator,ilevel=61,quality=artifact,stats=108enduran
 # gear_forcepower=1298
 # gear_surge_rating=171
 # Set Bonuses
+# set_bonus=rakata_stalkers_2pc
+# set_bonus=rakata_stalkers_4pc
 # main_hand=campaign_stalkers_saberstaff,weapon=doublebladedlightsaber_389min_584max
