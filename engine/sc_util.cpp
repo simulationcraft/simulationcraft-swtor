@@ -552,7 +552,7 @@ talent_tree_type util_t::talent_tree( talent_tab_type tree, player_type ptype )
       {
       case IA_OPERATIVE_MEDICINE:     return TREE_MEDICINE;
       case IA_OPERATIVE_CONCEALMENT:  return TREE_CONCEALMENT;
-      case IA_OPERATIVE_LETHALITY:    return TREE_LETHALITY;
+      case IA_LETHALITY:              return TREE_LETHALITY;
       default: break;
       }
     break;
@@ -561,7 +561,7 @@ talent_tree_type util_t::talent_tree( talent_tab_type tree, player_type ptype )
       {
       case IA_SNIPER_MARKSMANSHIP:    return TREE_MARKSMANSHIP;
       case IA_SNIPER_ENGINEERING:     return TREE_ENGINEERING;
-      case IA_SNIPER_LETHALITY:       return TREE_LETHALITY;
+      case IA_LETHALITY:              return TREE_LETHALITY;
       default: break;
       }
     break;

@@ -223,7 +223,7 @@ public:
   {
     tree_type[ IA_SNIPER_MARKSMANSHIP ] = TREE_MARKSMANSHIP;
     tree_type[ IA_SNIPER_ENGINEERING  ] = TREE_ENGINEERING;
-    tree_type[ IA_SNIPER_LETHALITY    ] = TREE_LETHALITY;
+    tree_type[ IA_LETHALITY           ] = TREE_LETHALITY;
 
     create_mirror();
     create_talents();
