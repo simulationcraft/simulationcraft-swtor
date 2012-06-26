@@ -126,12 +126,12 @@ struct class_t : public bount_troop::class_t
       talent_t* target_tracking;
       // t4
       talent_t* jet_escape;
-      talent_t* light_em_up;
+      talent_t* tracer_lock;
       talent_t* terminal_velocity;
       // t5
       talent_t* pinning_fire;
       talent_t* riddle;
-      talent_t* tracer_lock;
+      talent_t* light_em_up;
       talent_t* kolto_vents;
       // t6
       talent_t* barrage;
@@ -1171,9 +1171,9 @@ void class_t::create_talents()
     // t3
     { "Power Barrier"            , 2 }, { "Afterburners"      , 2 }, { "Tracer Missile"   , 1 }, { "Target Tracking"   , 2 },
     // t4
-    { "Jet Escape"               , 2 }, { "Light 'Em Up"      , 1 }, { "Terminal Velocity", 2 },
+    { "Jet Escape"               , 2 }, { "Tracer Lock"       , 1 }, { "Terminal Velocity", 2 },
     // t5
-    { "Pinning Fire"             , 2 }, { "Riddle"            , 1 }, { "Tracer Lock"      , 1 }, { "Kolto Vents"       , 1 },
+    { "Pinning Fire"             , 2 }, { "Riddle"            , 1 }, { "Light 'Em Up"     , 1 }, { "Kolto Vents"       , 1 },
     // t6
     { "Barrage"                  , 3 }, { "Power Overrides"   , 2 },
     // t7
