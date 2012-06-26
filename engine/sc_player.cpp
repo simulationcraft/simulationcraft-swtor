@@ -1518,9 +1518,8 @@ double player_t::armor_penetration_debuff() const
       arpen += 0.04 * b -> stack();
   }
   return
-    sim -> ptr && arpen != 0 ? 0.8 :
-    sim -> ptr               ? 0   :
-    arpen >= 1               ? 0   : 1 - arpen;
+    // TODO test: for now assuming 1.3 armor debuff changes means maximum of 20% armor reduction
+    arpen > 0.2 ? 0.8 : 1 - arpen;
 }
 
 // player_t::kinetic_damage_reduction =======================================

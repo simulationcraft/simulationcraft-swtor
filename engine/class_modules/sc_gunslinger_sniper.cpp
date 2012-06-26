@@ -43,7 +43,6 @@ public:
     buff_t* energy_overrides;
     buff_t* followthrough;
     buff_t* laze_target;
-    buff_t* rapid_fire;
     buff_t* reactive_shot;
     buff_t* snap_shot;
     buff_t* sniper_volley;
@@ -371,8 +370,7 @@ struct ambush_t : public range_attack_t
 
     base_cost                    = energy_cost();
     base_execute_time            = from_seconds( 2.5 );
-    // XXX ptr change here we reference the talent position rapid_fire, which is actually sniper_volley now
-    cooldown -> duration         = from_seconds( ( 15 - ( p -> ptr ? 1 * p -> talents.rapid_fire -> rank() : 0 ) ) );
+    cooldown -> duration         = from_seconds( ( 15 - p -> talents.rapid_fire -> rank() ) );
     range                        = 35.0;
     dd.standardhealthpercentmin  =
         dd.standardhealthpercentmax  = 0.329;
@@ -748,33 +746,6 @@ struct plasma_probe_t : public tech_attack_t
   }
 };
 
-// Rapid Fire | Rapid Fire ==================================================
-struct rapid_fire_t : public action_t
-{
-  typedef action_t base_t;
-
-  rapid_fire_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    base_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE )
-  {
-    // passive in PTR
-    check_talent( p -> ptr ? 0 : p -> talents.rapid_fire -> rank() );
-
-    parse_options( options_str );
-
-    cooldown -> duration = from_seconds( 90 );
-    use_off_gcd = true;
-    trigger_gcd = timespan_t::zero();
-  }
-
-  void execute()
-  {
-    base_t::execute();
-
-    p() -> buffs.rapid_fire -> trigger();
-    p() -> cooldowns.series_of_shots -> reset();
-  }
-};
-
 // Sniper Volley | Burst Volley =============================================
 struct sniper_volley_t : public action_t
 {
@@ -783,10 +754,7 @@ struct sniper_volley_t : public action_t
   sniper_volley_t( class_t* p, const std::string& n, const std::string& options_str ) :
     base_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE )
   {
-    // XXX checking talents.rapid_fire because it swapped places with sniper volley!
-    // until we reference some ptr talents hacking it in
-    // check_talent( sim -> ptr ? p -> talents.sniper_volley -> rank() : 0 );
-    check_talent( p -> ptr ? p -> talents.rapid_fire -> rank() : 0 );
+    check_talent( p -> talents.sniper_volley -> rank() );
 
     parse_options( options_str );
 
@@ -872,7 +840,7 @@ struct series_of_shots_t : public tech_attack_t
 
     base_cost                    = energy_cost();
     range                        = 35.0;
-    cooldown -> duration         = from_seconds( ( 15 - ( p -> ptr ? 1 * p -> talents.rapid_fire -> rank() : 0 ) ) );
+    cooldown -> duration         = from_seconds( ( 15 - p -> talents.rapid_fire -> rank() ) );
     channeled                    = true;
     tick_zero                    = true;
     num_ticks                    = 3;
@@ -910,12 +878,13 @@ struct series_of_shots_t : public tech_attack_t
   {
     base_t::execute();
 
-    buff_t* rapid_fire = p() -> buffs.rapid_fire;
-    if ( rapid_fire -> up() )
-    {
-      rapid_fire -> expire();
-      cooldown -> reset();
-    }
+    // TODO confirm this no longer double-grants series of shots...
+    //buff_t* sniper_volley = p() -> buffs.sniper_volley;
+    //if ( sniper_volley -> up() )
+    //{
+      ////sniper_volley -> expire();
+      //cooldown -> reset();
+    //}
   }
 
 };
@@ -1148,20 +1117,6 @@ public:
   class_t* cast() const { return p(); }
 };
 
-struct sniper_volley_callback_t : public action_callback_t
-{
-  sniper_volley_callback_t( class_t* p ) :
-    action_callback_t( p )
-  {}
-
-  virtual void trigger (::action_t* a, void* /* call_data */)
-  {
-    // TODO test what constitutes "blaster fire" assuming any weapon attack
-    if ( a -> weapon || a -> td.weapon )
-      p() -> buffs.sniper_volley -> trigger();
-  }
-};
-
 struct cluster_bombs_callback_t : public action_callback_t
 {
   struct cluster_bombs_t : public tech_attack_t
@@ -1223,12 +1178,8 @@ struct cluster_bombs_callback_t : public action_callback_t
   if ( name == m.t_interrogation_probe    ) return new interrogation_probe_t    ( this, name, options_str ) ;
   if ( name == m.a_laze_target            ) return new laze_target_t            ( this, name, options_str ) ;
   if ( name == m.t_plasma_probe           ) return new plasma_probe_t           ( this, name, options_str ) ;
-  // since profiles aren't often generated with ptr flag, we'll toggle the ability here too
-  if ( !ptr && name == m.t_rapid_fire     ) return new rapid_fire_t             ( this, name, options_str ) ;
-  if ( ptr && name == m.t_rapid_fire      ) return new sniper_volley_t          ( this, m.t_sniper_volley, options_str ) ;
   if ( name == m.a_series_of_shots        ) return new series_of_shots_t        ( this, name, options_str ) ;
-  if ( !ptr && name == m.t_sniper_volley  ) return new rapid_fire_t             ( this, m.t_rapid_fire, options_str ) ;
-  if ( ptr && name == m.t_sniper_volley   ) return new sniper_volley_t          ( this, name, options_str ) ;
+  if ( name == m.t_sniper_volley          ) return new sniper_volley_t          ( this, name, options_str ) ;
   if ( name == m.a_takedown               ) return new takedown_t               ( this, name, options_str ) ;
   if ( name == m.a_target_acquired        ) return new target_acquired_t        ( this, name, options_str ) ;
   if ( name == m.a_shatter_shot           ) return new shatter_shot_t           ( this, name, options_str ) ;
@@ -1354,11 +1305,8 @@ void class_t::init_buffs()
   buffs.followthrough    = new buff_t( this , m.t_followthrough     , 1 ,  from_seconds( 4.5 ) );
   buffs.laze_target      = new buff_t( this , m.a_laze_target       , 1 ,  from_seconds( 20  ) );
   buffs.snap_shot        = new buff_t( this , m.t_snap_shot         , 1 ,  from_seconds( 10  ), from_seconds( 6 ), 0.5 * talents.snap_shot -> rank() );
-  buffs.rapid_fire       = new buff_t( this , m.t_rapid_fire        , 1 ,  from_seconds( 10  ) );
   buffs.reactive_shot    = new buff_t( this , m.t_reactive_shot     , 1 ,  from_seconds( 10  ) );
-  // checking talents.rapid_fire rank because it position changed with sniper volley but we aren't referencing ptr
-  // talent builds yet
-  buffs.sniper_volley    = new buff_t( this , m.t_sniper_volley     , 1 ,  from_seconds( 10  ), from_seconds( ( ptr ? 0 : 30 ) ), 0.05 * ( ptr ? talents.sniper_volley -> rank() : talents.rapid_fire -> rank() ) );
+  buffs.sniper_volley    = new buff_t( this , m.t_sniper_volley     , 1 ,  from_seconds( 10  ), from_seconds( 0 ));
   buffs.stroke_of_genius = new buff_t( this , m.t_stroke_of_genius  , 1 ,  from_seconds( 10  ), timespan_t::zero(), 0.5 * talents.stroke_of_genius -> rank() );
   buffs.target_acquired  = new buff_t( this , m.a_target_acquired   , 1 ,  from_seconds( 10  ));
 }
@@ -1451,9 +1399,7 @@ void class_t::init_actions()
         list << "&energy>=" << energy_floor + explosive_probe_t::energy_cost( this ) / 2;
     }
 
-    if ( ! ptr && talents.rapid_fire -> rank() )
-      list << sl << m.t_rapid_fire << ",if=cooldown." << m.a_series_of_shots << ".remains";
-    if ( ptr && talents.rapid_fire -> rank() )
+    if ( talents.sniper_volley -> rank() )
       list << sl << m.t_sniper_volley << ",if=cooldown." << m.a_series_of_shots << ".remains";
 
     if ( talents.imperial_methodology -> rank() )
@@ -1523,12 +1469,6 @@ void class_t::init_actions()
     action_list_str = list.str();
   }
 
-  if ( !ptr && talents.sniper_volley -> rank() )
-  {
-    register_attack_callback( RESULT_HIT_MASK, new sniper_volley_callback_t( this ) );
-    register_tick_callback  ( RESULT_HIT_MASK, new sniper_volley_callback_t( this ) );
-  }
-
   if ( talents.cluster_bombs -> rank() )
   {
     register_attack_callback( RESULT_HIT_MASK, new cluster_bombs_callback_t( this ) );
@@ -1542,14 +1482,14 @@ void class_t::init_actions()
 double class_t::tech_accuracy_chance() const
 {
   return base_t::tech_accuracy_chance() + _tech_range_accuracy
-    + ( (ptr && buffs.target_acquired -> up()) ? 0.3 : 0 );
+    + ( buffs.target_acquired -> up() ? 0.3 : 0 );
 }
 
 // class_t::range_accuracy_chance ===============================
 double class_t::range_accuracy_chance() const
 {
   return base_t::range_accuracy_chance() + _tech_range_accuracy
-    + ( (ptr && buffs.target_acquired -> up()) ? 0.3 : 0 );
+    + ( buffs.target_acquired -> up() ? 0.3 : 0 );
 }
 
 // class_t::talented_energy =====================================
@@ -1587,21 +1527,14 @@ void class_t::regen( timespan_t periodicity )
 // class_t::alacrity ============================================
 double class_t::alacrity() const
 {
-  return base_t::alacrity() - ( buffs.sniper_volley -> up() ? 0.1 : 0 ) -
-    ( ptr                          ? 0   :
-     buffs.target_acquired -> up() ? 0.2 : 0 );
+  return base_t::alacrity() - ( buffs.sniper_volley -> up() ? 0.1 : 0 );
 }
 
 // class_t::armor_penetration =================================
 
 double class_t::armor_penetration() const
 {
-  double arpen = base_t::armor_penetration();
-
-  if ( ptr && buffs.target_acquired -> up() )
-    arpen -= 0.15;
-
-  return arpen;
+  return base_t::armor_penetration() - ( buffs.target_acquired -> up() ? 0.15 : 0 );
 }
 
 // class_t::primary_role ========================================
@@ -1705,10 +1638,10 @@ void class_t::create_talents()
     { m.t_cover_screen      , 2 }, { m.t_steady_shots       , 2 }, { m.t_marksmanship     , 3 },
     { m.t_heavy_shot        , 1 }, { m.t_ballistic_dampers  , 2 }, { m.t_precision_ambush , 2 }, { m.t_imperial_demarcation , 2 },
     { m.t_snap_shot         , 2 }, { m.t_diversion          , 1 }, { m.t_reactive_shot    , 2 },
-    { m.t_between_the_eyes  , 2 }, { m.t_sector_ranger      , 1 }, { m.t_sniper_volley    , 3 }, { m.t_snipers_nest         , 1 },
+    { m.t_between_the_eyes  , 2 }, { m.t_sector_ranger      , 1 }, { m.t_rapid_fire       , 3 }, { m.t_snipers_nest         , 1 },
     { m.t_recoil_control    , 2 }, { m.t_followthrough      , 1 }, { m.t_pillbox_sniper   , 2 },
     { m.t_imperial_assassin , 3 }, { m.t_siege_bunker       , 2 },
-    { m.t_rapid_fire        , 1 }
+    { m.t_sniper_volley     , 1 }
   };
   init_talent_tree( IA_SNIPER_MARKSMANSHIP, marksmanship_tree );
 

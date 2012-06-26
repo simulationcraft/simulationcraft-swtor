@@ -19,7 +19,7 @@ actions+=/power_potion
 actions+=/cool_head,if=energy<=76
 actions+=/illegal_mods,if=energy<=100
 actions+=/smugglers_luck
-actions+=/rapid_fire,if=cooldown.speed_shot.remains
+actions+=/burst_volley,if=cooldown.speed_shot.remains
 actions+=/trickshot,if=buff.trickshot.up&energy>=72
 actions+=/quickdraw,if=energy>=74
 actions+=/aimed_shot,if=buff.quick_aim.up&energy>=81

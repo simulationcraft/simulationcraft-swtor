@@ -19,7 +19,7 @@ actions+=/power_potion
 actions+=/adrenaline_probe,if=energy<=76
 actions+=/target_acquired,if=energy<=100
 actions+=/laze_target
-actions+=/rapid_fire,if=cooldown.series_of_shots.remains
+actions+=/sniper_volley,if=cooldown.series_of_shots.remains
 actions+=/followthrough,if=buff.followthrough.up&energy>=72
 actions+=/takedown,if=energy>=74
 actions+=/ambush,if=buff.reactive_shot.up&energy>=81
