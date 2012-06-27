@@ -1,6 +1,6 @@
 #!./simc
 
-jedi_sage="Jedi_Sage_Telekinetics"
+jedi_sage="Sage_Telekinetics_Rakata"
 origin="create_Jedi_Sage.simc"
 level=50
 race=human

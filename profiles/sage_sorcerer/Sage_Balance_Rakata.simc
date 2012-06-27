@@ -1,6 +1,6 @@
 #!./simc
 
-jedi_sage="Jedi_Sage_Balance"
+jedi_sage="Sage_Balance_Rakata"
 origin="create_Jedi_Sage.simc"
 level=50
 race=human
