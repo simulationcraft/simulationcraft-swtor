@@ -338,6 +338,24 @@ const char* util_t::player_type_string( player_type type )
   }
 }
 
+// util_t::player_type_string_short =========================================
+
+const char* util_t::player_type_string_short( player_type type )
+{
+  switch ( type )
+  {
+  case JEDI_SAGE:        return "sage";
+  case JEDI_SHADOW:      return "shadow";
+  case JEDI_SENTINEL:    return "sentinel";
+  case JEDI_GUARDIAN:    return "guardian";
+  case SITH_SORCERER:    return "sorcerer";
+  case SITH_ASSASSIN:    return "assassin";
+  case SITH_MARAUDER:    return "marauder";
+  case SITH_JUGGERNAUT:  return "juggernaut";
+  default:               return util_t::player_type_string( type );
+  }
+}
+
 // util_t::translate_class_str ==============================================
 
 player_type util_t::translate_class_str( const std::string& s )

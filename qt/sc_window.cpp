@@ -820,7 +820,8 @@ void SimulationCraftWindow::createBestInSlotTab()
 
       for ( player_type pt = PLAYER_NONE; pt < PLAYER_MAX; ++pt )
       {
-        if ( profileList[ i ].contains( util_t::player_type_string( pt ), Qt::CaseInsensitive ) )
+        if (   profileList[ i ].contains( util_t::player_type_string( pt ), Qt::CaseInsensitive )
+            || profileList[ i ].contains( util_t::player_type_string_short( pt ), Qt::CaseInsensitive ) )
         {
           if ( !rootItems[ k ][ pt ] )
           {
