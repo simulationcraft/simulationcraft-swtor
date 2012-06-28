@@ -18,7 +18,6 @@ struct targetdata_t : public bount_troop::targetdata_t
   dot_t dot_unload_offhand;
   dot_t dot_vent_heat;
 
-  // TODO this applies arpen to target of 4% per stack
   buff_t* debuff_heat_signature;
 
   targetdata_t( class_t& source, player_t& target );
@@ -541,25 +540,25 @@ struct tracer_missile_t : public missile_attack_t
   {
     missile_attack_t::execute();
 
-    if ( result_is_hit() )
+    class_t& p = *cast();
+
+    if ( p.talents.tracer_lock -> rank() )
+      p.buffs.tracer_lock -> trigger( ( p.talents.light_em_up -> rank() ) ? 2 : 1 );
+
+    if ( p.talents.barrage -> rank() && !p.buffs.barrage -> up() )
     {
-      // XXX REVIEW can't this thing be put in action_t or something so we always have p?
-      // it's C voodoo to me
-      class_t& p = *cast();
-
-      // BUG: debuff is ignoring travel time and incorrectly applying instantly
-      targetdata() -> debuff_heat_signature -> trigger( p.talents.light_em_up -> rank() ? 2 : 1 );
-
-      if ( p.talents.tracer_lock -> rank() )
-        p.buffs.tracer_lock -> trigger( ( p.talents.light_em_up -> rank() ) ? 2 : 1 );
-
-      if ( p.talents.barrage -> rank() && !p.buffs.barrage -> up() )
-      {
-          p.buffs.barrage -> trigger();
-          if ( p.buffs.barrage -> up() )
-            p.cooldowns.unload -> reset();
-      }
+        p.buffs.barrage -> trigger();
+        if ( p.buffs.barrage -> up() )
+          p.cooldowns.unload -> reset();
     }
+  }
+
+  virtual void impact( player_t* t, result_type impact_result, double travel_dmg )
+  {
+    missile_attack_t::impact( t, impact_result, travel_dmg );
+    if ( result_is_hit( impact_result ) )
+      targetdata() -> debuff_heat_signature
+        -> trigger( p() -> talents.light_em_up -> rank() ? 2 : 1 );
   }
 };
 
