@@ -855,7 +855,7 @@ struct discharge_t: public spell_t
     cooldown->duration = from_seconds( 15.0 - p->talents.recirculation->rank() * 1.5 );
 
     if ( p->actives.charge == LIGHTNING_CHARGE && p->talents.crackling_charge->rank() > 0 )
-      cooldown->duration -= cooldown->duration * p->talents.crackling_charge->rank() * 0.25;
+      cooldown->duration -= cooldown->duration * p->talents.crackling_charge->rank() * 0.5;
 
     if ( p->actives.charge == SURGING_CHARGE )
       p->buffs.static_charges->expire();
@@ -1064,10 +1064,7 @@ struct overcharge_saber_t : public spell_t
   virtual void execute()
   {
     spell_t::execute();
-
-    class_t* p = cast();
-
-    p->buffs.overcharge_saber->trigger();
+    p() -> buffs.overcharge_saber->trigger();
   }
 };
 
@@ -1441,6 +1438,7 @@ struct lightning_charge_callback_t : public action_callback_t
 
   virtual void trigger( ::action_t* /* a */, void* /* call_data */)
   {
+    // XXX TEST CONFIRM: does this really happen with all spells?
     //weapon_t* w = a -> weapon;
     //if ( ! w ) return;
 
