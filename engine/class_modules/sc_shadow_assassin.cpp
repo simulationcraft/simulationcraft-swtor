@@ -1562,6 +1562,8 @@ struct dark_charge_callback_t : public action_callback_t
     {
       // FIXME: ADD correct values and implement heal and other effects
       // Add Overcharge Saber
+      dd.standardhealthpercentmin = dd.standardhealthpercentmax = 0.02;
+      dd.power_mod = 0.19;
 
       proc = true;
       background = true;
