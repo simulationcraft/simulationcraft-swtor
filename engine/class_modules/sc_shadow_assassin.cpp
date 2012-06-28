@@ -96,6 +96,7 @@ struct class_t : public cons_inq::class_t
     talent_t* electric_execution;
     talent_t* blood_of_sith;
     talent_t* harnessed_darkness;
+    talent_t* wither;
 
     // Deception|Infiltration
     talent_t* insulation;
@@ -873,6 +874,38 @@ struct discharge_t: public spell_t
   }
 };
 
+// Wither | Slow Time ==================================
+
+struct wither_t : public spell_t
+{
+    wither_t( class_t* p, const std::string& name, const std::string& options_str)
+        : spell_t(name, p, SCHOOL_KINETIC)
+    {
+        check_talent( p->talents.wither->rank() );
+
+        parse_options( options_str );
+
+        dd.standardhealthpercentmin = 0.088;
+        dd.standardhealthpercentmax = 0.148;
+        dd.power_mod = 1.18;
+
+        base_cost = 30.0;
+        range = 10.0;
+        cooldown->duration = from_seconds( 7.5 );
+        aoe = 5;
+    }
+
+    virtual void execute()
+    {
+        spell_t::execute();
+
+        class_t* p = cast();
+
+        if ( p -> rngs.harnessed_darkness -> roll( p -> talents.harnessed_darkness -> rank() * 0.50 ) )
+            p -> buffs.harnessed_darkness -> trigger( 1 );
+    }
+};
+
 // Apply Charge ======================================
 
 struct apply_charge_t : public spell_t
@@ -1612,6 +1645,7 @@ struct duplicity_callback_t: action_callback_t
     if ( name == "surging_charge"     ) return new      surging_charge_t( this, name, options_str );
     if ( name == "thrash"             ) return new              thrash_t( this, name, options_str );
     if ( name == "voltaic_slash"      ) return new       voltaic_slash_t( this, name, options_str );
+    if ( name == "wither"             ) return new              wither_t( this, name, options_str );
   }
   else if ( type == JEDI_SHADOW )
   {
@@ -1632,6 +1666,7 @@ struct duplicity_callback_t: action_callback_t
     if ( name == "shadow_technique"   ) return new      surging_charge_t( this, name, options_str );
     if ( name == "double_strike"      ) return new              thrash_t( this, name, options_str );
     if ( name == "clairvoyant_strike" ) return new       voltaic_slash_t( this, name, options_str );
+    if ( name == "slow_time"          ) return new              wither_t( this, name, options_str );
   }
 
   // Abilities with the same name for Shadow and Assassin
@@ -1656,6 +1691,7 @@ void class_t::init_talents()
   talents.electric_execution    = find_talent( "Electric Execution" );
   talents.blood_of_sith         = find_talent( "Blood of Sith" );
   talents.harnessed_darkness    = find_talent( "Harnessed Darkness" );
+  talents.wither                = find_talent( "Wither" );
 
   // Deception|Infiltration
   talents.insulation            = find_talent( "Insulation" );
