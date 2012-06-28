@@ -550,6 +550,8 @@ struct force_lightning_t : public spell_t
     spell_t::execute();
 
     p() -> buffs.harnessed_darkness -> expire();
+    // this increases range to 30, but range isn't check for that in the sime
+    p() -> buffs.recklessness -> decrement();
   }
 };
 
@@ -791,8 +793,6 @@ struct discharge_t: public spell_t
       dd.standardhealthpercentmin = .154;
       dd.standardhealthpercentmax = .194;
       dd.power_mod = 1.74;
-
-      base_tick_time = from_seconds( 3.0 );
 
       background = true;
 
