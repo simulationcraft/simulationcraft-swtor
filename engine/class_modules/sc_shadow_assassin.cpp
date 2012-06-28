@@ -70,7 +70,6 @@ struct class_t : public cons_inq::class_t
   struct rngs_t
   {
     rng_t* chain_shock;
-    rng_t* harnessed_darkness;
   } rngs;
 
   // Benefits
@@ -505,8 +504,8 @@ struct shock_t : public spell_t
       chain_shock -> execute();
     }
 
-    if ( p -> rngs.harnessed_darkness -> roll( p -> talents.harnessed_darkness -> rank() * 0.50 ) )
-        p -> buffs.harnessed_darkness -> trigger( 1 );
+    if ( p -> talents.harnessed_darkness -> rank() )
+      p -> buffs.harnessed_darkness -> trigger();
   }
 };
 
@@ -550,9 +549,7 @@ struct force_lightning_t : public spell_t
   {
     spell_t::execute();
 
-    class_t* p = cast();
-
-    p -> buffs.harnessed_darkness -> expire();
+    p() -> buffs.harnessed_darkness -> expire();
   }
 };
 
@@ -901,8 +898,8 @@ struct wither_t : public spell_t
 
         class_t* p = cast();
 
-        if ( p -> rngs.harnessed_darkness -> roll( p -> talents.harnessed_darkness -> rank() * 0.50 ) )
-            p -> buffs.harnessed_darkness -> trigger( 1 );
+        if ( p -> talents.harnessed_darkness -> rank() )
+            p -> buffs.harnessed_darkness -> trigger();
     }
 };
 
@@ -1774,9 +1771,6 @@ void class_t::init_buffs()
 {
   base_t::init_buffs();
 
-  // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-  // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-  // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
 
   bool is_shadow = ( type == JEDI_SHADOW );
 
@@ -1793,6 +1787,9 @@ void class_t::init_buffs()
   const char* voltaic_slash       = is_shadow ? "clairvoyant_strike" : "voltaic_slash"       ;
   const char* harnessed_darkness  = is_shadow ? "harnessed_shadows"  : "harnessed_darkness"  ;
 
+  // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
+  // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
+  // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   buffs.exploit_weakness    = new buff_t( this, exploit_weakness,    1, from_seconds( 10.0 ), from_seconds( 10.0 ), talents.duplicity -> rank () * 0.1 );
   buffs.dark_embrace        = new buff_t( this, dark_embrace,        1, from_seconds(  6.0 ), timespan_t::zero() );
   buffs.induction           = new buff_t( this, induction,           2, from_seconds( 10.0 ), timespan_t::zero(),   talents.induction -> rank() * 0.5 );
@@ -1804,7 +1801,7 @@ void class_t::init_buffs()
   buffs.recklessness        = new buff_t( this, recklessness,        2, from_seconds( 20.0 ) );
   buffs.deathmark           = new buff_t( this, deathmark,          10, from_seconds( 30.0 ), timespan_t::zero() );
   buffs.overcharge_saber    = new buff_t( this, overcharge_saber,    1, from_seconds( 15.0 ) );
-  buffs.harnessed_darkness  = new buff_t( this, harnessed_darkness,  3, from_seconds( 30.0 ), timespan_t::zero());
+  buffs.harnessed_darkness  = new buff_t( this, harnessed_darkness,  3, from_seconds( 30.0 ), timespan_t::zero(),   talents.harnessed_darkness -> rank() * 0.5 );
 }
 
 // class_t::init_gains =======================================================
@@ -1837,7 +1834,6 @@ void class_t::init_rng()
   base_t::init_rng();
 
   rngs.chain_shock        = get_rng( "chain_shock"        );
-  rngs.harnessed_darkness = get_rng( "harnessed_darkness" );
 }
 
 // class_t::init_actions =====================================================
