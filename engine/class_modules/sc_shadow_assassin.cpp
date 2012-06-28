@@ -46,6 +46,7 @@ struct class_t : public cons_inq::class_t
     buff_t* recklessness;
     buff_t* deathmark;
     buff_t* overcharge_saber;
+    buff_t* harnessed_darkness;
   } buffs;
 
   // Gains
@@ -69,6 +70,7 @@ struct class_t : public cons_inq::class_t
   struct rngs_t
   {
     rng_t* chain_shock;
+    rng_t* harnessed_darkness;
   } rngs;
 
   // Benefits
@@ -93,6 +95,8 @@ struct class_t : public cons_inq::class_t
     talent_t* charge_mastery;
     talent_t* electric_execution;
     talent_t* blood_of_sith;
+    talent_t* harnessed_darkness;
+    talent_t* wither;
 
     // Deception|Infiltration
     talent_t* insulation;
@@ -500,6 +504,9 @@ struct shock_t : public spell_t
       if ( p -> rngs.chain_shock -> roll( p -> talents.chain_shock -> rank() * 0.15 ) )
       chain_shock -> execute();
     }
+
+    if ( p -> rngs.harnessed_darkness -> roll( p -> talents.harnessed_darkness -> rank() * 0.50 ) )
+        p -> buffs.harnessed_darkness -> trigger( 1 );
   }
 };
 
@@ -527,6 +534,25 @@ struct force_lightning_t : public spell_t
     channeled = true;
     tick_zero = true;
     cooldown -> duration = from_seconds( 6.0 );
+  }
+
+  virtual void player_buff()
+  {
+    spell_t::player_buff();
+
+    class_t* p = cast();
+
+    if ( p -> buffs.harnessed_darkness -> up() )
+      player_multiplier += 0.25 * p -> buffs.harnessed_darkness -> stack();
+  }
+
+  virtual void execute()
+  {
+    spell_t::execute();
+
+    class_t* p = cast();
+
+    p -> buffs.harnessed_darkness -> expire();
   }
 };
 
@@ -846,6 +872,38 @@ struct discharge_t: public spell_t
 
     charge_action->execute();
   }
+};
+
+// Wither | Slow Time ==================================
+
+struct wither_t : public spell_t
+{
+    wither_t( class_t* p, const std::string& name, const std::string& options_str)
+        : spell_t(name, p, SCHOOL_KINETIC)
+    {
+        check_talent( p->talents.wither->rank() );
+
+        parse_options( options_str );
+
+        dd.standardhealthpercentmin = 0.088;
+        dd.standardhealthpercentmax = 0.148;
+        dd.power_mod = 1.18;
+
+        base_cost = 30.0;
+        range = 10.0;
+        cooldown->duration = from_seconds( 7.5 );
+        aoe = 5;
+    }
+
+    virtual void execute()
+    {
+        spell_t::execute();
+
+        class_t* p = cast();
+
+        if ( p -> rngs.harnessed_darkness -> roll( p -> talents.harnessed_darkness -> rank() * 0.50 ) )
+            p -> buffs.harnessed_darkness -> trigger( 1 );
+    }
 };
 
 // Apply Charge ======================================
@@ -1587,6 +1645,7 @@ struct duplicity_callback_t: action_callback_t
     if ( name == "surging_charge"     ) return new      surging_charge_t( this, name, options_str );
     if ( name == "thrash"             ) return new              thrash_t( this, name, options_str );
     if ( name == "voltaic_slash"      ) return new       voltaic_slash_t( this, name, options_str );
+    if ( name == "wither"             ) return new              wither_t( this, name, options_str );
   }
   else if ( type == JEDI_SHADOW )
   {
@@ -1607,6 +1666,7 @@ struct duplicity_callback_t: action_callback_t
     if ( name == "shadow_technique"   ) return new      surging_charge_t( this, name, options_str );
     if ( name == "double_strike"      ) return new              thrash_t( this, name, options_str );
     if ( name == "clairvoyant_strike" ) return new       voltaic_slash_t( this, name, options_str );
+    if ( name == "slow_time"          ) return new              wither_t( this, name, options_str );
   }
 
   // Abilities with the same name for Shadow and Assassin
@@ -1630,6 +1690,8 @@ void class_t::init_talents()
   talents.charge_mastery        = find_talent( "Charge Mastery" );
   talents.electric_execution    = find_talent( "Electric Execution" );
   talents.blood_of_sith         = find_talent( "Blood of Sith" );
+  talents.harnessed_darkness    = find_talent( "Harnessed Darkness" );
+  talents.wither                = find_talent( "Wither" );
 
   // Deception|Infiltration
   talents.insulation            = find_talent( "Insulation" );
@@ -1729,6 +1791,7 @@ void class_t::init_buffs()
   const char* static_charges      = is_shadow ? "exit_strategy"      : "static_charges"      ;
   const char* unearthed_knowledge = is_shadow ? "twin_disciplines"   : "unearthed_knowledge" ;
   const char* voltaic_slash       = is_shadow ? "clairvoyant_strike" : "voltaic_slash"       ;
+  const char* harnessed_darkness  = is_shadow ? "harnessed_shadows"  : "harnessed_darkness"  ;
 
   buffs.exploit_weakness    = new buff_t( this, exploit_weakness,    1, from_seconds( 10.0 ), from_seconds( 10.0 ), talents.duplicity -> rank () * 0.1 );
   buffs.dark_embrace        = new buff_t( this, dark_embrace,        1, from_seconds(  6.0 ), timespan_t::zero() );
@@ -1741,6 +1804,7 @@ void class_t::init_buffs()
   buffs.recklessness        = new buff_t( this, recklessness,        2, from_seconds( 20.0 ) );
   buffs.deathmark           = new buff_t( this, deathmark,          10, from_seconds( 30.0 ), timespan_t::zero() );
   buffs.overcharge_saber    = new buff_t( this, overcharge_saber,    1, from_seconds( 15.0 ) );
+  buffs.harnessed_darkness  = new buff_t( this, harnessed_darkness,  3, from_seconds( 30.0 ), timespan_t::zero());
 }
 
 // class_t::init_gains =======================================================
@@ -1772,7 +1836,8 @@ void class_t::init_rng()
 {
   base_t::init_rng();
 
-  rngs.chain_shock = get_rng( "chain_shock" );
+  rngs.chain_shock        = get_rng( "chain_shock"        );
+  rngs.harnessed_darkness = get_rng( "harnessed_darkness" );
 }
 
 // class_t::init_actions =====================================================
