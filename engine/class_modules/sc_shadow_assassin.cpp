@@ -1438,10 +1438,6 @@ struct lightning_charge_callback_t : public action_callback_t
 
   virtual void trigger( ::action_t* /* a */, void* /* call_data */)
   {
-    // XXX TEST CONFIRM: does this really happen with all spells?
-    //weapon_t* w = a -> weapon;
-    //if ( ! w ) return;
-
     class_t* p = cast();
 
     if ( p->actives.charge != LIGHTNING_CHARGE )
@@ -1524,9 +1520,6 @@ struct surging_charge_callback_t : public action_callback_t
 
   virtual void trigger( ::action_t* /* a */, void* /* call_data */)
   {
-    //weapon_t* w = a -> weapon;
-    //if ( ! w ) return;
-
     class_t* p = cast();
 
     if ( p->actives.charge != SURGING_CHARGE )
@@ -1587,9 +1580,6 @@ struct dark_charge_callback_t : public action_callback_t
 
   virtual void trigger( ::action_t* /* a */, void* /* call_data */)
   {
-    //weapon_t* w = a -> weapon;
-    //if ( ! w ) return;
-
     class_t* p = cast();
 
     if ( p->actives.charge != DARK_CHARGE )
@@ -1995,19 +1985,15 @@ void class_t::init_spells()
 
   action_callback_t* c = new lightning_charge_callback_t( this );
   register_attack_callback( RESULT_HIT_MASK, c );
-  register_spell_callback( RESULT_HIT_MASK, c );
 
   c = new surging_charge_callback_t( this );
   register_attack_callback( RESULT_HIT_MASK, c );
-  register_spell_callback( RESULT_HIT_MASK, c );
 
   c = new dark_charge_callback_t( this );
   register_attack_callback( RESULT_HIT_MASK, c );
-  register_spell_callback( RESULT_HIT_MASK, c );
 
   c = new duplicity_callback_t( this );
   register_attack_callback( RESULT_HIT_MASK, c );
-  register_spell_callback( RESULT_HIT_MASK, c );
 }
 
 // class_t::primary_role ==========================================
