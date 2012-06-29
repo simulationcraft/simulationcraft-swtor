@@ -1569,7 +1569,6 @@ struct dark_charge_callback_t : public action_callback_t
       background = true;
       cooldown->duration = from_seconds( 4.5 );
 
-      base_crit *= 1.0 + p->talents.charge_mastery->rank() * 0.01;
       base_multiplier *= 1.0 + p->talents.electric_execution->rank() * 0.03;
     }
 
