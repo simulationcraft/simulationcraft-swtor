@@ -1856,10 +1856,10 @@ void class_t::init_actions()
     {
       action_list_str += "/force_valor";
 
-	  if ( talents.surging_charge->rank() )
-		action_list_str += "/shadow_technique";
-	  else
-		action_list_str += "/force_technique";
+      if ( talents.surging_charge->rank() )
+        action_list_str += "/shadow_technique";
+      else
+        action_list_str += "/force_technique";
 
       action_list_str += "/snapshot_stats";
 
