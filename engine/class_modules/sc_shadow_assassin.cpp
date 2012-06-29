@@ -148,10 +148,14 @@ struct class_t : public cons_inq::class_t
     bool stealth_tag;
   } actives;
 
+  player_type type;
+
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type r ) :
     base_t( sim, pt == SITH_ASSASSIN ? SITH_ASSASSIN : JEDI_SHADOW, name, r ),
     buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents(), actives()
   {
+    type = pt;
+
     if ( pt == SITH_ASSASSIN )
     {
       tree_type[ SITH_ASSASSIN_DARKNESS ]   = TREE_DARKNESS;
@@ -809,6 +813,11 @@ struct discharge_t: public spell_t
     {
       background = true;
 
+      dd.standardhealthpercentmin = 0.054;
+      dd.standardhealthpercentmax = 0.094;
+      dd.power_mod = 0.74;
+      aoe = 5;
+
       // FIME: Implement Dark Discharge
       crit_bonus += p->talents.crackling_blasts->rank() * 0.10;
     }
@@ -826,9 +835,18 @@ struct discharge_t: public spell_t
     range = 10.0;
     base_cost = 20.0;
 
-    lightning_discharge = new lightning_discharge_t( p, "lightning_discharge" );
-    surging_discharge = new surging_discharge_t( p, "surging_discharge" );
-    dark_discharge = new dark_discharge_t( p, "dark_discharge" );
+    if ( p -> type == JEDI_SHADOW )
+    {
+      lightning_discharge = new lightning_discharge_t( p, "force_breach (force_technique)" );
+      surging_discharge = new surging_discharge_t( p, "force_breach (shadow_technique)" );
+      dark_discharge = new dark_discharge_t( p, "force_breach (combat_technique)" );
+    }
+    else
+    {
+      lightning_discharge = new lightning_discharge_t( p, "lightning_discharge" );
+      surging_discharge = new surging_discharge_t( p, "surging_discharge" );
+      dark_discharge = new dark_discharge_t( p, "dark_discharge" );
+    }
 
     add_child( lightning_discharge );
     add_child( surging_discharge );
