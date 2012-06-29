@@ -96,6 +96,7 @@ struct class_t : public cons_inq::class_t
     talent_t* blood_of_sith;
     talent_t* harnessed_darkness;
     talent_t* wither;
+	talent_t* swelling_shadows;
 
     // Deception|Infiltration
     talent_t* insulation;
@@ -1598,7 +1599,7 @@ struct dark_charge_callback_t : public action_callback_t
     if ( dark_charge_damage_proc->cooldown->remains() > timespan_t::zero() )
       return;
 
-    if ( !rng_dark_charge->roll( 0.5 ) )
+    if ( !rng_dark_charge->roll( 0.5 + (0.075 * p -> talents.swelling_shadows -> rank() ) ) )
       return;
 
     dark_charge_damage_proc->execute();
@@ -1688,6 +1689,7 @@ void class_t::init_talents()
   talents.blood_of_sith         = find_talent( "Blood of Sith" );
   talents.harnessed_darkness    = find_talent( "Harnessed Darkness" );
   talents.wither                = find_talent( "Wither" );
+  talents.swelling_shadows      = find_talent( "Swelling Shadows" );
 
   // Deception|Infiltration
   talents.insulation            = find_talent( "Insulation" );
@@ -1854,10 +1856,10 @@ void class_t::init_actions()
     {
       action_list_str += "/force_valor";
 
-      if ( talents.surging_charge->rank() )
-        action_list_str += "/shadow_technique";
-      else
-        action_list_str += "/force_technique";
+	  if ( talents.surging_charge->rank() )
+		action_list_str += "/shadow_technique";
+	  else
+		action_list_str += "/force_technique";
 
       action_list_str += "/snapshot_stats";
 
