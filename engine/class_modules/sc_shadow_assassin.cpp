@@ -148,14 +148,10 @@ struct class_t : public cons_inq::class_t
     bool stealth_tag;
   } actives;
 
-  player_type type;
-
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type r ) :
     base_t( sim, pt == SITH_ASSASSIN ? SITH_ASSASSIN : JEDI_SHADOW, name, r ),
     buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents(), actives()
   {
-    type = pt;
-
     if ( pt == SITH_ASSASSIN )
     {
       tree_type[ SITH_ASSASSIN_DARKNESS ]   = TREE_DARKNESS;
