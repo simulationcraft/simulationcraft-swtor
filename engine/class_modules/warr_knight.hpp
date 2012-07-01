@@ -16,6 +16,14 @@ class class_t : public player_t
     }
 };
 
+class targetdata_t : public ::targetdata_t
+{
+  public:
+    targetdata_t( class_t& source, player_t& target ) :
+      ::targetdata_t (source, target)
+    {}
+};
+
 }
 
 

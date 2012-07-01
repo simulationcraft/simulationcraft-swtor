@@ -23,6 +23,9 @@ enum form_type
 
 struct sentinel_marauder_targetdata_t : public targetdata_t
 {
+  dot_t rupture;
+  dot_t deadly_saber;
+
   sentinel_marauder_targetdata_t( player_t& source, player_t& target )
     : targetdata_t( source, target ) {}
 };
@@ -172,10 +175,20 @@ struct class_t : public warr_knight::class_t
 
     } talents;
 
+    struct actives_t
+    {
+      form_type form;
+    } actives;
+
     class_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
       base_t( sim, pt == SITH_MARAUDER ? SITH_MARAUDER : JEDI_SENTINEL, name, ( r == RACE_NONE ) ? RACE_HUMAN : r ),
-      buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents()
+      buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents(), actives()
     {
+
+      tree_type[ SITH_MARAUDER_ANNIHILATION ] = TREE_ANNIHILATION;
+      tree_type[ SITH_MARAUDER_CARNAGE ] = TREE_CARNAGE;
+      tree_type[ SITH_MARAUDER_RAGE ] = TREE_RAGE;
+
       create_talents();
       create_options();
     }
@@ -204,14 +217,14 @@ struct class_t : public warr_knight::class_t
     }
 };
 
-namespace { // ANONYMOUS NAMESPACE ==========================================
 
-class sentinel_marauder_action_t : public action_t
+class action_t : public ::action_t
 {
+  typedef ::action_t base_t;
 public:
-  sentinel_marauder_action_t( const std::string& n, class_t* player,
+  action_t( const std::string& n, class_t* player,
                           attack_policy_t policy, resource_type r, school_type s ) :
-    action_t( ACTION_ATTACK, n, player, policy, r, s )
+    base_t( ACTION_ATTACK, n, player, policy, r, s )
   {}
 
   sentinel_marauder_targetdata_t* targetdata() const
@@ -225,20 +238,20 @@ public:
 // Sentinel / Marauder Abilities
 // ==========================================================================
 
-struct sentinel_marauder_attack_t : public sentinel_marauder_action_t
+struct attack_t : public action_t
 {
-    sentinel_marauder_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_KINETIC ) :
-      sentinel_marauder_action_t( n, p, melee_policy, RESOURCE_NONE, s )
+    attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_KINETIC ) :
+      action_t( n, p, melee_policy, RESOURCE_NONE, s )
     {
         may_crit   = true;
     }
 
 };
 
-struct sentinel_marauder_spell_t : public sentinel_marauder_action_t
+struct spell_t : public action_t
 {
-    sentinel_marauder_spell_t( const std::string& n, class_t* p, school_type s=SCHOOL_KINETIC ) :
-      sentinel_marauder_action_t( n, p, force_policy, RESOURCE_NONE, s )
+    spell_t( const std::string& n, class_t* p, school_type s=SCHOOL_KINETIC ) :
+      action_t( n, p, force_policy, RESOURCE_NONE, s )
     {
         may_crit   = true;
         tick_may_crit = true;
@@ -246,16 +259,13 @@ struct sentinel_marauder_spell_t : public sentinel_marauder_action_t
 
 };
 
-
-} // ANONYMOUS NAMESPACE ====================================================
-
 // ==========================================================================
 // sentinel_marauder Character Definition
 // ==========================================================================
 
 // class_t::create_action ====================================================
 
-action_t* class_t::create_action( const std::string& name,
+::action_t* class_t::create_action( const std::string& name,
                                             const std::string& options_str )
 {
     if ( type == SITH_MARAUDER )
