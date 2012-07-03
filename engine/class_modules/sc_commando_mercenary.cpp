@@ -367,13 +367,7 @@ struct missile_attack_t : public terminal_velocity_attack_t
     missile_attack_t( class_t* p, const std::string& n ) :
       terminal_velocity_attack_t( p, n, tech_policy, SCHOOL_KINETIC)
   {
-  }
-
-  virtual void player_buff()
-  {
-    terminal_velocity_attack_t::player_buff();
-    if ( unsigned rank = p() -> talents.mandalorian_iron_warheads -> rank() )
-      player_multiplier += 0.03 * rank;
+    base_multiplier += 0.03 * p -> talents.mandalorian_iron_warheads -> rank();
   }
 };
 
@@ -741,16 +735,14 @@ struct thermal_sensor_override_t : public action_t
   {
     parse_options( options_str );
 
-    cooldown -> duration = from_seconds( 120 );
+    cooldown -> duration = from_seconds( 120 - ( 15 * p -> talents.power_overrides -> rank() ) );
     trigger_gcd = timespan_t::zero();
   }
 
   virtual void execute()
   {
     action_t::execute();
-
-    class_t* p = cast();
-    p -> buffs.thermal_sensor_override -> trigger();
+    p() -> buffs.thermal_sensor_override -> trigger();
   }
 };
 
@@ -775,7 +767,7 @@ struct unload_t : public terminal_velocity_attack_t
     channeled                   = true;
     num_ticks                   = 3;
     base_tick_time              = from_seconds( 1 );
-    base_multiplier             = 1 + ( 0.33 * p -> talents.riddle -> rank() );
+    base_multiplier            += 0.33 * p -> talents.riddle -> rank();
     // still in 1.3 target tracking doesn't help unload
     // http://mmo-mechanics.com/swtor/forums/Thread-Mercenary-Commando-DPS-Compendium?pid=22606#pid22606
     crit_bonus                 += p -> bugs ? 0 : ( 0.15 * p -> talents.target_tracking -> rank() );
