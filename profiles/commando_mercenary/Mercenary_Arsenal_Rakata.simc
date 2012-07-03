@@ -13,9 +13,10 @@ actions=stim,type=exotech_reflex
 actions+=/snapshot_stats
 actions+=/high_velocity_gas_cylinder,if=!buff.high_velocity_gas_cylinder.up
 actions+=/vent_heat,if=heat<=40
-actions+=/thermal_sensor_override,if=heat<77
 actions+=/use_relics
 actions+=/power_potion
+actions+=/thermal_sensor_override,if=heat<77
+actions+=/fusion_missile,if=buff.thermal_sensor_override.up
 actions+=/rail_shot,if=buff.high_velocity_gas_cylinder.up
 actions+=/rail_shot,if=heat>77
 actions+=/heatseeker_missiles,if=heat>77|cooldown.vent_heat.remains<10|buff.thermal_sensor_override.up
