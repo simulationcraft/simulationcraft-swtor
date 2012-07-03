@@ -19,7 +19,7 @@ actions+=/force_potency
 actions+=/battle_readiness
 actions+=/force_in_balance
 actions+=/mind_crush,if=buff.force_strike.react
-actions+=/force_breach,if=!dot.force_technique.ticking
+actions+=/force_breach,if=!dot.force_breach_dot.ticking
 actions+=/spinning_strike
 actions+=/double_strike,if=force>45
 actions+=/saber_strike

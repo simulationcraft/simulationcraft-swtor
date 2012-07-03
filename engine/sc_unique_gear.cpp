@@ -909,19 +909,21 @@ bool unique_gear_t::get_equip_encoding( std::string&       encoding,
   else if ( name == "volatile_energy_module"                        ) e = "ondamage_170Energy_30%_4.5c";
   else if ( name == "relic_of_vital_rupturing"                      ) e = "ondamage_128Internal_30%_4.5cd";
   else if ( name == "battlemaster_relic_of_dark_radiance"           ) e = "ondamage_168internal_30%_4.5cd";
-  else if ( name == "battlemaster_relic_of_elemental_transcendance" ) e = "ondamage_168elemental_30%_4.5cd";
+  else if ( name == "battlemaster_relic_of_elemental_transcendence" ) e = "ondamage_168elemental_30%_4.5cd";
   else if ( name == "battlemaster_relic_of_the_cerulean_nova"       ) e = "ondamage_224energy_30%_4.5cd";
   else if ( name == "battlemaster_relic_of_the_kinetic_tempest"     ) e = "ondamage_224kinetic_30%_4.5cd";
   else if ( name == "campaign_relic_of_dark_radiance"               ) e = "ondamage_184internal_30%_4.5cd";
-  else if ( name == "campaign_relic_of_elemental_transcendance"     ) e = "ondamage_184elemental_30%_4.5cd";
+  else if ( name == "campaign_relic_of_elemental_transcendence"     ) e = "ondamage_184elemental_30%_4.5cd";
   else if ( name == "campaign_relic_of_the_cerulean_nova"           ) e = "ondamage_246energy_30%_4.5cd";
   else if ( name == "campaign_relic_of_the_kinetic_tempest"         ) e = "ondamage_246kinetic_30%_4.5cd";
   else if ( name == "war_hero_relic_of_dark_radiance"               ) e = "ondamage_184internal_30%_4.5cd";
+  else if ( name == "war_hero_relic_of_elemental_transcendence"     ) e = "ondamage_184elemental_30%_4.5cd";
+  // XXX still misspelled in torhead
   else if ( name == "war_hero_relic_of_elemental_transcendance"     ) e = "ondamage_184elemental_30%_4.5cd";
   else if ( name == "war_hero_relic_of_the_cerulean_nova"           ) e = "ondamage_246energy_30%_4.5cd";
   else if ( name == "war_hero_relic_of_the_kinetic_tempest"         ) e = "ondamage_246kinetic_30%_4.5cd";
   else if ( name == "denova_relic_of_dark_radiance"                 ) e = "ondamage_199internal_30%_4.5cd";
-  else if ( name == "denova_relic_of_elemental_transcendance"       ) e = "ondamage_199elemental_30%_4.5cd";
+  else if ( name == "denova_relic_of_elemental_transcendence"       ) e = "ondamage_199elemental_30%_4.5cd";
   else if ( name == "denova_relic_of_the_cerulean_nova"             ) e = "ondamage_256energy_30%_4.5cd";
   else if ( name == "denova_relic_of_the_kinetic_tempest"           ) e = "ondamage_256kinetic_30%_4.5cd";
 
