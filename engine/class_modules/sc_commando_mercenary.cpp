@@ -650,6 +650,7 @@ struct rapid_shots_t : public attack_t
     td.weapon                   = &( player -> main_hand_weapon );
     td.weapon_multiplier        = -0.8;
     td.power_mod                = 0.2;
+    channeled                   = true;
 
     if ( is_offhand )
     {

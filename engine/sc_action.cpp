@@ -909,7 +909,7 @@ void action_t::impact( player_t* t, result_type impact_result, double travel_dmg
 
         dot -> schedule_tick();
 
-        if ( sim -> log && ! result_is_hit( impact_result ) )
+        if ( sim -> log && ! result_is_hit( impact_result ) && ! ( td.weapon && channeled ) )
         {
           log_t::output( sim, "%s %s ticks (%d of %d) %s (miss)",
                          dot -> action -> player -> name(), dot -> action -> name(),
@@ -926,7 +926,7 @@ void action_t::impact( player_t* t, result_type impact_result, double travel_dmg
   }
   else
   {
-    if ( sim -> log )
+    if ( sim -> log && ! ( td.weapon && channeled ) )
     {
       log_t::output( sim, "Target %s avoids %s %s (%s)", target -> name(), player -> name(), name(), util_t::result_type_string( impact_result ) );
     }
@@ -948,7 +948,7 @@ void action_t::assess_damage( player_t*   t,
 
   if ( dmg_type == DMG_DIRECT )
   {
-    if ( sim -> log )
+    if ( sim -> log && ! ( td.weapon && channeled ) )
     {
       log_t::output( sim, "%s %s hits %s for %.0f %s damage (%s)",
                      player -> name(), name(),
