@@ -12,6 +12,7 @@ class class_t;
 struct targetdata_t : public bount_troop::targetdata_t
 {
 
+  dot_t dot_radiation_burns;
   dot_t dot_rapid_shots;
   dot_t dot_rapid_shots_offhand;
   dot_t dot_unload;
@@ -214,6 +215,7 @@ struct class_t : public bount_troop::class_t
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   bount_troop::targetdata_t ( source                , target  ),
+  dot_radiation_burns       ( "radiation_burns"     , &source ),
   dot_rapid_shots           ( "rapid_shots"         , &source ),
   dot_rapid_shots_offhand   ( "rapid_shots_offhand" , &source ),
   dot_unload                ( "unload"              , &source ),
@@ -221,6 +223,7 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   dot_vent_heat             ( "vent_heat"           , &source ),
   debuff_heat_signature( new buff_t( this, "heat_signature", 5, from_seconds( 15 ) ) )
 {
+  add ( dot_radiation_burns     );
   add ( dot_rapid_shots         );
   add ( dot_rapid_shots_offhand );
   add ( dot_unload              );
@@ -381,6 +384,54 @@ struct missile_attack_t : public terminal_velocity_attack_t
 // class_t::cure ==========================================================================
 // class_t::emergency_scan ================================================================
 // class_t::fusion_missile ================================================================
+struct fusion_missile_t : public missile_attack_t
+{
+  struct radiation_burns_t : public attack_t
+  {
+    radiation_burns_t( class_t* p, const std::string& n ) :
+      attack_t( n, p, tech_policy, SCHOOL_ELEMENTAL )
+    {
+      td.power_mod                = 0.28;
+      td.standardhealthpercentmin = td.standardhealthpercentmax = 0.028;
+      num_ticks                   = 6;
+      base_tick_time              = from_seconds( 1 );
+      background                  = true;
+      base_accuracy               = 999;
+    }
+  };
+
+  radiation_burns_t* radiation_burns;
+
+  fusion_missile_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    missile_attack_t( p, n ),
+    radiation_burns( new radiation_burns_t( p, "radiation_burns" ) )
+  {
+
+    parse_options( options_str );
+
+    base_cost                    = 33;
+    base_execute_time            = from_seconds( 1.5 );
+    cooldown -> duration         = from_seconds( 30 );
+    range                        = 30.0;
+    // travel_speed                 = 18.4; // XXX guess. how to convert theirs to ours?
+
+    dd.power_mod                 = 1.4;
+    dd.standardhealthpercentmin  = 0.1;
+    dd.standardhealthpercentmax  = 0.16;
+
+    aoe                          = 3;
+
+    add_child(radiation_burns);
+  }
+
+  virtual void impact( player_t* t, result_type impact_result, double travel_dmg )
+  {
+    missile_attack_t::impact( t, impact_result, travel_dmg );
+    if ( result_is_hit( impact_result ) )
+      radiation_burns -> execute();
+  }
+};
+
 // class_t::healing_scan ==================================================================
 // class_t::heatseeker_missiles ===========================================================
 struct heatseeker_missiles_t : public missile_attack_t
@@ -411,6 +462,9 @@ struct heatseeker_missiles_t : public missile_attack_t
     missile_attack_t::target_debuff( tgt, type );
 
     if ( unsigned stacks = targetdata() -> debuff_heat_signature -> stack() )
+      // BUG TODO XXX FIX
+      // because player and target multipliers are additive, this is 1.06 + 1.25 instead of 1.06 * 1.25
+      // need to change this to either use different min/max/mods per stack or a pure multiplier
       target_multiplier += 0.05 * stacks;
   }
 };
@@ -722,6 +776,8 @@ struct unload_t : public terminal_velocity_attack_t
     num_ticks                   = 3;
     base_tick_time              = from_seconds( 1 );
     base_multiplier             = 1 + ( 0.33 * p -> talents.riddle -> rank() );
+    // still in 1.3 target tracking doesn't help unload
+    // http://mmo-mechanics.com/swtor/forums/Thread-Mercenary-Commando-DPS-Compendium?pid=22606#pid22606
     crit_bonus                 += p -> bugs ? 0 : ( 0.15 * p -> talents.target_tracking -> rank() );
     td.standardhealthpercentmin = 
     td.standardhealthpercentmax = 0.105;
@@ -831,6 +887,7 @@ struct vent_heat_t : public action_t
 {
     if ( type == BH_MERCENARY )
     {
+      if ( name == "fusion_missile"             ) return new fusion_missile_t             ( this, name, options_str );
       if ( name == "heatseeker_missiles"        ) return new heatseeker_missiles_t        ( this, name, options_str );
       if ( name == "high_velocity_gas_cylinder" ) return new high_velocity_gas_cylinder_t ( this, name, options_str );
       if ( name == "power_shot"                 ) return new power_shot_t                 ( this, name, options_str );
@@ -1005,9 +1062,9 @@ void class_t::init_gains()
 {
   base_t::init_gains();
   bool is_bh = ( type == BH_MERCENARY );
-  const char* improved_vents    = is_bh ? "improved_vents"    : "cell_capacitor"  ; 
-  const char* terminal_velocity = is_bh ? "terminal_velocity" : "penetrate_armor" ; 
-  const char* vent_heat         = is_bh ? "vent_heat"         : "recharge_cells"  ; 
+  const char* improved_vents    = is_bh ? "improved_vents"    : "cell_capacitor"  ;
+  const char* terminal_velocity = is_bh ? "terminal_velocity" : "penetrate_armor" ;
+  const char* vent_heat         = is_bh ? "vent_heat"         : "recharge_cells"  ;
 
   gains.improved_vents    = get_gain( improved_vents    );
   gains.terminal_velocity = get_gain( terminal_velocity );
@@ -1085,9 +1142,10 @@ void class_t::init_actions()
             // ARSENAL
             action_list_str += "/high_velocity_gas_cylinder,if=!buff.high_velocity_gas_cylinder.up";
             action_list_str += "/vent_heat,if=heat<=40";
-            action_list_str += "/thermal_sensor_override,if=heat<77";
             action_list_str += "/use_relics";
             action_list_str += "/power_potion";
+            action_list_str += "/thermal_sensor_override,if=heat<77";
+            action_list_str += "/fusion_missile,if=buff.thermal_sensor_override.up";
             if ( set_bonus.rakata_eliminators -> four_pc() )
               action_list_str += "/rail_shot,if=buff.high_velocity_gas_cylinder.up";
             action_list_str += "/rail_shot,if=heat>77";
