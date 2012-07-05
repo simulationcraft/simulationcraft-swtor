@@ -1157,9 +1157,11 @@ void class_t::regen( timespan_t periodicity )
     if ( next_terminal_velocity < sim -> current_time )
     {
       next_terminal_velocity += from_seconds( 6 );
-      procs.terminal_velocity -> occur();
       if ( rngs.terminal_velocity -> roll( rank * 0.5 ) )
+      {
         resource_gain( RESOURCE_HEAT, 8, gains.terminal_velocity );
+        procs.terminal_velocity -> occur();
+      }
     }
   }
 }
