@@ -1226,7 +1226,7 @@ void class_t::create_talents()
 void class_t::reset()
 {
   // tried using rngs.terminal_velocity -> range(0,6) but it alwyas gives 3. meh.
-  next_terminal_velocity = sim -> current_time + from_seconds( rand() % 6 );
+  next_terminal_velocity = sim -> current_time + from_seconds( rand() % 5 );
   base_t::reset();
 }
 
