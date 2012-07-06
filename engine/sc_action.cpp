@@ -735,10 +735,14 @@ void action_t::execute()
     {
       target_debuff( tl[ t ], DMG_DIRECT );
 
-      calculate_result();
+      // no overarching hit/miss for weapon ticks. assessed per tick
+      if ( ! td.weapon )
+      {
+        calculate_result();
 
-      if ( result_is_hit() )
-        direct_dmg = calculate_direct_damage( t + 1 );
+        if ( result_is_hit() )
+          direct_dmg = calculate_direct_damage( t + 1 );
+      }
 
       schedule_travel( tl[ t ] );
     }
@@ -747,10 +751,14 @@ void action_t::execute()
   {
     target_debuff( target, DMG_DIRECT );
 
-    calculate_result();
+    // no overarching hit/miss for weapon ticks. assessed per tick
+    if ( ! td.weapon )
+    {
+      calculate_result();
 
-    if ( result_is_hit() )
-      direct_dmg = calculate_direct_damage();
+      if ( result_is_hit() )
+        direct_dmg = calculate_direct_damage();
+    }
 
     schedule_travel( target );
   }
@@ -815,7 +823,8 @@ void action_t::calculate_result()
 
 void action_t::tick_( timespan_t tick_time )
 {
-  result = RESULT_HIT;
+  if ( td.weapon ) calculate_result();
+  else result = RESULT_HIT;
 
   player_buff(); // 23/01/2012 According to http://sithwarrior.com/forums/Thread-Madness-Balance-Sorcerer-DPS-Compendium--573?pid=11311#pid11311
 
@@ -869,14 +878,15 @@ void action_t::last_tick( dot_t* d )
 
 void action_t::impact( player_t* t, result_type impact_result, double travel_dmg=0 )
 {
-  assess_damage( t, travel_dmg, type == ACTION_HEAL ? HEAL_DIRECT : DMG_DIRECT, impact_result );
+  // XXX what's this and do we need it for td.weapon hacks
+  if ( ! td.weapon )
+    assess_damage( t, travel_dmg, type == ACTION_HEAL ? HEAL_DIRECT : DMG_DIRECT, impact_result );
 
   // HACK: Set target so aoe dots work
   player_t* orig_target = target;
   target = t;
 
-  // hit check each tick of the channeled weapon ability, otherwise a single hit check up front
-  if ( ( td.weapon && channeled ) || result_is_hit( impact_result ) )
+  if ( td.weapon || result_is_hit( impact_result ) )
   {
     if ( num_ticks > 0 )
     {
@@ -909,7 +919,7 @@ void action_t::impact( player_t* t, result_type impact_result, double travel_dmg
 
         dot -> schedule_tick();
 
-        if ( sim -> log && ! result_is_hit( impact_result ) && ! ( td.weapon && channeled ) )
+        if ( sim -> log && ! result_is_hit( impact_result ) )
         {
           log_t::output( sim, "%s %s ticks (%d of %d) %s (miss)",
                          dot -> action -> player -> name(), dot -> action -> name(),
@@ -926,7 +936,7 @@ void action_t::impact( player_t* t, result_type impact_result, double travel_dmg
   }
   else
   {
-    if ( sim -> log && ! ( td.weapon && channeled ) )
+    if ( sim -> log )
     {
       log_t::output( sim, "Target %s avoids %s %s (%s)", target -> name(), player -> name(), name(), util_t::result_type_string( impact_result ) );
     }
@@ -948,7 +958,7 @@ void action_t::assess_damage( player_t*   t,
 
   if ( dmg_type == DMG_DIRECT )
   {
-    if ( sim -> log && ! ( td.weapon && channeled ) )
+    if ( sim -> log )
     {
       log_t::output( sim, "%s %s hits %s for %.0f %s damage (%s)",
                      player -> name(), name(),

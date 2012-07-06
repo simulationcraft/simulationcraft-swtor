@@ -654,7 +654,6 @@ struct rapid_shots_t : public attack_t
     td.weapon                   = &( player -> main_hand_weapon );
     td.weapon_multiplier        = -0.8;
     td.power_mod                = 0.2;
-    channeled                   = true;
 
     if ( is_offhand )
     {
@@ -662,7 +661,6 @@ struct rapid_shots_t : public attack_t
       dual                      = true;
       trigger_gcd               = timespan_t::zero();
       td.weapon                 = &( player -> off_hand_weapon );
-      rank_level_list           = { 0 };
       td.power_mod              = 0;
     }
     else
@@ -733,8 +731,6 @@ struct unload_t : public attack_t
     td.weapon                   = &( player -> main_hand_weapon );
     td.power_mod                = 1.05;
     td.weapon_multiplier        = -0.3;
-    // tick crits. the invisible execute hit shouldn't
-    may_crit                    = false;
 
     if ( is_offhand )
     {
@@ -744,12 +740,12 @@ struct unload_t : public attack_t
       base_cost                 = 0;
       trigger_gcd               = timespan_t::zero();
       td.weapon                 = &( player -> off_hand_weapon );
-      rank_level_list           = { 0 };
       td.power_mod              = 0;
+      rank_level_list           = { 0 };
     }
     else
     {
-      offhand_attack            = new unload_t( p, n+"_offhand", options_str, true);
+      offhand_attack            = new unload_t( p, n+"_offhand", options_str, true );
       add_child( offhand_attack );
     }
   }
