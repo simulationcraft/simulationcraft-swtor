@@ -823,16 +823,24 @@ void action_t::calculate_result()
 
 void action_t::tick_( timespan_t tick_time )
 {
-  if ( td.weapon ) calculate_result();
-  else result = RESULT_HIT;
 
   tick_dmg = 0;
-  if ( result_is_hit() )
+  if ( td.weapon )
   {
+    calculate_result();
+    if ( result_is_hit() )
+    {
+      player_buff();
+      target_debuff( target, type == ACTION_HEAL ? HEAL_OVER_TIME : DMG_OVER_TIME );
+      tick_dmg = calculate_tick_damage();
+    }
+  }
+  else
+  {
+    result = RESULT_HIT;
+
     player_buff(); // 23/01/2012 According to http://sithwarrior.com/forums/Thread-Madness-Balance-Sorcerer-DPS-Compendium--573?pid=11311#pid11311
-
     target_debuff( target, type == ACTION_HEAL ? HEAL_OVER_TIME : DMG_OVER_TIME );
-
     if ( tick_may_crit )
     {
       if ( sim -> roll( total_crit() ) )
