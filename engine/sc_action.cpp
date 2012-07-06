@@ -923,7 +923,7 @@ void action_t::impact( player_t* t, result_type impact_result, double travel_dmg
 
         dot -> schedule_tick();
 
-        if ( sim -> log && ! result_is_hit( impact_result ) )
+        if ( sim -> log && ( ! result_is_hit( impact_result ) && ! td.weapon ) )
         {
           log_t::output( sim, "%s %s ticks (%d of %d) %s (miss)",
                          dot -> action -> player -> name(), dot -> action -> name(),
