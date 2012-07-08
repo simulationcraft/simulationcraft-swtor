@@ -41,7 +41,7 @@ struct class_t : public warr_knight::class_t
       buff_t* annihlator;
       buff_t* fury;
       buff_t* deadly_saber;
-      buff_t* beserk;
+      buff_t* berserk;
       buff_t* bloodthirst;
     } buffs;
 
@@ -246,6 +246,8 @@ struct attack_t : public action_t
         may_crit   = true;
     }
 
+
+
 };
 
 struct spell_t : public action_t
@@ -258,6 +260,156 @@ struct spell_t : public action_t
     }
 
 };
+// Berserk | Combat Focus =====================================================
+struct berserk_t : public spell_t
+{
+
+};
+
+// Vicious Throw | Merciless Throw ============================================
+struct vicious_throw_t : public attack_t
+{
+
+};
+
+// Rupture | Cauterize ========================================================
+struct rupture_t : public attack_t
+{
+
+};
+
+// Annihilate | Merciless Slash ===============================================
+struct annihilate_t : public attack_t
+{
+
+};
+
+// Deadly Saber | Overload Saber ==============================================
+struct deadly_saber_t : public spell_t
+{
+
+};
+
+// Force Charge | Force Leap ==================================================
+struct force_charge_t : public attack_t
+{
+
+};
+
+// Ravage | Master Strike =====================================================
+struct ravage_t : public attack_t
+{
+
+};
+
+// Battering Assault | Zealous Strike =========================================
+struct battering_assault_t : public attack_t
+{
+
+};
+
+// Vicious Slash | Slash ======================================================
+struct vicious_slash_t : public attack_t
+{
+
+};
+
+// Assault | Strike ===========================================================
+struct assault_t : public attack_t
+{
+  assault_t( class_t* p, const std::string& n, const std::string& options_str) :
+    attack_t(n, p, SCHOOL_KINETIC)
+    {
+      parse_options( options_str );
+
+      range = 4.0;
+    }
+};
+
+// Gore | Precision Slash =====================================================
+struct gore_t : public attack_t
+{
+
+};
+
+// Massacre | Blade Rush ======================================================
+struct massacre_t : public attack_t
+{
+
+};
+
+// Obliterate | Zealous Leap ==================================================
+struct obliterate_t : attack_t
+{
+
+};
+
+// Force Crush | Force Exhaustion =============================================
+struct force_crush_t : spell_t
+{
+
+};
+
+// Force Choke | Force Stasis =================================================
+struct force_choke_t : spell_t
+{
+
+};
+
+// Force Sream | Blade Storm ==================================================
+struct force_scream_t : spell_t
+{
+
+};
+
+// Frenzy | Valorous Call =====================================================
+struct frenzy_t : spell_t
+{
+
+};
+
+// Juyo Form ==================================================================
+struct juyo_form_t : spell_t
+{
+
+};
+
+// Shii-Cho Form ==============================================================
+struct shii_cho_form_t : spell_t
+{
+
+};
+
+// Ataru Form =================================================================
+struct ataru_form_t : spell_t
+{
+
+};
+
+// Retaliate | Riposte ========================================================
+struct retaliate_t : attack_t
+{
+
+};
+
+// Smash | Sweep ==============================================================
+struct smash_t : attack_t
+{
+
+};
+
+// Sweeping Slash | Cyclone Slash =============================================
+struct sweeping_slash_t : attack_t
+{
+
+};
+
+// Unnatural Might | Force_Might ==============================================
+struct unnatural_might_t : spell_t
+{
+
+};
+
 
 // ==========================================================================
 // sentinel_marauder Character Definition
