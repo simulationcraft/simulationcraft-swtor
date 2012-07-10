@@ -42,12 +42,15 @@ std::string encode_tree( const std::vector<talent_t*>& tree )
   while( i >= 0 )
   {
     int first = 0;
-    if ( tree[ i ] )
-      first = tree[ i ] -> rank();
-    --i;
+    if ( ( ( i % 2 ) != 0 ) ) // make sure we start the pairing process at the right point so that we reach i == 0 with the second talent
+    {
+      if ( tree[ i ] )
+        first = tree[ i ] -> rank();
+      --i;
+    }
 
     int second = 0;
-    if ( i < tree.size() && tree[ i ] )
+    if ( i >= 0 && tree[ i ] )
       second = tree[ i ] -> rank();
     --i;
 
