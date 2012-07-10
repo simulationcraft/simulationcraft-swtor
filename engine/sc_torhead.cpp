@@ -119,6 +119,14 @@ bool parse_talents( player_t& p, const std::string& talent_string )
   size_t tree_count = 0;
   size_t count = 0;
 
+  if ( talent_string.find( ".2" ) != talent_string.npos )
+  {
+    p.sim -> errorf( "Player %s: New Torhead talent links ( version 2 ) are not yet supported, because of inconsistent tree order on Torhead. Please use Ask Mr. Robot talent links.\n",
+                     p.name() );
+    return false;
+  }
+
+
   for ( size_t i = 0; i < talent_string.size(); ++i )
   {
     if ( tree >= MAX_TALENT_TREES )
