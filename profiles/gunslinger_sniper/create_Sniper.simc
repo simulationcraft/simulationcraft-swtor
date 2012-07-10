@@ -40,3 +40,9 @@ copy=Sniper_Lethality_Campaign,Sniper_Marksmanship_Campaign
 talents=http://www.torhead.com/skill-calc#400bZbIZGbbkrMGdhR.1
 name=Sniper_Lethality_Campaign
 save=Sniper_Lethality_Campaign.simc
+
+mrrobot=38939f0b-85b7-40c5-930a-6272e3696588
+#talents=http://www.torhead.com/skill-calc#400rcrbbRsRGoZbfZh.1
+talents=http://www.torhead.com/skill-calc#400bZbIZGbbkrMGdhR.1
+name=Sniper_BiS
+save=Sniper_BiS.simc

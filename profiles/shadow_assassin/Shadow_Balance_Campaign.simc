@@ -21,7 +21,7 @@ actions+=/force_cloak,if=buff.shadows_respite.down
 actions+=/battle_readiness
 actions+=/force_in_balance
 actions+=/mind_crush,if=buff.force_strike.react
-actions+=/force_breach,if=!dot.force_technique.ticking
+actions+=/force_breach,if=!dot.force_breach_dot.ticking
 actions+=/spinning_strike
 actions+=/sever_force,if=!ticking
 actions+=/shadow_strike,if=buff.find_weakness.react

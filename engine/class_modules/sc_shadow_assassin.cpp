@@ -234,7 +234,7 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
 {
   add( dot_lightning_charge );
   alias( dot_lightning_charge, "lightning_discharge" );
-  alias( dot_lightning_charge, "force_technique" );
+  alias( dot_lightning_charge, "force_breach_dot" );
 }
 
 // ==========================================================================
@@ -833,9 +833,9 @@ struct discharge_t: public spell_t
 
     if ( p -> type == JEDI_SHADOW )
     {
-      lightning_discharge = new lightning_discharge_t( p, "force_breach (force_technique)" );
-      surging_discharge = new surging_discharge_t( p, "force_breach (shadow_technique)" );
-      dark_discharge = new dark_discharge_t( p, "force_breach (combat_technique)" );
+      lightning_discharge = new lightning_discharge_t( p, "force_breach_dot" );
+      surging_discharge = new surging_discharge_t( p, "shadow_discharge" );
+      dark_discharge = new dark_discharge_t( p, "combat_discharge" );
     }
     else
     {
@@ -1890,7 +1890,7 @@ void class_t::init_actions()
         action_list_str += "/mind_crush,if=buff.force_strike.react";
 
       if ( !talents.surging_charge->rank() )
-        action_list_str += "/force_breach,if=!dot.force_technique.ticking";
+        action_list_str += "/force_breach,if=!dot.force_breach_dot.ticking";
 
       if ( talents.induction->rank() )
         action_list_str += "/project,if=buff.circling_shadows.stack=2";
