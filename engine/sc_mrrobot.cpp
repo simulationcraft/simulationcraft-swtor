@@ -25,6 +25,46 @@ const base36_t::encoding_t talent_encoding =
 
 const base36_t decoder( talent_encoding );
 
+
+inline char encode_pair( int first, int second=0 )
+{
+  assert( 0 <= first  && first <= 5 );
+  assert( 0 <= second && second <= 5 );
+  return talent_encoding[ 6 * first + second ];
+}
+
+std::string encode_tree( const std::vector<talent_t*>& tree )
+{
+  std::string result;
+
+  bool first_talent_reached = false;
+  int i = tree.size() - 1;
+  while( i >= 0 )
+  {
+    int first = 0;
+    if ( tree[ i ] )
+      first = tree[ i ] -> rank();
+    --i;
+
+    int second = 0;
+    if ( i < tree.size() && tree[ i ] )
+      second = tree[ i ] -> rank();
+    --i;
+
+    if ( first || second || first_talent_reached )
+    {
+      first_talent_reached = true;
+      result += encode_pair( first, second );
+    }
+  }
+
+  size_t length = result.size();
+  while ( length > 0 && result[ length - 1 ] == '0' )
+    --length;
+  result.resize( length );
+
+  return result;
+}
 void parse_profession( js::node_t* profile,
                        const std::string& path,
                        std::string& player_profession_string )
@@ -776,7 +816,7 @@ bool parse_talents( player_t& p, const std::string& talent_string )
 
       catch ( base36_t::bad_char& bc )
       {
-        p.sim -> errorf( "Player %s has malformed wowhead talent string. Translation for '%c' unknown.\n",
+        p.sim -> errorf( "Player %s has malformed mrrobot talent string. Translation for '%c' unknown.\n",
                          p.name(), bc.c );
         return false;
       }
@@ -799,6 +839,29 @@ bool parse_talents( player_t& p, const std::string& talent_string )
   return p.parse_talent_trees( encoding );
 }
 
+
+std::string encode_talents( const player_t& p )
+{
+  std::string encoding;
+
+  if ( const char* ac_code = util_t::player_type_string_short( p.type ) )
+  {
+    std::stringstream ss;
+
+    ss << "http://swtor.askmrrobot.com/skills/" << ac_code << "#";
+
+    // This is necessary because sometimes the talent trees change shape between live/ptr.
+    for ( size_t i = 0; i < sizeof_array( p.talent_trees ); ++i )
+    {
+      if ( i > 0 ) ss << '-';
+      ss << encode_tree( p.talent_trees[ i ] );
+    }
+
+    encoding = ss.str();
+  }
+
+  return encoding;
+}
 
 #if 0
 // bcp_api::download_item() =================================================

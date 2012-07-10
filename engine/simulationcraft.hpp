@@ -4119,6 +4119,7 @@ namespace mrrobot {
 bool parse_talents( player_t& player, const std::string& encoding );
 player_t* download_player( sim_t* sim, const std::string& profile_id,
                            cache::behavior_t=cache::players() );
+std::string encode_talents( const player_t& p );
 }
 
 // Torhead ==================================================================
