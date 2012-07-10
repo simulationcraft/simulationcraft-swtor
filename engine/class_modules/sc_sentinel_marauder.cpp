@@ -232,6 +232,8 @@ public:
 
   class_t* p() const
   { return static_cast<class_t*>( player ); }
+
+  class_t* cast() const { return p(); }
 };
 
 // ==========================================================================
@@ -246,7 +248,18 @@ struct attack_t : public action_t
         may_crit   = true;
     }
 
+    virtual void impact( player_t* t, result_type impact_result, double travel_dmg)
+    {
+      action_t::impact( t, impact_result, travel_dmg);
 
+      if (result_is_hit( impact_result ) )
+      {
+        //class_t* p = cast();
+        //targetdata_t* td = targetdata();
+
+        //if (p->buffs.juyo_form->stacks)
+      }
+    }
 
 };
 
@@ -263,13 +276,57 @@ struct spell_t : public action_t
 // Berserk | Combat Focus =====================================================
 struct berserk_t : public spell_t
 {
+  berserk_t( class_t* p, const std::string& n, const std::string& options_str) :
+    spell_t( n, p)
+  {
+    parse_options( options_str );
+    harmful = false;
 
+    trigger_gcd = timespan_t::zero();
+  }
+
+  virtual bool ready()
+  {
+    class_t* p = cast();
+    return p -> buffs.fury -> current_stack >= 30;
+  }
+
+  virtual void execute()
+  {
+    spell_t::execute();
+
+    class_t* p = cast();
+
+    p -> buffs.berserk -> trigger( 6 );
+  }
 };
 
 // Vicious Throw | Merciless Throw ============================================
 struct vicious_throw_t : public attack_t
 {
+  typedef attack_t base_t;
 
+  static int energy_cost( class_t* p ) { return 3 - ( p -> set_bonus.rakata_weaponmasters -> two_pc() ? 1 : 0 ); }
+
+  vicious_throw_t( class_t* p, const std::string& n, const std::string& options_str) :
+    base_t( n, p )
+  {
+    parse_options( options_str );
+
+    base_cost = energy_cost( p );
+    cooldown -> duration = from_seconds(6);
+    range = 10.0;
+    dd.standardhealthpercentmin = 0.265;
+    dd.standardhealthpercentmax = 0.305;
+    dd.power_mod = 2.85;
+    weapon = &(player -> main_hand_weapon);
+    weapon_multiplier = 0.9;
+  }
+
+  virtual bool ready()
+  {
+    return target -> health_percentage() >= 30 ? false : base_t::ready();
+  }
 };
 
 // Rupture | Cauterize ========================================================
@@ -324,6 +381,12 @@ struct assault_t : public attack_t
 
       range = 4.0;
     }
+};
+
+// Bloodthirst | Inspiration ==================================================
+struct bloodthirst_t : public spell_t
+{
+
 };
 
 // Gore | Precision Slash =====================================================

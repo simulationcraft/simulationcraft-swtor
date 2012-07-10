@@ -2688,6 +2688,8 @@ public:
     set_bonus_t* rakata_field_techs;
     // mercenary
     set_bonus_t* rakata_eliminators;
+    //marauder
+    set_bonus_t* rakata_weaponmasters;
   };
   set_bonuses_t set_bonus;
 
