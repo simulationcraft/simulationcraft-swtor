@@ -190,8 +190,8 @@ void scaling_t::init_deltas()
   if ( stats.armor == 0 ) stats.armor = smooth_scale_factors ? 150 : 300;
 
 
-  if ( stats.weapon_dmg            == 0 ) stats.weapon_dmg            = scale_delta_multiplier * ( smooth_scale_factors ? 5 : 10 );
-  if ( stats.weapon_offhand_dmg    == 0 ) stats.weapon_offhand_dmg    = scale_delta_multiplier * ( smooth_scale_factors ? 5 : 10 );
+  if ( stats.weapon_dmg            == 0 ) stats.weapon_dmg            = scale_delta_multiplier * ( smooth_scale_factors ? 15 : 30 );
+  if ( stats.weapon_offhand_dmg    == 0 ) stats.weapon_offhand_dmg    = scale_delta_multiplier * ( smooth_scale_factors ? 15 : 30 );
 
 }
 
