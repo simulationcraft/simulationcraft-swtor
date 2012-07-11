@@ -723,11 +723,9 @@ struct unload_t : public attack_t
     num_ticks                   = 3;
     base_tick_time              = from_seconds( 1 );
     base_multiplier            += 0.33 * p -> talents.riddle -> rank();
-    // still in 1.3 target tracking doesn't help unload
-    // http://mmo-mechanics.com/swtor/forums/Thread-Mercenary-Commando-DPS-Compendium?pid=22606#pid22606
-    crit_bonus                 += p -> bugs ? 0 : ( 0.15 * p -> talents.target_tracking -> rank() );
-    td.standardhealthpercentmin = 
-    td.standardhealthpercentmax = 0.105;
+    crit_bonus                 +=  0.15 * p -> talents.target_tracking -> rank();
+    td.standardhealthpercentmin =
+      td.standardhealthpercentmax = 0.105;
     td.weapon                   = &( player -> main_hand_weapon );
     td.power_mod                = 1.05;
     td.weapon_multiplier        = -0.3;
