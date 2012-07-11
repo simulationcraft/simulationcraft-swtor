@@ -926,14 +926,14 @@ void SimulationCraftWindow::createSiteTab()
 void SimulationCraftWindow::createToolTips()
 {
   versionChoice->setToolTip( "Live: Use mechanics on Live servers\n"
-                             "PTR:  Use mechanics on PTR server"
+                             "PTR:  Use mechanics on PTR server\n"
                              "Both: Create Evil Twin with PTR mechanics" );
 
   iterationsChoice->setToolTip( "100:    Fast and Rough\n"
                                 "1000:   Sufficient for DPS Analysis\n"
                                 "10000:  Recommended for Scale Factor Generation\n"
                                 "25000:  Use if 10,000 isn't enough for Scale Factors\n"
-                                "50000:  If you're patient"
+                                "50000:  If you're patient\n"
                                 "100000: Showing off" );
 
   fightLengthChoice->setToolTip( "For custom fight lengths use max_time=seconds." );
@@ -941,7 +941,8 @@ void SimulationCraftWindow::createToolTips()
   fightVarianceChoice->setToolTip( "Varying the fight length over a given spectrum improves\n"
                                    "the analysis of trinkets and abilities with long cooldowns." );
 
-  fightStyleChoice->setToolTip( "Patchwerk: Tank-n-Spank\n"
+  fightStyleChoice->setToolTip( "Patchwerk:\n"
+                                "    Tank-n-Spank\n"
                                 "HelterSkelter:\n"
                                 "    Movement, Stuns, Interrupts,\n"
                                 "    Target-Switching (every 2min)\n"
@@ -952,13 +953,15 @@ void SimulationCraftWindow::createToolTips()
                                 "    10% into the fight until 20% before the end\n"
                                 "HeavyMovement:\n"
                                 "    4s Movement, 10s CD,\n"
-                                "    beginning 10s into the fight\n" );
+                                "    beginning 10s into the fight" );
 
   targetRaceChoice->setToolTip( "Race of the target and any adds." );
 
   //targetLevelChoice->setToolTip( "Level of the target and any adds." );
 
   playerSkillChoice->setToolTip( "Elite:       No mistakes.  No cheating either.\n"
+                                 "Good:        Rare DoT-clipping and skipping high-priority abilities\n"
+                                 "Avearge:     Occasional DoT-clipping and skipping high-priority abilities\n"
                                  "Fire-is-Hot: Frequent DoT-clipping and skipping high-priority abilities." );
 
   threadsChoice->setToolTip( "Match the number of CPUs for optimal performance.\n"

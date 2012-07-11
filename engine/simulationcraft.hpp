@@ -402,6 +402,7 @@ enum talent_tree_type
   TREE_MEDICINE,       TREE_CONCEALMENT,    TREE_LETHALITY,
   TREE_MARKSMANSHIP,   TREE_ENGINEERING,
   TREE_BODYGUARD,      TREE_ARSENAL,        TREE_PYROTECH,
+  TREE_ANNIHILATION,   TREE_CARNAGE,        TREE_RAGE,
   TALENT_TREE_MAX
 };
 
@@ -418,7 +419,9 @@ enum talent_tab_type
   IA_OPERATIVE_MEDICINE = 0,      IA_OPERATIVE_CONCEALMENT,  IA_LETHALITY,
   IA_SNIPER_MARKSMANSHIP = 0,     IA_SNIPER_ENGINEERING,
 
-  BH_MERCENARY_BODYGUARD = 0,     BH_MERCENARY_ARSENAL,      BH_MERCENARY_PYROTECH
+  BH_MERCENARY_BODYGUARD = 0,     BH_MERCENARY_ARSENAL,      BH_MERCENARY_PYROTECH,
+
+  SITH_MARAUDER_ANNIHILATION = 0, SITH_MARAUDER_CARNAGE,     SITH_MARAUDER_RAGE
 };
 
 enum weapon_type
@@ -2685,6 +2688,8 @@ public:
     set_bonus_t* rakata_field_techs;
     // mercenary
     set_bonus_t* rakata_eliminators;
+    //marauder
+    set_bonus_t* rakata_weaponmasters;
   };
   set_bonuses_t set_bonus;
 
@@ -4114,6 +4119,7 @@ namespace mrrobot {
 bool parse_talents( player_t& player, const std::string& encoding );
 player_t* download_player( sim_t* sim, const std::string& profile_id,
                            cache::behavior_t=cache::players() );
+std::string encode_talents( const player_t& p );
 }
 
 // Torhead ==================================================================

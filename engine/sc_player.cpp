@@ -4757,7 +4757,7 @@ void player_t::create_profile( std::ostream& os, save_type savetype )
 
   if ( savetype == SAVE_ALL || savetype == SAVE_TALENTS )
   {
-    talents_str = torhead::encode_talents( *this );
+    talents_str = mrrobot::encode_talents( *this );
     if ( ! talents_str.empty() )
       os << "talents=" << talents_str << '\n';
   }

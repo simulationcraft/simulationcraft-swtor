@@ -23,6 +23,9 @@ enum form_type
 
 struct sentinel_marauder_targetdata_t : public targetdata_t
 {
+  dot_t rupture;
+  dot_t deadly_saber;
+
   sentinel_marauder_targetdata_t( player_t& source, player_t& target )
     : targetdata_t( source, target ) {}
 };
@@ -38,7 +41,7 @@ struct class_t : public warr_knight::class_t
       buff_t* annihlator;
       buff_t* fury;
       buff_t* deadly_saber;
-      buff_t* beserk;
+      buff_t* berserk;
       buff_t* bloodthirst;
     } buffs;
 
@@ -172,10 +175,20 @@ struct class_t : public warr_knight::class_t
 
     } talents;
 
+    struct actives_t
+    {
+      form_type form;
+    } actives;
+
     class_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
       base_t( sim, pt == SITH_MARAUDER ? SITH_MARAUDER : JEDI_SENTINEL, name, ( r == RACE_NONE ) ? RACE_HUMAN : r ),
-      buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents()
+      buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents(), actives()
     {
+
+      tree_type[ SITH_MARAUDER_ANNIHILATION ] = TREE_ANNIHILATION;
+      tree_type[ SITH_MARAUDER_CARNAGE ] = TREE_CARNAGE;
+      tree_type[ SITH_MARAUDER_RAGE ] = TREE_RAGE;
+
       create_talents();
       create_options();
     }
@@ -204,14 +217,14 @@ struct class_t : public warr_knight::class_t
     }
 };
 
-namespace { // ANONYMOUS NAMESPACE ==========================================
 
-class sentinel_marauder_action_t : public action_t
+class action_t : public ::action_t
 {
+  typedef ::action_t base_t;
 public:
-  sentinel_marauder_action_t( const std::string& n, class_t* player,
+  action_t( const std::string& n, class_t* player,
                           attack_policy_t policy, resource_type r, school_type s ) :
-    action_t( ACTION_ATTACK, n, player, policy, r, s )
+    base_t( ACTION_ATTACK, n, player, policy, r, s )
   {}
 
   sentinel_marauder_targetdata_t* targetdata() const
@@ -219,35 +232,247 @@ public:
 
   class_t* p() const
   { return static_cast<class_t*>( player ); }
+
+  class_t* cast() const { return p(); }
 };
 
 // ==========================================================================
 // Sentinel / Marauder Abilities
 // ==========================================================================
 
-struct sentinel_marauder_attack_t : public sentinel_marauder_action_t
+struct attack_t : public action_t
 {
-    sentinel_marauder_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_KINETIC ) :
-      sentinel_marauder_action_t( n, p, melee_policy, RESOURCE_NONE, s )
+    attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_KINETIC ) :
+      action_t( n, p, melee_policy, RESOURCE_NONE, s )
     {
         may_crit   = true;
     }
 
+    virtual void impact( player_t* t, result_type impact_result, double travel_dmg)
+    {
+      action_t::impact( t, impact_result, travel_dmg);
+
+      if (result_is_hit( impact_result ) )
+      {
+        //class_t* p = cast();
+        //targetdata_t* td = targetdata();
+
+        //if (p->buffs.juyo_form->stacks)
+      }
+    }
+
 };
 
-struct sentinel_marauder_spell_t : public sentinel_marauder_action_t
+struct spell_t : public action_t
 {
-    sentinel_marauder_spell_t( const std::string& n, class_t* p, school_type s=SCHOOL_KINETIC ) :
-      sentinel_marauder_action_t( n, p, force_policy, RESOURCE_NONE, s )
+    spell_t( const std::string& n, class_t* p, school_type s=SCHOOL_KINETIC ) :
+      action_t( n, p, force_policy, RESOURCE_NONE, s )
     {
         may_crit   = true;
         tick_may_crit = true;
     }
 
 };
+// Berserk | Combat Focus =====================================================
+struct berserk_t : public spell_t
+{
+  berserk_t( class_t* p, const std::string& n, const std::string& options_str) :
+    spell_t( n, p)
+  {
+    parse_options( options_str );
+    harmful = false;
 
+    trigger_gcd = timespan_t::zero();
+  }
 
-} // ANONYMOUS NAMESPACE ====================================================
+  virtual bool ready()
+  {
+    class_t* p = cast();
+    return p -> buffs.fury -> current_stack >= 30;
+  }
+
+  virtual void execute()
+  {
+    spell_t::execute();
+
+    class_t* p = cast();
+
+    p -> buffs.berserk -> trigger( 6 );
+  }
+};
+
+// Vicious Throw | Merciless Throw ============================================
+struct vicious_throw_t : public attack_t
+{
+  typedef attack_t base_t;
+
+  static int energy_cost( class_t* p ) { return 3 - ( p -> set_bonus.rakata_weaponmasters -> two_pc() ? 1 : 0 ); }
+
+  vicious_throw_t( class_t* p, const std::string& n, const std::string& options_str) :
+    base_t( n, p )
+  {
+    parse_options( options_str );
+
+    base_cost = energy_cost( p );
+    cooldown -> duration = from_seconds(6);
+    range = 10.0;
+    dd.standardhealthpercentmin = 0.265;
+    dd.standardhealthpercentmax = 0.305;
+    dd.power_mod = 2.85;
+    weapon = &(player -> main_hand_weapon);
+    weapon_multiplier = 0.9;
+  }
+
+  virtual bool ready()
+  {
+    return target -> health_percentage() >= 30 ? false : base_t::ready();
+  }
+};
+
+// Rupture | Cauterize ========================================================
+struct rupture_t : public attack_t
+{
+
+};
+
+// Annihilate | Merciless Slash ===============================================
+struct annihilate_t : public attack_t
+{
+
+};
+
+// Deadly Saber | Overload Saber ==============================================
+struct deadly_saber_t : public spell_t
+{
+
+};
+
+// Force Charge | Force Leap ==================================================
+struct force_charge_t : public attack_t
+{
+
+};
+
+// Ravage | Master Strike =====================================================
+struct ravage_t : public attack_t
+{
+
+};
+
+// Battering Assault | Zealous Strike =========================================
+struct battering_assault_t : public attack_t
+{
+
+};
+
+// Vicious Slash | Slash ======================================================
+struct vicious_slash_t : public attack_t
+{
+
+};
+
+// Assault | Strike ===========================================================
+struct assault_t : public attack_t
+{
+  assault_t( class_t* p, const std::string& n, const std::string& options_str) :
+    attack_t(n, p, SCHOOL_KINETIC)
+    {
+      parse_options( options_str );
+
+      range = 4.0;
+    }
+};
+
+// Bloodthirst | Inspiration ==================================================
+struct bloodthirst_t : public spell_t
+{
+
+};
+
+// Gore | Precision Slash =====================================================
+struct gore_t : public attack_t
+{
+
+};
+
+// Massacre | Blade Rush ======================================================
+struct massacre_t : public attack_t
+{
+
+};
+
+// Obliterate | Zealous Leap ==================================================
+struct obliterate_t : attack_t
+{
+
+};
+
+// Force Crush | Force Exhaustion =============================================
+struct force_crush_t : spell_t
+{
+
+};
+
+// Force Choke | Force Stasis =================================================
+struct force_choke_t : spell_t
+{
+
+};
+
+// Force Sream | Blade Storm ==================================================
+struct force_scream_t : spell_t
+{
+
+};
+
+// Frenzy | Valorous Call =====================================================
+struct frenzy_t : spell_t
+{
+
+};
+
+// Juyo Form ==================================================================
+struct juyo_form_t : spell_t
+{
+
+};
+
+// Shii-Cho Form ==============================================================
+struct shii_cho_form_t : spell_t
+{
+
+};
+
+// Ataru Form =================================================================
+struct ataru_form_t : spell_t
+{
+
+};
+
+// Retaliate | Riposte ========================================================
+struct retaliate_t : attack_t
+{
+
+};
+
+// Smash | Sweep ==============================================================
+struct smash_t : attack_t
+{
+
+};
+
+// Sweeping Slash | Cyclone Slash =============================================
+struct sweeping_slash_t : attack_t
+{
+
+};
+
+// Unnatural Might | Force_Might ==============================================
+struct unnatural_might_t : spell_t
+{
+
+};
+
 
 // ==========================================================================
 // sentinel_marauder Character Definition
@@ -255,7 +480,7 @@ struct sentinel_marauder_spell_t : public sentinel_marauder_action_t
 
 // class_t::create_action ====================================================
 
-action_t* class_t::create_action( const std::string& name,
+::action_t* class_t::create_action( const std::string& name,
                                             const std::string& options_str )
 {
     if ( type == SITH_MARAUDER )
