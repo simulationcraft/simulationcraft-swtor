@@ -3351,6 +3351,8 @@ public:
   virtual bool   usable_moving();
   virtual bool   ready();
   virtual void   init();
+  virtual void   set_base_min_max();
+          double get_standard_rank_amount() const;
   virtual void   reset();
   virtual void   cancel();
   virtual void   interrupt_action();

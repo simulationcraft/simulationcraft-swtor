@@ -386,8 +386,9 @@ struct fusion_missile_t : public missile_attack_t
 // class_t::heatseeker_missiles ===========================================================
 struct heatseeker_missiles_t : public missile_attack_t
 {
+  typedef missile_attack_t base_t;
   heatseeker_missiles_t( class_t* p, const std::string& n, const std::string& options_str) :
-    missile_attack_t( p, n )
+    base_t( p, n )
   {
     // TODO
     // rank_level_list = { ... 50 }
@@ -400,22 +401,59 @@ struct heatseeker_missiles_t : public missile_attack_t
     cooldown -> duration         = from_seconds( 15 );
     range                        = 30.0;
 
-    dd.power_mod                 = 2.08;
-    dd.standardhealthpercentmin  = 0.168;
-    dd.standardhealthpercentmax  = 0.248;
+    dd.power_mod                 = 0; // set in execute
+    dd.standardhealthpercentmin  = 0; // set in execute
+    dd.standardhealthpercentmax  = 0; // set in execute
 
     crit_bonus                  += 0.15 * p -> talents.target_tracking -> rank();
   }
 
-  virtual void target_debuff( player_t* tgt, dmg_type type )
+  virtual void execute()
   {
-    missile_attack_t::target_debuff( tgt, type );
-
-    if ( unsigned stacks = targetdata() -> debuff_heat_signature -> stack() )
-      // BUG TODO XXX FIX
-      // because player and target multipliers are additive, this is 1.06 + 1.25 instead of 1.06 * 1.25
-      // need to change this to either use different min/max/mods per stack or a pure multiplier
-      target_multiplier += 0.05 * stacks;
+    // TEST:
+    // assuming damage is calculated on cast, not impact.
+    // could be
+    // 1: damage on cast, so target debuffs during travel time won't be included
+    // 2: damage on impact, so player changes during travel time will be included
+    // 3: player stats on cast, target damage on impact
+    // 3 would be the purest, but for simplicity going with 1. Unsure which the game does.
+    double mod = dd.power_mod;
+    switch ( targetdata() -> debuff_heat_signature -> stack() )
+    {
+      case 5:
+        dd.power_mod                 = 2.6;
+        dd.standardhealthpercentmin  = 0.21;
+        dd.standardhealthpercentmax  = 0.31;
+        break;
+      case 4:
+        dd.power_mod                 = 2.5;
+        dd.standardhealthpercentmin  = 0.202;
+        dd.standardhealthpercentmax  = 0.298;
+        break;
+      case 3:
+        dd.power_mod                 = 2.39;
+        dd.standardhealthpercentmin  = 0.193;
+        dd.standardhealthpercentmax  = 0.285;
+        break;
+      case 2:
+        dd.power_mod                 = 2.288;
+        dd.standardhealthpercentmin  = 0.185;
+        dd.standardhealthpercentmax  = 0.273;
+        break;
+      case 1:
+        dd.power_mod                 = 2.184;
+        dd.standardhealthpercentmin  = 0.176;
+        dd.standardhealthpercentmax  = 0.26;
+        break;
+      default:
+        dd.power_mod                 = 2.08;
+        dd.standardhealthpercentmin  = 0.168;
+        dd.standardhealthpercentmax  = 0.248;
+        break;
+    }
+    if ( mod != dd.power_mod )
+      set_base_min_max();
+    base_t::execute();
   }
 };
 
