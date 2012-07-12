@@ -2192,6 +2192,7 @@ struct item_t
   std::string option_ilevel_str;
   std::string option_quality_str;
   std::string option_data_source_str;
+  std::string option_armoring_str;
   std::string options_str;
 
   // Armory Data
@@ -2207,6 +2208,7 @@ struct item_t
   std::string armory_ilevel_str;
   std::string armory_quality_str;
   std::string armory_random_suffix_str;
+  std::string armory_armoring_str;
 
   // Encoded Data
   std::string id_str;
@@ -2223,6 +2225,7 @@ struct item_t
   std::string encoded_ilevel_str;
   std::string encoded_quality_str;
   std::string encoded_random_suffix_str;
+  std::string encoded_armoring_str;
 
   // Extracted data
   gear_stats_t base_stats,stats;
@@ -2266,6 +2269,7 @@ struct item_t
   bool matching_type();
   const char* name() const;
   const char* slot_name() const { return util_t::slot_type_string( slot ); }
+  const char* armoring() const;
   weapon_t* weapon() const;
   bool init();
   bool parse_options();
@@ -2296,13 +2300,15 @@ struct set_bonus_t
   bool has_2pc, has_4pc;
   set_bonus_t* next;
   std::string name;
-  std::vector<std::string> filters;
+  std::vector<std::string> shell_filters;
+  std::vector<std::string> armoring_filters;
   int count;
   slot_mask_t mask;
   bool force_enable_2pc, force_disable_2pc;
   bool force_enable_4pc, force_disable_4pc;
 
-  set_bonus_t( const std::string& name, const std::string& filters=std::string(),
+  set_bonus_t( const std::string& name, const std::string& shell_filters=std::string(),
+               const std::string& armoring_filters=std::string(),
                slot_mask_t s_mask=DEFAULT_SET_BONUS_SLOT_MASK );
 
   void init( const player_t& );
@@ -2313,7 +2319,9 @@ struct set_bonus_t
   //expr_ptr create_expression( action_t*, const std::string& type );
 
 private:
-  bool decode( const item_t& item ) const;
+  bool decode( const std::string name, const std::vector<std::string> filters ) const;
+  bool decode_by_shell(    const item_t& item ) const;
+  bool decode_by_armoring( const item_t& item ) const;
 };
 
 // Player ===================================================================
@@ -2693,6 +2701,7 @@ public:
   };
   set_bonuses_t set_bonus;
 
+  std::vector<std::string> armoring_filters;
   const size_t targetdata_id;
 private:
   auto_dispose<std::vector<targetdata_t*>> targetdata;
@@ -3060,8 +3069,11 @@ public:
   benefit_t*  get_benefit ( const std::string& name );
   uptime_t*   get_uptime  ( const std::string& name );
   rng_t*      get_rng     ( const std::string& name, rng_type type=RNG_DEFAULT );
-  set_bonus_t* get_set_bonus( const std::string& name, std::string filter,
+  set_bonus_t* get_set_bonus( const std::string& name, std::string shell_filter,
+                              std::string armoring_filter,
                               slot_mask_t slot_filter=DEFAULT_SET_BONUS_SLOT_MASK );
+  std::vector<std::string> get_armoring_filters() ;
+  bool armoring_matches_set( const std::string& armoring_name );
   double      get_player_distance( const player_t* p ) const;
   double      get_position_distance( double m=0, double v=0 ) const;
   action_priority_list_t* get_action_priority_list( const std::string& name );

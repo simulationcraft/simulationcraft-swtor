@@ -395,15 +395,22 @@ player_t::player_t( sim_t*             s,
   if ( reaction_stddev == timespan_t::zero() ) reaction_stddev = reaction_mean * 0.25;
 
 
-  set_bonus.rakata_force_masters = get_set_bonus( "rakata_force_masters", "tionese_force_masters_/columi_force_masters_/rakata_force_masters_/campaign_force_masters_" );
-  set_bonus.battlemaster_force_masters = get_set_bonus( "battlemaster_force_masters", "centurion_force_masters_/champion_force_masters_/battlemaster_force_masters_/warhero_force_masters_" );
-  set_bonus.rakata_stalkers = get_set_bonus( "rakata_stalkers", "tionese_stalkers_/columi_stalkers_/rakata_stalkers_/campaign_stalkers_" );
+  set_bonus.rakata_force_masters = get_set_bonus( "rakata_force_masters", "tionese_force_masters_/columi_force_masters_/rakata_force_masters_", "campaign_force_masters_" );
+  set_bonus.battlemaster_force_masters = get_set_bonus( "battlemaster_force_masters", "centurion_force_masters_/champion_force_masters_/battlemaster_force_masters_", "warhero_force_masters_" );
+  set_bonus.rakata_stalkers = get_set_bonus( "rakata_stalkers", "tionese_stalkers_/columi_stalkers_/rakata_stalkers_", "campaign_stalkers_" );
   // agents
-  set_bonus.rakata_enforcers = get_set_bonus( "rakata_enforcers", "tionese_enforcers_/columi_enforcers_/rakata_enforcers_/campaign_enforcers_" );
-  set_bonus.rakata_field_medics = get_set_bonus( "rakata_field_medics", "tionese_field_medics_/columi_field_medics_/rakata_field_medics_/campaign_field_medics_" );
-  set_bonus.rakata_field_techs = get_set_bonus( "rakata_field_techs", "tionese_field_techs_/columi_field_techs_/rakata_field_techs_/campaign_field_techs_" );
+  set_bonus.rakata_enforcers = get_set_bonus( "rakata_enforcers", "tionese_enforcers_/columi_enforcers_/rakata_enforcers_", "campaign_enforcers_" );
+  set_bonus.rakata_field_medics = get_set_bonus( "rakata_field_medics", "tionese_field_medics_/columi_field_medics_/rakata_field_medics_", "campaign_field_medics_" );
+  set_bonus.rakata_field_techs = get_set_bonus( "rakata_field_techs", "tionese_field_techs_/columi_field_techs_/rakata_field_techs_", "campaign_field_techs_" );
   // mercenary
-  set_bonus.rakata_eliminators = get_set_bonus( "rakata_eliminators", "tionese_eliminators_/columi_eliminators/rakata_eliminators_/campaign_eliminators_" );
+  set_bonus.rakata_eliminators = get_set_bonus( "rakata_eliminators", "tionese_eliminators_/columi_eliminators/rakata_eliminators_", "campaign_eliminators_" );
+
+  // Patch 1.3 changed how set bonuses attach to gear.
+  // Rakata and lower (<=58) attach on the shell
+  // Campaign and higher (>=61) attach on the armor
+  // We need to keep a full list of possible armoring bonuses to ensure that if the
+  // armoring can count towards a bonus, the shell will be excluded from counting
+  armoring_filters = get_armoring_filters();
 }
 
 // player_t::~player_t ======================================================
@@ -3558,13 +3565,13 @@ rng_t* player_t::get_rng( const std::string& n, rng_type type )
 
 // player_t::get_set_bonus =======================================================
 
-set_bonus_t* player_t::get_set_bonus( const std::string& name, std::string filter, slot_mask_t slot_filter )
+set_bonus_t* player_t::get_set_bonus( const std::string& name, std::string shell_filter, std::string armoring_filter, slot_mask_t slot_filter )
 {
   set_bonus_t* sb=find_set_bonus( name );
 
   if ( ! sb )
   {
-    sb = new set_bonus_t( name, filter, slot_filter );
+    sb = new set_bonus_t( name, shell_filter, armoring_filter, slot_filter );
 
     set_bonus_t** tail = &set_bonus_list;
 
@@ -3579,6 +3586,41 @@ set_bonus_t* player_t::get_set_bonus( const std::string& name, std::string filte
 
   return sb;
 }
+
+// player_t::get_armoring_filters ==========================================
+
+std::vector<std::string> player_t::get_armoring_filters()
+{
+  set_bonus_t* sb=0;
+  std::vector<std::string> retVal;
+
+  for ( sb = set_bonus_list; sb; sb = sb -> next )
+  {
+      for ( std::string armoring_filter: sb->armoring_filters )
+        {
+          retVal.push_back ( armoring_filter );
+        }
+  }
+
+  return retVal;
+}
+
+// player_t::armoring_matches_bonus ========================================
+
+bool player_t::armoring_matches_set( const std::string &armoring_name )
+{
+  try
+  {
+  for ( auto& filter: this -> armoring_filters )
+    {
+      if ( armoring_name.find( filter ) != armoring_name.npos )
+        return true;
+    }
+  return false;
+  }
+  catch (...) { return false; }
+}
+
 
 // player_t::get_position_distance ==========================================
 
