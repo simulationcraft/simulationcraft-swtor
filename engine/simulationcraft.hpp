@@ -2192,7 +2192,7 @@ struct item_t
   std::string option_ilevel_str;
   std::string option_quality_str;
   std::string option_data_source_str;
-  std::string option_armoring_str;
+  std::string option_setbonus_str;
   std::string options_str;
 
   // Armory Data
@@ -2208,7 +2208,7 @@ struct item_t
   std::string armory_ilevel_str;
   std::string armory_quality_str;
   std::string armory_random_suffix_str;
-  std::string armory_armoring_str;
+  std::string armory_setbonus_str;
 
   // Encoded Data
   std::string id_str;
@@ -2225,7 +2225,7 @@ struct item_t
   std::string encoded_ilevel_str;
   std::string encoded_quality_str;
   std::string encoded_random_suffix_str;
-  std::string encoded_armoring_str;
+  std::string encoded_setbonus_str;
 
   // Extracted data
   gear_stats_t base_stats,stats;
@@ -2269,7 +2269,7 @@ struct item_t
   bool matching_type();
   const char* name() const;
   const char* slot_name() const { return util_t::slot_type_string( slot ); }
-  const char* armoring() const;
+  const char* setbonus() const;
   weapon_t* weapon() const;
   bool init();
   bool parse_options();
@@ -2321,7 +2321,6 @@ struct set_bonus_t
 private:
   bool decode( const std::string name, const std::vector<std::string> filters ) const;
   bool decode_by_shell(    const item_t& item ) const;
-  bool decode_by_armoring( const item_t& item ) const;
 };
 
 // Player ===================================================================
@@ -2701,7 +2700,7 @@ public:
   };
   set_bonuses_t set_bonus;
 
-  std::vector<std::string> armoring_filters;
+
   const size_t targetdata_id;
 private:
   auto_dispose<std::vector<targetdata_t*>> targetdata;
@@ -3051,7 +3050,7 @@ public:
   bool      in_gcd() const { return gcd_ready > sim -> current_time; }
   item_t*   find_item( const std::string& );
   action_t* find_action( const std::string& );
-  set_bonus_t* find_set_bonus( const std::string& name );
+  set_bonus_t* find_set_bonus( const std::string& name ) const;
   bool      dual_wield() const { return main_hand_weapon.type != WEAPON_NONE && off_hand_weapon.type != WEAPON_NONE; }
   void      aura_gain( const std::string& name, double value=0 );
   void      aura_loss( const std::string& name, double value=0 );
@@ -3072,8 +3071,8 @@ public:
   set_bonus_t* get_set_bonus( const std::string& name, std::string shell_filter,
                               std::string armoring_filter,
                               slot_mask_t slot_filter=DEFAULT_SET_BONUS_SLOT_MASK );
-  std::vector<std::string> get_armoring_filters() ;
-  bool armoring_matches_set( const std::string& armoring_name );
+  std::string get_armoring_set_bonus_name( const std::string armoring_name );
+  std::string get_shell_set_bonus_name( const std::string shell_name );
   double      get_player_distance( const player_t* p ) const;
   double      get_position_distance( double m=0, double v=0 ) const;
   action_priority_list_t* get_action_priority_list( const std::string& name );

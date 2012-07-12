@@ -100,10 +100,10 @@ const char* item_t::name() const
   return "inactive";
 }
 
-const char* item_t::armoring() const
+const char* item_t::setbonus() const
 {
-    if ( ! encoded_armoring_str.empty() ) return encoded_armoring_str.c_str();
-    if ( !  armory_armoring_str.empty() ) return  armory_armoring_str.c_str();
+    if ( ! encoded_setbonus_str.empty() ) return encoded_setbonus_str.c_str();
+    if ( !  armory_setbonus_str.empty() ) return  armory_setbonus_str.c_str();
     return "";
 }
 
@@ -153,7 +153,7 @@ bool item_t::parse_options()
     { "ilevel",  OPT_STRING, &option_ilevel_str        },
     { "quality", OPT_STRING, &option_quality_str       },
     { "source",  OPT_STRING, &option_data_source_str   },
-    { "armoring",OPT_STRING, &option_armoring_str      },
+    { "setbonus",OPT_STRING, &option_setbonus_str      },
     { NULL,      OPT_NONE,   NULL }
   };
 
@@ -174,7 +174,7 @@ bool item_t::parse_options()
   util_t::tolower( option_random_suffix_str );
   util_t::tolower( option_ilevel_str        );
   util_t::tolower( option_quality_str       );
-  util_t::tolower( option_armoring_str      );
+  util_t::tolower( option_setbonus_str      );
 
   return true;
 }
@@ -194,6 +194,7 @@ void item_t::encode_options()
   if ( ! encoded_armor_type_str.empty()    ) { o += ",type=";     o += encoded_armor_type_str;    }
   if ( ! encoded_ilevel_str.empty()        ) { o += ",ilevel=";   o += encoded_ilevel_str;        }
   if ( ! encoded_quality_str.empty()       ) { o += ",quality=";  o += encoded_quality_str;       }
+  if ( ! encoded_setbonus_str.empty()      ) { o += ",setbonus="; o += encoded_setbonus_str;      }
   if ( ! encoded_stats_str.empty()         ) { o += ",stats=";    o += encoded_stats_str;         }
   if ( ! encoded_enchant_str.empty()       ) { o += ",enchant=";  o += encoded_enchant_str;       }
   if ( ! encoded_addon_str.empty()         ) { o += ",addon=";    o += encoded_addon_str;         }
@@ -201,7 +202,6 @@ void item_t::encode_options()
   if ( ! encoded_use_str.empty()           ) { o += ",use=";      o += encoded_use_str;           }
   if ( ! encoded_weapon_str.empty()        ) { o += ",weapon=";   o += encoded_weapon_str;        }
   if ( ! encoded_random_suffix_str.empty() ) { o += ",suffix=";   o += encoded_random_suffix_str; }
-  if ( ! encoded_armoring_str.empty()      ) { o += ",armoring="; o += encoded_armoring_str;      }
 }
 
 // item_t::init =============================================================
@@ -244,7 +244,7 @@ bool item_t::init()
     encoded_ilevel_str        = armory_ilevel_str;
     encoded_quality_str       = armory_quality_str;
     encoded_random_suffix_str = armory_random_suffix_str;
-    encoded_armoring_str      = armory_armoring_str;
+    encoded_setbonus_str      = armory_setbonus_str;
   }
 
   if ( ! option_heroic_str.empty()  ) encoded_heroic_str  = option_heroic_str;
@@ -273,7 +273,7 @@ bool item_t::init()
   if ( ! option_addon_str.empty()   ) encoded_addon_str   = option_addon_str;
   if ( ! option_weapon_str.empty()  ) encoded_weapon_str  = option_weapon_str;
   if ( ! option_random_suffix_str.empty() ) encoded_random_suffix_str = option_random_suffix_str;
-  if ( ! option_armoring_str.empty() ) encoded_armoring_str = option_armoring_str;
+  if ( ! option_setbonus_str.empty() ) encoded_setbonus_str = option_setbonus_str;
 
 
   if ( ! decode_stats()         ) return false;

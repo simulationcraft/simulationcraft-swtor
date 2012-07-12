@@ -405,12 +405,7 @@ player_t::player_t( sim_t*             s,
   // mercenary
   set_bonus.rakata_eliminators = get_set_bonus( "rakata_eliminators", "tionese_eliminators_/columi_eliminators/rakata_eliminators_", "campaign_eliminators_" );
 
-  // Patch 1.3 changed how set bonuses attach to gear.
-  // Rakata and lower (<=58) attach on the shell
-  // Campaign and higher (>=61) attach on the armor
-  // We need to keep a full list of possible armoring bonuses to ensure that if the
-  // armoring can count towards a bonus, the shell will be excluded from counting
-  armoring_filters = get_armoring_filters();
+
 }
 
 // player_t::~player_t ======================================================
@@ -3319,7 +3314,7 @@ action_priority_list_t* player_t::find_action_priority_list( const std::string& 
 
 // player_t::find_set_bonus =======================================================
 
-set_bonus_t* player_t::find_set_bonus( const std::string& name )
+set_bonus_t* player_t::find_set_bonus( const std::string& name ) const
 {
   set_bonus_t* sb=0;
 
@@ -3587,40 +3582,45 @@ set_bonus_t* player_t::get_set_bonus( const std::string& name, std::string shell
   return sb;
 }
 
-// player_t::get_armoring_filters ==========================================
+// player_t::get_armoring_set_bonus_name ========================================
 
-std::vector<std::string> player_t::get_armoring_filters()
+std::string player_t::get_armoring_set_bonus_name( const std::string armoring_name )
 {
   set_bonus_t* sb=0;
-  std::vector<std::string> retVal;
 
-  for ( sb = set_bonus_list; sb; sb = sb -> next )
-  {
-      for ( std::string armoring_filter: sb->armoring_filters )
-        {
-          retVal.push_back ( armoring_filter );
-        }
-  }
-
-  return retVal;
-}
-
-// player_t::armoring_matches_bonus ========================================
-
-bool player_t::armoring_matches_set( const std::string &armoring_name )
-{
-  try
-  {
-  for ( auto& filter: this -> armoring_filters )
+  for ( sb = set_bonus_list; sb; sb = sb -> next)
     {
-      if ( armoring_name.find( filter ) != armoring_name.npos )
-        return true;
+      for ( std::string armoring_filter: sb -> armoring_filters )
+        {
+          if ( armoring_name.find( armoring_filter ) != armoring_name.npos )
+            {
+              return sb -> name;
+            }
+        }
     }
-  return false;
-  }
-  catch (...) { return false; }
+
+  return "";
 }
 
+// player_t::get_shell_set_bonus_name ========================================
+
+std::string player_t::get_shell_set_bonus_name( const std::string shell_name )
+{
+  set_bonus_t* sb=0;
+
+  for ( sb = set_bonus_list; sb; sb = sb -> next)
+    {
+      for ( std::string shell_filter: sb -> shell_filters )
+        {
+          if ( shell_name.find( shell_filter ) != shell_name.npos )
+            {
+              return sb -> name;
+            }
+        }
+    }
+
+  return "";
+}
 
 // player_t::get_position_distance ==========================================
 

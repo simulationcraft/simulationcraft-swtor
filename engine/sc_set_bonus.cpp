@@ -14,16 +14,19 @@ set_bonus_t::set_bonus_t( const std::string& n, const std::string& shell_f, cons
   force_enable_4pc( false ), force_disable_4pc( false )
 {
   //set up shell filters for pieces rakata and below (ilevel <=58)
+  //only used is item.setbonus is not specified
   if ( shell_f.empty() )
     shell_filters.push_back( name );
   else
     util_t::string_split( shell_filters, shell_f, "/" );
 
-  //set up armoring filters for pieces campaign and above (ilevel >=61)
+  //set up armoring filters
+  //used during import to determine if setbonus should be set
   if ( armoring_f.empty() )
     armoring_filters.push_back( name );
   else
     util_t::string_split( armoring_filters, armoring_f, "/" );
+
 }
 
 // set_bonus_t::decode ======================================================
@@ -52,14 +55,6 @@ bool set_bonus_t::decode_by_shell( const item_t& item ) const
 
 }
 
-// set_bonus_t::decode_by_armoring ==========================================
-
-bool set_bonus_t::decode_by_armoring( const item_t& item ) const
-{
-  return decode ( item.armoring(), armoring_filters );
-}
-
-
 // set_bonus_t::init ========================================================
 
 void set_bonus_t::init( const player_t& p )
@@ -80,12 +75,19 @@ void set_bonus_t::init( const player_t& p )
 
 
       // Campaign and above pieces (ilevel >=61) bonuses are attached to the armoring
-      // Armoring bonuses take precedence over shell bonuses.
-      // If an armoring bonus is present it overrides the shell
-      if ( decode( i.armoring() , p.armoring_filters ) )
-        result = decode_by_armoring( i );
+      // On all new imports setbonus should be handled entirely by the import
+      set_bonus_t* sb = p.find_set_bonus( i.setbonus() );
+
+      if ( sb )
+        {
+          if ( sb -> name == name)
+            result = true;
+        }
+      // this is only left in place to maintain past scripts
+      // comment out the else to remove support and only base bonuses on the setbonus attribute
       else
         result = decode_by_shell( i );
+
 
       if ( result )
         ++count;

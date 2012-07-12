@@ -172,6 +172,25 @@ weapon_type decode_weapon_type( const std::string& s )
   return WEAPON_NONE;
 }
 
+// decode_setbonus =============================================================
+
+std::string decode_armoring( js::node_t* node )
+{
+  std::string value;
+  std::string armor_name;
+
+  for ( js::node_t* mod : *node )
+    {
+      if ( ! mod -> get ( "Slot" , value ))
+        continue;
+      if ( value != "Armoring" )
+        continue;
+      mod -> get ( "Name", armor_name );
+    }
+
+  return util_t::format_name( armor_name );
+}
+
 // decode_stats =============================================================
 
 std::string decode_stats( js::node_t* node )
@@ -290,6 +309,36 @@ void parse_items( player_t* p, js::node_t* items )
       if ( ! s.empty() )
         item_encoding << ",stats=" << s;
     }
+
+
+    if ( ! ( DEFAULT_SET_BONUS_SLOT_MASK != 0 &&
+         ( DEFAULT_SET_BONUS_SLOT_MASK & bitmask( slot ) ) == 0 ) )
+      {
+        //we have a valid set bonus item
+
+        if ( js::node_t* mods = item -> get_child( "Mods" ) )
+          {
+            std::string a = decode_armoring( mods );
+
+            if ( ! a.empty() )
+              {
+                // have the armor name, now need to see if it matches a set bonus
+                std::string s = p->get_armoring_set_bonus_name( a );
+
+                if ( s.empty() )
+                  {
+                    //armoring doesn't have bonus, check the shell
+                    s = p->get_shell_set_bonus_name( name );
+                    if ( ! s.empty() )
+                      item_encoding << ",setbonus=" << s;
+                  }
+                else
+                  {
+                    item_encoding << ",setbonus=" << s;
+                  }
+              }
+          }
+      }
 
     p -> items[ slot ].options_str = item_encoding.str();
   }
