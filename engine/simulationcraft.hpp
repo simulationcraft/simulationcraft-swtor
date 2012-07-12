@@ -2686,17 +2686,53 @@ public:
 
   struct set_bonuses_t
   {
+    // inquisitor/consular
+    // ==== PvE sets
     set_bonus_t* rakata_force_masters;
-    set_bonus_t* battlemaster_force_masters;
+    set_bonus_t* rakata_force_mystics;
     set_bonus_t* rakata_stalkers;
-    // agent
+    set_bonus_t* rakata_survivors;
+    // ==== PvP sets
+    set_bonus_t* battlemaster_force_masters;
+    set_bonus_t* battlemaster_force_mystics;
+    set_bonus_t* battlemaster_stalkers;
+    set_bonus_t* battlemaster_survivors;
+
+
+    // agent/smuggler
+    // ==== PvE sets
     set_bonus_t* rakata_enforcers;
     set_bonus_t* rakata_field_medics;
     set_bonus_t* rakata_field_techs;
-    // mercenary
+    // ==== PvP sets
+    set_bonus_t* battlemaster_enforcers;
+    set_bonus_t* battlemaster_field_medics;
+    set_bonus_t* battlemaster_field_techs;
+
+
+    // bountyhunter/trooper
+    // ==== PvE sets
     set_bonus_t* rakata_eliminators;
-    //marauder
+    set_bonus_t* rakata_combat_medics;
+    set_bonus_t* rakata_combat_techs;
+    set_bonus_t* rakata_supercomandos;
+    // ==== PvP sets
+    set_bonus_t* battlemaster_eliminators;
+    set_bonus_t* battlemaster_combat_medics;
+    set_bonus_t* battlemaster_combat_techs;
+    set_bonus_t* battlemaster_supercomandos;
+
+
+    // warrior/knight
+    // ==== PvE sets
     set_bonus_t* rakata_weaponmasters;
+    set_bonus_t* rakata_vindicators;
+    set_bonus_t* rakata_war_leaders;
+    // ==== PvP sets
+    set_bonus_t* battlemaster_weaponmasters;
+    set_bonus_t* battlemaster_vindicators;
+    set_bonus_t* battlemaster_war_leaders;
+
   };
   set_bonuses_t set_bonus;
 

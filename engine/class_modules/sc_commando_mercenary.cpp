@@ -646,6 +646,10 @@ struct rail_shot_t : public attack_t
 
     if ( unsigned rank = p -> talents.advanced_targeting -> rank () )
       player_armor_penetration -= 0.1 * rank;
+
+    if ( p -> set_bonus.battlemaster_eliminators -> four_pc() )
+      player_crit += 0.15;
+
   }
 
   virtual double cost() const

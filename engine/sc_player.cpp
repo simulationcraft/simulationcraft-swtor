@@ -395,17 +395,52 @@ player_t::player_t( sim_t*             s,
   if ( reaction_stddev == timespan_t::zero() ) reaction_stddev = reaction_mean * 0.25;
 
 
+  // inquisitors
+  // ==== PvE sets
   set_bonus.rakata_force_masters = get_set_bonus( "rakata_force_masters", "tionese_force_masters_/columi_force_masters_/rakata_force_masters_", "campaign_force_masters_" );
-  set_bonus.battlemaster_force_masters = get_set_bonus( "battlemaster_force_masters", "centurion_force_masters_/champion_force_masters_/battlemaster_force_masters_", "warhero_force_masters_" );
+  set_bonus.rakata_force_mystics = get_set_bonus( "rakata_force_mystics", "tionese_force_mystics_/columi_force_mystics_/rakata_force_mystics_", "campaign_force_mystics_");
   set_bonus.rakata_stalkers = get_set_bonus( "rakata_stalkers", "tionese_stalkers_/columi_stalkers_/rakata_stalkers_", "campaign_stalkers_" );
-  // agents
+  set_bonus.rakata_survivors = get_set_bonus( "unimplemented_rakata_survivors", "tionese_survivors_/columi_survivors_/rakata_survivors_", "campaign_survivors_" );
+  // ==== PvP sets
+  set_bonus.battlemaster_force_masters = get_set_bonus( "battlemaster_force_masters", "centurion_force_masters_/champion_force_masters_/battlemaster_force_masters_", "warhero_force_masters_" );
+  set_bonus.battlemaster_force_mystics = get_set_bonus( "unimplemented_battlemaster_force_mystics", "centurion_force_mystics_/champion_force_mystics_/battlemaster_force_mystics_", "warhero_force_mystics_" );
+  set_bonus.battlemaster_stalkers = get_set_bonus( "battlemaster_stalkers", "centurion_stalkers_/champion_stalkers_/battlemaster_stalkers_", "warhero_stalkers_" );
+  set_bonus.battlemaster_survivors = get_set_bonus( "unimplemented_battlemaster_survivors", "centurion_survivors_/champion_survivors_/battlemaster_survivors_", "warhero_survivors_" );
+
+
+  // agent/smuggler
+  // ==== PvE sets
   set_bonus.rakata_enforcers = get_set_bonus( "rakata_enforcers", "tionese_enforcers_/columi_enforcers_/rakata_enforcers_", "campaign_enforcers_" );
   set_bonus.rakata_field_medics = get_set_bonus( "rakata_field_medics", "tionese_field_medics_/columi_field_medics_/rakata_field_medics_", "campaign_field_medics_" );
   set_bonus.rakata_field_techs = get_set_bonus( "rakata_field_techs", "tionese_field_techs_/columi_field_techs_/rakata_field_techs_", "campaign_field_techs_" );
-  // mercenary
-  set_bonus.rakata_eliminators = get_set_bonus( "rakata_eliminators", "tionese_eliminators_/columi_eliminators/rakata_eliminators_", "campaign_eliminators_" );
+  // ==== PvP sets
+  set_bonus.battlemaster_enforcers = get_set_bonus( "battlemaster_enforcers", "centurion_enforcers_/champion_enforcers_/battlemaster_enforcers_", "warhero_enforcers_" );
+  set_bonus.battlemaster_field_medics = get_set_bonus( "unimplemented_battlemaster_field_medics", "centurion_field_medics_/champion_field_medics_/battlemaster_field_medics_", "warhero_field_medics_" );
+  set_bonus.battlemaster_field_techs = get_set_bonus( "battlemaster_field_techs", "centurion_field_techs_/champion_field_techs_/battlemaster_field_techs_", "warhero_field_techs_" );
 
 
+  // bountyhunter/trooper
+  // ==== PvE sets
+  set_bonus.rakata_eliminators = get_set_bonus( "rakata_eliminators", "tionese_eliminators_/columi_eliminators_/rakata_eliminators_", "campaign_eliminators_" );
+  set_bonus.rakata_combat_medics = get_set_bonus( "unimplemented_rakata_combat_medics", "tionese_combat_medics_/columi_combat_medics_/rakata_combat_medics_", "campaign_combat_medics_" );
+  set_bonus.rakata_combat_techs = get_set_bonus( "unimplemented_rakata_combat_techs", "tionese_combat_techs_/columi_combat_techs_/rakata_combat_techs_", "campaign_combat_techs_" );
+  set_bonus.rakata_supercomandos = get_set_bonus( "unimplemented_rakata_supercomandos", "tionese_supercomandos_/columi_supercomandos_/rakata_supercomandos_", "campaign_supercomandos_" );
+  // ==== PvP sets
+  set_bonus.battlemaster_eliminators = get_set_bonus( "battlemaster_eliminators", "centurion_eliminators_/champion_eliminators_/battlemaster_eliminators_", "warhero_eliminators_" );
+  set_bonus.battlemaster_combat_medics = get_set_bonus( "unimplemented_battlemaster_combat_medics", "centurion_combat_medics_/champion_combat_medics_/battlemaster_combat_medics_", "warhero_combat_medics_" );
+  set_bonus.battlemaster_combat_techs = get_set_bonus( "unimplemented_battlemaster_combat_techs", "centurion_combat_techs_/champion_combat_techs_/battlemaster_combat_techs_", "warhero_combat_techs_" );
+  set_bonus.battlemaster_supercomandos = get_set_bonus( "unimplemented_battlemaster_supercomandos", "centurion_supercomandos_/champion_supercomandos_/battlemaster_supercomandos_", "warhero_supercomandos_" );
+
+
+  // warrior/knight
+  // ==== PvE sets
+  set_bonus.rakata_weaponmasters = get_set_bonus( "unimplemented_rakata_weaponmasterss", "tionese_weaponmasters_/columi_weaponmasters_/rakata_weaponmasters_", "campaign_weaponmasters_" );
+  set_bonus.rakata_vindicators = get_set_bonus( "unimplemented_rakata_vindicators", "tionese_vindicators_/columi_vindicators_/rakata_vindicators_", "campaign_vindicators_" );
+  set_bonus.rakata_war_leaders = get_set_bonus( "unimplemented_rakata_war_leaders", "tionese_war_leaders_/columi_war_leaders_/rakata_war_leaders_", "campaign_war_leaders_" );
+  // ==== PvP sets
+  set_bonus.battlemaster_weaponmasters = get_set_bonus( "unimplemented_battlemaster_weaponmasterss", "centurion_weaponmasters_/champion_weaponmasters_/battlemaster_weaponmasters_", "warhero_weaponmasters_" );
+  set_bonus.battlemaster_vindicators = get_set_bonus( "unimplemented_battlemaster_vindicators", "centurion_vindicators_/champion_vindicators_/battlemaster_vindicators_", "warhero_vindicators_" );
+  set_bonus.battlemaster_war_leaders = get_set_bonus( "unimplemented_battlemaster_war_leaders", "centurion_war_leaders_/champion_war_leaders_/battlemaster_war_leaders_", "warhero_war_leaders_" );
 }
 
 // player_t::~player_t ======================================================
@@ -4799,7 +4834,8 @@ void player_t::create_profile( std::ostream& os, save_type savetype )
 
   if ( savetype == SAVE_ALL || savetype == SAVE_TALENTS )
   {
-    talents_str = mrrobot::encode_talents( *this );
+    //talents_str = mrrobot::encode_talents( *this );
+      talents_str = torhead::encode_talents( *this );
     if ( ! talents_str.empty() )
       os << "talents=" << talents_str << '\n';
   }

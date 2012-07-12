@@ -173,7 +173,9 @@ public:
     distance = default_distance = 3;
 
     resource_base[ RESOURCE_ENERGY ] += 100;
-    if ( set_bonus.rakata_enforcers -> four_pc() )
+    if ( set_bonus.rakata_enforcers -> four_pc()
+         || set_bonus.battlemaster_enforcers -> four_pc()
+         || set_bonus.battlemaster_field_medics -> four_pc() )
       resource_base[ RESOURCE_ENERGY ] += 5;
 
     set_base_alacrity( get_base_alacrity() + 0.02 * talents.deadly_directive -> rank() );

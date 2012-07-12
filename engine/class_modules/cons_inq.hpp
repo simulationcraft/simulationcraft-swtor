@@ -38,6 +38,8 @@ public:
   {
     player_t::init_base();
     resource_base[ RESOURCE_FORCE ] += 100;
+    if ( this -> set_bonus.rakata_force_mystics -> four_pc() )
+      resource_base[ RESOURCE_FORCE ] += 50;
   }
 
   virtual void init_gains()

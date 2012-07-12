@@ -1023,13 +1023,17 @@ void class_t::init_actions()
     action_list_str += sl + m.a_orbital_strike + ",if=energy>65";
     // energy dumps
     action_list_str += sl + m.a_explosive_probe + ",if=energy>"; // should use cover before, but not enforcing cover yet
-    if ( set_bonus.rakata_enforcers -> four_pc() )
+    if ( set_bonus.rakata_enforcers -> four_pc()
+         || set_bonus.battlemaster_enforcers -> four_pc()
+         || set_bonus.battlemaster_field_medics -> four_pc() )
       action_list_str += "100";
     else
       action_list_str += "95";
     action_list_str += "&cooldown." + m.a_shiv + ".remains>2";
     action_list_str += sl + m.a_overload_shot + ",if=energy>";
-    if ( set_bonus.rakata_enforcers -> four_pc() )
+    if ( set_bonus.rakata_enforcers -> four_pc()
+         || set_bonus.battlemaster_enforcers -> four_pc()
+         || set_bonus.battlemaster_field_medics -> four_pc() )
       action_list_str += "100";
     else
       action_list_str += "95";
