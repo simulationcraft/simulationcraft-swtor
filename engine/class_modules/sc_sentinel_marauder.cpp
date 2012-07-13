@@ -38,7 +38,7 @@ struct class_t : public warr_knight::class_t
     struct buffs_t
     {
       buff_t* juyo_form;
-      buff_t* annihlator;
+      buff_t* annihilator;
       buff_t* fury;
       buff_t* deadly_saber;
       buff_t* berserk;
@@ -48,7 +48,9 @@ struct class_t : public warr_knight::class_t
     // Gains
     struct gains_t
     {
-
+      gain_t* assault;
+      gain_t* battering_assault;
+      gain_t* force_charge;
     } gains;
 
     // Procs
@@ -220,8 +222,8 @@ struct class_t : public warr_knight::class_t
 
 class action_t : public ::action_t
 {
-  typedef ::action_t base_t;
 public:
+  typedef ::action_t base_t;
   action_t( const std::string& n, class_t* player,
                           attack_policy_t policy, resource_type r, school_type s ) :
     base_t( ACTION_ATTACK, n, player, policy, r, s )
@@ -240,44 +242,55 @@ public:
 // Sentinel / Marauder Abilities
 // ==========================================================================
 
-struct attack_t : public action_t
+struct force_attack_t : public action_t
 {
-    attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_KINETIC ) :
-      action_t( n, p, melee_policy, RESOURCE_NONE, s )
+    force_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_ENERGY ) :
+      action_t( n, p, force_policy, p -> primary_resource(), s )
     {
         may_crit   = true;
     }
 
-    virtual void impact( player_t* t, result_type impact_result, double travel_dmg)
+};
+
+struct melee_attack_t : public action_t
+{
+  melee_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_ENERGY) :
+    action_t(n, p, melee_policy, p -> primary_resource(), s)
+  {
+    may_crit = true;
+  }
+  virtual void impact( player_t* t, result_type impact_result, double travel_dmg)
     {
       action_t::impact( t, impact_result, travel_dmg);
 
       if (result_is_hit( impact_result ) )
       {
-        //class_t* p = cast();
-        //targetdata_t* td = targetdata();
+        class_t* p = cast();
 
-        //if (p->buffs.juyo_form->stacks)
+        if ( p -> actives.form == JUYO_FORM )
+        {
+          p->buffs.juyo_form-> increment();
+        }
       }
     }
-
 };
 
-struct spell_t : public action_t
+struct bleed_attack_t : public force_attack_t
 {
-    spell_t( const std::string& n, class_t* p, school_type s=SCHOOL_KINETIC ) :
-      action_t( n, p, force_policy, RESOURCE_NONE, s )
-    {
-        may_crit   = true;
-        tick_may_crit = true;
-    }
+  bleed_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_INTERNAL) :
+    force_attack_t(n, p, s)
+  {
+    tick_may_crit = true;
 
+  }
 };
 // Berserk | Combat Focus =====================================================
-struct berserk_t : public spell_t
+struct berserk_t : public action_t
 {
+  typedef action_t basae_t;
+
   berserk_t( class_t* p, const std::string& n, const std::string& options_str) :
-    spell_t( n, p)
+    action_t( n, p, force_policy, p -> primary_resource(), SCHOOL_INTERNAL)
   {
     parse_options( options_str );
     harmful = false;
@@ -293,7 +306,7 @@ struct berserk_t : public spell_t
 
   virtual void execute()
   {
-    spell_t::execute();
+    base_t::execute();
 
     class_t* p = cast();
 
@@ -302,9 +315,9 @@ struct berserk_t : public spell_t
 };
 
 // Vicious Throw | Merciless Throw ============================================
-struct vicious_throw_t : public attack_t
+struct vicious_throw_t : public melee_attack_t
 {
-  typedef attack_t base_t;
+  typedef melee_attack_t base_t;
 
   static int energy_cost( class_t* p ) { return 3 - ( p -> set_bonus.rakata_weaponmasters -> two_pc() ? 1 : 0 ); }
 
@@ -314,7 +327,7 @@ struct vicious_throw_t : public attack_t
     parse_options( options_str );
 
     base_cost = energy_cost( p );
-    cooldown -> duration = from_seconds(6);
+    cooldown -> duration = from_seconds( 6 );
     range = 10.0;
     dd.standardhealthpercentmin = 0.265;
     dd.standardhealthpercentmax = 0.305;
@@ -327,55 +340,130 @@ struct vicious_throw_t : public attack_t
   {
     return target -> health_percentage() >= 30 ? false : base_t::ready();
   }
+
+  virtual void execute()
+  {
+
+  }
 };
 
 // Rupture | Cauterize ========================================================
-struct rupture_t : public attack_t
+struct rupture_t : public melee_attack_t
 {
+  typedef melee_attack_t base_t;
 
 };
 
 // Annihilate | Merciless Slash ===============================================
-struct annihilate_t : public attack_t
+struct annihilate_t : public melee_attack_t
 {
+  typedef melee_attack_t base_t;
 
+  annihilate_t* offhand_attack;
+
+  annihilate_t( class_t* p, const std::string& n, const std::string& options_str,
+      bool is_offhand=false ) :
+    base_t(n, p)
+  {
+    check_talent( p -> talents.annihilate -> rank());
+
+    parse_options( options_str );
+
+    base_cost = 5;
+    cooldown -> duration = from_seconds( 12 - (1.5 * p -> buffs.annihilator -> current_stack));
+    range = 4.0;
+
+    dd.standardhealthpercentmin =
+    dd.standardhealthpercentmax = 0.285;
+    dd.power_mod = 2.85;
+    weapon = &(player -> main_hand_weapon);
+    weapon_multiplier = 0.9;
+
+    if (is_offhand)
+    {
+      base_cost = 0;
+      background = true;
+      dual = true;
+      base_execute_time = timespan_t::zero();
+      trigger_gcd = timespan_t::zero();
+      weapon = &( player -> off_hand_weapon );
+      rank_level_list = { 0 };
+      dd.power_mod = 0;
+    }
+    else
+    {
+      offhand_attack = new annihilate_t( p, n+"_offhand", options_str, true);
+      add_child( offhand_attack );
+    }
+  }
+
+  virtual void execute()
+  {
+    class_t* p = cast();
+    p -> buffs.annihilator -> increment();
+  }
 };
 
 // Deadly Saber | Overload Saber ==============================================
-struct deadly_saber_t : public spell_t
+struct deadly_saber_t : public action_t
 {
+  typedef action_t base_t;
 
 };
 
 // Force Charge | Force Leap ==================================================
-struct force_charge_t : public attack_t
+struct force_charge_t : public melee_attack_t
 {
+  typedef melee_attack_t base_t;
 
+  force_charge_t( class_t* p, const std::string& n, const std::string& options_str) :
+    base_t(n, p)
+  {
+    parse_options( options_str );
+
+    base_cost = 0;
+    cooldown -> duration = from_seconds( 15 );
+    range = 30.0;
+    weapon_multiplier = -0.39;
+    dd.standardhealthpercentmin =
+    dd.standardhealthpercentmax = 0.091;
+    dd.power_mod = 0.91;
+
+    p -> resource_gain( RESOURCE_RAGE, 3, p -> gains.force_charge );
+
+    //TODO: minimum range?
+    //TODO: travel range?
+  }
 };
 
 // Ravage | Master Strike =====================================================
-struct ravage_t : public attack_t
+struct ravage_t : public melee_attack_t
 {
+  typedef melee_attack_t base_t;
 
 };
 
 // Battering Assault | Zealous Strike =========================================
-struct battering_assault_t : public attack_t
+struct battering_assault_t : public melee_attack_t
 {
+  typedef melee_attack_t base_t;
 
 };
 
 // Vicious Slash | Slash ======================================================
-struct vicious_slash_t : public attack_t
+struct vicious_slash_t : public melee_attack_t
 {
+  typedef melee_attack_t base_t;
 
 };
 
 // Assault | Strike ===========================================================
-struct assault_t : public attack_t
+struct assault_t : public melee_attack_t
 {
+  typedef melee_attack_t base_t;
+
   assault_t( class_t* p, const std::string& n, const std::string& options_str) :
-    attack_t(n, p, SCHOOL_KINETIC)
+    melee_attack_t(n, p, SCHOOL_KINETIC)
     {
       parse_options( options_str );
 
@@ -384,92 +472,107 @@ struct assault_t : public attack_t
 };
 
 // Bloodthirst | Inspiration ==================================================
-struct bloodthirst_t : public spell_t
+struct bloodthirst_t : public action_t
 {
+  typedef action_t base_t;
 
 };
 
 // Gore | Precision Slash =====================================================
-struct gore_t : public attack_t
+struct gore_t : public melee_attack_t
 {
+  typedef melee_attack_t base_t;
 
 };
 
 // Massacre | Blade Rush ======================================================
-struct massacre_t : public attack_t
+struct massacre_t : public melee_attack_t
 {
+  typedef melee_attack_t base_t;
 
 };
 
 // Obliterate | Zealous Leap ==================================================
-struct obliterate_t : attack_t
+struct obliterate_t : melee_attack_t
 {
+  typedef melee_attack_t base_t;
 
 };
 
 // Force Crush | Force Exhaustion =============================================
-struct force_crush_t : spell_t
+struct force_crush_t : force_attack_t
 {
+  typedef force_attack_t base_t;
 
 };
 
 // Force Choke | Force Stasis =================================================
-struct force_choke_t : spell_t
+struct force_choke_t : force_attack_t
 {
+  typedef force_attack_t base_t;
 
 };
 
 // Force Sream | Blade Storm ==================================================
-struct force_scream_t : spell_t
+struct force_scream_t : force_attack_t
 {
+  typedef force_attack_t base_t;
 
 };
 
 // Frenzy | Valorous Call =====================================================
-struct frenzy_t : spell_t
+struct frenzy_t : action_t
 {
+  typedef action_t base_t;
 
 };
 
 // Juyo Form ==================================================================
-struct juyo_form_t : spell_t
+struct juyo_form_t : action_t
 {
+  typedef action_t base_t;
 
 };
 
 // Shii-Cho Form ==============================================================
-struct shii_cho_form_t : spell_t
+struct shii_cho_form_t : action_t
 {
+  typedef action_t base_t;
 
 };
 
 // Ataru Form =================================================================
-struct ataru_form_t : spell_t
+struct ataru_form_t : action_t
 {
+  typedef action_t base_t;
 
 };
 
 // Retaliate | Riposte ========================================================
-struct retaliate_t : attack_t
+struct retaliate_t : melee_attack_t
 {
+  typedef melee_attack_t base_t;
 
 };
 
 // Smash | Sweep ==============================================================
-struct smash_t : attack_t
+struct smash_t : force_attack_t
 {
+  typedef force_attack_t base_t;
 
 };
 
 // Sweeping Slash | Cyclone Slash =============================================
-struct sweeping_slash_t : attack_t
+struct sweeping_slash_t : melee_attack_t
 {
+  typedef melee_attack_t base_t;
 
 };
 
 // Unnatural Might | Force_Might ==============================================
-struct unnatural_might_t : spell_t
+struct unnatural_might_t : action_t
 {
+  typedef action_t base_t;
 
 };
 
@@ -625,19 +728,7 @@ resource_type class_t::primary_resource() const
 
 role_type class_t::primary_role() const
 {
-    switch ( player_t::primary_role() )
-    {
-    case ROLE_TANK:
-        return ROLE_TANK;
-    case ROLE_DPS:
-    case ROLE_HYBRID:
-        return ROLE_HYBRID;
-    default:
-
-        break;
-    }
-
-    return ROLE_HYBRID;
+    return ROLE_DPS;
 }
 
 // class_t::create_talents ==================================================
