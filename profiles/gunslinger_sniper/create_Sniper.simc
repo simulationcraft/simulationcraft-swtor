@@ -1,19 +1,48 @@
+## RAKATA
 mrrobot=8b20594c-ca50-417d-9376-dd7596dad1d6
 talents=http://www.torhead.com/skill-calc#400rcrbbRsRGoZbfZh.1
-name=Sniper_Marksmanship
-save=Sniper_Marksmanship.simc
+name=Sniper_Marksmanship_Rakata
+save=Sniper_Marksmanship_Rakata.simc
 
-copy=Sniper_Marks_Eng,Sniper_Marksmanship
+copy=Sniper_Marks_Eng_Rakata,Sniper_Marksmanship_Rakata
 talents=http://www.torhead.com/skill-calc#400rcrbbkRRZrI0bRoZb.1
-name=Sniper_Marks_Eng
-save=Sniper_Marks_Eng.simc
+name=Sniper_Marks_Eng_Rakata
+save=Sniper_Marks_Eng_Rakata.simc
 
-copy=Sniper_Engineering,Sniper_Marksmanship
+copy=Sniper_Engineering_Rakata,Sniper_Marksmanship_Rakata
 talents=http://www.torhead.com/skill-calc#400bcbZrI0bRorRrsZh.1
-name=Sniper_Engineering
-save=Sniper_Engineering.simc
+name=Sniper_Engineering_Rakata
+save=Sniper_Engineering_Rakata.simc
 
-copy=Sniper_Lethality,Sniper_Marksmanship
+copy=Sniper_Lethality_Rakata,Sniper_Marksmanship_Rakata
 talents=http://www.torhead.com/skill-calc#400bZbIZGbbkrMGdhR.1
-name=Sniper_Lethality
-save=Sniper_Lethality.simc
+name=Sniper_Lethality_Rakata
+save=Sniper_Lethality_Rakata.simc
+
+## CAMPAIGN
+
+mrrobot=20f57032-e811-4449-a7f9-300d9ae9b136
+talents=http://www.torhead.com/skill-calc#400rcrbbRsRGoZbfZh.1
+name=Sniper_Marksmanship_Campaign
+save=Sniper_Marksmanship_Campaign.simc
+
+copy=Sniper_Marks_Eng_Campaign,Sniper_Marksmanship_Campaign
+talents=http://www.torhead.com/skill-calc#400rcrbbkRRZrI0bRoZb.1
+name=Sniper_Marks_Eng_Campaign
+save=Sniper_Marks_Eng_Campaign.simc
+
+copy=Sniper_Engineering_Campaign,Sniper_Marksmanship_Campaign
+talents=http://www.torhead.com/skill-calc#400bcbZrI0bRorRrsZh.1
+name=Sniper_Engineering_Campaign
+save=Sniper_Engineering_Campaign.simc
+
+copy=Sniper_Lethality_Campaign,Sniper_Marksmanship_Campaign
+talents=http://www.torhead.com/skill-calc#400bZbIZGbbkrMGdhR.1
+name=Sniper_Lethality_Campaign
+save=Sniper_Lethality_Campaign.simc
+
+mrrobot=38939f0b-85b7-40c5-930a-6272e3696588
+#talents=http://www.torhead.com/skill-calc#400rcrbbRsRGoZbfZh.1
+talents=http://www.torhead.com/skill-calc#400bZbIZGbbkrMGdhR.1
+name=Sniper_BiS
+save=Sniper_BiS.simc

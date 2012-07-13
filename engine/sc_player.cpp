@@ -259,6 +259,9 @@ player_t::player_t( sim_t*             s,
   events( 0 ),
   race( r == RACE_NONE ? RACE_HUMAN : r ),
 
+  // for companion bonuses
+  bonus_accuracy_pc_( 0 ), bonus_crit_pc_( 0 ), bonus_surge_pc_( 0 ), bonus_health_pc_( 0 ),
+
   // Ratings
   initial_accuracy_rating( 0 ), accuracy_rating_( 0 ), base_accuracy_( 0 ), computed_accuracy( 0 ),
   initial_alacrity_rating( 0 ), alacrity_rating_( 0 ), base_alacrity_( 0 ), computed_alacrity( 0 ),
@@ -392,15 +395,52 @@ player_t::player_t( sim_t*             s,
   if ( reaction_stddev == timespan_t::zero() ) reaction_stddev = reaction_mean * 0.25;
 
 
-  set_bonus.rakata_force_masters = get_set_bonus( "rakata_force_masters", "tionese_force_masters_/columi_force_masters_/rakata_force_masters_" );
-  set_bonus.battlemaster_force_masters = get_set_bonus( "battlemaster_force_masters", "centurion_force_masters_/champion_force_masters_/battlemaster_force_masters_" );
-  set_bonus.rakata_stalkers = get_set_bonus( "rakata_stalkers", "tionese_stalkers_/columi_stalkers_/rakata_stalkers_" );
-  // operative
-  set_bonus.rakata_enforcers = get_set_bonus( "rakata_enforcers", "tionese_enforcers_/columi_enforcers_/rakata_enforcers_" );
-  set_bonus.rakata_field_medics = get_set_bonus( "rakata_field_medics", "tionese_field_medics_/columi_field_medics_/rakata_field_medics_" );
-  set_bonus.rakata_field_techs = get_set_bonus( "rakata_field_techs", "tionese_field_techs_/columi_field_techs_/rakata_field_techs_" );
-  // mercenary
-  set_bonus.rakata_eliminators = get_set_bonus( "rakata_eliminators", "tionese_eliminators_/columi_eliminators/rakata_eliminators_" );
+  // inquisitors
+  // ==== PvE sets
+  set_bonus.rakata_force_masters = get_set_bonus( "rakata_force_masters", "tionese_force_masters_/columi_force_masters_/rakata_force_masters_", "campaign_force_masters_" );
+  set_bonus.rakata_force_mystics = get_set_bonus( "rakata_force_mystics", "tionese_force_mystics_/columi_force_mystics_/rakata_force_mystics_", "campaign_force_mystics_");
+  set_bonus.rakata_stalkers = get_set_bonus( "rakata_stalkers", "tionese_stalkers_/columi_stalkers_/rakata_stalkers_", "campaign_stalkers_" );
+  set_bonus.rakata_survivors = get_set_bonus( "unimplemented_rakata_survivors", "tionese_survivors_/columi_survivors_/rakata_survivors_", "campaign_survivors_" );
+  // ==== PvP sets
+  set_bonus.battlemaster_force_masters = get_set_bonus( "battlemaster_force_masters", "centurion_force_masters_/champion_force_masters_/battlemaster_force_masters_", "warhero_force_masters_" );
+  set_bonus.battlemaster_force_mystics = get_set_bonus( "unimplemented_battlemaster_force_mystics", "centurion_force_mystics_/champion_force_mystics_/battlemaster_force_mystics_", "warhero_force_mystics_" );
+  set_bonus.battlemaster_stalkers = get_set_bonus( "battlemaster_stalkers", "centurion_stalkers_/champion_stalkers_/battlemaster_stalkers_", "warhero_stalkers_" );
+  set_bonus.battlemaster_survivors = get_set_bonus( "unimplemented_battlemaster_survivors", "centurion_survivors_/champion_survivors_/battlemaster_survivors_", "warhero_survivors_" );
+
+
+  // agent/smuggler
+  // ==== PvE sets
+  set_bonus.rakata_enforcers = get_set_bonus( "rakata_enforcers", "tionese_enforcers_/columi_enforcers_/rakata_enforcers_", "campaign_enforcers_" );
+  set_bonus.rakata_field_medics = get_set_bonus( "rakata_field_medics", "tionese_field_medics_/columi_field_medics_/rakata_field_medics_", "campaign_field_medics_" );
+  set_bonus.rakata_field_techs = get_set_bonus( "rakata_field_techs", "tionese_field_techs_/columi_field_techs_/rakata_field_techs_", "campaign_field_techs_" );
+  // ==== PvP sets
+  set_bonus.battlemaster_enforcers = get_set_bonus( "battlemaster_enforcers", "centurion_enforcers_/champion_enforcers_/battlemaster_enforcers_", "warhero_enforcers_" );
+  set_bonus.battlemaster_field_medics = get_set_bonus( "unimplemented_battlemaster_field_medics", "centurion_field_medics_/champion_field_medics_/battlemaster_field_medics_", "warhero_field_medics_" );
+  set_bonus.battlemaster_field_techs = get_set_bonus( "battlemaster_field_techs", "centurion_field_techs_/champion_field_techs_/battlemaster_field_techs_", "warhero_field_techs_" );
+
+
+  // bountyhunter/trooper
+  // ==== PvE sets
+  set_bonus.rakata_eliminators = get_set_bonus( "rakata_eliminators", "tionese_eliminators_/columi_eliminators_/rakata_eliminators_", "campaign_eliminators_" );
+  set_bonus.rakata_combat_medics = get_set_bonus( "unimplemented_rakata_combat_medics", "tionese_combat_medics_/columi_combat_medics_/rakata_combat_medics_", "campaign_combat_medics_" );
+  set_bonus.rakata_combat_techs = get_set_bonus( "unimplemented_rakata_combat_techs", "tionese_combat_techs_/columi_combat_techs_/rakata_combat_techs_", "campaign_combat_techs_" );
+  set_bonus.rakata_supercomandos = get_set_bonus( "unimplemented_rakata_supercomandos", "tionese_supercomandos_/columi_supercomandos_/rakata_supercomandos_", "campaign_supercomandos_" );
+  // ==== PvP sets
+  set_bonus.battlemaster_eliminators = get_set_bonus( "battlemaster_eliminators", "centurion_eliminators_/champion_eliminators_/battlemaster_eliminators_", "warhero_eliminators_" );
+  set_bonus.battlemaster_combat_medics = get_set_bonus( "unimplemented_battlemaster_combat_medics", "centurion_combat_medics_/champion_combat_medics_/battlemaster_combat_medics_", "warhero_combat_medics_" );
+  set_bonus.battlemaster_combat_techs = get_set_bonus( "unimplemented_battlemaster_combat_techs", "centurion_combat_techs_/champion_combat_techs_/battlemaster_combat_techs_", "warhero_combat_techs_" );
+  set_bonus.battlemaster_supercomandos = get_set_bonus( "unimplemented_battlemaster_supercomandos", "centurion_supercomandos_/champion_supercomandos_/battlemaster_supercomandos_", "warhero_supercomandos_" );
+
+
+  // warrior/knight
+  // ==== PvE sets
+  set_bonus.rakata_weaponmasters = get_set_bonus( "unimplemented_rakata_weaponmasterss", "tionese_weaponmasters_/columi_weaponmasters_/rakata_weaponmasters_", "campaign_weaponmasters_" );
+  set_bonus.rakata_vindicators = get_set_bonus( "unimplemented_rakata_vindicators", "tionese_vindicators_/columi_vindicators_/rakata_vindicators_", "campaign_vindicators_" );
+  set_bonus.rakata_war_leaders = get_set_bonus( "unimplemented_rakata_war_leaders", "tionese_war_leaders_/columi_war_leaders_/rakata_war_leaders_", "campaign_war_leaders_" );
+  // ==== PvP sets
+  set_bonus.battlemaster_weaponmasters = get_set_bonus( "unimplemented_battlemaster_weaponmasterss", "centurion_weaponmasters_/champion_weaponmasters_/battlemaster_weaponmasters_", "warhero_weaponmasters_" );
+  set_bonus.battlemaster_vindicators = get_set_bonus( "unimplemented_battlemaster_vindicators", "centurion_vindicators_/champion_vindicators_/battlemaster_vindicators_", "warhero_vindicators_" );
+  set_bonus.battlemaster_war_leaders = get_set_bonus( "unimplemented_battlemaster_war_leaders", "centurion_war_leaders_/champion_war_leaders_/battlemaster_war_leaders_", "warhero_war_leaders_" );
 }
 
 // player_t::~player_t ======================================================
@@ -599,7 +639,6 @@ void player_t::init()
   init_items();
   init_weapon( &main_hand_weapon );
   init_weapon( &off_hand_weapon );
-  init_abilities();
   init_talents();
   init_spells();
   init_race();
@@ -739,7 +778,7 @@ void player_t::init_core()
   initial_stats.alacrity_rating = gear.alacrity_rating  + enchant.alacrity_rating   + ( is_pet() ? 0 : sim -> enchant.alacrity_rating );
   initial_stats.surge_rating    = gear.surge_rating     + enchant.surge_rating      + ( is_pet() ? 0 : sim -> enchant.surge_rating );
 
-  initial_alacrity_rating    = initial_stats.alacrity_rating;
+  initial_alacrity_rating = initial_stats.alacrity_rating;
   initial_crit_rating     = initial_stats.crit_rating;
   initial_accuracy_rating = initial_stats.accuracy_rating;
   initial_surge_rating    = initial_stats.surge_rating;
@@ -1199,11 +1238,6 @@ void player_t::init_actions()
   action_sequence.reserve( capacity );
 }
 
-// player_t::init_abilities ===================================================
-
-void player_t::init_abilities()
-{}
-
 // player_t::init_talents ===================================================
 
 void player_t::init_talents()
@@ -1520,7 +1554,9 @@ double player_t::armor_penetration_debuff() const
         || b -> name_str.compare( 0, heat_signature.length(), heat_signature ) == 0 )
       arpen += 0.04 * b -> stack();
   }
-  return arpen >= 1 ? 0 : 1 - arpen;
+  return
+    // TODO test: for now assuming 1.3 armor debuff changes means maximum of 20% armor reduction
+    arpen > 0.2 ? 0.8 : 1 - arpen;
 }
 
 // player_t::kinetic_damage_reduction =======================================
@@ -1627,7 +1663,7 @@ double player_t::default_bonus_multiplier() const
 
 double player_t::default_crit_chance() const
 {
-  double c = base_crit_chance_ + crit_from_rating;
+  double c = base_crit_chance_ + crit_from_rating + ( (double) bonus_crit_pc_ / 100 );
 
   if ( buffs.coordination -> up() )
     c += 0.05;
@@ -2974,10 +3010,10 @@ void player_t::recalculate_crit_from_rating()
 { crit_from_rating = rating_scaler.crit( crit_rating ); }
 
 void player_t::recalculate_accuracy()
-{ computed_accuracy = get_base_accuracy() + rating_scaler.accuracy( get_accuracy_rating() ); }
+{ computed_accuracy = get_base_accuracy() + rating_scaler.accuracy( get_accuracy_rating() ) + ( (double) bonus_accuracy_pc_ / 100 ); }
 
 void player_t::recalculate_surge_from_rating()
-{ surge_bonus = rating_scaler.surge( surge_rating ); }
+{ surge_bonus = rating_scaler.surge( surge_rating ) + ( (double) bonus_surge_pc_ / 100 ); }
 
 void player_t::recalculate_defense_from_rating()
 { defense_from_rating = rating_scaler.defense( defense_rating ); }
@@ -3313,7 +3349,7 @@ action_priority_list_t* player_t::find_action_priority_list( const std::string& 
 
 // player_t::find_set_bonus =======================================================
 
-set_bonus_t* player_t::find_set_bonus( const std::string& name )
+set_bonus_t* player_t::find_set_bonus( const std::string& name ) const
 {
   set_bonus_t* sb=0;
 
@@ -3559,13 +3595,13 @@ rng_t* player_t::get_rng( const std::string& n, rng_type type )
 
 // player_t::get_set_bonus =======================================================
 
-set_bonus_t* player_t::get_set_bonus( const std::string& name, std::string filter, slot_mask_t slot_filter )
+set_bonus_t* player_t::get_set_bonus( const std::string& name, std::string shell_filter, std::string armoring_filter, slot_mask_t slot_filter )
 {
   set_bonus_t* sb=find_set_bonus( name );
 
   if ( ! sb )
   {
-    sb = new set_bonus_t( name, filter, slot_filter );
+    sb = new set_bonus_t( name, shell_filter, armoring_filter, slot_filter );
 
     set_bonus_t** tail = &set_bonus_list;
 
@@ -3579,6 +3615,46 @@ set_bonus_t* player_t::get_set_bonus( const std::string& name, std::string filte
   }
 
   return sb;
+}
+
+// player_t::get_armoring_set_bonus_name ========================================
+
+std::string player_t::get_armoring_set_bonus_name( const std::string armoring_name )
+{
+  set_bonus_t* sb=0;
+
+  for ( sb = set_bonus_list; sb; sb = sb -> next)
+    {
+      for ( std::string armoring_filter: sb -> armoring_filters )
+        {
+          if ( armoring_name.find( armoring_filter ) != armoring_name.npos )
+            {
+              return sb -> name;
+            }
+        }
+    }
+
+  return "";
+}
+
+// player_t::get_shell_set_bonus_name ========================================
+
+std::string player_t::get_shell_set_bonus_name( const std::string shell_name )
+{
+  set_bonus_t* sb=0;
+
+  for ( sb = set_bonus_list; sb; sb = sb -> next)
+    {
+      for ( std::string shell_filter: sb -> shell_filters )
+        {
+          if ( shell_name.find( shell_filter ) != shell_name.npos )
+            {
+              return sb -> name;
+            }
+        }
+    }
+
+  return "";
 }
 
 // player_t::get_position_distance ==========================================
@@ -4459,7 +4535,7 @@ talent_t* player_t::find_talent( const std::string& n,
     {
       talent_t* t = talent_trees[ i ][ j ];
 
-      if ( n == t -> name_cstr() )
+      if ( n == t -> name() )
       {
         return t;
       }
@@ -4758,7 +4834,8 @@ void player_t::create_profile( std::ostream& os, save_type savetype )
 
   if ( savetype == SAVE_ALL || savetype == SAVE_TALENTS )
   {
-    talents_str = torhead::encode_talents( *this );
+    //talents_str = mrrobot::encode_talents( *this );
+      talents_str = torhead::encode_talents( *this );
     if ( ! talents_str.empty() )
       os << "talents=" << talents_str << '\n';
   }
@@ -4852,6 +4929,10 @@ void player_t::create_profile( std::ostream& os, save_type savetype )
     if ( enchant.resource[ RESOURCE_ENERGY ] != 0 )  os << "enchant_energy="           << enchant.resource[ RESOURCE_ENERGY ] << '\n';
     if ( enchant.resource[ RESOURCE_AMMO   ] != 0 )  os << "enchant_ammo="             << enchant.resource[ RESOURCE_AMMO   ] << '\n';
     if ( enchant.resource[ RESOURCE_HEAT   ] != 0 )  os << "enchant_heat="             << enchant.resource[ RESOURCE_HEAT   ] << '\n';
+    if ( bonus_surge_pc_ != 0 )  os << "bonus_surge_pc="             << bonus_surge_pc_ << '\n';
+    if ( bonus_crit_pc_ != 0 )  os << "bonus_crit_pc="             << bonus_crit_pc_ << '\n';
+    if ( bonus_accuracy_pc_ != 0 )  os << "bonus_accuracy_pc="             << bonus_accuracy_pc_ << '\n';
+    if ( bonus_health_pc_ != 0 )  os << "bonus_health_pc="             << bonus_health_pc_ << '\n';
   }
 }
 
@@ -4955,7 +5036,7 @@ void player_t::copy_from( const player_t& source )
       {
         talent_t* t = talent_trees[ i ][ j ];
         int rank = 0;
-        if ( const talent_t* source_t = source.find_talent( t -> name_cstr() ) )
+        if ( const talent_t* source_t = source.find_talent( t -> name() ) )
         {
           rank = source_t -> rank();
           t -> set_rank( rank );
@@ -5106,7 +5187,14 @@ void player_t::create_options()
     { "reaction_time_mean",                   OPT_TIMESPAN, &( reaction_mean                          ) },
     { "reaction_time_stddev",                 OPT_TIMESPAN, &( reaction_stddev                        ) },
     { "reaction_time_nu",                     OPT_TIMESPAN, &( reaction_nu                            ) },
-    { NULL, OPT_UNKNOWN, NULL }
+    // stat bonuses- outside dr, for companions
+    { "bonus_crit_pc",                        OPT_INT,    &( bonus_crit_pc_                           ) },
+    { "bonus_accuracy_pc",                    OPT_INT,    &( bonus_accuracy_pc_                       ) },
+    { "bonus_surge_pc",                       OPT_INT,    &( bonus_surge_pc_                          ) },
+    // XXX FIX how does companion health bonus work. % or set amount?
+    { "bonus_health_pc",                     OPT_INT,    &( bonus_health_pc_                          ) },
+    { NULL, OPT_UNKNOWN, NULL },
+
   };
 
   option_t::copy( options, player_options );

@@ -891,27 +891,41 @@ bool unique_gear_t::get_equip_encoding( std::string&       encoding,
                                         const bool         /* heroic */,
                                         const bool         /* lfr */,
                                         const bool         /* ptr */,
-                                        const std::string& /* id */ )
+                                        const std::string& /*  id i*/ )
 {
   const char* e = nullptr;
 
   // SWTOR Equip Relics
-       if ( name == "relentless_winds"                          ) e = "ondamage_224Kinetic_30%_4.5cd";
-  else if ( name == "plasma_burst_device"                       ) e = "ondamage_168Elemental_30%_4.5cd";
-  else if ( name == "energy_surge_device"                       ) e = "ondamage_224Energy_30%_4.5cd";
-  else if ( name == "dark_energy_surge"                         ) e = "ondamage_168Internal_30%_4.5cd";
-  else if ( name == "lightning_pillar"                          ) e = "ondamage_208Energy_30%_4.5cd";
-  else if ( name == "gravity_wave"                              ) e = "Ondamage_208Kinetic_30%_4.5cd";
-  else if ( name == "corrosive_injection_kit"                   ) e = "ondamage_156Internal_30%_4.5cd";
-  else if ( name == "burning_force_relic"                       ) e = "ondamage_170Kinetic_30%_4.5cd";
-  else if ( name == "relic_of_kinetic_force"                    ) e = "ondamage_224Kinetic_30%_4.5cd";
-  else if ( name == "plasma_injection_nanobots"                 ) e = "ondamage_128Elemental_30%_4.5cd";
-  else if ( name == "volatile_energy_module"                    ) e = "ondamage_170Energy_30%_4.5c";
-  else if ( name == "relic_of_vital_rupturing"                  ) e = "ondamage_128Internal_30%_4.5cd";
-  else if ( name == "campaign_relic_of_dark_radiance"           ) e = "ondamage_184internal_30%_4.5cd";
-  else if ( name == "campaign_relic_of_elemental_transcendance" ) e = "ondamage_184elemental_30%_4.5cd";
-  else if ( name == "campaign_relic_of_the_cerulean_nova"       ) e = "ondamage_246energy_30%_4.5cd";
-  else if ( name == "campaign_relic_of_the_kinetic_tempest"     ) e = "ondamage_246kinetic_30%_4.5cd";
+       if ( name == "relentless_winds"                              ) e = "ondamage_224Kinetic_30%_4.5cd";
+  else if ( name == "plasma_burst_device"                           ) e = "ondamage_168Elemental_30%_4.5cd";
+  else if ( name == "energy_surge_device"                           ) e = "ondamage_224Energy_30%_4.5cd";
+  else if ( name == "dark_energy_surge"                             ) e = "ondamage_168Internal_30%_4.5cd";
+  else if ( name == "lightning_pillar"                              ) e = "ondamage_208Energy_30%_4.5cd";
+  else if ( name == "gravity_wave"                                  ) e = "Ondamage_208Kinetic_30%_4.5cd";
+  else if ( name == "corrosive_injection_kit"                       ) e = "ondamage_156Internal_30%_4.5cd";
+  else if ( name == "burning_force_relic"                           ) e = "ondamage_156Elemental_30%_4.5cd";
+  else if ( name == "relic_of_kinetic_force"                        ) e = "ondamage_170Kinetic_30%_4.5cd";
+  else if ( name == "plasma_injection_nanobots"                     ) e = "ondamage_128Elemental_30%_4.5cd";
+  else if ( name == "volatile_energy_module"                        ) e = "ondamage_170Energy_30%_4.5c";
+  else if ( name == "relic_of_vital_rupturing"                      ) e = "ondamage_128Internal_30%_4.5cd";
+  else if ( name == "battlemaster_relic_of_dark_radiance"           ) e = "ondamage_168internal_30%_4.5cd";
+  else if ( name == "battlemaster_relic_of_elemental_transcendence" ) e = "ondamage_168elemental_30%_4.5cd";
+  else if ( name == "battlemaster_relic_of_the_cerulean_nova"       ) e = "ondamage_224energy_30%_4.5cd";
+  else if ( name == "battlemaster_relic_of_the_kinetic_tempest"     ) e = "ondamage_224kinetic_30%_4.5cd";
+  else if ( name == "campaign_relic_of_dark_radiance"               ) e = "ondamage_184internal_30%_4.5cd";
+  else if ( name == "campaign_relic_of_elemental_transcendence"     ) e = "ondamage_184elemental_30%_4.5cd";
+  else if ( name == "campaign_relic_of_the_cerulean_nova"           ) e = "ondamage_246energy_30%_4.5cd";
+  else if ( name == "campaign_relic_of_the_kinetic_tempest"         ) e = "ondamage_246kinetic_30%_4.5cd";
+  else if ( name == "war_hero_relic_of_dark_radiance"               ) e = "ondamage_184internal_30%_4.5cd";
+  else if ( name == "war_hero_relic_of_elemental_transcendence"     ) e = "ondamage_184elemental_30%_4.5cd";
+  // XXX still misspelled in torhead
+  else if ( name == "war_hero_relic_of_elemental_transcendance"     ) e = "ondamage_184elemental_30%_4.5cd";
+  else if ( name == "war_hero_relic_of_the_cerulean_nova"           ) e = "ondamage_246energy_30%_4.5cd";
+  else if ( name == "war_hero_relic_of_the_kinetic_tempest"         ) e = "ondamage_246kinetic_30%_4.5cd";
+  else if ( name == "denova_relic_of_dark_radiance"                 ) e = "ondamage_199internal_30%_4.5cd";
+  else if ( name == "denova_relic_of_elemental_transcendence"       ) e = "ondamage_199elemental_30%_4.5cd";
+  else if ( name == "denova_relic_of_the_cerulean_nova"             ) e = "ondamage_256energy_30%_4.5cd";
+  else if ( name == "denova_relic_of_the_kinetic_tempest"           ) e = "ondamage_256kinetic_30%_4.5cd";
 
   if ( ! e ) return false;
 

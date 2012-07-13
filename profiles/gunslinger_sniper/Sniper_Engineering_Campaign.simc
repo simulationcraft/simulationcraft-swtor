@@ -1,0 +1,66 @@
+#!./simc
+
+sniper="Sniper_Engineering_Campaign"
+origin="http://swtor.askmrrobot.com/character/20f57032-e811-4449-a7f9-300d9ae9b136"
+level=50
+race=chiss
+position=back
+role=dps
+use_pre_potion=0
+professions=armormech
+talents=http://www.torhead.com/skill-calc#400bcbZrI0bRorRrsZh.1
+actions=stim,type=exotech_skill
+actions+=/coordination
+actions+=/snapshot_stats
+actions+=/take_cover,if=buff.take_cover.down
+actions+=/shatter_shot,if=buff.shatter_shot.remains<1.5
+actions+=/use_relics
+actions+=/power_potion
+actions+=/adrenaline_probe,if=energy<=76
+actions+=/target_acquired,if=energy<=100
+actions+=/laze_target
+actions+=/emp_discharge,if=dot.interrogation_probe.remains
+actions+=/plasma_probe,if=buff.energy_overrides.up
+actions+=/explosive_probe,if=buff.energy_overrides.up
+actions+=/explosive_probe,if=energy>=82
+actions+=/orbital_strike,if=energy>=96
+actions+=/takedown,if=energy>=74
+actions+=/series_of_shots,if=energy>86
+actions+=/plasma_probe,if=energy>=82
+actions+=/ambush,if=energy>=81
+actions+=/interrogation_probe,if=energy>=82
+actions+=/snipe,if=energy>=86
+actions+=/rifle_shot
+head=campaign_field_techs_headgear,ilevel=61,quality=artifact,stats=673armor_137endurance_110cunning_63crit_57surge
+ear=black_hole_trappers_mk_1_device,ilevel=61,quality=artifact,stats=87endurance_102cunning_71crit_57surge
+shirt=datacrons,stats=40strength_40aim_40cunning_40willpower_40endurance_40presence
+chest=campaign_field_techs_jacket,ilevel=61,quality=artifact,stats=673armor_137endurance_110cunning_63crit_57surge
+waist=campaign_field_techs_belt,ilevel=61,quality=artifact,stats=420armor_78endurance_113cunning_12power
+legs=campaign_field_techs_leggings,ilevel=61,quality=artifact,stats=673armor_137endurance_110cunning_63power_57accuracy
+feet=campaign_field_techs_boots,ilevel=61,quality=artifact,stats=420armor_117endurance_136cunning_53power_57surge
+wrists=campaign_field_techs_bracers,ilevel=61,quality=artifact,stats=420armor_78endurance_113cunning_12crit
+hands=campaign_field_techs_gloves,ilevel=61,quality=artifact,stats=420armor_137endurance_110cunning_57accuracy_63crit
+implant1=black_hole_targeters_mk_1_enhancer,ilevel=61,quality=artifact,stats=87endurance_102cunning_57accuracy_71crit
+implant2=black_hole_targeters_mk_1_enhancer,ilevel=61,quality=artifact,stats=87endurance_102cunning_57accuracy_71crit
+relic1=campaign_relic_of_boundless_ages,ilevel=61,quality=artifact,stats=84endurance,use=405power_120cd_20dur
+relic2=campaign_relic_of_elemental_transcendence,ilevel=61,quality=artifact,stats=84endurance,equip=ondamage_184elemental_30%_4.5cd
+main_hand=campaign_field_techs_sniper_rifle,ilevel=61,quality=artifact,stats=108endurance_121cunning_123power_649techpower_57surge,weapon=sniperrifle_438min_535max
+off_hand=campaign_field_techs_vibroknife,ilevel=61,quality=artifact,stats=93endurance_113cunning_84power_649techpower_57accuracy,weapon=vibroknife_349min_524max
+# Gear Summary
+# gear_strength=40
+# gear_aim=40
+# gear_cunning=1382
+# gear_willpower=40
+# gear_endurance=1491
+# gear_presence=40
+# gear_accuracy_rating=285
+# gear_crit_rating=414
+# gear_armor=3699
+# gear_power=335
+# gear_techpower=1298
+# gear_surge_rating=285
+# Set Bonuses
+# set_bonus=rakata_field_techs_2pc
+# set_bonus=rakata_field_techs_4pc
+# main_hand=campaign_field_techs_sniper_rifle,weapon=sniperrifle_438min_535max
+# off_hand=campaign_field_techs_vibroknife,weapon=vibroknife_349min_524max

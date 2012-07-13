@@ -41,6 +41,7 @@ HEADERS += engine/simulationcraft.hpp
 HEADERS += engine/class_modules/agent_smug.hpp
 HEADERS += engine/class_modules/cons_inq.hpp
 HEADERS += engine/class_modules/bount_troop.hpp
+HEADERS += engine/class_modules/warr_knight.hpp
 HEADERS += engine/utf8.h
 HEADERS += engine/utf8/core.h
 HEADERS += engine/utf8/checked.h

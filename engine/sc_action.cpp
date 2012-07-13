@@ -735,10 +735,14 @@ void action_t::execute()
     {
       target_debuff( tl[ t ], DMG_DIRECT );
 
-      calculate_result();
+      // no overarching hit/miss for weapon ticks. assessed per tick
+      if ( ! td.weapon )
+      {
+        calculate_result();
 
-      if ( result_is_hit() )
-        direct_dmg = calculate_direct_damage( t + 1 );
+        if ( result_is_hit() )
+          direct_dmg = calculate_direct_damage( t + 1 );
+      }
 
       schedule_travel( tl[ t ] );
     }
@@ -747,10 +751,14 @@ void action_t::execute()
   {
     target_debuff( target, DMG_DIRECT );
 
-    calculate_result();
+    // no overarching hit/miss for weapon ticks. assessed per tick
+    if ( ! td.weapon )
+    {
+      calculate_result();
 
-    if ( result_is_hit() )
-      direct_dmg = calculate_direct_damage();
+      if ( result_is_hit() )
+        direct_dmg = calculate_direct_damage();
+    }
 
     schedule_travel( target );
   }
@@ -815,19 +823,32 @@ void action_t::calculate_result()
 
 void action_t::tick_( timespan_t tick_time )
 {
-  result = RESULT_HIT;
 
-  player_buff(); // 23/01/2012 According to http://sithwarrior.com/forums/Thread-Madness-Balance-Sorcerer-DPS-Compendium--573?pid=11311#pid11311
-
-  target_debuff( target, type == ACTION_HEAL ? HEAL_OVER_TIME : DMG_OVER_TIME );
-
-  if ( tick_may_crit )
+  tick_dmg = 0;
+  if ( td.weapon )
   {
-    if ( sim -> roll( total_crit() ) )
-      result = RESULT_CRIT;
+    calculate_result();
+    if ( result_is_hit() )
+    {
+      player_buff();
+      target_debuff( target, type == ACTION_HEAL ? HEAL_OVER_TIME : DMG_OVER_TIME );
+      tick_dmg = calculate_tick_damage();
+    }
   }
+  else
+  {
+    result = RESULT_HIT;
 
-  tick_dmg = calculate_tick_damage();
+    player_buff(); // 23/01/2012 According to http://sithwarrior.com/forums/Thread-Madness-Balance-Sorcerer-DPS-Compendium--573?pid=11311#pid11311
+    target_debuff( target, type == ACTION_HEAL ? HEAL_OVER_TIME : DMG_OVER_TIME );
+    if ( tick_may_crit )
+    {
+      if ( sim -> roll( total_crit() ) )
+        result = RESULT_CRIT;
+    }
+
+    tick_dmg = calculate_tick_damage();
+  }
 
   assess_damage( target, tick_dmg, type == ACTION_HEAL ? HEAL_OVER_TIME : DMG_OVER_TIME, result );
 
@@ -869,14 +890,15 @@ void action_t::last_tick( dot_t* d )
 
 void action_t::impact( player_t* t, result_type impact_result, double travel_dmg=0 )
 {
-  assess_damage( t, travel_dmg, type == ACTION_HEAL ? HEAL_DIRECT : DMG_DIRECT, impact_result );
+  // XXX what's this and do we need it for td.weapon hacks
+  if ( ! td.weapon )
+    assess_damage( t, travel_dmg, type == ACTION_HEAL ? HEAL_DIRECT : DMG_DIRECT, impact_result );
 
   // HACK: Set target so aoe dots work
   player_t* orig_target = target;
   target = t;
 
-  // hit check each tick of the channeled weapon ability, otherwise a single hit check up front
-  if ( ( td.weapon && channeled ) || result_is_hit( impact_result ) )
+  if ( td.weapon || result_is_hit( impact_result ) )
   {
     if ( num_ticks > 0 )
     {
@@ -909,7 +931,7 @@ void action_t::impact( player_t* t, result_type impact_result, double travel_dmg
 
         dot -> schedule_tick();
 
-        if ( sim -> log && ! result_is_hit( impact_result ) )
+        if ( sim -> log && ( ! result_is_hit( impact_result ) && ! td.weapon ) )
         {
           log_t::output( sim, "%s %s ticks (%d of %d) %s (miss)",
                          dot -> action -> player -> name(), dot -> action -> name(),
@@ -1217,22 +1239,8 @@ void action_t::init()
     }
   }
 
-  const double standard_rank_amount =
-      ( type == ACTION_HEAL || type == ACTION_ABSORB ) ?
-        rating_t::standardhealth_healing( rank_level ) :
-        rating_t::standardhealth_damage( rank_level );
-
-  if ( dd.standardhealthpercentmin > 0 )
-    dd.base_min = dd.standardhealthpercentmin * standard_rank_amount;
-
-  if ( dd.standardhealthpercentmax > 0 )
-    dd.base_max = dd.standardhealthpercentmax * standard_rank_amount;
-
-  if ( td.standardhealthpercentmin > 0 )
-    td.base_min = td.standardhealthpercentmin * standard_rank_amount;
-
-  if ( td.standardhealthpercentmax > 0 )
-    td.base_max = td.standardhealthpercentmax * standard_rank_amount;
+  // if min/max mods change during combat this needs to be re set
+  set_base_min_max();
 
   if ( ! sync_str.empty() )
   {
@@ -1256,9 +1264,38 @@ void action_t::init()
 
   if ( sim -> debug )
     log_t::output( sim, "%s initialised: ranklevel(%d amount:%f) dd.bmin(%f) dd.bmax(%f) td.bmin(%f) tdbmax(%f)",
-        name(), rank_level, standard_rank_amount, dd.base_min, dd.base_max, td.base_min, td.base_max  );
+        name(), rank_level, get_standard_rank_amount(), dd.base_min, dd.base_max, td.base_min, td.base_max  );
 
   initialized = true;
+}
+
+// action_t::get_standard_rank_amount =======================================
+
+double action_t::get_standard_rank_amount() const
+{
+  return
+    ( type == ACTION_HEAL || type == ACTION_ABSORB ) ?
+      rating_t::standardhealth_healing( rank_level ) :
+      rating_t::standardhealth_damage( rank_level );
+}
+
+// action_t::set_base_min_max ===============================================
+
+void action_t::set_base_min_max()
+{
+  const double standard_rank_amount = get_standard_rank_amount();
+
+  if ( dd.standardhealthpercentmin > 0 )
+    dd.base_min = dd.standardhealthpercentmin * standard_rank_amount;
+
+  if ( dd.standardhealthpercentmax > 0 )
+    dd.base_max = dd.standardhealthpercentmax * standard_rank_amount;
+
+  if ( td.standardhealthpercentmin > 0 )
+    td.base_min = td.standardhealthpercentmin * standard_rank_amount;
+
+  if ( td.standardhealthpercentmax > 0 )
+    td.base_max = td.standardhealthpercentmax * standard_rank_amount;
 }
 
 // action_t::reset ==========================================================

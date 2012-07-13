@@ -1,0 +1,68 @@
+#!./simc
+
+operative="Operative_Concealment_Campaign"
+origin="http://swtor.askmrrobot.com/character/862772dd-b798-401e-974f-3343d98f3f99"
+level=50
+race=cyborg
+position=back
+role=hybrid
+use_pre_potion=0
+professions=armormech
+talents=http://www.torhead.com/skill-calc#4010cZGIRodzRdGoZhMoz.1
+actions=stim,type=exotech_skill
+actions+=/coordination
+actions+=/snapshot_stats
+actions+=/stealth
+actions+=/adrenaline_probe,if=energy<=60
+actions+=/stim_boost,if=buff.tactical_advantage.stack>1
+actions+=/acid_blade,if=!buff.acid_blade_coating.up&!cooldown.backstab.remains
+actions+=/use_relics
+actions+=/power_potion
+actions+=/hidden_strike
+actions+=/backstab,if=energy>=65,if=buff.acid_blade_coating.up
+actions+=/shiv,if=energy>=75&buff.tactical_advantage.stack<2
+actions+=/corrosive_dart,if=!ticking&energy>=75
+actions+=/laceration,if=energy>=75&buff.tactical_advantage.stack>1
+actions+=/laceration,if=energy>=75&cooldown.shiv.remains<2
+actions+=/acid_blade,if=!buff.acid_blade_coating.up&energy>75
+actions+=/orbital_strike,if=energy>65
+actions+=/explosive_probe,if=energy>100&cooldown.shiv.remains>2
+actions+=/overload_shot,if=energy>100&cooldown.shiv.remains>2
+actions+=/rifle_shot
+head=campaign_enforcers_headgear,ilevel=61,quality=artifact,stats=673armor_117endurance_136cunning_53power_57accuracy
+ear=black_hole_trappers_mk_1_device,ilevel=61,quality=artifact,stats=87endurance_102cunning_71crit_57surge
+shirt=datacrons,stats=40strength_40aim_40cunning_40willpower_40endurance_40presence
+chest=campaign_enforcers_jacket,ilevel=61,quality=artifact,stats=673armor_117endurance_136cunning_53power_57surge
+waist=campaign_enforcers_belt,ilevel=61,quality=artifact,stats=420armor_81endurance_93cunning_41power
+legs=campaign_enforcers_leggings,ilevel=61,quality=artifact,stats=673armor_117endurance_136cunning_57accuracy_53crit
+feet=campaign_enforcers_boots,ilevel=61,quality=artifact,stats=420armor_137endurance_110cunning_63crit_57surge
+wrists=campaign_enforcers_armguards,ilevel=61,quality=artifact,stats=420armor_81endurance_93cunning_41power
+hands=campaign_enforcers_gloves,ilevel=61,quality=artifact,stats=420armor_137endurance_110cunning_57accuracy_63crit
+implant1=black_hole_targeters_mk_1_enhancer,ilevel=61,quality=artifact,stats=87endurance_102cunning_57accuracy_71crit
+implant2=black_hole_targeters_mk_1_enhancer,ilevel=61,quality=artifact,stats=87endurance_102cunning_57accuracy_71crit
+relic1=campaign_relic_of_boundless_ages,ilevel=61,quality=artifact,stats=84endurance,use=405power_120cd_20dur
+relic2=campaign_relic_of_the_kinetic_tempest,ilevel=61,quality=artifact,stats=84endurance,equip=ondamage_246kinetic_30%_4.5cd
+main_hand=campaign_enforcers_blaster_rifle,ilevel=61,quality=artifact,stats=108endurance_121cunning_123power_649techpower_57accuracy,weapon=blasterrifle_324min_486max
+off_hand=campaign_enforcers_vibroknife,ilevel=61,quality=artifact,stats=93endurance_113cunning_649techpower_84crit_57surge,weapon=vibroknife_349min_524max
+# Gear Summary
+# gear_strength=40
+# gear_aim=40
+# gear_cunning=1394
+# gear_willpower=40
+# gear_endurance=1457
+# gear_presence=40
+# gear_accuracy_rating=342
+# gear_crit_rating=476
+# gear_armor=3699
+# gear_power=311
+# gear_techpower=1298
+# gear_surge_rating=228
+# Set Bonuses
+# set_bonus=rakata_enforcers_2pc
+# set_bonus=rakata_enforcers_4pc
+# main_hand=campaign_enforcers_blaster_rifle,weapon=blasterrifle_324min_486max
+# off_hand=campaign_enforcers_vibroknife,weapon=vibroknife_349min_524max
+bonus_surge_pc=1
+bonus_crit_pc=1
+bonus_accuracy_pc=1
+bonus_health_pc=1

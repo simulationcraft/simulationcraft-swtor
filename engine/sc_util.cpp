@@ -338,6 +338,24 @@ const char* util_t::player_type_string( player_type type )
   }
 }
 
+// util_t::player_type_string_short =========================================
+
+const char* util_t::player_type_string_short( player_type type )
+{
+  switch ( type )
+  {
+  case JEDI_SAGE:        return "sage";
+  case JEDI_SHADOW:      return "shadow";
+  case JEDI_SENTINEL:    return "sentinel";
+  case JEDI_GUARDIAN:    return "guardian";
+  case SITH_SORCERER:    return "sorcerer";
+  case SITH_ASSASSIN:    return "assassin";
+  case SITH_MARAUDER:    return "marauder";
+  case SITH_JUGGERNAUT:  return "juggernaut";
+  default:               return util_t::player_type_string( type );
+  }
+}
+
 // util_t::translate_class_str ==============================================
 
 player_type util_t::translate_class_str( const std::string& s )
@@ -552,7 +570,7 @@ talent_tree_type util_t::talent_tree( talent_tab_type tree, player_type ptype )
       {
       case IA_OPERATIVE_MEDICINE:     return TREE_MEDICINE;
       case IA_OPERATIVE_CONCEALMENT:  return TREE_CONCEALMENT;
-      case IA_OPERATIVE_LETHALITY:    return TREE_LETHALITY;
+      case IA_LETHALITY:              return TREE_LETHALITY;
       default: break;
       }
     break;
@@ -561,7 +579,7 @@ talent_tree_type util_t::talent_tree( talent_tab_type tree, player_type ptype )
       {
       case IA_SNIPER_MARKSMANSHIP:    return TREE_MARKSMANSHIP;
       case IA_SNIPER_ENGINEERING:     return TREE_ENGINEERING;
-      case IA_SNIPER_LETHALITY:       return TREE_LETHALITY;
+      case IA_LETHALITY:              return TREE_LETHALITY;
       default: break;
       }
     break;

@@ -1,3 +1,11 @@
+:: ###########################################
+:: #                                         #
+:: # A COPY OF simc_swtor_reports.bash       #
+:: #                                         #
+:: # CHECK FOR ANY CHANGES BEFORE RERUNNING  #
+:: #                                         #
+:: ###########################################
+
 @echo off
 setlocal
 set PATH=..\engine;engine;%PATH%

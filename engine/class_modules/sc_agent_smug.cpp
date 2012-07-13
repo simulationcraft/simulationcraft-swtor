@@ -9,13 +9,13 @@ namespace agent_smug { // ===================================================
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   ::targetdata_t( source, target ),
-  debuff_weakening_blast  ( new debuff_t ( this, source.abilities.weakening_blast, 10, from_seconds (  15 ) ) ),
-  dot_adrenaline_probe       ( source.abilities.adrenaline_probe       , &source ),
-  dot_corrosive_dart         ( source.abilities.corrosive_dart         , &source ),
-  dot_corrosive_dart_weak    ( source.abilities.corrosive_dart_weak    , &source ),
-  dot_corrosive_grenade      ( source.abilities.corrosive_grenade      , &source ),
-  dot_corrosive_grenade_weak ( source.abilities.corrosive_grenade_weak , &source ),
-  dot_orbital_strike         ( source.abilities.orbital_strike         , &source )
+  debuff_weakening_blast  ( new debuff_t ( this, source.m.t_weakening_blast, 10, from_seconds (  15 ) ) ),
+  dot_adrenaline_probe       ( source.m.a_adrenaline_probe            , &source ),
+  dot_corrosive_dart         ( source.m.a_corrosive_dart              , &source ),
+  dot_corrosive_dart_weak    ( source.m.a_corrosive_dart + "_weak"    , &source ),
+  dot_corrosive_grenade      ( source.m.a_corrosive_grenade           , &source ),
+  dot_corrosive_grenade_weak ( source.m.a_corrosive_grenade + "_weak" , &source ),
+  dot_orbital_strike         ( source.m.a_orbital_strike              , &source )
 {
   add( *debuff_weakening_blast    );
   add( dot_adrenaline_probe       );
@@ -71,7 +71,7 @@ void poison_attack_t::target_debuff( player_t* tgt, dmg_type type )
       target_multiplier += 0.05 * rank;
   }
 
-  if ( p.talents.weakening_blast -> rank() )
+  if ( type == DMG_OVER_TIME && p.talents.weakening_blast -> rank() )
   {
     targetdata_t& td = *targetdata();
     bool up = td.debuff_weakening_blast -> up();
@@ -258,7 +258,6 @@ corrosive_grenade_t::corrosive_grenade_t( class_t* p, const std::string& n, cons
     td.power_mod                = 0.32;
     num_ticks                   = 7;
     tick_zero                   = true;
-    // TEST: maybe not limited?
     aoe                         = 3;
 
     if ( p -> talents.lingering_toxins -> rank() )
@@ -401,6 +400,8 @@ orbital_strike_t::orbital_strike_t( class_t* p, const std::string& n, const std:
   td.standardhealthpercentmax = 0.177;
   td.power_mod                = 1.77;
   num_ticks                   = 3;
+  if ( player -> set_bonus.battlemaster_field_techs -> two_pc() )
+    num_ticks                 += 1;
   base_tick_time              = from_seconds( 3 );
   base_execute_time           = from_seconds( 3 );
 
@@ -610,57 +611,21 @@ struct poison_tick_crit_callback_t : public action_callback_t
 ::action_t* class_t::create_action( const std::string& name,
                                     const std::string& options_str )
 {
-  if ( name == abilities.adrenaline_probe      ) return new adrenaline_probe_t      ( this, name, options_str ) ;
-  if ( name == abilities.coordination          ) return new coordination_t          ( this, name, options_str ) ;
-  if ( name == abilities.corrosive_dart        ) return new corrosive_dart_t        ( this, name, options_str ) ;
-  if ( name == abilities.corrosive_grenade     ) return new corrosive_grenade_t     ( this, name, options_str ) ;
-  if ( name == abilities.explosive_probe       ) return new explosive_probe_t       ( this, name, options_str ) ;
-  if ( name == abilities.fragmentation_grenade ) return new fragmentation_grenade_t ( this, name, options_str ) ;
-  if ( name == abilities.orbital_strike        ) return new orbital_strike_t        ( this, name, options_str ) ;
-  if ( name == abilities.overload_shot         ) return new overload_shot_t         ( this, name, options_str ) ;
-  if ( name == abilities.rifle_shot            ) return new rifle_shot_t            ( this, name, options_str ) ;
-  if ( name == abilities.shiv                  ) return new shiv_t                  ( this, name, options_str ) ;
-  if ( name == abilities.snipe                 ) return new snipe_t                 ( this, name, options_str ) ;
-  if ( name == abilities.take_cover            ) return new take_cover_t            ( this, name, options_str ) ;
-  if ( name == abilities.weakening_blast       ) return new weakening_blast_t       ( this, name, options_str ) ;
+  if ( name == m.a_adrenaline_probe      ) return new adrenaline_probe_t      ( this, name, options_str ) ;
+  if ( name == m.a_coordination          ) return new coordination_t          ( this, name, options_str ) ;
+  if ( name == m.a_corrosive_dart        ) return new corrosive_dart_t        ( this, name, options_str ) ;
+  if ( name == m.a_corrosive_grenade     ) return new corrosive_grenade_t     ( this, name, options_str ) ;
+  if ( name == m.a_explosive_probe       ) return new explosive_probe_t       ( this, name, options_str ) ;
+  if ( name == m.a_fragmentation_grenade ) return new fragmentation_grenade_t ( this, name, options_str ) ;
+  if ( name == m.a_orbital_strike        ) return new orbital_strike_t        ( this, name, options_str ) ;
+  if ( name == m.a_overload_shot         ) return new overload_shot_t         ( this, name, options_str ) ;
+  if ( name == m.a_rifle_shot            ) return new rifle_shot_t            ( this, name, options_str ) ;
+  if ( name == m.a_shiv                  ) return new shiv_t                  ( this, name, options_str ) ;
+  if ( name == m.a_snipe                 ) return new snipe_t                 ( this, name, options_str ) ;
+  if ( name == m.a_take_cover            ) return new take_cover_t            ( this, name, options_str ) ;
+  if ( name == m.t_weakening_blast       ) return new weakening_blast_t       ( this, name, options_str ) ;
 
   return base_t::create_action( name, options_str );
-}
-
-// class_t::init_abilities =======================================
-
-void class_t::init_abilities()
-{
-  //=======================================================================
-  //
-  //   Please Mirror all changes between Smuggler and Agent!!!
-  //
-  //=======================================================================
-  bool ag = type == IA_SNIPER || type == IA_OPERATIVE;
-
-  // ABILITY                        =    ? AGENT LABEL              : SMUGGLER LABEL       ;
-  abilities.adrenaline_probe        = ag ? "adrenaline_probe"       : "cool_head"          ;
-  abilities.coordination            = ag ? "coordination"           : "lucky_shots"        ;
-  abilities.corrosive_dart          = ag ? "corrosive_dart"         : "vital_shot"         ;
-  abilities.corrosive_dart_weak     = ag ? "corrosive_dart_weak"    : "vital_shot_weak"    ;
-  abilities.corrosive_grenade       = ag ? "corrosive_grenade"      : "shrap_bomb"         ;
-  abilities.corrosive_grenade_weak  = ag ? "corrosive_grenade_weak" : "shrap_bomb_weak"    ;
-  abilities.corrosive_microbes      = ag ? "corrosive_microbes"     : "mortal_wounds"      ;
-  abilities.corrosive_microbes_tick = ag ? "corrosive_microbes_tick": "mortal_wounds_tick" ;
-  abilities.cull                    = ag ? "cull"                   : "wounding_shot"      ;
-  abilities.explosive_probe         = ag ? "explosive_probe"        : "sabotage_charge"    ;
-  abilities.fragmentation_grenade   = ag ? "fragmentation_grenade"  : "thermal_grenade"    ;
-  abilities.lethal_purpose          = ag ? "lethal_purpose"         : "fighting_spirit"    ;
-  abilities.orbital_strike          = ag ? "orbital_strike"         : "xs_freighter_flyby" ;
-  abilities.overload_shot           = ag ? "overload_shot"          : "quick_shot"         ;
-  abilities.rifle_shot              = ag ? "rifle_shot"             : "flurry_of_bolts"    ;
-  abilities.shiv                    = ag ? "shiv"                   : "blaster_whip"       ;
-  abilities.snipe                   = ag ? "snipe"                  : "charged_burst"      ;
-  abilities.take_cover              = ag ? "take_cover"             : "take_cover"         ;
-  abilities.weakening_blast         = ag ? "weakening_blast"        : "hemorrhaging_blast" ;
-
-  // buffs
-  abilities.cover                   = ag ? "cover"                  : "cover"              ;
 }
 
 // class_t::init_talents =======================================
@@ -671,29 +636,29 @@ void class_t::init_talents()
 
   // Lethality|Dirty Fighting
   // t1
-  talents.deadly_directive     = find_talent( "Deadly Directive"     );
-  talents.lethality            = find_talent( "Lethality"            );
-  talents.razor_edge           = find_talent( "Razor Edge"           );
+  talents.deadly_directive     = find_talent( m.t_deadly_directive    );
+  talents.lethality            = find_talent( m.t_lethality           );
+  talents.razor_edge           = find_talent( m.t_razor_edge          );
   // t2
-  talents.slip_away            = find_talent( "Slip Away"            );
-  talents.flash_powder         = find_talent( "Flash Powder"         );
-  talents.corrosive_microbes   = find_talent( "Corrosive Microbes"   );
-  talents.lethal_injectors     = find_talent( "Lethal Injectors"     );
+  talents.slip_away            = find_talent( m.t_slip_away           );
+  talents.flash_powder         = find_talent( m.t_flash_powder        );
+  talents.corrosive_microbes   = find_talent( m.t_corrosive_microbes  );
+  talents.lethal_injectors     = find_talent( m.t_lethal_injectors    );
   // t3
-  talents.corrosive_grenade    = find_talent( "Corrosive Grenade"    );
-  talents.cut_down             = find_talent( "Cut Down"             );
+  talents.corrosive_grenade    = find_talent( m.t_corrosive_grenade   );
+  talents.cut_down             = find_talent( m.t_cut_down            );
   // t4
-  talents.lethal_purpose       = find_talent( "Lethal Purpose"       );
-  talents.adhesive_corrosives  = find_talent( "Adhesive Corrosives"  );
-  talents.lethal_dose          = find_talent( "Lethal Dose"          );
+  talents.lethal_purpose       = find_talent( m.t_lethal_purpose      );
+  talents.adhesive_corrosives  = find_talent( m.t_adhesive_corrosives );
+  talents.lethal_dose          = find_talent( m.t_lethal_dose         );
   // t5
-  talents.cull                 = find_talent( "Cull"                 );
-  talents.counterstrike        = find_talent( "Counterstrike"        );
+  talents.cull                 = find_talent( m.t_cull                );
+  talents.counterstrike        = find_talent( m.t_counterstrike       );
   // t6
-  talents.devouring_microbes   = find_talent( "Devouring Microbes"   );
-  talents.lingering_toxins     = find_talent( "Lingering Toxins"     );
+  talents.devouring_microbes   = find_talent( m.t_devouring_microbes  );
+  talents.lingering_toxins     = find_talent( m.t_lingering_toxins    );
   // t7
-  talents.weakening_blast      = find_talent( "Weakening Blast"      );
+  talents.weakening_blast      = find_talent( m.t_weakening_blast     );
 }
 
 // class_t::init_benefits =====================================
@@ -712,8 +677,8 @@ void class_t::init_buffs()
 {
   base_t::init_buffs();
 
-  buffs.adrenaline_probe   = new buff_t( this , abilities.adrenaline_probe   , 1 ,  from_seconds(  3 ) );
-  buffs.cover              = new buff_t( this , abilities.cover              , 1);
+  buffs.adrenaline_probe   = new buff_t( this , m.a_adrenaline_probe  , 1 ,  from_seconds(  3 ) );
+  buffs.cover              = new buff_t( this , m.a_take_cover        , 1);
 }
 
 // class_t::init_gains ========================================
@@ -727,8 +692,8 @@ void class_t::init_gains()
   energy_gains.medium    = get_gain( "med"  );
   energy_gains.high      = get_gain( "high" );
 
-  gains.adrenaline_probe = get_gain( abilities.adrenaline_probe );
-  gains.lethal_purpose   = get_gain( abilities.lethal_purpose );
+  gains.adrenaline_probe = get_gain( m.a_adrenaline_probe );
+  gains.lethal_purpose   = get_gain( m.t_lethal_purpose );
 }
 
 // class_t::init_procs ========================================
@@ -764,25 +729,72 @@ void class_t::init_actions()
   register_tick_callback( RESULT_CRIT_MASK, new poison_tick_crit_callback_t ( this ) );
 }
 
+// class_t::create_mirror =======================================
+
+void class_t::create_mirror()
+{
+  bool ag = type == IA_SNIPER || type == IA_OPERATIVE;
+
+  // ABILITY                  =    ? AGENT LABEL              : SMUGGLER LABEL          ;
+  m.a_adrenaline_probe        = ag ? "adrenaline_probe"       : "cool_head"             ;
+  m.a_coordination            = ag ? "coordination"           : "lucky_shots"           ;
+  m.a_corrosive_dart          = ag ? "corrosive_dart"         : "vital_shot"            ;
+  m.a_corrosive_grenade       = ag ? "corrosive_grenade"      : "shrap_bomb"            ;
+  m.a_corrosive_microbes      = ag ? "corrosive_microbes"     : "mortal_wounds"         ;
+  m.a_explosive_probe         = ag ? "explosive_probe"        : "sabotage_charge"       ;
+  m.a_fragmentation_grenade   = ag ? "fragmentation_grenade"  : "thermal_grenade"       ;
+  m.a_orbital_strike          = ag ? "orbital_strike"         : "xs_freighter_flyby"    ;
+  m.a_overload_shot           = ag ? "overload_shot"          : "quick_shot"            ;
+  m.a_rifle_shot              = ag ? "rifle_shot"             : "flurry_of_bolts"       ;
+  m.a_shiv                    = ag ? "shiv"                   : "blaster_whip"          ;
+  m.a_snipe                   = ag ? "snipe"                  : "charged_burst"         ;
+  m.a_take_cover              = ag ? "take_cover"             : "take_cover"            ;
+
+  // Lethality|Dirty Fighting
+  // t1
+  m.t_deadly_directive          = ag ? "deadly_directive"     : "black_market_mods"     ;
+  m.t_lethality                 = ag ? "lethality"            : "no_holds_barred"       ;
+  m.t_razor_edge                = ag ? "razor_edge"           : "holdout_defense"       ;
+  // t2
+  m.t_slip_away                 = ag ? "slip_away"            : "dirty_escape"          ;
+  m.t_flash_powder              = ag ? "flash_powder"         : "flash_powder"          ;
+  m.t_corrosive_microbes        = ag ? "corrosive_microbes"   : "mortal_wound"          ;
+  m.t_lethal_injectors          = ag ? "lethal_injectors"     : "open_wound"            ;
+  // t3
+  m.t_corrosive_grenade         = ag ? "corrosive_grenade"    : "shrap_bomb"            ;
+  // m.t_targeted_demolition specified in advanced class
+  m.t_cut_down                  = ag ? "cut_down"             : "cheap_shots"           ;
+  // t4
+  m.t_lethal_purpose            = ag ? "lethal_purpose"       : "fighting_spirit"       ;
+  m.t_adhesive_corrosives       = ag ? "adhesive_corrosives"  : "feelin_woozy"          ;
+  // m.t_hold_your_ground
+  m.t_lethal_dose               = ag ? "lethal_dose"          : "black_market_equipment";
+  // t5
+  m.t_cull                      = ag ? "cull"                 : "wounding_shots"        ;
+  // m.t_razor_round specified in advanced class
+  m.t_counterstrike             = ag ? "counterstrike"        : "dirty_trickster"       ;
+  // t6
+  m.t_devouring_microbes        = ag ? "devouring_microbes"   : "cold_blooded"          ;
+  m.t_lingering_toxins          = ag ? "lingering_toxins"     : "nice_try"              ;
+  // t7
+  m.t_weakening_blast           = ag ? "weakening_blast"      : "hemorrhaging_blast"    ;
+}
+
 // class_t::create_talents =======================================
 
 void class_t::create_talents()
 {
-  bool is_op_sc = ( type == IA_OPERATIVE || type == S_SCOUNDREL );
-  const char* ltkrr  = is_op_sc ? "License to Kill" : "Razor Rounds"         ;
-  const char* cstd   = is_op_sc ? "Combat Stims"    : "Targeted Demolition"  ;
-  const char* eshyg  = is_op_sc ? "Escape Plan"     : "Hold Your Ground"     ;
   // Lethality|Dirty Fighting
   const talentinfo_t lethality_tree[] = {
-     { "Deadly Directive"   , 2 }, { "Lethality"           , 3 }, { "Razor Edge"         , 2 },
-     { "Slip Away"          , 2 }, { "Flash Powder"        , 2 }, { "Corrosive Microbes" , 2 }, { "Lethal Injectors" , 1 },
-     { "Corrosive Grenade"  , 1 }, { cstd                  , 2 }, { "Cut Down"           , 2 },
-     { "Lethal Purpose"     , 2 }, { "Adhesive Corrosives" , 2 }, { eshyg                , 2 }, { "Lethal Dose"      , 3 },
-     { "Cull"               , 1 }, { ltkrr                 , 2 }, { "Counterstrike"      , 2 },
-     { "Devouring Microbes" , 3 }, { "Lingering Toxins"    , 2 },
-     { "Weakening Blast"    , 1 },
+    { m.t_deadly_directive    , 2 }, { m.t_lethality            , 3 }, { m.t_razor_edge         , 2 },
+    { m.t_slip_away           , 2 }, { m.t_flash_powder         , 2 }, { m.t_corrosive_microbes , 2 }, { m.t_lethal_injectors , 1 },
+    { m.t_corrosive_grenade   , 1 }, { m.t_targeted_demolition  , 2 }, { m.t_cut_down           , 2 },
+    { m.t_lethal_purpose      , 2 }, { m.t_adhesive_corrosives  , 2 }, { m.t_hold_your_ground   , 2 }, { m.t_lethal_dose      , 3 },
+    { m.t_cull                , 1 }, { m.t_razor_rounds         , 2 }, { m.t_counterstrike      , 2 },
+    { m.t_devouring_microbes  , 3 }, { m.t_lingering_toxins     , 2 },
+    { m.t_weakening_blast     , 1 }
   };
-  init_talent_tree( is_op_sc ? IA_OPERATIVE_LETHALITY : IA_SNIPER_LETHALITY, lethality_tree );
+  init_talent_tree( IA_LETHALITY, lethality_tree );
 }
 
 } // namespace agent_smug ===================================================

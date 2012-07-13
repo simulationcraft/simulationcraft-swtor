@@ -25,6 +25,49 @@ const base36_t::encoding_t talent_encoding =
 
 const base36_t decoder( talent_encoding );
 
+
+inline char encode_pair( int first, int second=0 )
+{
+  assert( 0 <= first  && first <= 5 );
+  assert( 0 <= second && second <= 5 );
+  return talent_encoding[ 6 * first + second ];
+}
+
+std::string encode_tree( const std::vector<talent_t*>& tree )
+{
+  std::string result;
+
+  bool first_talent_reached = false;
+  int i = tree.size() - 1;
+  while( i >= 0 )
+  {
+    int first = 0;
+    if ( ( ( i % 2 ) != 0 ) ) // make sure we start the pairing process at the right point so that we reach i == 0 with the second talent
+    {
+      if ( tree[ i ] )
+        first = tree[ i ] -> rank();
+      --i;
+    }
+
+    int second = 0;
+    if ( i >= 0 && tree[ i ] )
+      second = tree[ i ] -> rank();
+    --i;
+
+    if ( first || second || first_talent_reached )
+    {
+      first_talent_reached = true;
+      result += encode_pair( first, second );
+    }
+  }
+
+  size_t length = result.size();
+  while ( length > 0 && result[ length - 1 ] == '0' )
+    --length;
+  result.resize( length );
+
+  return result;
+}
 void parse_profession( js::node_t* profile,
                        const std::string& path,
                        std::string& player_profession_string )
@@ -127,6 +170,25 @@ weapon_type decode_weapon_type( const std::string& s )
       return i.type;
 
   return WEAPON_NONE;
+}
+
+// decode_setbonus =============================================================
+
+std::string decode_armoring( js::node_t* node )
+{
+  std::string value;
+  std::string armor_name;
+
+  for ( js::node_t* mod : *node )
+    {
+      if ( ! mod -> get ( "Slot" , value ))
+        continue;
+      if ( value != "Armoring" )
+        continue;
+      mod -> get ( "Name", armor_name );
+    }
+
+  return util_t::format_name( armor_name );
 }
 
 // decode_stats =============================================================
@@ -248,8 +310,81 @@ void parse_items( player_t* p, js::node_t* items )
         item_encoding << ",stats=" << s;
     }
 
+
+    if ( ! ( DEFAULT_SET_BONUS_SLOT_MASK != 0 &&
+         ( DEFAULT_SET_BONUS_SLOT_MASK & bitmask( slot ) ) == 0 ) )
+      {
+        //we have a valid set bonus item
+
+        if ( js::node_t* mods = item -> get_child( "Mods" ) )
+          {
+            std::string a = decode_armoring( mods );
+
+            if ( ! a.empty() )
+              {
+                // have the armor name, now need to see if it matches a set bonus
+                std::string s = p->get_armoring_set_bonus_name( a );
+
+                if ( s.empty() )
+                  {
+                    //armoring doesn't have bonus, check the shell
+                    s = p->get_shell_set_bonus_name( name );
+                    if ( ! s.empty() )
+                      item_encoding << ",setbonus=" << s;
+                  }
+                else
+                  {
+                    item_encoding << ",setbonus=" << s;
+                  }
+              }
+          }
+      }
+
     p -> items[ slot ].options_str = item_encoding.str();
   }
+}
+
+// parse_companion_bonuses ==================================================
+void parse_companion_bonuses( player_t* p, js::node_t* profile )
+{
+  std::string has_human;
+  profile -> get( "LegacyHasHuman", has_human );
+  //std::cout << "has human" << has_human;
+  //std::stringstream ss;
+  if ( js::node_t* bonuses = profile -> get_child("LegacyCompanionBonuses") )
+  {
+    std::string bonus;
+
+    for ( js::node_t* node : *bonuses )
+    {
+      node -> get ( bonus );
+      if ( util_t::str_compare_ci ( "MeleeDamage", bonus ) )
+      {
+        p -> bonus_surge_pc_ = 1;
+        //ss << "bonus_surge_pc=1\n";
+      }
+      else if ( util_t::str_compare_ci ( "RangedTank", bonus ) )
+      {
+        p -> bonus_health_pc_ = 1;
+        //ss << "bonus_health_pc=1\n";
+      }
+      else if ( util_t::str_compare_ci ( "RangedDamage", bonus ) )
+      {
+        p -> bonus_crit_pc_ = 1;
+        //ss << "bonus_crit_pc=1\n";
+      }
+      else if ( util_t::str_compare_ci ( "MeleeTank", bonus ) )
+      {
+        p -> bonus_accuracy_pc_ = 1;
+        //ss << "bonus_accuracy_pc=1\n";
+      }
+      else if ( util_t::str_compare_ci ( "Healer", bonus ) )
+      {
+        //ss << "bonus_heal_pc=1\n";
+      }
+    }
+  }
+  //std::cout << ss.str() << std::endl;
 }
 
 // parse_datacrons ==========================================================
@@ -692,6 +827,8 @@ player_t* download_player( sim_t*             sim,
 
   parse_datacrons( p, profile -> get_child( "Datacrons" ) );
 
+  parse_companion_bonuses( p, profile );
+
   return p;
 }
 
@@ -731,7 +868,7 @@ bool parse_talents( player_t& p, const std::string& talent_string )
 
       catch ( base36_t::bad_char& bc )
       {
-        p.sim -> errorf( "Player %s has malformed wowhead talent string. Translation for '%c' unknown.\n",
+        p.sim -> errorf( "Player %s has malformed mrrobot talent string. Translation for '%c' unknown.\n",
                          p.name(), bc.c );
         return false;
       }
@@ -754,6 +891,29 @@ bool parse_talents( player_t& p, const std::string& talent_string )
   return p.parse_talent_trees( encoding );
 }
 
+
+std::string encode_talents( const player_t& p )
+{
+  std::string encoding;
+
+  if ( const char* ac_code = util_t::player_type_string_short( p.type ) )
+  {
+    std::stringstream ss;
+
+    ss << "http://swtor.askmrrobot.com/skills/" << ac_code << "#";
+
+    // This is necessary because sometimes the talent trees change shape between live/ptr.
+    for ( size_t i = 0; i < sizeof_array( p.talent_trees ); ++i )
+    {
+      if ( i > 0 ) ss << '-';
+      ss << encode_tree( p.talent_trees[ i ] );
+    }
+
+    encoding = ss.str();
+  }
+
+  return encoding;
+}
 
 #if 0
 // bcp_api::download_item() =================================================

@@ -35,7 +35,6 @@ class class_t : public agent_smug::class_t
 {
 public:
 
-
   typedef agent_smug::class_t base_t;
 
   // Buffs
@@ -44,7 +43,6 @@ public:
     buff_t* energy_overrides;
     buff_t* followthrough;
     buff_t* laze_target;
-    buff_t* rapid_fire;
     buff_t* reactive_shot;
     buff_t* snap_shot;
     buff_t* sniper_volley;
@@ -89,14 +87,6 @@ public:
   // Talents
   struct talents_t:base_t::talents_t
   {
-    // Lethality|Dirty Fighting
-    // t3
-    talent_t* targeted_demolition;
-    // t4
-    talent_t* hold_your_ground;
-    // t5
-    talent_t* razor_rounds;
-
     // Marksmanship|Sharpshooter
     // t1
     talent_t* cover_screen;
@@ -156,45 +146,86 @@ public:
     talent_t* plasma_probe;
   } talents;
 
-  // Abilities
-  struct abilities_t:base_t::abilities_t
+  // Mirror names
+  struct mirror_t:base_t::mirror_t
   {
-    std::string ambush;
-    std::string cover_pulse;
-    std::string emp_discharge;
-    std::string followthrough;
-    std::string interrogation_probe;
-    std::string laze_target;
-    std::string plasma_probe;
-    std::string rapid_fire;
-    std::string series_of_shots;
-    std::string sniper_volley;
-    std::string takedown;
-    std::string target_acquired;
-    std::string shatter_shot;
+    // abilities
+    std::string a_ambush;
+    std::string a_cover_pulse;
+    std::string a_laze_target;
+    std::string a_series_of_shots;
+    std::string a_shatter_shot;
+    std::string a_takedown;
+    std::string a_target_acquired;
 
-    // buffs
-    std::string cluster_bombs;
-    std::string energy_overrides;
-    std::string snap_shot;
-    std::string stroke_of_genius;
-    // rngs from talent
-    std::string reactive_shot;
-    // gains from talent
-    std::string imperial_methodology;
-    std::string snipers_nest;
-    // talent dot
-    std::string electrified_railgun;
-  } abilities;
+    // Marksmanship|Sharpshooter
+    // t1
+    std::string t_cover_screen;
+    std::string t_steady_shots;
+    std::string t_marksmanship;
+    // t2
+    std::string t_heavy_shot;
+    std::string t_ballistic_dampers;
+    std::string t_precision_ambush;
+    std::string t_imperial_demarcation;
+    // t3
+    std::string t_snap_shot;
+    std::string t_diversion;
+    std::string t_reactive_shot;
+    // t4
+    std::string t_between_the_eyes;
+    std::string t_sector_ranger;
+    std::string t_sniper_volley;
+    std::string t_snipers_nest;
+    // t5
+    std::string t_recoil_control;
+    std::string t_followthrough;
+    std::string t_pillbox_sniper;
+    // t6
+    std::string t_imperial_assassin;
+    std::string t_siege_bunker;
+    // t7
+    std::string t_rapid_fire;
+
+    // Engineering|Saboteur
+    // t1
+    std::string t_engineers_tool_belt;
+    std::string t_energy_tanks;
+    std::string t_gearhead;
+    // t2
+    std::string t_explosive_engineering;
+    std::string t_vital_regulators;
+    std::string t_stroke_of_genius;
+    std::string t_vitality_serum;
+    // t3
+    std::string t_cluster_bombs;
+    std::string t_efficient_engineering;
+    std::string t_interrogation_probe;
+    std::string t_inventive_interrogation_techniques;
+    // t4
+    std::string t_imperial_methodology;
+    std::string t_calculated_pursuit;
+    std::string t_experimental_explosives;
+    // t5
+    std::string t_energy_overrides;
+    std::string t_emp_discharge;
+    std::string t_augmented_shields;
+    // t6
+    std::string t_deployed_shields;
+    std::string t_electrified_railgun;
+    // t7
+    std::string t_plasma_probe;
+  } m;
 
   class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
-    base_t( sim, pt == IA_SNIPER ? IA_SNIPER : S_GUNSLINGER, name, rt, buffs, gains, procs, rngs, benefits, talents, abilities ),
+    base_t( sim, pt == IA_SNIPER ? IA_SNIPER : S_GUNSLINGER, name, rt, buffs, gains, procs, rngs, benefits, talents, m ),
     buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents()
   {
     tree_type[ IA_SNIPER_MARKSMANSHIP ] = TREE_MARKSMANSHIP;
     tree_type[ IA_SNIPER_ENGINEERING  ] = TREE_ENGINEERING;
-    tree_type[ IA_SNIPER_LETHALITY    ] = TREE_LETHALITY;
+    tree_type[ IA_LETHALITY           ] = TREE_LETHALITY;
 
+    create_mirror();
     create_talents();
     create_options();
   }
@@ -205,7 +236,6 @@ public:
   { return new targetdata_t( *this, target ); }
   ::action_t* create_action( const std::string& name, const std::string& options );
   void      init_talents();
-  void      init_abilities();
   void      init_base();
   void      init_benefits();
   void      init_buffs();
@@ -217,6 +247,7 @@ public:
   role_type primary_role() const;
   double    tech_accuracy_chance() const;
   double    range_accuracy_chance() const;
+  void      create_mirror();
   void      create_talents();
 
   double    energy_regen_per_second() const;
@@ -230,14 +261,14 @@ public:
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   agent_smug::targetdata_t( source, target ),
-  debuff_cluster_bombs        ( new debuff_t ( this, source.abilities.cluster_bombs, 2 + source.talents.imperial_methodology -> rank(), from_seconds ( 0 ), from_seconds( 1.5 ), 100, false, true /*reverse*/ ) ),
-  debuff_electrified_railgun  ( new debuff_t ( this, source.abilities.electrified_railgun, 4, from_seconds ( 5 ), from_seconds( 0 ), 1 * source.talents.electrified_railgun -> rank() ) ),
-  debuff_shatter_shot         ( new debuff_t ( this, source.abilities.shatter_shot, 1, from_seconds ( 45 ) ) ),
-  dot_cull                ( source.abilities.cull               , &source ),
-  dot_electrified_railgun ( source.abilities.electrified_railgun, &source ),
-  dot_interrogation_probe ( source.abilities.interrogation_probe, &source ),
-  dot_plasma_probe        ( source.abilities.plasma_probe       , &source ),
-  dot_series_of_shots     ( source.abilities.series_of_shots    , &source )
+  debuff_cluster_bombs        ( new debuff_t ( this, source.m.t_cluster_bombs       , 2 + ( 2 * source.talents.imperial_methodology -> rank()) , from_seconds ( 20 ), from_seconds( 1 ) , 100, false, true /*reverse*/ ) ),
+  debuff_electrified_railgun  ( new debuff_t ( this, source.m.t_electrified_railgun , 4, from_seconds ( 5 ), from_seconds( 0 )   , 1 * source.talents.electrified_railgun -> rank() ) ),
+  debuff_shatter_shot         ( new debuff_t ( this, source.m.a_shatter_shot        , 1, from_seconds ( 45 ) ) ),
+  dot_cull                ( source.m.t_cull                 , &source ),
+  dot_electrified_railgun ( source.m.t_electrified_railgun  , &source ),
+  dot_interrogation_probe ( source.m.t_interrogation_probe  , &source ),
+  dot_plasma_probe        ( source.m.t_plasma_probe         , &source ),
+  dot_series_of_shots     ( source.m.a_series_of_shots      , &source )
 {
   add( *debuff_cluster_bombs       );
   add( *debuff_electrified_railgun );
@@ -339,8 +370,7 @@ struct ambush_t : public range_attack_t
 
     base_cost                    = energy_cost();
     base_execute_time            = from_seconds( 2.5 );
-    // XXX ptr change here we reference the talent position rapid_fire, which is actually sniper_volley now
-    cooldown -> duration         = from_seconds( ( 15 - ( p -> ptr ? 1 * p -> talents.rapid_fire -> rank() : 0 ) ) );
+    cooldown -> duration         = from_seconds( ( 15 - p -> talents.rapid_fire -> rank() ) );
     range                        = 35.0;
     dd.standardhealthpercentmin  =
         dd.standardhealthpercentmax  = 0.329;
@@ -432,6 +462,7 @@ struct cull_extra_t : public agent_smug::cull_extra_t
     dd.standardhealthpercentmin =
     dd.standardhealthpercentmax =  0.037;
     dd.power_mod                =  0.37;
+    // TODO CHECK do razor_rounds and steady_shot benefit the extra attack as well?
   }
 };
 
@@ -448,7 +479,6 @@ struct cull_t : public agent_smug::cull_t
   cull_t( class_t* p, const std::string& n, const std::string& options_str ) :
     base_t( p, n, options_str )
   {
-    // TODO does RR benefit the extra attack as well?
     range                       = 30; // TODO check or 35?
     cooldown -> duration        = from_seconds( 9 );
     base_crit                   = 0.04 * p -> talents.razor_rounds -> rank();
@@ -460,6 +490,7 @@ struct cull_t : public agent_smug::cull_t
     channeled                   = true;
     num_ticks                   = 3;
     base_tick_time              = from_seconds(1);
+    base_multiplier            += 0.03 * p -> talents.steady_shots -> rank();
   }
 
   agent_smug::cull_extra_t* get_extra_strike()
@@ -636,7 +667,6 @@ struct laze_target_t : public action_t
     parse_options( options_str );
 
     cooldown -> duration = from_seconds( 60 );
-    // TODO find out if this triggers GCD, and if it can be used off GCD
     use_off_gcd = true;
     trigger_gcd = timespan_t::zero();
   }
@@ -716,33 +746,6 @@ struct plasma_probe_t : public tech_attack_t
   }
 };
 
-// Rapid Fire | Rapid Fire ==================================================
-struct rapid_fire_t : public action_t
-{
-  typedef action_t base_t;
-
-  rapid_fire_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    base_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE )
-  {
-    // passive in PTR
-    check_talent( p -> ptr ? 0 : p -> talents.rapid_fire -> rank() );
-
-    parse_options( options_str );
-
-    cooldown -> duration = from_seconds( 90 );
-    use_off_gcd = true;
-    trigger_gcd = timespan_t::zero();
-  }
-
-  void execute()
-  {
-    base_t::execute();
-
-    p() -> buffs.rapid_fire -> trigger();
-    p() -> cooldowns.series_of_shots -> reset();
-  }
-};
-
 // Sniper Volley | Burst Volley =============================================
 struct sniper_volley_t : public action_t
 {
@@ -751,10 +754,7 @@ struct sniper_volley_t : public action_t
   sniper_volley_t( class_t* p, const std::string& n, const std::string& options_str ) :
     base_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE )
   {
-    // XXX checking talents.rapid_fire because it swapped places with sniper volley!
-    // until we reference some ptr talents hacking it in
-    // check_talent( sim -> ptr ? p -> talents.sniper_volley -> rank() : 0 );
-    check_talent( p -> ptr ? p -> talents.rapid_fire -> rank() : 0 );
+    check_talent( p -> talents.sniper_volley -> rank() );
 
     parse_options( options_str );
 
@@ -840,7 +840,7 @@ struct series_of_shots_t : public tech_attack_t
 
     base_cost                    = energy_cost();
     range                        = 35.0;
-    cooldown -> duration         = from_seconds( ( 15 - ( p -> ptr ? 1 * p -> talents.rapid_fire -> rank() : 0 ) ) );
+    cooldown -> duration         = from_seconds( ( 15 - p -> talents.rapid_fire -> rank() ) );
     channeled                    = true;
     tick_zero                    = true;
     num_ticks                    = 3;
@@ -858,7 +858,7 @@ struct series_of_shots_t : public tech_attack_t
     crit_multiplier             += 0.1  * p -> talents.imperial_assassin -> rank();
     if ( p -> talents.electrified_railgun -> rank() )
     {
-      electrified = new electrified_railgun_t( p, p -> abilities.electrified_railgun );
+      electrified = new electrified_railgun_t( p, p -> m.t_electrified_railgun );
       add_child(electrified);
     }
   }
@@ -878,17 +878,15 @@ struct series_of_shots_t : public tech_attack_t
   {
     base_t::execute();
 
-    buff_t* rapid_fire = p() -> buffs.rapid_fire;
-    if ( rapid_fire -> up() )
-    {
-      rapid_fire -> expire();
-      cooldown -> reset();
-    }
+    // TODO confirm this no longer double-grants series of shots...
+    //buff_t* sniper_volley = p() -> buffs.sniper_volley;
+    //if ( sniper_volley -> up() )
+    //{
+      ////sniper_volley -> expire();
+      //cooldown -> reset();
+    //}
   }
 
-  // TODO talent: electrified raligun has 1/3 2/3 3/3 chance on damage to
-  // deal elemental damage over 4 seconds, stacking up to 4 times.
-  // need to determine mechanics of the stack.
 };
 
 // Overload Shot | Quick Shot ===============================================
@@ -986,10 +984,6 @@ struct fragmentation_grenade_t : public agent_smug::fragmentation_grenade_t
   }
 };
 
-// TODO steady_shots also affects Cull, but we still need to move that from
-// scoundrel to agent
-
-
 // Take Cover | Take Cover ==================================================
 struct take_cover_t : public agent_smug::take_cover_t
 {
@@ -1028,6 +1022,8 @@ struct takedown_t : public range_attack_t
     base_cost                    = energy_cost( p );
     cooldown -> duration         = from_seconds( 12 );
     range                        = 35.0;
+    if ( player -> set_bonus.battlemaster_field_techs -> four_pc() )
+      range += 5.0;
     dd.standardhealthpercentmin  =
     dd.standardhealthpercentmax  = 0.27;
     dd.power_mod                 = 2.7;
@@ -1123,20 +1119,6 @@ public:
   class_t* cast() const { return p(); }
 };
 
-struct sniper_volley_callback_t : public action_callback_t
-{
-  sniper_volley_callback_t( class_t* p ) :
-    action_callback_t( p )
-  {}
-
-  virtual void trigger (::action_t* a, void* /* call_data */)
-  {
-    // TODO test what constitutes "blaster fire" assuming any weapon attack
-    if ( a -> weapon || a -> td.weapon )
-      p() -> buffs.sniper_volley -> trigger();
-  }
-};
-
 struct cluster_bombs_callback_t : public action_callback_t
 {
   struct cluster_bombs_t : public tech_attack_t
@@ -1165,7 +1147,7 @@ struct cluster_bombs_callback_t : public action_callback_t
 
   cluster_bombs_callback_t( class_t* p ) :
     action_callback_t( p ),
-    cluster_bombs( new cluster_bombs_t( p, p -> abilities.cluster_bombs ) ),
+    cluster_bombs( new cluster_bombs_t( p, p -> m.t_cluster_bombs ) ),
     debuff_cluster_bombs( cluster_bombs -> targetdata() -> debuff_cluster_bombs )
   {}
 
@@ -1191,71 +1173,30 @@ struct cluster_bombs_callback_t : public action_callback_t
 ::action_t* class_t::create_action( const std::string& name,
                                     const std::string& options_str )
 {
-  if ( name == abilities.ambush                ) return new ambush_t                ( this, name, options_str ) ;
-  if ( name == abilities.cover_pulse           ) return new cover_pulse_t           ( this, name, options_str ) ;
-  if ( name == abilities.emp_discharge         ) return new emp_discharge_t         ( this, name, options_str ) ;
-  if ( name == abilities.followthrough         ) return new followthrough_t         ( this, name, options_str ) ;
-  if ( name == abilities.interrogation_probe   ) return new interrogation_probe_t   ( this, name, options_str ) ;
-  if ( name == abilities.laze_target           ) return new laze_target_t           ( this, name, options_str ) ;
-  if ( name == abilities.plasma_probe          ) return new plasma_probe_t          ( this, name, options_str ) ;
-  // since profiles aren't often generated with ptr flag, we'll toggle the ability here too
-  if ( !ptr && name == abilities.rapid_fire            ) return new rapid_fire_t            ( this, name, options_str ) ;
-  if ( ptr && name == abilities.rapid_fire            ) return new sniper_volley_t            ( this, abilities.sniper_volley, options_str ) ;
-  if ( name == abilities.series_of_shots       ) return new series_of_shots_t       ( this, name, options_str ) ;
-  if ( !ptr && name == abilities.sniper_volley         ) return new rapid_fire_t         ( this, abilities.rapid_fire, options_str ) ;
-  if ( ptr && name == abilities.sniper_volley         ) return new sniper_volley_t         ( this, name, options_str ) ;
-  if ( name == abilities.takedown              ) return new takedown_t              ( this, name, options_str ) ;
-  if ( name == abilities.target_acquired       ) return new target_acquired_t       ( this, name, options_str ) ;
-  if ( name == abilities.shatter_shot          ) return new shatter_shot_t          ( this, name, options_str ) ;
+  if ( name == m.a_ambush                 ) return new ambush_t                 ( this, name, options_str ) ;
+  if ( name == m.a_cover_pulse            ) return new cover_pulse_t            ( this, name, options_str ) ;
+  if ( name == m.t_emp_discharge          ) return new emp_discharge_t          ( this, name, options_str ) ;
+  if ( name == m.t_followthrough          ) return new followthrough_t          ( this, name, options_str ) ;
+  if ( name == m.t_interrogation_probe    ) return new interrogation_probe_t    ( this, name, options_str ) ;
+  if ( name == m.a_laze_target            ) return new laze_target_t            ( this, name, options_str ) ;
+  if ( name == m.t_plasma_probe           ) return new plasma_probe_t           ( this, name, options_str ) ;
+  if ( name == m.a_series_of_shots        ) return new series_of_shots_t        ( this, name, options_str ) ;
+  if ( name == m.t_sniper_volley          ) return new sniper_volley_t          ( this, name, options_str ) ;
+  if ( name == m.a_takedown               ) return new takedown_t               ( this, name, options_str ) ;
+  if ( name == m.a_target_acquired        ) return new target_acquired_t        ( this, name, options_str ) ;
+  if ( name == m.a_shatter_shot           ) return new shatter_shot_t           ( this, name, options_str ) ;
 
   // extended
-  if ( name == abilities.corrosive_grenade     ) return new corrosive_grenade_t     ( this, name, options_str ) ;
-  if ( name == abilities.cull                  ) return new cull_t                  ( this, name, options_str ) ;
-  if ( name == abilities.explosive_probe       ) return new explosive_probe_t       ( this, name, options_str ) ;
-  if ( name == abilities.fragmentation_grenade ) return new fragmentation_grenade_t ( this, name, options_str ) ;
-  if ( name == abilities.orbital_strike        ) return new orbital_strike_t        ( this, name, options_str ) ;
-  if ( name == abilities.overload_shot         ) return new overload_shot_t         ( this, name, options_str ) ;
-  if ( name == abilities.snipe                 ) return new snipe_t                 ( this, name, options_str ) ;
-  if ( name == abilities.take_cover            ) return new take_cover_t            ( this, name, options_str ) ;
+  if ( name == m.a_corrosive_grenade      ) return new corrosive_grenade_t      ( this, name, options_str ) ;
+  if ( name == m.t_cull                   ) return new cull_t                   ( this, name, options_str ) ;
+  if ( name == m.a_explosive_probe        ) return new explosive_probe_t        ( this, name, options_str ) ;
+  if ( name == m.a_fragmentation_grenade  ) return new fragmentation_grenade_t  ( this, name, options_str ) ;
+  if ( name == m.a_orbital_strike         ) return new orbital_strike_t         ( this, name, options_str ) ;
+  if ( name == m.a_overload_shot          ) return new overload_shot_t          ( this, name, options_str ) ;
+  if ( name == m.a_snipe                  ) return new snipe_t                  ( this, name, options_str ) ;
+  if ( name == m.a_take_cover             ) return new take_cover_t             ( this, name, options_str ) ;
 
   return base_t::create_action( name, options_str );
-}
-
-// class_t::init_abilities =======================================
-
-void class_t::init_abilities()
-{
-  base_t::init_abilities();
-
-  bool sn = type == IA_SNIPER;
-
-  //                             =    ? SNIPER LABEL           : GUNSLINGER LABEL       ;
-  abilities.ambush               = sn ? "ambush"               : "aimed_shot"           ;
-  abilities.cover_pulse          = sn ? "cover_pulse"          : "pulse_detonator"      ;
-  abilities.emp_discharge        = sn ? "emp_discharge"        : "sabotage"             ;
-  abilities.followthrough        = sn ? "followthrough"        : "trickshot"            ;
-  abilities.interrogation_probe  = sn ? "interrogation_probe"  : "shock_charge"         ;
-  abilities.laze_target          = sn ? "laze_target"          : "smugglers_luck"       ;
-  abilities.plasma_probe         = sn ? "plasma_probe"         : "incendiary_grenade"   ;
-  abilities.rapid_fire           = sn ? "rapid_fire"           : "rapid_fire"           ;
-  abilities.series_of_shots      = sn ? "series_of_shots"      : "speed_shot"           ;
-  abilities.takedown             = sn ? "takedown"             : "quickdraw"            ;
-  abilities.target_acquired      = sn ? "target_acquired"      : "illegal_mods"         ;
-  abilities.shatter_shot         = sn ? "shatter_shot"         : "flourish_shot"        ;
-
-  // buffs
-  abilities.energy_overrides     = sn ? "energy_overrides"     : "seize_the_moment"     ;
-  abilities.cluster_bombs        = sn ? "cluster_bombs"        : "contingency_charges"  ;
-  abilities.snap_shot            = sn ? "snap_shot"            : "snap_shot"            ;
-  abilities.sniper_volley        = sn ? "sniper_volley"        : "burst_volley"         ;
-  abilities.stroke_of_genius     = sn ? "stroke_of_genius"     : "pandemonium"          ;
-  // rngs
-  abilities.reactive_shot        = sn ? "reactive_shot"        : "quick_aim"            ;
-  // gains
-  abilities.imperial_methodology = sn ? "imperial_methodology" : "imperial_methodology" ;
-  abilities.snipers_nest         = sn ? "snipers_nest"         : "fox_hole"             ;
-  // talent dot
-  abilities.electrified_railgun  = sn ? "electrified_railgun"  : "blazing_speed"        ;
 }
 
 // class_t::init_talents ========================================
@@ -1266,69 +1207,69 @@ void class_t::init_talents()
 
   // Lethality
   // t3
-  talents.targeted_demolition                 = find_talent( "Targeted Demolition"                );
+  talents.targeted_demolition                 = find_talent( m.t_targeted_demolition                );
   // t4
-  talents.hold_your_ground                    = find_talent( "Hold Your Ground"                   );
+  talents.hold_your_ground                    = find_talent( m.t_hold_your_ground                   );
   // t5
-  talents.razor_rounds                        = find_talent( "Razor Rounds"                       );
+  talents.razor_rounds                        = find_talent( m.t_razor_rounds                       );
 
   // Marksmanship|Sharpshooter
   // t1
-  talents.cover_screen                        = find_talent( "Cover Screen"                       );
-  talents.steady_shots                        = find_talent( "Steady Shots"                       );
-  talents.marksmanship                        = find_talent( "Marksmanship"                       );
+  talents.cover_screen                        = find_talent( m.t_cover_screen                       );
+  talents.steady_shots                        = find_talent( m.t_steady_shots                       );
+  talents.marksmanship                        = find_talent( m.t_marksmanship                       );
   // t2
-  talents.heavy_shot                          = find_talent( "Heavy Shot"                         );
-  talents.ballistic_dampers                   = find_talent( "Ballistic Dampers"                  );
-  talents.precision_ambush                    = find_talent( "Precision Ambush"                   );
-  talents.imperial_demarcation                = find_talent( "Imperial Demarcation"               );
+  talents.heavy_shot                          = find_talent( m.t_heavy_shot                         );
+  talents.ballistic_dampers                   = find_talent( m.t_ballistic_dampers                  );
+  talents.precision_ambush                    = find_talent( m.t_precision_ambush                   );
+  talents.imperial_demarcation                = find_talent( m.t_imperial_demarcation               );
   // t3
-  talents.snap_shot                           = find_talent( "Snap Shot"                          );
-  talents.diversion                           = find_talent( "Diversion"                          );
-  talents.reactive_shot                       = find_talent( "Reactive Shot"                      );
+  talents.snap_shot                           = find_talent( m.t_snap_shot                          );
+  talents.diversion                           = find_talent( m.t_diversion                          );
+  talents.reactive_shot                       = find_talent( m.t_reactive_shot                      );
   // t4
-  talents.between_the_eyes                    = find_talent( "Between the Eyes"                   );
-  talents.sector_ranger                       = find_talent( "Sector Ranger"                      );
-  talents.sniper_volley                       = find_talent( "Sniper Volley"                      );
-  talents.snipers_nest                        = find_talent( "Sniper's Nest"                      );
+  talents.between_the_eyes                    = find_talent( m.t_between_the_eyes                   );
+  talents.sector_ranger                       = find_talent( m.t_sector_ranger                      );
+  talents.sniper_volley                       = find_talent( m.t_sniper_volley                      );
+  talents.snipers_nest                        = find_talent( m.t_snipers_nest                       );
   // t5
-  talents.recoil_control                      = find_talent( "Recoil Control"                     );
-  talents.followthrough                       = find_talent( "Followthrough"                      );
-  talents.pillbox_sniper                      = find_talent( "Pillbox Sniper"                     );
+  talents.recoil_control                      = find_talent( m.t_recoil_control                     );
+  talents.followthrough                       = find_talent( m.t_followthrough                      );
+  talents.pillbox_sniper                      = find_talent( m.t_pillbox_sniper                     );
   // t6
-  talents.imperial_assassin                   = find_talent( "Imperial Assassin"                  );
-  talents.siege_bunker                        = find_talent( "Siege Bunker"                       );
+  talents.imperial_assassin                   = find_talent( m.t_imperial_assassin                  );
+  talents.siege_bunker                        = find_talent( m.t_siege_bunker                       );
   // t7
-  talents.rapid_fire                          = find_talent( "Rapid Fire"                         );
+  talents.rapid_fire                          = find_talent( m.t_rapid_fire                         );
 
   // Engineering|Saboteur
   // t1
-  talents.engineers_tool_belt                 = find_talent( "Engineer's Tool Belt"               );
-  talents.energy_tanks                        = find_talent( "Energy Tanks"                       );
-  talents.gearhead                            = find_talent( "Gearhead"                           );
+  talents.engineers_tool_belt                 = find_talent( m.t_engineers_tool_belt                );
+  talents.energy_tanks                        = find_talent( m.t_energy_tanks                       );
+  talents.gearhead                            = find_talent( m.t_gearhead                           );
   // t2
-  talents.explosive_engineering               = find_talent( "Explosive Engineering"              );
-  talents.vital_regulators                    = find_talent( "Vital Regulators"                   );
-  talents.stroke_of_genius                    = find_talent( "Stroke of Genius"                   );
-  talents.vitality_serum                      = find_talent( "Vitality Serum"                     );
+  talents.explosive_engineering               = find_talent( m.t_explosive_engineering              );
+  talents.vital_regulators                    = find_talent( m.t_vital_regulators                   );
+  talents.stroke_of_genius                    = find_talent( m.t_stroke_of_genius                   );
+  talents.vitality_serum                      = find_talent( m.t_vitality_serum                     );
   // t3
-  talents.cluster_bombs                       = find_talent( "Cluster Bombs"                      );
-  talents.efficient_engineering               = find_talent( "Efficient Engineering"              );
-  talents.interrogation_probe                 = find_talent( "Interrogation Probe"                );
-  talents.inventive_interrogation_techniques  = find_talent( "Inventive Interrogation Techniques" );
+  talents.cluster_bombs                       = find_talent( m.t_cluster_bombs                      );
+  talents.efficient_engineering               = find_talent( m.t_efficient_engineering              );
+  talents.interrogation_probe                 = find_talent( m.t_interrogation_probe                );
+  talents.inventive_interrogation_techniques  = find_talent( m.t_inventive_interrogation_techniques );
   // t4
-  talents.imperial_methodology                = find_talent( "Imperial Methodology"               );
-  talents.calculated_pursuit                  = find_talent( "Calculated Pursuit"                 );
-  talents.experimental_explosives             = find_talent( "Experimental Explosives"            );
+  talents.imperial_methodology                = find_talent( m.t_imperial_methodology               );
+  talents.calculated_pursuit                  = find_talent( m.t_calculated_pursuit                 );
+  talents.experimental_explosives             = find_talent( m.t_experimental_explosives            );
   // t5
-  talents.energy_overrides                    = find_talent( "Energy Overrides"                   );
-  talents.emp_discharge                       = find_talent( "EMP Discharge"                      );
-  talents.augmented_shields                   = find_talent( "Augmented Shields"                  );
+  talents.energy_overrides                    = find_talent( m.t_energy_overrides                   );
+  talents.emp_discharge                       = find_talent( m.t_emp_discharge                      );
+  talents.augmented_shields                   = find_talent( m.t_augmented_shields                  );
   // t6
-  talents.deployed_shields                    = find_talent( "Deployed Shields"                   );
-  talents.electrified_railgun                 = find_talent( "Electrified Railgun"                );
+  talents.deployed_shields                    = find_talent( m.t_deployed_shields                   );
+  talents.electrified_railgun                 = find_talent( m.t_electrified_railgun                );
   // t7
-  talents.plasma_probe                        = find_talent( "Plasma Probe"                       );
+  talents.plasma_probe                        = find_talent( m.t_plasma_probe                       );
 }
 
 // class_t::init_base ===========================================
@@ -1362,17 +1303,14 @@ void class_t::init_buffs()
 
 // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
 
-  buffs.energy_overrides = new buff_t( this , abilities.energy_overrides , 1 ,  from_seconds( 15  ) );
-  buffs.followthrough    = new buff_t( this , abilities.followthrough    , 1 ,  from_seconds( 4.5 ) );
-  buffs.laze_target      = new buff_t( this , abilities.laze_target      , 1 ,  from_seconds( 20  ) );
-  buffs.snap_shot        = new buff_t( this , abilities.snap_shot        , 1 ,  from_seconds( 10  ), from_seconds( 6 ), 0.5 * talents.snap_shot -> rank() );
-  buffs.rapid_fire       = new buff_t( this , abilities.rapid_fire       , 1 ,  from_seconds( 10  ) );
-  buffs.reactive_shot    = new buff_t( this , abilities.reactive_shot    , 1 ,  from_seconds( 10  ) );
-  // checking talents.rapid_fire rank because it position changed with sniper volley but we aren't referencing ptr
-  // talent builds yet
-  buffs.sniper_volley    = new buff_t( this , abilities.sniper_volley    , 1 ,  from_seconds( 10  ), from_seconds( ( ptr ? 0 : 30 ) ), 0.05 * ( ptr ? talents.sniper_volley -> rank() : talents.rapid_fire -> rank() ) );
-  buffs.stroke_of_genius = new buff_t( this , abilities.stroke_of_genius , 1 ,  from_seconds( 10  ), timespan_t::zero(), 0.5 * talents.stroke_of_genius -> rank() );
-  buffs.target_acquired  = new buff_t( this , abilities.target_acquired  , 1 ,  from_seconds( 10  ));
+  buffs.energy_overrides = new buff_t( this , m.t_energy_overrides  , 1 ,  from_seconds( 15  ) );
+  buffs.followthrough    = new buff_t( this , m.t_followthrough     , 1 ,  from_seconds( 4.5 ) );
+  buffs.laze_target      = new buff_t( this , m.a_laze_target       , 1 ,  from_seconds( 20  ) );
+  buffs.snap_shot        = new buff_t( this , m.t_snap_shot         , 1 ,  from_seconds( 10  ), from_seconds( 6 ), 0.5 * talents.snap_shot -> rank() );
+  buffs.reactive_shot    = new buff_t( this , m.t_reactive_shot     , 1 ,  from_seconds( 10  ) );
+  buffs.sniper_volley    = new buff_t( this , m.t_sniper_volley     , 1 ,  from_seconds( 10  ), from_seconds( 0 ));
+  buffs.stroke_of_genius = new buff_t( this , m.t_stroke_of_genius  , 1 ,  from_seconds( 10  ), timespan_t::zero(), 0.5 * talents.stroke_of_genius -> rank() );
+  buffs.target_acquired  = new buff_t( this , m.a_target_acquired   , 1 ,  from_seconds( 10  ));
 }
 
 // class_t::init_gains ==========================================
@@ -1381,10 +1319,10 @@ void class_t::init_gains()
 {
   base_t::init_gains();
 
-  gains.imperial_methodology = get_gain( abilities.imperial_methodology );
-  gains.snipers_nest         = get_gain( abilities.snipers_nest         );
-  gains.sniper_volley        = get_gain( abilities.sniper_volley        );
-  gains.target_acquired      = get_gain( abilities.target_acquired      );
+  gains.imperial_methodology = get_gain( m.t_imperial_methodology );
+  gains.snipers_nest         = get_gain( m.t_snipers_nest         );
+  gains.sniper_volley        = get_gain( m.t_sniper_volley        );
+  gains.target_acquired      = get_gain( m.a_target_acquired      );
 }
 
 // class_t::init_procs ==========================================
@@ -1401,10 +1339,10 @@ void class_t::init_cooldowns()
 {
   base_t::init_cooldowns();
 
-  cooldowns.adrenaline_probe    = get_cooldown ( abilities.adrenaline_probe    );
-  cooldowns.ambush              = get_cooldown ( abilities.ambush              );
-  cooldowns.interrogation_probe = get_cooldown ( abilities.interrogation_probe );
-  cooldowns.series_of_shots     = get_cooldown ( abilities.series_of_shots     );
+  cooldowns.adrenaline_probe    = get_cooldown ( m.a_adrenaline_probe    );
+  cooldowns.ambush              = get_cooldown ( m.a_ambush              );
+  cooldowns.interrogation_probe = get_cooldown ( m.t_interrogation_probe );
+  cooldowns.series_of_shots     = get_cooldown ( m.a_series_of_shots     );
 }
 
 // class_t::init_rng ============================================
@@ -1412,7 +1350,7 @@ void class_t::init_cooldowns()
 void class_t::init_rng()
 {
   base_t::init_rng();
-  rngs.reactive_shot = get_rng( abilities.reactive_shot );
+  rngs.reactive_shot = get_rng( m.t_reactive_shot );
 
 }
 
@@ -1432,113 +1370,105 @@ void class_t::init_actions()
 
     list << "/stim,type=exotech_skill";
 
-    list << sl << abilities.coordination;
+    list << sl << m.a_coordination;
 
     list << "/snapshot_stats";
 
-    list << sl << abilities.take_cover << ",if=buff." << abilities.cover << ".down";
+    list << sl << m.a_take_cover << ",if=buff." << m.a_take_cover << ".down";
 
-    list << sl << abilities.shatter_shot << ",if=buff." << abilities.shatter_shot << ".remains<1.5";
+    list << sl << m.a_shatter_shot << ",if=buff." << m.a_shatter_shot << ".remains<1.5";
 
     list << "/use_relics";
 
     list << "/power_potion";
 
-    list << sl << abilities.adrenaline_probe << ",if=energy<=" << energy_ceil - agent_smug::adrenaline_probe_t::energy_returned_initial();
+    list << sl << m.a_adrenaline_probe << ",if=energy<=" << energy_ceil - agent_smug::adrenaline_probe_t::energy_returned_initial();
 
-    list << sl << abilities.target_acquired << ",if=energy<=" << energy_ceil - target_acquired_t::energy_returned();
+    list << sl << m.a_target_acquired << ",if=energy<=" << energy_ceil - target_acquired_t::energy_returned();
 
-    list << sl << abilities.laze_target;
+    list << sl << m.a_laze_target;
 
     if ( talents.emp_discharge -> rank() )
-      list << sl << abilities.emp_discharge << ",if=dot." << abilities.interrogation_probe  << ".remains";
+      list << sl << m.t_emp_discharge << ",if=dot." << m.t_interrogation_probe  << ".remains";
 
     if ( unsigned rank = talents.energy_overrides -> rank() )
     {
-      list << sl << abilities.plasma_probe << ",if=buff." << abilities.energy_overrides << ".up";
+      list << sl << m.t_plasma_probe << ",if=buff." << m.t_energy_overrides << ".up";
       if ( rank == 1 )
         list << "&energy>=" << energy_floor + plasma_probe_t::energy_cost( this ) / 2;
-      list << sl << abilities.explosive_probe << ",if=buff." << abilities.energy_overrides << ".up";
+      list << sl << m.a_explosive_probe << ",if=buff." << m.t_energy_overrides << ".up";
       if ( rank == 1 )
         list << "&energy>=" << energy_floor + explosive_probe_t::energy_cost( this ) / 2;
     }
 
-    if ( ! ptr && talents.rapid_fire -> rank() )
-      list << sl << abilities.rapid_fire << ",if=cooldown." << abilities.series_of_shots << ".remains";
-    if ( ptr && talents.rapid_fire -> rank() )
-      list << sl << abilities.sniper_volley << ",if=cooldown." << abilities.series_of_shots << ".remains";
+    if ( talents.sniper_volley -> rank() )
+      list << sl << m.t_sniper_volley << ",if=cooldown." << m.a_series_of_shots << ".remains";
 
     if ( talents.imperial_methodology -> rank() )
-      list << sl << abilities.explosive_probe << ",if=energy>=" << energy_floor + explosive_probe_t::energy_cost( this );
+      list << sl << m.a_explosive_probe << ",if=energy>=" << energy_floor + explosive_probe_t::energy_cost( this );
 
     if ( talents.followthrough -> rank() )
-      list << sl << abilities.followthrough << ",if=buff." << abilities.followthrough << ".up&energy>=" << energy_floor + followthrough_t::energy_cost( this );
+      list << sl << m.t_followthrough << ",if=buff." << m.t_followthrough << ".up&energy>=" << energy_floor + followthrough_t::energy_cost( this );
 
     if ( talents.experimental_explosives -> rank() || talents.cull -> rank() )
-      list << sl << abilities.orbital_strike << ",if=energy>=" << energy_floor + agent_smug::orbital_strike_t::energy_cost();
+      list << sl << m.a_orbital_strike << ",if=energy>=" << energy_floor + agent_smug::orbital_strike_t::energy_cost();
 
     if ( talents.corrosive_grenade -> rank() )
-      list << sl << abilities.corrosive_grenade << ",if=!ticking&energy>=" << energy_floor + corrosive_grenade_t::energy_cost();
+      list << sl << m.a_corrosive_grenade << ",if=!ticking&energy>=" << energy_floor + corrosive_grenade_t::energy_cost();
 
     if ( talents.corrosive_microbes -> rank() )
-      list << sl << abilities.corrosive_dart << ",if=!ticking&energy>=" << energy_floor + agent_smug::corrosive_dart_t::energy_cost();
+      list << sl << m.a_corrosive_dart << ",if=!ticking&energy>=" << energy_floor + agent_smug::corrosive_dart_t::energy_cost();
 
     if ( talents.cut_down -> rank() )
-      list << sl << abilities.series_of_shots << ",if=energy>" << energy_floor + series_of_shots_t::energy_cost();
+      list << sl << m.a_series_of_shots << ",if=energy>" << energy_floor + series_of_shots_t::energy_cost();
 
     if ( set_bonus.rakata_field_techs -> four_pc() )
-      list << sl << abilities.takedown << ",if=energy>=" << energy_floor + takedown_t::energy_cost( this );
+      list << sl << m.a_takedown << ",if=energy>=" << energy_floor + takedown_t::energy_cost( this );
 
     if ( talents.weakening_blast -> rank() )
-      list << sl << abilities.weakening_blast;
+      list << sl << m.t_weakening_blast;
 
     if ( talents.cull -> rank() )
-      list << sl << abilities.cull << ",if=energy>=" << energy_floor + cull_t::energy_cost() <<
-              "&(dot." << abilities.corrosive_dart << ".ticking|dot." << abilities.corrosive_dart << "_weak.ticking)"
-              "&(dot." << abilities.corrosive_grenade << ".ticking|dot." << abilities.corrosive_grenade << "_weak.ticking)";
+      list << sl << m.t_cull << ",if=energy>=" << energy_floor + cull_t::energy_cost() <<
+              "&(dot." << m.a_corrosive_dart << ".ticking|dot." << m.a_corrosive_dart << "_weak.ticking)"
+              "&(dot." << m.a_corrosive_grenade << ".ticking|dot." << m.a_corrosive_grenade << "_weak.ticking)";
 
     if ( talents.reactive_shot -> rank() )
-      list << sl << abilities.ambush << ",if=buff." << abilities.reactive_shot << ".up&energy>=" << energy_floor + ambush_t::energy_cost();
+      list << sl << m.a_ambush << ",if=buff." << m.t_reactive_shot << ".up&energy>=" << energy_floor + ambush_t::energy_cost();
 
     if ( !talents.cut_down -> rank() )
-      list << sl << abilities.series_of_shots << ",if=energy>" << energy_floor + series_of_shots_t::energy_cost();
+      list << sl << m.a_series_of_shots << ",if=energy>" << energy_floor + series_of_shots_t::energy_cost();
 
     if ( talents.plasma_probe -> rank() )
-      list << sl << abilities.plasma_probe << ",if=energy>=" << energy_floor + plasma_probe_t::energy_cost( this );
+      list << sl << m.t_plasma_probe << ",if=energy>=" << energy_floor + plasma_probe_t::energy_cost( this );
 
     if ( !talents.experimental_explosives -> rank() && !talents.cull -> rank() )
-      list << sl << abilities.orbital_strike << ",if=energy>=" << energy_floor + agent_smug::orbital_strike_t::energy_cost();
+      list << sl << m.a_orbital_strike << ",if=energy>=" << energy_floor + agent_smug::orbital_strike_t::energy_cost();
 
     if ( !talents.reactive_shot -> rank() && talents.precision_ambush -> rank() )
-      list << sl << abilities.ambush << ",if=energy>=" << energy_floor + ambush_t::energy_cost();
+      list << sl << m.a_ambush << ",if=energy>=" << energy_floor + ambush_t::energy_cost();
 
     if ( talents.interrogation_probe -> rank() )
-      list << sl << abilities.interrogation_probe << ",if=energy>=" << energy_floor + interrogation_probe_t::energy_cost( this );
+      list << sl << m.t_interrogation_probe << ",if=energy>=" << energy_floor + interrogation_probe_t::energy_cost( this );
 
     if ( !set_bonus.rakata_field_techs -> four_pc() )
-      list << sl << abilities.takedown << ",if=energy>=" << energy_floor + takedown_t::energy_cost( this );
+      list << sl << m.a_takedown << ",if=energy>=" << energy_floor + takedown_t::energy_cost( this );
 
     if ( !talents.imperial_methodology -> rank() )
-      list << sl << abilities.explosive_probe << ",if=energy>=" << energy_floor + explosive_probe_t::energy_cost( this );
+      list << sl << m.a_explosive_probe << ",if=energy>=" << energy_floor + explosive_probe_t::energy_cost( this );
 
     if ( !talents.reactive_shot -> rank() && !talents.precision_ambush -> rank() )
-      list << sl << abilities.ambush << ",if=energy>=" << energy_floor + ambush_t::energy_cost();
+      list << sl << m.a_ambush << ",if=energy>=" << energy_floor + ambush_t::energy_cost();
 
     if ( !talents.cull -> rank() )
-      list << sl << abilities.snipe << ",if=energy>=" << energy_floor + snipe_t::energy_cost();
+      list << sl << m.a_snipe << ",if=energy>=" << energy_floor + snipe_t::energy_cost();
 
-    list << sl << abilities.rifle_shot;
+    list << sl << m.a_rifle_shot;
 
     if ( talents.stroke_of_genius -> rank() )
-      list << sl << abilities.cover_pulse;
+      list << sl << m.a_cover_pulse;
 
     action_list_str = list.str();
-  }
-
-  if ( !ptr && talents.sniper_volley -> rank() )
-  {
-    register_attack_callback( RESULT_HIT_MASK, new sniper_volley_callback_t( this ) );
-    register_tick_callback  ( RESULT_HIT_MASK, new sniper_volley_callback_t( this ) );
   }
 
   if ( talents.cluster_bombs -> rank() )
@@ -1554,14 +1484,14 @@ void class_t::init_actions()
 double class_t::tech_accuracy_chance() const
 {
   return base_t::tech_accuracy_chance() + _tech_range_accuracy
-    + ( (ptr && buffs.target_acquired -> up()) ? 0.3 : 0 );
+    + ( buffs.target_acquired -> up() ? 0.3 : 0 );
 }
 
 // class_t::range_accuracy_chance ===============================
 double class_t::range_accuracy_chance() const
 {
   return base_t::range_accuracy_chance() + _tech_range_accuracy
-    + ( (ptr && buffs.target_acquired -> up()) ? 0.3 : 0 );
+    + ( buffs.target_acquired -> up() ? 0.3 : 0 );
 }
 
 // class_t::talented_energy =====================================
@@ -1599,23 +1529,14 @@ void class_t::regen( timespan_t periodicity )
 // class_t::alacrity ============================================
 double class_t::alacrity() const
 {
-  // TODO confirm how these 10% and 20% work/stack
-  // are they a flat 20%, or maybe 20% increase to alacrity rating?
-  return base_t::alacrity() - ( buffs.sniper_volley -> up() ? 0.1 : 0 ) -
-    ( ptr                          ? 0   :
-     buffs.target_acquired -> up() ? 0.2 : 0 );
+  return base_t::alacrity() - ( buffs.sniper_volley -> up() ? 0.1 : 0 );
 }
 
 // class_t::armor_penetration =================================
 
 double class_t::armor_penetration() const
 {
-  double arpen = base_t::armor_penetration();
-
-  if ( ptr && buffs.target_acquired -> up() )
-    arpen -= 0.15;
-
-  return arpen;
+  return base_t::armor_penetration() - ( buffs.target_acquired -> up() ? 0.15 : 0 );
 }
 
 // class_t::primary_role ========================================
@@ -1624,32 +1545,117 @@ role_type class_t::primary_role() const
   return ROLE_DPS;
 }
 
+// class_t::create_mirror =======================================
+
+void class_t::create_mirror()
+{
+  base_t::create_mirror();
+
+  bool sn = type == IA_SNIPER;
+
+  // ABILITY               =    ? SNIPER LABEL           : GUNSLINGER LABEL       ;
+  m.a_ambush               = sn ? "ambush"               : "aimed_shot"           ;
+  m.a_cover_pulse          = sn ? "cover_pulse"          : "pulse_detonator"      ;
+  m.a_laze_target          = sn ? "laze_target"          : "smugglers_luck"       ;
+  m.a_series_of_shots      = sn ? "series_of_shots"      : "speed_shot"           ;
+  m.a_takedown             = sn ? "takedown"             : "quickdraw"            ;
+  m.a_target_acquired      = sn ? "target_acquired"      : "illegal_mods"         ;
+  m.a_shatter_shot         = sn ? "shatter_shot"         : "flourish_shot"        ;
+
+  // Marksmanship|Sharpshooter
+  // t1
+  m.t_cover_screen                        = sn ? "cover_screen"                       : "cover_screen"            ;
+  m.t_steady_shots                        = sn ? "steady_shots"                       : "steady_shots"            ;
+  m.t_marksmanship                        = sn ? "marksmanship"                       : "sharpshooter"            ;
+  // t2
+  m.t_heavy_shot                          = sn ? "heavy_shot"                         : "percussive_shot"         ;
+  m.t_ballistic_dampers                   = sn ? "ballistic_dampers"                  : "ballistic_dampers"       ;
+  m.t_precision_ambush                    = sn ? "precision_ambush"                   : "sharp_aim"               ;
+  m.t_imperial_demarcation                = sn ? "imperial_demarcation"               : "trip_shot"               ;
+  // t3
+  m.t_snap_shot                           = sn ? "snap_shot"                          : "snap_shot"               ;
+  m.t_diversion                           = sn ? "diversion"                          : "diversion"               ;
+  m.t_reactive_shot                       = sn ? "reactive_shot"                      : "quick_aim"               ;
+  // t4
+  m.t_between_the_eyes                    = sn ? "between_the_eyes"                   : "slick_shooter"           ;
+  m.t_sector_ranger                       = sn ? "sector_ranger"                      : "spacer"                  ;
+  m.t_sniper_volley                       = sn ? "sniper_volley"                      : "burst_volley"            ;
+  m.t_snipers_nest                        = sn ? "snipers_nest"                       : "foxhole"                 ;
+  // t5
+  m.t_recoil_control                      = sn ? "recoil_control"                     : "recoil_control"          ;
+  m.t_followthrough                       = sn ? "followthrough"                      : "trickshot"               ;
+  m.t_pillbox_sniper                      = sn ? "pillbox_sniper"                     : "lay_low"                 ;
+  // t6
+  m.t_imperial_assassin                   = sn ? "imperial_assassin"                  : "deadeye"                 ;
+  m.t_siege_bunker                        = sn ? "siege_bunker"                       : "holed_up"                ;
+  // t7
+  m.t_rapid_fire                          = sn ? "rapid_fire"                         : "rapid_fire"              ;
+
+  // Engineering|Saboteur
+  // t1
+  m.t_engineers_tool_belt                 = sn ? "engineers_tool_belt"                : "saboteurs_utility_belt"  ;
+  m.t_energy_tanks                        = sn ? "energy_tanks"                       : "bravado"                 ;
+  m.t_gearhead                            = sn ? "gearhead"                           : "streetwise"              ;
+  // t2
+  m.t_explosive_engineering               = sn ? "explosive_engineering"              : "independent_anarchy"     ;
+  m.t_vital_regulators                    = sn ? "vital_regulators"                   : "cool_under_pressure"     ;
+  m.t_stroke_of_genius                    = sn ? "stroke_of_genius"                   : "pandemonium"             ;
+  m.t_vitality_serum                      = sn ? "vitality_serum"                     : "underworld_hardships"    ;
+  // t3
+  m.t_cluster_bombs                       = sn ? "cluster_bombs"                      : "contingency_charges"     ;
+  m.t_efficient_engineering               = sn ? "efficient_engineering"              : "dealers_discount"        ;
+  m.t_interrogation_probe                 = sn ? "interrogation_probe"                : "shock_charge"            ;
+  m.t_inventive_interrogation_techniques  = sn ? "inventive_interrogation_techniques" : "sapping_charge"          ;
+  // t4
+  m.t_imperial_methodology                = sn ? "imperial_methodology"               : "insurrection"            ;
+  m.t_calculated_pursuit                  = sn ? "calculated_pursuit"                 : "hot_pursuit"             ;
+  m.t_experimental_explosives             = sn ? "experimental_explosives"            : "arsonist"                ;
+  // t5
+  m.t_energy_overrides                    = sn ? "energy_overrides"                   : "seize_the_moment"        ;
+  m.t_emp_discharge                       = sn ? "emp_discharge"                      : "sabotage"                ;
+  m.t_augmented_shields                   = sn ? "augmented_shields"                  : "hotwired_defenses"       ;
+  // t6
+  m.t_deployed_shields                    = sn ? "deployed_shields"                   : "riot_screen"             ;
+  m.t_electrified_railgun                 = sn ? "electrified_railgun"                : "blazing_speed"           ;
+  // t7
+  m.t_plasma_probe                        = sn ? "plasma_probe"                       : "incendiary_grenade"      ;
+
+  // Lethality|Dirty Fighting
+  // t3
+  m.t_targeted_demolition                 = sn ? "targeted_demolition"                : "reopen_wound"            ;
+  // t4
+  m.t_hold_your_ground                    = sn ? "hold_your_ground"                   : "bombastic"               ;
+  // t5
+  m.t_razor_rounds                        = sn ? "razor_round"                        : "reopen_wounds"           ;
+}
+
 // class_t::create_talents ======================================
+
 void class_t::create_talents()
 {
   base_t::create_talents();
 
   // Marksmanship|Sharpshooter
-  static const talentinfo_t marksmanship_tree[] = {
-     { "Cover Screen"      , 2 }, { "Steady Shots"      , 2 }, { "Marksmanship"     , 3 },
-     { "Heavy Shot"        , 1 }, { "Ballistic Dampers" , 2 }, { "Precision Ambush" , 2 }, { "Imperial Demarcation" , 2 },
-     { "Snap Shot"         , 2 }, { "Diversion"         , 1 }, { "Reactive Shot"    , 2 },
-     { "Between the Eyes"  , 2 }, { "Sector Ranger"     , 1 }, { "Sniper Volley"    , 3 }, { "Sniper's Nest"        , 1 },
-     { "Recoil Control"    , 2 }, { "Followthrough"     , 1 }, { "Pillbox Sniper"   , 2 },
-     { "Imperial Assassin" , 3 }, { "Siege Bunker"      , 2 },
-     { "Rapid Fire"        , 1 }
+  const talentinfo_t marksmanship_tree[] = {
+    { m.t_cover_screen      , 2 }, { m.t_steady_shots       , 2 }, { m.t_marksmanship     , 3 },
+    { m.t_heavy_shot        , 1 }, { m.t_ballistic_dampers  , 2 }, { m.t_precision_ambush , 2 }, { m.t_imperial_demarcation , 2 },
+    { m.t_snap_shot         , 2 }, { m.t_diversion          , 1 }, { m.t_reactive_shot    , 2 },
+    { m.t_between_the_eyes  , 2 }, { m.t_sector_ranger      , 1 }, { m.t_rapid_fire       , 3 }, { m.t_snipers_nest         , 1 },
+    { m.t_recoil_control    , 2 }, { m.t_followthrough      , 1 }, { m.t_pillbox_sniper   , 2 },
+    { m.t_imperial_assassin , 3 }, { m.t_siege_bunker       , 2 },
+    { m.t_sniper_volley     , 1 }
   };
   init_talent_tree( IA_SNIPER_MARKSMANSHIP, marksmanship_tree );
 
   // Engineering|Saboteur
-  static const talentinfo_t engineering_tree[] = {
-     { "Engineer's Tool Belt"  , 2 }, { "Energy Tanks"          , 2 }, { "Gearhead"                , 3 },
-     { "Explosive Engineering" , 3 }, { "Vital Regulators"      , 2 }, { "Stroke of Genius"        , 2 }, { "Vitality Serum"                     , 2 },
-     { "Cluster Bombs"         , 2 }, { "Efficient Engineering" , 2 }, { "Interrogation Probe"     , 1 }, { "Inventive Interrogation Techniques" , 2 },
-     { "Imperial Methodology"  , 1 }, { "Calculated Pursuit"    , 2 }, { "Experimental Explosives" , 2 },
-     { "Energy Overrides"      , 2 }, { "EMP Discharge"         , 1 }, { "Augmented Shields"       , 2 },
-     { "Deployed Shields"      , 2 }, { "Electrified Railgun"   , 3 },
-     { "Plasma Probe"          , 1 }
+  const talentinfo_t engineering_tree[] = {
+    { m.t_engineers_tool_belt   , 2 }, { m.t_energy_tanks           , 2 }, { m.t_gearhead                 , 3 },
+    { m.t_explosive_engineering , 3 }, { m.t_vital_regulators       , 2 }, { m.t_stroke_of_genius         , 2 }, { m.t_vitality_serum                     , 2 },
+    { m.t_cluster_bombs         , 2 }, { m.t_efficient_engineering  , 2 }, { m.t_interrogation_probe      , 1 }, { m.t_inventive_interrogation_techniques , 2 },
+    { m.t_imperial_methodology  , 1 }, { m.t_calculated_pursuit     , 2 }, { m.t_experimental_explosives  , 2 },
+    { m.t_energy_overrides      , 2 }, { m.t_emp_discharge          , 1 }, { m.t_augmented_shields        , 2 },
+    { m.t_deployed_shields      , 2 }, { m.t_electrified_railgun    , 3 },
+    { m.t_plasma_probe          , 1 }
   };
   init_talent_tree( IA_SNIPER_ENGINEERING, engineering_tree );
 }

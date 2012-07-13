@@ -1,19 +1,43 @@
+## RAKATA
+
 mrrobot=87c412bc-724f-4727-bbf0-195052bc600e
 talents=http://www.torhead.com/skill-calc#700rcrbbRsRGoZbcZh.1
-name=Gunslinger_Sharpshooter
-save=Gunslinger_Sharpshooter.simc
+name=Gunslinger_Sharpshooter_Rakata
+save=Gunslinger_Sharpshooter_Rakata.simc
 
-copy=Gunslinger_Sharp_Sabo,Gunslinger_Sharpshooter
+copy=Gunslinger_Sharp_Sabo_Rakata,Gunslinger_Sharpshooter_Rakata
 talents=http://www.torhead.com/skill-calc#700rcrbbkRRZrI0bRoZb.1
-name=Gunslinger_Sharp_Sabo
-save=Gunslinger_Sharp_Sabo.simc
+name=Gunslinger_Sharp_Sabo_Rakata
+save=Gunslinger_Sharp_Sabo_Rakata.simc
 
-copy=Gunslinger_Saboteur,Gunslinger_Sharpshooter
+copy=Gunslinger_Saboteur_Rakata,Gunslinger_Sharpshooter_Rakata
 talents=http://www.torhead.com/skill-calc#700bcbZrI0bRorRrsZh.1
-name=Gunslinger_Saboteur
-save=Gunslinger_Saboteur.simc
+name=Gunslinger_Saboteur_Rakata
+save=Gunslinger_Saboteur_Rakata.simc
 
-copy=Gunslinger_Dirty_Fighting,Gunslinger_Sharpshooter
+copy=Gunslinger_Dirty_Fighting_Rakata,Gunslinger_Sharpshooter_Rakata
 talents=http://www.torhead.com/skill-calc#700bZbIZGbbkrMGdhR.1
-name=Gunslinger_Dirty_Fighting
-save=Gunslinger_Dirty_Fighting.simc
+name=Gunslinger_Dirty_Fighting_Rakata
+save=Gunslinger_Dirty_Fighting_Rakata.simc
+
+## CAMPAIGN
+
+mrrobot=6ee48e95-2381-4940-9ab8-cfaa37e0cd38
+talents=http://www.torhead.com/skill-calc#700rcrbbRsRGoZbcZh.1
+name=Gunslinger_Sharpshooter_Campaign
+save=Gunslinger_Sharpshooter_Campaign.simc
+
+copy=Gunslinger_Sharp_Sabo_Campaign,Gunslinger_Sharpshooter_Campaign
+talents=http://www.torhead.com/skill-calc#700rcrbbkRRZrI0bRoZb.1
+name=Gunslinger_Sharp_Sabo_Campaign
+save=Gunslinger_Sharp_Sabo_Campaign.simc
+
+copy=Gunslinger_Saboteur_Campaign,Gunslinger_Sharpshooter_Campaign
+talents=http://www.torhead.com/skill-calc#700bcbZrI0bRorRrsZh.1
+name=Gunslinger_Saboteur_Campaign
+save=Gunslinger_Saboteur_Campaign.simc
+
+copy=Gunslinger_Dirty_Fighting_Campaign,Gunslinger_Sharpshooter_Campaign
+talents=http://www.torhead.com/skill-calc#700bZbIZGbbkrMGdhR.1
+name=Gunslinger_Dirty_Fighting_Campaign
+save=Gunslinger_Dirty_Fighting_Campaign.simc

@@ -80,11 +80,11 @@
 
 #define PRINTF_ATTRIBUTE(a,b) __attribute__((format(printf,a,b)))
 
-#define SC_MAJOR_VERSION "120"
-#define SC_MINOR_VERSION "3"
-#define SWTOR_VERSION_LIVE "1.2.6a"
+#define SC_MAJOR_VERSION "130"
+#define SC_MINOR_VERSION "2"
+#define SWTOR_VERSION_LIVE "1.3.0"
 #define SWTOR_VERSION_PTR "1.3.0"
-#define SC_USE_PTR ( 1 )
+#define SC_USE_PTR ( 0 )
 #define SC_BETA ( 0 )
 #define SC_EPSILON ( 0.000001 )
 #ifndef M_PI
@@ -402,6 +402,7 @@ enum talent_tree_type
   TREE_MEDICINE,       TREE_CONCEALMENT,    TREE_LETHALITY,
   TREE_MARKSMANSHIP,   TREE_ENGINEERING,
   TREE_BODYGUARD,      TREE_ARSENAL,        TREE_PYROTECH,
+  TREE_ANNIHILATION,   TREE_CARNAGE,        TREE_RAGE,
   TALENT_TREE_MAX
 };
 
@@ -415,10 +416,12 @@ enum talent_tab_type
   JEDI_SHADOW_KINETIC_COMBAT = 0, JEDI_SHADOW_INFILTRATION,  JEDI_SHADOW_BALANCE,
   SITH_ASSASSIN_DARKNESS = 0,     SITH_ASSASSIN_DECEPTION,   SITH_ASSASSIN_MADNESS,
 
-  IA_OPERATIVE_MEDICINE = 0,      IA_OPERATIVE_CONCEALMENT,  IA_OPERATIVE_LETHALITY,
-  IA_SNIPER_MARKSMANSHIP = 0,     IA_SNIPER_ENGINEERING,     IA_SNIPER_LETHALITY,
+  IA_OPERATIVE_MEDICINE = 0,      IA_OPERATIVE_CONCEALMENT,  IA_LETHALITY,
+  IA_SNIPER_MARKSMANSHIP = 0,     IA_SNIPER_ENGINEERING,
 
-  BH_MERCENARY_BODYGUARD = 0,     BH_MERCENARY_ARSENAL,      BH_MERCENARY_PYROTECH
+  BH_MERCENARY_BODYGUARD = 0,     BH_MERCENARY_ARSENAL,      BH_MERCENARY_PYROTECH,
+
+  SITH_MARAUDER_ANNIHILATION = 0, SITH_MARAUDER_CARNAGE,     SITH_MARAUDER_RAGE
 };
 
 enum weapon_type
@@ -1043,26 +1046,27 @@ public:
   static double ability_rank( int player_level, double ability_value, int ability_level, ... );
   static int    ability_rank( int player_level, int    ability_value, int ability_level, ... );
 
-  static const char* attribute_type_string ( attribute_type );
-  static const char* dmg_type_string       ( dmg_type );
-  static const char* stim_type_string      ( stim_type );
-  static const char* player_type_string    ( player_type type );
-  static const char* pet_type_string       ( pet_type );
-  static const char* position_type_string  ( position_type );
-  static const char* profession_type_string( profession_type );
-  static const char* quality_type_string   ( quality_type );
-  static const char* race_type_string      ( race_type );
-  static const char* role_type_string      ( role_type );
-  static const char* resource_type_string  ( resource_type );
-  static const char* result_type_string    ( result_type );
-  static const char* school_type_string    ( school_type );
-  static const char* slot_type_string      ( slot_type );
-  static const char* stat_type_string      ( stat_type );
-  static const char* stat_type_abbrev      ( stat_type );
-  static const char* stat_type_wowhead     ( stat_type );
-  static talent_tree_type talent_tree      ( talent_tab_type tree, player_type ptype );
-  static const char* talent_tree_string    ( talent_tree_type tree, bool armory_format = true );
-  static const char* weapon_type_string    ( weapon_type type );
+  static const char* attribute_type_string    ( attribute_type );
+  static const char* dmg_type_string          ( dmg_type );
+  static const char* stim_type_string         ( stim_type );
+  static const char* player_type_string       ( player_type type );
+  static const char* player_type_string_short ( player_type type );
+  static const char* pet_type_string          ( pet_type );
+  static const char* position_type_string     ( position_type );
+  static const char* profession_type_string   ( profession_type );
+  static const char* quality_type_string      ( quality_type );
+  static const char* race_type_string         ( race_type );
+  static const char* role_type_string         ( role_type );
+  static const char* resource_type_string     ( resource_type );
+  static const char* result_type_string       ( result_type );
+  static const char* school_type_string       ( school_type );
+  static const char* slot_type_string         ( slot_type );
+  static const char* stat_type_string         ( stat_type );
+  static const char* stat_type_abbrev         ( stat_type );
+  static const char* stat_type_wowhead        ( stat_type );
+  static talent_tree_type talent_tree         ( talent_tab_type tree, player_type ptype );
+  static const char* talent_tree_string       ( talent_tree_type tree, bool armory_format = true );
+  static const char* weapon_type_string       ( weapon_type type );
 
   static attribute_type parse_attribute_type  ( const std::string& name );
   static dmg_type parse_dmg_type              ( const std::string& name );
@@ -1196,7 +1200,7 @@ class talent_t
 private:
   unsigned    _rank;
   unsigned    _tab_page;    // Talent tab page
-  const char* _name;        // Talent name
+  std::string _name;        // Talent name
   //unsigned    _col;         // Talent column
   //unsigned    _row;         // Talent row
   unsigned    _max_rank;
@@ -1204,7 +1208,7 @@ private:
 
 public:
   // Careful: name needs
-  talent_t( player_t* p, const char* name, unsigned tab_page, unsigned max_rank );
+  talent_t( player_t* p, const std::string name, unsigned tab_page, unsigned max_rank );
 
   bool set_rank( unsigned value );
   bool ok() const { return ( _rank > 0 ); }
@@ -1214,7 +1218,7 @@ public:
 
   unsigned tab_page() const { return _tab_page; }
 
-  const char* name_cstr() const { return _name; }
+  std::string name() const { return _name; }
 };
 
 // Raid Event
@@ -2188,6 +2192,7 @@ struct item_t
   std::string option_ilevel_str;
   std::string option_quality_str;
   std::string option_data_source_str;
+  std::string option_setbonus_str;
   std::string options_str;
 
   // Armory Data
@@ -2203,6 +2208,7 @@ struct item_t
   std::string armory_ilevel_str;
   std::string armory_quality_str;
   std::string armory_random_suffix_str;
+  std::string armory_setbonus_str;
 
   // Encoded Data
   std::string id_str;
@@ -2219,6 +2225,7 @@ struct item_t
   std::string encoded_ilevel_str;
   std::string encoded_quality_str;
   std::string encoded_random_suffix_str;
+  std::string encoded_setbonus_str;
 
   // Extracted data
   gear_stats_t base_stats,stats;
@@ -2262,6 +2269,7 @@ struct item_t
   bool matching_type();
   const char* name() const;
   const char* slot_name() const { return util_t::slot_type_string( slot ); }
+  const char* setbonus() const;
   weapon_t* weapon() const;
   bool init();
   bool parse_options();
@@ -2292,13 +2300,15 @@ struct set_bonus_t
   bool has_2pc, has_4pc;
   set_bonus_t* next;
   std::string name;
-  std::vector<std::string> filters;
+  std::vector<std::string> shell_filters;
+  std::vector<std::string> armoring_filters;
   int count;
   slot_mask_t mask;
   bool force_enable_2pc, force_disable_2pc;
   bool force_enable_4pc, force_disable_4pc;
 
-  set_bonus_t( const std::string& name, const std::string& filters=std::string(),
+  set_bonus_t( const std::string& name, const std::string& shell_filters=std::string(),
+               const std::string& armoring_filters=std::string(),
                slot_mask_t s_mask=DEFAULT_SET_BONUS_SLOT_MASK );
 
   void init( const player_t& );
@@ -2309,7 +2319,8 @@ struct set_bonus_t
   //expr_ptr create_expression( action_t*, const std::string& type );
 
 private:
-  bool decode( const item_t& item ) const;
+  bool decode( const std::string name, const std::vector<std::string> filters ) const;
+  bool decode_by_shell(    const item_t& item ) const;
 };
 
 // Player ===================================================================
@@ -2345,6 +2356,7 @@ struct player_t : public noncopyable
   pet_t*      active_companion;
   bool        ptr;
 
+
   // Latency
   timespan_t  world_lag, world_lag_stddev;
   timespan_t  brain_lag, brain_lag_stddev;
@@ -2363,7 +2375,7 @@ struct player_t : public noncopyable
 
   struct talentinfo_t
   {
-    const char* name;
+    std::string name;
     unsigned points;
   };
 
@@ -2382,10 +2394,16 @@ struct player_t : public noncopyable
   race_type race;
 
   // Ratings
+
+  // companion bonuses
+  // XXX TODO unsure how companion bonus health works. %? set amount?
+  int bonus_accuracy_pc_, bonus_crit_pc_, bonus_surge_pc_, bonus_health_pc_;
+
 private:
   double initial_accuracy_rating, accuracy_rating_, base_accuracy_, computed_accuracy;
   double initial_alacrity_rating, alacrity_rating_, base_alacrity_, computed_alacrity;
   double initial_crit_rating, crit_rating, base_crit_chance_;
+
   double initial_surge_rating, surge_rating;
   double initial_defense_rating, defense_rating;
   double initial_shield_rating, shield_rating;
@@ -2668,17 +2686,56 @@ public:
 
   struct set_bonuses_t
   {
+    // inquisitor/consular
+    // ==== PvE sets
     set_bonus_t* rakata_force_masters;
-    set_bonus_t* battlemaster_force_masters;
+    set_bonus_t* rakata_force_mystics;
     set_bonus_t* rakata_stalkers;
-    // agent
+    set_bonus_t* rakata_survivors;
+    // ==== PvP sets
+    set_bonus_t* battlemaster_force_masters;
+    set_bonus_t* battlemaster_force_mystics;
+    set_bonus_t* battlemaster_stalkers;
+    set_bonus_t* battlemaster_survivors;
+
+
+    // agent/smuggler
+    // ==== PvE sets
     set_bonus_t* rakata_enforcers;
     set_bonus_t* rakata_field_medics;
     set_bonus_t* rakata_field_techs;
-    // mercenary
+    // ==== PvP sets
+    set_bonus_t* battlemaster_enforcers;
+    set_bonus_t* battlemaster_field_medics;
+    set_bonus_t* battlemaster_field_techs;
+
+
+    // bountyhunter/trooper
+    // ==== PvE sets
     set_bonus_t* rakata_eliminators;
+    set_bonus_t* rakata_combat_medics;
+    set_bonus_t* rakata_combat_techs;
+    set_bonus_t* rakata_supercomandos;
+    // ==== PvP sets
+    set_bonus_t* battlemaster_eliminators;
+    set_bonus_t* battlemaster_combat_medics;
+    set_bonus_t* battlemaster_combat_techs;
+    set_bonus_t* battlemaster_supercomandos;
+
+
+    // warrior/knight
+    // ==== PvE sets
+    set_bonus_t* rakata_weaponmasters;
+    set_bonus_t* rakata_vindicators;
+    set_bonus_t* rakata_war_leaders;
+    // ==== PvP sets
+    set_bonus_t* battlemaster_weaponmasters;
+    set_bonus_t* battlemaster_vindicators;
+    set_bonus_t* battlemaster_war_leaders;
+
   };
   set_bonuses_t set_bonus;
+
 
   const size_t targetdata_id;
 private:
@@ -2717,7 +2774,6 @@ public:
   virtual std::string init_use_racial_actions( const std::string& append = std::string() );
   virtual void init_actions();
   virtual void init_scaling();
-  virtual void init_abilities();
   virtual void init_talents();
   virtual void init_spells();
   virtual void init_buffs();
@@ -3030,7 +3086,7 @@ public:
   bool      in_gcd() const { return gcd_ready > sim -> current_time; }
   item_t*   find_item( const std::string& );
   action_t* find_action( const std::string& );
-  set_bonus_t* find_set_bonus( const std::string& name );
+  set_bonus_t* find_set_bonus( const std::string& name ) const;
   bool      dual_wield() const { return main_hand_weapon.type != WEAPON_NONE && off_hand_weapon.type != WEAPON_NONE; }
   void      aura_gain( const std::string& name, double value=0 );
   void      aura_loss( const std::string& name, double value=0 );
@@ -3048,8 +3104,11 @@ public:
   benefit_t*  get_benefit ( const std::string& name );
   uptime_t*   get_uptime  ( const std::string& name );
   rng_t*      get_rng     ( const std::string& name, rng_type type=RNG_DEFAULT );
-  set_bonus_t* get_set_bonus( const std::string& name, std::string filter,
+  set_bonus_t* get_set_bonus( const std::string& name, std::string shell_filter,
+                              std::string armoring_filter,
                               slot_mask_t slot_filter=DEFAULT_SET_BONUS_SLOT_MASK );
+  std::string get_armoring_set_bonus_name( const std::string armoring_name );
+  std::string get_shell_set_bonus_name( const std::string shell_name );
   double      get_player_distance( const player_t* p ) const;
   double      get_position_distance( double m=0, double v=0 ) const;
   action_priority_list_t* get_action_priority_list( const std::string& name );
@@ -3339,6 +3398,8 @@ public:
   virtual bool   usable_moving();
   virtual bool   ready();
   virtual void   init();
+  virtual void   set_base_min_max();
+          double get_standard_rank_amount() const;
   virtual void   reset();
   virtual void   cancel();
   virtual void   interrupt_action();
@@ -4107,6 +4168,7 @@ namespace mrrobot {
 bool parse_talents( player_t& player, const std::string& encoding );
 player_t* download_player( sim_t* sim, const std::string& profile_id,
                            cache::behavior_t=cache::players() );
+std::string encode_talents( const player_t& p );
 }
 
 // Torhead ==================================================================

@@ -1,13 +1,31 @@
-sith_assassin=Sith_Assassin_Madness
+## RAKATA
+
+sith_assassin=Assassin_Madness_Rakata
 Assassin_Gear-1.1.5.simc
 talents=http://www.torhead.com/skill-calc#200McZhMZfrbRrRkMfz.1
 position=back
-save=Sith_Assassin_Madness.simc
+save=Assassin_Madness_Rakata.simc
 
-copy=Sith_Assassin_Deception,Sith_Assassin_Madness
+copy=Assassin_Deception_Rakata,Assassin_Madness_Rakata
 talents=http://www.torhead.com/skill-calc#2000MZhGMRkhMrtzZf0c.1
-save=Sith_Assassin_Deception.simc
+save=Assassin_Deception_Rakata.simc
 
-copy=Sith_Assassin_Blood,Sith_Assassin_Madness
+copy=Assassin_Blood_Rakata,Assassin_Madness_Rakata
 talents=http://www.torhead.com/skill-calc#200RIMs00cZZfMfRr0kM.1
-save=Sith_Assassin_Blood.simc
+save=Assassin_Blood_Rakata.simc
+
+## CAMPAIGN
+
+mrrobot=704e50fa-8be9-4d8c-a3de-e60b53b15e14
+name=Assassin_Madness_Campaign
+talents=http://www.torhead.com/skill-calc#200McZhMZfrbRrRkMfz.1
+position=back
+save=Assassin_Madness_Campaign.simc
+
+copy=Assassin_Deception_Campaign,Assassin_Madness_Campaign
+talents=http://www.torhead.com/skill-calc#2000MZhGMRkhMrtzZf0c.1
+save=Assassin_Deception_Campaign.simc
+
+copy=Assassin_Blood_Campaign,Assassin_Madness_Campaign
+talents=http://www.torhead.com/skill-calc#200RIMs00cZZfMfRr0kM.1
+save=Assassin_Blood_Campaign.simc

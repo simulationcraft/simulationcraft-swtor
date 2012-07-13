@@ -1,0 +1,63 @@
+#!./simc
+
+scoundrel="Scoundrel_Dirty_Fighting_Rakata"
+origin="http://swtor.askmrrobot.com/character/dc7edc33-2adb-4e6d-8655-5b98dbfb4a26"
+level=50
+race=cyborg
+position=back
+role=hybrid
+use_pre_potion=0
+professions=armormech
+talents=http://www.torhead.com/skill-calc#7010cZG0MZGMbkrMGdhR.1
+actions=stim,type=exotech_skill
+actions+=/lucky_shots
+actions+=/snapshot_stats
+actions+=/stealth
+actions+=/cool_head,if=energy<=60
+actions+=/pugnacity,if=buff.upper_hand.stack>1
+actions+=/use_relics
+actions+=/power_potion
+actions+=/shoot_first
+actions+=/hemorrhaging_blast
+actions+=/blaster_whip,if=energy>=75&buff.upper_hand.stack<2
+actions+=/vital_shot,if=!ticking&energy>=75
+actions+=/shrap_bomb,if=!ticking&energy>=80
+actions+=/wounding_shots,if=energy>=50&buff.upper_hand.stack>=2&(dot.vital_shot.ticking|dot.vital_shot_weak.ticking)&(dot.shrap_bomb.ticking|dot.shrap_bomb_weak.ticking)
+actions+=/back_blast,if=energy>=70
+actions+=/xs_freighter_flyby,if=energy>65
+actions+=/sabotage_charge,if=energy>100&cooldown.blaster_whip.remains>2
+actions+=/quick_shot,if=energy>100&cooldown.blaster_whip.remains>2
+actions+=/flurry_of_bolts
+head=rakata_enforcers_headgear,ilevel=58,quality=artifact,stats=645armor_105endurance_122cunning_48power_51accuracy
+ear=rakata_enforcers_device,ilevel=58,quality=artifact,stats=85endurance_103cunning_51accuracy_44crit
+shirt=datacrons,stats=40strength_40aim_40cunning_40willpower_40endurance_40presence
+chest=rakata_enforcers_jacket,ilevel=58,quality=artifact,stats=645armor_116endurance_112cunning_51accuracy_48crit
+waist=rakata_enforcers_belt,ilevel=58,quality=artifact,stats=403armor_74endurance_85cunning_37crit
+legs=rakata_enforcers_leggings,ilevel=58,quality=artifact,stats=645armor_105endurance_122cunning_51accuracy_48crit
+feet=rakata_enforcers_boots,ilevel=58,quality=artifact,stats=403armor_116endurance_112cunning_51accuracy_48crit
+wrists=rakata_enforcers_armguards,ilevel=58,quality=artifact,stats=403armor_71endurance_103cunning_11power
+hands=rakata_enforcers_gloves,ilevel=58,quality=artifact,stats=403armor_105endurance_122cunning_48power_51accuracy
+implant1=rakata_enforcers_implant,ilevel=58,quality=artifact,stats=98endurance_85cunning_51power_51surge
+implant2=rakata_enforcers_package,ilevel=58,quality=artifact,stats=98endurance_85cunning_51power_51surge
+relic1=rakata_relic_of_boundless_ages,ilevel=58,quality=artifact,stats=77endurance,use=380power_120cd_20dur
+relic2=rakata_relic_of_forbidden_secrets,ilevel=58,quality=artifact,stats=77endurance,use=235crit_235surge_120cd_20dur
+main_hand=old_ironsights,ilevel=58,quality=artifact,stats=105endurance_122cunning_89power_612techpower_51accuracy,weapon=blasterpistol_268min_497max
+off_hand=disaster_insurance,ilevel=58,quality=artifact,stats=98endurance_85cunning_82power_612techpower_51accuracy,weapon=scattergun_309min_515max
+# Gear Summary
+# gear_strength=40
+# gear_aim=40
+# gear_cunning=1298
+# gear_willpower=40
+# gear_endurance=1370
+# gear_presence=40
+# gear_accuracy_rating=408
+# gear_crit_rating=225
+# gear_armor=3547
+# gear_power=380
+# gear_techpower=1224
+# gear_surge_rating=102
+# Set Bonuses
+# set_bonus=rakata_enforcers_2pc
+# set_bonus=rakata_enforcers_4pc
+# main_hand=old_ironsights,weapon=blasterpistol_268min_497max
+# off_hand=disaster_insurance,weapon=scattergun_309min_515max

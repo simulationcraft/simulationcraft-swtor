@@ -1,18 +1,20 @@
-jedi_sage=Jedi_Sage_Balance
+## RAKATA
+
+jedi_sage=Sage_Balance_Rakata
 Gear-1.1.5.simc
 talents=http://www.torhead.com/skill-calc#600hZbcMZcMfRsMkrfz.1
 position=ranged_front
-save=Jedi_Sage_Balance.simc
+save=Sage_Balance_Rakata.simc
 
-copy=Jedi_Sage_Telekinetics,Jedi_Sage_Balance
+copy=Sage_Telekinetics_Rakata,Sage_Balance_Rakata
 talents=http://www.torhead.com/skill-calc#600hZfsrodoMutzZcM0M.1
-save=Jedi_Sage_Telekinetics.simc
+save=Sage_Telekinetics_Rakata.simc
 
-copy=Jedi_Sage_Hybrid,Jedi_Sage_Balance
+copy=Sage_Hybrid_Rakata,Sage_Balance_Rakata
 talents=http://www.torhead.com/skill-calc#600oZfcM0bZfMfRs0krc.1
-save=Jedi_Sage_Hybrid.simc
+save=Sage_Hybrid_Rakata.simc
 
-copy=Jedi_Sage_Suffusion,Jedi_Sage_Balance
+copy=Sage_Suffusion_Rakata,Sage_Balance_Rakata
 talents=http://www.torhead.com/skill-calc#600G0bZfcMMdoMZcMcRs0z.1
 actions=stim,type=exotech_resolve
 actions+=/force_valor
@@ -27,9 +29,9 @@ actions+=/mind_crush,if=!ticking&buff.presence_of_mind.react
 actions+=/telekinetic_wave,if=buff.tidal_force.react
 actions+=/telekinetic_throw
 actions+=/project,moving=1
-save=Jedi_Sage_Suffusion.simc
+save=Sage_Suffusion_Rakata.simc
 
-copy=Jedi_Sage_Momentum,Jedi_Sage_Balance
+copy=Sage_Momentum_Rakata,Sage_Balance_Rakata
 talents=http://www.torhead.com/skill-calc#600ZfcrMdoMuzZcMcRs0z.1
 actions=stim,type=exotech_resolve
 actions+=/force_valor
@@ -46,4 +48,56 @@ actions+=/telekinetic_wave,if=buff.tidal_force.react
 actions+=/mental_alacrity
 actions+=/sequence,name=pewpew:disturbance:telekinetic_throw:telekinetic_throw:telekinetic_throw:telekinetic_throw:telekinetic_throw:telekinetic_throw:telekinetic_throw/restart_sequence,name=pewpew
 actions+=/project,moving=1
-save=Jedi_Sage_Momentum.simc
+save=Sage_Momentum_Rakata.simc
+
+## CAMPAIGN
+
+mrrobot=f4822a49-e091-441d-9e05-3f30f01d01e8
+name=Sage_Balance_Campaign
+talents=http://www.torhead.com/skill-calc#600hZbcMZcMfRsMkrfz.1
+position=ranged_front
+save=Sage_Balance_Campaign.simc
+
+copy=Sage_Telekinetics_Campaign,Sage_Balance_Campaign
+talents=http://www.torhead.com/skill-calc#600hZfsrodoMutzZcM0M.1
+save=Sage_Telekinetics_Campaign.simc
+
+copy=Sage_Hybrid_Campaign,Sage_Balance_Campaign
+talents=http://www.torhead.com/skill-calc#600oZfcM0bZfMfRs0krc.1
+save=Sage_Hybrid_Campaign.simc
+
+copy=Sage_Suffusion_Campaign,Sage_Balance_Campaign
+talents=http://www.torhead.com/skill-calc#600G0bZfcMMdoMZcMcRs0z.1
+actions=stim,type=exotech_resolve
+actions+=/force_valor
+actions+=/snapshot_stats
+actions+=/telekinetic_throw,if=buff.psychic_projection_dd.up
+actions+=/power_potion
+actions+=/force_potency
+actions+=/use_relics
+actions+=/weaken_mind,if=!ticking
+actions+=/force_in_balance
+actions+=/mind_crush,if=!ticking&buff.presence_of_mind.react
+actions+=/telekinetic_wave,if=buff.tidal_force.react
+actions+=/telekinetic_throw
+actions+=/project,moving=1
+save=Sage_Suffusion_Campaign.simc
+
+copy=Sage_Momentum_Campaign,Sage_Balance_Campaign
+talents=http://www.torhead.com/skill-calc#600ZfcrMdoMuzZcMcRs0z.1
+actions=stim,type=exotech_resolve
+actions+=/force_valor
+actions+=/snapshot_stats
+actions+=/telekinetic_throw,if=buff.psychic_projection_dd.up
+actions+=/power_potion
+actions+=/force_potency
+actions+=/use_relics
+actions+=/weaken_mind,if=!ticking
+actions+=/telekinetic_throw,if=buff.psychic_projection.react
+actions+=/force_in_balance
+actions+=/mind_crush,if=buff.presence_of_mind.react
+actions+=/telekinetic_wave,if=buff.tidal_force.react
+actions+=/mental_alacrity
+actions+=/sequence,name=pewpew:disturbance:telekinetic_throw:telekinetic_throw:telekinetic_throw:telekinetic_throw:telekinetic_throw:telekinetic_throw:telekinetic_throw/restart_sequence,name=pewpew
+actions+=/project,moving=1
+save=Sage_Momentum_Campaign.simc

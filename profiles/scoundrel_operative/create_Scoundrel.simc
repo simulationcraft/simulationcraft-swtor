@@ -1,14 +1,31 @@
+## RAKATA
+
 mrrobot=dc7edc33-2adb-4e6d-8655-5b98dbfb4a26
-name=Scoundrel_Scrapper
+name=Scoundrel_Scrapper_Rakata
 talents=http://www.torhead.com/skill-calc#7010cZGIRodzRdGoZhM0z.1
 position=back
-save=Scoundrel_Scrapper.simc
+save=Scoundrel_Scrapper_Rakata.simc
 
-copy=Scoundrel_Dirty_Fighting,Scoundrel_Scrapper
+copy=Scoundrel_Dirty_Fighting_Rakata,Scoundrel_Scrapper_Rakata
 talents=http://www.torhead.com/skill-calc#4010cZG0MZGMbkrMGdhR.1
 position=back
-save=Scoundrel_Dirty_Fighting.simc
+save=Scoundrel_Dirty_Fighting_Rakata.simc
 
-copy=Scoundrel_Sawbones,Scoundrel_Scrapper
-talents=http://www.torhead.com/skill-calc#401MffrzGoRdsZ0cZG.1
-save=Scoundrel_Sawbones.simc
+#talents=http://www.torhead.com/skill-calc#401MffrzGoRdsZ0cZG.1
+#save=Scoundrel_Sawbones_Rakata.simc
+
+## CAMPAIGN
+
+mrrobot=61abecbc-fbdd-4df4-ab8b-8f6e699899e3
+name=Scoundrel_Scrapper_Campaign
+talents=http://www.torhead.com/skill-calc#7010cZGIRodzRdGoZhM0z.1
+position=back
+save=Scoundrel_Scrapper_Campaign.simc
+
+copy=Scoundrel_Dirty_Fighting_Campaign,Scoundrel_Scrapper_Campaign
+talents=http://www.torhead.com/skill-calc#4010cZG0MZGMbkrMGdhR.1
+position=back
+save=Scoundrel_Dirty_Fighting_Campaign.simc
+
+#talents=http://www.torhead.com/skill-calc#401MffrzGoRdsZ0cZG.1
+#save=Scoundrel_Sawbones_Campaign.simc

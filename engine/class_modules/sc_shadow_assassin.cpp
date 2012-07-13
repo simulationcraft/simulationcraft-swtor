@@ -46,6 +46,7 @@ struct class_t : public cons_inq::class_t
     buff_t* recklessness;
     buff_t* deathmark;
     buff_t* overcharge_saber;
+    buff_t* harnessed_darkness;
   } buffs;
 
   // Gains
@@ -93,6 +94,9 @@ struct class_t : public cons_inq::class_t
     talent_t* charge_mastery;
     talent_t* electric_execution;
     talent_t* blood_of_sith;
+    talent_t* harnessed_darkness;
+    talent_t* wither;
+	talent_t* swelling_shadows;
 
     // Deception|Infiltration
     talent_t* insulation;
@@ -230,7 +234,7 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
 {
   add( dot_lightning_charge );
   alias( dot_lightning_charge, "lightning_discharge" );
-  alias( dot_lightning_charge, "force_technique" );
+  alias( dot_lightning_charge, "force_breach_dot" );
 }
 
 // ==========================================================================
@@ -500,6 +504,9 @@ struct shock_t : public spell_t
       if ( p -> rngs.chain_shock -> roll( p -> talents.chain_shock -> rank() * 0.15 ) )
       chain_shock -> execute();
     }
+
+    if ( p -> talents.harnessed_darkness -> rank() )
+      p -> buffs.harnessed_darkness -> trigger();
   }
 };
 
@@ -527,6 +534,25 @@ struct force_lightning_t : public spell_t
     channeled = true;
     tick_zero = true;
     cooldown -> duration = from_seconds( 6.0 );
+  }
+
+  virtual void player_buff()
+  {
+    spell_t::player_buff();
+
+    class_t* p = cast();
+
+    if ( p -> buffs.harnessed_darkness -> up() )
+      player_multiplier += 0.25 * p -> buffs.harnessed_darkness -> stack();
+  }
+
+  virtual void execute()
+  {
+    spell_t::execute();
+
+    p() -> buffs.harnessed_darkness -> expire();
+    // this increases range to 30, but range isn't check for that in the sime
+    p() -> buffs.recklessness -> decrement();
   }
 };
 
@@ -712,6 +738,8 @@ struct recklessness_t : public spell_t
   {
     parse_options( options_str );
     cooldown->duration = from_seconds( 90.0 );
+    if ( player -> set_bonus.battlemaster_stalkers -> four_pc() )
+      cooldown -> duration -= from_seconds( 15.0 );
     harmful = false;
 
     trigger_gcd = timespan_t::zero();
@@ -723,7 +751,7 @@ struct recklessness_t : public spell_t
 
     class_t* p = cast();
 
-    p->buffs.recklessness->trigger( 2 );
+    p->buffs.recklessness->trigger( p -> buffs.recklessness -> max_stack );
   }
 };
 
@@ -769,8 +797,6 @@ struct discharge_t: public spell_t
       dd.standardhealthpercentmax = .194;
       dd.power_mod = 1.74;
 
-      base_tick_time = from_seconds( 3.0 );
-
       background = true;
 
       player_multiplier += p->buffs.static_charges->stack() * 0.06;
@@ -784,6 +810,11 @@ struct discharge_t: public spell_t
         spell_t( n, p, SCHOOL_INTERNAL )
     {
       background = true;
+
+      dd.standardhealthpercentmin = 0.054;
+      dd.standardhealthpercentmax = 0.094;
+      dd.power_mod = 0.74;
+      aoe = 5;
 
       // FIME: Implement Dark Discharge
       crit_bonus += p->talents.crackling_blasts->rank() * 0.10;
@@ -802,9 +833,18 @@ struct discharge_t: public spell_t
     range = 10.0;
     base_cost = 20.0;
 
-    lightning_discharge = new lightning_discharge_t( p, "lightning_discharge" );
-    surging_discharge = new surging_discharge_t( p, "surging_discharge" );
-    dark_discharge = new dark_discharge_t( p, "dark_discharge" );
+    if ( p -> type == JEDI_SHADOW )
+    {
+      lightning_discharge = new lightning_discharge_t( p, "force_breach_dot" );
+      surging_discharge = new surging_discharge_t( p, "shadow_discharge" );
+      dark_discharge = new dark_discharge_t( p, "combat_discharge" );
+    }
+    else
+    {
+      lightning_discharge = new lightning_discharge_t( p, "lightning_discharge" );
+      surging_discharge = new surging_discharge_t( p, "surging_discharge" );
+      dark_discharge = new dark_discharge_t( p, "dark_discharge" );
+    }
 
     add_child( lightning_discharge );
     add_child( surging_discharge );
@@ -832,7 +872,7 @@ struct discharge_t: public spell_t
     cooldown->duration = from_seconds( 15.0 - p->talents.recirculation->rank() * 1.5 );
 
     if ( p->actives.charge == LIGHTNING_CHARGE && p->talents.crackling_charge->rank() > 0 )
-      cooldown->duration -= cooldown->duration * p->talents.crackling_charge->rank() * 0.25;
+      cooldown->duration -= cooldown->duration * p->talents.crackling_charge->rank() * 0.5;
 
     if ( p->actives.charge == SURGING_CHARGE )
       p->buffs.static_charges->expire();
@@ -846,6 +886,38 @@ struct discharge_t: public spell_t
 
     charge_action->execute();
   }
+};
+
+// Wither | Slow Time ==================================
+
+struct wither_t : public spell_t
+{
+    wither_t( class_t* p, const std::string& name, const std::string& options_str)
+        : spell_t(name, p, SCHOOL_KINETIC)
+    {
+        check_talent( p->talents.wither->rank() );
+
+        parse_options( options_str );
+
+        dd.standardhealthpercentmin = 0.088;
+        dd.standardhealthpercentmax = 0.148;
+        dd.power_mod = 1.18;
+
+        base_cost = 30.0;
+        range = 10.0;
+        cooldown->duration = from_seconds( 7.5 );
+        aoe = 5;
+    }
+
+    virtual void execute()
+    {
+        spell_t::execute();
+
+        class_t* p = cast();
+
+        if ( p -> talents.harnessed_darkness -> rank() )
+            p -> buffs.harnessed_darkness -> trigger();
+    }
 };
 
 // Apply Charge ======================================
@@ -1009,10 +1081,7 @@ struct overcharge_saber_t : public spell_t
   virtual void execute()
   {
     spell_t::execute();
-
-    class_t* p = cast();
-
-    p->buffs.overcharge_saber->trigger();
+    p() -> buffs.overcharge_saber->trigger();
   }
 };
 
@@ -1386,9 +1455,6 @@ struct lightning_charge_callback_t : public action_callback_t
 
   virtual void trigger( ::action_t* /* a */, void* /* call_data */)
   {
-    //weapon_t* w = a -> weapon;
-    //if ( ! w ) return;
-
     class_t* p = cast();
 
     if ( p->actives.charge != LIGHTNING_CHARGE )
@@ -1471,9 +1537,6 @@ struct surging_charge_callback_t : public action_callback_t
 
   virtual void trigger( ::action_t* /* a */, void* /* call_data */)
   {
-    //weapon_t* w = a -> weapon;
-    //if ( ! w ) return;
-
     class_t* p = cast();
 
     if ( p->actives.charge != SURGING_CHARGE )
@@ -1509,12 +1572,13 @@ struct dark_charge_callback_t : public action_callback_t
     {
       // FIXME: ADD correct values and implement heal and other effects
       // Add Overcharge Saber
+      dd.standardhealthpercentmin = dd.standardhealthpercentmax = 0.02;
+      dd.power_mod = 0.19;
 
       proc = true;
       background = true;
       cooldown->duration = from_seconds( 4.5 );
 
-      base_crit *= 1.0 + p->talents.charge_mastery->rank() * 0.01;
       base_multiplier *= 1.0 + p->talents.electric_execution->rank() * 0.03;
     }
 
@@ -1533,9 +1597,6 @@ struct dark_charge_callback_t : public action_callback_t
 
   virtual void trigger( ::action_t* /* a */, void* /* call_data */)
   {
-    //weapon_t* w = a -> weapon;
-    //if ( ! w ) return;
-
     class_t* p = cast();
 
     if ( p->actives.charge != DARK_CHARGE )
@@ -1544,7 +1605,7 @@ struct dark_charge_callback_t : public action_callback_t
     if ( dark_charge_damage_proc->cooldown->remains() > timespan_t::zero() )
       return;
 
-    if ( !rng_dark_charge->roll( 0.5 ) )
+    if ( !rng_dark_charge->roll( 0.5 + (0.075 * p -> talents.swelling_shadows -> rank() ) ) )
       return;
 
     dark_charge_damage_proc->execute();
@@ -1587,6 +1648,7 @@ struct duplicity_callback_t: action_callback_t
     if ( name == "surging_charge"     ) return new      surging_charge_t( this, name, options_str );
     if ( name == "thrash"             ) return new              thrash_t( this, name, options_str );
     if ( name == "voltaic_slash"      ) return new       voltaic_slash_t( this, name, options_str );
+    if ( name == "wither"             ) return new              wither_t( this, name, options_str );
   }
   else if ( type == JEDI_SHADOW )
   {
@@ -1607,6 +1669,7 @@ struct duplicity_callback_t: action_callback_t
     if ( name == "shadow_technique"   ) return new      surging_charge_t( this, name, options_str );
     if ( name == "double_strike"      ) return new              thrash_t( this, name, options_str );
     if ( name == "clairvoyant_strike" ) return new       voltaic_slash_t( this, name, options_str );
+    if ( name == "slow_time"          ) return new              wither_t( this, name, options_str );
   }
 
   // Abilities with the same name for Shadow and Assassin
@@ -1630,6 +1693,9 @@ void class_t::init_talents()
   talents.charge_mastery        = find_talent( "Charge Mastery" );
   talents.electric_execution    = find_talent( "Electric Execution" );
   talents.blood_of_sith         = find_talent( "Blood of Sith" );
+  talents.harnessed_darkness    = find_talent( "Harnessed Darkness" );
+  talents.wither                = find_talent( "Wither" );
+  talents.swelling_shadows      = find_talent( "Swelling Shadows" );
 
   // Deception|Infiltration
   talents.insulation            = find_talent( "Insulation" );
@@ -1712,9 +1778,6 @@ void class_t::init_buffs()
 {
   base_t::init_buffs();
 
-  // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-  // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-  // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
 
   bool is_shadow = ( type == JEDI_SHADOW );
 
@@ -1729,7 +1792,11 @@ void class_t::init_buffs()
   const char* static_charges      = is_shadow ? "exit_strategy"      : "static_charges"      ;
   const char* unearthed_knowledge = is_shadow ? "twin_disciplines"   : "unearthed_knowledge" ;
   const char* voltaic_slash       = is_shadow ? "clairvoyant_strike" : "voltaic_slash"       ;
+  const char* harnessed_darkness  = is_shadow ? "harnessed_shadows"  : "harnessed_darkness"  ;
 
+  // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
+  // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
+  // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   buffs.exploit_weakness    = new buff_t( this, exploit_weakness,    1, from_seconds( 10.0 ), from_seconds( 10.0 ), talents.duplicity -> rank () * 0.1 );
   buffs.dark_embrace        = new buff_t( this, dark_embrace,        1, from_seconds(  6.0 ), timespan_t::zero() );
   buffs.induction           = new buff_t( this, induction,           2, from_seconds( 10.0 ), timespan_t::zero(),   talents.induction -> rank() * 0.5 );
@@ -1738,9 +1805,12 @@ void class_t::init_buffs()
   buffs.exploitive_strikes  = new buff_t( this, exploitive_strikes,  1, from_seconds( 10.0 ), timespan_t::zero() );
   buffs.raze                = new buff_t( this, raze,                1, from_seconds( 15.0 ), from_seconds( 7.5 ),  talents.raze -> rank() * 0.6 );
   buffs.unearthed_knowledge = new buff_t( this, unearthed_knowledge, 1, from_seconds( 20.0 ), timespan_t::zero(),   talents.unearthed_knowledge -> rank() * 0.5 );
-  buffs.recklessness        = new buff_t( this, recklessness,        2, from_seconds( 20.0 ) );
+  buffs.recklessness        = new buff_t( this, recklessness,
+                                          set_bonus.battlemaster_stalkers -> four_pc() ? 3 : 2
+                                                                      , from_seconds( 20.0 ) );
   buffs.deathmark           = new buff_t( this, deathmark,          10, from_seconds( 30.0 ), timespan_t::zero() );
   buffs.overcharge_saber    = new buff_t( this, overcharge_saber,    1, from_seconds( 15.0 ) );
+  buffs.harnessed_darkness  = new buff_t( this, harnessed_darkness,  3, from_seconds( 30.0 ), timespan_t::zero(),   talents.harnessed_darkness -> rank() * 0.5 );
 }
 
 // class_t::init_gains =======================================================
@@ -1772,7 +1842,7 @@ void class_t::init_rng()
 {
   base_t::init_rng();
 
-  rngs.chain_shock = get_rng( "chain_shock" );
+  rngs.chain_shock        = get_rng( "chain_shock"        );
 }
 
 // class_t::init_actions =====================================================
@@ -1805,6 +1875,7 @@ void class_t::init_actions()
         action_list_str += "/stealth";
 
       action_list_str += "/power_potion"
+                         "/use_relics"
                          "/force_potency";
 
       if ( talents.dark_embrace->rank() )
@@ -1823,7 +1894,7 @@ void class_t::init_actions()
         action_list_str += "/mind_crush,if=buff.force_strike.react";
 
       if ( !talents.surging_charge->rank() )
-        action_list_str += "/force_breach,if=!dot.force_technique.ticking";
+        action_list_str += "/force_breach,if=!dot.force_breach_dot.ticking";
 
       if ( talents.induction->rank() )
         action_list_str += "/project,if=buff.circling_shadows.stack=2";
@@ -1871,6 +1942,7 @@ void class_t::init_actions()
         action_list_str += "/stealth";
 
       action_list_str += "/power_potion"
+                         "/use_relics"
                          "/recklessness";
 
       if ( talents.dark_embrace->rank() )
@@ -1933,19 +2005,15 @@ void class_t::init_spells()
 
   action_callback_t* c = new lightning_charge_callback_t( this );
   register_attack_callback( RESULT_HIT_MASK, c );
-  register_spell_callback( RESULT_HIT_MASK, c );
 
   c = new surging_charge_callback_t( this );
   register_attack_callback( RESULT_HIT_MASK, c );
-  register_spell_callback( RESULT_HIT_MASK, c );
 
   c = new dark_charge_callback_t( this );
   register_attack_callback( RESULT_HIT_MASK, c );
-  register_spell_callback( RESULT_HIT_MASK, c );
 
   c = new duplicity_callback_t( this );
   register_attack_callback( RESULT_HIT_MASK, c );
-  register_spell_callback( RESULT_HIT_MASK, c );
 }
 
 // class_t::primary_role ==========================================

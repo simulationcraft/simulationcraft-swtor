@@ -1,4 +1,13 @@
 mrrobot=fbcf6ea9-f33c-428d-9e4b-9d834bd89ad4
 talents=http://www.torhead.com/skill-calc#300Mc0MZMIkroMdRkfzZd.t
-name=Mercenary_Arsenal
-save=Mercenary_Arsenal.simc
+name=Mercenary_Arsenal_Rakata
+save=Mercenary_Arsenal_Rakata.simc
+
+mrrobot=7d9b4a17-1eaa-41b5-b5cc-52eb165b0946
+name=Mercenary_Arsenal_Campaign
+talents=http://www.torhead.com/skill-calc#300Mc0MZMIkroMdRkfzZd.t
+save=Mercenary_Arsenal_Campaign.simc
+
+mrrobot=c3c1b096-e36a-4c85-a23a-1050bcd95660
+name=Mercenary_Arsenal_Campaign_BiS
+save=Mercenary_Arsenal_Campaign_BiS.simc

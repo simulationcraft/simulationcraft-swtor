@@ -315,7 +315,7 @@ void dot_tick_event_t::execute()
     dot -> time_to_tick = timespan_t::zero();
     dot -> action -> last_tick( dot );
 
-    if ( dot -> action -> channeled )
+    if ( dot -> action -> channeled && ! dot -> action -> background )
     {
       if ( dot -> action -> player -> readying ) fprintf( sim -> output_file, "Danger Will Robinson!  Danger!  %s\n", dot -> name() );
 

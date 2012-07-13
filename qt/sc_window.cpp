@@ -27,12 +27,12 @@ static OptionEntry* getBuffOptions()
 {
   static OptionEntry options[] =
   {
-     { "Toggle All Buffs" , ""                                    , "Toggle all buffs on/off"                      },
-     { "Crit"             , "override.coordination"               , "+5% Crit"                                     },
-     { "Stats"            , "override.force_valor"                , "+5% Stat Buff (Str, Aim, Cunning, Willpower)" },
-     { "Endurance"        , "override.fortification_hunters_boon" , "+5% Endurance"                                },
-     { "Damage Bonus"     , "override.unnatural_might"            , "+5% Damage Bonus"                             },
-     { NULL, NULL, NULL }
+    { "Toggle All Buffs", "",                         "Toggle all buffs on/off"                           },
+    { "Crit",             "override.coordination",    "+5% Crit"                                          },
+    { "Stats",            "override.force_valor",     "+5% Stat Buff ( Str, Aim, Cunning, Willpower )"    },
+    { "Endurance",        "override.fortification_hunters_boon","+5% Endurance"                                    },
+    { "Damage Bonus",     "override.unnatural_might", "+5% Damage Bonus"                                  },
+    { NULL, NULL, NULL }
   };
   return options;
 }
@@ -59,10 +59,10 @@ static OptionEntry* getDebuffOptions()
 {
   static OptionEntry options[] =
   {
-     { "Toggle All Debuffs"          , ""                        , "Toggle all debuffs on/off"    },
-     { "Shatter Shot"                , "override.shatter_shot"   , "-20% Armor Shatter Shot"      },
-     { "Sundering Assault(x5stacks)" , "override.sunder"         , "-20% Armor Sundering Assault" },
-     { "Heat Signature(x5stacks)"    , "override.heat_signature" , "-20% Armor Heat Signature"    },
+    { "Toggle All Debuffs",     "",                        "Toggle all debuffs on/off"     },
+    { "Armor Reduction",        "override.shatter_shot",   "-20% Armor Reduction"          },
+    //{ "Armor Reduction SU",     "override.sunder",         "-20% Armor Sundering Strike"   },
+    //{ "Armor Reduction HS",     "override.heat_signature", "-20% Armor Heat Signature"     },
     { NULL, NULL, NULL }
   };
   return options;
@@ -288,16 +288,13 @@ QString SimulationCraftWindow::encodeOptions()
        << ( buttons.at( i ) -> isChecked() ? '1' : '0' );
   }
 
-//  buttons = debuffsButtonGroup->buttons();
+  buttons = debuffsButtonGroup->buttons();
   OptionEntry* debuffs = getDebuffOptions();
-  ss << " debuff:" << debuffs[ 1 ].option << '=' << shatterChoice -> currentText();
-  ss << " debuff:" << debuffs[ 2 ].option << '=' << sunderChoice  -> currentText();
-  ss << " debuff:" << debuffs[ 3 ].option << '=' << heatsigChoice -> currentText();
-//  for ( int i=1; debuffs[ i ].label; i++ )
-//  {
-//    ss << " debuff:" << debuffs[ i ].option << '='
-//       << ( buttons.at( i ) -> isChecked() ? '1' : '0' );
-//  }
+  for ( int i=1; debuffs[ i ].label; i++ )
+  {
+    ss << " debuff:" << debuffs[ i ].option << '='
+       << ( buttons.at( i ) -> isChecked() ? '1' : '0' );
+  }
 
   buttons = scalingButtonGroup->buttons();
   OptionEntry* scaling = getScalingOptions();
@@ -558,7 +555,7 @@ void SimulationCraftWindow::createGlobalsTab()
   QFormLayout* globalsLayout = new QFormLayout();
   globalsLayout->setFieldGrowthPolicy( QFormLayout::FieldsStayAtSizeHint );
   globalsLayout->addRow(        "Version",       versionChoice = createChoice( 3, "Live", "PTR", "Both" ) );
-  globalsLayout->addRow(     "Iterations",    iterationsChoice = createChoice( 5, "100", "1000", "10000", "25000", "50000" ) );
+  globalsLayout->addRow(     "Iterations",    iterationsChoice = createChoice( 6, "100", "1000", "10000", "25000", "50000", "100000" ) );
   globalsLayout->addRow(      "World Lag",       latencyChoice = createChoice( 3, "Low", "Medium", "High" ) );
   globalsLayout->addRow(   "Length (sec)",   fightLengthChoice = createChoice( 9, "100", "150", "200", "250", "300", "350", "400", "450", "500" ) );
   globalsLayout->addRow(    "Vary Length", fightVarianceChoice = createChoice( 3, "0%", "10%", "20%" ) );
@@ -566,7 +563,7 @@ void SimulationCraftWindow::createGlobalsTab()
   //globalsLayout->addRow(   "Target Level",   targetLevelChoice = createChoice( 3, "Raid Boss", "5-man heroic", "5-man normal" ) );
   globalsLayout->addRow(    "Target Race",    targetRaceChoice = createChoice( 7, "humanoid", "beast", "demon", "dragonkin", "elemental", "giant", "undead" ) );
   globalsLayout->addRow(   "Player Skill",   playerSkillChoice = createChoice( 4, "Elite", "Good", "Average", "Ouch! Fire is hot!" ) );
-  globalsLayout->addRow(        "Threads",       threadsChoice = createChoice( 4, "1", "2", "4", "8" ) );
+  globalsLayout->addRow(        "Threads",       threadsChoice = createChoice( 5, "1", "2", "4", "8", "12" ) );
   //globalsLayout->addRow(  "Armory Region",  armoryRegionChoice = createChoice( 5, "us", "eu", "tw", "cn", "kr" ) );
   //globalsLayout->addRow(    "Armory Spec",    armorySpecChoice = createChoice( 2, "active", "inactive" ) );
   globalsLayout->addRow(   "Default Role",   defaultRoleChoice = createChoice( 4, "auto", "dps", "heal", "tank" ) );
@@ -610,7 +607,6 @@ void SimulationCraftWindow::createBuffsTab()
 
 void SimulationCraftWindow::createDebuffsTab()
 {
-  //QVBoxLayout* debuffsLayout = new QVBoxLayout();
   QVBoxLayout* debuffsLayout = new QVBoxLayout();
   debuffsButtonGroup = new QButtonGroup();
   debuffsButtonGroup->setExclusive( false );
@@ -624,30 +620,8 @@ void SimulationCraftWindow::createDebuffsTab()
     debuffsLayout->addWidget( checkBox );
   }
   debuffsLayout->addStretch( 1 );
-
-  // XXX changing debuffs to dropdowns
-
-  QFormLayout* debuffsLayout2 = new QFormLayout();
-  debuffsLayout2 -> setFieldGrowthPolicy( QFormLayout::FieldsStayAtSizeHint );
-
-  shatterChoice = createChoice( 6, "0", "1", "2", "3", "4", "5" );
-  shatterChoice -> setToolTip( debuffs[ 1 ].tooltip );
-  shatterChoice -> setCurrentIndex( 1 );
-  debuffsLayout2 -> addRow( debuffs[ 1 ].label, shatterChoice );
-
-  sunderChoice = createChoice( 6, "0", "1", "2", "3", "4", "5" );
-  sunderChoice -> setToolTip( debuffs[ 2 ].tooltip );
-  sunderChoice -> setCurrentIndex( 1 );
-  debuffsLayout2 -> addRow( debuffs[ 2 ].label, sunderChoice );
-
-  heatsigChoice = createChoice( 6, "0", "1", "2", "3", "4", "5" );
-  heatsigChoice -> setToolTip( debuffs[ 3 ].tooltip );
-  heatsigChoice -> setCurrentIndex( 1 );
-  debuffsLayout2 -> addRow( debuffs[ 3 ].label, heatsigChoice );
-
   QGroupBox* debuffsGroupBox = new QGroupBox();
-  //debuffsGroupBox->setLayout( debuffsLayout );
-  debuffsGroupBox->setLayout( debuffsLayout2 );
+  debuffsGroupBox->setLayout( debuffsLayout );
 
   optionsTab->addTab( debuffsGroupBox, "Debuffs" );
 }
@@ -846,7 +820,8 @@ void SimulationCraftWindow::createBestInSlotTab()
 
       for ( player_type pt = PLAYER_NONE; pt < PLAYER_MAX; ++pt )
       {
-        if ( profileList[ i ].contains( util_t::player_type_string( pt ), Qt::CaseInsensitive ) )
+        if (   profileList[ i ].contains( util_t::player_type_string( pt ), Qt::CaseInsensitive )
+            || profileList[ i ].contains( util_t::player_type_string_short( pt ), Qt::CaseInsensitive ) )
         {
           if ( !rootItems[ k ][ pt ] )
           {
@@ -951,21 +926,23 @@ void SimulationCraftWindow::createSiteTab()
 void SimulationCraftWindow::createToolTips()
 {
   versionChoice->setToolTip( "Live: Use mechanics on Live servers\n"
-                             "PTR:  Use mechanics on PTR server"
+                             "PTR:  Use mechanics on PTR server\n"
                              "Both: Create Evil Twin with PTR mechanics" );
 
-  iterationsChoice->setToolTip( "100:   Fast and Rough\n"
-                                "1000:  Sufficient for DPS Analysis\n"
-                                "10000: Recommended for Scale Factor Generation\n"
-                                "25000: Use if 10,000 isn't enough for Scale Factors\n"
-                                "50000: If you're patient" );
+  iterationsChoice->setToolTip( "100:    Fast and Rough\n"
+                                "1000:   Sufficient for DPS Analysis\n"
+                                "10000:  Recommended for Scale Factor Generation\n"
+                                "25000:  Use if 10,000 isn't enough for Scale Factors\n"
+                                "50000:  If you're patient\n"
+                                "100000: Showing off" );
 
   fightLengthChoice->setToolTip( "For custom fight lengths use max_time=seconds." );
 
   fightVarianceChoice->setToolTip( "Varying the fight length over a given spectrum improves\n"
                                    "the analysis of trinkets and abilities with long cooldowns." );
 
-  fightStyleChoice->setToolTip( "Patchwerk: Tank-n-Spank\n"
+  fightStyleChoice->setToolTip( "Patchwerk:\n"
+                                "    Tank-n-Spank\n"
                                 "HelterSkelter:\n"
                                 "    Movement, Stuns, Interrupts,\n"
                                 "    Target-Switching (every 2min)\n"
@@ -976,13 +953,15 @@ void SimulationCraftWindow::createToolTips()
                                 "    10% into the fight until 20% before the end\n"
                                 "HeavyMovement:\n"
                                 "    4s Movement, 10s CD,\n"
-                                "    beginning 10s into the fight\n" );
+                                "    beginning 10s into the fight" );
 
   targetRaceChoice->setToolTip( "Race of the target and any adds." );
 
   //targetLevelChoice->setToolTip( "Level of the target and any adds." );
 
   playerSkillChoice->setToolTip( "Elite:       No mistakes.  No cheating either.\n"
+                                 "Good:        Rare DoT-clipping and skipping high-priority abilities\n"
+                                 "Avearge:     Occasional DoT-clipping and skipping high-priority abilities\n"
                                  "Fire-is-Hot: Frequent DoT-clipping and skipping high-priority abilities." );
 
   threadsChoice->setToolTip( "Match the number of CPUs for optimal performance.\n"
@@ -1352,19 +1331,15 @@ QString SimulationCraftWindow::mergeOptions()
     options += buttons.at( i )->isChecked() ? "1" : "0";
     options += "\n";
   }
-//  buttons = debuffsButtonGroup->buttons();
+  buttons = debuffsButtonGroup->buttons();
   OptionEntry* debuffs = getDebuffOptions();
-  options += debuffs[ 1 ].option; options += "=" + shatterChoice -> currentText() + "\n";
-  options += debuffs[ 2 ].option; options += "=" + sunderChoice  -> currentText() + "\n";
-  options += debuffs[ 3 ].option; options += "=" + heatsigChoice -> currentText() + "\n";
-//  for ( int i=1; debuffs[ i ].label; i++ )
-//  {
-//    options += debuffs[ i ].option;
-//    options += "=";
-//    options += buttons.at( i )->isChecked() ? "1" : "0";
-//    options += "\n";
-//  }
-
+  for ( int i=1; debuffs[ i ].label; i++ )
+  {
+    options += debuffs[ i ].option;
+    options += "=";
+    options += buttons.at( i )->isChecked() ? "1" : "0";
+    options += "\n";
+  }
   buttons = scalingButtonGroup->buttons();
   OptionEntry* scaling = getScalingOptions();
   for ( int i=2; scaling[ i ].label; i++ )

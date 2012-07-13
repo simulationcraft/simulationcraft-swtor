@@ -70,51 +70,75 @@ public:
     talent_t* lethal_injectors;
     // t3
     talent_t* corrosive_grenade;
+    talent_t* targeted_demolition;
     talent_t* cut_down;
     // t4
     talent_t* lethal_purpose;
     talent_t* adhesive_corrosives;
+    talent_t* hold_your_ground;
     talent_t* lethal_dose;
     // t5
     talent_t* cull;
     talent_t* counterstrike;
     // t6
     talent_t* devouring_microbes;
+    talent_t* razor_rounds;
     talent_t* lingering_toxins;
     // t7
     talent_t* weakening_blast;
   };
   talents_t& talents;
 
-  struct abilities_t
+  struct mirror_t
   {
-    std::string adrenaline_probe;
-    std::string coordination;
-    std::string corrosive_dart;
-    std::string corrosive_dart_weak;
-    std::string corrosive_grenade;
-    std::string corrosive_grenade_weak;
-    std::string corrosive_microbes;
-    std::string corrosive_microbes_tick;
-    std::string cull;
-    std::string explosive_probe;
-    std::string fragmentation_grenade;
-    std::string lethal_purpose;
-    std::string orbital_strike;
-    std::string overload_shot;
-    std::string rifle_shot;
-    std::string shiv;
-    std::string snipe;
-    std::string take_cover;
-    std::string weakening_blast;
+    // abilities
+    std::string a_adrenaline_probe;
+    std::string a_coordination;
+    std::string a_corrosive_dart;
+    std::string a_corrosive_grenade;
+    std::string a_corrosive_microbes;
+    std::string a_explosive_probe;
+    std::string a_fragmentation_grenade;
+    std::string a_orbital_strike;
+    std::string a_overload_shot;
+    std::string a_rifle_shot;
+    std::string a_shiv;
+    std::string a_snipe;
+    std::string a_take_cover;
 
-    // buff names
-    std::string cover;
+    // Lethality|Dirty Fighting
+    // t1
+    std::string t_deadly_directive;
+    std::string t_lethality;
+    std::string t_razor_edge;
+    // t2
+    std::string t_slip_away;
+    std::string t_flash_powder;
+    std::string t_corrosive_microbes;
+    std::string t_lethal_injectors;
+    // t3
+    std::string t_corrosive_grenade;
+    std::string t_targeted_demolition;
+    std::string t_cut_down;
+    // t4
+    std::string t_lethal_purpose;
+    std::string t_adhesive_corrosives;
+    std::string t_hold_your_ground;
+    std::string t_lethal_dose;
+    // t5
+    std::string t_cull;
+    std::string t_razor_rounds;
+    std::string t_counterstrike;
+    // t6
+    std::string t_devouring_microbes;
+    std::string t_lingering_toxins;
+    // t7
+    std::string t_weakening_blast;
   };
-  abilities_t& abilities;
+  mirror_t& m;
 
-  class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt, buffs_t& buffs, gains_t& gains, procs_t& procs, rngs_t& rngs, benefits_t& benefits, talents_t& talents, abilities_t& abilities ) :
-    player_t( sim, pt, name, rt ), energy_gains(), buffs(buffs), gains(gains), procs(procs), rngs(rngs), benefits(benefits), talents(talents), abilities(abilities)
+  class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt, buffs_t& buffs, gains_t& gains, procs_t& procs, rngs_t& rngs, benefits_t& benefits, talents_t& talents, mirror_t& m ) :
+    player_t( sim, pt, name, rt ), energy_gains(), buffs(buffs), gains(gains), procs(procs), rngs(rngs), benefits(benefits), talents(talents), m(m)
   {
     primary_attribute   = ATTR_CUNNING;
     secondary_attribute = ATTR_AIM;
@@ -149,7 +173,9 @@ public:
     distance = default_distance = 3;
 
     resource_base[ RESOURCE_ENERGY ] += 100;
-    if ( set_bonus.rakata_enforcers -> four_pc() )
+    if ( set_bonus.rakata_enforcers -> four_pc()
+         || set_bonus.battlemaster_enforcers -> four_pc()
+         || set_bonus.battlemaster_field_medics -> four_pc() )
       resource_base[ RESOURCE_ENERGY ] += 5;
 
     set_base_alacrity( get_base_alacrity() + 0.02 * talents.deadly_directive -> rank() );
@@ -200,8 +226,6 @@ public:
 
   virtual ::action_t* create_action( const std::string& name, const std::string& options ) = 0;
 
-  virtual void init_abilities();
-
   virtual void init_talents();
 
   virtual void init_benefits();
@@ -215,6 +239,8 @@ public:
   virtual void init_procs();
 
   virtual void init_rng();
+
+  virtual void create_mirror();
 
   virtual void create_talents();
 };
