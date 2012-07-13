@@ -1022,6 +1022,8 @@ struct takedown_t : public range_attack_t
     base_cost                    = energy_cost( p );
     cooldown -> duration         = from_seconds( 12 );
     range                        = 35.0;
+    if ( player -> set_bonus.battlemaster_field_techs -> four_pc() )
+      range += 5.0;
     dd.standardhealthpercentmin  =
     dd.standardhealthpercentmax  = 0.27;
     dd.power_mod                 = 2.7;

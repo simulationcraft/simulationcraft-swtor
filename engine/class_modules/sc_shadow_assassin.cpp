@@ -738,6 +738,8 @@ struct recklessness_t : public spell_t
   {
     parse_options( options_str );
     cooldown->duration = from_seconds( 90.0 );
+    if ( player -> set_bonus.battlemaster_stalkers -> four_pc() )
+      cooldown -> duration -= from_seconds( 15.0 );
     harmful = false;
 
     trigger_gcd = timespan_t::zero();
@@ -749,7 +751,7 @@ struct recklessness_t : public spell_t
 
     class_t* p = cast();
 
-    p->buffs.recklessness->trigger( 2 );
+    p->buffs.recklessness->trigger( p -> buffs.recklessness -> max_stack );
   }
 };
 
@@ -1803,7 +1805,9 @@ void class_t::init_buffs()
   buffs.exploitive_strikes  = new buff_t( this, exploitive_strikes,  1, from_seconds( 10.0 ), timespan_t::zero() );
   buffs.raze                = new buff_t( this, raze,                1, from_seconds( 15.0 ), from_seconds( 7.5 ),  talents.raze -> rank() * 0.6 );
   buffs.unearthed_knowledge = new buff_t( this, unearthed_knowledge, 1, from_seconds( 20.0 ), timespan_t::zero(),   talents.unearthed_knowledge -> rank() * 0.5 );
-  buffs.recklessness        = new buff_t( this, recklessness,        2, from_seconds( 20.0 ) );
+  buffs.recklessness        = new buff_t( this, recklessness,
+                                          set_bonus.battlemaster_stalkers -> four_pc() ? 3 : 2
+                                                                      , from_seconds( 20.0 ) );
   buffs.deathmark           = new buff_t( this, deathmark,          10, from_seconds( 30.0 ), timespan_t::zero() );
   buffs.overcharge_saber    = new buff_t( this, overcharge_saber,    1, from_seconds( 15.0 ) );
   buffs.harnessed_darkness  = new buff_t( this, harnessed_darkness,  3, from_seconds( 30.0 ), timespan_t::zero(),   talents.harnessed_darkness -> rank() * 0.5 );

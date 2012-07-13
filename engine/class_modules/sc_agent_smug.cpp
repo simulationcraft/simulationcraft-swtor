@@ -400,6 +400,8 @@ orbital_strike_t::orbital_strike_t( class_t* p, const std::string& n, const std:
   td.standardhealthpercentmax = 0.177;
   td.power_mod                = 1.77;
   num_ticks                   = 3;
+  if ( player -> set_bonus.battlemaster_field_techs -> two_pc() )
+    num_ticks                 += 1;
   base_tick_time              = from_seconds( 3 );
   base_execute_time           = from_seconds( 3 );
 

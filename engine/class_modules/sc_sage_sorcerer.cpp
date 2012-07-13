@@ -497,6 +497,8 @@ struct project_t : public spell_t
     parse_options( options_str );
 
     range = 30.0;
+    if ( player -> set_bonus.battlemaster_force_masters -> four_pc() )
+      range += 5.0;
 
     if ( p -> type == JEDI_SAGE )
       travel_speed = 40.0; // 0.5s travel time for range=20, 0.75s for range=30
@@ -1107,6 +1109,8 @@ struct force_potency_t : public spell_t
   {
     parse_options( options_str );
     cooldown -> duration = from_seconds( 90.0 );
+    if ( p -> set_bonus.battlemaster_stalkers -> four_pc() )
+      cooldown -> duration -= from_seconds( 15.0 );
     harmful = false;
 
     trigger_gcd = timespan_t::zero();
@@ -1118,7 +1122,7 @@ struct force_potency_t : public spell_t
 
     class_t* p = cast();
 
-    p -> buffs.force_potency -> trigger( 2 );
+    p -> buffs.force_potency -> trigger ( p -> buffs.force_potency -> max_stack );
   }
 };
 
@@ -1274,10 +1278,11 @@ struct healing_trance_t : public heal_t
     channeled = true;
 
     base_cost = 40.0;
-
     num_ticks = 3;
     base_tick_time = from_seconds( 1.0 );
     cooldown -> duration = from_seconds( 9.0 );
+    if ( player -> set_bonus.rakata_force_mystics -> two_pc() )
+      cooldown -> duration -= from_seconds( 1.5 );
 
     range = 30.0;
   }
@@ -1615,7 +1620,6 @@ void class_t::init_base()
   distance = default_distance = 30;
 
   resource_base[ RESOURCE_FORCE ] += 400 + talents.mental_longevity -> rank() * 50;
-
   attribute_multiplier_initial[ ATTR_WILLPOWER ] += talents.will_of_the_jedi -> rank() * 0.03;
 }
 
@@ -1661,7 +1665,10 @@ void class_t::init_buffs()
   buffs.presence_of_mind = new buff_t( this, is_sage ? "presence_of_mind" : "wrath", 1, from_seconds( 30 ), timespan_t::zero(), talents.presence_of_mind -> rank() * 0.3 );
   buffs.force_suppression = new buff_t( this, is_sage ? "force_suppression" : "deathmark", 10, from_seconds( 30.0 ), timespan_t::zero(), talents.force_suppression -> rank() );
   buffs.mental_alacrity = new buff_t( this, is_sage ? "mental_alacrity" : "polarity_shift", 1, from_seconds( 10.0 ) );
-  buffs.force_potency = new buff_t( this, is_sage ? "force_potency" : "recklessness", 2, from_seconds( 20.0 ) );
+  buffs.force_potency = new buff_t( this, is_sage ? "force_potency" : "recklessness",
+                                     set_bonus.battlemaster_stalkers -> four_pc() ? 3 : 2
+
+                                    , from_seconds( 20.0 ) );
   buffs.psychic_projection_dd = new buff_t( this, is_sage ? "psychic_projection_dd" : "lightning_barrage_dd", 1, from_seconds( 2.0 ), timespan_t::zero() );
   buffs.rakata_force_masters_4pc = new buff_t( this, "rakata_force_masters_4pc", 1, from_seconds( 15.0 ), from_seconds( 20.0 ), set_bonus.rakata_force_masters -> four_pc() ? 0.10 : 0.0 );
   buffs.noble_sacrifice = new buff_t( this, "noble_sacrifice", 4, from_seconds( 10.0 ) );

@@ -1239,22 +1239,8 @@ void action_t::init()
     }
   }
 
-  const double standard_rank_amount =
-      ( type == ACTION_HEAL || type == ACTION_ABSORB ) ?
-        rating_t::standardhealth_healing( rank_level ) :
-        rating_t::standardhealth_damage( rank_level );
-
-  if ( dd.standardhealthpercentmin > 0 )
-    dd.base_min = dd.standardhealthpercentmin * standard_rank_amount;
-
-  if ( dd.standardhealthpercentmax > 0 )
-    dd.base_max = dd.standardhealthpercentmax * standard_rank_amount;
-
-  if ( td.standardhealthpercentmin > 0 )
-    td.base_min = td.standardhealthpercentmin * standard_rank_amount;
-
-  if ( td.standardhealthpercentmax > 0 )
-    td.base_max = td.standardhealthpercentmax * standard_rank_amount;
+  // if min/max mods change during combat this needs to be re set
+  set_base_min_max();
 
   if ( ! sync_str.empty() )
   {
@@ -1278,9 +1264,38 @@ void action_t::init()
 
   if ( sim -> debug )
     log_t::output( sim, "%s initialised: ranklevel(%d amount:%f) dd.bmin(%f) dd.bmax(%f) td.bmin(%f) tdbmax(%f)",
-        name(), rank_level, standard_rank_amount, dd.base_min, dd.base_max, td.base_min, td.base_max  );
+        name(), rank_level, get_standard_rank_amount(), dd.base_min, dd.base_max, td.base_min, td.base_max  );
 
   initialized = true;
+}
+
+// action_t::get_standard_rank_amount =======================================
+
+double action_t::get_standard_rank_amount() const
+{
+  return
+    ( type == ACTION_HEAL || type == ACTION_ABSORB ) ?
+      rating_t::standardhealth_healing( rank_level ) :
+      rating_t::standardhealth_damage( rank_level );
+}
+
+// action_t::set_base_min_max ===============================================
+
+void action_t::set_base_min_max()
+{
+  const double standard_rank_amount = get_standard_rank_amount();
+
+  if ( dd.standardhealthpercentmin > 0 )
+    dd.base_min = dd.standardhealthpercentmin * standard_rank_amount;
+
+  if ( dd.standardhealthpercentmax > 0 )
+    dd.base_max = dd.standardhealthpercentmax * standard_rank_amount;
+
+  if ( td.standardhealthpercentmin > 0 )
+    td.base_min = td.standardhealthpercentmin * standard_rank_amount;
+
+  if ( td.standardhealthpercentmax > 0 )
+    td.base_max = td.standardhealthpercentmax * standard_rank_amount;
 }
 
 // action_t::reset ==========================================================

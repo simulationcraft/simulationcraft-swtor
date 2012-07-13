@@ -2192,6 +2192,7 @@ struct item_t
   std::string option_ilevel_str;
   std::string option_quality_str;
   std::string option_data_source_str;
+  std::string option_setbonus_str;
   std::string options_str;
 
   // Armory Data
@@ -2207,6 +2208,7 @@ struct item_t
   std::string armory_ilevel_str;
   std::string armory_quality_str;
   std::string armory_random_suffix_str;
+  std::string armory_setbonus_str;
 
   // Encoded Data
   std::string id_str;
@@ -2223,6 +2225,7 @@ struct item_t
   std::string encoded_ilevel_str;
   std::string encoded_quality_str;
   std::string encoded_random_suffix_str;
+  std::string encoded_setbonus_str;
 
   // Extracted data
   gear_stats_t base_stats,stats;
@@ -2266,6 +2269,7 @@ struct item_t
   bool matching_type();
   const char* name() const;
   const char* slot_name() const { return util_t::slot_type_string( slot ); }
+  const char* setbonus() const;
   weapon_t* weapon() const;
   bool init();
   bool parse_options();
@@ -2296,13 +2300,15 @@ struct set_bonus_t
   bool has_2pc, has_4pc;
   set_bonus_t* next;
   std::string name;
-  std::vector<std::string> filters;
+  std::vector<std::string> shell_filters;
+  std::vector<std::string> armoring_filters;
   int count;
   slot_mask_t mask;
   bool force_enable_2pc, force_disable_2pc;
   bool force_enable_4pc, force_disable_4pc;
 
-  set_bonus_t( const std::string& name, const std::string& filters=std::string(),
+  set_bonus_t( const std::string& name, const std::string& shell_filters=std::string(),
+               const std::string& armoring_filters=std::string(),
                slot_mask_t s_mask=DEFAULT_SET_BONUS_SLOT_MASK );
 
   void init( const player_t& );
@@ -2313,7 +2319,8 @@ struct set_bonus_t
   //expr_ptr create_expression( action_t*, const std::string& type );
 
 private:
-  bool decode( const item_t& item ) const;
+  bool decode( const std::string name, const std::vector<std::string> filters ) const;
+  bool decode_by_shell(    const item_t& item ) const;
 };
 
 // Player ===================================================================
@@ -2679,19 +2686,56 @@ public:
 
   struct set_bonuses_t
   {
+    // inquisitor/consular
+    // ==== PvE sets
     set_bonus_t* rakata_force_masters;
-    set_bonus_t* battlemaster_force_masters;
+    set_bonus_t* rakata_force_mystics;
     set_bonus_t* rakata_stalkers;
-    // agent
+    set_bonus_t* rakata_survivors;
+    // ==== PvP sets
+    set_bonus_t* battlemaster_force_masters;
+    set_bonus_t* battlemaster_force_mystics;
+    set_bonus_t* battlemaster_stalkers;
+    set_bonus_t* battlemaster_survivors;
+
+
+    // agent/smuggler
+    // ==== PvE sets
     set_bonus_t* rakata_enforcers;
     set_bonus_t* rakata_field_medics;
     set_bonus_t* rakata_field_techs;
-    // mercenary
+    // ==== PvP sets
+    set_bonus_t* battlemaster_enforcers;
+    set_bonus_t* battlemaster_field_medics;
+    set_bonus_t* battlemaster_field_techs;
+
+
+    // bountyhunter/trooper
+    // ==== PvE sets
     set_bonus_t* rakata_eliminators;
-    //marauder
+    set_bonus_t* rakata_combat_medics;
+    set_bonus_t* rakata_combat_techs;
+    set_bonus_t* rakata_supercomandos;
+    // ==== PvP sets
+    set_bonus_t* battlemaster_eliminators;
+    set_bonus_t* battlemaster_combat_medics;
+    set_bonus_t* battlemaster_combat_techs;
+    set_bonus_t* battlemaster_supercomandos;
+
+
+    // warrior/knight
+    // ==== PvE sets
     set_bonus_t* rakata_weaponmasters;
+    set_bonus_t* rakata_vindicators;
+    set_bonus_t* rakata_war_leaders;
+    // ==== PvP sets
+    set_bonus_t* battlemaster_weaponmasters;
+    set_bonus_t* battlemaster_vindicators;
+    set_bonus_t* battlemaster_war_leaders;
+
   };
   set_bonuses_t set_bonus;
+
 
   const size_t targetdata_id;
 private:
@@ -3042,7 +3086,7 @@ public:
   bool      in_gcd() const { return gcd_ready > sim -> current_time; }
   item_t*   find_item( const std::string& );
   action_t* find_action( const std::string& );
-  set_bonus_t* find_set_bonus( const std::string& name );
+  set_bonus_t* find_set_bonus( const std::string& name ) const;
   bool      dual_wield() const { return main_hand_weapon.type != WEAPON_NONE && off_hand_weapon.type != WEAPON_NONE; }
   void      aura_gain( const std::string& name, double value=0 );
   void      aura_loss( const std::string& name, double value=0 );
@@ -3060,8 +3104,11 @@ public:
   benefit_t*  get_benefit ( const std::string& name );
   uptime_t*   get_uptime  ( const std::string& name );
   rng_t*      get_rng     ( const std::string& name, rng_type type=RNG_DEFAULT );
-  set_bonus_t* get_set_bonus( const std::string& name, std::string filter,
+  set_bonus_t* get_set_bonus( const std::string& name, std::string shell_filter,
+                              std::string armoring_filter,
                               slot_mask_t slot_filter=DEFAULT_SET_BONUS_SLOT_MASK );
+  std::string get_armoring_set_bonus_name( const std::string armoring_name );
+  std::string get_shell_set_bonus_name( const std::string shell_name );
   double      get_player_distance( const player_t* p ) const;
   double      get_position_distance( double m=0, double v=0 ) const;
   action_priority_list_t* get_action_priority_list( const std::string& name );
@@ -3351,6 +3398,8 @@ public:
   virtual bool   usable_moving();
   virtual bool   ready();
   virtual void   init();
+  virtual void   set_base_min_max();
+          double get_standard_rank_amount() const;
   virtual void   reset();
   virtual void   cancel();
   virtual void   interrupt_action();
@@ -4119,6 +4168,7 @@ namespace mrrobot {
 bool parse_talents( player_t& player, const std::string& encoding );
 player_t* download_player( sim_t* sim, const std::string& profile_id,
                            cache::behavior_t=cache::players() );
+std::string encode_talents( const player_t& p );
 }
 
 // Torhead ==================================================================

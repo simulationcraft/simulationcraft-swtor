@@ -48,9 +48,10 @@ public:
 
   virtual void init_scaling()
   {
+    scales_with[ STAT_TECH_POWER ]         = true;
+    scales_with[ STAT_WEAPON_OFFHAND_DMG ] = true; // empire only
+
     player_t::init_scaling();
-    // TODO check
-    scales_with[ STAT_TECH_POWER ] = true;
   }
 
   virtual void init_base()
