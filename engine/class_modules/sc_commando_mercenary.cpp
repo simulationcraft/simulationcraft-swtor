@@ -1133,16 +1133,16 @@ void class_t::init_actions()
             action_list_str += "/vent_heat,if=heat<=40";
             action_list_str += "/use_relics";
             action_list_str += "/power_potion";
-            action_list_str += "/thermal_sensor_override,if=heat<77";
-            action_list_str += "/fusion_missile,if=buff.thermal_sensor_override.up";
             if ( set_bonus.rakata_eliminators -> four_pc() )
-              action_list_str += "/rail_shot,if=buff.high_velocity_gas_cylinder.up";
-            action_list_str += "/rail_shot,if=heat>77";
+              action_list_str += "/rail_shot,if=heat<83&buff.high_velocity_gas_cylinder.up";
+              action_list_str += "/rail_shot,if=heat>77&!buff.high_velocity_gas_cylinder.up";
+            action_list_str += "/thermal_sensor_override,if=heat<83";
+            action_list_str += "/fusion_missile,if=buff.thermal_sensor_override.up";
             if ( talents.heatseeker_missiles)
-              action_list_str += "/heatseeker_missiles,if=heat>77|cooldown.vent_heat.remains<10|buff.thermal_sensor_override.up";
-            action_list_str += "/unload,if=heat>77|cooldown.vent_heat.remains<10|buff.thermal_sensor_override.up";
+              action_list_str += "/heatseeker_missiles,if=heat>77|cooldown.vent_heat.remains<10";
+            action_list_str += "/unload,if=heat>77|cooldown.vent_heat.remains<10";
             if ( talents.tracer_missile )
-              action_list_str += "/tracer_missile,if=heat>77|cooldown.vent_heat.remains<10|buff.thermal_sensor_override.up|(heat>=70&cooldown.heatseeker_missiles.remains>1.5&cooldown.unload.remains>1.5)";
+              action_list_str += "/tracer_missile,if=heat>77|cooldown.vent_heat.remains<10|(heat>=70&cooldown.heatseeker_missiles.remains>1.5&cooldown.unload.remains>1.5)";
             else
               action_list_str += "/power_shot,if=heat>75";
             action_list_str += "/rapid_shots";
