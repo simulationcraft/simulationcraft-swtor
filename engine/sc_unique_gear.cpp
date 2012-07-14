@@ -949,19 +949,19 @@ bool unique_gear_t::get_use_encoding( std::string&       encoding,
   const char* e = nullptr;
 
   // SWTOR Use Relics
-       if ( name == "rakata_relic_of_boundless_ages"            ) e = "380Power_120cd_20dur";
-  else if ( name == "rakata_relic_of_forbidden_secrets"         ) e = "235Crit_235Surge_120cd_20dur";
-  else if ( name == "rakata_relic_of_the_primeval_fatesealer"   ) e = "380Alacrity_120cd_20dur";
-  else if ( name == "columi_relic_of_boundless_ages"            ) e = "355Power_120cd_20dur";
-  else if ( name == "columi_relic_of_forbidden_secrets"         ) e = "220Crit_220Surge_120cd_20dur";
-  else if ( name == "columi_relic_of_primeval_fatesealer"       ) e = "355Alacrity_120cd_20dur";
-  else if ( name == "relic_of_boundless_ages"                   ) e = "300Power_120cd_20dur";
-  else if ( name == "relic_of_forbidden_secrets"                ) e = "185Crit_185Surge_120cd_20dur";
-  else if ( name == "relic_of_primeval_fatesealer"              ) e = "300Alacrity_120cd_20dur";
-  else if ( name == "campaign_relic_of_boundless_ages"          ) e = "405Power_120cd_20dur";
-  else if ( name == "campaign_relic_of_imperiling_serenity"     ) e = "405Defense_120cd_20dur";
-  else if ( name == "campaign_relic_of_the_primeval_fatesealer" ) e = "405Alacrity_120cd_20dur";
-  else if ( name == "campaign_relic_of_the_shrouded_crusader"   ) e = "255shield_255absorb_120cd_20dur";
+       if ( name == "rakata_relic_of_boundless_ages"            ) e = "290Power_120cd_30dur";
+  else if ( name == "rakata_relic_of_forbidden_secrets"         ) e = "175Crit_175Surge_120cd_30dur";
+  else if ( name == "rakata_relic_of_the_primeval_fatesealer"   ) e = "290Alacrity_120cd_30dur";
+  else if ( name == "columi_relic_of_boundless_ages"            ) e = "270Power_120cd_30dur";
+  else if ( name == "columi_relic_of_forbidden_secrets"         ) e = "165Crit_165Surge_120cd_30dur";
+  else if ( name == "columi_relic_of_primeval_fatesealer"       ) e = "270Alacrity_120cd_30dur";
+  else if ( name == "relic_of_boundless_ages"                   ) e = "225Power_120cd_30dur";
+  else if ( name == "relic_of_forbidden_secrets"                ) e = "135Crit_135Surge_120cd_30dur";
+  else if ( name == "relic_of_primeval_fatesealer"              ) e = "225Alacrity_120cd_30dur";
+  else if ( name == "campaign_relic_of_boundless_ages"          ) e = "315Power_120cd_30dur";
+  else if ( name == "campaign_relic_of_imperiling_serenity"     ) e = "315Defense_120cd_30dur";
+  else if ( name == "campaign_relic_of_the_primeval_fatesealer" ) e = "315Alacrity_120cd_30dur";
+  else if ( name == "campaign_relic_of_the_shrouded_crusader"   ) e = "190shield_190abs_120cd_30dur";
 
   if ( ! e ) return false;
 
