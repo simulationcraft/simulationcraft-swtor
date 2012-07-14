@@ -8,7 +8,7 @@ position=back
 role=hybrid
 use_pre_potion=0
 professions=none
-talents=http://www.torhead.com/skill-calc#300Mc0MZMIkroMdRkfzZd.1
+talents=http://swtor.askmrrobot.com/skills/mercenary#2032-1f78d26e7l2-d
 actions=stim,type=exotech_reflex
 actions+=/snapshot_stats
 actions+=/high_velocity_gas_cylinder,if=!buff.high_velocity_gas_cylinder.up

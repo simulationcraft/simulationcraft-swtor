@@ -8,7 +8,7 @@ position=ranged_front
 role=spell
 use_pre_potion=0
 professions=artifice
-talents=http://www.torhead.com/skill-calc#201hZbcMZfrfRs0krcz.1
+talents=http://swtor.askmrrobot.com/skills/sorcerer#i-23c-13e7098fef
 actions=stim,type=exotech_resolve
 actions+=/mark_of_power
 actions+=/snapshot_stats

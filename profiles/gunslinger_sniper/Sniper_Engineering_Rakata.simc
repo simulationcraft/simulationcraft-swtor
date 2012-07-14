@@ -8,7 +8,7 @@ position=back
 role=dps
 use_pre_potion=0
 professions=armormech
-talents=http://www.torhead.com/skill-calc#400bcbZrI0bRorRrsZh.1
+talents=http://swtor.askmrrobot.com/skills/sniper#c3c-9e8e68c0le-i
 actions=stim,type=exotech_skill
 actions+=/coordination
 actions+=/snapshot_stats

@@ -8,7 +8,7 @@ position=back
 role=hybrid
 use_pre_potion=0
 professions=armormech
-talents=http://www.torhead.com/skill-calc#7010cZGIRodzRdGoZhM0z.1
+talents=http://swtor.askmrrobot.com/skills/scoundrel#30-6kd81d68lk-102i
 actions=stim,type=exotech_skill
 actions+=/lucky_shots
 actions+=/snapshot_stats

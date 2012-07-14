@@ -8,7 +8,7 @@ position=ranged_front
 role=spell
 use_pre_potion=0
 professions=none
-talents=http://www.torhead.com/skill-calc#600oZfcM0bZfMfRs0krc.1
+talents=http://swtor.askmrrobot.com/skills/sage#6-c023f-3e7098f2f
 actions=stim,type=exotech_resolve
 actions+=/force_valor
 actions+=/snapshot_stats
