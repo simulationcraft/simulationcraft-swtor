@@ -804,7 +804,8 @@ void action_t::calculate_result()
     // Second roll: Crit vs. Shield chance
     random = sim -> real();
 
-    if ( may_crit && random < total_crit() )
+    if ( ( ( td.weapon && tick_may_crit ) || ( !td.weapon && may_crit ) )
+        && random < total_crit() )
       result = RESULT_CRIT;
     else if ( random > 1.0 - target_shield )
       result = RESULT_BLOCK;
