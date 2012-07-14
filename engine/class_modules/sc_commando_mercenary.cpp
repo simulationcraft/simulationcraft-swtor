@@ -369,6 +369,10 @@ struct fusion_missile_t : public missile_attack_t
     dd.standardhealthpercentmin  = 0.1;
     dd.standardhealthpercentmax  = 0.16;
 
+    if ( p -> bugs )
+      // revert bonus from missile_attack_t tested in 1.3 by freehugs
+      base_multiplier -= 0.03 * p -> talents.mandalorian_iron_warheads -> rank();
+
     aoe                          = 3;
 
     add_child(radiation_burns);
