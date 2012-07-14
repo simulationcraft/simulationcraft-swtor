@@ -1,0 +1,63 @@
+#!./simc
+
+mercenary="Mercenary_Arsenal_Campaign_BiS"
+origin="http://swtor.askmrrobot.com/character/c3c1b096-e36a-4c85-a23a-1050bcd95660"
+level=50
+race=cyborg
+position=back
+role=hybrid
+use_pre_potion=0
+professions=biochem
+talents=http://swtor.askmrrobot.com/skills/mercenary#1032-1f78d26e7l2-9
+actions=stim,type=exotech_reflex
+actions+=/snapshot_stats
+actions+=/high_velocity_gas_cylinder,if=!buff.high_velocity_gas_cylinder.up
+actions+=/vent_heat,if=heat<=40
+actions+=/use_relics
+actions+=/power_potion
+actions+=/rail_shot,if=heat<83&buff.high_velocity_gas_cylinder.up
+actions+=/rail_shot,if=heat>77&!buff.high_velocity_gas_cylinder.up
+actions+=/thermal_sensor_override,if=heat<83
+actions+=/fusion_missile,if=buff.thermal_sensor_override.up
+actions+=/heatseeker_missiles,if=heat>77|cooldown.vent_heat.remains<10
+actions+=/unload,if=heat>77|cooldown.vent_heat.remains<10
+actions+=/tracer_missile,if=heat>77|cooldown.vent_heat.remains<10|(heat>=70&cooldown.heatseeker_missiles.remains>1.5&cooldown.unload.remains>1.5)
+actions+=/rapid_shots
+head=rakata_eliminators_helmet,ilevel=58,quality=artifact,setbonus=rakata_eliminators,stats=897armor_120endurance_139aim_82power_57accuracy
+ear=black_hole_boltblasters_mk_1_device,ilevel=61,quality=artifact,stats=99endurance_120aim_71crit_57surge
+shirt=datacrons,stats=40strength_40aim_40cunning_40willpower_40endurance_40presence
+chest=rakata_eliminators_chestguard,ilevel=58,quality=artifact,setbonus=rakata_eliminators,stats=897armor_120endurance_139aim_82power_57accuracy
+waist=hunters_exalted_belt,ilevel=58,quality=custom,stats=561armor_93endurance_139aim_41crit
+legs=rakata_eliminators_greaves,ilevel=58,quality=artifact,setbonus=rakata_eliminators,stats=897armor_120endurance_139aim_82power_57surge
+feet=rakata_eliminators_boots,ilevel=58,quality=artifact,setbonus=rakata_eliminators,stats=561armor_120endurance_139aim_82power_57surge
+wrists=hunters_exalted_bracers,ilevel=58,quality=custom,stats=561armor_93endurance_139aim_41crit
+hands=rakata_eliminators_gauntlets,ilevel=58,quality=artifact,setbonus=rakata_eliminators,stats=561armor_120endurance_139aim_82power_57surge
+implant1=black_hole_annihilators_mk_1_enhancer,ilevel=61,quality=artifact,stats=99endurance_120aim_71power_57accuracy
+implant2=black_hole_annihilators_mk_1_enhancer,ilevel=61,quality=artifact,stats=99endurance_120aim_71power_57accuracy
+relic1=war_hero_relic_of_boundless_ages,ilevel=61,quality=artifact,stats=53endurance_18aim_57expertise_113power
+relic2=war_hero_relic_of_boundless_ages,ilevel=61,quality=artifact,stats=53endurance_18aim_57expertise_113power
+main_hand=elegant_modified_blaster_pistol,ilevel=50,quality=custom,stats=120endurance_139aim_123power_649techpower_57accuracy,weapon=blasterpistol_284min_527max
+off_hand=elegant_modified_blaster_pistol,ilevel=50,quality=custom,stats=120endurance_139aim_41power_649techpower_82crit_57surge,weapon=blasterpistol_284min_527max
+# Gear Summary
+# gear_strength=40
+# gear_aim=1687
+# gear_cunning=40
+# gear_willpower=40
+# gear_endurance=1469
+# gear_presence=40
+# gear_expertise=114
+# gear_accuracy_rating=285
+# gear_crit_rating=235
+# gear_armor=4935
+# gear_power=942
+# gear_techpower=1298
+# gear_surge_rating=285
+# Set Bonuses
+# set_bonus=rakata_eliminators_2pc
+# set_bonus=rakata_eliminators_4pc
+# main_hand=elegant_modified_blaster_pistol,weapon=blasterpistol_284min_527max
+# off_hand=elegant_modified_blaster_pistol,weapon=blasterpistol_284min_527max
+bonus_surge_pc=1
+bonus_crit_pc=1
+bonus_accuracy_pc=1
+bonus_health_pc=1

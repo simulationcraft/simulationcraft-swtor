@@ -10,20 +10,21 @@
 PATH="../engine:engine:$PATH"
 echo $PATH
 
-iterations=10000
+iterations=50000
 threads=7
-calculate_scale_factors=0
+calculate_scale_factors=1
 center_scale_delta=1
 statistics_level=3
+positive_scale_delta=0
 #ptr=0
 
 runsim ()
 {
   echo $1$2
-  simc $1.simc $3 output=/dev/null statistics_level=$statistics_level iterations=$iterations calculate_scale_factors=$calculate_scale_factors center_scale_delta=$center_scale_delta threads=$threads  html=$1$2.html # ptr=$ptr
+  simc $1.simc $3 output=/dev/null statistics_level=$statistics_level iterations=$iterations calculate_scale_factors=$calculate_scale_factors center_scale_delta=$center_scale_delta positive_scale_delta=$positive_scale_delta threads=$threads  html=$1$2.html # ptr=$ptr
 }
 
-runsim Raid_Campaign
+#runsim Raid_Campaign
 # runsim Sage_Sorcerer_Raid_Campaign
 # runsim Sage_Sorcerer_Raid_Campaign -HelterSkelter "fight_style=HelterSkelter"
 # runsim Sage_Sorcerer_Raid_Campaign -HeavyMovement "fight_style=HeavyMovement"
@@ -33,6 +34,10 @@ runsim Raid_Campaign
 # runsim Mercenary_Raid_Campaign
 # runsim Scoundrel_Operative_Raid_Campaign
 # runsim Gunslinger_Sniper_Raid_Campaign
+# runsim Sorcerer_Raid_Campaign_BiS
+#iterations=200000
+#runsim Mercenary_Arsenal_Campaign_BiS
+#runsim Empire_Raid_Campaign_BiS
 
 # runsim Sage_Sorcerer_Raid
 # runsim Sage_Sorcerer_Raid -HelterSkelter "fight_style=HelterSkelter"
