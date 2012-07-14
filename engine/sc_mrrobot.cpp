@@ -61,12 +61,7 @@ std::string encode_tree( const std::vector<talent_t*>& tree )
     }
   }
 
-  size_t length = result.size();
-  while ( length > 0 && result[ length - 1 ] == '0' )
-    --length;
-  result.resize( length );
-
-  return result;
+  return result.size() > 0  ? result : "0";
 }
 void parse_profession( js::node_t* profile,
                        const std::string& path,
@@ -858,10 +853,10 @@ bool parse_talents( player_t& p, const std::string& talent_string )
       try
       {
         base36_t::pair_t point_pair = decoder( tree_strings[ tree ][ pos ] );
-        if ( ++tree_count >= tree_size )
+        if ( ++tree_count > tree_size )
           break;
         encoding[ count++ ] = point_pair.second;
-        if ( ++tree_count >= tree_size )
+        if ( ++tree_count > tree_size )
           break;
         encoding[ count++ ] = point_pair.first;
       }
