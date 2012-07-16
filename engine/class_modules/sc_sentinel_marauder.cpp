@@ -248,6 +248,8 @@ struct force_attack_t : public action_t
       action_t( n, p, force_policy, p -> primary_resource(), s )
     {
         may_crit   = true;
+
+        base_multiplier += (0.02 * p -> buffs.juyo_form -> current_stack );
     }
 
 };
@@ -258,21 +260,28 @@ struct melee_attack_t : public action_t
     action_t(n, p, melee_policy, p -> primary_resource(), s)
   {
     may_crit = true;
+
+    base_multiplier += (0.02 * p -> buffs.juyo_form -> current_stack );
   }
   virtual void impact( player_t* t, result_type impact_result, double travel_dmg)
+  {
+    action_t::impact( t, impact_result, travel_dmg);
+
+    if (result_is_hit( impact_result ) )
     {
-      action_t::impact( t, impact_result, travel_dmg);
+      class_t* p = cast();
 
-      if (result_is_hit( impact_result ) )
+      if ( p -> actives.form == JUYO_FORM )
       {
-        class_t* p = cast();
+        p->buffs.juyo_form-> increment();
+      }
 
-        if ( p -> actives.form == JUYO_FORM )
-        {
-          p->buffs.juyo_form-> increment();
-        }
+      if ( p -> buffs.deadly_saber -> up() )
+      {
+        p -> buffs.deadly_saber -> decrement();
       }
     }
+  }
 };
 
 struct bleed_attack_t : public force_attack_t
@@ -304,11 +313,12 @@ struct berserk_t : public action_t
   typedef action_t basae_t;
 
   berserk_t( class_t* p, const std::string& n, const std::string& options_str) :
-    action_t( n, p, force_policy, p -> primary_resource(), SCHOOL_INTERNAL)
+    action_t( n, p, default_policy, p -> primary_resource(), SCHOOL_NONE )
   {
     parse_options( options_str );
     harmful = false;
 
+    use_off_gcd = true;
     trigger_gcd = timespan_t::zero();
   }
 
@@ -371,12 +381,13 @@ struct rupture_t : public melee_attack_t
     rupture_dot_t( class_t* p, const std::string& n) :
       bleed_attack_t( n, p )
     {
-      dd.standardhealthpercentmin =
-      dd.standardhealthpercentmax = 0.02;
-      dd.power_mod = 0.2;
+      td.standardhealthpercentmin =
+      td.standardhealthpercentmax = 0.02;
+      td.power_mod = 0.2;
 
       base_tick_time = from_seconds( 1.0 );
       num_ticks = 6;
+      tick_zero = false;
       range = 4.0;
       background = true;
     }
@@ -416,7 +427,7 @@ struct rupture_t : public melee_attack_t
     }
     else
     {
-      offhand_attack = new rupture_t( p, n, options_str, true );
+      offhand_attack = new rupture_t( p, n + "_offhand", options_str, true );
       add_child( offhand_attack );
     }
   }
@@ -477,6 +488,46 @@ struct deadly_saber_t : public action_t
 {
   typedef action_t base_t;
 
+  deadly_saber_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    base_t( n, p, default_policy, p -> primary_resource(), SCHOOL_NONE )
+  {
+    parse_options( options_str );
+    harmful = false;
+    cooldown -> duration = from_seconds( 12.0 );
+    base_cost = 3;
+
+    use_off_gcd = true;
+    trigger_gcd = timespan_t::zero();
+  }
+  virtual void execute()
+  {
+    base_t::execute();
+
+    class_t* p = cast();
+
+    p -> buffs.deadly_saber -> trigger( 3 );
+  }
+
+};
+
+struct deadly_saber_dot_t : public bleed_attack_t
+{
+  typedef bleed_attack_t base_t;
+
+  deadly_saber_dot_t( class_t* p, const std::string& n, const std::string& options_str) :
+    base_t( n, p )
+  {
+    parse_options( options_str );
+
+    td.standardhealthpercentmin =
+    td.standardhealthpercentmax = 0.02;
+    td.power_mod = 0.2;
+
+    base_tick_time = from_seconds( 3.0 );
+    num_ticks = 3;
+    tick_zero = true;
+    background = true;
+  }
 };
 
 // Force Charge | Force Leap ==================================================
@@ -485,7 +536,7 @@ struct force_charge_t : public melee_attack_t
   typedef melee_attack_t base_t;
 
   force_charge_t( class_t* p, const std::string& n, const std::string& options_str) :
-    base_t(n, p)
+    base_t( n, p )
   {
     parse_options( options_str );
 
@@ -493,14 +544,21 @@ struct force_charge_t : public melee_attack_t
     cooldown -> duration = from_seconds( 15 );
     range = 30.0;
     weapon_multiplier = -0.39;
+    weapon = &(player -> main_hand_weapon);
+
     dd.standardhealthpercentmin =
     dd.standardhealthpercentmax = 0.091;
     dd.power_mod = 0.91;
 
-    p -> resource_gain( RESOURCE_RAGE, 3, p -> gains.force_charge );
 
     //TODO: minimum range?
     //TODO: travel time?
+  }
+
+  virtual void execute()
+  {
+    class_t* p = cast();
+    p -> resource_gain( RESOURCE_RAGE, 3, p -> gains.force_charge );
   }
 };
 
@@ -516,6 +574,17 @@ struct battering_assault_t : public melee_attack_t
 {
   typedef melee_attack_t base_t;
 
+  battering_assault_t( class_t* p, const std::string& n, const std::string& options_str) :
+    base_t( n, p )
+  {
+    parse_options( options_str );
+  }
+
+  virtual void execute()
+  {
+    class_t* p = cast();
+    p -> resource_gain( RESOURCE_RAGE, 6, p -> gains.battering_assault );
+  }
 };
 
 // Vicious Slash | Slash ======================================================
@@ -523,6 +592,40 @@ struct vicious_slash_t : public melee_attack_t
 {
   typedef melee_attack_t base_t;
 
+  vicious_slash_t* offhand_attack;
+
+  vicious_slash_t( class_t* p, const std::string& n, const std::string& options_str,
+                  bool is_offhand = false ) :
+    base_t( n, p )
+  {
+    parse_options( options_str );
+
+    base_cost = 3;
+    range = 4.0;
+
+    dd.standardhealthpercentmin =
+    dd.standardhealthpercentmax = 0.153;
+    dd.power_mod = 1.54;
+    weapon = &(player -> main_hand_weapon);
+    weapon_multiplier = 0.02;
+
+    if ( is_offhand )
+    {
+      base_cost = 0;
+      background = true;
+      dual = true;
+      base_execute_time = timespan_t::zero();
+      trigger_gcd = timespan_t::zero();
+      weapon = &( player -> off_hand_weapon );
+      rank_level_list = { 0 };
+      dd.power_mod = 0;
+    }
+    else
+    {
+      offhand_attack = new vicious_slash_t( p, n+"_offhand", options_str, true);
+      add_child( offhand_attack );
+    }
+  }
 };
 
 // Assault | Strike ===========================================================
@@ -531,7 +634,7 @@ struct assault_t : public melee_attack_t
   typedef melee_attack_t base_t;
 
   assault_t( class_t* p, const std::string& n, const std::string& options_str) :
-    melee_attack_t(n, p, SCHOOL_KINETIC)
+    melee_attack_t( n, p )
     {
       parse_options( options_str );
 
