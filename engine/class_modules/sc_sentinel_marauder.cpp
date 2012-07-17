@@ -250,6 +250,11 @@ struct force_attack_t : public action_t
         may_crit   = true;
 
         base_multiplier += (0.02 * p -> buffs.juyo_form -> current_stack );
+
+        if ( p -> buffs.bloodthirst -> up() )
+        {
+          player_multiplier += 0.15;
+        }
     }
 
 };
@@ -262,6 +267,11 @@ struct melee_attack_t : public action_t
     may_crit = true;
 
     base_multiplier += (0.02 * p -> buffs.juyo_form -> current_stack );
+
+    if ( p -> buffs.bloodthirst -> up() )
+    {
+      player_multiplier += 0.15;
+    }
   }
   virtual void impact( player_t* t, result_type impact_result, double travel_dmg)
   {
@@ -313,7 +323,7 @@ struct berserk_t : public action_t
   typedef action_t basae_t;
 
   berserk_t( class_t* p, const std::string& n, const std::string& options_str) :
-    action_t( n, p, default_policy, p -> primary_resource(), SCHOOL_NONE )
+    action_t( n, p, force_policy, p -> primary_resource(), SCHOOL_NONE )
   {
     parse_options( options_str );
     harmful = false;
@@ -367,7 +377,7 @@ struct vicious_throw_t : public melee_attack_t
 
   virtual void execute()
   {
-
+    base_t::execute();
   }
 };
 
@@ -478,6 +488,8 @@ struct annihilate_t : public melee_attack_t
 
   virtual void execute()
   {
+    base_t::execute();
+
     class_t* p = cast();
     p -> buffs.annihilator -> increment();
   }
@@ -489,7 +501,7 @@ struct deadly_saber_t : public action_t
   typedef action_t base_t;
 
   deadly_saber_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    base_t( n, p, default_policy, p -> primary_resource(), SCHOOL_NONE )
+    base_t( n, p, force_policy, p -> primary_resource(), SCHOOL_NONE )
   {
     parse_options( options_str );
     harmful = false;
@@ -557,6 +569,8 @@ struct force_charge_t : public melee_attack_t
 
   virtual void execute()
   {
+    base_t::execute();
+
     class_t* p = cast();
     p -> resource_gain( RESOURCE_RAGE, 3, p -> gains.force_charge );
   }
@@ -574,16 +588,71 @@ struct battering_assault_t : public melee_attack_t
 {
   typedef melee_attack_t base_t;
 
-  battering_assault_t( class_t* p, const std::string& n, const std::string& options_str) :
+  battering_assault_t* second_strike;
+  battering_assault_t* offhand_attack;
+  bool rage_gain;
+
+  battering_assault_t( class_t* p, const std::string& n, const std::string& options_str,
+                      bool is_offhand = false, bool is_second_strike = false ) :
     base_t( n, p )
   {
     parse_options( options_str );
+
+    base_cost = 0;
+    range = 4.0;
+    weapon = &( player -> main_hand_weapon );
+    weapon_multiplier = -0.835;
+    dd.standardhealthpercentmin =
+    dd.standardhealthpercentmax = 0.05;
+    dd.power_mod = 0.5;
+    base_accuracy -= 10.0;
+    rage_gain = true;
+
+    if ( is_second_strike )
+    {
+      background = dual = true;
+      trigger_gcd = timespan_t::zero();
+      base_execute_time = from_seconds( 0.4 );
+      rage_gain = false;
+    }
+    else if ( ! is_offhand )
+    {
+      second_strike = new battering_assault_t( p, n, options_str, true, is_offhand );
+    }
+
+    if ( is_offhand )
+    {
+      background = dual = true;
+      trigger_gcd = timespan_t::zero();
+      weapon = &( player -> off_hand_weapon );
+      rank_level_list = { 0 };
+      dd.power_mod = 0;
+      rage_gain = false;
+    }
+    else
+    {
+      offhand_attack = new battering_assault_t( p, n + "_offhand", options_str, is_second_strike, true );
+      add_child( offhand_attack );
+    }
+
   }
 
   virtual void execute()
   {
-    class_t* p = cast();
-    p -> resource_gain( RESOURCE_RAGE, 6, p -> gains.battering_assault );
+    base_t::execute();
+    if ( second_strike )
+    {
+      second_strike -> schedule_execute();
+    }
+    if ( offhand_attack )
+    {
+      offhand_attack -> schedule_execute();
+    }
+    if ( rage_gain )
+    {
+      class_t* p = cast();
+      p -> resource_gain( RESOURCE_RAGE, 6, p -> gains.battering_assault );
+    }
   }
 };
 
@@ -647,35 +716,35 @@ struct bloodthirst_t : public action_t
 {
   typedef action_t base_t;
 
+  bloodthirst_t( class_t* p, const std::string& n, const std::string options_str ) :
+    base_t( n, p, force_policy, RESOURCE_NONE, SCHOOL_NONE )
+  {
+    parse_options( options_str );
+    base_cost = 0;
+    harmful = false;
+
+    use_off_gcd = true;
+    trigger_gcd = timespan_t::zero();
+
+    cooldown -> duration = from_seconds( 300 );
+  }
+
+  virtual void execute()
+  {
+    base_t::execute();
+
+    class_t* p = cast();
+    p -> buffs.bloodthirst -> trigger();
+  }
+
+  virtual bool ready()
+  {
+    class_t* p = cast();
+    return p -> buffs.fury -> current_stack >= 30;
+  }
 };
 
-// Gore | Precision Slash =====================================================
-struct gore_t : public melee_attack_t
-{
-  typedef melee_attack_t base_t;
 
-};
-
-// Massacre | Blade Rush ======================================================
-struct massacre_t : public melee_attack_t
-{
-  typedef melee_attack_t base_t;
-
-};
-
-// Obliterate | Zealous Leap ==================================================
-struct obliterate_t : melee_attack_t
-{
-  typedef melee_attack_t base_t;
-
-};
-
-// Force Crush | Force Exhaustion =============================================
-struct force_crush_t : force_attack_t
-{
-  typedef force_attack_t base_t;
-
-};
 
 // Force Choke | Force Stasis =================================================
 struct force_choke_t : force_attack_t
@@ -696,6 +765,26 @@ struct frenzy_t : action_t
 {
   typedef action_t base_t;
 
+  frenzy_t( class_t* p, const std::string& n, const std::string options_str ) :
+    base_t( n, p, force_policy, RESOURCE_NONE, SCHOOL_NONE )
+    {
+      parse_options( options_str );
+      base_cost = 0;
+
+      harmful = false;
+      trigger_gcd = timespan_t::zero();
+      use_off_gcd = true;
+
+      cooldown -> duration = from_seconds( 180 );
+    }
+
+    virtual void execute()
+    {
+      base_t::execute();
+      class_t* p = cast();
+      p -> buffs.fury -> trigger( 30 );
+    }
+
 };
 
 // Juyo Form ==================================================================
@@ -703,47 +792,126 @@ struct juyo_form_t : action_t
 {
   typedef action_t base_t;
 
+  juyo_form_t( class_t* p, const std::string& n, const std::string options_str ) :
+    base_t( n, p, force_policy, RESOURCE_NONE, SCHOOL_NONE )
+  {
+    parse_options( options_str );
+
+    base_cost = 0;
+
+    harmful = false;
+  }
+
+  virtual void execute()
+  {
+    base_t::execute();
+    class_t* p = cast();
+
+    p -> actives.form = JUYO_FORM;
+  }
+
 };
 
 // Shii-Cho Form ==============================================================
 struct shii_cho_form_t : action_t
 {
   typedef action_t base_t;
-
+  // TODO: Rage
 };
 
 // Ataru Form =================================================================
 struct ataru_form_t : action_t
 {
   typedef action_t base_t;
-
+  // TODO: Carnage
 };
 
 // Retaliate | Riposte ========================================================
 struct retaliate_t : melee_attack_t
 {
   typedef melee_attack_t base_t;
-
+  //TODO: Not used by dps
 };
 
 // Smash | Sweep ==============================================================
 struct smash_t : force_attack_t
 {
   typedef force_attack_t base_t;
-
+  //TODO: AOE?
 };
 
 // Sweeping Slash | Cyclone Slash =============================================
 struct sweeping_slash_t : melee_attack_t
 {
   typedef melee_attack_t base_t;
-
+  //TODO: AOE?
 };
 
 // Unnatural Might | Force_Might ==============================================
 struct unnatural_might_t : action_t
 {
   typedef action_t base_t;
+
+  unnatural_might_t( class_t* p, const std::string& n, const std::string options_str ) :
+    base_t( n, p, force_policy, RESOURCE_NONE, SCHOOL_NONE )
+  {
+    parse_options( options_str );
+    base_cost = 0;
+  }
+
+  virtual void execute()
+  {
+    base_t::execute();
+
+    for ( player_t* p : list_range( sim -> player_list ) )
+    {
+      if ( p -> ooc_buffs() )
+      {
+        p -> buffs.unnatural_might -> trigger();
+      }
+    }
+  }
+
+  virtual bool ready()
+  {
+    if ( player -> buffs.unnatural_might -> check() )
+    {
+      return false;
+    }
+
+    return base_t::ready();
+  }
+
+};
+
+// ============================================================================
+// Carnage Talents ============================================================
+// Gore | Precision Slash =====================================================
+struct gore_t : public melee_attack_t
+{
+  typedef melee_attack_t base_t;
+
+};
+// Massacre | Blade Rush ======================================================
+struct massacre_t : public melee_attack_t
+{
+  typedef melee_attack_t base_t;
+
+};
+
+// ============================================================================
+// Rage Talents
+// Obliterate | Zealous Leap ==================================================
+struct obliterate_t : melee_attack_t
+{
+  typedef melee_attack_t base_t;
+
+};
+
+// Force Crush | Force Exhaustion =============================================
+struct force_crush_t : force_attack_t
+{
+  typedef force_attack_t base_t;
 
 };
 
