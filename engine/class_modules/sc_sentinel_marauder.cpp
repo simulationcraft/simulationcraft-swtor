@@ -209,6 +209,7 @@ struct class_t : public warr_knight::class_t
     virtual void      init_rng();
     virtual void      init_actions();
     virtual resource_type primary_resource() const;
+    virtual int       fury_generated() const;
     virtual role_type primary_role() const;
             void      create_talents();
 
@@ -302,7 +303,7 @@ struct bleed_attack_t : public force_attack_t
     tick_may_crit = true;
     may_crit = false;
 
-    if ( p -> buffs.berserk -> up() )
+    if ( p -> actives.form == JUYO_FORM && p -> buffs.berserk -> up() )
     {
       base_crit += 1;
     }
@@ -311,7 +312,7 @@ struct bleed_attack_t : public force_attack_t
   virtual void execute()
   {
     class_t* p = cast();
-    if ( p -> buffs.berserk -> up() )
+    if ( p -> actives.form == JUYO_FORM && p -> buffs.berserk -> up() )
     {
       p -> buffs.berserk -> decrement();
     }
@@ -322,12 +323,15 @@ struct berserk_t : public action_t
 {
   typedef action_t basae_t;
 
+  //TODO: Ataru Form Berserk
+
   berserk_t( class_t* p, const std::string& n, const std::string& options_str) :
     action_t( n, p, force_policy, p -> primary_resource(), SCHOOL_NONE )
   {
     parse_options( options_str );
     harmful = false;
 
+    base_cost = 0;
     use_off_gcd = true;
     trigger_gcd = timespan_t::zero();
   }
@@ -378,6 +382,9 @@ struct vicious_throw_t : public melee_attack_t
   virtual void execute()
   {
     base_t::execute();
+
+    class_t* p = cast();
+    p -> buffs.fury -> increment( p -> fury_generated() );
   }
 };
 
@@ -395,6 +402,7 @@ struct rupture_t : public melee_attack_t
       td.standardhealthpercentmax = 0.02;
       td.power_mod = 0.2;
 
+      base_cost = 0;
       base_tick_time = from_seconds( 1.0 );
       num_ticks = 6;
       tick_zero = false;
@@ -440,6 +448,12 @@ struct rupture_t : public melee_attack_t
       offhand_attack = new rupture_t( p, n + "_offhand", options_str, true );
       add_child( offhand_attack );
     }
+  }
+
+  virtual void execute()
+  {
+    class_t* p = cast();
+    p -> buffs.fury -> increment( p -> fury_generated() );
   }
 };
 
@@ -492,6 +506,7 @@ struct annihilate_t : public melee_attack_t
 
     class_t* p = cast();
     p -> buffs.annihilator -> increment();
+    p -> buffs.fury -> increment( p -> fury_generated() );
   }
 };
 
@@ -516,7 +531,7 @@ struct deadly_saber_t : public action_t
     base_t::execute();
 
     class_t* p = cast();
-
+    p -> buffs.fury -> increment( p -> fury_generated() );
     p -> buffs.deadly_saber -> trigger( 3 );
   }
 
@@ -534,6 +549,7 @@ struct deadly_saber_dot_t : public bleed_attack_t
     td.standardhealthpercentmin =
     td.standardhealthpercentmax = 0.02;
     td.power_mod = 0.2;
+    base_cost = 0;
 
     base_tick_time = from_seconds( 3.0 );
     num_ticks = 3;
@@ -581,6 +597,20 @@ struct ravage_t : public melee_attack_t
 {
   typedef melee_attack_t base_t;
 
+  ravage_t* second_strike;
+  ravage_t* third_strike;
+  ravage_t* offhand_attack;
+
+  ravage_t( class_t* p, const std::string& n, const std::string& options_str,
+           strike_number = 1, is_offhand = false ) :
+    base_t( n, p )
+  {
+    parse_options( options_str );
+    base_cost = 0;
+
+    cooldown -> duration = from_seconds( 30 );
+
+  }
 };
 
 // Battering Assault | Zealous Strike =========================================
@@ -600,6 +630,7 @@ struct battering_assault_t : public melee_attack_t
 
     base_cost = 0;
     range = 4.0;
+    cooldown -> duration = from_seconds( 15 );
     weapon = &( player -> main_hand_weapon );
     weapon_multiplier = -0.835;
     dd.standardhealthpercentmin =
@@ -669,7 +700,7 @@ struct vicious_slash_t : public melee_attack_t
   {
     parse_options( options_str );
 
-    base_cost = 3;
+    base_cost = energy_cost( p );
     range = 4.0;
 
     dd.standardhealthpercentmin =
@@ -695,6 +726,26 @@ struct vicious_slash_t : public melee_attack_t
       add_child( offhand_attack );
     }
   }
+
+  static int energy_cost( class_t* p )
+  {
+    //TODO: Hits one addition target too
+    if ( p -> actives.form == SHII_CHO_FORM && p -> buffs.berserk -> up() )
+    {
+      p -> buffs.berserk -> decrement();
+      return 0;
+    }
+    else
+    {
+      return 3;
+    }
+  }
+
+  virtual void execute()
+  {
+    class_t* p = cast();
+    p -> buffs.fury -> increment( p -> fury_generated() );
+  }
 };
 
 // Assault | Strike ===========================================================
@@ -702,10 +753,15 @@ struct assault_t : public melee_attack_t
 {
   typedef melee_attack_t base_t;
 
+  assault_t* second_strike;
+  assault_t* third_strike;
+  assault_t* offhand_strike;
+
   assault_t( class_t* p, const std::string& n, const std::string& options_str) :
     melee_attack_t( n, p )
     {
       parse_options( options_str );
+      base_cost = 0;
 
       range = 4.0;
     }
@@ -927,7 +983,20 @@ struct force_crush_t : force_attack_t
 {
     if ( type == SITH_MARAUDER )
     {
-
+      if ( name == "vicious_throw"    ) return new vicious_throw_t    ( this, name, options_str );
+      if ( name == "annihilate"       ) return new annihilate_t       ( this, name, options_str );
+      if ( name == "rupture"          ) return new rupture_t          ( this, name, options_str );
+      if ( name == "deadly_saber"     ) return new deadly_saber_t     ( this, name, options_str );
+      if ( name == "force_charge"     ) return new force_charge_t     ( this, name, options_str );
+      if ( name == "ravage"           ) return new ravage_t           ( this, name, options_str );
+      if ( name == "battering_assault") return new battering_assault_t( this, name, options_str );
+      if ( name == "vicious_slash"    ) return new vicious_slash_t    ( this, name, options_str );
+      if ( name == "assault"          ) return new assault_t          ( this, name, options_str );
+      if ( name == "bloodthirst"      ) return new bloodthirst_t      ( this, name, options_str );
+      if ( name == "berserk"          ) return new berserk_t          ( this, name, options_str );
+      if ( name == "juyo_form"        ) return new juyo_form_t        ( this, name, options_str );
+      if ( name == "frenzy"           ) return new frenzy_t           ( this, name, options_str );
+      if ( name == "unnatural_might"  ) return new unnatural_might_t ( this, name, options_str );
     }
     else if ( type == JEDI_SENTINEL )
     {
@@ -936,21 +1005,97 @@ struct force_crush_t : force_attack_t
 
     //if ( name == "apply_charge"           ) return new        apply_charge_t( this, options_str );
 
-    return player_t::create_action( name, options_str );
+    return base_t::create_action( name, options_str );
 }
 
 // class_t::init_talents =====================================================
 
 void class_t::init_talents()
 {
-    player_t::init_talents();
+    base_t::init_talents();
 
-    // Darkness|Kinetic Combat
-    //talents.thrashing_blades      = find_talent( "Thrashing Blades" );
+     // Annihilation|Watchman
+        // t1
+        talents.cloak_of_annihilation       = find_talent( "Cloak of Annihilation" );
+        talents.short_fuse                  = find_talent( "Short Fuse" );
+        talents.enraged_slash               = find_talent( "Enraged Slash" );
+        //t2
+        talents.juyo_mastery                = find_talent( "Juyo Mastery" );
+        talents.seeping_wound               = find_talent( "Seeping Wound" );
+        talents.hungering                   = find_talent( "Hungering" );
+        //t3
+        talents.bleedout                    = find_talent( "Bleedout" );
+        talents.deadly_saber                = find_talent( "Deadly Saber" );
+        talents.blurred_speed               = find_talent( "Blurred Speed" );
+        //t4
+        talents.enraged_charge              = find_talent( "Enraged Charge" );
+        talents.subjugation                 = find_talent( "Subjugation" );
+        talents.deep_wound                  = find_talent( "Deep Wound" );
+        talents.close_quarters              = find_talent( "Close Quarters" );
+        //t5
+        talents.phantom                     = find_talent( "Phantom" );
+        talents.pulverize                   = find_talent( "Pulverize" );
+        //t6
+        talents.empowerment                 = find_talent( "Empowerment" );
+        talents.hemorrhage                  = find_talent( "Hemorrhage" );
+        //t7
+        talents.annihilate                  = find_talent( "Annihilate" );
 
-    // Deception|Infiltration
+        // Carnage|Combat
+        //t1
+        talents.cloak_of_carnage            = find_talent( "Cloak of Carnage" );
+        talents.dual_wield_mastery          = find_talent( "Dual Wield Mastery" );
+        talents.defensive_forms             = find_talent( "Defensive Forms" );
+        //t2
+        talents.narrowed_hatred             = find_talent( "Narrowed Hatred" );
+        talents.defensive_roll              = find_talent( "Defensive Roll" );
+        talents.stagger                     = find_talent( "Stagger" );
+        //t3
+        talents.execute                     = find_talent( "Execute" );
+        talents.ataru_form                  = find_talent( "Ataru Form" );
+        talents.ataru_mastery               = find_talent( "Ataru Mastery" );
+        //t4
+        talents.blood_frenzy                = find_talent( "Blood Frenzy" );
+        talents.towering_rage               = find_talent( "Towering Rage" );
+        talents.enraged_assault             = find_talent( "Enraged Assault" );
+        talents.displacement                = find_talent( "Displacement" );
+        //t5
+        talents.unbound                     = find_talent( "Unbound" );
+        talents.gore                        = find_talent( "Gore" );
+        talents.rattling_voice              = find_talent( "Rattling Voice");
+        //t6
+        talents.overwhelm                   = find_talent( "Overwhelm" );
+        talents.sever                       = find_talent( "Sever" );
+        //t7
+        talents.massacre                    = find_talent( "Massacre" );
 
-    // Madness|Balance
+        // Rage|Focus
+        //t1
+        talents.ravager                     = find_talent( "Ravager" );
+        talents.malice                      = find_talent( "Malice");
+        talents.decimate                    = find_talent( "Decimate" );
+        //t2
+        talents.payback                     = find_talent( "Payback" );
+        talents.overpower                   = find_talent( "Overpower" );
+        talents.enraged_scream              = find_talent( "Enraged Scream" );
+        talents.brutality                   = find_talent( "Brutality" );
+        //t3
+        talents.saber_strength              = find_talent( "Saber Strength" );
+        talents.obliterate                  = find_talent( "Obliterate" );
+        talents.strangulate                 = find_talent( "Strangulate" );
+        //t4
+        talents.dominate                    = find_talent( "Dominate" );
+        talents.shockwave                   = find_talent( "Shockwave" );
+        talents.berserker                   = find_talent( "Berserker" );
+        //t5
+        talents.gravity                     = find_talent( "Gravity" );
+        talents.interceptor                 = find_talent( "Interceptor" );
+        talents.shii_cho_mastery            = find_talent( "Shii Cho Mastery" );
+        //t6
+        talents.dark_resonance              = find_talent( "Dark Resonance" );
+        talents.undying                     = find_talent( "Undying" );
+        //t7
+        talents.force_crush                 = find_talent( "Force Crush" );
 }
 
 // class_t::init_base ========================================================
@@ -962,6 +1107,7 @@ void class_t::init_base()
     default_distance = 3;
     distance = default_distance;
 
+    resource_base[ RESOURCE_RAGE ] = 0;
 }
 
 // class_t::init_benefits =======================================================
@@ -982,10 +1128,12 @@ void class_t::init_buffs()
     // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
     // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
 
-    //bool is_juggernaut = ( type == SITH_MARAUDER );
-
-
-
+    buffs.juyo_form = new buff_t( this, "Juyo Form", 5, from_seconds( 15.0 ), from_seconds( 1.5 ) );
+    buffs.annihilator = new buff_t( this, "Annihilator", 3, from_seconds( 15.0 ) );
+    buffs.fury = new buff_t( this, "Fury", 30, from_seconds( 60 ) );
+    buffs.deadly_saber = new buff_t( this, "Deadly Saber", 3, from_seconds( 15.0 ), from_seconds( 1.5 ) );
+    buffs.berserk = new buff_t( this, "Berserk", 6, from_seconds( 20 ) );
+    buffs.bloodthirst = new buff_t( this, "Bloodthirst", 1, from_seconds( 15 ) );
 }
 
 // class_t::init_gains =======================================================
@@ -993,6 +1141,14 @@ void class_t::init_buffs()
 void class_t::init_gains()
 {
     player_t::init_gains();
+    bool is_marauder = ( type == SITH_MARAUDER );
+    const char* assault = is_marauder ? "assault" : "strike";
+    const char* battering_assault = is_marauder ? "battering_assault" : "zealous_strike";
+    const char* force_charge = is_marauder ? "force_charge" : "force_leap";
+
+    gains.assault = get_gain( assault );
+    gains.battering_assault = get_gain( battering_assault );
+    gains.force_charge = get_gain( force_charge );
 
 }
 
@@ -1009,6 +1165,8 @@ void class_t::init_procs()
 void class_t::init_rng()
 {
     player_t::init_rng();
+
+
 
 }
 
@@ -1039,11 +1197,27 @@ void class_t::init_actions()
             action_list_default = 1;
         }
 
-        // Sith ASSASSIN
+        // Sith MARAUDER
         else
         {
             action_list_str += "stim,type=exotech_might";
             action_list_str += "/snapshot_stats";
+            // ANNIHILATION
+            action_list_str += "/juyo_form";
+            action_list_str += "/bloodthirst";
+            action_list_str += "/frenzy";
+            action_list_str += "/berserk";
+            action_list_str += "/vicious_throw";
+            action_list_str += "/rupture";
+            action_list_str += "/annihilate";
+            action_list_str += "/force_charge";
+            action_list_str += "/deadly_saber";
+            action_list_str += "/ravage";
+            action_list_str += "/battering_assault";
+            action_list_str += "/vicious_slash";
+            action_list_str += "/assault";
+
+
 
             switch ( primary_tree() )
             {
@@ -1063,6 +1237,12 @@ void class_t::init_actions()
 resource_type class_t::primary_resource() const
 { return RESOURCE_RAGE; }
 
+// class_t::fury_generated ==================================================
+int class_t::fury_generated() const
+{
+  return 2;
+}
+
 // class_t::primary_role ==================================================
 
 role_type class_t::primary_role() const
@@ -1074,7 +1254,59 @@ role_type class_t::primary_role() const
 
 void class_t::create_talents()
 {
-  // See sage_sorcerer_t::create_talents()
+  static const talentinfo_t annihilation_tree[] = {
+    // t1
+    { "Cloak of Annihilation"   , 2 }, { "Short Fuse"         , 2 }, { "Enraged Slash"    , 3 },
+    // t2
+    { "Juyo Mastery"            , 3 }, { "Seeping Wound"      , 2 }, { "Hungering"        , 2 },
+    // t3
+    { "Bleedout"                , 2 }, { "Deadly Saber"       , 1 }, { "Blurred Speed"    , 2 },
+    // t4
+    { "Enraged Charge"          , 2 }, { "Subjugation"        , 2 }, { "Deep Wound"       , 1 }, { "Close Quarters"   , 2 },
+    // t5
+    { "Phantom"                 , 2 }, { "Pulverize"          , 3 },
+    //t6
+    { "Empowerment"             , 2 }, { "Hemorrhage"         , 3 },
+    // t7
+    { "Annihilate"              , 1 }
+  };
+  init_talent_tree( SITH_MARAUDER_ANNIHILATION, annihilation_tree );
+
+  static const talentinfo_t carnage_tree[] = {
+    // t1
+    { "Cloak of Carnage"        , 2 }, { "Dual Wield Mastery" , 3 }, { "Defensive Forms"  , 2 },
+    // t2
+    { "Narrowed Hatred"         , 3 }, { "Defensive Roll"     , 2 }, { "Stagger"          , 2 },
+    // t3
+    { "Execute"                 , 2 }, { "Ataru Form"         , 1 }, { "Ataru Mastery"    , 2 },
+    // t4
+    { "Blood Frenzy"            , 1 }, { "Towering Rage"      , 2 }, { "Enraged Assault"  , 2 }, { "Displacement"     , 2 },
+    // t5
+    { "Unbound"                 , 2 }, { "Gore"               , 1 }, { "Rattling Voice"   , 2 },
+    //t6
+    { "Overwhelm"               , 2 }, { "Sever"              , 3 },
+    //t7
+    { "Massacre"                , 1 }
+  };
+  init_talent_tree( SITH_MARAUDER_CARNAGE, carnage_tree );
+
+  static const talentinfo_t rage_tree[] = {
+    // t1
+    { "Ravager"                 , 3 }, { "Malice"             , 3 }, { "Decimate"         , 2 },
+    // t2
+    { "Payback"                 , 2 }, { "Overpower"          , 2 }, { "Enraged Scream"   , 1 }, { "Brutality"        , 2 },
+    // t3
+    { "Saber Strength"          , 2 }, { "Obliterate"         , 1 }, { "Strangulate"      , 2 },
+    // t4
+    { "Dominate"                , 3 }, { "Shockwave"          , 2 }, { "Berserker"        , 2 },
+    // t5
+    { "Gravity"                 , 1 }, { "Interceptor"        , 2 }, { "Shii Cho Mastery" , 2 },
+    // t6
+    { "Dark Resonance"          , 3 }, { "Undying"            , 2 },
+    // t7
+    { "Force Crush"             , 1 }
+  };
+  init_talent_tree( SITH_MARAUDER_RAGE, rage_tree );
 }
 
 } // namespace sentinel_marauder ============================================
