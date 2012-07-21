@@ -927,7 +927,8 @@ struct force_crush_t : force_attack_t
 {
     if ( type == SITH_MARAUDER )
     {
-
+      if ( name == "deadly_saber"           ) return new        deadly_saber_t( this, name, options_str );
+      if ( name == "battering_assault"       ) return new        battering_assault_t( this, name, options_str );
     }
     else if ( type == JEDI_SENTINEL )
     {
@@ -981,6 +982,8 @@ void class_t::init_buffs()
     // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
     // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
     // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
+    buffs.deadly_saber = new buff_t( this, "deadly_saber", 15, from_seconds( 12 ) );
+
 
     //bool is_juggernaut = ( type == SITH_MARAUDER );
 
@@ -1039,11 +1042,11 @@ void class_t::init_actions()
             action_list_default = 1;
         }
 
-        // Sith ASSASSIN
         else
         {
             action_list_str += "stim,type=exotech_might";
             action_list_str += "/snapshot_stats";
+            action_list_str += "/deadly_saber,if=!buff.deadly_saber.up";
 
             switch ( primary_tree() )
             {
