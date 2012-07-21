@@ -602,7 +602,7 @@ struct ravage_t : public melee_attack_t
   ravage_t* offhand_attack;
 
   ravage_t( class_t* p, const std::string& n, const std::string& options_str,
-           strike_number = 1, is_offhand = false ) :
+           int strike_number = 1, bool is_offhand = false ) :
     base_t( n, p )
   {
     parse_options( options_str );
