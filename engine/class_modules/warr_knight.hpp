@@ -14,6 +14,20 @@ class class_t : public player_t
       primary_attribute   = ATTR_STRENGTH;
       secondary_attribute = ATTR_WILLPOWER;
     }
+
+  virtual resource_type primary_resource() const
+  { return RESOURCE_RAGE; }
+
+  virtual void init_base()
+  {
+    player_t::init_base();
+
+    distance = default_distance = 3;
+
+    std::cout << "base rage 12\n";
+    resource_base[ RESOURCE_RAGE ] = 12;
+  }
+
 };
 
 class targetdata_t : public ::targetdata_t
@@ -23,6 +37,8 @@ class targetdata_t : public ::targetdata_t
       ::targetdata_t (source, target)
     {}
 };
+
+
 
 }
 

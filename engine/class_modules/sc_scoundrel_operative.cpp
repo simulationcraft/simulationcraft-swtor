@@ -391,7 +391,7 @@ struct acid_blade_t : public action_t
 
     parse_options( options_str );
 
-    base_cost = 10;
+    base_cost = 15;
     cooldown -> duration = from_seconds( 2.0 );
     use_off_gcd = true;
     trigger_gcd = timespan_t::zero();
