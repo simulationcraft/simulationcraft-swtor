@@ -86,6 +86,15 @@ struct use_stim_t : public action_t
       p -> stat_gain( STAT_POWER, 46, gain, this );
       break;
 
+    case stim_type::exotech_might:
+      p -> stat_gain( STAT_STRENGTH, 128, gain, this );
+      p -> stat_gain( STAT_POWER, 52, gain, this );
+      break;
+
+    case stim_type::rakata_might:
+      p -> stat_gain( STAT_STRENGTH, 112, gain, this );
+      p -> stat_gain( STAT_POWER, 46, gain, this );
+      break;
     default:
       assert( 0 );
       break;
