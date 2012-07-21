@@ -202,6 +202,7 @@ struct class_t : public warr_knight::class_t
     virtual action_t* create_action( const std::string& name, const std::string& options );
     virtual void      init_talents();
     virtual void      init_base();
+    virtual void      init_resources( bool force );
     virtual void      init_benefits();
     virtual void      init_buffs();
     virtual void      init_gains();
@@ -593,7 +594,7 @@ struct battering_assault_t : public melee_attack_t
   bool rage_gain;
 
   battering_assault_t( class_t* p, const std::string& n, const std::string& options_str,
-                      bool is_offhand = false, bool is_second_strike = false ) :
+                       bool is_second_strike = false, bool is_offhand = false ) :
     base_t( n, p )
   {
     parse_options( options_str );
@@ -605,7 +606,6 @@ struct battering_assault_t : public melee_attack_t
     dd.standardhealthpercentmin =
     dd.standardhealthpercentmax = 0.05;
     dd.power_mod = 0.5;
-    base_accuracy -= 10.0;
     rage_gain = true;
 
     if ( is_second_strike )
@@ -708,6 +708,7 @@ struct assault_t : public melee_attack_t
       parse_options( options_str );
 
       range = 4.0;
+      base_accuracy -= 0.10;
     }
 };
 
@@ -927,8 +928,8 @@ struct force_crush_t : force_attack_t
 {
     if ( type == SITH_MARAUDER )
     {
-      if ( name == "deadly_saber"           ) return new        deadly_saber_t( this, name, options_str );
-      if ( name == "battering_assault"       ) return new        battering_assault_t( this, name, options_str );
+      if ( name == "deadly_saber"      ) return new deadly_saber_t( this, name, options_str );
+      if ( name == "battering_assault" ) return new battering_assault_t( this, name, options_str );
     }
     else if ( type == JEDI_SENTINEL )
     {
@@ -962,7 +963,16 @@ void class_t::init_base()
 
     default_distance = 3;
     distance = default_distance;
+    resource_base[ RESOURCE_RAGE ] = 12;
+}
 
+
+// class_t::init_resources ======================================================
+
+void class_t::init_resources( bool force )
+{
+  player_t::init_resources( force );
+  resource_current[ RESOURCE_RAGE ] = 0;
 }
 
 // class_t::init_benefits =======================================================
@@ -982,7 +992,9 @@ void class_t::init_buffs()
     // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
     // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
     // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-    buffs.deadly_saber = new buff_t( this, "deadly_saber", 15, from_seconds( 12 ) );
+    buffs.deadly_saber = new buff_t( this, "deadly_saber", 3, from_seconds( 15 ), from_seconds( 12 ) );
+    buffs.juyo_form = new buff_t( this, "juyo_form", 5, from_seconds( 15 ), from_seconds( 1.5 ) );
+    buffs.bloodthirst = new buff_t( this, "bloodthirst", 1, from_seconds( 15 ));
 
 
     //bool is_juggernaut = ( type == SITH_MARAUDER );
@@ -996,6 +1008,7 @@ void class_t::init_buffs()
 void class_t::init_gains()
 {
     player_t::init_gains();
+    gains.battering_assault = get_gain( "battering_assault" );
 
 }
 
@@ -1047,6 +1060,7 @@ void class_t::init_actions()
             action_list_str += "stim,type=exotech_might";
             action_list_str += "/snapshot_stats";
             action_list_str += "/deadly_saber,if=!buff.deadly_saber.up";
+            action_list_str += "/battering_assault,if=rage<7";
 
             switch ( primary_tree() )
             {
