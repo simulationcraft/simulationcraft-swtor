@@ -350,6 +350,8 @@ struct berserk_t : public action_t
     class_t* p = cast();
 
     p -> buffs.berserk -> trigger( 6 );
+    // TODO REVIEW: resets or just loses 30 stacks? ie is 35 possible, and would it go to 5 or 0?
+    p -> buffs.fury -> reset();
   }
 };
 
@@ -700,7 +702,7 @@ struct vicious_slash_t : public melee_attack_t
   {
     parse_options( options_str );
 
-    base_cost = energy_cost( p );
+    base_cost = 3;
     range = 4.0;
 
     dd.standardhealthpercentmin =
@@ -727,24 +729,27 @@ struct vicious_slash_t : public melee_attack_t
     }
   }
 
-  static int energy_cost( class_t* p )
+  virtual double cost() const
   {
+    class_t* p = cast();
     //TODO: Hits one addition target too
-    if ( p -> actives.form == SHII_CHO_FORM && p -> buffs.berserk -> up() )
-    {
-      p -> buffs.berserk -> decrement();
-      return 0;
-    }
-    else
-    {
-      return 3;
-    }
+    return ( p -> actives.form == SHII_CHO_FORM && p -> buffs.berserk -> check() )
+      ? 0 : base_t::cost();
   }
 
   virtual void execute()
   {
-    class_t* p = cast();
-    p -> buffs.fury -> increment( p -> fury_generated() );
+    base_t::execute();
+
+    if ( offhand_attack ) {
+      offhand_attack -> schedule_execute();
+
+      class_t* p = cast();
+      if ( p -> actives.form == SHII_CHO_FORM && p -> buffs.berserk -> up() )
+        p -> buffs.berserk -> decrement();
+
+      p -> buffs.fury -> increment( p -> fury_generated() );
+    }
   }
 };
 
@@ -1216,6 +1221,12 @@ void class_t::init_actions()
             // ANNIHILATION
             action_list_str += "/deadly_saber,if=!buff.deadly_saber.up";
             action_list_str += "/battering_assault,if=rage<7";
+            action_list_str += "/berserk";
+            action_list_str += "/annihilate";
+            action_list_str += "/rupture";
+            action_list_str += "/vicious_throw";
+            action_list_str += "/ravage";
+            action_list_str += "/vicious_slash";
 
             switch ( primary_tree() )
             {
