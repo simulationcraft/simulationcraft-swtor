@@ -771,6 +771,12 @@ struct assault_t : public melee_attack_t
       range = 4.0;
       base_accuracy -= 0.10;
     }
+
+  virtual void execute()
+  {
+    base_t::execute();
+    p() -> resource_gain( RESOURCE_RAGE, 2, p() -> gains.assault );
+  }
 };
 
 // Bloodthirst | Inspiration ==================================================
