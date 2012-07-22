@@ -10,12 +10,12 @@
 PATH="../engine:engine:$PATH"
 echo $PATH
 
-iterations=50000
+iterations=100000
 threads=7
-calculate_scale_factors=1
-center_scale_delta=1
+calculate_scale_factors=0
+center_scale_delta=0
 statistics_level=3
-positive_scale_delta=0
+positive_scale_delta=1
 #ptr=0
 
 runsim ()
@@ -35,9 +35,9 @@ runsim ()
 # runsim Scoundrel_Operative_Raid_Campaign
 # runsim Gunslinger_Sniper_Raid_Campaign
 # runsim Sorcerer_Raid_Campaign_BiS
+runsim Empire_Raid_Campaign_BiS
 #iterations=200000
 #runsim Mercenary_Arsenal_Campaign_BiS
-#runsim Empire_Raid_Campaign_BiS
 
 # runsim Sage_Sorcerer_Raid
 # runsim Sage_Sorcerer_Raid -HelterSkelter "fight_style=HelterSkelter"

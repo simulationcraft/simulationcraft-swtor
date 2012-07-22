@@ -455,8 +455,13 @@ struct rupture_t : public melee_attack_t
 
   virtual void execute()
   {
-    class_t* p = cast();
-    p -> buffs.fury -> increment( p -> fury_generated() );
+    base_t::execute();
+    if ( offhand_attack )
+    {
+      offhand_attack -> schedule_execute();
+      class_t* p = cast();
+      p -> buffs.fury -> increment( p -> fury_generated() );
+    }
   }
 };
 
