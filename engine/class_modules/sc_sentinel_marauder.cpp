@@ -443,8 +443,8 @@ struct rupture_t : public melee_attack_t
       base_execute_time = timespan_t::zero();
       trigger_gcd = timespan_t::zero();
       weapon = &( player -> off_hand_weapon );
-      rank_level_list = { 0 };
-      dd.power_mod = 0;
+      //rank_level_list = { 0 };
+      //dd.power_mod = 0;
     }
     else
     {
@@ -498,8 +498,8 @@ struct annihilate_t : public melee_attack_t
       base_execute_time = timespan_t::zero();
       trigger_gcd = timespan_t::zero();
       weapon = &( player -> off_hand_weapon );
-      rank_level_list = { 0 };
-      dd.power_mod = 0;
+      //rank_level_list = { 0 };
+      //dd.power_mod = 0;
     }
     else
     {
@@ -626,6 +626,7 @@ struct battering_assault_t : public melee_attack_t
 {
   typedef melee_attack_t base_t;
 
+  // REVIEW TODO: determine exact hit mechanics. "hits with both lightsabers" but there are three strikes.
   battering_assault_t* second_strike;
   battering_assault_t* offhand_attack;
   bool rage_gain;
@@ -663,8 +664,8 @@ struct battering_assault_t : public melee_attack_t
       background = dual = true;
       trigger_gcd = timespan_t::zero();
       weapon = &( player -> off_hand_weapon );
-      rank_level_list = { 0 };
-      dd.power_mod = 0;
+      //rank_level_list = { 0 };
+      //dd.power_mod = 0;
       rage_gain = false;
     }
     else
@@ -724,8 +725,8 @@ struct vicious_slash_t : public melee_attack_t
       base_execute_time = timespan_t::zero();
       trigger_gcd = timespan_t::zero();
       weapon = &( player -> off_hand_weapon );
-      rank_level_list = { 0 };
-      dd.power_mod = 0;
+      //rank_level_list = { 0 };
+      //dd.power_mod = 0;
     }
     else
     {
