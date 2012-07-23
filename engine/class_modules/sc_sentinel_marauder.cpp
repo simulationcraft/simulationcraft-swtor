@@ -580,7 +580,7 @@ struct force_charge_t : public melee_attack_t
     cooldown -> duration = from_seconds( 15 );
     range = 30.0;
     weapon_multiplier = -0.39;
-    weapon = &(player -> main_hand_weapon);
+    weapon = &( player -> main_hand_weapon );
 
     dd.standardhealthpercentmin =
     dd.standardhealthpercentmax = 0.091;
@@ -601,25 +601,100 @@ struct force_charge_t : public melee_attack_t
 };
 
 // Ravage | Master Strike =====================================================
+struct ravage_strong_t : public melee_attack_t
+{
+  typedef melee_attack_t base_t;
+  ravage_strong_t* offhand_attack;
+
+  ravage_strong_t( class_t* p, const std::string& n, const std::string& options_str,
+                  bool is_offhand = false ) :
+    base_t( n, p )
+  {
+    parse_options( options_str );
+
+    base_cost = 0;
+    range = 4.0;
+    base_execute_time = from_seconds( 2.0 );
+    dd.standardhealthpercentmin =
+    dd.standardhealthpercentmax = 0.278;
+    dd.power_mod = 2.78;
+    weapon = &( player -> main_hand_weapon );
+    weapon_multiplier = 0.85;
+
+    if ( is_offhand )
+    {
+      background = true;
+      dual = true;
+      trigger_gcd = timespan_t::zero();
+      weapon = &( player -> off_hand_weapon );
+      dd.power_mod = 0;
+      rank_level_list = { 0 };
+    }
+    else
+    {
+      offhand_attack = new ravage_strong_t( p, n+"_offhand", options_str, true);
+      add_child( offhand_attack );
+    }
+  }
+};
+
 struct ravage_t : public melee_attack_t
 {
   typedef melee_attack_t base_t;
 
-  ravage_t* second_strike;
-  ravage_t* third_strike;
   ravage_t* offhand_attack;
+  ravage_strong_t* last_hit;
 
   ravage_t( class_t* p, const std::string& n, const std::string& options_str,
-           int strike_number = 1, bool is_offhand = false ) :
+           bool is_offhand = false ) :
     base_t( n, p )
   {
     parse_options( options_str );
+
     base_cost = 0;
-
+    range = 4.0;
     cooldown -> duration = from_seconds( 30 );
+    channeled = true;
+    num_ticks = 2;
+    base_tick_time = from_seconds( 0.5 );
+    tick_zero = false;
+    td.standardhealthpercentmin =
+    td.standardhealthpercentmax = 0.139;
+    td.power_mod = 1.39;
+    td.weapon = &( player -> main_hand_weapon );
+    td.weapon_multiplier = -0.075;
 
+    if ( is_offhand )
+    {
+      background = true;
+      dual = true;
+      channeled = false;
+      base_cost = 0;
+      trigger_gcd = timespan_t::zero();
+      td.weapon = &( player -> off_hand_weapon );
+      td.power_mod = 0;
+      rank_level_list = { 0 };
+    }
+    else
+    {
+      offhand_attack = new ravage_t( p, n+"_offhand", options_str, true );
+      add_child( offhand_attack );
+      last_hit = new ravage_strong_t( p, n, options_str );
+      add_child( last_hit );
+    }
+  }
+
+  virtual void last_tick( dot_t* d )
+  {
+    base_t::last_tick( d );
+    if ( last_hit )
+    {
+      last_hit -> schedule_execute();
+    }
   }
 };
+
+
 
 // Battering Assault | Zealous Strike =========================================
 struct battering_assault_t : public melee_attack_t
@@ -764,11 +839,10 @@ struct assault_t : public melee_attack_t
 {
   typedef melee_attack_t base_t;
 
-  assault_t* second_strike;
-  assault_t* third_strike;
-  assault_t* offhand_strike;
+  assault_t* offhand_attack;
 
-  assault_t( class_t* p, const std::string& n, const std::string& options_str) :
+  assault_t( class_t* p, const std::string& n, const std::string& options_str,
+            bool is_offhand = false ) :
     melee_attack_t( n, p )
     {
       parse_options( options_str );
@@ -776,6 +850,29 @@ struct assault_t : public melee_attack_t
 
       range = 4.0;
       base_accuracy -= 0.10;
+      num_ticks = 3;
+      base_tick_time = from_seconds( .5 );
+      tick_zero = true;
+      td.weapon = &( player -> main_hand_weapon );
+      td.weapon_multiplier = -0.66;
+      td.power_mod = 0.33;
+
+      if ( is_offhand )
+      {
+        background = true;
+        dual = true;
+        num_ticks = 1;
+        tick_zero = false;
+        trigger_gcd = timespan_t::zero();
+        td.weapon = &( player -> off_hand_weapon );
+        td.power_mod = 0;
+        rank_level_list = { 0 };
+      }
+      else
+      {
+        offhand_attack = new assault_t( p, n+"offhand", options_str, true );
+        add_child( offhand_attack );
+      }
     }
 
   virtual void execute()
