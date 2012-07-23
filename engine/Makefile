@@ -127,6 +127,7 @@ SRC = \
 	class_modules$(PATHSEP)bount_troop.hpp \
 	class_modules$(PATHSEP)cons_inq.hpp \
 	class_modules$(PATHSEP)warr_knight.hpp \
+	class_modules$(PATHSEP)sc_warr_knight.cpp \
 	class_modules$(PATHSEP)sc_commando_mercenary.cpp \
 	class_modules$(PATHSEP)sc_gunslinger_sniper.cpp \
 	class_modules$(PATHSEP)sc_juggernaut_guardian.cpp \

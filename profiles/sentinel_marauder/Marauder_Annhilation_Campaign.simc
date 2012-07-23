@@ -18,8 +18,8 @@ actions+=/annihilate
 actions+=/rupture
 actions+=/vicious_throw
 actions+=/ravage
-actions+=/vicious_slash
-actions+=/assault
+#actions+=/vicious_slash
+#actions+=/assault
 head=campaign_weaponmasters_headgear,ilevel=61,quality=artifact,setbonus=unimplemented_rakata_weaponmasterss,stats=673armor_137endurance_110strength_63power_57accuracy
 ear=black_hole_pummelers_mk_1_device,ilevel=61,quality=artifact,stats=87endurance_102strength_71power_57accuracy
 shirt=datacrons,stats=40strength_40aim_40cunning_40willpower_40endurance_40presence

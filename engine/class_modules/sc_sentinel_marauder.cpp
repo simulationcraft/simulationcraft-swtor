@@ -3,14 +3,11 @@
 // http://code.google.com/p/simulationcraft-swtor/
 // ==========================================================================
 
-#include "../simulationcraft.hpp"
 #include "warr_knight.hpp"
 
 // ==========================================================================
 // Jedi Sentinel | Sith Marauder
 // ==========================================================================
-
-namespace { // ANONYMOUS ====================================================
 
 namespace sentinel_marauder {
 
@@ -36,7 +33,7 @@ struct class_t : public warr_knight::class_t
 {
     typedef warr_knight::class_t base_t;
     // Buffs
-    struct buffs_t
+    struct buffs_t:base_t::buffs_t
     {
       buff_t* juyo_form;
       buff_t* annihilator;
@@ -47,7 +44,7 @@ struct class_t : public warr_knight::class_t
     } buffs;
 
     // Gains
-    struct gains_t
+    struct gains_t:base_t::gains_t
     {
       gain_t* assault;
       gain_t* battering_assault;
@@ -55,13 +52,13 @@ struct class_t : public warr_knight::class_t
     } gains;
 
     // Procs
-    struct procs_t
+    struct procs_t:base_t::procs_t
     {
 
     } procs;
 
     // RNGs
-    struct rngs_t
+    struct rngs_t:base_t::rngs_t
     {
       rng_t* enraged_charge;
       rng_t* pulverize;
@@ -69,7 +66,7 @@ struct class_t : public warr_knight::class_t
     } rngs;
 
     // Benefits
-    struct benefits_t
+    struct benefits_t:base_t::benefits_t
     {
 
     } benefits;
@@ -91,7 +88,7 @@ struct class_t : public warr_knight::class_t
     } cooldowns;
 
     // Talents
-    struct talents_t
+    struct talents_t:base_t::talents_t
     {
         // Annihilation|Watchman
         // t1
@@ -148,43 +145,20 @@ struct class_t : public warr_knight::class_t
         //t7
         talent_t* massacre;
 
-        // Rage|Focus
-        //t1
-        talent_t* ravager;
-        talent_t* malice;
-        talent_t* decimate;
-        //t2
-        talent_t* payback;
-        talent_t* overpower;
-        talent_t* enraged_scream;
-        talent_t* brutality;
-        //t3
-        talent_t* saber_strength;
-        talent_t* obliterate;
-        talent_t* strangulate;
-        //t4
-        talent_t* dominate;
-        talent_t* shockwave;
-        talent_t* berserker;
-        //t5
-        talent_t* gravity;
-        talent_t* interceptor;
-        talent_t* shii_cho_mastery;
-        //t6
-        talent_t* dark_resonance;
-        talent_t* undying;
-        //t7
-        talent_t* force_crush;
-
     } talents;
+
+    struct mirror_t:base_t::mirror_t
+    {
+
+    } m;
 
     struct actives_t
     {
       form_type form;
     } actives;
 
-    class_t( sim_t* sim, player_type pt, const std::string& name, race_type r = RACE_NONE ) :
-      base_t( sim, pt == SITH_MARAUDER ? SITH_MARAUDER : JEDI_SENTINEL, name, ( r == RACE_NONE ) ? RACE_HUMAN : r ),
+    class_t( sim_t* sim, player_type pt, const std::string& name, race_type rt ) :
+      base_t( sim, pt == SITH_MARAUDER ? SITH_MARAUDER : JEDI_SENTINEL, name, rt, buffs, gains, procs, rngs, benefits, talents, m ),
       buffs(), gains(), procs(), rngs(), benefits(), cooldowns(), talents(), actives()
     {
 
@@ -192,6 +166,7 @@ struct class_t : public warr_knight::class_t
       tree_type[ SITH_MARAUDER_CARNAGE ] = TREE_CARNAGE;
       tree_type[ SITH_MARAUDER_RAGE ] = TREE_RAGE;
 
+      create_mirror();
       create_talents();
       create_options();
     }
@@ -201,26 +176,21 @@ struct class_t : public warr_knight::class_t
     { return new targetdata_t( *this, target ); }
 
 
-    virtual action_t* create_action( const std::string& name, const std::string& options );
-    virtual void      init_talents();
-    virtual void      init_base();
-    virtual void      init_resources( bool force );
-    virtual void      init_benefits();
-    virtual void      init_buffs();
-    virtual void      init_gains();
-    virtual void      init_procs();
-    virtual void      init_rng();
-    virtual void      init_actions();
-    virtual resource_type primary_resource() const;
-    virtual int       fury_generated() const;
-    virtual role_type primary_role() const;
-            void      create_talents();
-
-    virtual void init_scaling()
-    {
-      player_t::init_scaling();
-      scales_with[ STAT_FORCE_POWER ] = true;
-    }
+    action_t* create_action( const std::string& name, const std::string& options );
+    void      init_talents();
+    void      init_base();
+    void      init_resources( bool force );
+    void      init_benefits();
+    void      init_buffs();
+    void      init_gains();
+    void      init_procs();
+    void      init_rng();
+    void      init_actions();
+    resource_type primary_resource() const;
+    int       fury_generated() const;
+    role_type primary_role() const;
+    void      create_mirror();
+    void      create_talents();
 };
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
@@ -1351,10 +1321,17 @@ role_type class_t::primary_role() const
     return ROLE_DPS;
 }
 
+// class_t::create_mirror ===================================================
+
+void class_t::create_mirror()
+{
+  base_t::create_mirror();
+}
 // class_t::create_talents ==================================================
 
 void class_t::create_talents()
 {
+  base_t::create_talents();
   static const talentinfo_t annihilation_tree[] = {
     // t1
     { "Cloak of Annihilation"   , 2 }, { "Short Fuse"         , 2 }, { "Enraged Slash"    , 3 },
@@ -1411,8 +1388,6 @@ void class_t::create_talents()
 }
 
 } // namespace sentinel_marauder ============================================
-
-} // ANONYMOUS NAMESPACE ====================================================
 
 // ==========================================================================
 // PLAYER_T EXTENSIONS
