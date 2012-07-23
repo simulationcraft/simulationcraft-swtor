@@ -1141,34 +1141,6 @@ void class_t::init_talents()
         talents.sever                       = find_talent( "Sever" );
         //t7
         talents.massacre                    = find_talent( "Massacre" );
-
-        // Rage|Focus
-        //t1
-        talents.ravager                     = find_talent( "Ravager" );
-        talents.malice                      = find_talent( "Malice");
-        talents.decimate                    = find_talent( "Decimate" );
-        //t2
-        talents.payback                     = find_talent( "Payback" );
-        talents.overpower                   = find_talent( "Overpower" );
-        talents.enraged_scream              = find_talent( "Enraged Scream" );
-        talents.brutality                   = find_talent( "Brutality" );
-        //t3
-        talents.saber_strength              = find_talent( "Saber Strength" );
-        talents.obliterate                  = find_talent( "Obliterate" );
-        talents.strangulate                 = find_talent( "Strangulate" );
-        //t4
-        talents.dominate                    = find_talent( "Dominate" );
-        talents.shockwave                   = find_talent( "Shockwave" );
-        talents.berserker                   = find_talent( "Berserker" );
-        //t5
-        talents.gravity                     = find_talent( "Gravity" );
-        talents.interceptor                 = find_talent( "Interceptor" );
-        talents.shii_cho_mastery            = find_talent( "Shii Cho Mastery" );
-        //t6
-        talents.dark_resonance              = find_talent( "Dark Resonance" );
-        talents.undying                     = find_talent( "Undying" );
-        //t7
-        talents.force_crush                 = find_talent( "Force Crush" );
 }
 
 // class_t::init_benefits =======================================================
