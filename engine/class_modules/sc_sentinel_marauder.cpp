@@ -178,8 +178,6 @@ struct class_t : public warr_knight::class_t
 
     action_t* create_action( const std::string& name, const std::string& options );
     void      init_talents();
-    void      init_base();
-    void      init_resources( bool force );
     void      init_benefits();
     void      init_buffs();
     void      init_gains();
@@ -1166,29 +1164,11 @@ void class_t::init_talents()
         talents.force_crush                 = find_talent( "Force Crush" );
 }
 
-// class_t::init_base ========================================================
-
-void class_t::init_base()
-{
-    player_t::init_base();
-
-    default_distance = 3;
-    distance = default_distance;
-    resource_base[ RESOURCE_RAGE ] = 12;
-}
-// class_t::init_resources ======================================================
-
-void class_t::init_resources( bool force )
-{
-  player_t::init_resources( force );
-  resource_current[ RESOURCE_RAGE ] = 0;
-}
-
 // class_t::init_benefits =======================================================
 
 void class_t::init_benefits()
 {
-    player_t::init_benefits();
+    base_t::init_benefits();
 
 }
 
@@ -1196,7 +1176,7 @@ void class_t::init_benefits()
 
 void class_t::init_buffs()
 {
-    player_t::init_buffs();
+    base_t::init_buffs();
 
     // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
     // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
@@ -1218,7 +1198,7 @@ void class_t::init_buffs()
 
 void class_t::init_gains()
 {
-    player_t::init_gains();
+    base_t::init_gains();
     bool is_marauder = ( type == SITH_MARAUDER );
     const char* assault = is_marauder ? "assault" : "strike";
     const char* battering_assault = is_marauder ? "battering_assault" : "zealous_strike";
@@ -1234,7 +1214,7 @@ void class_t::init_gains()
 
 void class_t::init_procs()
 {
-    player_t::init_procs();
+    base_t::init_procs();
 
 }
 
@@ -1242,7 +1222,7 @@ void class_t::init_procs()
 
 void class_t::init_rng()
 {
-    player_t::init_rng();
+    base_t::init_rng();
 
 
 
@@ -1300,7 +1280,7 @@ void class_t::init_actions()
         }
     }
 
-    player_t::init_actions();
+    base_t::init_actions();
 }
 
 // class_t::primary_resource ==================================================

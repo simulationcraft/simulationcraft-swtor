@@ -110,10 +110,15 @@ public:
     player_t::init_base();
 
     distance = default_distance = 3;
-
-    std::cout << "base rage 12\n";
     resource_base[ RESOURCE_RAGE ] = 12;
   }
+
+  virtual void init_resources( bool force )
+  {
+    player_t::init_resources( force );
+    resource_current[ RESOURCE_RAGE ] = 0;
+  }
+
 
   virtual ::action_t* create_action( const std::string& name, const std::string& options ) = 0;
 
