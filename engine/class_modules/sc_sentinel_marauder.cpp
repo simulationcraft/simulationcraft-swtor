@@ -22,6 +22,8 @@ struct targetdata_t : public warr_knight::targetdata_t
 {
   dot_t dot_ravage;
   dot_t dot_ravage_offhand;
+  dot_t dot_assault;
+  dot_t dot_assault_offhand;
   dot_t dot_rupture;
   dot_t dot_deadly_saber;
 
@@ -194,10 +196,14 @@ struct class_t : public warr_knight::class_t
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   warr_knight::targetdata_t( source, target ),
   dot_ravage ( "ravage", &source ),
-  dot_ravage_offhand ( "ravage_offhand", &source )
+  dot_ravage_offhand ( "ravage_offhand", &source ),
+  dot_assault ( "assault", &source ),
+  dot_assault_offhand ( "assault_offhand", &source )
 {
   add( dot_ravage );
   add( dot_ravage_offhand );
+  add( dot_assault );
+  add( dot_assault_offhand );
 }
 
 struct action_t : public warr_knight::action_t
@@ -217,19 +223,19 @@ struct action_t : public warr_knight::action_t
 
 struct force_attack_t : public action_t
 {
-    force_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_ENERGY ) :
-      action_t( n, p, force_policy, p -> primary_resource(), s )
+  force_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_ENERGY ) :
+    action_t( n, p, force_policy, p -> primary_resource(), s )
+  {
+    harmful = true;
+    may_crit   = true;
+
+    base_multiplier += (0.02 * p -> buffs.juyo_form -> current_stack );
+
+    if ( p -> buffs.bloodthirst -> up() )
     {
-        may_crit   = true;
-
-        base_multiplier += (0.02 * p -> buffs.juyo_form -> current_stack );
-
-        if ( p -> buffs.bloodthirst -> up() )
-        {
-          player_multiplier += 0.15;
-        }
+      player_multiplier += 0.15;
     }
-
+  }
 };
 
 struct melee_attack_t : public action_t
@@ -237,6 +243,7 @@ struct melee_attack_t : public action_t
   melee_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_ENERGY) :
     action_t(n, p, melee_policy, p -> primary_resource(), s)
   {
+    harmful = true;
     may_crit = true;
 
     base_multiplier += (0.02 * p -> buffs.juyo_form -> current_stack );
@@ -415,7 +422,7 @@ struct rupture_t : public melee_attack_t
       trigger_gcd = timespan_t::zero();
       weapon = &( player -> off_hand_weapon );
       //rank_level_list = { 0 };
-      //dd.power_mod = 0;
+      dd.power_mod = 0;
     }
     else
     {
@@ -470,7 +477,7 @@ struct annihilate_t : public melee_attack_t
       trigger_gcd = timespan_t::zero();
       weapon = &( player -> off_hand_weapon );
       //rank_level_list = { 0 };
-      //dd.power_mod = 0;
+      dd.power_mod = 0;
     }
     else
     {
@@ -606,8 +613,8 @@ struct ravage_t : public melee_attack_t
       base_cost = 0;
       trigger_gcd = timespan_t::zero();
       td.weapon = &( player -> off_hand_weapon );
-      td.power_mod = 0;
       //rank_level_list = { 0 };
+      td.power_mod = 0;
     }
     else
     {
@@ -690,7 +697,7 @@ struct battering_assault_t : public melee_attack_t
       background = dual = true;
       trigger_gcd = timespan_t::zero();
       weapon = &( player -> off_hand_weapon );
-      rank_level_list = { 0 };
+      //rank_level_list = { 0 };
       dd.power_mod = 0;
       rage_gain = false;
     }
@@ -816,8 +823,8 @@ struct assault_t : public melee_attack_t
         tick_zero = false;
         trigger_gcd = timespan_t::zero();
         td.weapon = &( player -> off_hand_weapon );
+        //rank_level_list = { 0 };
         td.power_mod = 0;
-        rank_level_list = { 0 };
       }
       else
       {
