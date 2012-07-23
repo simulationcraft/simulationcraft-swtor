@@ -21,13 +21,14 @@ enum form_type
   FORM_NONE = 0, JUYO_FORM, SHII_CHO_FORM, ATARU_FORM
 };
 
-struct sentinel_marauder_targetdata_t : public targetdata_t
+struct targetdata_t : public warr_knight::targetdata_t
 {
-  dot_t rupture;
-  dot_t deadly_saber;
+  dot_t dot_ravage;
+  dot_t dot_ravage_offhand;
+  dot_t dot_rupture;
+  dot_t dot_deadly_saber;
 
-  sentinel_marauder_targetdata_t( player_t& source, player_t& target )
-    : targetdata_t( source, target ) {}
+    targetdata_t( class_t& source, player_t& target );
 };
 
 
@@ -196,8 +197,9 @@ struct class_t : public warr_knight::class_t
     }
 
     // Character Definition
-    virtual targetdata_t* new_targetdata( player_t& target ) // override
-    { return new sentinel_marauder_targetdata_t( *this, target ); }
+    targetdata_t* new_targetdata( player_t& target ) // override
+    { return new targetdata_t( *this, target ); }
+
 
     virtual action_t* create_action( const std::string& name, const std::string& options );
     virtual void      init_talents();
@@ -221,23 +223,24 @@ struct class_t : public warr_knight::class_t
     }
 };
 
-
-class action_t : public ::action_t
+targetdata_t::targetdata_t( class_t& source, player_t& target ) :
+  warr_knight::targetdata_t( source, target ),
+  dot_ravage ( "ravage", &source ),
+  dot_ravage_offhand ( "ravage_offhand", &source )
 {
-public:
-  typedef ::action_t base_t;
-  action_t( const std::string& n, class_t* player,
-                          attack_policy_t policy, resource_type r, school_type s ) :
-    base_t( ACTION_ATTACK, n, player, policy, r, s )
+  add( dot_ravage );
+  add( dot_ravage_offhand );
+}
+
+struct action_t : public warr_knight::action_t
+{
+  action_t( const std::string& n, class_t* player, attack_policy_t policy, resource_type r, school_type s ) :
+    warr_knight::action_t( n, player, policy, r, s )
   {}
 
-  sentinel_marauder_targetdata_t* targetdata() const
-  { return static_cast<sentinel_marauder_targetdata_t*>( action_t::targetdata() ); }
-
-  class_t* p() const
-  { return static_cast<class_t*>( player ); }
-
-  class_t* cast() const { return p(); }
+  targetdata_t* targetdata() const { return static_cast<targetdata_t*>( warr_knight::action_t::targetdata() ); }
+  class_t* p() const { return static_cast<class_t*>( player ); }
+  class_t* cast() const { return static_cast<class_t*>( player ); }
 };
 
 // ==========================================================================
@@ -322,7 +325,7 @@ struct bleed_attack_t : public force_attack_t
 // Berserk | Combat Focus =====================================================
 struct berserk_t : public action_t
 {
-  typedef action_t basae_t;
+  typedef action_t base_t;
 
   //TODO: Ataru Form Berserk
 
@@ -601,49 +604,12 @@ struct force_charge_t : public melee_attack_t
 };
 
 // Ravage | Master Strike =====================================================
-struct ravage_strong_t : public melee_attack_t
-{
-  typedef melee_attack_t base_t;
-  ravage_strong_t* offhand_attack;
-
-  ravage_strong_t( class_t* p, const std::string& n, const std::string& options_str,
-                  bool is_offhand = false ) :
-    base_t( n, p )
-  {
-    parse_options( options_str );
-
-    base_cost = 0;
-    range = 4.0;
-    base_execute_time = from_seconds( 2.0 );
-    dd.standardhealthpercentmin =
-    dd.standardhealthpercentmax = 0.278;
-    dd.power_mod = 2.78;
-    weapon = &( player -> main_hand_weapon );
-    weapon_multiplier = 0.85;
-
-    if ( is_offhand )
-    {
-      background = true;
-      dual = true;
-      trigger_gcd = timespan_t::zero();
-      weapon = &( player -> off_hand_weapon );
-      dd.power_mod = 0;
-      rank_level_list = { 0 };
-    }
-    else
-    {
-      offhand_attack = new ravage_strong_t( p, n+"_offhand", options_str, true);
-      add_child( offhand_attack );
-    }
-  }
-};
 
 struct ravage_t : public melee_attack_t
 {
   typedef melee_attack_t base_t;
 
   ravage_t* offhand_attack;
-  ravage_strong_t* last_hit;
 
   ravage_t( class_t* p, const std::string& n, const std::string& options_str,
            bool is_offhand = false ) :
@@ -655,8 +621,8 @@ struct ravage_t : public melee_attack_t
     range = 4.0;
     cooldown -> duration = from_seconds( 30 );
     channeled = true;
-    num_ticks = 2;
-    base_tick_time = from_seconds( 0.5 );
+    num_ticks = 3;
+    base_tick_time = from_seconds( 0.5 ); // changes to 2s for last tick
     tick_zero = false;
     td.standardhealthpercentmin =
     td.standardhealthpercentmax = 0.139;
@@ -673,24 +639,41 @@ struct ravage_t : public melee_attack_t
       trigger_gcd = timespan_t::zero();
       td.weapon = &( player -> off_hand_weapon );
       td.power_mod = 0;
-      rank_level_list = { 0 };
+      //rank_level_list = { 0 };
     }
     else
     {
       offhand_attack = new ravage_t( p, n+"_offhand", options_str, true );
       add_child( offhand_attack );
-      last_hit = new ravage_strong_t( p, n, options_str );
-      add_child( last_hit );
     }
   }
 
-  virtual void last_tick( dot_t* d )
+  virtual void tick( dot_t* d )
   {
-    base_t::last_tick( d );
-    if ( last_hit )
+    if ( d -> current_tick == ( d-> num_ticks - 1 ) )
+      base_tick_time = from_seconds( 2 );
+    if ( d -> current_tick == d -> num_ticks )
     {
-      last_hit -> schedule_execute();
+      // last hit is stronger
+      td.standardhealthpercentmin =
+      td.standardhealthpercentmax = 0.278;
+      td.power_mod = offhand_attack ? 2.78 : 0;
+      td.weapon_multiplier = 0.85;
     }
+
+    base_t::tick( d );
+  }
+
+  virtual void execute()
+  {
+    // reset values from stronger last hit
+    td.standardhealthpercentmin = td.standardhealthpercentmax = 0.139;
+    td.power_mod = offhand_attack ? 1.39 : 0;
+    td.weapon_multiplier = -0.075;
+    base_tick_time = from_seconds( 0.5 );
+    if ( offhand_attack )
+      offhand_attack -> schedule_execute();
+    base_t::execute();
   }
 };
 
@@ -739,8 +722,8 @@ struct battering_assault_t : public melee_attack_t
       background = dual = true;
       trigger_gcd = timespan_t::zero();
       weapon = &( player -> off_hand_weapon );
-      //rank_level_list = { 0 };
-      //dd.power_mod = 0;
+      rank_level_list = { 0 };
+      dd.power_mod = 0;
       rage_gain = false;
     }
     else
@@ -801,7 +784,7 @@ struct vicious_slash_t : public melee_attack_t
       trigger_gcd = timespan_t::zero();
       weapon = &( player -> off_hand_weapon );
       //rank_level_list = { 0 };
-      //dd.power_mod = 0;
+      dd.power_mod = 0;
     }
     else
     {
