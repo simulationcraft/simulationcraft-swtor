@@ -51,6 +51,7 @@ struct class_t : public warr_knight::class_t
       gain_t* assault;
       gain_t* battering_assault;
       gain_t* force_charge;
+      gain_t* enraged_slash;
     } gains;
 
     // Procs
@@ -62,6 +63,7 @@ struct class_t : public warr_knight::class_t
     // RNGs
     struct rngs_t:base_t::rngs_t
     {
+      rng_t* enraged_slash;
       rng_t* enraged_charge;
       rng_t* pulverize;
       rng_t* empowerment;
@@ -95,8 +97,8 @@ struct class_t : public warr_knight::class_t
       // Annihilation|Watchman
       // t1
       talent_t* cloak_of_annihilation; // unimplemented
-      talent_t* short_fuse; // unimplemented
-      talent_t* enraged_slash; // unimplemented
+      talent_t* short_fuse;
+      talent_t* enraged_slash;
       //t2
       talent_t* juyo_mastery; // unimplemented
       talent_t* seeping_wound; // unimplemented
@@ -187,7 +189,7 @@ struct class_t : public warr_knight::class_t
     void      init_rng();
     void      init_actions();
     resource_type primary_resource() const;
-    int       fury_generated() const;
+    int       fury_generated();
     role_type primary_role() const;
     double    force_accuracy_chance() const;
     double    melee_accuracy_chance() const;
@@ -371,6 +373,10 @@ struct vicious_throw_t : public melee_attack_t
 
     class_t* p = cast();
     p -> buffs.fury -> increment( p -> fury_generated() );
+    if ( p -> rngs.enraged_slash -> roll ( p -> talents.enraged_slash -> rank() * 0.34 ) )
+      {
+        p -> resource_gain( RESOURCE_RAGE, 1, p -> gains.enraged_slash );
+      }
   }
 };
 
@@ -504,6 +510,10 @@ struct annihilate_t : public melee_attack_t
       class_t* p = cast();
       p -> buffs.annihilator -> increment();
       p -> buffs.fury -> increment( p -> fury_generated() );
+      if ( p -> rngs.enraged_slash -> roll ( p -> talents.enraged_slash -> rank() * 0.34 ) )
+      {
+        p -> resource_gain( RESOURCE_RAGE, 1, p -> gains.enraged_slash );
+      }
     }
   }
 };
@@ -806,6 +816,11 @@ struct vicious_slash_t : public melee_attack_t
         p -> buffs.berserk -> decrement();
 
       p -> buffs.fury -> increment( p -> fury_generated() );
+
+      if ( p -> rngs.enraged_slash -> roll ( p -> talents.enraged_slash -> rank() * 0.34 ) )
+      {
+        p -> resource_gain( RESOURCE_RAGE, 1, p -> gains.enraged_slash );
+      }
     }
   }
 };
@@ -855,7 +870,8 @@ struct assault_t : public melee_attack_t
   virtual void execute()
   {
     base_t::execute();
-    p() -> resource_gain( RESOURCE_RAGE, 2, p() -> gains.assault );
+    class_t* p = cast();
+    p -> resource_gain( RESOURCE_RAGE, 2, p -> gains.assault );
   }
 };
 
@@ -923,7 +939,7 @@ struct frenzy_t : action_t
       trigger_gcd = timespan_t::zero();
       use_off_gcd = true;
 
-      cooldown -> duration = from_seconds( 180 );
+      cooldown -> duration = from_seconds( 180 - 15 * p -> talents.short_fuse -> rank() );
     }
 
     virtual void execute()
@@ -1045,6 +1061,17 @@ struct massacre_t : public melee_attack_t
 {
   typedef melee_attack_t base_t;
 
+  virtual void execute()
+  {
+    base_t::execute();
+
+    class_t* p = cast();
+    p -> buffs.fury -> increment( p -> fury_generated() );
+    if ( p -> rngs.enraged_slash -> roll ( p -> talents.enraged_slash -> rank() * 0.34 ) )
+      {
+        p -> resource_gain( RESOURCE_RAGE, 1, p -> gains.enraged_slash );
+      }
+  }
 };
 
 // ============================================================================
@@ -1204,10 +1231,12 @@ void class_t::init_gains()
     const char* assault = is_marauder ? "assault" : "strike";
     const char* battering_assault = is_marauder ? "battering_assault" : "zealous_strike";
     const char* force_charge = is_marauder ? "force_charge" : "force_leap";
+    const char* enraged_slash = is_marauder ? "enraged_slash" : "focused_slash";
 
     gains.assault = get_gain( assault );
     gains.battering_assault = get_gain( battering_assault );
     gains.force_charge = get_gain( force_charge );
+    gains.enraged_slash = get_gain( enraged_slash );
 
 }
 
@@ -1225,7 +1254,10 @@ void class_t::init_rng()
 {
     base_t::init_rng();
 
+    bool is_marauder = ( type == SITH_MARAUDER );
+    const char* enraged_slash = is_marauder ? "enraged_slash" : "focused_slash";
 
+    rngs.enraged_slash = get_rng( enraged_slash );
 
 }
 
@@ -1297,9 +1329,9 @@ resource_type class_t::primary_resource() const
 { return RESOURCE_RAGE; }
 
 // class_t::fury_generated ==================================================
-int class_t::fury_generated() const
+int class_t::fury_generated()
 {
-  return 2;
+  return 2 + this -> talents.short_fuse -> rank();
 }
 
 // class_t::primary_role ==================================================
