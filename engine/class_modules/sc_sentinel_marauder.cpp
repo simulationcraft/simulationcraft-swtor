@@ -204,13 +204,15 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   dot_ravage_offhand ( "ravage_offhand", &source ),
   dot_rupture ( "rupture_dot", &source ),
   dot_assault ( "assault", &source ),
-  dot_assault_offhand ( "assault_offhand", &source )
+  dot_assault_offhand ( "assault_offhand", &source ),
+  dot_deadly_saber ( "deadly_saber_dot", &source )
 {
   add( dot_ravage );
   add( dot_ravage_offhand );
   add( dot_rupture );
   add( dot_assault );
   add( dot_assault_offhand );
+  add( dot_deadly_saber );
 }
 
 struct action_t : public warr_knight::action_t
@@ -273,11 +275,6 @@ struct melee_attack_t : public action_t
       if ( p -> actives.form == JUYO_FORM )
       {
         p->buffs.juyo_form-> increment();
-      }
-
-      if ( p -> buffs.deadly_saber -> up() )
-      {
-        p -> buffs.deadly_saber -> decrement();
       }
     }
   }
@@ -545,31 +542,15 @@ struct deadly_saber_t : public action_t
 
     class_t* p = cast();
     p -> buffs.fury -> increment( p -> fury_generated() );
-    p -> buffs.deadly_saber -> trigger( 3 );
+    // hacker to make reverse buffs start at max stacks
+    if ( p -> buffs.deadly_saber -> up() )
+      p -> buffs.deadly_saber -> refresh( p -> buffs.deadly_saber -> max_stack );
+    else
+      p -> buffs.deadly_saber -> start( p -> buffs.deadly_saber -> max_stack );
   }
 
 };
 
-struct deadly_saber_dot_t : public bleed_attack_t
-{
-  typedef bleed_attack_t base_t;
-
-  deadly_saber_dot_t( class_t* p, const std::string& n, const std::string& options_str) :
-    base_t( n, p )
-  {
-    parse_options( options_str );
-
-    td.standardhealthpercentmin =
-    td.standardhealthpercentmax = 0.02;
-    td.power_mod = 0.2;
-    base_cost = 0;
-
-    base_tick_time = from_seconds( 3.0 );
-    num_ticks = 3;
-    tick_zero = true;
-    background = true;
-  }
-};
 
 // Force Charge | Force Leap ==================================================
 struct force_charge_t : public melee_attack_t
@@ -1097,6 +1078,63 @@ struct force_crush_t : force_attack_t
 
 
 // ==========================================================================
+// Sentinel / Marauder Callbacks
+// ==========================================================================
+
+class action_callback_t : public ::action_callback_t
+{
+public:
+  action_callback_t( class_t* player ) :
+    ::action_callback_t( player )
+  {}
+
+  class_t* p() const { return static_cast<class_t*>( listener ); }
+  class_t* cast() const { return p(); }
+};
+
+struct deadly_saber_callback_t : public action_callback_t
+{
+  struct deadly_saber_dot_t : public bleed_attack_t
+  {
+    typedef bleed_attack_t base_t;
+
+    deadly_saber_dot_t( class_t* p, const std::string& n) :
+      base_t( n, p )
+    {
+      td.standardhealthpercentmin =
+      td.standardhealthpercentmax = 0.02;
+      td.power_mod = 0.2;
+      base_cost = 0;
+
+      base_tick_time = from_seconds( 3.0 );
+      num_ticks = 3;
+      tick_zero = true;
+      background = true;
+    }
+  };
+
+  deadly_saber_dot_t* deadly_saber_dot;
+  buff_t* buff_deadly_saber;
+
+  deadly_saber_callback_t( class_t* p ) :
+    action_callback_t( p ),
+    deadly_saber_dot( new deadly_saber_dot_t( p, "deadly_saber_dot") ),
+    buff_deadly_saber( p -> buffs.deadly_saber )
+  {}
+
+  virtual void trigger (::action_t* a, void* /* call_data */)
+  {
+    if ( ( a -> weapon || a -> td.weapon ) && buff_deadly_saber -> up() && buff_deadly_saber -> trigger() )
+    {
+      // TODO confirm behavior of the dot
+      // currently when the 2nd and 3rd execute it basically resets the dot.
+      // we either want to strengthen the dot with each "stack", or have it overlap.
+      deadly_saber_dot -> execute();
+    }
+  }
+};
+
+// ==========================================================================
 // sentinel_marauder Character Definition
 // ==========================================================================
 
@@ -1219,12 +1257,12 @@ void class_t::init_buffs()
     // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
     // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
     // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-    buffs.juyo_form = new buff_t( this, "juyo_form", 5, from_seconds( 15.0 ), from_seconds( 1.5 ) );
-    buffs.annihilator = new buff_t( this, "annihilator", 3, from_seconds( 15.0 ) );
-    buffs.fury = new buff_t( this, "fury", 30, from_seconds( 60 ) );
-    buffs.deadly_saber = new buff_t( this, "deadly_saber", 3, from_seconds( 15.0 ) );
-    buffs.berserk = new buff_t( this, "berserk", 6, from_seconds( 20 ) );
-    buffs.bloodthirst = new buff_t( this, "bloodthirst", 1, from_seconds( 15 ) );
+    buffs.juyo_form    = new buff_t ( this , "juyo_form"    , 5  , from_seconds ( 15.0 )  , from_seconds ( 1.5 )  ) ;
+    buffs.annihilator  = new buff_t ( this , "annihilator"  , 3  , from_seconds ( 15.0 )  ) ;
+    buffs.fury         = new buff_t ( this , "fury"         , 30 , from_seconds ( 60   )  ) ;
+    buffs.berserk      = new buff_t ( this , "berserk"      , 6  , from_seconds ( 20   )  ) ;
+    buffs.bloodthirst  = new buff_t ( this , "bloodthirst"  , 1  , from_seconds ( 15   )  ) ;
+    buffs.deadly_saber = new buff_t ( this , "deadly_saber" , 3  , from_seconds ( 15.0 )  , from_seconds ( 1.5 )  , 100 , false , true /*reverse*/ ) ;
 }
 
 // class_t::init_gains =======================================================
@@ -1318,6 +1356,12 @@ void class_t::init_actions()
         }
     }
 
+    if ( talents.deadly_saber -> rank() )
+    {
+      deadly_saber_callback_t* callback = new deadly_saber_callback_t( this );
+      register_attack_callback( RESULT_HIT_MASK, callback );
+      register_tick_callback  ( RESULT_HIT_MASK, callback );
+    }
     base_t::init_actions();
 }
 
