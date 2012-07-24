@@ -22,9 +22,9 @@ struct targetdata_t : public warr_knight::targetdata_t
 {
   dot_t dot_ravage;
   dot_t dot_ravage_offhand;
+  dot_t dot_rupture;
   dot_t dot_assault;
   dot_t dot_assault_offhand;
-  dot_t dot_rupture;
   dot_t dot_deadly_saber;
 
     targetdata_t( class_t& source, player_t& target );
@@ -100,11 +100,11 @@ struct class_t : public warr_knight::class_t
       talent_t* short_fuse;
       talent_t* enraged_slash;
       //t2
-      talent_t* juyo_mastery; // unimplemented
-      talent_t* seeping_wound; // unimplemented
+      talent_t* juyo_mastery;
+      talent_t* seeping_wound; // unimplemented: needs retaliation implemented
       talent_t* hungering; // unimplemented
       //t3
-      talent_t* bleedout; // unimplemented
+      talent_t* bleedout;
       talent_t* deadly_saber; // unimplemented
       talent_t* blurred_speed; // unimplemented
       //t4
@@ -202,11 +202,13 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   warr_knight::targetdata_t( source, target ),
   dot_ravage ( "ravage", &source ),
   dot_ravage_offhand ( "ravage_offhand", &source ),
+  dot_rupture ( "rupture_dot", &source ),
   dot_assault ( "assault", &source ),
   dot_assault_offhand ( "assault_offhand", &source )
 {
   add( dot_ravage );
   add( dot_ravage_offhand );
+  add( dot_rupture );
   add( dot_assault );
   add( dot_assault_offhand );
 }
@@ -283,18 +285,21 @@ struct melee_attack_t : public action_t
 
 struct bleed_attack_t : public force_attack_t
 {
+  typedef force_attack_t base_t;
   bleed_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_INTERNAL) :
     force_attack_t(n, p, s)
   {
     if ( p -> actives.form == JUYO_FORM && p -> buffs.berserk -> up() )
     {
-      base_crit += 1;
+      base_crit += 0.01;
     }
-    base_crit += 1 * p -> talents.juyo_mastery -> rank();
+    base_crit += 0.01 * p -> talents.juyo_mastery -> rank();
+    crit_multiplier += .15 * p -> talents.bleedout -> rank();
   }
 
   virtual void execute()
   {
+    base_t::execute();
     class_t* p = cast();
     if ( p -> actives.form == JUYO_FORM && p -> buffs.berserk -> up() )
     {
@@ -396,8 +401,9 @@ struct rupture_t : public melee_attack_t
       base_tick_time = from_seconds( 1.0 );
       num_ticks = 6;
       tick_zero = false;
-      range = 4.0;
       background = true;
+      //trigger_gcd = timespan_t::zero();
+      //base_execute_time = timespan_t::zero();
     }
   };
 
@@ -448,6 +454,7 @@ struct rupture_t : public melee_attack_t
     if ( offhand_attack )
     {
       offhand_attack -> schedule_execute();
+      rupture_dot -> schedule_execute();
       class_t* p = cast();
       p -> buffs.fury -> increment( p -> fury_generated() );
     }
