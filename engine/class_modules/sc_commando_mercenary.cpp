@@ -494,7 +494,8 @@ struct power_shot_t : public attack_t
 
   power_shot_t( class_t* p, const std::string& n, const std::string& options_str,
       bool is_offhand = false ) :
-    attack_t( n, p, range_policy, SCHOOL_ENERGY )
+    attack_t( n, p, range_policy, SCHOOL_ENERGY ),
+    offhand_attack( 0 )
   {
     rank_level_list = { 10, 13, 16, 22, 33, 45, 50 };
 

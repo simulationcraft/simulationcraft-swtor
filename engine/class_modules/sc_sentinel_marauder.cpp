@@ -92,60 +92,60 @@ struct class_t : public warr_knight::class_t
     // Talents
     struct talents_t:base_t::talents_t
     {
-        // Annihilation|Watchman
-        // t1
-        talent_t* cloak_of_annihilation;
-        talent_t* short_fuse;
-        talent_t* enraged_slash;
-        //t2
-        talent_t* juyo_mastery;
-        talent_t* seeping_wound;
-        talent_t* hungering;
-        //t3
-        talent_t* bleedout;
-        talent_t* deadly_saber;
-        talent_t* blurred_speed;
-        //t4
-        talent_t* enraged_charge;
-        talent_t* subjugation;
-        talent_t* deep_wound;
-        talent_t* close_quarters;
-        //t5
-        talent_t* phantom;
-        talent_t* pulverize;
-        //t6
-        talent_t* empowerment;
-        talent_t* hemorrhage;
-        //t7
-        talent_t* annihilate;
+      // Annihilation|Watchman
+      // t1
+      talent_t* cloak_of_annihilation;
+      talent_t* short_fuse;
+      talent_t* enraged_slash;
+      //t2
+      talent_t* juyo_mastery;
+      talent_t* seeping_wound;
+      talent_t* hungering;
+      //t3
+      talent_t* bleedout;
+      talent_t* deadly_saber;
+      talent_t* blurred_speed;
+      //t4
+      talent_t* enraged_charge;
+      talent_t* subjugation;
+      talent_t* deep_wound;
+      talent_t* close_quarters;
+      //t5
+      talent_t* phantom;
+      talent_t* pulverize;
+      //t6
+      talent_t* empowerment;
+      talent_t* hemorrhage;
+      //t7
+      talent_t* annihilate;
 
-        // Carnage|Combat
-        //t1
-        talent_t* cloak_of_carnage;
-        talent_t* dual_wield_mastery;
-        talent_t* defensive_forms;
-        //t2
-        talent_t* narrowed_hatred;
-        talent_t* defensive_roll;
-        talent_t* stagger;
-        //t3
-        talent_t* execute;
-        talent_t* ataru_form;
-        talent_t* ataru_mastery;
-        //t4
-        talent_t* blood_frenzy;
-        talent_t* towering_rage;
-        talent_t* enraged_assault;
-        talent_t* displacement;
-        //t5
-        talent_t* unbound;
-        talent_t* gore;
-        talent_t* rattling_voice;
-        //t6
-        talent_t* overwhelm;
-        talent_t* sever;
-        //t7
-        talent_t* massacre;
+      // Carnage|Combat
+      //t1
+      talent_t* cloak_of_carnage;
+      talent_t* dual_wield_mastery;
+      talent_t* defensive_forms;
+      //t2
+      talent_t* narrowed_hatred;
+      talent_t* defensive_roll;
+      talent_t* stagger;
+      //t3
+      talent_t* execute;
+      talent_t* ataru_form;
+      talent_t* ataru_mastery;
+      //t4
+      talent_t* blood_frenzy;
+      talent_t* towering_rage;
+      talent_t* enraged_assault;
+      talent_t* displacement;
+      //t5
+      talent_t* unbound;
+      talent_t* gore;
+      talent_t* rattling_voice;
+      //t6
+      talent_t* overwhelm;
+      talent_t* sever;
+      //t7
+      talent_t* massacre;
 
     } talents;
 
@@ -397,7 +397,9 @@ struct rupture_t : public melee_attack_t
 
   rupture_t( class_t* p, const std::string& n, const std::string& options_str,
              bool is_offhand = false ) :
-    melee_attack_t( n, p ), rupture_dot( new rupture_dot_t( p, n + "_dot" ) )
+    melee_attack_t( n, p ),
+    rupture_dot( new rupture_dot_t( p, n + "_dot" ) ),
+    offhand_attack( 0 )
   {
     parse_options( options_str );
 
@@ -421,7 +423,7 @@ struct rupture_t : public melee_attack_t
       base_execute_time = timespan_t::zero();
       trigger_gcd = timespan_t::zero();
       weapon = &( player -> off_hand_weapon );
-      //rank_level_list = { 0 };
+      rank_level_list = { 0 };
       dd.power_mod = 0;
     }
     else
@@ -452,7 +454,8 @@ struct annihilate_t : public melee_attack_t
 
   annihilate_t( class_t* p, const std::string& n, const std::string& options_str,
                 bool is_offhand=false ) :
-    base_t(n, p)
+    base_t(n, p),
+    offhand_attack( 0 )
   {
     check_talent( p -> talents.annihilate -> rank());
 
@@ -476,7 +479,7 @@ struct annihilate_t : public melee_attack_t
       base_execute_time = timespan_t::zero();
       trigger_gcd = timespan_t::zero();
       weapon = &( player -> off_hand_weapon );
-      //rank_level_list = { 0 };
+      rank_level_list = { 0 };
       dd.power_mod = 0;
     }
     else
@@ -490,9 +493,13 @@ struct annihilate_t : public melee_attack_t
   {
     base_t::execute();
 
-    class_t* p = cast();
-    p -> buffs.annihilator -> increment();
-    p -> buffs.fury -> increment( p -> fury_generated() );
+    if ( offhand_attack ) {
+      offhand_attack -> schedule_execute();
+
+      class_t* p = cast();
+      p -> buffs.annihilator -> increment();
+      p -> buffs.fury -> increment( p -> fury_generated() );
+    }
   }
 };
 
@@ -588,7 +595,8 @@ struct ravage_t : public melee_attack_t
 
   ravage_t( class_t* p, const std::string& n, const std::string& options_str,
            bool is_offhand = false ) :
-    base_t( n, p )
+    base_t( n, p ),
+    offhand_attack( 0 )
   {
     parse_options( options_str );
 
@@ -613,7 +621,7 @@ struct ravage_t : public melee_attack_t
       base_cost = 0;
       trigger_gcd = timespan_t::zero();
       td.weapon = &( player -> off_hand_weapon );
-      //rank_level_list = { 0 };
+      rank_level_list = { 0 };
       td.power_mod = 0;
     }
     else
@@ -666,7 +674,9 @@ struct battering_assault_t : public melee_attack_t
 
   battering_assault_t( class_t* p, const std::string& n, const std::string& options_str,
                        bool is_second_strike = false, bool is_offhand = false ) :
-    base_t( n, p )
+    base_t( n, p ),
+    second_strike( 0 ),
+    offhand_attack( 0 )
   {
     parse_options( options_str );
 
@@ -697,7 +707,7 @@ struct battering_assault_t : public melee_attack_t
       background = dual = true;
       trigger_gcd = timespan_t::zero();
       weapon = &( player -> off_hand_weapon );
-      //rank_level_list = { 0 };
+      rank_level_list = { 0 };
       dd.power_mod = 0;
       rage_gain = false;
     }
@@ -737,7 +747,8 @@ struct vicious_slash_t : public melee_attack_t
 
   vicious_slash_t( class_t* p, const std::string& n, const std::string& options_str,
                   bool is_offhand = false ) :
-    base_t( n, p )
+    base_t( n, p ),
+    offhand_attack( 0 )
   {
     parse_options( options_str );
 
@@ -758,7 +769,7 @@ struct vicious_slash_t : public melee_attack_t
       base_execute_time = timespan_t::zero();
       trigger_gcd = timespan_t::zero();
       weapon = &( player -> off_hand_weapon );
-      //rank_level_list = { 0 };
+      rank_level_list = { 0 };
       dd.power_mod = 0;
     }
     else
@@ -801,7 +812,8 @@ struct assault_t : public melee_attack_t
 
   assault_t( class_t* p, const std::string& n, const std::string& options_str,
             bool is_offhand = false ) :
-    melee_attack_t( n, p )
+    melee_attack_t( n, p ),
+    offhand_attack( 0 )
     {
       parse_options( options_str );
       base_cost = 0;
@@ -823,7 +835,7 @@ struct assault_t : public melee_attack_t
         tick_zero = false;
         trigger_gcd = timespan_t::zero();
         td.weapon = &( player -> off_hand_weapon );
-        //rank_level_list = { 0 };
+        rank_level_list = { 0 };
         td.power_mod = 0;
       }
       else
