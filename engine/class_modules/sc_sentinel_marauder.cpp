@@ -1279,7 +1279,7 @@ void class_t::init_actions()
 
 double class_t::offhand_multiplier()
 {
-  return 0.3 + ( 0.12 * talents.dual_wield_mastery -> rank() );
+  return base_t::offhand_multiplier() + ( 0.12 * talents.dual_wield_mastery -> rank() );
 }
 
 // class_t::primary_resource ==================================================
