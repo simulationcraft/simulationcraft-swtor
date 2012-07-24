@@ -46,36 +46,36 @@ public:
     //t1
     talent_t* ravager;
     talent_t* malice;
-    talent_t* decimate;
+    talent_t* decimate; // unimplemented
     //t2
-    talent_t* payback;
-    talent_t* overpower;
-    talent_t* enraged_scream;
+    talent_t* payback; // unimplemented
+    talent_t* overpower; // unimplemented
+    talent_t* enraged_scream; // unimplemented
     talent_t* brutality;
     //t3
-    talent_t* saber_strength;
-    talent_t* obliterate;
-    talent_t* strangulate;
+    talent_t* saber_strength; // unimplemented
+    talent_t* obliterate; // unimplemented
+    talent_t* strangulate; // unimplemented
     //t4
-    talent_t* dominate;
-    talent_t* shockwave;
-    talent_t* berserker;
+    talent_t* dominate; // unimplemented
+    talent_t* shockwave; // unimplemented
+    talent_t* berserker; // unimplemented
     //t5
-    talent_t* gravity;
-    talent_t* interceptor;
-    talent_t* shii_cho_mastery;
+    talent_t* gravity; // unimplemented
+    talent_t* interceptor; // unimplemented
+    talent_t* shii_cho_mastery; // unimplemented
     //t6
-    talent_t* dark_resonance;
-    talent_t* undying;
+    talent_t* dark_resonance; // unimplemented
+    talent_t* undying; // unimplemented
     //t7
-    talent_t* force_crush;
+    talent_t* force_crush; // unimplemented
   };
   talents_t& talents;
 
   struct mirror_t
   {
     // abilities
-    std::string a_adrenaline_probe;
+    // std::string a_adrenaline_probe;
 
     // shared tree talents
     // t1

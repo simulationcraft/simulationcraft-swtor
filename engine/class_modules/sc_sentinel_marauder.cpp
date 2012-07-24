@@ -94,58 +94,58 @@ struct class_t : public warr_knight::class_t
     {
       // Annihilation|Watchman
       // t1
-      talent_t* cloak_of_annihilation;
-      talent_t* short_fuse;
-      talent_t* enraged_slash;
+      talent_t* cloak_of_annihilation; // unimplemented
+      talent_t* short_fuse; // unimplemented
+      talent_t* enraged_slash; // unimplemented
       //t2
-      talent_t* juyo_mastery;
-      talent_t* seeping_wound;
-      talent_t* hungering;
+      talent_t* juyo_mastery; // unimplemented
+      talent_t* seeping_wound; // unimplemented
+      talent_t* hungering; // unimplemented
       //t3
-      talent_t* bleedout;
-      talent_t* deadly_saber;
-      talent_t* blurred_speed;
+      talent_t* bleedout; // unimplemented
+      talent_t* deadly_saber; // unimplemented
+      talent_t* blurred_speed; // unimplemented
       //t4
-      talent_t* enraged_charge;
-      talent_t* subjugation;
-      talent_t* deep_wound;
-      talent_t* close_quarters;
+      talent_t* enraged_charge; // unimplemented
+      talent_t* subjugation; // unimplemented
+      talent_t* deep_wound; // unimplemented
+      talent_t* close_quarters; // unimplemented
       //t5
-      talent_t* phantom;
-      talent_t* pulverize;
+      talent_t* phantom; // unimplemented
+      talent_t* pulverize; // unimplemented
       //t6
-      talent_t* empowerment;
-      talent_t* hemorrhage;
+      talent_t* empowerment; // unimplemented
+      talent_t* hemorrhage; // unimplemented
       //t7
-      talent_t* annihilate;
+      talent_t* annihilate; // unimplemented
 
       // Carnage|Combat
       //t1
-      talent_t* cloak_of_carnage;
+      talent_t* cloak_of_carnage; // unimplemented - defensive
       talent_t* dual_wield_mastery;
-      talent_t* defensive_forms;
+      talent_t* defensive_forms; // unimplemented - defensive
       //t2
       talent_t* narrowed_hatred;
-      talent_t* defensive_roll;
-      talent_t* stagger;
+      talent_t* defensive_roll; // unimplemented - defensive
+      talent_t* stagger; // unimplemented - pvp
       //t3
-      talent_t* execute;
-      talent_t* ataru_form;
-      talent_t* ataru_mastery;
+      talent_t* execute; // unimplemented
+      talent_t* ataru_form; // unimplemented
+      talent_t* ataru_mastery; // unimplemented
       //t4
-      talent_t* blood_frenzy;
-      talent_t* towering_rage;
-      talent_t* enraged_assault;
-      talent_t* displacement;
+      talent_t* blood_frenzy; // unimplemented
+      talent_t* towering_rage; // unimplemented
+      talent_t* enraged_assault; // unimplemented
+      talent_t* displacement; // unimplemented
       //t5
-      talent_t* unbound;
-      talent_t* gore;
-      talent_t* rattling_voice;
+      talent_t* unbound; // unimplemented
+      talent_t* gore; // unimplemented
+      talent_t* rattling_voice; // unimplemented
       //t6
-      talent_t* overwhelm;
-      talent_t* sever;
+      talent_t* overwhelm; // unimplemented
+      talent_t* sever; // unimplemented
       //t7
-      talent_t* massacre;
+      talent_t* massacre; // unimplemented
 
     } talents;
 
@@ -174,11 +174,11 @@ struct class_t : public warr_knight::class_t
     }
 
     // Character Definition
+    double    _force_melee_accuracy;
     targetdata_t* new_targetdata( player_t& target ) // override
     { return new targetdata_t( *this, target ); }
-
-
     action_t* create_action( const std::string& name, const std::string& options );
+    void      init_base();
     void      init_talents();
     void      init_benefits();
     void      init_buffs();
@@ -189,6 +189,8 @@ struct class_t : public warr_knight::class_t
     resource_type primary_resource() const;
     int       fury_generated() const;
     role_type primary_role() const;
+    double    force_accuracy_chance() const;
+    double    melee_accuracy_chance() const;
     void      create_mirror();
     void      create_talents();
     double    offhand_multiplier();
@@ -232,10 +234,10 @@ struct force_attack_t : public action_t
     may_crit   = true;
 
     base_multiplier += (0.02 * p -> buffs.juyo_form -> current_stack );
-
+    base_crit += .02 * p -> talents.malice -> rank();
     if ( p -> buffs.bloodthirst -> up() )
     {
-      player_multiplier += 0.15;
+      base_multiplier += 0.15;
     }
   }
 };
@@ -605,7 +607,7 @@ struct ravage_t : public melee_attack_t
 
     base_cost = 0;
     range = 4.0;
-    cooldown -> duration = from_seconds( 30 );
+    cooldown -> duration = from_seconds( 30 - 1.5 * ( p -> talents.ravager -> rank() ) );
     channeled = true;
     num_ticks = 3;
     base_tick_time = from_seconds( 0.5 ); // changes to 2s for last tick
@@ -615,6 +617,7 @@ struct ravage_t : public melee_attack_t
     td.power_mod = 1.39;
     td.weapon = &( player -> main_hand_weapon );
     td.weapon_multiplier = -0.075;
+    base_multiplier += .04 * p -> talents.ravager -> rank();
 
     if ( is_offhand )
     {
@@ -763,6 +766,7 @@ struct vicious_slash_t : public melee_attack_t
     dd.power_mod = 1.54;
     weapon = &(player -> main_hand_weapon);
     weapon_multiplier = 0.02;
+    base_crit += .075 * p -> talents.brutality -> rank();
 
     if ( is_offhand )
     {
@@ -1158,6 +1162,14 @@ void class_t::init_talents()
         talents.massacre                    = find_talent( "Massacre" );
 }
 
+// class_t::init_base
+void class_t::init_base()
+{
+  base_t::init_base();
+
+  _force_melee_accuracy = 0.01 * talents.narrowed_hatred -> rank();
+}
+
 // class_t::init_benefits =======================================================
 
 void class_t::init_benefits()
@@ -1175,17 +1187,12 @@ void class_t::init_buffs()
     // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
     // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
     // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-    buffs.deadly_saber = new buff_t( this, "deadly_saber", 3, from_seconds( 15 ), from_seconds( 12 ) );
-    buffs.juyo_form = new buff_t( this, "juyo_form", 5, from_seconds( 15 ), from_seconds( 1.5 ) );
-    buffs.bloodthirst = new buff_t( this, "bloodthirst", 1, from_seconds( 15 ));
-
-
-    buffs.juyo_form = new buff_t( this, "Juyo Form", 5, from_seconds( 15.0 ), from_seconds( 1.5 ) );
-    buffs.annihilator = new buff_t( this, "Annihilator", 3, from_seconds( 15.0 ) );
-    buffs.fury = new buff_t( this, "Fury", 30, from_seconds( 60 ) );
-    buffs.deadly_saber = new buff_t( this, "Deadly Saber", 3, from_seconds( 15.0 ), from_seconds( 1.5 ) );
-    buffs.berserk = new buff_t( this, "Berserk", 6, from_seconds( 20 ) );
-    buffs.bloodthirst = new buff_t( this, "Bloodthirst", 1, from_seconds( 15 ) );
+    buffs.juyo_form = new buff_t( this, "juyo_form", 5, from_seconds( 15.0 ), from_seconds( 1.5 ) );
+    buffs.annihilator = new buff_t( this, "annihilator", 3, from_seconds( 15.0 ) );
+    buffs.fury = new buff_t( this, "fury", 30, from_seconds( 60 ) );
+    buffs.deadly_saber = new buff_t( this, "deadly_saber", 3, from_seconds( 15.0 ) );
+    buffs.berserk = new buff_t( this, "berserk", 6, from_seconds( 20 ) );
+    buffs.bloodthirst = new buff_t( this, "bloodthirst", 1, from_seconds( 15 ) );
 }
 
 // class_t::init_gains =======================================================
@@ -1301,6 +1308,19 @@ role_type class_t::primary_role() const
 {
     return ROLE_DPS;
 }
+
+// class_t::force_accuracy_chance
+double class_t::force_accuracy_chance() const
+{
+  return base_t::force_accuracy_chance() + _force_melee_accuracy;
+}
+
+// class_t::range_accuracy_chance ===============================
+double class_t::melee_accuracy_chance() const
+{
+  return base_t::melee_accuracy_chance() + _force_melee_accuracy;
+}
+
 
 // class_t::create_mirror ===================================================
 
