@@ -2952,6 +2952,8 @@ public:
   virtual double assess_damage( double amount, school_type, dmg_type, result_type, action_t* a );
   virtual double target_mitigation( double amount, school_type, dmg_type, result_type, action_t* a );
 
+  virtual double offhand_multiplier();
+
   struct heal_info_t { double actual, amount; };
   virtual heal_info_t assess_heal( double amount, school_type school, dmg_type, result_type, action_t* a );
 

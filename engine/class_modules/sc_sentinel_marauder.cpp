@@ -191,6 +191,7 @@ struct class_t : public warr_knight::class_t
     role_type primary_role() const;
     void      create_mirror();
     void      create_talents();
+    double    offhand_multiplier();
 };
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
@@ -1272,6 +1273,13 @@ void class_t::init_actions()
     }
 
     base_t::init_actions();
+}
+
+// class_t::offhand_multiplier ================================================
+
+double class_t::offhand_multiplier()
+{
+  return 0.3 + ( 0.12 * talents.dual_wield_mastery -> rank() );
 }
 
 // class_t::primary_resource ==================================================

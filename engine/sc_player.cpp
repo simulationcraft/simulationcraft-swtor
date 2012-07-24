@@ -3025,6 +3025,12 @@ void player_t::recalculate_absorb_from_rating()
 { absorb_from_rating = rating_scaler.absorb( absorb_rating ); }
 
 
+// player_t::offhand_multiplier =============================================
+double player_t::offhand_multiplier()
+{
+  return 0.3;
+}
+
 // player_t::target_mitigation ==============================================
 
 double player_t::target_mitigation( double      amount,
@@ -5199,6 +5205,7 @@ void player_t::create_options()
 
   option_t::copy( options, player_options );
 }
+
 
 // player_t::create =========================================================
 

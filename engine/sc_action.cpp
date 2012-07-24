@@ -531,7 +531,8 @@ double action_t::calculate_weapon_damage( weapon_t* weapon )
 
   // OH penalty
   if ( weapon -> slot == SLOT_OFF_HAND )
-    dmg *= 0.3; // FIXME: check this multiplier for SWTOR, Marauder talent will increase it.
+    //dmg *= 0.3;
+    dmg *= player -> offhand_multiplier();
 
   if ( sim -> debug )
   {
