@@ -228,6 +228,7 @@ struct force_attack_t : public action_t
     action_t( n, p, force_policy, p -> primary_resource(), s )
   {
     harmful = true;
+    tick_may_crit = true;
     may_crit   = true;
 
     base_multiplier += (0.02 * p -> buffs.juyo_form -> current_stack );
@@ -245,6 +246,7 @@ struct melee_attack_t : public action_t
     action_t(n, p, melee_policy, p -> primary_resource(), s)
   {
     harmful = true;
+    tick_may_crit = true;
     may_crit = true;
 
     base_multiplier += (0.02 * p -> buffs.juyo_form -> current_stack );
