@@ -96,7 +96,7 @@ struct class_t : public warr_knight::class_t
     {
       // Annihilation|Watchman
       // t1
-      talent_t* cloak_of_annihilation; // unimplemented
+      talent_t* cloak_of_annihilation; // unimplemented: needs retaliation implemented
       talent_t* short_fuse;
       talent_t* enraged_slash;
       //t2
@@ -286,13 +286,11 @@ struct bleed_attack_t : public force_attack_t
   bleed_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_INTERNAL) :
     force_attack_t(n, p, s)
   {
-    tick_may_crit = true;
-    may_crit = false;
-
     if ( p -> actives.form == JUYO_FORM && p -> buffs.berserk -> up() )
     {
       base_crit += 1;
     }
+    base_crit += 1 * p -> talents.juyo_mastery -> rank();
   }
 
   virtual void execute()
