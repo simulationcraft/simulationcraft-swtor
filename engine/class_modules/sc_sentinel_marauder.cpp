@@ -52,6 +52,8 @@ struct class_t : public warr_knight::class_t
       gain_t* battering_assault;
       gain_t* force_charge;
       gain_t* enraged_slash;
+      gain_t* enraged_charge;
+      gain_t* empowerment;
     } gains;
 
     // Procs
@@ -78,17 +80,7 @@ struct class_t : public warr_knight::class_t
     // Cooldowns
     struct cooldowns_t
     {
-      cooldown_t* deadly_saber;
-      cooldown_t* force_charge;
       cooldown_t* rupture;
-      cooldown_t* annihilate;
-      cooldown_t* ravage;
-      cooldown_t* battering_assault;
-      cooldown_t* bloodthirst;
-      cooldown_t* vicious_throw;
-      cooldown_t* frenzy;
-      cooldown_t* force_choke;
-      cooldown_t* smash;
     } cooldowns;
 
     // Talents
@@ -105,21 +97,21 @@ struct class_t : public warr_knight::class_t
       talent_t* hungering; // unimplemented
       //t3
       talent_t* bleedout;
-      talent_t* deadly_saber; // unimplemented
-      talent_t* blurred_speed; // unimplemented
+      talent_t* deadly_saber;
+      talent_t* blurred_speed;
       //t4
-      talent_t* enraged_charge; // unimplemented
-      talent_t* subjugation; // unimplemented
-      talent_t* deep_wound; // unimplemented
-      talent_t* close_quarters; // unimplemented
+      talent_t* enraged_charge;
+      talent_t* subjugation; // unimplemented - interrupt and accuracy debuff
+      talent_t* deep_wound;
+      talent_t* close_quarters; // unimplemented - need to implement minimum range on force charge
       //t5
-      talent_t* phantom; // unimplemented
-      talent_t* pulverize; // unimplemented
+      talent_t* phantom; // unimplemented - force camo
+      talent_t* pulverize;
       //t6
-      talent_t* empowerment; // unimplemented
-      talent_t* hemorrhage; // unimplemented
+      talent_t* empowerment;
+      talent_t* hemorrhage;
       //t7
-      talent_t* annihilate; // unimplemented
+      talent_t* annihilate;
 
       // Carnage|Combat
       //t1
@@ -169,6 +161,8 @@ struct class_t : public warr_knight::class_t
       tree_type[ SITH_MARAUDER_ANNIHILATION ] = TREE_ANNIHILATION;
       tree_type[ SITH_MARAUDER_CARNAGE ] = TREE_CARNAGE;
       tree_type[ SITH_MARAUDER_RAGE ] = TREE_RAGE;
+
+      cooldowns.rupture = get_cooldown( "rupture" );
 
       create_mirror();
       create_talents();
@@ -292,6 +286,17 @@ struct bleed_attack_t : public force_attack_t
     }
     base_crit += 0.01 * p -> talents.juyo_mastery -> rank();
     crit_multiplier += .15 * p -> talents.bleedout -> rank();
+    base_multiplier += .05 * p -> talents.hemorrhage -> rank();
+  }
+
+  virtual void tick( dot_t* d )
+  {
+    class_t* p = cast();
+    if ( p -> rngs.empowerment -> roll( 0.15 * p -> talents.empowerment -> rank() ) )
+    {
+      p -> resource_gain( RESOURCE_RAGE, 1, p -> gains.empowerment );
+      //TODO: 1.5 second ICD
+    }
   }
 
   virtual void execute()
@@ -424,6 +429,7 @@ struct rupture_t : public melee_attack_t
     dd.power_mod = 0.6;
     weapon = &(player -> main_hand_weapon);
     weapon_multiplier = -0.6;
+    base_multiplier = 0.3 * ( p -> talents.deep_wound -> rank() );
 
     add_child( rupture_dot );
 
@@ -475,7 +481,7 @@ struct annihilate_t : public melee_attack_t
     parse_options( options_str );
 
     base_cost = 5;
-    cooldown -> duration = from_seconds( 12 - (1.5 * p -> buffs.annihilator -> current_stack));
+    cooldown -> duration = from_seconds( 12 - ( 1.5 * p -> buffs.annihilator -> current_stack ) );
     range = 4.0;
 
     dd.standardhealthpercentmin =
@@ -515,6 +521,10 @@ struct annihilate_t : public melee_attack_t
       if ( p -> rngs.enraged_slash -> roll ( p -> talents.enraged_slash -> rank() * 0.34 ) )
       {
         p -> resource_gain( RESOURCE_RAGE, 1, p -> gains.enraged_slash );
+      }
+      if ( p -> rngs.pulverize -> roll( 0.22 * p -> talents.pulverize -> rank() ) )
+      {
+        p -> cooldowns.rupture -> reset();
       }
     }
   }
@@ -563,7 +573,7 @@ struct force_charge_t : public melee_attack_t
     parse_options( options_str );
 
     base_cost = 0;
-    cooldown -> duration = from_seconds( 15 );
+    cooldown -> duration = from_seconds( 15 - 1.5 * p -> talents.blurred_speed -> rank() );
     range = 30.0;
     weapon_multiplier = -0.39;
     weapon = &( player -> main_hand_weapon );
@@ -583,6 +593,10 @@ struct force_charge_t : public melee_attack_t
 
     class_t* p = cast();
     p -> resource_gain( RESOURCE_RAGE, 3, p -> gains.force_charge );
+    if ( p -> rngs.enraged_charge -> roll( .5 * p -> talents.enraged_charge -> rank() ) )
+    {
+      p -> resource_gain( RESOURCE_RAGE, 1, p -> gains.enraged_charge );
+    }
   }
 };
 
@@ -806,6 +820,11 @@ struct vicious_slash_t : public melee_attack_t
       if ( p -> rngs.enraged_slash -> roll ( p -> talents.enraged_slash -> rank() * 0.34 ) )
       {
         p -> resource_gain( RESOURCE_RAGE, 1, p -> gains.enraged_slash );
+      }
+
+      if ( p -> rngs.pulverize -> roll( 0.11 * p -> talents.pulverize -> rank() ) )
+      {
+        p -> cooldowns.rupture -> reset();
       }
     }
   }
@@ -1299,8 +1318,10 @@ void class_t::init_rng()
 
     bool is_marauder = ( type == SITH_MARAUDER );
     const char* enraged_slash = is_marauder ? "enraged_slash" : "focused_slash";
+    const char* enraged_charge = is_marauder ? "enraged_charge" : "focused_leap";
 
     rngs.enraged_slash = get_rng( enraged_slash );
+    rngs.enraged_charge = get_rng( enraged_charge );
 
 }
 
