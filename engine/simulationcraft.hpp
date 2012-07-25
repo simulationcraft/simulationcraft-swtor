@@ -3559,6 +3559,19 @@ struct cooldown_t
     if ( diff < timespan_t::zero() ) diff = timespan_t::zero();
     return diff;
   }
+
+  // check if the cooldown is ready and trigger the next period
+  bool trigger()
+  {
+    if ( remains() == timespan_t::zero() )
+    {
+      start();
+      return true;
+    }
+    else
+      return false;
+  }
+
   const char* name() { return name_str.c_str(); }
 
   // modify cooldown by +- x seconds

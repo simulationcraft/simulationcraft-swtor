@@ -81,6 +81,7 @@ struct class_t : public warr_knight::class_t
     struct cooldowns_t
     {
       cooldown_t* rupture;
+      cooldown_t* empowerment;
     } cooldowns;
 
     // Talents
@@ -162,7 +163,10 @@ struct class_t : public warr_knight::class_t
       tree_type[ SITH_MARAUDER_CARNAGE ] = TREE_CARNAGE;
       tree_type[ SITH_MARAUDER_RAGE ] = TREE_RAGE;
 
-      cooldowns.rupture = get_cooldown( "rupture" );
+      // TODO REVIEW: put this in init cooldowns
+      cooldowns.rupture     = get_cooldown( "rupture" );
+      cooldowns.empowerment = get_cooldown( "empowerment" );
+      cooldowns.empowerment -> duration = from_seconds( 1.5 );
 
       create_mirror();
       create_talents();
@@ -280,23 +284,26 @@ struct bleed_attack_t : public force_attack_t
   bleed_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_INTERNAL) :
     force_attack_t(n, p, s)
   {
+    base_multiplier += .05 * p -> talents.hemorrhage -> rank();
+  }
+
+  virtual void player_buff()
+  {
+    class_t* p = cast();
     if ( p -> actives.form == JUYO_FORM && p -> buffs.berserk -> up() )
     {
-      base_crit += 0.01;
+      player_crit = 1;
     }
-    base_crit += 0.01 * p -> talents.juyo_mastery -> rank();
-    crit_multiplier += .15 * p -> talents.bleedout -> rank();
-    base_multiplier += .05 * p -> talents.hemorrhage -> rank();
+    player_crit += 0.01 * p -> buffs.juyo_form -> stack() * p -> talents.juyo_mastery -> rank();
   }
 
   virtual void tick( dot_t* d )
   {
+    base_t::tick( d );
     class_t* p = cast();
     if ( p -> rngs.empowerment -> roll( 0.15 * p -> talents.empowerment -> rank() ) )
-    {
-      p -> resource_gain( RESOURCE_RAGE, 1, p -> gains.empowerment );
-      //TODO: 1.5 second ICD
-    }
+      if ( p -> cooldowns.empowerment -> trigger() )
+        p -> resource_gain( RESOURCE_RAGE, 1, p -> gains.empowerment );
   }
 
   virtual void execute()
@@ -1317,11 +1324,14 @@ void class_t::init_rng()
     base_t::init_rng();
 
     bool is_marauder = ( type == SITH_MARAUDER );
+    // move mirror names into m struct at some point
     const char* enraged_slash = is_marauder ? "enraged_slash" : "focused_slash";
     const char* enraged_charge = is_marauder ? "enraged_charge" : "focused_leap";
 
     rngs.enraged_slash = get_rng( enraged_slash );
     rngs.enraged_charge = get_rng( enraged_charge );
+    rngs.empowerment = get_rng( "empowerment" );
+    rngs.pulverize = get_rng( "pulverize" );
 
 }
 
