@@ -236,6 +236,7 @@ struct force_attack_t : public action_t
     harmful = true;
     tick_may_crit = true;
     may_crit   = true;
+    base_crit += 0.02 * p -> talents.malice -> rank();
   }
 
   virtual void player_buff()
