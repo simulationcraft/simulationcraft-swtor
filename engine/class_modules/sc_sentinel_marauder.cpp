@@ -236,12 +236,15 @@ struct force_attack_t : public action_t
     harmful = true;
     tick_may_crit = true;
     may_crit   = true;
+  }
 
-    base_multiplier += (0.02 * p -> buffs.juyo_form -> current_stack );
-    base_crit += .02 * p -> talents.malice -> rank();
+  virtual void player_buff()
+  {
+    class_t* p = cast();
+    player_multiplier += (0.02 * p -> buffs.juyo_form -> current_stack );
     if ( p -> buffs.bloodthirst -> up() )
     {
-      base_multiplier += 0.15;
+      player_multiplier += 0.15;
     }
   }
 };
@@ -255,12 +258,6 @@ struct melee_attack_t : public action_t
     tick_may_crit = true;
     may_crit = true;
 
-    base_multiplier += (0.02 * p -> buffs.juyo_form -> current_stack );
-
-    if ( p -> buffs.bloodthirst -> up() )
-    {
-      player_multiplier += 0.15;
-    }
   }
   virtual void impact( player_t* t, result_type impact_result, double travel_dmg)
   {
@@ -274,6 +271,16 @@ struct melee_attack_t : public action_t
       {
         p->buffs.juyo_form-> increment();
       }
+    }
+  }
+
+  virtual void player_buff()
+  {
+    class_t* p = cast();
+    player_multiplier += (0.02 * p -> buffs.juyo_form -> current_stack );
+    if ( p -> buffs.bloodthirst -> up() )
+    {
+      player_multiplier += 0.15;
     }
   }
 };
@@ -337,7 +344,7 @@ struct berserk_t : public action_t
   virtual bool ready()
   {
     class_t* p = cast();
-    return p -> buffs.fury -> current_stack >= 30;
+    return p -> buffs.fury -> current_stack >= 30 && base_t::ready();
   }
 
   virtual void execute()
@@ -436,7 +443,7 @@ struct rupture_t : public melee_attack_t
     dd.power_mod = 0.6;
     weapon = &(player -> main_hand_weapon);
     weapon_multiplier = -0.6;
-    base_multiplier = 0.3 * ( p -> talents.deep_wound -> rank() );
+    base_multiplier += 0.3 * ( p -> talents.deep_wound -> rank() );
 
     add_child( rupture_dot );
 
@@ -916,7 +923,7 @@ struct bloodthirst_t : public action_t
   virtual bool ready()
   {
     class_t* p = cast();
-    return p -> buffs.fury -> current_stack >= 30;
+    return p -> buffs.fury -> current_stack >= 30 && base_t::ready();
   }
 };
 
