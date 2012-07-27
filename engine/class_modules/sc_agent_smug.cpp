@@ -606,6 +606,13 @@ struct poison_tick_crit_callback_t : public action_callback_t
 // Smuggler / Agent Character Definition
 // ==========================================================================
 
+// class_t::alacrity ============================================
+double class_t::alacrity() const
+{
+  return base_t::alacrity() - ( talents.deadly_directive -> rank() * 0.02 );
+}
+
+
 // class_t::create_action =======================================
 
 ::action_t* class_t::create_action( const std::string& name,
