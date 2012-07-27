@@ -138,6 +138,7 @@ struct class_t : public agent_smug::class_t
     // abilities
     std::string a_backstab;
     std::string a_combat_stims;
+    std::string a_cloaking_screen;
     std::string a_hidden_strike;
     std::string a_stealth;
     std::string a_stim_boost;
@@ -641,16 +642,13 @@ struct hidden_strike_t : public consume_acid_blade_attack_t
 
   virtual bool ready()
   {
-    if ( ! p() -> buffs.stealth -> check() )
-      return false;
-
-    return base_t::ready();
+    return p() -> buffs.stealth -> check() && base_t::ready();
   }
 
   virtual void execute()
   {
     class_t& p = *cast();
-    p.buffs.stealth -> up();
+    p.buffs.stealth -> up(); // statistics
     base_t::execute();
     p.buffs.tactical_advantage -> trigger();
   }
@@ -765,7 +763,27 @@ struct stim_boost_t : public action_t
 };
 
 // Cloaking Screen | ??? ====================================================
-// "vanish" allows reusing hidden strike.
+struct cloaking_screen_t : action_t
+{
+  typedef action_t base_t;
+
+  cloaking_screen_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    base_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE )
+  {
+    parse_options( options_str );
+
+    cooldown -> duration = from_seconds( 180 - ( 30 * p -> talents.advanced_cloaking -> rank() ) );
+    // TODO confirm GCD behavior
+    use_off_gcd          = true;
+    trigger_gcd          = timespan_t::zero();
+  }
+
+  virtual void execute()
+  {
+    base_t::execute();
+    p() -> buffs.stealth -> trigger();
+  }
+};
 
 // Sever Tendon | ??? =======================================================
 // does damage, snares and roots talented. mainly for pvp.
@@ -817,6 +835,7 @@ struct all_attack_callback_t : public action_callback_t
 {
   if ( name == m.t_acid_blade       ) return new acid_blade_t       ( this, name, options_str ) ;
   if ( name == m.a_backstab         ) return new backstab_t         ( this, name, options_str ) ;
+  if ( name == m.a_cloaking_screen  ) return new cloaking_screen_t  ( this, name, options_str ) ;
   if ( name == m.a_hidden_strike    ) return new hidden_strike_t    ( this, name, options_str ) ;
   if ( name == m.t_laceration       ) return new laceration_t       ( this, name, options_str ) ;
   if ( name == m.a_stealth          ) return new stealth_t          ( this, name, options_str ) ;
@@ -1142,6 +1161,7 @@ void class_t::create_mirror()
 
   // ABILITY              =    ? OPERATIVE LABEL      : SCOUNDREL LABEL           ;
   m.a_backstab            = op ? "backstab"           : "back_blast"              ;
+  m.a_cloaking_screen     = op ? "cloaking_screen"    : "disappearing_act"        ;
   m.a_combat_stims        = op ? "combat_stims"       : "street_tough"            ;
   m.a_hidden_strike       = op ? "hidden_strike"      : "shoot_first"             ;
   m.a_stealth             = op ? "stealth"            : "stealth"                 ;

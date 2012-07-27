@@ -230,16 +230,19 @@ struct action_t : public warr_knight::action_t
 
 struct force_attack_t : public action_t
 {
+  typedef action_t base_t;
   force_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_ENERGY ) :
     action_t( n, p, force_policy, p -> primary_resource(), s )
   {
     harmful = true;
     tick_may_crit = true;
     may_crit   = true;
+    base_crit += 0.02 * p -> talents.malice -> rank();
   }
 
   virtual void player_buff()
   {
+    base_t::player_buff();
     class_t* p = cast();
     player_multiplier += (0.02 * p -> buffs.juyo_form -> current_stack );
     if ( p -> buffs.bloodthirst -> up() )
@@ -251,8 +254,9 @@ struct force_attack_t : public action_t
 
 struct melee_attack_t : public action_t
 {
+  typedef action_t base_t;
   melee_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_ENERGY) :
-    action_t(n, p, melee_policy, p -> primary_resource(), s)
+    base_t(n, p, melee_policy, p -> primary_resource(), s)
   {
     harmful = true;
     tick_may_crit = true;
@@ -261,7 +265,7 @@ struct melee_attack_t : public action_t
   }
   virtual void impact( player_t* t, result_type impact_result, double travel_dmg)
   {
-    action_t::impact( t, impact_result, travel_dmg);
+    base_t::impact( t, impact_result, travel_dmg);
 
     if (result_is_hit( impact_result ) )
     {
@@ -276,6 +280,7 @@ struct melee_attack_t : public action_t
 
   virtual void player_buff()
   {
+    base_t::player_buff();
     class_t* p = cast();
     player_multiplier += (0.02 * p -> buffs.juyo_form -> current_stack );
     if ( p -> buffs.bloodthirst -> up() )
@@ -289,13 +294,14 @@ struct bleed_attack_t : public force_attack_t
 {
   typedef force_attack_t base_t;
   bleed_attack_t( const std::string& n, class_t* p, school_type s=SCHOOL_INTERNAL) :
-    force_attack_t(n, p, s)
+    base_t(n, p, s)
   {
     base_multiplier += .05 * p -> talents.hemorrhage -> rank();
   }
 
   virtual void player_buff()
   {
+    base_t::player_buff();
     class_t* p = cast();
     if ( p -> actives.form == JUYO_FORM && p -> buffs.berserk -> up() )
     {
