@@ -1404,6 +1404,7 @@ void class_t::init_actions()
     {
       deadly_saber_callback_t* callback = new deadly_saber_callback_t( this );
       register_attack_callback( RESULT_HIT_MASK, callback );
+      register_tick_callback  ( RESULT_HIT_MASK, callback );
     }
     base_t::init_actions();
 }
