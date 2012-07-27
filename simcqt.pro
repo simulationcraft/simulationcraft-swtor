@@ -93,6 +93,7 @@ SOURCES += engine/sc_util.cpp
 SOURCES += engine/sc_weapon.cpp
 SOURCES += engine/sc_xml.cpp
 SOURCES += engine/class_modules/sc_agent_smug.cpp
+SOURCES += engine/class_modules/sc_warr_knight.cpp
 SOURCES += engine/class_modules/sc_commando_mercenary.cpp
 SOURCES += engine/class_modules/sc_gunslinger_sniper.cpp
 SOURCES += engine/class_modules/sc_juggernaut_guardian.cpp
