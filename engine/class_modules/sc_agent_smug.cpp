@@ -53,7 +53,6 @@ range_attack_t::range_attack_t( const std::string& n, class_t* p, school_type s 
 poison_attack_t::poison_attack_t( const std::string& n, class_t* p, school_type s ) :
   base_t( n, p, s )
 {
-  may_crit       =  false;
   base_crit     += .04 * p -> talents.lethal_dose -> rank();
 }
 
@@ -587,9 +586,9 @@ public:
   class_t* cast() const { return p(); }
 };
 
-struct poison_tick_crit_callback_t : public action_callback_t
+struct poison_crit_callback_t : public action_callback_t
 {
-  poison_tick_crit_callback_t( class_t* p ) :
+  poison_crit_callback_t( class_t* p ) :
     action_callback_t( p )
   {}
 
@@ -733,7 +732,7 @@ void class_t::init_actions()
 {
   base_t::init_actions();
 
-  register_tick_callback( RESULT_CRIT_MASK, new poison_tick_crit_callback_t ( this ) );
+  register_attack_callback( RESULT_CRIT_MASK, new poison_crit_callback_t ( this ) );
 }
 
 // class_t::create_mirror =======================================

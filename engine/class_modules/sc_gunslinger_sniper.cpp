@@ -1474,7 +1474,6 @@ void class_t::init_actions()
   if ( talents.cluster_bombs -> rank() )
   {
     register_attack_callback( RESULT_HIT_MASK, new cluster_bombs_callback_t( this ) );
-    register_tick_callback  ( RESULT_HIT_MASK, new cluster_bombs_callback_t( this ) );
   }
 
   base_t::init_actions();
