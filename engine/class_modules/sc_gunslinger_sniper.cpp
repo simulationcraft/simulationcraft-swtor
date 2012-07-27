@@ -1154,6 +1154,7 @@ struct cluster_bombs_callback_t : public action_callback_t
   virtual void trigger (::action_t* a, void* /* call_data */)
   {
     if ( ( a -> weapon || a -> td.weapon )
+        && a -> result_is_hit()
         && debuff_cluster_bombs -> up()
         && debuff_cluster_bombs -> trigger() )
     {
@@ -1473,7 +1474,8 @@ void class_t::init_actions()
 
   if ( talents.cluster_bombs -> rank() )
   {
-    register_attack_callback( RESULT_HIT_MASK, new cluster_bombs_callback_t( this ) );
+    register_direct_damage_callback( SCHOOL_ALL_MASK, new cluster_bombs_callback_t( this ) );
+    register_tick_damage_callback( SCHOOL_ALL_MASK, new cluster_bombs_callback_t( this ) );
   }
 
   base_t::init_actions();
