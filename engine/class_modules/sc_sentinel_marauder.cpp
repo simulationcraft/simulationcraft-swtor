@@ -1002,13 +1002,6 @@ struct shii_cho_form_t : action_t
   // TODO: Rage
 };
 
-// Ataru Form =================================================================
-struct ataru_form_t : action_t
-{
-  typedef action_t base_t;
-  // TODO: Carnage
-};
-
 // Retaliate | Riposte ========================================================
 struct retaliate_t : melee_attack_t
 {
@@ -1069,6 +1062,13 @@ struct unnatural_might_t : action_t
 
 // ============================================================================
 // Carnage Talents ============================================================
+// Ataru Form =================================================================
+struct ataru_form_t : action_t
+{
+  typedef action_t base_t;
+  // TODO: Carnage
+};
+
 // Gore | Precision Slash =====================================================
 struct gore_t : public melee_attack_t
 {
@@ -1107,6 +1107,18 @@ struct force_crush_t : force_attack_t
 {
   typedef force_attack_t base_t;
 
+};
+
+// Enter Form =================================================================
+struct enter_form_t : public action_t
+{
+  typedef action_t base_t;
+
+  enter_form_t( class_t* p, const std::string& n, form_type form, const std::string& options_str ) :
+    base_t( n, p, force_policy, RESOURCE_NONE, SCHOOL_NONE )
+  {
+
+  }
 };
 
 
@@ -1375,14 +1387,16 @@ void class_t::init_actions()
             action_list_str += "stim,type=exotech_might";
             action_list_str += "/snapshot_stats";
             // ANNIHILATION
-            action_list_str += "/deadly_saber,if=!buff.deadly_saber.up";
-            action_list_str += "/battering_assault,if=rage<7";
             action_list_str += "/berserk";
+            action_list_str += "/vicious_throw";
             action_list_str += "/annihilate";
             action_list_str += "/rupture";
-            action_list_str += "/vicious_throw";
+            action_list_str += "/force_charge";
+            action_list_str += "/deadly_saber,if=!buff.deadly_saber.up";
+            action_list_str += "/battering_assault,if=rage<7";
             action_list_str += "/ravage";
             action_list_str += "/vicious_slash";
+            action_list_str += "/assault";
 
             switch ( primary_tree() )
             {
