@@ -166,6 +166,7 @@ corrosive_dart_t::corrosive_dart_t( class_t* p, const std::string& n, const std:
   //may_crit = false; // only ticks may crit
   range = 30.0;
   base_tick_time = from_seconds( 3.0 );
+  may_crit = false; // only ticks may crit
 
   if ( weak )
   {
@@ -235,7 +236,7 @@ corrosive_grenade_t::corrosive_grenade_t( class_t* p, const std::string& n, cons
 
   range = 30.0;
   base_tick_time = from_seconds( 3 );
-  //may_crit = false; // only ticks may crit
+  may_crit = false; // only ticks may crit
 
   if ( weak )
   {
@@ -596,9 +597,8 @@ struct poison_crit_callback_t : public action_callback_t
 
   virtual void trigger (::action_t* a, void* /* call_data */)
   {
-    if ( dynamic_cast<agent_smug::poison_attack_t*>(a) != NULL )
+    if ( a -> result == RESULT_CRIT && dynamic_cast<agent_smug::poison_attack_t*>(a) != NULL )
     {
-      std::cout << a -> name() << "XXXX\n";
       p()->resource_gain( RESOURCE_ENERGY, p()->talents.lethal_purpose -> rank(), p()->gains.lethal_purpose );
     }
   }
@@ -735,13 +735,8 @@ void class_t::init_actions()
 {
   base_t::init_actions();
 
-  // cull extra
-  // XXX and tick zeros?
-  register_attack_callback( RESULT_CRIT_MASK, new poison_crit_callback_t ( this ) );
-  // SERGE: run above with log=1 look for XXX output. now swap it for the one below. no XXX output.
-  //register_direct_damage_callback( RESULT_CRIT_MASK, new poison_crit_callback_t ( this ) );
-  // poisons
-  //register_tick_callback( RESULT_CRIT_MASK, new poison_crit_callback_t ( this ) );
+  register_direct_damage_callback( SCHOOL_ALL_MASK, new poison_crit_callback_t ( this ) );
+  register_tick_damage_callback( SCHOOL_ALL_MASK, new poison_crit_callback_t ( this ) );
 }
 
 // class_t::create_mirror =======================================
