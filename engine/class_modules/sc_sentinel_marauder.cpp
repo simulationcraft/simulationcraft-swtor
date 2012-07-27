@@ -976,44 +976,6 @@ struct frenzy_t : action_t
 
 };
 
-// Juyo Form ==================================================================
-struct juyo_form_t : action_t
-{
-  typedef action_t base_t;
-
-  juyo_form_t( class_t* p, const std::string& n, const std::string options_str ) :
-    base_t( n, p, force_policy, RESOURCE_NONE, SCHOOL_NONE )
-  {
-    parse_options( options_str );
-
-    base_cost = 0;
-
-    harmful = false;
-  }
-
-  virtual void execute()
-  {
-    base_t::execute();
-    class_t* p = cast();
-
-    p -> actives.form = JUYO_FORM;
-  }
-
-};
-
-// Shii-Cho Form ==============================================================
-struct shii_cho_form_t : action_t
-{
-  typedef action_t base_t;
-  // TODO: Rage
-};
-
-// Ataru Form =================================================================
-struct ataru_form_t : action_t
-{
-  typedef action_t base_t;
-  // TODO: Carnage
-};
 
 // Retaliate | Riposte ========================================================
 struct retaliate_t : melee_attack_t
@@ -1113,6 +1075,80 @@ struct force_crush_t : force_attack_t
 {
   typedef force_attack_t base_t;
 
+};
+
+// Enter Form =================================================================
+struct enter_form_t : public action_t
+{
+  typedef action_t base_t;
+
+  form_type form;
+
+  enter_form_t( class_t* p, const std::string& n, form_type form, const std::string& options_str ) :
+    base_t( n, p, force_policy, RESOURCE_NONE, SCHOOL_NONE ), form( form )
+  {
+    parse_options( options_str );
+
+    assert( form != FORM_NONE );
+    base_cost = 0;
+    harmful = false;
+  }
+
+  virtual void execute()
+  {
+    base_t::execute();
+
+    class_t* p = cast();
+
+    p -> actives.form = form;
+  }
+
+  virtual bool ready()
+  {
+    class_t* p = cast();
+
+    if ( form == p -> actives.form )
+    {
+      return false;
+    }
+    else
+    {
+      return base_t::ready();
+    }
+  }
+};
+
+// Juyo Form ==================================================================
+struct juyo_form_t : enter_form_t
+{
+  typedef enter_form_t base_t;
+
+  juyo_form_t( class_t* p, const std::string& n, const std::string options_str ) :
+    base_t( p, n, JUYO_FORM, options_str )
+  {
+  }
+};
+
+// Ataru Form =================================================================
+struct ataru_form_t : enter_form_t
+{
+  typedef enter_form_t base_t;
+
+  ataru_form_t( class_t* p, const std::string& n, const std::string options_str ) :
+    base_t( p, n, ATARU_FORM, options_str )
+  {
+  }
+};
+
+// Shii-Cho Form ==============================================================
+struct shii_cho_form_t : enter_form_t
+{
+  typedef enter_form_t base_t;
+
+  shii_cho_form_t( class_t* p, const std::string& n, const std::string options_str ) :
+    base_t( p, n, SHII_CHO_FORM, options_str )
+  {
+  }
 };
 
 
@@ -1381,14 +1417,17 @@ void class_t::init_actions()
             action_list_str += "stim,type=exotech_might";
             action_list_str += "/snapshot_stats";
             // ANNIHILATION
-            action_list_str += "/deadly_saber,if=!buff.deadly_saber.up";
-            action_list_str += "/battering_assault,if=rage<7";
+            action_list_str += "/juyo_form";
             action_list_str += "/berserk";
+            action_list_str += "/vicious_throw";
             action_list_str += "/annihilate";
             action_list_str += "/rupture";
-            action_list_str += "/vicious_throw";
+            action_list_str += "/force_charge";
+            action_list_str += "/deadly_saber,if=!buff.deadly_saber.up";
+            action_list_str += "/battering_assault,if=rage<7";
             action_list_str += "/ravage";
             action_list_str += "/vicious_slash";
+            action_list_str += "/assault";
 
             switch ( primary_tree() )
             {
