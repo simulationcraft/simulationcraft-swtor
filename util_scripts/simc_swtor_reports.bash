@@ -12,7 +12,7 @@ echo $PATH
 
 iterations=100000
 threads=7
-calculate_scale_factors=0
+calculate_scale_factors=1
 center_scale_delta=0
 statistics_level=3
 positive_scale_delta=1
@@ -34,8 +34,10 @@ runsim ()
 # runsim Mercenary_Raid_Campaign
 # runsim Scoundrel_Operative_Raid_Campaign
 # runsim Gunslinger_Sniper_Raid_Campaign
-# runsim Sorcerer_Raid_Campaign_BiS
-runsim Empire_Raid_Campaign_BiS
+#runsim Sorcerer_Raid_Campaign_BiS
+#runsim Empire_Raid_Campaign_BiS
+#runsim Operative_Concealment_Campaign_BiS
+runsim Sniper_Raid_Campaign_BiS
 #iterations=200000
 #runsim Mercenary_Arsenal_Campaign_BiS
 
