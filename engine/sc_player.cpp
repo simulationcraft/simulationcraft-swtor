@@ -5067,8 +5067,12 @@ void player_t::copy_from( const player_t& source )
     items[ i ] = source.items[ i ];
     items[ i ].player = this;
   }
-  gear = source.gear;
-  enchant = source.enchant;
+  gear               = source.gear;
+  enchant            = source.enchant;
+  bonus_surge_pc_    = source.bonus_surge_pc_;
+  bonus_crit_pc_     = source.bonus_crit_pc_;
+  bonus_accuracy_pc_ = source.bonus_accuracy_pc_;
+  bonus_health_pc_   = source.bonus_health_pc_;
 }
 
 // player_t::create_options =================================================

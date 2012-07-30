@@ -10,18 +10,19 @@
 PATH="../engine:engine:$PATH"
 echo $PATH
 
-iterations=100000
+iterations=50000
 threads=7
 calculate_scale_factors=1
 center_scale_delta=0
 statistics_level=3
 positive_scale_delta=1
+hosted_html=1
 #ptr=0
 
 runsim ()
 {
   echo $1$2
-  simc $1.simc $3 output=/dev/null statistics_level=$statistics_level iterations=$iterations calculate_scale_factors=$calculate_scale_factors center_scale_delta=$center_scale_delta positive_scale_delta=$positive_scale_delta threads=$threads  html=$1$2.html # ptr=$ptr
+  simc $1.simc $3 output=/dev/null statistics_level=$statistics_level iterations=$iterations calculate_scale_factors=$calculate_scale_factors center_scale_delta=$center_scale_delta positive_scale_delta=$positive_scale_delta threads=$threads  html=$1$2.html hosted_html=$hosted_html # ptr=$ptr
 }
 
 #runsim Raid_Campaign
