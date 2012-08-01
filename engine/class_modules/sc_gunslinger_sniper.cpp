@@ -400,9 +400,10 @@ struct ambush_t : public range_attack_t
   virtual timespan_t execute_time() const
   {
     if ( p() -> buffs.reactive_shot -> check() )
-      return base_execute_time - from_seconds( 1.0 );
+      // TODO: test whether this 1s comes off before or after alacrity. this is after.
+      return base_t::execute_time() - from_seconds( 1.0 );
     else
-      return base_execute_time;
+      return base_t::execute_time();
   }
 
   virtual void player_buff()
