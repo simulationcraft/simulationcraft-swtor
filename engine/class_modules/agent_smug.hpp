@@ -226,8 +226,6 @@ public:
 
   virtual ::action_t* create_action( const std::string& name, const std::string& options ) = 0;
 
-  virtual double alacrity() const;
-
   virtual void init_talents();
 
   virtual void init_benefits();

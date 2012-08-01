@@ -373,10 +373,10 @@ struct ambush_t : public range_attack_t
     cooldown -> duration         = from_seconds( ( 15 - p -> talents.rapid_fire -> rank() ) );
     range                        = 35.0;
     dd.standardhealthpercentmin  =
-        dd.standardhealthpercentmax  = 0.329;
-    dd.power_mod                 = 3.29;
+        dd.standardhealthpercentmax  = 0.347;
+    dd.power_mod                 = 3.47;
     weapon                       = &( player -> main_hand_weapon );
-    weapon_multiplier            = 1.2;
+    weapon_multiplier            = 1.310;
 
     if ( is_offhand )
     {
@@ -610,10 +610,10 @@ struct followthrough_t : public range_attack_t
     cooldown -> duration         = from_seconds( 9 - 1.5 * p -> talents.recoil_control -> rank() );
     range                        = 35.0;
     dd.standardhealthpercentmin  =
-    dd.standardhealthpercentmax  = 0.227;
-    dd.power_mod                 = 2.27;
+    dd.standardhealthpercentmax  = 0.239;
+    dd.power_mod                 = 2.39;
     weapon                       = &( player -> main_hand_weapon );
-    weapon_multiplier            = 0.51;
+    weapon_multiplier            = 0.6;
     base_crit                   += 0.02 * p -> talents.between_the_eyes -> rank();
     crit_multiplier             += 0.1  * p -> talents.imperial_assassin -> rank();
   }
@@ -846,10 +846,10 @@ struct series_of_shots_t : public tech_attack_t
     num_ticks                    = 3;
     base_tick_time               = from_seconds( 1 );
     td.standardhealthpercentmin  =
-    td.standardhealthpercentmax  = 0.098;
+    td.standardhealthpercentmax  = 0.103;
     td.weapon                    = &( player -> main_hand_weapon );
-    td.power_mod                 = 0.98;
-    td.weapon_multiplier         = -0.348;
+    td.power_mod                 = 1.03;
+    td.weapon_multiplier         = -0.313;
     // tick crits. the invisible execute hit shouldn't
     may_crit                     = false;
     base_multiplier             += 0.03 * p -> talents.steady_shots      -> rank();
@@ -914,6 +914,7 @@ struct snipe_t : public agent_smug::snipe_t
   snipe_t( class_t* p, const std::string& n, const std::string& options_str) :
     base_t( p, n, options_str )
   {
+    range            = 35;
     base_multiplier += 0.03 * p -> talents.steady_shots     -> rank();
     base_crit       += 0.02 * p -> talents.between_the_eyes -> rank();
   }
@@ -928,8 +929,9 @@ struct snipe_t : public agent_smug::snipe_t
 
   virtual void player_buff()
   {
-    if ( p() -> buffs.laze_target -> up() )
-      base_crit += 1; // 100% crit
+    base_t::player_buff();
+    //if ( p() -> buffs.laze_target -> up() )
+      //player_crit += 1; // 100% crit
   }
 
   virtual void execute()
@@ -1025,10 +1027,10 @@ struct takedown_t : public range_attack_t
     if ( player -> set_bonus.battlemaster_field_techs -> four_pc() )
       range += 5.0;
     dd.standardhealthpercentmin  =
-    dd.standardhealthpercentmax  = 0.27;
-    dd.power_mod                 = 2.7;
+    dd.standardhealthpercentmax  = 0.284;
+    dd.power_mod                 = 2.84;
     weapon                       = &( player -> main_hand_weapon );
-    weapon_multiplier            = 0.8;
+    weapon_multiplier            = 0.89;
     crit_multiplier             += 0.1  * p -> talents.imperial_assassin -> rank();
   }
 

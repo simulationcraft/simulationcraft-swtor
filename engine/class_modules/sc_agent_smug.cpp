@@ -505,15 +505,15 @@ snipe_t::snipe_t( class_t* p, const std::string& n, const std::string& options_s
 {
   parse_options( options_str );
 
-  range = ( player -> type == IA_SNIPER || player -> type == S_GUNSLINGER ) ? 35 : 30.0;
+  range = 30;
 
   base_cost                   = energy_cost();
   base_execute_time           = from_seconds( 1.5 );
-  dd.power_mod                = 1.85;
+  dd.power_mod                = 1.94;
   dd.standardhealthpercentmin =
-  dd.standardhealthpercentmax = 0.185;
-  weapon                      = &( player->main_hand_weapon );
-  weapon_multiplier           = 0.23;
+  dd.standardhealthpercentmax = 0.194;
+  weapon                      = &( player-> main_hand_weapon );
+  weapon_multiplier           = 0.29;
 }
 
 int snipe_t::energy_cost() { return 20; }
@@ -607,13 +607,6 @@ struct poison_crit_callback_t : public action_callback_t
 // ==========================================================================
 // Smuggler / Agent Character Definition
 // ==========================================================================
-
-// class_t::alacrity ============================================
-double class_t::alacrity() const
-{
-  return base_t::alacrity() - ( talents.deadly_directive -> rank() * 0.02 );
-}
-
 
 // class_t::create_action =======================================
 
