@@ -551,9 +551,9 @@ struct laceration_t : public tech_attack_t
       parse_options( options_str );
 
       cooldown -> duration        =  from_seconds( 10.0 );
-      dd.standardhealthpercentmin =  0.14;
-      dd.standardhealthpercentmax =  0.22;
-      dd.power_mod                =  1.8;
+      dd.standardhealthpercentmin =  0.056;
+      dd.standardhealthpercentmax =  0.056;
+      dd.power_mod                =  0.56;
       base_multiplier             += p -> talents.culling->rank() * 0.02;
       background                  =  true;
       trigger_gcd                 =  timespan_t::zero();
