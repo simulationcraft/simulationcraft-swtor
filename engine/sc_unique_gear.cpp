@@ -918,15 +918,24 @@ bool unique_gear_t::get_equip_encoding( std::string&       encoding,
   else if ( name == "campaign_relic_of_the_kinetic_tempest"         ) e = "ondamage_246kinetic_30%_4.5cd";
   else if ( name == "war_hero_relic_of_dark_radiance"               ) e = "ondamage_184internal_30%_4.5cd";
   else if ( name == "war_hero_relic_of_elemental_transcendence"     ) e = "ondamage_184elemental_30%_4.5cd";
-  // XXX still misspelled in torhead
-  else if ( name == "war_hero_relic_of_elemental_transcendance"     ) e = "ondamage_184elemental_30%_4.5cd";
   else if ( name == "war_hero_relic_of_the_cerulean_nova"           ) e = "ondamage_246energy_30%_4.5cd";
   else if ( name == "war_hero_relic_of_the_kinetic_tempest"         ) e = "ondamage_246kinetic_30%_4.5cd";
+  else if ( name == "dread_guard_relic_of_dark_radiance"              ) e = "ondamage_210internal_30%_4.5cd";
+  else if ( name == "dread_guard_relic_of_elemental_transcendence"    ) e = "ondamage_210elemental_30%_4.5cd";
+  else if ( name == "dread_guard_relic_of_the_cerulean_nova"          ) e = "ondamage_280energy_30%_4.5cd";
+  else if ( name == "dread_guard_relic_of_the_kinetic_tempest"        ) e = "ondamage_280kinetic_30%_4.5cd";
+  else if ( name == "elite_war_hero_relic_of_dark_radiance"           ) e = "ondamage_199internal_30%_4.5cd";
+  else if ( name == "elite_war_hero_relic_of_elemental_transcendence" ) e = "ondamage_199elemental_30%_4.5cd";       
+  else if ( name == "elite_war_hero_relic_of_the_cerulean_nova"       ) e = "ondamage_265energy_30%_4.5cd";
+  else if ( name == "elite_war_hero_relic_of_the_kinetic_tempest"     ) e = "ondamage_265kinetic_30%_4.5cd";
+  // XXX still misspelled in torhead and/or MrRobot
+  else if ( name == "battlemaster_relic_of_elemental_transcendance" ) e = "ondamage_168elemental_30%_4.5cd";
+  else if ( name == "war_hero_relic_of_elemental_transcendance"     ) e = "ondamage_184elemental_30%_4.5cd";
+  else if ( name == "elite_war_hero_relic_of_elemental_transcendance" ) e = "ondamage_199elemental_30%_4.5cd";
   else if ( name == "denova_relic_of_dark_radiance"                 ) e = "ondamage_199internal_30%_4.5cd";
   else if ( name == "denova_relic_of_elemental_transcendence"       ) e = "ondamage_199elemental_30%_4.5cd";
   else if ( name == "denova_relic_of_the_cerulean_nova"             ) e = "ondamage_256energy_30%_4.5cd";
   else if ( name == "denova_relic_of_the_kinetic_tempest"           ) e = "ondamage_256kinetic_30%_4.5cd";
-
   if ( ! e ) return false;
 
   encoding = e;
@@ -962,6 +971,10 @@ bool unique_gear_t::get_use_encoding( std::string&       encoding,
   else if ( name == "campaign_relic_of_imperiling_serenity"     ) e = "315Defense_120cd_30dur";
   else if ( name == "campaign_relic_of_the_primeval_fatesealer" ) e = "315Alacrity_120cd_30dur";
   else if ( name == "campaign_relic_of_the_shrouded_crusader"   ) e = "190shield_190abs_120cd_30dur";
+  else if ( name == "dread_guard_relic_of_boundless_ages"          ) e = "350Power_120cd_30dur";
+  else if ( name == "dread_guard_relic_of_imperiling_serenity"     ) e = "350Defense_120cd_30dur";
+  else if ( name == "dread_guard_relic_of_the_primeval_fatesealer" ) e = "350Alacrity_120cd_30dur";
+  else if ( name == "dread_guard_relic_of_the_shrouded_crusader"   ) e = "215shield_215abs_120cd_30dur";
 
   if ( ! e ) return false;
 
