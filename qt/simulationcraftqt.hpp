@@ -170,7 +170,7 @@ public:
   std::string simPhase;
   int simProgress;
   int simResults;
-  QStringList resultsHtml;
+//  QStringList resultsHtml;
 
   QString cmdLineText;
   QString logFileText;

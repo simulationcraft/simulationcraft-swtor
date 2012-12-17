@@ -1451,8 +1451,10 @@ void SimulationCraftWindow::simulateFinished()
     s.setCodec( "UTF-8" );
     QString resultsName = QString( "Results %1" ).arg( ++simResults );
     SimulationCraftWebView* resultsView = new SimulationCraftWebView( this );
-    resultsHtml.append( s.readAll() );
-    resultsView->setHtml( resultsHtml.last() );
+    QString resultHtml = s.readAll();
+//    resultsHtml.append( resultHtml );
+    resultsView->setProperty( "resultHTML", QVariant(resultHtml) );
+    resultsView->setHtml( resultHtml );
     resultsTab->addTab( resultsView, resultsName );
     resultsTab->setCurrentWidget( resultsView );
     resultsView->setFocus();
@@ -1487,9 +1489,9 @@ void SimulationCraftWindow::saveLog()
 void SimulationCraftWindow::saveResults()
 {
   int index = resultsTab->currentIndex();
-  if ( index <= 0 ) return;
+  if ( index < 0 ) return;
 
-  if ( visibleWebView->url().toString() != "about:blank" ) return;
+  if (visibleWebView == NULL) return;
 
   resultsCmdLineHistory.add( cmdLine->text() );
 
@@ -1497,7 +1499,7 @@ void SimulationCraftWindow::saveResults()
 
   if ( file.open( QIODevice::WriteOnly ) )
   {
-    file.write( resultsHtml[ index-1 ].toAscii() );
+    file.write( visibleWebView->property("resultHTML").toString().toAscii() );
     file.close();
   }
 
@@ -1574,7 +1576,8 @@ void SimulationCraftWindow::backButtonClicked( bool /* checked */ )
   {
     if ( mainTab->currentIndex() == TAB_RESULTS && ! visibleWebView->history()->canGoBack() )
     {
-      visibleWebView->setHtml( resultsHtml[ resultsTab->indexOf( visibleWebView ) - 1 ] );
+//        visibleWebView->setHtml( resultsHtml[ resultsTab->indexOf( visibleWebView ) ] );
+      visibleWebView->setHtml( visibleWebView->property("resultHTML").toString() );
 
       QWebHistory* h = visibleWebView->history();
       visibleWebView->history()->clear(); // This is not appearing to work.
@@ -1682,7 +1685,7 @@ void SimulationCraftWindow::importTabChanged( int index )
 
 void SimulationCraftWindow::resultsTabChanged( int index )
 {
-  if ( index <= 0 )
+  if ( index < 0 )
   {
     cmdLine->setText( "" );
   }
@@ -1698,7 +1701,7 @@ void SimulationCraftWindow::resultsTabChanged( int index )
 void SimulationCraftWindow::resultsTabCloseRequest( int index )
 {
   resultsTab->removeTab( index );
-  resultsHtml.removeAt( index-1 );
+//  resultsHtml.removeAt( index );
 }
 
 void SimulationCraftWindow::historyDoubleClicked( QListWidgetItem* item )
