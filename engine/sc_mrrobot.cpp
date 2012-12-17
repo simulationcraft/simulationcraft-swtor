@@ -176,9 +176,10 @@ std::string decode_armoring( js::node_t* node )
 
   for ( js::node_t* mod : *node )
     {
-      if ( ! mod -> get ( "Slot" , value ))
-        continue;
-      if ( value != "Armoring" )
+      // It's an Armoring if there is no slot defined of there is a slot defined as 'Armoring'.
+      // Depends if you are using the test API (defined) or not (no slot).
+      // So it's NOT an armoring if there is a slot defined that's not set to 'Armoring'.
+      if (( mod -> get ( "Slot" , value ) ) && ( value != "Armoring" ))  //
         continue;
       mod -> get ( "Name", armor_name );
     }
