@@ -3548,6 +3548,7 @@ struct cooldown_t
     ready( timespan_t_min() ), next( 0 ) {}
 
   void reset() { ready=timespan_t_min(); }
+  void reset( timespan_t override ) { ready=min(ready, sim -> current_time + override); }
   void start( timespan_t override=timespan_t_min(), timespan_t delay=timespan_t::zero() )
   {
     if ( override >= timespan_t::zero() ) duration = override;

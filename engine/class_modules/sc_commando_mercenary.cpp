@@ -544,13 +544,9 @@ struct power_shot_t : public attack_t
     if ( offhand_attack )
     {
       offhand_attack -> schedule_execute();
-      // TEST: if barrage can proc from /either/ powershot hit, the this should move out in scope
-      if ( result_is_hit() && p.talents.barrage -> rank() && !p.buffs.barrage -> up() )
-      {
-          p.buffs.barrage -> trigger();
-          if ( p.buffs.barrage -> up() )
-            p.cooldowns.unload -> reset();
-      }
+
+      if ( result_is_hit() && p.talents.barrage -> rank() && p.buffs.barrage -> trigger() )
+        p.cooldowns.unload -> reset( sim->reaction_time ); // p.total_reaction_time() seems to have way too much variance
     }
   }
 };
@@ -592,12 +588,8 @@ struct tracer_missile_t : public missile_attack_t
     if ( p.talents.tracer_lock -> rank() )
       p.buffs.tracer_lock -> trigger( ( p.talents.light_em_up -> rank() ) ? 2 : 1 );
 
-    if ( p.talents.barrage -> rank() && !p.buffs.barrage -> up() )
-    {
-        p.buffs.barrage -> trigger();
-        if ( p.buffs.barrage -> up() )
-          p.cooldowns.unload -> reset();
-    }
+    if ( result_is_hit() && p.talents.barrage -> rank() && p.buffs.barrage -> trigger() )
+      p.cooldowns.unload -> reset( sim->reaction_time ); // p.total_reaction_time() seems to have way too much variance
   }
 
   virtual void impact( player_t* t, result_type impact_result, double travel_dmg )
@@ -781,7 +773,12 @@ struct unload_t : public attack_t
     {
       background                = true;
       dual                      = true;
-      channeled                 = false;
+      // Setting channeled=true allows the OH dot to be interrupted the same way as the MH dot for higher priority attacks or low player skill.
+      // This seems better than leaving it tick in all situations but still not ideal:
+      // Low player skill interrupts on MH and OH will not be in synch and I doubt other cancel/interrupt mechanics will affect OH.
+      // TODO: Modify dot_event to allow cancelling a dot to cancel related dots via action object.
+      // Add a vitrual empty func to action/attack called on interrupting a dot that can be overridden here to cancel offhand dots? If not overidden functionality remains unchanged.
+//      channeled                 = false;
       base_cost                 = 0;
       trigger_gcd               = timespan_t::zero();
       td.weapon                 = &( player -> off_hand_weapon );
@@ -798,7 +795,7 @@ struct unload_t : public attack_t
   virtual void player_buff()
   {
     attack_t::player_buff();
-    if ( benefit_from_barrage )
+    if ( p() -> buffs.barrage -> up() )
       player_multiplier += 0.25;
 
     if ( unsigned rank = p() -> talents.advanced_targeting -> rank () )
@@ -809,9 +806,7 @@ struct unload_t : public attack_t
   virtual void last_tick(dot_t* d)
   {
     attack_t::last_tick( d );
-    if ( offhand_attack )
-      // XXX TODO check last tick will happen on a miss now that individual weapon ticks can miss
-      // and also, with the same change made, should be able to move this to the offhand.
+    if ( ! offhand_attack )
       p() -> buffs.barrage -> expire();
   }
 
@@ -827,6 +822,7 @@ struct unload_t : public attack_t
     if ( offhand_attack )
       offhand_attack->schedule_execute();
   }
+
 };
 
 // class_t::vent_heat =====================================================================
