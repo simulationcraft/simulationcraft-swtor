@@ -106,6 +106,7 @@ struct class_t : public bount_troop::class_t
       talent_t* cure_mind;
       // t6
       talent_t* warden;
+      talent_t* peacekeeper;
       // t7
       talent_t* emergency_scan;
 
@@ -332,6 +333,7 @@ struct missile_attack_t : public attack_t
 // class_t::combat_support_cylinder =======================================================
 // class_t::concussion_missile ============================================================
 // class_t::cure ==========================================================================
+// class_t::disabling_shot ================================================================
 // class_t::emergency_scan ================================================================
 // class_t::fusion_missile ================================================================
 struct fusion_missile_t : public missile_attack_t
@@ -940,6 +942,7 @@ void class_t::init_talents()
   talents.cure_mind                      = find_talent( "Cure Mind" );
   // t6
   talents.warden                         = find_talent( "Warden" );
+  talents.peacekeeper                    = find_talent( "Peacekeeper" );
   // t7
   talents.emergency_scan                 = find_talent( "Emergency Scan" );
 
@@ -1219,7 +1222,7 @@ void class_t::create_talents()
     // t5
     { "Reactive Armor"    , 1 }, { "Proactive Medicine"       , 2 }, { "Kolto Shell"     , 1 }, { "Cure Mind"        , 1 },
     // t6
-    { "Warden"            , 5 },
+    { "Warden"            , 3 }, { "Peacekeeper"            , 2 },
     // t7
     { "Emergency Scan"    , 1 }
   };
