@@ -545,7 +545,7 @@ struct power_shot_t : public attack_t
     {
       offhand_attack -> schedule_execute();
 
-      if ( result_is_hit() && p.talents.barrage -> rank() && p.buffs.barrage -> trigger() )
+      if ( p.talents.barrage -> rank() && p.buffs.barrage -> trigger() )
         p.cooldowns.unload -> reset( sim->reaction_time ); // p.total_reaction_time() seems to have way too much variance
     }
   }
@@ -588,7 +588,7 @@ struct tracer_missile_t : public missile_attack_t
     if ( p.talents.tracer_lock -> rank() )
       p.buffs.tracer_lock -> trigger( ( p.talents.light_em_up -> rank() ) ? 2 : 1 );
 
-    if ( result_is_hit() && p.talents.barrage -> rank() && p.buffs.barrage -> trigger() )
+    if ( p.talents.barrage -> rank() && p.buffs.barrage -> trigger() )
       p.cooldowns.unload -> reset( sim->reaction_time ); // p.total_reaction_time() seems to have way too much variance
   }
 
