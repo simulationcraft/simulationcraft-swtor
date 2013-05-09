@@ -46,9 +46,11 @@ public:
     buff_t* force_potency;
     buff_t* psychic_projection_dd;
     buff_t* rakata_force_masters_4pc;
+    buff_t* underworld_force_masters_4pc;
     buff_t* noble_sacrifice;
     buff_t* resplendence;
     buff_t* conveyance;
+    buff_t* telekinetic_focal_point;
   } buffs;
 
   // Gains
@@ -74,7 +76,10 @@ public:
     rng_t* psychic_barrier;
     rng_t* upheaval;
     rng_t* tm;
+    rng_t* mm;
+    rng_t* tremors;
     rng_t* psychic_projection_dd;
+    rng_t* rippling_force;
   } rngs;
 
   struct benefits_t
@@ -88,51 +93,60 @@ public:
   struct cooldowns_t
   {
     cooldown_t* telekinetic_wave;
+    cooldown_t* mental_alacrity;
   } cooldowns;
 
   // Talents
   struct talents_t
   {
     // Seer|Corruption
-    talent_t* immutable_force;
+    talent_t* force_gift;
     talent_t* penetrating_light;
-    talent_t* wisdom;
+    talent_t* psychic_suffusion;
     talent_t* foresight;
     talent_t* pain_bearer;
-    talent_t* psychic_suffusion;
+    talent_t* immutable_force;
+    talent_t* humility;
     talent_t* conveyance;
     talent_t* rejuvenate;
-    talent_t* valiance;
     talent_t* preservation;
+    talent_t* valiance;
     talent_t* mend_wounds;
     talent_t* force_shelter;
     talent_t* egress;
     talent_t* confound;
     talent_t* healing_trance;
+    talent_t* life_ward;
     talent_t* serenity;
     talent_t* resplendence;
     talent_t* clairvoyance;
+    talent_t* master_speed;
+    talent_t* force_warden;
+    talent_t* amnesty;
     talent_t* salvation;
 
     // Telekinetics|Lightning
-    talent_t* inner_strength;
+    talent_t* upheaval;
     talent_t* mental_longevity;
-    talent_t* clamoring_force;
+    talent_t* inner_strength;
     talent_t* minds_eye;
-    talent_t* disturb_mind;
+    talent_t* clamoring_force;
     talent_t* concentration;
     talent_t* telekinetic_defense;
-    talent_t* blockout;
-    talent_t* telekinetic_wave;
     talent_t* psychic_projection;
-    talent_t* force_wake;
-    talent_t* tidal_force;
+    talent_t* telekinetic_wave;
     talent_t* telekinetic_effusion;
+    talent_t* cascading_force;
+    talent_t* tidal_force;
     talent_t* kinetic_collapse;
     talent_t* tremors;
     talent_t* telekinetic_momentum;
-    talent_t* mental_alacrity;
+    talent_t* blockout;
+    talent_t* force_wake;
+    talent_t* flowing_force;
     talent_t* reverberation;
+    talent_t* force_haste;
+    talent_t* mental_momentum;
     talent_t* turbulence;
 
     // Balance|Madness
@@ -140,7 +154,7 @@ public:
     talent_t* jedi_resistance;
     talent_t* will_of_the_jedi;
     talent_t* pinning_resolve;
-    talent_t* upheaval;
+    talent_t* drain_thoughts;
     talent_t* focused_insight;
     talent_t* critical_kinesis;
     talent_t* force_in_balance;
@@ -150,10 +164,13 @@ public:
     talent_t* mind_ward;
     talent_t* presence_of_mind;
     talent_t* force_suppression;
-    talent_t* drain_thoughts;
-    talent_t* assertion;
+    talent_t* rippling_force;
+    talent_t* mind_warp;
     talent_t* mental_scarring;
     talent_t* psychic_absorption;
+    talent_t* telekinetic_focal_point;
+    talent_t* metaphysical_alacrity;
+    talent_t* mental_defense;
     talent_t* sever_force;
   } talents;
 
@@ -170,6 +187,7 @@ public:
       tree_type[ SITH_SORCERER_LIGHTNING ]  = TREE_LIGHTNING;
       tree_type[ SITH_SORCERER_MADNESS ]    = TREE_MADNESS;
       cooldowns.telekinetic_wave = get_cooldown( "chain_lightning" );
+      cooldowns.mental_alacrity = get_cooldown( "polarity_shift" );
     }
     else
     {
@@ -177,6 +195,7 @@ public:
       tree_type[ JEDI_SAGE_TELEKINETICS ] = TREE_TELEKINETICS;
       tree_type[ JEDI_SAGE_BALANCE ]      = TREE_BALANCE;
       cooldowns.telekinetic_wave = get_cooldown( "telekinetic_wave" );
+      cooldowns.mental_alacrity = get_cooldown( "mental_alacrity" );
     }
 
     create_talents();
@@ -218,7 +237,7 @@ public:
   { return base_t::force_healing_crit_chance() + talents.penetrating_light -> rank() * 0.01 + talents.serenity -> rank() * 0.01; }
 
   virtual double composite_player_heal_multiplier( school_type school ) const
-  { return base_t::composite_player_heal_multiplier( school ) + talents.wisdom -> rank() * 0.01; }
+  { return base_t::composite_player_heal_multiplier( school ); }
 
   double school_damage_reduction( school_type school ) const
   { return base_t::school_damage_reduction( school ) + talents.serenity -> rank() * 0.01; }
@@ -242,6 +261,10 @@ public:
   {
     if ( talents.tidal_force -> rank() && buffs.tidal_force -> trigger( 1, 0, pc ) )
       cooldowns.telekinetic_wave -> reset();
+  }
+  
+  void trigger_tremors(){
+      cooldowns.mental_alacrity -> reduce(from_seconds( 1.0 ));
   }
 
   virtual bool report_attack_type( ::action_t::policy_t policy )
@@ -323,7 +346,8 @@ struct spell_t : public action_t
     action_t::init();
 
     if ( td.base_min > 0 && ! channeled )
-      crit_bonus += p() -> talents.mental_scarring -> rank() * 0.1;
+      crit_bonus += p() -> talents.mental_scarring -> rank() * 0.1 + 
+                    p() -> talents.drain_thoughts -> rank() * 0.03;
   }
 
   virtual void execute()
@@ -384,7 +408,7 @@ struct spell_t : public action_t
 
     if ( p -> buffs.telekinetic_effusion -> check() > 0 )
     {
-      c *= 0.5;
+      c *= 0.25;
       c = ceil( c ); // FIXME: floor or ceil?
     }
 
@@ -492,7 +516,7 @@ struct project_t : public spell_t
     spell_t( n + std::string( is_upheaval ? "_upheaval" : "" ), p ),
     upheaval()
   {
-    rank_level_list = { 1, 4, 7, 11, 14, 17, 23, 34, 47, 50 };
+    rank_level_list = { 1, 4, 7, 11, 14, 17, 23, 34, 47, 50, 53, 55};
 
     parse_options( options_str );
 
@@ -544,15 +568,44 @@ struct project_t : public spell_t
   }
 };
 
+struct rippling_force_d_t : public spell_t
+{
+  rippling_force_d_t( class_t* p, const std::string& n) :
+    spell_t( n, p, SCHOOL_KINETIC )
+  {
+
+    td.standardhealthpercentmin = td.standardhealthpercentmax = .027;
+    td.power_mod = 0.27;
+
+    base_tick_time = from_seconds( 0.5 );
+    num_ticks = 2;
+    base_cost = 0;
+    may_crit = false;
+    background = true;
+  }
+};
+
+//This is only so I can add a child for FL specifically and not get 'parent already exists' error
+struct rippling_force_tt_t : public rippling_force_d_t
+{
+  rippling_force_tt_t( class_t* p, const std::string& n) :
+    rippling_force_d_t( p, n)
+    {
+    }
+};
+
+
 struct telekinetic_throw_t : public spell_t
 {
   bool is_buffed_by_psychic_projection;
+  rippling_force_tt_t* rf;
 
   telekinetic_throw_t( class_t* p, const std::string& n, const std::string& options_str ) :
     spell_t( n, p ),
-    is_buffed_by_psychic_projection( false )
+    is_buffed_by_psychic_projection( false ),
+    rf( new rippling_force_tt_t(p, "rippling_force_tt") )
   {
-    rank_level_list = { 2, 5, 8, 11, 14, 19, 27, 39, 50 };
+    rank_level_list = { 2, 5, 8, 11, 14, 19, 27, 39, 50, 55 };
 
     parse_options( options_str );
 
@@ -562,8 +615,6 @@ struct telekinetic_throw_t : public spell_t
     td.power_mod = 0.79;
 
     base_cost = 30.0;
-    if ( player -> set_bonus.rakata_force_masters -> two_pc() )
-      base_cost -= 2.0;
 
     range = 30.0;
     num_ticks = 3;
@@ -579,6 +630,7 @@ struct telekinetic_throw_t : public spell_t
 
     base_crit += p -> talents.critical_kinesis -> rank() * 0.03;
     base_multiplier *= 1.0 + p -> talents.empowered_throw -> rank() * 0.02;
+    add_child( rf );
   }
 
   virtual void execute()
@@ -632,6 +684,9 @@ struct telekinetic_throw_t : public spell_t
     if ( tick_dmg > 0 )
     {
       class_t* p = cast();
+      if ( p -> rngs.rippling_force -> roll( p -> talents.rippling_force -> rank() * 0.10 ) ){
+          rf -> execute();
+      }
 
       if ( p -> talents.psychic_barrier -> rank() > 0 && p -> rngs.psychic_barrier -> roll( p -> talents.psychic_barrier -> rank() * ( 1 / 3.0 ) ) )
       {
@@ -639,6 +694,7 @@ struct telekinetic_throw_t : public spell_t
         p -> resource_gain( RESOURCE_FORCE, f , p -> gains.psychic_barrier );
       }
       p -> buffs.presence_of_mind -> trigger();
+      p -> buffs.telekinetic_focal_point -> trigger(1, 0, 0.1);
     }
   }
 };
@@ -646,34 +702,36 @@ struct telekinetic_throw_t : public spell_t
 struct disturbance_t : public spell_t
 {
   spell_t* tm;
+  bool is_tm;
+  rippling_force_d_t* rf;
 
-  disturbance_t( class_t* p, const std::string& n, const std::string& options_str, bool is_tm = false ) :
-    spell_t( n + std::string( is_tm ? "_tm" : "" ), p ),
-    tm( 0 )
+  disturbance_t( class_t* p, const std::string& n, const std::string& options_str, bool is_tm_in = false ) :
+    spell_t( n + std::string( is_tm_in ? "_tm" : "" ), p ),
+    tm( 0 ),
+    is_tm ( is_tm_in)
   {
-    rank_level_list = { 10, 13, 16, 25, 36, 45, 50 };
+    rank_level_list = { 10, 13, 16, 25, 36, 45, 50, 53, 55 };
 
     parse_options( options_str );
 
-    dd.standardhealthpercentmin = .112;
-    dd.standardhealthpercentmax = .152;
-    dd.power_mod = 1.32;
+    dd.standardhealthpercentmin = .14;
+    dd.standardhealthpercentmax = .16;
+    dd.power_mod = 1.5;
 
     base_execute_time = from_seconds( 1.5 );
 
-    base_cost = 30.0;
-    if ( player -> set_bonus.rakata_force_masters -> two_pc() )
-      base_cost -= 2.0;
+    base_cost = 40.0;
     range = 30.0;
+    crit_bonus += p -> talents.reverberation -> rank() * 0.25;
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
     base_crit += p -> talents.critical_kinesis -> rank() * 0.03;
 
-    if ( is_tm )
+    if ( is_tm_in )
     {
-      dd.standardhealthpercentmin = .03;
-      dd.standardhealthpercentmax = .05;
-      dd.power_mod = 0.4;
+      dd.standardhealthpercentmin = .035;
+      dd.standardhealthpercentmax = .055;
+      dd.power_mod = 0.45;
       base_cost = 0.0;
       background = true;
     }
@@ -681,6 +739,12 @@ struct disturbance_t : public spell_t
     {
       tm = new disturbance_t( p, n, options_str, true );
       add_child( tm );
+    }
+
+    //Only add rf if we're not on a proc'd version
+    if (!is_tm_in){
+        rf = new rippling_force_d_t(p, "rippling_force_d"); 
+        add_child( rf );
     }
   }
 
@@ -697,7 +761,7 @@ struct disturbance_t : public spell_t
     spell_t::player_buff();
 
     if ( p() -> buffs.presence_of_mind -> up() )
-      dd.player_multiplier *= 1.20;
+      dd.player_multiplier *= 1.35;
   }
 
   virtual void impact( player_t* t, result_type impact_result, double travel_dmg )
@@ -709,11 +773,12 @@ struct disturbance_t : public spell_t
       class_t* p = cast();
 
       p -> buffs.concentration -> trigger();
+      p -> buffs.telekinetic_focal_point -> trigger(1, 0, 0.5);
 
       // Does the TM version also proc Tidal Force? We'll assume that it does
       // not for now.
-      if ( tm )
-        p -> trigger_tidal_force( 0.3 );
+      if ( !is_tm )
+        p -> trigger_tidal_force( 0.6 );
     }
   }
 
@@ -723,13 +788,24 @@ struct disturbance_t : public spell_t
 
     class_t* p = cast();
 
+    //This naming is confusing
+    //tm != NULL on NON-TM proc IFF we're spec'd into telekinetic_momentum
     if ( tm )
     {
-      if ( p -> rngs.tm -> roll( p -> talents.telekinetic_momentum -> rank() * 0.10 ) )
+      double tm_trigger_pct_per_stack = 0.10;
+      if(p-> buffs.mental_alacrity -> up() && p -> talents.flowing_force -> rank())
+          tm_trigger_pct_per_stack *= 2;
+      if ( p -> rngs.tm -> roll( p -> talents.telekinetic_momentum -> rank() * tm_trigger_pct_per_stack ) )
       {
         tm -> execute();
         p -> buffs.tremors -> trigger( 1 );
+        if ( p -> rngs.tremors -> roll( p -> talents.tremors -> rank() * 0.50 ) )
+            p -> trigger_tremors();
       }
+    }
+
+    if ( p -> rngs.rippling_force -> roll( p -> talents.rippling_force -> rank() * 0.30 ) && !is_tm){
+        rf -> execute();
     }
 
     // TESTME: Should PoM really affect the tm proc as implemented here?
@@ -747,29 +823,29 @@ struct mind_crush_t : public spell_t
       spell_t( n, p ),
       is_buffed_by_presence_of_mind( false )
     {
-      rank_level_list = { 14, 19, 30, 41, 50 };
+      rank_level_list = { 14, 19, 28, 38, 50, 52, 55};
 
       td.standardhealthpercentmin = td.standardhealthpercentmax = .0295;
       td.power_mod = 0.295;
 
       base_tick_time = from_seconds( 1.0 );
-      num_ticks = 6 + p -> talents.assertion -> rank() * 1;
+      num_ticks = 6 + p -> talents.mind_warp -> rank() * 1;
       range = 30.0;
       influenced_by_inner_strength = false;
       background = true;
       may_crit = false;
 
-      base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
+      base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02; 
     }
 
     virtual void player_buff() // override
     {
       spell_t::player_buff();
 
-      // 1.2 PTS: Mind Crush's periodic damage now benefits from the 20%
+      // 1.2 PTS: Mind Crush's periodic damage now benefits from the 35%
       // damage bonus when it is used to consume the Presence of Mind buff.
       if ( is_buffed_by_presence_of_mind )
-        td.player_multiplier *= 1.20;
+        td.player_multiplier *= 1.35;
     }
 
     virtual void target_debuff( player_t* t, dmg_type dmg_type )
@@ -781,6 +857,15 @@ struct mind_crush_t : public spell_t
       if ( p -> talents.force_suppression -> rank() > 0 )
         p -> benefits.fs_mind_crush -> update( p -> buffs.force_suppression -> check() > 0 );
     }
+
+    virtual void tick( dot_t* d )
+    {
+      spell_t::tick( d );
+      class_t* p = cast();
+      //Is the second tick calculated differently?
+      if ( p -> rngs.mm -> roll( p -> talents.mental_momentum -> rank() * 0.10 ) )
+          spell_t::tick( d );
+    }
   };
 
   mind_crush_dot_t* dot_spell;
@@ -789,7 +874,7 @@ struct mind_crush_t : public spell_t
     spell_t( n, p ),
     dot_spell( new mind_crush_dot_t( p, n + "_dot" ) )
   {
-    static const int ranks[] = { 14, 19, 30, 41, 50 };
+    static const int ranks[] = { 14, 19, 28, 38, 50, 52, 55};
     rank_level_list = util_t::array_to_vector( ranks );
 
     parse_options( options_str );
@@ -826,7 +911,7 @@ struct mind_crush_t : public spell_t
     bool p_o_m = p() -> buffs.presence_of_mind -> up();
     dot_spell -> is_buffed_by_presence_of_mind = p_o_m;
     if( p_o_m )
-      dd.player_multiplier *= 1.20;
+      dd.player_multiplier *= 1.35;
   }
 
   virtual void execute()
@@ -842,25 +927,22 @@ struct weaken_mind_t : public spell_t
   weaken_mind_t( class_t* p, const std::string& n, const std::string& options_str ) :
     spell_t( n, p, SCHOOL_INTERNAL )
   {
-    rank_level_list = { 16, 22, 33, 44, 50 };
+    rank_level_list = { 16, 22, 33, 44, 50, 53, 55 };
 
     parse_options( options_str );
 
-    td.standardhealthpercentmin = td.standardhealthpercentmax = .031;
-    td.power_mod = 0.31;
+    td.standardhealthpercentmin = td.standardhealthpercentmax = .036;
+    td.power_mod = 0.36;
 
     base_tick_time = from_seconds( 3.0 );
-    num_ticks = 5 + p -> talents.disturb_mind -> rank();
-    base_cost = 35.0;
+    num_ticks = 5;
+    base_cost = 30.0;
     range = 30.0;
     may_crit = false;
-    crit_bonus += p -> talents.reverberation -> rank() * 0.1;
 
     influenced_by_inner_strength = true;
 
-    // TESTME: Additive or multiplicative combination?
-    base_multiplier += p -> talents.drain_thoughts -> rank() * 0.075 +
-                       p -> talents.empowered_throw -> rank() * 0.02;
+    base_multiplier += p -> talents.empowered_throw -> rank() * 0.02;
   }
 
   virtual void tick( dot_t* d )
@@ -875,6 +957,7 @@ struct weaken_mind_t : public spell_t
     }
 
     p -> buffs.rakata_force_masters_4pc -> trigger();
+    p -> buffs.underworld_force_masters_4pc -> trigger();
   }
 
   virtual void target_debuff( player_t* t, dmg_type dmg_type )
@@ -890,26 +973,58 @@ struct weaken_mind_t : public spell_t
 
 struct turbulence_t : public spell_t
 {
-  spell_t* tm;
+  spell_t* mm;
+  bool is_mm;
 
-  turbulence_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    spell_t( n, p, SCHOOL_INTERNAL )
+  turbulence_t( class_t* p, const std::string& n, const std::string& options_str, bool is_mm_in = false ) :
+    spell_t( n + std::string( is_mm_in ? "_mm" : ""), p, SCHOOL_INTERNAL ),
+    mm(0),
+    is_mm (is_mm_in)
   {
     check_talent( p -> talents.turbulence -> rank() );
 
     parse_options( options_str );
 
-    dd.standardhealthpercentmin = .138;
-    dd.standardhealthpercentmax = .178;
-    dd.power_mod = 1.58;
+    dd.standardhealthpercentmin = .149;
+    dd.standardhealthpercentmax = .209;
+    dd.power_mod = 1.79;
 
     base_execute_time = from_seconds( 2.0 );
-    base_cost = 45.0;
+    base_cost = 50.0;
     range = 30.0;
-    crit_bonus += p -> talents.reverberation -> rank() * 0.1;
+    crit_bonus += p -> talents.reverberation -> rank() * 0.25;
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
     cooldown -> duration = from_seconds( 9.0 );
+
+    if ( is_mm_in )
+    {
+      dd.standardhealthpercentmin = .037;
+      dd.standardhealthpercentmax = .057;
+      dd.power_mod = 0.474;
+      base_cost = 0.0;
+      background = true;
+    }
+    else if ( p -> talents.mental_momentum -> rank() > 0 )
+    {
+      mm = new turbulence_t( p, n, options_str, true );
+      add_child( mm );
+    }
+  }
+
+  virtual void impact( player_t* t, result_type impact_result, double travel_dmg )
+  {
+    spell_t::impact( t, impact_result, travel_dmg );
+
+    if ( result_is_hit( impact_result ) )
+    {
+      class_t* p = cast();
+
+      // Does the MM version also proc Tidal Force? We'll assume that it does
+      // not for now.
+      if ( !is_mm )
+        p -> trigger_tidal_force( 0.6 );
+    }
   }
 
   virtual void target_debuff( player_t *t, dmg_type dmg_type )
@@ -925,6 +1040,27 @@ struct turbulence_t : public spell_t
 
     if ( increase_crit_chance )
       target_crit += 1.0;
+  }
+
+  virtual void execute()
+  {
+    spell_t::execute();
+
+    class_t* p = cast();
+
+    if ( mm )
+    {
+      if ( p -> rngs.mm -> roll( p -> talents.mental_momentum -> rank() * 0.10 ) )
+      {
+        mm -> execute();
+        p -> buffs.tremors -> trigger( 1 );
+        if ( p -> rngs.tremors -> roll( p -> talents.tremors -> rank() * 0.50 ) )
+            p -> trigger_tremors();
+      }
+    }
+
+    // TESTME: Should PoM really affect the mm proc as implemented here?
+    p -> buffs.presence_of_mind -> expire();
   }
 };
 
@@ -949,7 +1085,7 @@ struct force_in_balance_t : public spell_t
     cooldown -> duration = from_seconds( 15.0 );
 
     crit_bonus += p -> talents.mental_scarring -> rank() * 0.1;
-    base_multiplier *= 1.0 + p -> talents.psychic_suffusion -> rank() * 0.05;
+    base_multiplier *= 1.0;
   }
 
   virtual void execute()
@@ -960,7 +1096,7 @@ struct force_in_balance_t : public spell_t
 
     // ToDo: Move buff to targetdata and buff trigger to impact
 
-    p -> buffs.force_suppression -> trigger( 10 );
+    p -> buffs.force_suppression -> trigger( 15 );
   }
 };
 
@@ -973,8 +1109,8 @@ struct sever_force_t : public spell_t
 
     parse_options( options_str );
 
-    td.standardhealthpercentmin = td.standardhealthpercentmax = .031;
-    td.power_mod = 0.311;
+    td.standardhealthpercentmin = td.standardhealthpercentmax = .036;
+    td.power_mod = 0.36;
 
     base_tick_time = from_seconds( 3.0 );
     num_ticks = 6;
@@ -984,6 +1120,8 @@ struct sever_force_t : public spell_t
     cooldown -> duration = from_seconds( 9.0 );
     tick_zero = true;
     influenced_by_inner_strength = false;
+
+    base_multiplier += p -> talents.empowered_throw -> rank() * 0.02;
   }
 
   virtual void target_debuff( player_t* t, dmg_type dmg_type )
@@ -1002,11 +1140,12 @@ struct mental_alacrity_t : public spell_t
   mental_alacrity_t( class_t* p, const std::string& n, const std::string& options_str ) :
     spell_t( n, p )
   {
-    check_talent( p -> talents.mental_alacrity -> rank() );
-
     parse_options( options_str );
 
     cooldown -> duration = from_seconds( 120 );
+    cooldown -> duration -= from_seconds( p -> talents.flowing_force -> rank() * 15 );
+    if ( player -> set_bonus.underworld_force_masters -> two_pc())
+        cooldown -> duration -= from_seconds(15);
     trigger_gcd = timespan_t::zero();
     harmful = false;
   }
@@ -1033,20 +1172,20 @@ struct telekinetic_wave_t : public spell_t
 
     if ( is_tm )
     {
-      dd.standardhealthpercentmin = .041;
-      dd.standardhealthpercentmax = .081;
-      dd.power_mod = .61;
+      dd.standardhealthpercentmin = .057;
+      dd.standardhealthpercentmax = .077;
+      dd.power_mod = .667;
 
       base_cost = 0.0;
       background = true;
     }
     else
     {
-      dd.standardhealthpercentmin = .182;
-      dd.standardhealthpercentmax = .222;
-      dd.power_mod = 2.02;
+      dd.standardhealthpercentmin = .201;
+      dd.standardhealthpercentmax = .241;
+      dd.power_mod = 2.21;
 
-      base_cost = 50.0;
+      base_cost = 60.0;
       cooldown -> duration = from_seconds( 6.0 );
       base_execute_time = from_seconds( 3.0 );
 
@@ -1061,21 +1200,26 @@ struct telekinetic_wave_t : public spell_t
     aoe = 4;
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02 + p -> talents.psychic_suffusion -> rank() * 0.05;
-    crit_bonus += p -> talents.reverberation -> rank() * 0.1;
+    crit_bonus += p -> talents.reverberation -> rank() * 0.25;
   }
 
   virtual void execute()
   {
     spell_t::execute();
 
+    class_t* p = cast();
+
     if ( tm )
     {
-      class_t* p = cast();
-
-      if ( p -> rngs.tm -> roll( p -> talents.telekinetic_momentum -> rank() * 0.10 ) )
+      double tm_trigger_pct_per_stack = 0.10;
+      if(p -> buffs.mental_alacrity -> up() && p -> talents.flowing_force -> rank())
+          tm_trigger_pct_per_stack *= 2;
+      if ( p -> rngs.tm -> roll( p -> talents.telekinetic_momentum -> rank() * tm_trigger_pct_per_stack ) )
       {
         tm -> execute();
         p -> buffs.tremors -> trigger( 1 );
+        if ( p -> rngs.tremors -> roll( p -> talents.tremors -> rank() * 0.50 ) )
+            p -> trigger_tremors();
       }
     }
   }
@@ -1166,7 +1310,7 @@ public:
 
     if ( p() -> buffs.telekinetic_effusion -> check() > 0 )
     {
-      c *= 0.5;
+      c *= 0.25;
       c = floor( c ); // FIXME: floor or ceil?
     }
 
@@ -1226,9 +1370,9 @@ struct benevolence_t : public heal_t
   {
     parse_options( options_str );
 
-    dd.standardhealthpercentmin = .078;
-    dd.standardhealthpercentmax = .098;
-    dd.power_mod = 1.75;
+    dd.standardhealthpercentmin = .086;
+    dd.standardhealthpercentmax = .126;
+    dd.power_mod = 2.13;
 
     base_cost = 50.0;
     base_execute_time = from_seconds( 1.5 );
@@ -1271,8 +1415,8 @@ struct healing_trance_t : public heal_t
   {
     parse_options( options_str );
 
-    td.standardhealthpercentmin = td.standardhealthpercentmax = .0515;
-    td.power_mod = 1.03;
+    td.standardhealthpercentmin = td.standardhealthpercentmax = .056;
+    td.power_mod = 1.12;
 
     tick_zero = true;
     channeled = true;
@@ -1325,8 +1469,8 @@ struct rejuvenate_t : public heal_t
     dd.standardhealthpercentmax = .055;
     dd.power_mod = 0.91;
 
-    td.standardhealthpercentmin = td.standardhealthpercentmax = .016;
-    td.power_mod = 0.33;
+    td.standardhealthpercentmin = td.standardhealthpercentmax = .02;
+    td.power_mod = 0.393;
 
     base_cost = 30.0;
     cooldown -> duration = from_seconds( 6.0 );
@@ -1546,45 +1690,53 @@ void class_t::init_talents()
   base_t::init_talents();
 
   // Seer|Corruption
-  talents.immutable_force       = find_talent( "Immutable Force" );
+  talents.force_gift            = find_talent( "Force Gift" );
   talents.penetrating_light     = find_talent( "Penetrating Light" );
-  talents.wisdom                = find_talent( "Wisdom" );
+  talents.psychic_suffusion     = find_talent( "Psychic Suffusion" );
   talents.foresight             = find_talent( "Foresight" );
   talents.pain_bearer           = find_talent( "Pain Bearer" );
-  talents.psychic_suffusion     = find_talent( "Psychic Suffusion" );
+  talents.immutable_force       = find_talent( "Immutable Force" );
+  talents.humility              = find_talent( "Humility" );
   talents.conveyance            = find_talent( "Conveyance" );
   talents.rejuvenate            = find_talent( "Rejuvenate" );
-  talents.valiance              = find_talent( "Valiance" );
   talents.preservation          = find_talent( "Preservation" ); // add
+  talents.valiance              = find_talent( "Valiance" );
   talents.mend_wounds           = find_talent( "Mend Wounds" );
   talents.force_shelter         = find_talent( "Force Shelter" ); // add buff
   talents.egress                = find_talent( "Egress" ); // add
   talents.confound              = find_talent( "Confound" ); // add
   talents.healing_trance        = find_talent( "Healing Trance" );
+  talents.life_ward             = find_talent( "Life Ward" );
   talents.serenity              = find_talent( "Serenity" );
   talents.resplendence          = find_talent( "Resplendence" );
   talents.clairvoyance          = find_talent( "Clairvoyance" );
+  talents.master_speed          = find_talent( "Master Speed" );
+  talents.force_warden          = find_talent( "Force Warden" );
+  talents.amnesty               = find_talent( "Amnesty");
   talents.salvation             = find_talent( "Salvation" );
 
   // Telekinetics|Lightning
-  talents.inner_strength        = find_talent( "Inner Strength" );
+  talents.upheaval              = find_talent( "Upheaval" );
   talents.mental_longevity      = find_talent( "Mental Longevity" );
+  talents.inner_strength        = find_talent( "Inner Strength" );
+  talents.minds_eye             = find_talent( "Mind's Eye" );
   talents.clamoring_force       = find_talent( "Clamoring Force" );
-  talents.minds_eye             = find_talent( "Minds Eye" );
-  talents.disturb_mind          = find_talent( "Disturb Mind" );
   talents.concentration         = find_talent( "Concentration" );
   talents.telekinetic_defense   = find_talent( "Telekinetic Defense" );
-  talents.blockout              = find_talent( "Blockout" );
-  talents.telekinetic_wave      = find_talent( "Telekinetic Wave" );
   talents.psychic_projection    = find_talent( "Psychic Projection" );
-  talents.force_wake            = find_talent( "Force Wake" );
-  talents.tidal_force           = find_talent( "Tidal Force" );
+  talents.telekinetic_wave      = find_talent( "Telekinetic Wave" );
   talents.telekinetic_effusion  = find_talent( "Telekinetic Effusion" );
+  talents.cascading_force       = find_talent( "Cascading Force" );
+  talents.tidal_force           = find_talent( "Tidal Force" );
   talents.kinetic_collapse      = find_talent( "Kinetic Collapse" );
   talents.tremors               = find_talent( "Tremors" );
   talents.telekinetic_momentum  = find_talent( "Telekinetic Momentum" );
-  talents.mental_alacrity       = find_talent( "Mental Alacrity" );
+  talents.blockout              = find_talent( "Blockout" );
+  talents.force_wake            = find_talent( "Force Wake" );
+  talents.flowing_force         = find_talent( "Flowing Force" );
   talents.reverberation         = find_talent( "Reverberation" );
+  talents.force_haste           = find_talent( "Force Haste" );
+  talents.mental_momentum       = find_talent( "Mental Momentum" );
   talents.turbulence            = find_talent( "Turbulence" );
 
   // Balance|Madness
@@ -1592,7 +1744,7 @@ void class_t::init_talents()
   talents.jedi_resistance       = find_talent( "Jedi Resistance" );
   talents.will_of_the_jedi      = find_talent( "Will of the Jedi" );
   talents.pinning_resolve       = find_talent( "Pinning Resolve" );
-  talents.upheaval              = find_talent( "Upheaval" );
+  talents.drain_thoughts        = find_talent( "Drain Thoughts" );
   talents.focused_insight       = find_talent( "Focused Insight" );
   talents.critical_kinesis      = find_talent( "Critical Kinesis" );
   talents.force_in_balance      = find_talent( "Force in Balance" );
@@ -1602,13 +1754,16 @@ void class_t::init_talents()
   talents.mind_ward             = find_talent( "Mind Ward" );
   talents.presence_of_mind      = find_talent( "Presence of Mind" );
   talents.force_suppression     = find_talent( "Force Suppression" );
-  talents.drain_thoughts        = find_talent( "Drain Thoughts" );
-  talents.assertion             = find_talent( "Assertion" );
+  talents.rippling_force        = find_talent( "Rippling Force" );
+  talents.mind_warp             = find_talent( "Mind Warp" );
   talents.mental_scarring       = find_talent( "Mental Scarring" );
   talents.psychic_absorption    = find_talent( "Psychic Absorption" );
+  talents.telekinetic_focal_point = find_talent( "Telekinetic Focal Point" );
+  talents.metaphysical_alacrity = find_talent( "Metaphysical Alacrity" );
+  talents.mental_defense        = find_talent( "Mental Defense" );
   talents.sever_force           = find_talent( "Sever Force" );
 
-  set_base_accuracy( get_base_accuracy() + 0.01 * talents.clairvoyance -> rank() );
+  set_base_accuracy( get_base_accuracy() + 0.01 * talents.inner_strength -> rank() );
 }
 
 // class_t::init_base ===============================================
@@ -1658,19 +1813,21 @@ void class_t::init_buffs()
   bool is_sage = ( type == JEDI_SAGE );
 
   buffs.concentration = new buff_t( this, is_sage ? "concentration" : "subversion", 3, from_seconds( 10.0 ), timespan_t::zero(), 0.5 * talents.concentration -> rank() );
+  buffs.telekinetic_focal_point = new buff_t( this, is_sage ? "telekinetic_focal_point" : "focal_lightning", 3, from_seconds( 15.0 ), timespan_t::zero()); 
   buffs.psychic_projection = new buff_t( this, is_sage ? "psychic_projection" : "lightning_barrage", 1, from_seconds( 10 ), from_seconds( 10.0 ), 0.5 * talents.psychic_projection -> rank() );
   buffs.tidal_force = new buff_t( this, is_sage ? "tidal_force" : "lightning_storm", 1, from_seconds( 30 ), from_seconds( 10.0 ) );
   buffs.telekinetic_effusion = new buff_t( this, is_sage ? "telekinetic_effusion" : "lightning_effusion", 2, from_seconds( 30 ), timespan_t::zero(), 0.5 * talents.telekinetic_effusion -> rank() );
   buffs.tremors = new buff_t( this, is_sage ? "tremors" : "conduction", 3, from_seconds( 30.0 ) );
   buffs.presence_of_mind = new buff_t( this, is_sage ? "presence_of_mind" : "wrath", 1, from_seconds( 30 ), timespan_t::zero(), talents.presence_of_mind -> rank() * 0.3 );
   buffs.force_suppression = new buff_t( this, is_sage ? "force_suppression" : "deathmark", 10, from_seconds( 30.0 ), timespan_t::zero(), talents.force_suppression -> rank() );
-  buffs.mental_alacrity = new buff_t( this, is_sage ? "mental_alacrity" : "polarity_shift", 1, from_seconds( 10.0 ) );
+  buffs.mental_alacrity = new buff_t( this, is_sage ? "mental_alacrity" : "polarity_shift", 1, talents.flowing_force -> rank() ? from_seconds( 15.0 ) : from_seconds( 10.0 ));
   buffs.force_potency = new buff_t( this, is_sage ? "force_potency" : "recklessness",
                                      set_bonus.battlemaster_stalkers -> four_pc() ? 3 : 2
 
                                     , from_seconds( 20.0 ) );
   buffs.psychic_projection_dd = new buff_t( this, is_sage ? "psychic_projection_dd" : "lightning_barrage_dd", 1, from_seconds( 2.0 ), timespan_t::zero() );
   buffs.rakata_force_masters_4pc = new buff_t( this, "rakata_force_masters_4pc", 1, from_seconds( 15.0 ), from_seconds( 20.0 ), set_bonus.rakata_force_masters -> four_pc() ? 0.10 : 0.0 );
+  buffs.underworld_force_masters_4pc = new buff_t( this, "underworld_force_masters_4pc", 1, from_seconds( 15.0 ), from_seconds( 20.0 ), set_bonus.underworld_force_masters -> four_pc() ? 0.30 : 0.0 );
   buffs.noble_sacrifice = new buff_t( this, "noble_sacrifice", 4, from_seconds( 10.0 ) );
   buffs.resplendence = new buff_t( this, is_sage ? "resplendence" : "force_surge", 1 , from_seconds( 10 ), timespan_t::zero(), talents.resplendence -> rank() / 2.0 );
   buffs.conveyance = new buff_t( this, is_sage ? "conveyace" : "force_bending", 1, from_seconds( 10 ), timespan_t::zero(), talents.conveyance -> rank() / 2.0 );
@@ -1708,7 +1865,10 @@ void class_t::init_rng()
   rngs.psychic_barrier = get_rng( "psychic_barrier" );
   rngs.upheaval = get_rng( "upheaval" );
   rngs.tm = get_rng( "telekinetic_momentum" );
+  rngs.mm = get_rng( "mental_momentum" );
+  rngs.tremors = get_rng( "tremors" );
   rngs.psychic_projection_dd = get_rng( type == JEDI_SAGE ? "psychic_projection_dd" : "lightning_barrage_dd" );
+  rngs.rippling_force = get_rng( "rippling_force" );
 }
 
 // class_t::init_actions ============================================
@@ -1725,7 +1885,7 @@ void class_t::init_actions()
   {
     if ( type == JEDI_SAGE )
     {
-      action_list_str += "stim,type=exotech_resolve";
+      action_list_str += "stim,type=prototype_nano_infused_resolve";
       action_list_str += "/force_valor";
       action_list_str += "/snapshot_stats";
 
@@ -1891,8 +2051,9 @@ role_type class_t::primary_role() const
 double class_t::force_regen_per_second() const
 {
   double regen = base_t::force_regen_per_second();
+  //alacrity here is the modifier for cast time, i.e. something like 93%, in that case we want regen to go up by 7%
   regen += base_regen_per_second * ( buffs.concentration -> check() * 0.10 -
-                                     buffs.noble_sacrifice -> check() * 0.25 );
+                                     buffs.noble_sacrifice -> check() * 0.25  + (1-alacrity()));
   return regen;
 }
 
@@ -1908,6 +2069,7 @@ void class_t::regen( timespan_t periodicity )
   if ( buffs.noble_sacrifice -> up() )
     resource_loss( RESOURCE_FORCE, force_regen * buffs.noble_sacrifice -> check() * 0.25, gains.noble_sacrifice_power_regen_lost );
 
+  resource_gain( RESOURCE_FORCE, force_regen * (1-alacrity()));
   base_t::regen( periodicity );
 }
 
@@ -1935,6 +2097,10 @@ double class_t::alacrity() const
 
   sh -= buffs.rakata_force_masters_4pc -> up() * 0.05;
 
+  sh -= talents.force_gift -> rank() * 0.01;
+
+  sh -= buffs.telekinetic_focal_point -> stack() * 0.01;
+
   return sh;
 }
 
@@ -1944,32 +2110,39 @@ void class_t::create_talents()
 {
   // Seer|Corruption
   static const talentinfo_t seer_tree[] = {
-    { "Immutable Force", 2 }, { "Penetrating Light", 3 }, { "Wisdom", 2 }, { "Foresight", 3 },
-    { "Pain Bearer", 2 }, { "Psychic Suffusion", 2 }, { "Conveyance", 2 }, { "Rejuvenate", 1 },
-    { "Valiance", 2 }, { "Preservation", 2 }, { "Mend Wounds", 1 }, { "Force Shelter", 2 },
-    { "Egress", 2 }, { "Confound", 2 }, { "Healing Trance", 1 }, { "Serenity", 2 },
-    { "Resplendence", 2 }, { "Clairvoyance", 3 }, { "Salvation", 1 }
+      { "Force Gift", 2}, { "Penetrating Light", 3}, { "Psychic Suffusion", 2},
+      { "Foresight", 1}, { "Pain Bearer", 2}, { "Immutable Force", 2}, { "Humility", 1},
+      { "Conveyance", 2}, { "Rejuvenate", 1}, { "Preservation", 2}, { "Valiance", 2},
+      { "Mend Wounds", 1}, { "Force Shelter", 2}, { "Egress", 2},
+      { "Confound", 2}, { "Healing Trance", 1}, { "Life Ward", 2}, { "Serenity", 2},
+      { "Resplendence", 2}, { "Clairvoyance", 3},
+      { "Master Speed", 1}, { "Force Warden", 3}, { "Amnesty", 1}, { "Salvation", 1}
   };
   init_talent_tree( JEDI_SAGE_SEER, seer_tree );
 
   // Telekinetics|Lightning
   static const talentinfo_t telekinetics_tree[] = {
-    { "Inner Strength", 3 }, { "Mental Longevity", 2 }, { "Clamoring Force", 3 }, { "Minds Eye", 1 },
-    { "Disturb Mind", 2 }, { "Concentration", 2 }, { "Telekinetic Defense",  2 }, { "Blockout", 2 },
-    { "Telekinetic Wave", 1 }, { "Psychic Projection", 2 }, { "Force Wake", 2 },
-    { "Tidal Force", 1 }, { "Telekinetic Effusion", 2 }, { "Kinetic Collapse", 2 }, { "Tremors", 1 },
-    { "Telekinetic Momentum", 3 }, { "Mental Alacrity", 1 }, { "Reverberation", 5 }, { "Turbulence", 1 },
+      { "Upheaval", 3}, { "Mental Longevity", 2}, { "Inner Strength", 3},
+      { "Mind's Eye", 1}, { "Clamoring Force", 2}, { "Concentration", 2}, { "Telekinetic Defense", 2},
+      { "Psychic Projection", 2}, { "Telekinetic Wave", 1}, { "Telekinetic Effusion", 2},
+      { "Cascading Force", 2}, { "Tidal Force", 1}, { "Kinetic Collapse", 2},
+      { "Tremors", 2}, { "Telekinetic Momentum", 3}, { "Blockout", 2},
+      { "Force Wake", 2}, { "Flowing Force", 1}, { "Reverberation", 2},
+      { "Force Haste", 2}, { "Mental Momentum", 3},
+      { "Turbulence", 1}
   };
   init_talent_tree( JEDI_SAGE_TELEKINETICS, telekinetics_tree );
 
    // Balance|Madness
   static const talentinfo_t balance_tree[] = {
-    { "Empowered Throw", 3 }, { "Jedi Resistance", 2 }, { "Will of the Jedi", 2 },
-    { "Pinning Resolve", 2 }, { "Upheaval", 3 }, { "Focused Insight", 2 }, { "Critical Kinesis", 2 },
-    { "Force in Balance", 1 }, { "Psychic Barrier", 3 }, { "Telekinetic Balance", 1 },
-    { "Containment", 2 }, { "Mind Ward", 2 }, { "Presence of Mind", 1 }, { "Force Suppression", 1 },
-    { "Drain Thoughts", 2 }, { "Assertion", 2 }, { "Mental Scarring", 3 }, { "Psychic Absorption", 2 },
-    { "Sever Force", 1 },
+      { "Empowered Throw", 3}, { "Jedi Resistance", 2}, { "Will of the Jedi", 2},
+      { "Pinning Resolve", 2}, { "Drain Thoughts", 3}, { "Focused Insight", 2}, { "Critical Kinesis", 2},
+      { "Force in Balance", 1}, { "Psychic Barrier", 3}, { "Telekinetic Balance", 1},
+      { "Containment", 2}, { "Mind Ward", 2}, { "Presence of Mind", 1},
+      { "Force Suppression", 1}, { "Rippling Force", 2}, { "Mind Warp", 2},
+      { "Mental Scarring", 3}, { "Psychic Absorption", 2},
+      { "Telekinetic Focal Point", 2}, { "Metaphysical Alacrity", 1}, { "Mental Defense", 2},
+      { "Sever Force", 1}
   };
   init_talent_tree( JEDI_SAGE_BALANCE, balance_tree );
 }

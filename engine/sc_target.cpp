@@ -36,6 +36,7 @@ struct enemy_t : public player_t
 
     // Current best guess
     base_melee_avoidance = base_range_avoidance = .10;
+    base_force_avoidance = base_tech_avoidance = .10;
   }
 
 // target_t::combat_begin ===================================================

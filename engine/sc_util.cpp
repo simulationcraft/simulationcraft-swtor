@@ -723,6 +723,7 @@ const char* util_t::stim_type_string( stim_type stim )
   switch ( stim )
   {
   case stim_type::none:            return "none";
+  case stim_type::prototype_nano_infused_resolve: return "prototype_nano_infused_resolve";
   case stim_type::exotech_resolve: return "exotech_resolve";
   case stim_type::rakata_resolve:  return "rakata_resolve";
   case stim_type::exotech_skill:   return "exotech_skill";

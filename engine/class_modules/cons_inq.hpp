@@ -69,12 +69,16 @@ public:
   dot_t dot_telekinetic_throw;
   dot_t dot_mind_crush;
   dot_t dot_sever_force;
+  dot_t dot_rippling_force_tt;
+  dot_t dot_rippling_force_d;
 
   targetdata_t( class_t& source, player_t& target ) :
     ::targetdata_t( source, target ),
     dot_telekinetic_throw( "telekinetic_throw", &source ),
     dot_mind_crush( "mind_crush", &source ),
-    dot_sever_force( "sever_force", &source )
+    dot_sever_force( "sever_force", &source ),
+    dot_rippling_force_tt( "rippling_force_tt", &source ),
+    dot_rippling_force_d( "rippling_force_d", &source )
   {
     add( dot_telekinetic_throw );
     alias( dot_telekinetic_throw, "force_lightning" );
@@ -86,6 +90,13 @@ public:
 
     add( dot_sever_force );
     alias( dot_sever_force, "creeping_terror" );
+
+    add( dot_rippling_force_tt );
+    alias( dot_rippling_force_tt, "lightning_burns_fl" );
+
+    add( dot_rippling_force_d );
+    alias( dot_rippling_force_d, "lightning_burns_ls" );
+
   }
 };
 

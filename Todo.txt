@@ -1,0 +1,5 @@
+Known work:
+basehealthtable values for 50+ - These may not be needed
+set bonuses other than force-master's
+default action lists
+relics other than underworld serendipitous assault

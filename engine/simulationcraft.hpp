@@ -515,6 +515,7 @@ check( PRESENCE );
 enum class stim_type
 {
   none=0,
+  prototype_nano_infused_resolve,
   exotech_resolve,
   rakata_resolve,
   exotech_skill,
@@ -2110,15 +2111,15 @@ private:
   };
 
 public:
-  scaling_t<50,  18> absorb;
-  scaling_t<30,  55> accuracy;
-  scaling_t<30,  55> alacrity;
-  scaling_t<30,  45> crit;
-  scaling_t<30, 250> crit_from_stat;
-  scaling_t<30,  55> defense;
-  scaling_t<50,  32> shield;
-  scaling_t<30,  11> surge;
 
+  scaling_t<50,  65> absorb;
+  scaling_t<30,  120> accuracy;
+  scaling_t<30,  125> alacrity;
+  scaling_t<30,  90> crit;
+  scaling_t<20, 550> crit_from_stat;
+  scaling_t<30,  120> defense;
+  scaling_t<50,  78> shield;
+  scaling_t<30,  22> surge;
   void init( int level )
   {
     absorb.init( level );
@@ -2694,6 +2695,7 @@ public:
     set_bonus_t* rakata_force_mystics;
     set_bonus_t* rakata_stalkers;
     set_bonus_t* rakata_survivors;
+    set_bonus_t* underworld_force_masters;
     // ==== PvP sets
     set_bonus_t* battlemaster_force_masters;
     set_bonus_t* battlemaster_force_mystics;

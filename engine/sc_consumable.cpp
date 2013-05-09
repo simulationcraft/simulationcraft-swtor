@@ -56,6 +56,11 @@ struct use_stim_t : public action_t
     p -> stim = type;
     switch ( type )
     {
+    case stim_type::prototype_nano_infused_resolve:
+      p -> stat_gain( STAT_WILLPOWER, 169, gain, this );
+      p -> stat_gain( STAT_POWER, 70, gain, this );
+      break;
+      
     case stim_type::exotech_resolve:
       p -> stat_gain( STAT_WILLPOWER, 128, gain, this );
       p -> stat_gain( STAT_POWER, 52, gain, this );
@@ -116,7 +121,7 @@ struct power_potion_t : public action_t
 
   power_potion_t( player_t* p, const std::string& options_str ) :
     action_t( ACTION_USE, "power_potion", p ),
-    amount( 535.0 ) // Exotech Attack Adrenal
+    amount( 675.0 ) // Prototype Nano Infused Attack Adrenal
   {
     option_t options[] =
     {

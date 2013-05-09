@@ -389,8 +389,7 @@ timespan_t action_t::gcd() const
     // http://sithwarrior.com/forums/Thread-Alacrity-and-the-GCD?pid=9152#pid9152
     // abilities with base_execute_time > 0 but with time_to_execute=0 ( e.g., because of procs ) don't get
     // a reduced gcd. Tested visually by Kor, 15/2/2012
-    if ( time_to_execute > timespan_t::zero() )
-      t *= alacrity();
+    t *= alacrity();
 
     if ( t < min_gcd ) t = min_gcd;
   }
@@ -803,12 +802,13 @@ void action_t::calculate_result()
   if ( random < accuracy - target_avoidance )
   {
     // Second roll: Crit vs. Shield chance
+    // Kinetic and Energy are only school's that can be shielded
     random = sim -> real();
 
     if ( ( ( td.weapon && tick_may_crit ) || ( !td.weapon && may_crit ) )
         && random < total_crit() )
       result = RESULT_CRIT;
-    else if ( random > 1.0 - target_shield )
+    else if ( random > 1.0 - target_shield && (school == SCHOOL_KINETIC || school == SCHOOL_ENERGY) )
       result = RESULT_BLOCK;
     else
       result = RESULT_HIT;

@@ -397,6 +397,7 @@ player_t::player_t( sim_t*             s,
 
   // inquisitors
   // ==== PvE sets
+  set_bonus.underworld_force_masters = get_set_bonus( "underworld_force_masters", "underworld_force_masters_/arkanian_force_masters_", "" );
   set_bonus.rakata_force_masters = get_set_bonus( "rakata_force_masters", "tionese_force_masters_/columi_force_masters_/rakata_force_masters_", "campaign_force_masters_/denova_force_masters_" ); // MrRobot ItemSetID = 24
   set_bonus.rakata_force_mystics = get_set_bonus( "rakata_force_mystics", "tionese_force_mystics_/columi_force_mystics_/rakata_force_mystics_", "campaign_force_mystics_/denova_force_mystics_" ); // MrRobot ItemSetID = 2
   set_bonus.rakata_stalkers = get_set_bonus( "rakata_stalkers", "tionese_stalkers_/columi_stalkers_/rakata_stalkers_", "campaign_stalkers_/denova_stalkers_" );                                    // MrRobot ItemSetID = 7

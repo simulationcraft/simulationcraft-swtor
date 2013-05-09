@@ -913,6 +913,7 @@ bool unique_gear_t::get_equip_encoding( std::string&       encoding,
   else if ( name == "battlemaster_relic_of_the_cerulean_nova"       ) e = "ondamage_224energy_30%_4.5cd";
   else if ( name == "battlemaster_relic_of_the_kinetic_tempest"     ) e = "ondamage_224kinetic_30%_4.5cd";
   else if ( name == "campaign_relic_of_dark_radiance"               ) e = "ondamage_184internal_30%_4.5cd";
+  else if ( name == "underworld_relic_of__serendipitous_assault"    ) e = "ondamage_550Power_30%_20cd_6dur";
   else if ( name == "campaign_relic_of_elemental_transcendence"     ) e = "ondamage_184elemental_30%_4.5cd";
   else if ( name == "campaign_relic_of_the_cerulean_nova"           ) e = "ondamage_246energy_30%_4.5cd";
   else if ( name == "campaign_relic_of_the_kinetic_tempest"         ) e = "ondamage_246kinetic_30%_4.5cd";
