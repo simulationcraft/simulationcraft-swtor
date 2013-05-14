@@ -1,6 +1,10 @@
 #include <QLocale>
-#include <QtGui/QApplication>
 #include <locale>
+#ifdef QT_VERSION_5
+#include <QtGui/QGuiApplication>
+#else
+#include <QtGui/QApplication>
+#endif
 #include "simulationcraftqt.hpp"
 #ifndef SIMC_NO_AUTOUPDATE
 #include "sc_autoupdate.h"
