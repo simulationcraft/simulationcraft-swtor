@@ -9,6 +9,10 @@
 #include "simulationcraft.hpp"
 #include <QtGui/QtGui>
 #include <QtWebKit>
+#ifdef QT_VERSION_5
+#include <QtWidgets/QtWidgets>
+#include <QtWebKitWidgets/QtWebKitWidgets>
+#endif
 
 enum master_tabs {
   TAB_WELCOME,

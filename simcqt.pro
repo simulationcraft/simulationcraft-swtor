@@ -8,6 +8,11 @@ exists( build.conf ) {
   include( build.conf )
 }
 
+contains ( QT_MAJOR_VERSION , 5 ) {
+QT += widgets webkitwidgets
+DEFINES += QT_VERSION_5
+}
+
 QMAKE_CXXFLAGS += $$OPTS
 
 QMAKE_CXXFLAGS_RELEASE += -DNDEBUG

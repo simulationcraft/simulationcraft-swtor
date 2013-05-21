@@ -33,6 +33,9 @@ CPP_FLAGS += -m64
 LINK_FLAGS+= -m64
 endif
 
+ifneq (${NO_DEBUG},)
+  CPP_FLAGS += -DNDEBUG
+endif
 # Windows platform with MinGW32
 ifeq (${OS},WINDOWS)
 MODULE_EXT = .exe

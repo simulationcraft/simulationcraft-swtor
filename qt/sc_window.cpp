@@ -490,7 +490,6 @@ void SimulationCraftWindow::createCmdLine()
   cmdLineLayout->addWidget( mainButton = new QPushButton( "Simulate!" ) );
   backButton->setMaximumWidth( 30 );
   forwardButton->setMaximumWidth( 30 );
-  progressBar->setStyle( new QPlastiqueStyle() );
   progressBar->setMaximum( 100 );
   progressBar->setMaximumWidth( 200 );
   progressBar->setMinimumWidth( 150 );
@@ -865,12 +864,12 @@ void SimulationCraftWindow::createCustomTab()
   customGlyphsTab = new QWidget();
   customGlyphsTab->setObjectName( QString::fromUtf8( "customGlyphsTab" ) );
   createCustomProfileDock->addTab( customGlyphsTab, QString() );
-  createCustomProfileDock->setTabText( createCustomProfileDock->indexOf( customGearTab ), QApplication::translate( "createCustomTab", "Gear", 0, QApplication::UnicodeUTF8 ) );
-  createCustomProfileDock->setTabToolTip( createCustomProfileDock->indexOf( customGearTab ), QApplication::translate( "createCustomTab", "Customise Gear Setup", 0, QApplication::UnicodeUTF8 ) );
-  createCustomProfileDock->setTabText( createCustomProfileDock->indexOf( customTalentsTab ), QApplication::translate( "createCustomTab", "Talents", 0, QApplication::UnicodeUTF8 ) );
-  createCustomProfileDock->setTabToolTip( createCustomProfileDock->indexOf( customTalentsTab ), QApplication::translate( "createCustomTab", "Customise Talents", 0, QApplication::UnicodeUTF8 ) );
-  createCustomProfileDock->setTabText( createCustomProfileDock->indexOf( customGlyphsTab ), QApplication::translate( "createCustomTab", "Glyphs", 0, QApplication::UnicodeUTF8 ) );
-  createCustomProfileDock->setTabToolTip( createCustomProfileDock->indexOf( customGlyphsTab ), QApplication::translate( "createCustomTab", "Customise Glyphs", 0, QApplication::UnicodeUTF8 ) );
+  createCustomProfileDock -> setTabText( createCustomProfileDock -> indexOf( customGearTab ), tr( "Gear", "createCustomTab" ) );
+  createCustomProfileDock -> setTabToolTip( createCustomProfileDock -> indexOf( customGearTab ), tr( "Customise Gear Setup", "createCustomTab" ) );
+  createCustomProfileDock -> setTabText( createCustomProfileDock -> indexOf( customTalentsTab ), tr( "Talents", "createCustomTab" ) );
+  createCustomProfileDock -> setTabToolTip( createCustomProfileDock -> indexOf( customTalentsTab ), tr( "Customise Talents", "createCustomTab" ) );
+  createCustomProfileDock -> setTabText( createCustomProfileDock -> indexOf( customGlyphsTab ), tr( "Glyphs", "createCustomTab" ) );
+  createCustomProfileDock -> setTabToolTip( createCustomProfileDock -> indexOf( customGlyphsTab ), tr( "Customise Glyphs", "createCustomTab" ) );
 }
 
 void SimulationCraftWindow::createSimulateTab()
@@ -1211,10 +1210,11 @@ void SimulationCraftWindow::importFinished()
 
 void SimulateThread::run()
 {
+  QByteArray utf8_profile = options.toUtf8();
   QFile file( "simc_gui.simc" );
   if ( file.open( QIODevice::WriteOnly ) )
   {
-    file.write( options.toAscii() );
+    file.write( utf8_profile );
     file.close();
   }
 
@@ -1479,7 +1479,7 @@ void SimulationCraftWindow::saveLog()
 
   if ( file.open( QIODevice::WriteOnly ) )
   {
-    file.write( logText->toPlainText().toAscii() );
+    file.write( logText->toPlainText().toUtf8() );
     file.close();
   }
 
@@ -1499,7 +1499,7 @@ void SimulationCraftWindow::saveResults()
 
   if ( file.open( QIODevice::WriteOnly ) )
   {
-    file.write( visibleWebView->property("resultHTML").toString().toAscii() );
+    file.write( visibleWebView->property("resultHTML").toString().toUtf8() );
     file.close();
   }
 
@@ -1711,7 +1711,7 @@ void SimulationCraftWindow::historyDoubleClicked( QListWidgetItem* item )
 
   if ( mrRobotBuilderView )
   {
-    mrRobotBuilderView->setUrl( QUrl::fromEncoded( url.toAscii() ) );
+    mrRobotBuilderView->setUrl( QUrl::fromEncoded( url.toUtf8() ) );
     importTab->setCurrentIndex( TAB_MR_ROBOT );
   }
 }

@@ -1987,7 +1987,7 @@ static void print_html_player_buffs( FILE* file, player_t* p )
         if ( uptime > 0 )
         {
           fprintf( file,
-                   "\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">%s_%zd:</span>%.1f%%</li>\n",
+                   "\t\t\t\t\t\t\t\t\t\t<li><span class=\"label\">%s_%d:</span>%.1f%%</li>\n",
                    b -> name(), j,
                    uptime * 100.0 );
         }
