@@ -913,7 +913,6 @@ bool unique_gear_t::get_equip_encoding( std::string&       encoding,
   else if ( name == "battlemaster_relic_of_the_cerulean_nova"       ) e = "ondamage_224energy_30%_4.5cd";
   else if ( name == "battlemaster_relic_of_the_kinetic_tempest"     ) e = "ondamage_224kinetic_30%_4.5cd";
   else if ( name == "campaign_relic_of_dark_radiance"               ) e = "ondamage_184internal_30%_4.5cd";
-  else if ( name == "underworld_relic_of__serendipitous_assault"    ) e = "ondamage_550Power_30%_20cd_6dur";
   else if ( name == "campaign_relic_of_elemental_transcendence"     ) e = "ondamage_184elemental_30%_4.5cd";
   else if ( name == "campaign_relic_of_the_cerulean_nova"           ) e = "ondamage_246energy_30%_4.5cd";
   else if ( name == "campaign_relic_of_the_kinetic_tempest"         ) e = "ondamage_246kinetic_30%_4.5cd";
@@ -937,6 +936,26 @@ bool unique_gear_t::get_equip_encoding( std::string&       encoding,
   else if ( name == "denova_relic_of_elemental_transcendence"       ) e = "ondamage_199elemental_30%_4.5cd";
   else if ( name == "denova_relic_of_the_cerulean_nova"             ) e = "ondamage_256energy_30%_4.5cd";
   else if ( name == "denova_relic_of_the_kinetic_tempest"           ) e = "ondamage_256kinetic_30%_4.5cd";
+  else if ( name == "underworld_relic_of__serendipitous_assault"    ) e = "ondamage_550Power_30%_20cd_6dur";
+  else if ( name == "underworld_relic_of_dark_radiance"             ) e = "ondamage_264internal_30%_4.5cd";
+  else if ( name == "underworld_relic_of_elemental_transcendence"    ) e = "ondamage_264elemental_30%_4.5cd";
+  else if ( name == "underworld_relic_of_the_cerulean_nova"         ) e = "ondamage_352energy_30%_4.5cd";
+  else if ( name == "underworld_relic_of_the_kinetic_tempest"       ) e = "ondamage_352kinetic_30%_4.5cd";
+  else if ( name == "arkanian_relic_of__serendipitous_assault"      ) e = "ondamage_500Power_30%_20cd_6dur";
+  else if ( name == "arkanian_relic_of_dark_radiance"               ) e = "ondamage_241internal_30%_4.5cd";
+  else if ( name == "arkanian_relic_of_elemental_transcendence"      ) e = "ondamage_241elemental_30%_4.5cd";
+  else if ( name == "arkanian_relic_of_the_cerulean_nova"           ) e = "ondamage_322energy_30%_4.5cd";
+  else if ( name == "arkanian_relic_of_the_kinetic_tempest"         ) e = "ondamage_322kinetic_30%_4.5cd";
+  else if ( name == "partisan_relic_of__serendipitous_assault"      ) e = "ondamage_410Power_30%_20cd_6dur";
+  else if ( name == "partisan_relic_of_dark_radiance"               ) e = "ondamage_190internal_30%_4.5cd";
+  else if ( name == "partisan_relic_of_elemental_transcendence"      ) e = "ondamage_190elemental_30%_4.5cd";
+  else if ( name == "partisan_relic_of_the_cerulean_nova"           ) e = "ondamage_254energy_30%_4.5cd";
+  else if ( name == "partisan_relic_of_the_kinetic_tempest"         ) e = "ondamage_254kinetic_30%_4.5cd";
+  else if ( name == "conqueror_relic_of__serendipitous_assault"     ) e = "ondamage_435Power_30%_20cd_6dur";
+  else if ( name == "conqueror_relic_of_dark_radiance"              ) e = "ondamage_202internal_30%_4.5cd";
+  else if ( name == "conqueror_relic_of_elemental_transcendence"     ) e = "ondamage_202elemental_30%_4.5cd";
+  else if ( name == "conqueror_relic_of_the_cerulean_nova"          ) e = "ondamage_269energy_30%_4.5cd";
+  else if ( name == "conqueror_relic_of_the_kinetic_tempest"        ) e = "ondamage_269kinetic_30%_4.5cd";
   if ( ! e ) return false;
 
   encoding = e;
@@ -976,6 +995,10 @@ bool unique_gear_t::get_use_encoding( std::string&       encoding,
   else if ( name == "dread_guard_relic_of_imperiling_serenity"     ) e = "350Defense_120cd_30dur";
   else if ( name == "dread_guard_relic_of_the_primeval_fatesealer" ) e = "350Alacrity_120cd_30dur";
   else if ( name == "dread_guard_relic_of_the_shrouded_crusader"   ) e = "215shield_215abs_120cd_30dur";
+  else if ( name == "arkanian_relic_of_boundless_ages"             ) e = "395Power_120cd_30dur";
+  else if ( name == "arkanian_relic_of_the_primeval_fatesealer"    ) e = "395Alacrity_120cd_30dur";
+  else if ( name == "underworld_relic_of_boundless_ages"           ) e = "425Power_120cd_30dur";
+  else if ( name == "underworld_relic_of_the_primeval_fatesealer"  ) e = "425Alacrity_120cd_30dur";
 
   if ( ! e ) return false;
 

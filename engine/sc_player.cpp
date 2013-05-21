@@ -681,7 +681,13 @@ void player_t::init_base()
     attribute_base[ ATTR_PRESENCE  ] = floor( 45 + 3.6 * level );
 
   assert( primary_attribute != secondary_attribute );
-  attribute_base[ primary_attribute   ] = floor( 50 + 4 * level );
+
+  if(level <= 50)
+      attribute_base[ primary_attribute   ] = floor( 50 + 4 * level );
+  else
+      attribute_base[ primary_attribute   ] = floor( 250 + 30 * (level-50));
+  
+  //FIXME:  This is most likely wrong for the expansion, but not hugely important
   attribute_base[ secondary_attribute ] = floor( 20 + 1.6 * level );
 
   resource_base[ RESOURCE_HEALTH ] = rating_t::get_base_health( level );
@@ -1394,7 +1400,7 @@ void player_t::init_scaling()
     scales_with[ primary_attribute    ] = true;
     scales_with[ secondary_attribute  ] = true;
 
-    scales_with[ STAT_ACCURACY_RATING ] = attack;
+    scales_with[ STAT_ACCURACY_RATING ] = true;
     scales_with[ STAT_WEAPON_DMG      ] = attack;
 
     scales_with[ STAT_CRIT_RATING     ] = true;

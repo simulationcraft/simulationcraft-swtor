@@ -57,6 +57,7 @@ public:
   struct gains_t
   {
     gain_t* concentration;
+    gain_t* rippling_force;
     gain_t* focused_insight;
     gain_t* psychic_barrier;
     gain_t* noble_sacrifice_power;
@@ -345,9 +346,10 @@ struct spell_t : public action_t
   {
     action_t::init();
 
-    if ( td.base_min > 0 && ! channeled )
-      crit_bonus += p() -> talents.mental_scarring -> rank() * 0.1 + 
-                    p() -> talents.drain_thoughts -> rank() * 0.03;
+    if ( td.base_min > 0 && ! channeled ){
+      crit_bonus += p() -> talents.mental_scarring -> rank() * 0.1;
+      base_multiplier *= 1.0 + p() -> talents.drain_thoughts -> rank() * 0.03;
+    }
   }
 
   virtual void execute()
@@ -383,7 +385,6 @@ struct spell_t : public action_t
   virtual void assess_damage( player_t* t, double dmg_amount, dmg_type dmg_type, result_type dmg_result )
   {
     action_t::assess_damage( t, dmg_amount, dmg_type, dmg_result );
-
     class_t* p = cast();
 
     // Procs from all critical damage including dot ticks. Source:  17/01/2012 http://sithwarrior.com/forums/Thread-Sorcerer-Sage-Mechanics-and-Quirks
@@ -392,6 +393,7 @@ struct spell_t : public action_t
     {
       p -> buffs.telekinetic_effusion -> trigger( 2 );
     }
+
   }
 
   virtual double cost() const
@@ -420,9 +422,12 @@ struct spell_t : public action_t
     action_t::consume_resource();
 
     class_t* p = cast();
+    double c = action_t::cost();
 
-    p -> buffs.telekinetic_effusion -> up();
-    p -> buffs.telekinetic_effusion -> decrement();
+    if(c > 0){
+        p -> buffs.telekinetic_effusion -> up();
+        p -> buffs.telekinetic_effusion -> decrement();
+    }
   }
 
   virtual void tick( dot_t* d )
@@ -577,11 +582,20 @@ struct rippling_force_d_t : public spell_t
     td.standardhealthpercentmin = td.standardhealthpercentmax = .027;
     td.power_mod = 0.27;
 
-    base_tick_time = from_seconds( 0.5 );
-    num_ticks = 2;
+    base_tick_time = from_seconds( 1 );
+    num_ticks = 1;
     base_cost = 0;
     may_crit = false;
     background = true;
+  }
+
+  virtual void execute(){
+      spell_t::execute();
+      class_t* p = cast();
+
+      double f = 2;
+      p -> resource_gain( RESOURCE_FORCE, f , p -> gains.rippling_force );
+
   }
 };
 
@@ -615,6 +629,10 @@ struct telekinetic_throw_t : public spell_t
     td.power_mod = 0.79;
 
     base_cost = 30.0;
+    if ( player -> set_bonus.rakata_force_masters -> two_pc() )
+        base_cost -= 2.0;
+    if ( player -> set_bonus.underworld_force_masters -> two_pc() )
+        base_cost -= 2.0;
 
     range = 30.0;
     num_ticks = 3;
@@ -694,7 +712,7 @@ struct telekinetic_throw_t : public spell_t
         p -> resource_gain( RESOURCE_FORCE, f , p -> gains.psychic_barrier );
       }
       p -> buffs.presence_of_mind -> trigger();
-      p -> buffs.telekinetic_focal_point -> trigger(1, 0, 0.1);
+      p -> buffs.telekinetic_focal_point -> trigger(1, 0, 0.1 * p -> talents.telekinetic_focal_point -> rank());
     }
   }
 };
@@ -721,6 +739,10 @@ struct disturbance_t : public spell_t
     base_execute_time = from_seconds( 1.5 );
 
     base_cost = 40.0;
+    if ( player -> set_bonus.rakata_force_masters -> two_pc() )
+        base_cost -= 2.0;
+    if ( player -> set_bonus.underworld_force_masters -> two_pc() )
+        base_cost -= 2.0;
     range = 30.0;
     crit_bonus += p -> talents.reverberation -> rank() * 0.25;
 
@@ -773,7 +795,7 @@ struct disturbance_t : public spell_t
       class_t* p = cast();
 
       p -> buffs.concentration -> trigger();
-      p -> buffs.telekinetic_focal_point -> trigger(1, 0, 0.5);
+      p -> buffs.telekinetic_focal_point -> trigger(1, 0, 0.5 * p -> talents.telekinetic_focal_point -> rank());
 
       // Does the TM version also proc Tidal Force? We'll assume that it does
       // not for now.
@@ -889,7 +911,7 @@ struct mind_crush_t : public spell_t
     cooldown -> duration = from_seconds( 15.0 );
     if ( player -> set_bonus.battlemaster_force_masters -> two_pc() )
       cooldown -> duration -= from_seconds( 1.5 );
-    influenced_by_inner_strength = false;
+    influenced_by_inner_strength = true;
 
     base_multiplier *= 1.0 + p -> talents.clamoring_force -> rank() * 0.02;
 
@@ -935,7 +957,7 @@ struct weaken_mind_t : public spell_t
     td.power_mod = 0.36;
 
     base_tick_time = from_seconds( 3.0 );
-    num_ticks = 5;
+    num_ticks = 6;
     base_cost = 30.0;
     range = 30.0;
     may_crit = false;
@@ -1119,7 +1141,7 @@ struct sever_force_t : public spell_t
     may_crit = false;
     cooldown -> duration = from_seconds( 9.0 );
     tick_zero = true;
-    influenced_by_inner_strength = false;
+    influenced_by_inner_strength = true;
 
     base_multiplier += p -> talents.empowered_throw -> rank() * 0.02;
   }
@@ -1224,6 +1246,20 @@ struct telekinetic_wave_t : public spell_t
     }
   }
 
+  virtual double cost() const
+  {
+      spell_t::cost();
+
+      class_t* p = cast();
+
+      double c = action_t::cost();
+
+      if(p -> buffs.tidal_force -> up())
+          c = 0;
+
+      return c;
+  }
+
   virtual timespan_t execute_time() const
   {
     timespan_t et = spell_t::execute_time();
@@ -1321,8 +1357,12 @@ public:
   {
     base_t::consume_resource();
 
-    p() -> buffs.telekinetic_effusion -> up();
-    p() -> buffs.telekinetic_effusion -> decrement();
+    double c = action_t::cost();
+
+    if(c > 0){
+        p() -> buffs.telekinetic_effusion -> up();
+        p() -> buffs.telekinetic_effusion -> decrement();
+    }
   }
 };
 
@@ -1586,9 +1626,12 @@ public:
   {
     base_t::consume_resource();
 
-    // TEST
-    p() -> buffs.telekinetic_effusion -> up();
-    p() -> buffs.telekinetic_effusion -> decrement();
+    double c = action_t::cost();
+
+    if(c > 0){
+        p() -> buffs.telekinetic_effusion -> up();
+        p() -> buffs.telekinetic_effusion -> decrement();
+    }
   }
 };
 
@@ -1813,7 +1856,7 @@ void class_t::init_buffs()
   bool is_sage = ( type == JEDI_SAGE );
 
   buffs.concentration = new buff_t( this, is_sage ? "concentration" : "subversion", 3, from_seconds( 10.0 ), timespan_t::zero(), 0.5 * talents.concentration -> rank() );
-  buffs.telekinetic_focal_point = new buff_t( this, is_sage ? "telekinetic_focal_point" : "focal_lightning", 3, from_seconds( 15.0 ), timespan_t::zero()); 
+  buffs.telekinetic_focal_point = new buff_t( this, is_sage ? "telekinetic_focal_point" : "focal_lightning", 4, from_seconds( 15.0 ), timespan_t::zero()); 
   buffs.psychic_projection = new buff_t( this, is_sage ? "psychic_projection" : "lightning_barrage", 1, from_seconds( 10 ), from_seconds( 10.0 ), 0.5 * talents.psychic_projection -> rank() );
   buffs.tidal_force = new buff_t( this, is_sage ? "tidal_force" : "lightning_storm", 1, from_seconds( 30 ), from_seconds( 10.0 ) );
   buffs.telekinetic_effusion = new buff_t( this, is_sage ? "telekinetic_effusion" : "lightning_effusion", 2, from_seconds( 30 ), timespan_t::zero(), 0.5 * talents.telekinetic_effusion -> rank() );
@@ -1847,6 +1890,7 @@ void class_t::init_gains()
   gains.noble_sacrifice_health = get_gain( is_sage ? "noble_sacrifice_health" : "consumption_health" );
   gains.noble_sacrifice_power = get_gain( is_sage ? "noble_sacrifice_power" : "consumption_power" );
   gains.noble_sacrifice_power_regen_lost = get_gain( is_sage ? "noble_sacrifice_power_regen_lost" : "consumption_power_regen_lost" );
+  gains.rippling_force = get_gain ( is_sage ? "rippling_force" : "lightning_burns" );
 }
 
 // class_t::init_procs ==============================================
@@ -1896,19 +1940,27 @@ void class_t::init_actions()
       if ( talents.psychic_projection -> rank() )
         action_list_str += "/telekinetic_throw,if=buff.psychic_projection_dd.up";
 
-      action_list_str += "/power_potion";
-      action_list_str += "/force_potency";
-      action_list_str += "/use_relics";
       action_list_str += "/weaken_mind,if=!ticking";
+      action_list_str += "/power_potion";
+      action_list_str += "/use_relics";
+
+      action_list_str += "/mental_alacrity";
+      action_list_str += "/force_potency,if=cooldown.force_in_balance.remains<2.7";
+      action_list_str +="/force_in_balance,if=buff.force_potency.up";
+      
 
       if ( talents.force_in_balance -> rank() > 0 )
         action_list_str += "/force_in_balance,if=force>80";
 
-      if ( talents.presence_of_mind -> rank() )
-        action_list_str += "/mind_crush,if=buff.presence_of_mind.react";
-
       if ( talents.sever_force -> rank() > 0 )
         action_list_str += "/sever_force,if=!ticking";
+
+      action_list_str +="/telekinetic_throw,if=buff.force_potency.up";
+
+      if ( talents.presence_of_mind -> rank() ){
+        action_list_str += "/mind_crush,if=buff.presence_of_mind.react";
+        action_list_str += "/disturbance,if=buff.presence_of_mind.react";
+      }
 
       if ( ! talents.presence_of_mind -> rank() )
         action_list_str += "/mind_crush";
@@ -1921,9 +1973,10 @@ void class_t::init_actions()
 
       case TREE_TELEKINETICS:
 
+      action_list_str += "/weaken_mind,if=!ticking";
       action_list_str += "/power_potion";
       action_list_str += "/use_relics";
-      action_list_str += "/weaken_mind,if=!ticking";
+      action_list_str += "/mental_alacrity";
 
       if ( talents.turbulence -> rank() > 0 )
         action_list_str += "/turbulence,if=dot.weaken_mind.remains>cast_time";
@@ -1936,9 +1989,9 @@ void class_t::init_actions()
       if ( talents.telekinetic_wave -> rank() > 0 && talents.tidal_force -> rank() > 0 )
         action_list_str += "/telekinetic_wave,if=buff.tidal_force.react";
 
-      action_list_str += "/mental_alacrity,moving=0";
+      action_list_str += "/disturbance,if=buff.mental_alacrity.react";
       action_list_str += "/mind_crush";
-      action_list_str += "/sequence,name=pewpew:disturbance:telekinetic_throw/restart_sequence,name=pewpew";
+      action_list_str += "/disturbance";
       action_list_str += "/project,moving=1";
 
       break;
@@ -1951,7 +2004,7 @@ void class_t::init_actions()
     // Sith Sorcerer
     else
     {
-      action_list_str += "stim,type=exotech_resolve";
+      action_list_str += "stim,type=prototype_nano_infused_resolve";
       action_list_str += "/mark_of_power";
       action_list_str += "/snapshot_stats";
 
@@ -1962,19 +2015,28 @@ void class_t::init_actions()
       if ( talents.psychic_projection -> rank() )
         action_list_str += "/force_lightning,if=buff.lightning_barrage_dd.up";
 
-      action_list_str += "/power_potion";
-      action_list_str += "/recklessness";
-      action_list_str += "/use_relics";
       action_list_str += "/affliction,if=!ticking";
+      action_list_str += "/power_potion";
+      action_list_str += "/use_relics";
+
+      action_list_str += "/polarity_shift";
+      action_list_str += "/recklessness,if=cooldown.death_field.remains<2.7";
+      action_list_str +="/death_field,if=buff.recklessness.up";
+      
 
       if ( talents.force_in_balance -> rank() > 0 )
         action_list_str += "/death_field,if=force>80";
 
-      if ( talents.presence_of_mind -> rank() )
-        action_list_str += "/crushing_darkness,if=buff.wrath.react";
-
       if ( talents.sever_force -> rank() > 0 )
         action_list_str += "/creeping_terror,if=!ticking";
+
+      action_list_str +="/force_lightning,if=buff.recklessness.up";
+
+      if ( talents.presence_of_mind -> rank() ){
+        action_list_str += "/crushing_darkness,if=buff.wrath.react";
+        action_list_str += "/lightning_strike,if=buff.wrath.react";
+      }
+
 
       if ( ! talents.presence_of_mind -> rank() )
         action_list_str += "/crushing_darkness";
@@ -1987,9 +2049,10 @@ void class_t::init_actions()
 
       case TREE_LIGHTNING:
 
+      action_list_str += "/affliction,if=!ticking";
       action_list_str += "/power_potion";
       action_list_str += "/use_relics";
-      action_list_str += "/affliction,if=!ticking";
+      action_list_str += "/polarity_shift";
 
       if ( talents.turbulence -> rank() > 0 )
         action_list_str += "/thundering_blast,if=dot.affliction.remains>cast_time";
@@ -2002,9 +2065,9 @@ void class_t::init_actions()
       if ( talents.telekinetic_wave -> rank() > 0 && talents.tidal_force -> rank() > 0 )
         action_list_str += "/chain_lightning,if=buff.lightning_storm.react";
 
-      action_list_str += "/polarity_shift,moving=0";
+      action_list_str += "/lightning_strike,if=buff.polarity_shift.react";
       action_list_str += "/crushing_darkness";
-      action_list_str += "/sequence,name=pewpew:lightning_strike:force_lightning/restart_sequence,name=pewpew";
+      action_list_str += "/lightning_strike";
       action_list_str += "/shock,moving=1";
 
       break;
@@ -2094,8 +2157,6 @@ double class_t::alacrity() const
   double sh = base_t::alacrity();
 
   sh -= buffs.mental_alacrity -> stack() * 0.20;
-
-  sh -= buffs.rakata_force_masters_4pc -> up() * 0.05;
 
   sh -= talents.force_gift -> rank() * 0.01;
 
