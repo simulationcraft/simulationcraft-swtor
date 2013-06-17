@@ -389,9 +389,10 @@ timespan_t action_t::gcd() const
     // http://sithwarrior.com/forums/Thread-Alacrity-and-the-GCD?pid=9152#pid9152
     // abilities with base_execute_time > 0 but with time_to_execute=0 ( e.g., because of procs ) don't get
     // a reduced gcd. Tested visually by Kor, 15/2/2012
-    t *= alacrity();
+    // Above is irrelevant with 2.0 changes. Alacrity affects all abilities now and redices the GCD
+    t /= alacrity();
 
-    if ( t < min_gcd ) t = min_gcd;
+    if ( t < min_gcd ) t = min_gcd;  // TODO: Check if there is actually a minimum GCD. Although I doubt a 1 sec GCD could ever be reached...
   }
 
   return t;
@@ -797,7 +798,7 @@ void action_t::calculate_result()
       ( td.weapon && td.weapon -> slot == SLOT_OFF_HAND )
       || ( weapon && weapon -> slot == SLOT_OFF_HAND )
   )
-    accuracy -= 0.34;
+    accuracy -= 0.33;
 
   if ( random < accuracy - target_avoidance )
   {
@@ -1034,7 +1035,7 @@ timespan_t action_t::execute_time() const
        base_execute_time == timespan_t::zero() )
     return timespan_t::zero();
   else
-    return base_execute_time * alacrity();
+    return base_execute_time / alacrity();
 }
 
 // action_t::schedule_execute ===============================================
@@ -1567,7 +1568,7 @@ timespan_t action_t::tick_time() const
   timespan_t t = base_tick_time;
   if ( channeled || hasted_ticks )
   {
-    t *= player_alacrity;
+    t /= player_alacrity;
   }
   return t;
 }
@@ -1586,7 +1587,7 @@ int action_t::hasted_num_ticks( timespan_t d ) const
   if ( d < timespan_t::zero() )
     d = num_ticks * base_tick_time;
 
-  timespan_t t = from_millis( (int) ( to_millis( base_tick_time ) * player_alacrity + 0.5 ) );
+  timespan_t t = from_millis( (int) ( to_millis( base_tick_time ) / player_alacrity + 0.5 ) );
 
   double n = d / t;
 

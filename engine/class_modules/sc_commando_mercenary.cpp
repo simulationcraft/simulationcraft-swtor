@@ -898,7 +898,7 @@ struct vent_heat_t : public action_t
 
 double class_t::alacrity() const
 {
-  return buffs.critical_reaction -> up() ? base_t::alacrity() - 0.05 : base_t::alacrity();
+  return buffs.critical_reaction -> up() ? base_t::alacrity() + 0.05 : base_t::alacrity();
 }
 
 // class_t::armor_penetration ================================================================

@@ -75,7 +75,7 @@ void dot_t::extend_duration_seconds( timespan_t extra_seconds )
   // ( num_ticks - current_tick ) - 1
   int old_num_ticks = num_ticks;
   int old_remaining_ticks = old_num_ticks - current_tick - 1;
-  double old_haste_factor = 1.0 / action -> player_alacrity;
+  double old_haste_factor = action -> player_alacrity;
 
   // Multiply with tick_time() for the duration left after the next tick
   timespan_t duration_left = old_remaining_ticks * action -> tick_time();
@@ -94,7 +94,7 @@ void dot_t::extend_duration_seconds( timespan_t extra_seconds )
   {
     log_t::output( sim, "%s extends duration of %s on %s by %.1f second(s). h: %.2f => %.2f, num_t: %d => %d, rem_t: %d => %d",
                    action -> player -> name(), name(), player -> name(), to_seconds( extra_seconds ),
-                   old_haste_factor, ( 1.0 / action -> player_alacrity ),
+                   old_haste_factor, ( action -> player_alacrity ),
                    old_num_ticks, num_ticks,
                    old_remaining_ticks, new_remaining_ticks );
   }

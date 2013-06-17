@@ -2116,7 +2116,7 @@ double class_t::force_regen_per_second() const
   double regen = base_t::force_regen_per_second();
   //alacrity here is the modifier for cast time, i.e. something like 93%, in that case we want regen to go up by 7%
   regen += base_regen_per_second * ( buffs.concentration -> check() * 0.10 -
-                                     buffs.noble_sacrifice -> check() * 0.25  + (1-alacrity()));
+                                     buffs.noble_sacrifice -> check() * 0.25  + (alacrity()-1));
   return regen;
 }
 
@@ -2132,7 +2132,7 @@ void class_t::regen( timespan_t periodicity )
   if ( buffs.noble_sacrifice -> up() )
     resource_loss( RESOURCE_FORCE, force_regen * buffs.noble_sacrifice -> check() * 0.25, gains.noble_sacrifice_power_regen_lost );
 
-  resource_gain( RESOURCE_FORCE, force_regen * (1-alacrity()));
+  resource_gain( RESOURCE_FORCE, force_regen * (alacrity()-1));
   base_t::regen( periodicity );
 }
 
@@ -2156,11 +2156,11 @@ double class_t::alacrity() const
 {
   double sh = base_t::alacrity();
 
-  sh -= buffs.mental_alacrity -> stack() * 0.20;
+  sh += buffs.mental_alacrity -> stack() * 0.20;
 
-  sh -= talents.force_gift -> rank() * 0.01;
+  sh += talents.force_gift -> rank() * 0.01;
 
-  sh -= buffs.telekinetic_focal_point -> stack() * 0.01;
+  sh += buffs.telekinetic_focal_point -> stack() * 0.01;
 
   return sh;
 }

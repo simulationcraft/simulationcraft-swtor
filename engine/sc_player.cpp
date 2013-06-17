@@ -3287,7 +3287,7 @@ void player_t::register_direct_heal_callback( int64_t mask,
 // player_t::alacrity =======================================================
 
 double player_t::alacrity() const
-{ return 1.0 - computed_alacrity; }
+{ return 1.0 + computed_alacrity; }
 
 // player_t::find_action ====================================================
 

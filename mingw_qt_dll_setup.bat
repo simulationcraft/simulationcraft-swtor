@@ -13,8 +13,8 @@
 :: Qt-Framework: C:\Qt\4.8.0
 
 :: Update the qt_dir as necessary
-set qt_dir=E:\QtSDK\Desktop\Qt\4.8.1\mingw
-set mingw_dir=E:\MinGW
+set qt_dir=C:\Code\QtSDK\Desktop\Qt\4.8.1\mingw
+set mingw_dir=D:\Code\MinGW
 
 :: IMPORTANT NOTE FOR DEBUGGING
 :: This script will ONLY copy the optimized Qt dlls

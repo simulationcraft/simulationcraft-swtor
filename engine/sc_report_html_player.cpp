@@ -964,8 +964,8 @@ static void print_html_stats( FILE* file, player_t* a )
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.2f%%</td>\n"
              "\t\t\t\t\t\t\t\t\t\t<td class=\"right\">%.0f</td>\n"
              "\t\t\t\t\t\t\t\t\t</tr>\n",
-             100 * ( 1 - a -> buffed.alacrity ),
-             100 * ( 1 - a -> alacrity() ),
+             100 * ( a -> buffed.alacrity - 1 ),
+             100 * ( a -> alacrity() - 1 ),
              a -> stats.alacrity_rating );
 
     // Melee

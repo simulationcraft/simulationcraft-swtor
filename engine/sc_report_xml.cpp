@@ -349,7 +349,7 @@ void print_xml_player_stats( xml_writer_t & writer, player_t * p )
   print_xml_player_attribute( writer, "presence",
                               p -> presence(),  p -> stats.attribute[ ATTR_PRESENCE  ], p -> buffed.attribute[ ATTR_PRESENCE  ] );
   print_xml_player_attribute( writer, "alacrity",
-                              100 * ( 1 - p -> alacrity() ), p -> stats.alacrity_rating, 100 * ( 1 - p -> buffed.alacrity ) );
+                              100 * ( p -> alacrity() - 1 ), p -> stats.alacrity_rating, 100 * ( p -> buffed.alacrity - 1 ) );
   print_xml_player_attribute( writer, "meleeaccuracy",
                               100 * p -> melee_accuracy_chance(), p -> stats.accuracy_rating, 100 * p -> buffed.melee_accuracy );
   print_xml_player_attribute( writer, "meleecrit",

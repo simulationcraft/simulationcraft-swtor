@@ -1533,7 +1533,7 @@ void class_t::regen( timespan_t periodicity )
 // class_t::alacrity ============================================
 double class_t::alacrity() const
 {
-  return base_t::alacrity() - ( buffs.sniper_volley -> up() ? 0.1 : 0 );
+  return base_t::alacrity() + ( buffs.sniper_volley -> up() ? 0.1 : 0 );
 }
 
 // class_t::armor_penetration =================================
