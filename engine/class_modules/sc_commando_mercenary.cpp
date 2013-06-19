@@ -12,6 +12,7 @@ class class_t;
 struct targetdata_t : public bount_troop::targetdata_t
 {
 
+  dot_t dot_electro_net;
   dot_t dot_radiation_burns;
   dot_t dot_rapid_shots;
   dot_t dot_rapid_shots_offhand;
@@ -19,6 +20,7 @@ struct targetdata_t : public bount_troop::targetdata_t
   dot_t dot_unload_offhand;
   dot_t dot_vent_heat;
 
+  buff_t* debuff_electro_net;
   buff_t* debuff_heat_signature;
 
   targetdata_t( class_t& source, player_t& target );
@@ -38,9 +40,10 @@ struct class_t : public bount_troop::class_t
       buff_t* barrage;
       buff_t* critical_reaction;
       buff_t* high_velocity_gas_cylinder;
-      buff_t* power_barrier;
+//      buff_t* power_barrier;
       buff_t* thermal_sensor_override;
       buff_t* tracer_lock;
+      buff_t* improved_vents;
 
     } buffs;
 
@@ -62,7 +65,7 @@ struct class_t : public bount_troop::class_t
     // RNGs
     struct rngs_t
     {
-      rng_t* terminal_velocity;
+
     } rngs;
 
     // Benefits
@@ -88,12 +91,12 @@ struct class_t : public bount_troop::class_t
       // t2
       talent_t* empowered_scans;
       talent_t* surgical_precision_system;
-      talent_t* supercharged_gas;
+      talent_t* heat_damping;
       talent_t* critical_reaction;
       // t3
-      talent_t* heat_damping;
+      talent_t* kolto_pods;
       talent_t* kolto_residue;
-      talent_t* kolto_missile;
+      talent_t* supercharged_gas;
       talent_t* power_shield;
       // t4
       talent_t* powered_insulators;
@@ -108,20 +111,21 @@ struct class_t : public bount_troop::class_t
       talent_t* warden;
       talent_t* peacekeeper;
       // t7
+      talent_t* kolto_jets;
+      talent_t* bodyguard;
+      // t8
       talent_t* emergency_scan;
 
       // Arsenal
       // t1
       talent_t* mandalorian_iron_warheads;
-      talent_t* integrated_systems;
+      talent_t* stabilizers;
       talent_t* ironsights;
       // t2
-      talent_t* stabilizers;
-      talent_t* muzzle_fluting;
+      talent_t* power_barrier;
       talent_t* upgraded_arsenal;
       talent_t* custom_enviro_suit;
       // t3
-      talent_t* power_barrier;
       talent_t* afterburners;
       talent_t* tracer_missile;
       talent_t* target_tracking;
@@ -133,11 +137,15 @@ struct class_t : public bount_troop::class_t
       talent_t* pinning_fire;
       talent_t* riddle;
       talent_t* light_em_up;
-      talent_t* kolto_vents;
+      talent_t* torque_boosters;
       // t6
       talent_t* barrage;
       talent_t* power_overrides;
+      talent_t* decoy;
       // t7
+      talent_t* energy_rebounder;
+      talent_t* power_launcher;
+      // t8
       talent_t* heatseeker_missiles;
 
       // Pyrotech
@@ -150,21 +158,25 @@ struct class_t : public bount_troop::class_t
       talent_t* sweltering_heat;
       talent_t* gyroscopic_alignment_jets;
       // t3
-      talent_t* degauss;
+      talent_t* pyro_shield;
       talent_t* superheated_rail;
       talent_t* incendiary_missile;
       talent_t* infrared_sensors;
       // t4
-      talent_t* rapid_venting;
+      talent_t* suit_foe;
       talent_t* prototype_particle_accelerator;
+      talent_t* volatile_warhead;
       // t5
-      talent_t* energy_rebounder;
-      talent_t* rain_of_fire;
       talent_t* firebug;
+      talent_t* rain_of_fire;
       // t6
-      talent_t* automated_defenses;
+      talent_t* degauss;
       talent_t* burnout;
       // t7
+      talent_t* rapid_venting;
+      talent_t* power_barrels;
+      talent_t* jet_rebounder;
+      // t8
       talent_t* thermal_detonator;
 
     } talents;
@@ -206,7 +218,6 @@ struct class_t : public bount_troop::class_t
     virtual void      init_gains();
     virtual void      init_procs();
     virtual void      init_cooldowns();
-    virtual void      init_rng();
     virtual void      init_actions();
     virtual role_type primary_role() const;
     virtual void      regen( timespan_t periodicity );
@@ -217,20 +228,24 @@ struct class_t : public bount_troop::class_t
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   bount_troop::targetdata_t ( source                , target  ),
+  dot_electro_net           ( "electro_net"         , &source ),
   dot_radiation_burns       ( "radiation_burns"     , &source ),
   dot_rapid_shots           ( "rapid_shots"         , &source ),
   dot_rapid_shots_offhand   ( "rapid_shots_offhand" , &source ),
   dot_unload                ( "unload"              , &source ),
   dot_unload_offhand        ( "unload_offhand"      , &source ),
   dot_vent_heat             ( "vent_heat"           , &source ),
-  debuff_heat_signature( new buff_t( this, "heat_signature", 5, from_seconds( 15 ) ) )
+  debuff_electro_net    ( new buff_t( this, "electro_net",    5, from_seconds( 10 ) ) ),
+  debuff_heat_signature ( new buff_t( this, "heat_signature", 1, from_seconds( 45 ) ) )
 {
+  add ( dot_electro_net         );
   add ( dot_radiation_burns     );
   add ( dot_rapid_shots         );
   add ( dot_rapid_shots_offhand );
   add ( dot_unload              );
   add ( dot_unload_offhand      );
   add ( dot_vent_heat           );
+  add ( *debuff_electro_net     );
   add ( *debuff_heat_signature  );
 }
 
@@ -335,6 +350,48 @@ struct missile_attack_t : public attack_t
 // class_t::cure ==========================================================================
 // class_t::disabling_shot ================================================================
 // class_t::emergency_scan ================================================================
+// class_t::electro_net ================================================================
+struct electro_net_t : public attack_t
+{
+  electro_net_t( class_t* p, const std::string& n, const std::string& options_str) :
+    attack_t( n, p, tech_policy, SCHOOL_ENERGY )
+  {
+//    rank_level_list = { ... 55 };
+
+    parse_options( options_str );
+
+    base_cost                    = 8;
+    range                        = 30.0;
+    td.power_mod                 = 0.29;
+    td.standardhealthpercentmin  = 0.029;
+    td.standardhealthpercentmax  = 0.029;
+    num_ticks                    = 10;
+    tick_zero                    = true;
+    base_tick_time               = from_seconds( 1 );
+    cooldown -> duration         = from_seconds( 90 );
+
+    base_multiplier += 0.02 * p -> talents.power_launcher -> rank();
+  }
+
+  virtual void execute()
+  {
+    targetdata() -> debuff_electro_net -> expire();
+    attack_t::execute();
+  }
+
+  virtual void tick( dot_t* d )
+  {
+    attack_t::tick( d );
+    targetdata() -> debuff_electro_net -> trigger();  // Triggers after the dot ticks because the first tick doesn't benefit from the increased damage.
+  }
+
+  virtual void player_buff()
+  {
+    attack_t::player_buff();
+    player_multiplier += 0.02 * targetdata() -> debuff_electro_net -> stack() ;
+  }
+};
+
 // class_t::fusion_missile ================================================================
 struct fusion_missile_t : public missile_attack_t
 {
@@ -343,12 +400,14 @@ struct fusion_missile_t : public missile_attack_t
     radiation_burns_t( class_t* p, const std::string& n ) :
       attack_t( n, p, tech_policy, SCHOOL_ELEMENTAL )
     {
+      // TODO: Check valuse as the tool-tip values are around 1% off assuming (Without Mand Iron Warheads).
       td.power_mod                = 0.28;
       td.standardhealthpercentmin = td.standardhealthpercentmax = 0.028;
+
       num_ticks                   = 6;
       base_tick_time              = from_seconds( 1 );
       background                  = true;
-      base_accuracy               = 999;
+//      base_accuracy               = 999;  // Not required???
     }
   };
 
@@ -365,8 +424,9 @@ struct fusion_missile_t : public missile_attack_t
     base_execute_time            = from_seconds( 1.5 );
     cooldown -> duration         = from_seconds( 30 );
     range                        = 30.0;
-    // travel_speed                 = 18.4; // XXX guess. how to convert theirs to ours?
+    travel_speed                 = 2 * 9;
 
+    // TODO: Check valuse as the tool-tip values are around 1% off assuming Mand Iron Warheads is NOT affecting the values as suggested by the bug line below. All other missile tool-tips are spot on.
     dd.power_mod                 = 1.4;
     dd.standardhealthpercentmin  = 0.1;
     dd.standardhealthpercentmax  = 0.16;
@@ -397,7 +457,7 @@ struct heatseeker_missiles_t : public missile_attack_t
     base_t( p, n )
   {
     // TODO
-    // rank_level_list = { ... 50 }
+    // rank_level_list = { ... 55 }
 
     check_talent( p -> talents.heatseeker_missiles -> rank() );
 
@@ -406,16 +466,20 @@ struct heatseeker_missiles_t : public missile_attack_t
     base_cost                    = 16;
     cooldown -> duration         = from_seconds( 15 );
     range                        = 30.0;
+    travel_speed                 = 2 * 9;
 
-    dd.power_mod                 = 0; // set in execute
-    dd.standardhealthpercentmin  = 0; // set in execute
-    dd.standardhealthpercentmax  = 0; // set in execute
+    dd.power_mod                 = 2.77;  // No longer set in execute - Looks like it's now just a standard 25% damage increase from the effect details.
+    dd.standardhealthpercentmin  = 0.257; // No longer set in execute - See above
+    dd.standardhealthpercentmax  = 0.297; // No longer set in execute - See above
 
     crit_bonus                  += 0.15 * p -> talents.target_tracking -> rank();
+    base_multiplier             += 0.02 * p -> talents.power_launcher -> rank();
   }
 
-  virtual void execute()
+  virtual void player_buff()
   {
+    missile_attack_t::player_buff();
+
     // TEST:
     // assuming damage is calculated on cast, not impact.
     // could be
@@ -423,43 +487,8 @@ struct heatseeker_missiles_t : public missile_attack_t
     // 2: damage on impact, so player changes during travel time will be included
     // 3: player stats on cast, target damage on impact
     // 3 would be the purest, but for simplicity going with 1. Unsure which the game does.
-    double mod = dd.power_mod;
-    switch ( targetdata() -> debuff_heat_signature -> stack() )
-    {
-      case 5:
-        dd.power_mod                 = 2.6;
-        dd.standardhealthpercentmin  = 0.21;
-        dd.standardhealthpercentmax  = 0.31;
-        break;
-      case 4:
-        dd.power_mod                 = 2.5;
-        dd.standardhealthpercentmin  = 0.202;
-        dd.standardhealthpercentmax  = 0.298;
-        break;
-      case 3:
-        dd.power_mod                 = 2.39;
-        dd.standardhealthpercentmin  = 0.193;
-        dd.standardhealthpercentmax  = 0.285;
-        break;
-      case 2:
-        dd.power_mod                 = 2.288;
-        dd.standardhealthpercentmin  = 0.185;
-        dd.standardhealthpercentmax  = 0.273;
-        break;
-      case 1:
-        dd.power_mod                 = 2.184;
-        dd.standardhealthpercentmin  = 0.176;
-        dd.standardhealthpercentmax  = 0.26;
-        break;
-      default:
-        dd.power_mod                 = 2.08;
-        dd.standardhealthpercentmin  = 0.168;
-        dd.standardhealthpercentmax  = 0.248;
-        break;
-    }
-    if ( mod != dd.power_mod )
-      set_base_min_max();
-    base_t::execute();
+    if ( targetdata() -> debuff_heat_signature -> check() )
+      player_multiplier += 0.25;
   }
 };
 
@@ -499,19 +528,21 @@ struct power_shot_t : public attack_t
     attack_t( n, p, range_policy, SCHOOL_ENERGY ),
     offhand_attack( 0 )
   {
-    rank_level_list = { 10, 13, 16, 22, 33, 45, 50 };
+    rank_level_list = { 10, 13, 16, 22, 33, 45, 50, 55 };
 
     parse_options( options_str );
 
-    base_cost                    = 16;
+    base_cost                    = 19;
     range                        = 30.0;
-    base_execute_time            = from_seconds( 2 - 0.5 * p -> talents.muzzle_fluting -> rank() );
-    weapon_multiplier            = 0.15;
+    base_execute_time            = from_seconds( 1.5 );
+    weapon_multiplier            = 0.12;
     weapon                       = &( player -> main_hand_weapon );
-    dd.power_mod                 = 1.71;
-    dd.standardhealthpercentmin  = 
-    dd.standardhealthpercentmax  = 0.171;
-    base_crit                   += ( p -> set_bonus.rakata_eliminators -> two_pc() ? 0.15 : 0 );
+    dd.power_mod                 = 1.67;  // Estimated since new val not in Torhead (was 1.71). Changind the ability level caused too much of a diffecence.
+    dd.standardhealthpercentmin  =        // As above (was 0.171). Tooltip min value was off by 1.8%, now spot on.
+    dd.standardhealthpercentmax  = 0.167; // As above (was 0.171). Tooltip max value was off by 1.5%, now spot on.
+
+    base_crit                   += (( p -> set_bonus.rakata_eliminators -> two_pc() || p -> set_bonus.underworld_eliminators -> two_pc() ) ? 0.15 : 0 );
+    base_multiplier             += 0.03 * p -> talents.mandalorian_iron_warheads -> rank();   // No need for this to be in player_buff()
 
     if ( is_offhand )
     {
@@ -531,13 +562,6 @@ struct power_shot_t : public attack_t
     }
   }
 
-  virtual void player_buff()
-  {
-    attack_t::player_buff();
-    if ( unsigned rank = p() -> talents.mandalorian_iron_warheads -> rank() )
-      player_multiplier += 0.03 * rank;
-  }
-
   virtual void execute()
   {
     attack_t::execute();
@@ -554,7 +578,7 @@ struct power_shot_t : public attack_t
 };
 
 // class_t::power_surge ===================================================================
-// TODO 120s cooldown. next ability with a cast time is instant.
+// TODO 120s cooldown reduced by Power Overrides. Next ability with a cast time is instant. 50%/100% for a second instant ability depending on
 
 // class_t::rapid_scan ====================================================================
 // class_t::supercharged_gas ==============================================================
@@ -566,19 +590,32 @@ struct tracer_missile_t : public missile_attack_t
     missile_attack_t( p, n )
   {
     // TODO
-    // rank_level_list = { ... 50 }
+    // rank_level_list = { ... 55 }
     check_talent( p -> talents.tracer_missile -> rank() );
 
     parse_options( options_str );
 
-    base_cost                    = 16;
-    base_execute_time            = from_seconds( 2 - 0.5 * p -> talents.muzzle_fluting -> rank() );
+    base_cost                    = 19;
+    base_execute_time            = from_seconds( 1.5 );
     range                        = 30.0;
-    travel_speed                 = 18.4; // XXX guess. how to convert theirs to ours?
-    dd.power_mod                 = 1.71;
-    dd.standardhealthpercentmin  = 0.131;
-    dd.standardhealthpercentmax  = 0.211;
-    base_crit                   += ( p -> set_bonus.rakata_eliminators -> two_pc() ? 0.15 : 0 );
+    travel_speed                 = 2.5 * 9; // XXX guess. how to convert theirs to ours? FIXED? It takes 1.33 seconds to travel the full 30m so multiply their value of 2.5 by 9 (actually 10 because of animation delay?)
+    dd.power_mod                 = 1.75;
+    dd.standardhealthpercentmin  = 0.125;
+    dd.standardhealthpercentmax  = 0.225;
+
+    base_crit                   += (( p -> set_bonus.rakata_eliminators -> two_pc() || p -> set_bonus.underworld_eliminators -> two_pc() ) ? 0.15 : 0 );
+    base_multiplier             += 0.02 * p -> talents.power_launcher -> rank();
+  }
+
+  virtual double cost() const
+  {
+    double c = missile_attack_t::cost();
+    class_t* p = cast();
+    int arsenal_rank = p -> talents.upgraded_arsenal -> rank();
+    if ( arsenal_rank && p -> buffs.high_velocity_gas_cylinder -> check() )
+      c -= 1 * arsenal_rank;
+
+    return c;
   }
 
   virtual void execute()
@@ -598,8 +635,7 @@ struct tracer_missile_t : public missile_attack_t
   {
     missile_attack_t::impact( t, impact_result, travel_dmg );
     if ( result_is_hit( impact_result ) )
-      targetdata() -> debuff_heat_signature
-        -> trigger( p() -> talents.light_em_up -> rank() ? 2 : 1 );
+      targetdata() -> debuff_heat_signature -> trigger();
   }
 };
 
@@ -621,7 +657,7 @@ struct rail_shot_t : public attack_t
   rail_shot_t( class_t* p, const std::string& n, const std::string& options_str) :
     attack_t( n, p, range_policy, SCHOOL_ENERGY )
   {
-    rank_level_list = { 9, 12, 15, 20, 31, 42, 50 };
+    rank_level_list = { 9, 12, 15, 20, 31, 42, 50, 55 };
 
     parse_options( options_str );
 
@@ -633,6 +669,8 @@ struct rail_shot_t : public attack_t
     dd.standardhealthpercentmax  =  0.19;
     weapon                       =  &( player -> main_hand_weapon );
     weapon_multiplier            =  0.27;
+
+    base_multiplier             += 0.02 * p -> talents.power_launcher -> rank();
   }
 
   virtual void player_buff()
@@ -649,14 +687,18 @@ struct rail_shot_t : public attack_t
     if ( p -> set_bonus.battlemaster_eliminators -> four_pc() )
       player_crit += 0.15;
 
+    if ( p -> set_bonus.underworld_eliminators -> four_pc() )
+      player_multiplier += 0.08;
+
   }
 
   virtual double cost() const
   {
     double c = attack_t::cost();
     class_t* p = cast();
-    if ( p -> talents.upgraded_arsenal -> rank() && p -> buffs.high_velocity_gas_cylinder -> check() )
-      c -= 8;
+    int arsenal_rank = p -> talents.upgraded_arsenal -> rank();
+    if ( arsenal_rank && p -> buffs.high_velocity_gas_cylinder -> check() )
+      c -= 2 * arsenal_rank;
 
     return c;
   }
@@ -667,11 +709,11 @@ struct rail_shot_t : public attack_t
     p() -> buffs.tracer_lock -> expire();
   }
 
-  bool ignore_thermal_sensor_override()
-  {
-    // XXX TODO i think this is only meant to be true if we have both  4pc and upgraded_arsenal and HVGS up
-    return true;
-  }
+//  bool ignore_thermal_sensor_override()
+//  {
+//    // XXX TODO: This will never be free now since you can only reduce Rail Shots cost to 2 heat.
+//    return true;
+//  }
 };
 
 // class_t::rapid_shots ===================================================================
@@ -691,7 +733,10 @@ struct rapid_shots_t : public attack_t
     range                       = 30.0;
     base_accuracy              -= 0.10;
     num_ticks                   = 5;
-    base_tick_time              = from_seconds( 0.3 );
+    base_tick_time              = from_seconds( 0.1 );     // Checked in combat log for varying alacrity values.
+    // For each alacrity value all 10 ticks occur on average within 400ms of each other making it 500ms adding on the initial tick delay.
+    // Having it set to 0.3 also caused the last tick to be cut off if another rapid shots was cast directly after with any alacrity. More if alacrity was high enough.
+    // This is because it is not 'channeled' or 'hasted_ticks' causing tick times to stay the same regardless of alacrity while the GCD is reduced.
     td.weapon                   = &( player -> main_hand_weapon );
     td.weapon_multiplier        = -0.8;
     td.power_mod                = 0.2;
@@ -731,7 +776,7 @@ struct thermal_sensor_override_t : public action_t
   {
     parse_options( options_str );
 
-    cooldown -> duration = from_seconds( 120 - ( 15 * p -> talents.power_overrides -> rank() ) );
+    cooldown -> duration = from_seconds( 120 );
     trigger_gcd = timespan_t::zero();
   }
 
@@ -753,7 +798,7 @@ struct unload_t : public attack_t
     attack_t( n, p, range_policy, SCHOOL_ENERGY ), offhand_attack( 0 ),
     benefit_from_barrage(false)
   {
-    rank_level_list = { 3, 6, 9, 12, 15, 21, 32, 44, 50 };
+    rank_level_list = { 3, 6, 9, 12, 15, 21, 32, 44, 50, 55 };
 
     parse_options( options_str );
 
@@ -763,13 +808,14 @@ struct unload_t : public attack_t
     channeled                   = true;
     num_ticks                   = 3;
     base_tick_time              = from_seconds( 1 );
-    base_multiplier            += 0.33 * p -> talents.riddle -> rank();
-    crit_bonus                 +=  0.15 * p -> talents.target_tracking -> rank();
     td.standardhealthpercentmin =
-      td.standardhealthpercentmax = 0.105;
+    td.standardhealthpercentmax = 0.11;
     td.weapon                   = &( player -> main_hand_weapon );
-    td.power_mod                = 1.05;
+    td.power_mod                = 1.1;
     td.weapon_multiplier        = -0.3;
+
+    base_multiplier            += 0.33 * p -> talents.riddle -> rank();
+    crit_bonus                 += 0.15 * p -> talents.target_tracking -> rank();
 
     if ( is_offhand )
     {
@@ -797,10 +843,12 @@ struct unload_t : public attack_t
   virtual void player_buff()
   {
     attack_t::player_buff();
-    if ( p() -> buffs.barrage -> up() )
+    class_t* p = cast();
+
+    if ( p -> buffs.barrage -> up() )
       player_multiplier += 0.25;
 
-    if ( unsigned rank = p() -> talents.advanced_targeting -> rank () )
+    if ( unsigned rank = p -> talents.advanced_targeting -> rank () )
       player_armor_penetration -= 0.1 * rank;
 
   }
@@ -814,10 +862,7 @@ struct unload_t : public attack_t
 
   virtual void execute()
   {
-    if ( p() -> buffs.barrage -> up() )
-      benefit_from_barrage = true;
-    else
-      benefit_from_barrage = false; // to be safe
+    benefit_from_barrage = p() -> buffs.barrage -> check();   // Up used in player buff
 
     attack_t::execute();
 
@@ -838,7 +883,7 @@ struct vent_heat_t : public action_t
 
     cooldown -> duration = from_seconds( 120.0 );
     num_ticks            = 2;
-    base_tick_time       = from_seconds( 3 );
+    base_tick_time       = from_seconds( 1.5 );
     trigger_gcd          = timespan_t::zero();
   }
 
@@ -849,7 +894,10 @@ struct vent_heat_t : public action_t
 
     p -> resource_gain( RESOURCE_HEAT, 34, p -> gains.vent_heat );
     if ( unsigned rank = p -> talents.improved_vents -> rank() )
+    {
+      p -> buffs.improved_vents -> trigger();
       p -> resource_gain( RESOURCE_HEAT, 8 * rank, p -> gains.improved_vents );
+    }
   }
 
   virtual void tick(dot_t* d)
@@ -875,6 +923,7 @@ struct vent_heat_t : public action_t
 {
     if ( type == BH_MERCENARY )
     {
+      if ( name == "electro_net"                ) return new electro_net_t                ( this, name, options_str );
       if ( name == "fusion_missile"             ) return new fusion_missile_t             ( this, name, options_str );
       if ( name == "heatseeker_missiles"        ) return new heatseeker_missiles_t        ( this, name, options_str );
       if ( name == "high_velocity_gas_cylinder" ) return new high_velocity_gas_cylinder_t ( this, name, options_str );
@@ -898,7 +947,10 @@ struct vent_heat_t : public action_t
 
 double class_t::alacrity() const
 {
-  return buffs.critical_reaction -> up() ? base_t::alacrity() + 0.05 : base_t::alacrity();
+  return  base_t::alacrity()
+          + (buffs.high_velocity_gas_cylinder -> up() ? 0.03 : 0)
+          + (buffs.critical_reaction -> up()          ? 0.03 : 0)
+          + (buffs.improved_vents -> up()             ? 0.1  : 0);
 }
 
 // class_t::armor_penetration ================================================================
@@ -907,8 +959,6 @@ double class_t::armor_penetration() const
 {
   return buffs.high_velocity_gas_cylinder -> up() ? base_t::armor_penetration() - 0.35 : base_t::armor_penetration();
 }
-
-
 
 // class_t::init_talents ==================================================================
 
@@ -924,12 +974,12 @@ void class_t::init_talents()
   // t2
   talents.empowered_scans                = find_talent( "Empowered Scans" );
   talents.surgical_precision_system      = find_talent( "Surgical Precision System" );
-  talents.supercharged_gas               = find_talent( "Supercharged Gas" );
+  talents.heat_damping                   = find_talent( "Heat Damping" );
   talents.critical_reaction              = find_talent( "Critical Reaction" );
   // t3
-  talents.heat_damping                   = find_talent( "Heat Damping" );
+  talents.kolto_pods                     = find_talent( "Kolto Pods" );
   talents.kolto_residue                  = find_talent( "Kolto Residue" );
-  talents.kolto_missile                  = find_talent( "Kolto Missile" );
+  talents.supercharged_gas               = find_talent( "Supercharged Gas" );
   talents.power_shield                   = find_talent( "Power Shield" );
   // t4
   talents.powered_insulators             = find_talent( "Powered Insulators" );
@@ -944,36 +994,41 @@ void class_t::init_talents()
   talents.warden                         = find_talent( "Warden" );
   talents.peacekeeper                    = find_talent( "Peacekeeper" );
   // t7
+  talents.kolto_jets                     = find_talent( "Kolto Jets" );
+  talents.bodyguard                      = find_talent( "Bodyguard" );
+  // t8
   talents.emergency_scan                 = find_talent( "Emergency Scan" );
 
   // Arsenal
   // t1
   talents.mandalorian_iron_warheads      = find_talent( "Mandalorian Iron Warheads" );
-  talents.integrated_systems             = find_talent( "Integrated Systems" );
+  talents.stabilizers                    = find_talent( "Stabilizers"            "Integrated Systems" );
   talents.ironsights                     = find_talent( "Ironsights" );
   // t2
-  talents.stabilizers                    = find_talent( "Stabilizers" );
-  talents.muzzle_fluting                 = find_talent( "Muzzle Fluting" );
+  talents.power_barrier                  = find_talent( "Power Barrier" );
   talents.upgraded_arsenal               = find_talent( "Upgraded Arsenal" );
   talents.custom_enviro_suit             = find_talent( "Custom Enviro Suit" );
   // t3
-  talents.power_barrier                  = find_talent( "Power Barrier" );
   talents.afterburners                   = find_talent( "Afterburners" );
   talents.tracer_missile                 = find_talent( "Tracer Missile" );
   talents.target_tracking                = find_talent( "Target Tracking" );
   // t4
   talents.jet_escape                     = find_talent( "Jet Escape" );
-  talents.light_em_up                    = find_talent( "Light 'Em Up" );
+  talents.tracer_lock                    = find_talent( "Tracer Lock" );
   talents.terminal_velocity              = find_talent( "Terminal Velocity" );
   // t5
   talents.pinning_fire                   = find_talent( "Pinning Fire" );
   talents.riddle                         = find_talent( "Riddle" );
-  talents.tracer_lock                    = find_talent( "Tracer Lock" );
-  talents.kolto_vents                    = find_talent( "Kolto Vents" );
+  talents.light_em_up                    = find_talent( "Light 'Em Up" );
+  talents.torque_boosters                = find_talent( "Torque Boosters" );
   // t6
   talents.barrage                        = find_talent( "Barrage" );
   talents.power_overrides                = find_talent( "Power Overrides" );
+  talents.decoy                          = find_talent( "Decoy" );
   // t7
+  talents.energy_rebounder               = find_talent( "Energy Rebounder" );
+  talents.power_launcher                 = find_talent( "Power Launcher" );
+  // t8
   talents.heatseeker_missiles            = find_talent( "Heatseeker Missiles" );
 
   // pyrotech
@@ -986,21 +1041,25 @@ void class_t::init_talents()
   talents.sweltering_heat                = find_talent( "Sweltering Heat" );
   talents.gyroscopic_alignment_jets      = find_talent( "Gyroscopic Alignment Jets" );
   // t3
-  talents.degauss                        = find_talent( "Degauss" );
+  talents.pyro_shield                    = find_talent( "Pyro Shield" );
   talents.superheated_rail               = find_talent( "Superheated Rail" );
   talents.incendiary_missile             = find_talent( "Incendiary Missile" );
   talents.infrared_sensors               = find_talent( "Infrared Sensors" );
   // t4
-  talents.rapid_venting                  = find_talent( "Rapid Venting" );
+  talents.suit_foe                       = find_talent( "Suit FOE" );
   talents.prototype_particle_accelerator = find_talent( "Prototype Particle Accelerator" );
+  talents.volatile_warhead               = find_talent( "Volatile Warhead" );
   // t5
-  talents.energy_rebounder               = find_talent( "Energy Rebounder" );
-  talents.rain_of_fire                   = find_talent( "Rain of Fire" );
   talents.firebug                        = find_talent( "Firebug" );
+  talents.rain_of_fire                   = find_talent( "Rain of Fire" );
   // t6
-  talents.automated_defenses             = find_talent( "Automated Defenses" );
+  talents.degauss                        = find_talent( "Degauss" );
   talents.burnout                        = find_talent( "Burnout" );
   // t7
+  talents.rapid_venting                  = find_talent( "Rapid Venting" );
+  talents.power_barrels                  = find_talent( "Power Barrels" );
+  talents.jet_rebounder                  = find_talent( "Jet Rebounder" );
+  // t8
   talents.thermal_detonator              = find_talent( "Thermal Detonator" );
 }
 
@@ -1014,8 +1073,9 @@ void class_t::init_base()
   distance = default_distance;
 
   attribute_multiplier_initial[ ATTR_AIM ] += 0.03 * talents.ironsights          -> rank();
-  set_base_alacrity( get_base_alacrity()   +  0.02 * talents.system_calibrations -> rank() );
-  set_base_crit( get_base_crit()           +  0.01 *  talents.hired_muscle       -> rank() );
+  set_base_accuracy( get_base_accuracy()   +  0.01 * talents.advanced_targeting  -> rank() );
+  set_base_alacrity( get_base_alacrity()   +  0.01 * talents.system_calibrations -> rank() );
+  set_base_crit( get_base_crit()           +  0.01 * talents.hired_muscle        -> rank() );
 }
 
 
@@ -1023,7 +1083,7 @@ void class_t::init_base()
 
 void class_t::init_benefits()
 {
-    base_t::init_benefits();
+  base_t::init_benefits();
 }
 
 // class_t::init_buffs ====================================================================
@@ -1035,13 +1095,12 @@ void class_t::init_buffs()
   // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-  buffs.barrage           = new buff_t( this, "barrage",               1, from_seconds( 15 ), from_seconds( 6 ), (talents.barrage -> rank() * 0.15) );
-  buffs.critical_reaction = new buff_t( this, "critical_reaction",     1, from_seconds( 6 ),  from_seconds( 0 ), (talents.critical_reaction -> rank() * 0.5) );
-
-  buffs.tracer_lock             = new buff_t( this, "tracer_lock",             5, from_seconds( 15 ) );
-  buffs.thermal_sensor_override = new buff_t( this, "thermal_sensor_override", 1, from_seconds( 15 ) );
-
+  buffs.barrage                    = new buff_t( this, "barrage",                    1, from_seconds( 15 ), from_seconds( 6 ), (talents.barrage -> rank() * 0.15) );
+  buffs.critical_reaction          = new buff_t( this, "critical_reaction",          1, from_seconds( 6 ),  from_seconds( 0 ), (talents.critical_reaction -> rank() * 0.5) );
+  buffs.tracer_lock                = new buff_t( this, "tracer_lock",                5, from_seconds( 15 ) );
+  buffs.thermal_sensor_override    = new buff_t( this, "thermal_sensor_override",    1, from_seconds( 15 ) );
   buffs.high_velocity_gas_cylinder = new buff_t( this, "high_velocity_gas_cylinder", 1 );
+  buffs.improved_vents             = new buff_t( this, "improved_vents",             1, from_seconds( 6 ) );
 
 }
 
@@ -1081,18 +1140,6 @@ void class_t::init_cooldowns()
   const char* unload = is_bh ? "unload"    : "???" ;
   cooldowns.unload = get_cooldown( unload );
 
-}
-
-// class_t::init_rng ======================================================================
-
-void class_t::init_rng()
-{
-  base_t::init_rng();
-  bool is_bh = ( type == BH_MERCENARY );
-  const char* terminal_velocity = is_bh ? "terminal_velocity" : "penetrate_armor" ;
-
-
-  rngs.terminal_velocity = get_rng( terminal_velocity );
 }
 
 // class_t::init_actions ==================================================================
@@ -1192,16 +1239,15 @@ role_type class_t::primary_role() const
 void class_t::regen( timespan_t periodicity )
 {
   base_t::regen( periodicity );
-  if ( unsigned rank = talents.terminal_velocity -> rank() )
+  unsigned rank = talents.terminal_velocity -> rank();
+
+  if (( rank ) && ( buffs.high_velocity_gas_cylinder -> check() ))
   {
     if ( next_terminal_velocity < sim -> current_time )
     {
       next_terminal_velocity += from_seconds( 6 );
-      if ( rngs.terminal_velocity -> roll( rank * 0.5 ) )
-      {
-        resource_gain( RESOURCE_HEAT, 8, gains.terminal_velocity );
-        procs.terminal_velocity -> occur();
-      }
+      resource_gain( RESOURCE_HEAT, 4 * rank, gains.terminal_velocity );
+      procs.terminal_velocity -> occur();
     }
   }
 }
@@ -1214,34 +1260,38 @@ void class_t::create_talents()
     // t1
     { "Improved Vents"    , 2 }, { "Med Tech"                 , 2 }, { "Hired Muscle"    , 3 },
     // t2
-    { "Empowered Scans"   , 2 }, { "Surgical Precision System", 2 }, { "Supercharged Gas", 1 }, { "Critical Reaction", 2 },
+    { "Empowered Scans"   , 2 }, { "Surgical Precision System", 2 }, { "Heat Damping"    , 1 }, { "Critical Reaction", 2 },
     // t3
-    { "Heat Damping"      , 1 }, { "Kolto Residue"            , 2 }, { "Kolto Missile"   , 1 }, { "Power Shield"     , 1 },
+    { "Kolto Pods"        , 1 }, { "Kolto Residue"            , 2 }, { "Supercharged Gas", 1 }, { "Power Shield"     , 1 },
     // t4
     { "Powered Insulators", 2 }, { "Critical Efficiency"      , 3 }, { "Protective Field", 2 },
     // t5
     { "Reactive Armor"    , 1 }, { "Proactive Medicine"       , 2 }, { "Kolto Shell"     , 1 }, { "Cure Mind"        , 1 },
     // t6
-    { "Warden"            , 3 }, { "Peacekeeper"            , 2 },
+    { "Warden"            , 3 }, { "Peacekeeper"              , 2 },
     // t7
+    { "Kolto Jets"        , 2 }, { "Bodyguard"                , 3 },
+    // t8
     { "Emergency Scan"    , 1 }
   };
   init_talent_tree( BH_MERCENARY_BODYGUARD, bodyguard_tree );
 
   static const talentinfo_t arsenal_tree[] = {
     // t1
-    { "Mandalorian Iron Warheads", 2 }, { "Integrated Systems", 2 }, { "Ironsights"       , 3 },
+    { "Mandalorian Iron Warheads", 2 }, { "Stabilizers"       , 2 }, { "Ironsights"        , 3 },
     // t2
-    { "Stabilizers"              , 3 }, { "Muzzle Fluting"    , 1 }, { "Upgraded Arsenal" , 1 }, { "Custom Enviro Suit", 2 },
+    { "Power Barrier"            , 2 }, { "Upgraded Arsenal"  , 3 }, { "Custom Enviro Suit", 2 },
     // t3
-    { "Power Barrier"            , 2 }, { "Afterburners"      , 2 }, { "Tracer Missile"   , 1 }, { "Target Tracking"   , 2 },
+    { "Afterburners"             , 2 }, { "Tracer Missile"    , 1 }, { "Target Tracking"   , 2 },
     // t4
-    { "Jet Escape"               , 2 }, { "Tracer Lock"       , 1 }, { "Terminal Velocity", 2 },
+    { "Jet Escape"               , 2 }, { "Tracer Lock"       , 1 }, { "Terminal Velocity" , 2 },
     // t5
-    { "Pinning Fire"             , 2 }, { "Riddle"            , 1 }, { "Light 'Em Up"     , 1 }, { "Kolto Vents"       , 1 },
+    { "Pinning Fire"             , 2 }, { "Riddle"            , 1 }, { "Light 'Em Up"      , 1 }, { "Torque Boosters"  , 1 },
     // t6
-    { "Barrage"                  , 3 }, { "Power Overrides"   , 2 },
+    { "Barrage"                  , 3 }, { "Power Overrides"   , 2 }, { "Decoy"             , 2 },
     // t7
+    { "Energy Rebounder"         , 2 }, { "Power Launcher"   , 3 },
+    // t8
     { "Heatseeker Missiles"      , 1 }
   };
   init_talent_tree( BH_MERCENARY_ARSENAL, arsenal_tree );
@@ -1252,14 +1302,16 @@ void class_t::create_talents()
     // t2
     { "Superheated Gas"   , 3 }, { "Sweltering Heat"               , 2 }, { "Gyroscopic Alignment Jets", 2 },
     // t3
-    { "Degauss"           , 2 }, { "Superheated Rail"              , 2 }, { "Incendiary Missile"       , 1 }, { "Infrared Sensors", 2 },
+    { "Pyro Shield"       , 2 }, { "Superheated Rail"              , 2 }, { "Incendiary Missile"       , 1 }, { "Infrared Sensors"   , 2 },
     // t4
-    { "Rapid Venting"     , 2 }, { "Prototype Particle Accelerator", 3 },
+    { "Suit FOE"          , 2 }, { "Prototype Particle Accelerator", 1 }, { "Volatile Warhead"         , 2 },
     // t5
-    { "Energy Rebounder"  , 2 }, { "Rain of Fire"                  , 3 }, { "Firebug"                  , 2 },
+    { "Firebug"           , 2 }, { "Rain of Fire"                  , 3 },
     // t6
-    { "Automated Defenses", 2 }, { "Burnout"                       , 3 },
+    { "Degauss"           , 2 }, { "Burnout"                       , 3 },
     // t7
+    { "Rapid Venting"     , 2 }, { "Power Barrels"                 , 1 }, { "Jet Rebounder"  , 2 },
+    // t8
     { "Thermal Detonator" , 1 }
   };
   init_talent_tree( BH_MERCENARY_PYROTECH, pyrotech_tree );

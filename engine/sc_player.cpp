@@ -422,6 +422,7 @@ player_t::player_t( sim_t*             s,
 
   // bountyhunter/trooper
   // ==== PvE sets
+  set_bonus.underworld_eliminators = get_set_bonus( "underworld_eliminators", "underworld_eliminators_/arkanian_eliminators_", "" );
   set_bonus.rakata_eliminators = get_set_bonus( "rakata_eliminators", "tionese_eliminators_/columi_eliminators_/rakata_eliminators_", "campaign_eliminators_/denova_eliminators_" );                             // MrRobot ItemSetID = 22
   set_bonus.rakata_combat_medics = get_set_bonus( "unimplemented_rakata_combat_medics", "tionese_combat_medics_/columi_combat_medics_/rakata_combat_medics_", "campaign_combat_medics_/denova_combat_medics_" ); // MrRobot ItemSetID = 18
   set_bonus.rakata_combat_techs = get_set_bonus( "unimplemented_rakata_combat_techs", "tionese_combat_techs_/columi_combat_techs_/rakata_combat_techs_", "campaign_combat_techs_/denova_combat_techs_" );        // MrRobot ItemSetID = 19
@@ -1553,17 +1554,13 @@ double player_t::armor_penetration_debuff() const
     if ( sim -> overrides.ignore_player_arpen_debuffs && ! b -> initial_source -> is_enemy() )
       continue;
     if ( b -> name_str.compare( 0, shatter_shot.length(), shatter_shot ) == 0
-        || b -> name_str.compare( 0, flourish_shot.length(), flourish_shot ) == 0 )
-    {
-      arpen += 0.2 * b -> stack();
-    }
-    if ( b -> name_str.compare( 0, sunder.length(), sunder ) == 0
-        || b -> name_str.compare( 0, heat_signature.length(), heat_signature ) == 0 )
-      arpen += 0.04 * b -> stack();
+         || b -> name_str.compare( 0, flourish_shot.length(), flourish_shot ) == 0
+         || b -> name_str.compare( 0, sunder.length(), sunder ) == 0
+         || b -> name_str.compare( 0, heat_signature.length(), heat_signature ) == 0 )
+      arpen += b -> check() ? 0.2 : 0;
   }
-  return
-    // TODO test: for now assuming 1.3 armor debuff changes means maximum of 20% armor reduction
-    arpen > 0.2 ? 0.8 : 1 - arpen;
+  // TODO test: for now assuming 1.3 armor debuff changes means maximum of 20% armor reduction
+  return arpen > 0.2 ? 0.8 : 1 - arpen;
 }
 
 // player_t::kinetic_damage_reduction =======================================

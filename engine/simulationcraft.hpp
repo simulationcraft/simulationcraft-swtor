@@ -2716,6 +2716,7 @@ public:
 
     // bountyhunter/trooper
     // ==== PvE sets
+    set_bonus_t* underworld_eliminators;
     set_bonus_t* rakata_eliminators;
     set_bonus_t* rakata_combat_medics;
     set_bonus_t* rakata_combat_techs;
