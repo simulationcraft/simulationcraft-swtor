@@ -42,26 +42,18 @@ std::string encode_tree( const std::vector<talent_t*>& tree )
   while( i >= 0 )
   {
     int first = 0;
-    if ( ( ( i % 2 ) != 0 ) ) // make sure we start the pairing process at the right point so that we reach i == 0 with the second talent
-    {
-      if ( tree[ i ] )
-        first = tree[ i ] -> rank();
-      --i;
-    }
-
-    int second = 0;
-    if ( i >= 0 && tree[ i ] )
-      second = tree[ i ] -> rank();
+    if ( tree[ i ] )
+      first = tree[ i ] -> rank();
     --i;
 
-    if ( first || second || first_talent_reached )
+    if ( first || first_talent_reached )
     {
       first_talent_reached = true;
-      result += encode_pair( first, second );
+      result += first + '0';
     }
   }
 
-  return result.size() > 0  ? result : "0";
+  return result.size() > 0 ? result : "0";
 }
 void parse_profession( js::node_t* profile,
                        const std::string& path,
@@ -833,8 +825,8 @@ player_t* download_player( sim_t*             sim,
 bool parse_talents( player_t& p, const std::string& talent_string )
 {
   // format: [tree_1]-[tree_2]-[tree_3] where each tree is a
-  // sum over all talents of [# of points] * 6 ^ [0-based talent index]
-  // in base 36.
+  // string of numbers which, from right to left, represent the
+  // rank of each skill from bottom left to right and on up.
 
   int encoding[ MAX_TALENT_SLOTS ];
   boost::fill( encoding, 0 );
@@ -849,26 +841,8 @@ bool parse_talents( player_t& p, const std::string& talent_string )
     size_t tree_size = p.talent_trees[ tree ].size();
     std::string::size_type pos = tree_strings[ tree ].length();
     size_t tree_count = 0;
-    while ( pos-- > 0 )
-    {
-      try
-      {
-        base36_t::pair_t point_pair = decoder( tree_strings[ tree ][ pos ] );
-        if ( ++tree_count > tree_size )
-          break;
-        encoding[ count++ ] = point_pair.second;
-        if ( ++tree_count > tree_size )
-          break;
-        encoding[ count++ ] = point_pair.first;
-      }
-
-      catch ( base36_t::bad_char& bc )
-      {
-        p.sim -> errorf( "Player %s has malformed mrrobot talent string. Translation for '%c' unknown.\n",
-                         p.name(), bc.c );
-        return false;
-      }
-    }
+    while (( pos-- > 0 ) && ( tree_count++ < tree_size ))
+      encoding[ count++ ] = tree_strings[ tree ][ pos ] - '0';
   }
 
   if ( p.sim -> debug )
