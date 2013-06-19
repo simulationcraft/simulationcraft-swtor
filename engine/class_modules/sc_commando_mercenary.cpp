@@ -1002,7 +1002,7 @@ void class_t::init_talents()
   // Arsenal
   // t1
   talents.mandalorian_iron_warheads      = find_talent( "Mandalorian Iron Warheads" );
-  talents.stabilizers                    = find_talent( "Stabilizers"            "Integrated Systems" );
+  talents.stabilizers                    = find_talent( "Stabilizers" );
   talents.ironsights                     = find_talent( "Ironsights" );
   // t2
   talents.power_barrier                  = find_talent( "Power Barrier" );
