@@ -726,10 +726,13 @@ const char* util_t::stim_type_string( stim_type stim )
   case stim_type::prototype_nano_infused_resolve: return "prototype_nano_infused_resolve";
   case stim_type::exotech_resolve: return "exotech_resolve";
   case stim_type::rakata_resolve:  return "rakata_resolve";
+  case stim_type::prototype_nano_infused_skill: return "prototype_nano_infused_skill";
   case stim_type::exotech_skill:   return "exotech_skill";
   case stim_type::rakata_skill:    return "rakata_skill";
+  case stim_type::prototype_nano_infused_reflex: return "prototype_nano_infused_reflex";
   case stim_type::exotech_reflex:  return "exotech_reflex";
   case stim_type::rakata_reflex:   return "rakata_reflex";
+  case stim_type::prototype_nano_infused_might: return "prototype_nano_infused_might";
   case stim_type::exotech_might:   return "exotech_might";
   case stim_type::rakata_might:    return "rakata_might";
   default:                         return "unknown";

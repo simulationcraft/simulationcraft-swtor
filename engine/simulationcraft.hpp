@@ -518,10 +518,13 @@ enum class stim_type
   prototype_nano_infused_resolve,
   exotech_resolve,
   rakata_resolve,
+  prototype_nano_infused_skill,
   exotech_skill,
   rakata_skill,
+  prototype_nano_infused_reflex,
   exotech_reflex,
   rakata_reflex,
+  prototype_nano_infused_might,
   exotech_might,
   rakata_might,
   max

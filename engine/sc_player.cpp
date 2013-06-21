@@ -5160,6 +5160,7 @@ void player_t::create_options()
     { "gear_expertise_rating",                OPT_FLT,  &( gear.expertise_rating                      ) },
     { "gear_alacrity_rating",                 OPT_FLT,  &( gear.alacrity_rating                       ) },
     { "gear_accuracy_rating",                 OPT_FLT,  &( gear.accuracy_rating                       ) },
+    { "gear_surge_rating",                    OPT_FLT,  &( gear.surge_rating                          ) },
     { "gear_crit_rating",                     OPT_FLT,  &( gear.crit_rating                           ) },
     { "gear_health",                          OPT_FLT,  &( gear.resource[ RESOURCE_HEALTH ]           ) },
     { "gear_mana",                            OPT_FLT,  &( gear.resource[ RESOURCE_MANA   ]           ) },

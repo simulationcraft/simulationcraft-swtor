@@ -71,6 +71,11 @@ struct use_stim_t : public action_t
       p -> stat_gain( STAT_POWER, 46, gain, this );
       break;
 
+    case stim_type::prototype_nano_infused_skill:
+      p -> stat_gain( STAT_CUNNING, 169, gain, this );
+      p -> stat_gain( STAT_POWER, 70, gain, this );
+      break;
+
     case stim_type::exotech_skill:
       p -> stat_gain( STAT_CUNNING, 128, gain, this );
       p -> stat_gain( STAT_POWER, 52, gain, this );
@@ -81,6 +86,11 @@ struct use_stim_t : public action_t
       p -> stat_gain( STAT_POWER, 46, gain, this );
       break;
 
+    case stim_type::prototype_nano_infused_reflex:
+      p -> stat_gain( STAT_AIM, 169, gain, this );
+      p -> stat_gain( STAT_POWER, 70, gain, this );
+      break;
+
     case stim_type::exotech_reflex:
       p -> stat_gain( STAT_AIM, 128, gain, this );
       p -> stat_gain( STAT_POWER, 52, gain, this );
@@ -89,6 +99,11 @@ struct use_stim_t : public action_t
     case stim_type::rakata_reflex:
       p -> stat_gain( STAT_AIM, 112, gain, this );
       p -> stat_gain( STAT_POWER, 46, gain, this );
+      break;
+
+    case stim_type::prototype_nano_infused_might:
+      p -> stat_gain( STAT_STRENGTH, 169, gain, this );
+      p -> stat_gain( STAT_POWER, 70, gain, this );
       break;
 
     case stim_type::exotech_might:
