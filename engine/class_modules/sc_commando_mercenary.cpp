@@ -892,11 +892,11 @@ struct vent_heat_t : public action_t
     action_t::execute();
     class_t* p = cast();
 
-    p -> resource_gain( RESOURCE_HEAT, 34, p -> gains.vent_heat );
+    p -> resource_loss( RESOURCE_HEAT, 34, p -> gains.vent_heat );
     if ( unsigned rank = p -> talents.improved_vents -> rank() )
     {
       p -> buffs.improved_vents -> trigger();
-      p -> resource_gain( RESOURCE_HEAT, 8 * rank, p -> gains.improved_vents );
+      p -> resource_loss( RESOURCE_HEAT, 8 * rank, p -> gains.improved_vents );
     }
   }
 
@@ -905,7 +905,7 @@ struct vent_heat_t : public action_t
     action_t::tick(d);
     class_t* p = cast();
 
-    p -> resource_gain( RESOURCE_HEAT, 8, p -> gains.vent_heat );
+    p -> resource_loss( RESOURCE_HEAT, 8, p -> gains.vent_heat );
   }
 };
 
@@ -1177,21 +1177,21 @@ void class_t::init_actions()
             action_list_str += "/snapshot_stats";
             // ARSENAL
             action_list_str += "/high_velocity_gas_cylinder,if=!buff.high_velocity_gas_cylinder.up";
-            action_list_str += "/vent_heat,if=heat<=40";
+            action_list_str += "/vent_heat,if=heat>=60";
             action_list_str += "/use_relics";
             action_list_str += "/power_potion";
             if ( set_bonus.rakata_eliminators -> four_pc() )
-              action_list_str += "/rail_shot,if=heat<83&buff.high_velocity_gas_cylinder.up";
-              action_list_str += "/rail_shot,if=heat>77&!buff.high_velocity_gas_cylinder.up";
-            action_list_str += "/thermal_sensor_override,if=heat<83";
+              action_list_str += "/rail_shot,if=heat>17&buff.high_velocity_gas_cylinder.up";
+              action_list_str += "/rail_shot,if=heat<23&!buff.high_velocity_gas_cylinder.up";
+            action_list_str += "/thermal_sensor_override,if=heat>17";
             action_list_str += "/fusion_missile,if=buff.thermal_sensor_override.up";
             if ( talents.heatseeker_missiles)
-              action_list_str += "/heatseeker_missiles,if=heat>77|cooldown.vent_heat.remains<10";
-            action_list_str += "/unload,if=heat>77|cooldown.vent_heat.remains<10";
+              action_list_str += "/heatseeker_missiles,if=heat<23|cooldown.vent_heat.remains<10";
+            action_list_str += "/unload,if=heat<23|cooldown.vent_heat.remains<10";
             if ( talents.tracer_missile )
-              action_list_str += "/tracer_missile,if=heat>77|cooldown.vent_heat.remains<10|(heat>=70&cooldown.heatseeker_missiles.remains>1.5&cooldown.unload.remains>1.5)";
+              action_list_str += "/tracer_missile,if=heat<23|cooldown.vent_heat.remains<10|(heat<=30&cooldown.heatseeker_missiles.remains>1.5&cooldown.unload.remains>1.5)";
             else
-              action_list_str += "/power_shot,if=heat>75";
+              action_list_str += "/power_shot,if=heat<25";
             action_list_str += "/rapid_shots";
 
             switch ( primary_tree() )
@@ -1246,7 +1246,7 @@ void class_t::regen( timespan_t periodicity )
     if ( next_terminal_velocity < sim -> current_time )
     {
       next_terminal_velocity += from_seconds( 6 );
-      resource_gain( RESOURCE_HEAT, 4 * rank, gains.terminal_velocity );
+      resource_loss( RESOURCE_HEAT, 4 * rank, gains.terminal_velocity );
       procs.terminal_velocity -> occur();
     }
   }

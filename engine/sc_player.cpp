@@ -364,6 +364,9 @@ player_t::player_t( sim_t*             s,
   boost::fill( resource_reduction, 0 );
   boost::fill( initial_resource_reduction, 0 );
 
+  boost::fill( resource_reverse, false );
+  resource_reverse[ RESOURCE_HEAT ] = true;
+
   boost::fill( resource_base, 0 );
   boost::fill( resource_initial, 0 );
   boost::fill( resource_max, 0 );
@@ -927,16 +930,16 @@ void player_t::init_resources( bool force )
 
   for ( resource_type i = RESOURCE_NONE; i < RESOURCE_MAX; i++ )
   {
-    if ( force || resource_initial[ i ] == 0 )
+    if ( force || resource_max[ i ] == 0)
     {
-      resource_initial[ i ] = resource_base[ i ] + gear.resource[ i ] + enchant.resource[ i ] + ( is_pet() ? 0 : sim -> enchant.resource[ i ] );
+      resource_max[ i ] = resource_base[ i ] + gear.resource[ i ] + enchant.resource[ i ] + ( is_pet() ? 0 : sim -> enchant.resource[ i ] );
 
       if ( i == RESOURCE_HEALTH )
       {
-        resource_initial[ i ] += floor( endurance() ) * health_per_endurance;
+        resource_max[ i ] += floor( endurance() ) * health_per_endurance;
       }
     }
-    resource_current[ i ] = resource_max[ i ] = resource_initial[ i ];
+    resource_current[ i ] = resource_initial[ i ] = resource_reverse[ i ] ? 0 : resource_max[ i ];
   }
 
   if ( timeline_resource[ 0 ].empty() )
@@ -2473,24 +2476,19 @@ double player_t::resource_loss( resource_type resource,
                                 gain_t*       source,
                                 action_t*     action )
 {
-  if ( amount == 0 )
+  if ( sleeping || amount == 0 )
     return 0;
 
-  if ( sleeping )
-    return 0;
-
-  if ( resource == primary_resource() )
-    primary_resource_cap -> update( false );
-
-  double actual_amount;
-
-  if ( infinite_resource[ resource ] == 0 || is_enemy() ) // FIXME: WTF special case for is_enemy()?
+  double actual_amount = amount;
+  if ( !infinite_resource[ resource ] )
     actual_amount = std::min( amount, resource_current[ resource ] );
-  else
-    actual_amount = amount;
 
   resource_current[ resource ] -= actual_amount;
   resource_lost   [ resource ] += actual_amount;
+
+  if ( resource == primary_resource() )
+    primary_resource_cap -> update( resource_used_amount( resource ) <= 0 );
+
 
   if ( source )
   {
@@ -2504,7 +2502,8 @@ double player_t::resource_loss( resource_type resource,
       assert ( 0 );
     }
 
-    source -> add( -actual_amount, actual_amount - amount );
+    int invert = resource_reverse[ resource ] ? -1 : 1;
+    source -> add( -actual_amount * invert, ( actual_amount - amount ) * invert);
   }
 
   action_callback_t::trigger( resource_loss_callbacks[ resource ], action, &actual_amount );
@@ -2526,16 +2525,16 @@ double player_t::resource_gain( resource_type resource,
   if ( sleeping )
     return 0;
 
-  double actual_amount = std::min( amount, resource_max[ resource ] - resource_current[ resource ] );
+  double actual_amount = amount;
+  if ( !infinite_resource[ resource ] )
+    actual_amount = std::min( amount, resource_max[ resource ] - resource_current[ resource ] );
 
-  if ( actual_amount > 0 )
-  {
-    resource_current[ resource ] += actual_amount;
-    resource_gained [ resource ] += actual_amount;
-  }
+  resource_current[ resource ] += actual_amount;
+  resource_gained [ resource ] += actual_amount;
 
-  if ( resource == primary_resource() && resource_max[ resource ] <= resource_current[ resource ] )
-    primary_resource_cap -> update( true );
+  if ( resource == primary_resource() )
+    primary_resource_cap -> update( resource_used_amount( resource ) <= 0 );
+
 
   if ( source )
   {
@@ -2549,7 +2548,8 @@ double player_t::resource_gain( resource_type resource,
       assert ( 0 );
     }
 
-    source -> add( actual_amount, amount - actual_amount );
+    int invert = resource_reverse[ resource ] ? -1 : 1;
+    source -> add( actual_amount * invert, ( amount - actual_amount ) * invert );
   }
 
   action_callback_t::trigger( resource_gain_callbacks[ resource ], action, &actual_amount );
@@ -2574,7 +2574,38 @@ bool player_t::resource_available( resource_type resource,
   if ( resource == RESOURCE_NONE || cost <= 0 || infinite_resource[ resource ] == 1 )
     return true;
 
+  if ( resource_reverse[ resource ] )
+      return resource_max[ resource ] - resource_current[ resource ] >= cost;
   return resource_current[ resource ] >= cost;
+}
+
+// player_t::resource_available =============================================
+
+double player_t::resource_available_amount( resource_type resource ) const
+{
+  if ( resource == RESOURCE_NONE )
+    return 0;
+
+  if (infinite_resource[ resource ] )
+      return resource_max[ resource ];
+
+  if ( resource_reverse[ resource ] )
+      return resource_max[ resource ] - resource_current[ resource ];
+
+  return resource_current[ resource ];
+}
+
+// player_t::resource_available =============================================
+
+double player_t::resource_used_amount( resource_type resource ) const
+{
+  if (( resource == RESOURCE_NONE ) || (infinite_resource[ resource ] ))
+    return 0;
+
+  if ( resource_reverse[ resource ] )
+      return resource_current[ resource ];
+
+  return resource_max[ resource ] - resource_current[ resource ];
 }
 
 // player_t::recalculate_resource_max =======================================
@@ -4652,17 +4683,13 @@ expr_ptr player_t::create_expression( action_t* a,
     else if ( splits[ 1 ] == "time_to_max" )
     {
       if ( rt == RESOURCE_FORCE )
-        return make_expr( name_str, [this]{ return ( resource_max[ RESOURCE_FORCE ] - resource_current[ RESOURCE_FORCE ] )
-                                                   / force_regen_per_second(); } );
+        return make_expr( name_str, [this]{ return ( resource_used_amount( RESOURCE_FORCE ) ) / force_regen_per_second(); } );
       if ( rt == RESOURCE_ENERGY )
-        return make_expr( name_str, [this]{ return ( resource_max[ RESOURCE_ENERGY ] - resource_current[ RESOURCE_ENERGY ] )
-                                                   / energy_regen_per_second(); } );
+        return make_expr( name_str, [this]{ return ( resource_used_amount( RESOURCE_ENERGY ) ) / energy_regen_per_second(); } );
       if ( rt == RESOURCE_AMMO )
-        return make_expr( name_str, [this]{ return ( resource_max[ RESOURCE_AMMO ] - resource_current[ RESOURCE_AMMO ] )
-                                                   / ammo_regen_per_second(); } );
-      if ( rt == RESOURCE_HEAT )
-        return make_expr( name_str, [this]{ return ( resource_max[ RESOURCE_HEAT ] - resource_current[ RESOURCE_HEAT ] )
-                                                   / heat_regen_per_second(); } );
+        return make_expr( name_str, [this]{ return ( resource_used_amount( RESOURCE_AMMO ) ) / ammo_regen_per_second(); } );
+      if ( rt == RESOURCE_HEAT )   // Will only be accurate for the first heat bracket.
+        return make_expr( name_str, [this]{ return ( resource_used_amount( RESOURCE_HEAT ) ) / heat_regen_per_second(); } );
     }
   }
 

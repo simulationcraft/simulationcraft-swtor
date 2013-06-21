@@ -1625,7 +1625,7 @@ static void print_html_player_resources( FILE* file, player_t* p )
   i = 1;
   for ( gain_t* g = p -> gain_list; g; g = g -> next )
   {
-    if ( g -> actual > 0 || g -> overflow > 0 )
+    if ( g -> actual + g -> overflow != 0 )
     {
       double overflow_pct = 100.0 * g -> overflow / ( g -> actual + g -> overflow );
       fprintf( file,
@@ -1660,7 +1660,7 @@ static void print_html_player_resources( FILE* file, player_t* p )
     bool first = true;
     for ( gain_t* g = pet -> gain_list; g; g = g -> next )
     {
-      if ( g -> actual > 0 || g -> overflow > 0 )
+      if ( g -> actual + g -> overflow != 0 )
       {
         if ( first )
         {

@@ -638,7 +638,7 @@ void print_xml_player_gains( xml_writer_t & writer, player_t * p )
 
   for ( gain_t* g = p -> gain_list; g; g = g -> next )
   {
-    if ( g -> actual > 0 || g -> overflow > 0 )
+    if ( g -> actual + g -> overflow != 0 )
     {
       writer.begin_tag( "gain" );
       writer.print_attribute( "name", g -> name() );

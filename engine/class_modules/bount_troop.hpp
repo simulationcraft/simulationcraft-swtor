@@ -59,8 +59,6 @@ public:
 
     distance = default_distance = 20;
 
-    // TODO heat needs to be reversed, so it dissipates and abilities generate it
-    // 
     resource_base[ RESOURCE_HEAT ] += 100;
   }
 
@@ -74,9 +72,9 @@ public:
 
   std::pair<double,gain_t*> heat_regen_bracket() const
   {
-    if ( resource_current[ RESOURCE_HEAT ] > 60 )
+    if ( resource_current[ RESOURCE_HEAT ] < 40 )
       return std::make_pair( 5 * alacrity(), heat_gains.high );
-    else if ( resource_current[ RESOURCE_HEAT ] > 20 )
+    else if ( resource_current[ RESOURCE_HEAT ] < 80 )
       return std::make_pair( 3 * alacrity(), heat_gains.medium );
     else
       return std::make_pair( 2 * alacrity(), heat_gains.low );
@@ -88,7 +86,7 @@ public:
   virtual void regen( timespan_t periodicity )
   {
     std::pair<double,gain_t*> r = heat_regen_bracket();
-    resource_gain( RESOURCE_HEAT, to_seconds( periodicity ) * r.first, r.second );
+    resource_loss( RESOURCE_HEAT, to_seconds( periodicity ) * r.first, r.second );
 
     player_t::regen( periodicity );
   }

@@ -2476,6 +2476,7 @@ public:
   weapon_t off_hand_weapon;
 
   // Resources
+  bool resource_reverse[ RESOURCE_MAX ];
   double resource_base   [ RESOURCE_MAX ];
   double resource_initial[ RESOURCE_MAX ];
   double resource_max    [ RESOURCE_MAX ];
@@ -2937,6 +2938,8 @@ public:
           double resource_loss( resource_type resource, double amount, gain_t* g=0, action_t* a=0 );
   virtual void   recalculate_resource_max( resource_type );
   virtual bool   resource_available( resource_type, double cost ) const;
+  virtual double resource_available_amount( resource_type ) const;
+  virtual double resource_used_amount( resource_type ) const;
   virtual resource_type primary_resource() const { return RESOURCE_NONE; }
   virtual role_type primary_role() const;
   virtual talent_tree_type primary_tree() const;
