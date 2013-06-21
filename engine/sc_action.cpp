@@ -1430,6 +1430,9 @@ expr_ptr action_t::create_expression( const std::string& name_str )
   if ( name_str == "cast_time" )
     return make_expr( name_str, [this](){ return to_seconds( execute_time() ); } );
 
+  if ( name_str == "cost" )
+    return make_expr( name_str, [this](){ return cost(); } );
+
   if ( name_str == "cooldown" )
     return make_expr( name_str, [this](){ return to_seconds( cooldown -> duration ); } );
 
