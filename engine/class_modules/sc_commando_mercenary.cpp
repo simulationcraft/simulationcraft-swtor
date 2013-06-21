@@ -1146,67 +1146,69 @@ void class_t::init_cooldowns()
 
 void class_t::init_actions()
 {
-    //=====================================================================================
-    //
-    //   Please Mirror all changes between Empire/Republic
-    //
-    //=====================================================================================
+  //=====================================================================================
+  //
+  //   Please Mirror all changes between Empire/Republic
+  //
+  //=====================================================================================
 
-    if ( action_list_str.empty() )
+  if ( action_list_str.empty() )
+  {
+    // Commando
+    if ( type == T_COMMANDO )
     {
-        // Commando
-        if ( type == T_COMMANDO )
-        {
-            action_list_str += "stim,type=exotech_reflex";
-            action_list_str += "/snapshot_stats";
+      action_list_str += "stim,type=prototype_nano_infused_reflex";
+      action_list_str += "/snapshot_stats";
 
-            switch ( primary_tree() )
-            {
+      switch ( primary_tree() )
+      {
+      default: break;
+      }
 
-
-            default: break;
-            }
-
-            action_list_default = 1;
-        }
-
-        // Mercenary
-        else
-        {
-            action_list_str += "stim,type=exotech_reflex";
-            action_list_str += "/snapshot_stats";
-            // ARSENAL
-            action_list_str += "/high_velocity_gas_cylinder,if=!buff.high_velocity_gas_cylinder.up";
-            action_list_str += "/vent_heat,if=heat>=60";
-            action_list_str += "/use_relics";
-            action_list_str += "/power_potion";
-            if ( set_bonus.rakata_eliminators -> four_pc() )
-              action_list_str += "/rail_shot,if=heat>17&buff.high_velocity_gas_cylinder.up";
-              action_list_str += "/rail_shot,if=heat<23&!buff.high_velocity_gas_cylinder.up";
-            action_list_str += "/thermal_sensor_override,if=heat>17";
-            action_list_str += "/fusion_missile,if=buff.thermal_sensor_override.up";
-            if ( talents.heatseeker_missiles)
-              action_list_str += "/heatseeker_missiles,if=heat<23|cooldown.vent_heat.remains<10";
-            action_list_str += "/unload,if=heat<23|cooldown.vent_heat.remains<10";
-            if ( talents.tracer_missile )
-              action_list_str += "/tracer_missile,if=heat<23|cooldown.vent_heat.remains<10|(heat<=30&cooldown.heatseeker_missiles.remains>1.5&cooldown.unload.remains>1.5)";
-            else
-              action_list_str += "/power_shot,if=heat<25";
-            action_list_str += "/rapid_shots";
-
-            switch ( primary_tree() )
-            {
-            case TREE_ARSENAL:
-
-              break;
-            default: break;
-            }
-
-            action_list_default = 1;
-        }
+      action_list_default = 1;
     }
 
-    base_t::init_actions();
+    // Mercenary
+    else
+    {
+      std::string heatseeker_condition = talents.heatseeker_missiles ? "&cooldown.heatseeker_missiles.remains>cast_time" : "";
+
+      action_list_str += "stim,type=prototype_nano_infused_reflex";
+      // ARSENAL
+      action_list_str += "/high_velocity_gas_cylinder,if=!buff.high_velocity_gas_cylinder.up";
+      action_list_str += "/snapshot_stats";     // After HVGS since it now adds a 3% alacritl buff as well.
+      action_list_str += "/sequence,name=debuff:tracer_missile:tracer_missile";  // Only one is required for debuff but two is higher DPS. Maybe to avoid sitting on 0 heat after electro net?
+      action_list_str += "/vent_heat,if=heat>=55";
+      action_list_str += "/use_relics";
+      action_list_str += "/power_potion";
+      action_list_str += "/thermal_sensor_override,if=heat>25";
+      action_list_str += "/fusion_missile,if=buff.thermal_sensor_override.up";
+      if ( set_bonus.rakata_eliminators -> four_pc() )
+        action_list_str += "/rail_shot";
+      if ( talents.heatseeker_missiles)
+        action_list_str += "/heatseeker_missiles,if=heat<40-cost|cooldown.vent_heat.remains<10";
+      action_list_str += "/electro_net,if=heat<40-cost|cooldown.vent_heat.remains<10";
+      if ( !set_bonus.rakata_eliminators -> four_pc() )
+        action_list_str += "/rail_shot,if=buff.tracer_lock.stack>4&heat<40-cost|cooldown.vent_heat.remains<10";
+      action_list_str += "/unload,if=heat<40-cost|cooldown.vent_heat.remains<10";
+      if ( talents.tracer_missile )
+        action_list_str += "/tracer_missile,if=heat<21|cooldown.vent_heat.remains<10|(heat<31" + heatseeker_condition + "&cooldown.unload.remains)";
+      else
+        action_list_str += "/power_shot,if=heat<21|cooldown.vent_heat.remains<10|(heat<31" + heatseeker_condition + "&cooldown.unload.remains)";
+      action_list_str += "/rapid_shots";
+
+      switch ( primary_tree() )
+      {
+      case TREE_ARSENAL:
+        break;
+      default: break;
+      }
+
+      action_list_default = 1;
+    }
+  }
+
+  base_t::init_actions();
 }
 
 // class_t::primary_role ===============================================================
