@@ -2695,12 +2695,19 @@ public:
   {
     // inquisitor/consular
     // ==== PvE sets
+    set_bonus_t* underworld_force_masters;
+    set_bonus_t* underworld_force_mystics;
+    set_bonus_t* underworld_stalkers;
+    set_bonus_t* underworld_survivors;
     set_bonus_t* rakata_force_masters;
     set_bonus_t* rakata_force_mystics;
     set_bonus_t* rakata_stalkers;
     set_bonus_t* rakata_survivors;
-    set_bonus_t* underworld_force_masters;
     // ==== PvP sets
+    set_bonus_t* partisan_force_masters;
+    set_bonus_t* partisan_force_mystics;
+    set_bonus_t* partisan_stalkers;
+    set_bonus_t* partisan_survivors;
     set_bonus_t* battlemaster_force_masters;
     set_bonus_t* battlemaster_force_mystics;
     set_bonus_t* battlemaster_stalkers;
@@ -2709,10 +2716,16 @@ public:
 
     // agent/smuggler
     // ==== PvE sets
+    set_bonus_t* underworld_enforcers;
+    set_bonus_t* underworld_field_medics;
+    set_bonus_t* underworld_field_techs;
     set_bonus_t* rakata_enforcers;
     set_bonus_t* rakata_field_medics;
     set_bonus_t* rakata_field_techs;
     // ==== PvP sets
+    set_bonus_t* partisan_enforcers;
+    set_bonus_t* partisan_field_medics;
+    set_bonus_t* partisan_field_techs;
     set_bonus_t* battlemaster_enforcers;
     set_bonus_t* battlemaster_field_medics;
     set_bonus_t* battlemaster_field_techs;
@@ -2721,11 +2734,18 @@ public:
     // bountyhunter/trooper
     // ==== PvE sets
     set_bonus_t* underworld_eliminators;
+    set_bonus_t* underworld_combat_medics;
+    set_bonus_t* underworld_combat_techs;
+    set_bonus_t* underworld_supercomandos;
     set_bonus_t* rakata_eliminators;
     set_bonus_t* rakata_combat_medics;
     set_bonus_t* rakata_combat_techs;
     set_bonus_t* rakata_supercomandos;
     // ==== PvP sets
+    set_bonus_t* partisan_eliminators;
+    set_bonus_t* partisan_combat_medics;
+    set_bonus_t* partisan_combat_techs;
+    set_bonus_t* partisan_supercomandos;
     set_bonus_t* battlemaster_eliminators;
     set_bonus_t* battlemaster_combat_medics;
     set_bonus_t* battlemaster_combat_techs;
@@ -2734,10 +2754,16 @@ public:
 
     // warrior/knight
     // ==== PvE sets
+    set_bonus_t* underworld_weaponmasters;
+    set_bonus_t* underworld_vindicators;
+    set_bonus_t* underworld_war_leaders;
     set_bonus_t* rakata_weaponmasters;
     set_bonus_t* rakata_vindicators;
     set_bonus_t* rakata_war_leaders;
     // ==== PvP sets
+    set_bonus_t* partisan_weaponmasters;
+    set_bonus_t* partisan_vindicators;
+    set_bonus_t* partisan_war_leaders;
     set_bonus_t* battlemaster_weaponmasters;
     set_bonus_t* battlemaster_vindicators;
     set_bonus_t* battlemaster_war_leaders;
