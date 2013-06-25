@@ -103,20 +103,26 @@ static const char* stat_color( int type )
 {
   switch ( type )
   {
-  case STAT_STRENGTH:                 return class_color( JEDI_SENTINEL );
-  case STAT_SURGE_RATING:             return class_color( BH_MERCENARY );
-  case STAT_WILLPOWER:                return class_color( T_COMMANDO );
-  case STAT_POWER:                    return class_color( JEDI_SAGE );
-  case STAT_FORCE_POWER:              return class_text_color( T_VANGUARD );
-  case STAT_TECH_POWER:               return class_text_color( T_VANGUARD );
-  case STAT_ACCURACY_RATING:          return class_color( SITH_JUGGERNAUT );
-  case STAT_CRIT_RATING:              return class_color( IA_OPERATIVE );
-  case STAT_ALACRITY_RATING:          return class_color( SITH_SORCERER );
+  case STAT_STRENGTH:                 return class_color( JEDI_SENTINEL );  // Red
+  case STAT_WILLPOWER:                return class_color( SITH_SORCERER );  // Purple (dark)
+  case STAT_AIM:                      return class_color( BH_MERCENARY );   // Orange
+  case STAT_CUNNING:                  return class_color( IA_OPERATIVE );   // Grey
+
+  case STAT_ACCURACY_RATING:          return color::white;
+  case STAT_CRIT_RATING:              return color::green;
+  case STAT_ALACRITY_RATING:          return color::yellow;
+  case STAT_SURGE_RATING:             return color::olive;
+  case STAT_POWER:                    return color::blue;
+  case STAT_FORCE_POWER:              return color::cyan;
+  case STAT_TECH_POWER:               return color::cyan;
+  case STAT_WEAPON_DMG:               return color::pink;
+  case STAT_WEAPON_OFFHAND_DMG:       return color::purple;
+
   case STAT_EXPERTISE_RATING:         return color::red;
   case STAT_DEFENSE_RATING:           return color::white;
   case STAT_SHIELD_RATING:            return color::white;
   case STAT_ABSORB_RATING:            return color::white;
-  default:                            return 0;
+  default:                            return color::white;
   }
 }
 

@@ -2030,6 +2030,8 @@ void sim_t::create_options()
     { "default_enchant_alacrity_rating",          OPT_FLT,  &( enchant.alacrity_rating             ) },
     { "default_enchant_accuracy_rating",          OPT_FLT,  &( enchant.accuracy_rating             ) },
     { "default_enchant_crit_rating",              OPT_FLT,  &( enchant.crit_rating                 ) },
+    { "default_enchant_weapon_dmg",               OPT_FLT,  &( enchant.weapon_dmg                  ) },
+    { "default_enchant_weapon_offhand_dmg",       OPT_FLT,  &( enchant.weapon_offhand_dmg          ) },
     { "default_enchant_health",                   OPT_FLT,  &( enchant.resource[ RESOURCE_HEALTH ] ) },
     { "default_enchant_mana",                     OPT_FLT,  &( enchant.resource[ RESOURCE_MANA   ] ) },
     { "default_enchant_rage",                     OPT_FLT,  &( enchant.resource[ RESOURCE_RAGE   ] ) },

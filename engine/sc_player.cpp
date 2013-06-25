@@ -811,7 +811,7 @@ void player_t::init_core()
   if ( sim -> debug ) log_t::output( sim, "Initializing core for player (%s)", name() );
 
   initial_stats.accuracy_rating = gear.accuracy_rating  + enchant.accuracy_rating   + ( is_pet() ? 0 : sim -> enchant.accuracy_rating );
-  initial_stats.crit_rating     = gear. crit_rating     + enchant. crit_rating      + ( is_pet() ? 0 : sim -> enchant. crit_rating );
+  initial_stats.crit_rating     = gear.crit_rating      + enchant.crit_rating       + ( is_pet() ? 0 : sim -> enchant.crit_rating );
   initial_stats.alacrity_rating = gear.alacrity_rating  + enchant.alacrity_rating   + ( is_pet() ? 0 : sim -> enchant.alacrity_rating );
   initial_stats.surge_rating    = gear.surge_rating     + enchant.surge_rating      + ( is_pet() ? 0 : sim -> enchant.surge_rating );
 
@@ -894,7 +894,9 @@ void player_t::init_attack()
 {
   if ( sim -> debug ) log_t::output( sim, "Initializing attack for player (%s)", name() );
 
-  initial_stats.expertise_rating = gear.expertise_rating + enchant.expertise_rating + ( is_pet() ? 0 : sim -> enchant.expertise_rating );
+  initial_stats.expertise_rating   = gear.expertise_rating + enchant.expertise_rating   + ( is_pet() ? 0 : sim -> enchant.expertise_rating );
+  initial_stats.weapon_dmg         =                         enchant.weapon_dmg         + ( is_pet() ? 0 : sim -> enchant.weapon_dmg );
+  initial_stats.weapon_offhand_dmg =                         enchant.weapon_offhand_dmg + ( is_pet() ? 0 : sim -> enchant.weapon_offhand_dmg );
 }
 
 // player_t::init_defense ===================================================
@@ -2145,11 +2147,11 @@ void player_t::reset()
 
   main_hand_weapon.buff_type  = 0;
   main_hand_weapon.buff_value = 0;
-  main_hand_weapon.bonus_dmg  = 0;
+  main_hand_weapon.bonus_dmg  = initial_stats.weapon_dmg;
 
   off_hand_weapon.buff_type  = 0;
   off_hand_weapon.buff_value = 0;
-  off_hand_weapon.bonus_dmg  = 0;
+  off_hand_weapon.bonus_dmg  = initial_stats.weapon_offhand_dmg;
 
   stim = stim_type::none;
 
@@ -4986,6 +4988,8 @@ void player_t::create_profile( std::ostream& os, save_type savetype )
     if ( enchant.alacrity_rating             != 0 )  os << "enchant_alacrity_rating="  << enchant.alacrity_rating << '\n';
     if ( enchant.accuracy_rating             != 0 )  os << "enchant_accuracy_rating="  << enchant.accuracy_rating << '\n';
     if ( enchant.crit_rating                 != 0 )  os << "enchant_crit_rating="      << enchant.crit_rating << '\n';
+    if ( enchant.weapon_dmg                  != 0 )  os << "enchant_weapon_dmg="       << enchant.weapon_dmg << '\n';
+    if ( enchant.weapon_offhand_dmg          != 0 )  os << "enchant_weapon_offhand_dmg=" << enchant.weapon_offhand_dmg << '\n';
     if ( enchant.resource[ RESOURCE_HEALTH ] != 0 )  os << "enchant_health="           << enchant.resource[ RESOURCE_HEALTH ] << '\n';
     if ( enchant.resource[ RESOURCE_MANA   ] != 0 )  os << "enchant_mana="             << enchant.resource[ RESOURCE_MANA   ] << '\n';
     if ( enchant.resource[ RESOURCE_RAGE   ] != 0 )  os << "enchant_rage="             << enchant.resource[ RESOURCE_RAGE   ] << '\n';
@@ -5236,6 +5240,8 @@ void player_t::create_options()
     { "enchant_alacrity_rating",              OPT_FLT,  &( enchant.alacrity_rating                    ) },
     { "enchant_accuracy_rating",              OPT_FLT,  &( enchant.accuracy_rating                    ) },
     { "enchant_crit_rating",                  OPT_FLT,  &( enchant.crit_rating                        ) },
+    { "enchant_weapon_dmg",                   OPT_FLT,  &( enchant.weapon_dmg                         ) },
+    { "enchant_weapon_offhand_dmg",           OPT_FLT,  &( enchant.weapon_offhand_dmg                 ) },
     { "enchant_health",                       OPT_FLT,  &( enchant.resource[ RESOURCE_HEALTH ]        ) },
     { "enchant_mana",                         OPT_FLT,  &( enchant.resource[ RESOURCE_MANA   ]        ) },
     { "enchant_rage",                         OPT_FLT,  &( enchant.resource[ RESOURCE_RAGE   ]        ) },

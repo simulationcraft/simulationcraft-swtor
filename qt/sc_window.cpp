@@ -100,17 +100,19 @@ static OptionEntry* getPlotOptions()
 {
   static OptionEntry options[] =
   {
-    { "Plot DPS per Strength",            "str",        "Generate DPS curve for Strength"         },
-    { "Plot DPS per Willpower",           "willpower",  "Generate DPS curve for Willpower"        },
-    { "Plot DPS per Accuracy Rating",     "acc",        "Generate DPS curve for Accuracy Rating"  },
-    { "Plot DPS per Crit Rating",         "crit",       "Generate DPS curve for Crit Rating"      },
-    { "Plot DPS per Alacrity Rating",     "alacrity",   "Generate DPS curve for Alacrity Rating"  },
-    { "Plot DPS per Surge Rating",        "surge",      "Generate DPS curve for Surge Rating"     },
-    { "Plot DPS per Power",               "power",      "Generate DPS curve for Power"            },
-    { "Plot DPS per Force Power",         "forcepower", "Generate DPS curve for Force Power"      },
-    { "Plot DPS per Tech Power",          "techpower",  "Generate DPS curve for Tech Power"       },
-    { "Plot DPS per Weapon Damage",       "wdmg",       "Generate DPS curve for Weapon Damage"    },
-    { "Plot DPS per Off-hand Weapon Damage",       "wohdmg",       "Generate DPS curve for Off-hand Weapon Damage"   },
+    { "Plot DPS per Strength",               "str",        "Generate DPS curve for Strength"         },
+    { "Plot DPS per Willpower",              "willpower",  "Generate DPS curve for Willpower"        },
+    { "Plot DPS per Aim",                    "aim",        "Generate DPS curve for Aim"              },
+    { "Plot DPS per Cunning",                "cunning",    "Generate DPS curve for Cunning"          },
+    { "Plot DPS per Accuracy Rating",        "acc",        "Generate DPS curve for Accuracy Rating"  },
+    { "Plot DPS per Crit Rating",            "crit",       "Generate DPS curve for Crit Rating"      },
+    { "Plot DPS per Alacrity Rating",        "alacrity",   "Generate DPS curve for Alacrity Rating"  },
+    { "Plot DPS per Surge Rating",           "surge",      "Generate DPS curve for Surge Rating"     },
+    { "Plot DPS per Power",                  "power",      "Generate DPS curve for Power"            },
+    { "Plot DPS per Force Power",            "forcepower", "Generate DPS curve for Force Power"      },
+    { "Plot DPS per Tech Power",             "techpower",  "Generate DPS curve for Tech Power"       },
+    { "Plot DPS per Weapon Damage",          "wdmg",       "Generate DPS curve for Weapon Damage"    },
+    { "Plot DPS per Off-hand Weapon Damage", "wohdmg",     "Generate DPS curve for Off-hand Weapon Damage"   },
     { NULL, NULL, NULL }
   };
   return options;
