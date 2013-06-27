@@ -1334,9 +1334,11 @@ const char* chart_t::reforge_dps( std::string& s,
   if ( num_stats == 2 )
   {
     int range = p -> sim -> reforge_plot -> reforge_plot_amount;
+    int step = p -> sim -> reforge_plot -> reforge_plot_step;
     int num_points = ( int ) pd.size();
     const auto& stat_indices = p -> sim -> reforge_plot -> reforge_plot_stat_indices;
-    const reforge_plot_data_t& baseline = pd[ num_points / 2 ][ 2 ];
+//    const reforge_plot_data_t& baseline = pd[ num_points / 2 ][ 2 ];
+    const reforge_plot_data_t baseline = { p -> dps.mean, p -> dps_error };
     double min_delta = baseline.value - ( min_dps - baseline.error / 2 );
     double max_delta = ( max_dps + baseline.error / 2 ) - baseline.value;
     double max_ydelta = std::max( min_delta, max_delta );
@@ -1356,18 +1358,21 @@ const char* chart_t::reforge_dps( std::string& s,
       s += "&amp;";
     }
 
-    // X series
-    s += "chd=t2:";
-    for ( int i=0; i < num_points; i++ )
-    {
-      snprintf( buffer, sizeof( buffer ), "%.0f", pd[ i ][ 0 ].value );
-      s += buffer;
-      if ( i < num_points - 1 )
-        s+= ",";
-    }
+    // Fill gaps at the start of each series with null values. Error bars don't line up with main graph otherwise.
+    std::string start_null_values = "";
+    for (int i = pd[ 0 ][ 0 ].value; i > -range; i -= step)
+      start_null_values += "_,";
+
+    // Fill gaps at the end of each series with null values. Error bars don't line up with main graph otherwise.
+    std::string end_null_values = "";
+    for (int i = pd[ num_points-1 ][ 0 ].value; i < range; i += step)
+      end_null_values += ",_";
+
+    // Series
+    s += "chd=t2:_|";
 
     // Y series
-    s += "|";
+    s += start_null_values;
     for ( int i=0; i < num_points; i++ )
     {
       snprintf( buffer, sizeof( buffer ), "%.0f", pd[ i ][ 2 ].value );
@@ -1375,9 +1380,11 @@ const char* chart_t::reforge_dps( std::string& s,
       if ( i < num_points - 1 )
         s+= ",";
     }
+    s += end_null_values;
 
     // Min Y series
-    s += "|-1|";
+    s += "|_|";
+    s += start_null_values;
     for ( int i=0; i < num_points; i++ )
     {
       double v = pd[ i ][ 2 ].value - pd[ i ][ 2 ].error / 2;
@@ -1386,9 +1393,11 @@ const char* chart_t::reforge_dps( std::string& s,
       if ( i < num_points - 1 )
         s+= ",";
     }
+    s += end_null_values;
 
     // Max Y series
-    s += "|-1|";
+    s += "|_|";
+    s += start_null_values;
     for ( int i=0; i < num_points; i++ )
     {
       double v = pd[ i ][ 2 ].value + pd[ i ][ 2 ].error / 2;
@@ -1397,6 +1406,7 @@ const char* chart_t::reforge_dps( std::string& s,
       if ( i < num_points - 1 )
         s+= ",";
     }
+    s += end_null_values;
 
     s += "&amp;";
 
