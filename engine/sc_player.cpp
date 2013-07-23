@@ -400,10 +400,10 @@ player_t::player_t( sim_t*             s,
 
   // inquisitors
   // ==== PvE sets
-  set_bonus.underworld_force_masters = get_set_bonus( "underworld_force_masters", "underworld_force_masters_/arkanian_force_masters_", "" );   // MrRobot ItemSetID = 52
-  set_bonus.underworld_force_mystics = get_set_bonus( "underworld_force_mystics", "underworld_force_mystics_/arkanian_force_mystics_", "" );   // MrRobot ItemSetID = 30
-  set_bonus.underworld_stalkers = get_set_bonus( "underworld_stalkers", "underworld_stalkers_/arkanian_stalkers_", "" );                       // MrRobot ItemSetID = 35
-  set_bonus.underworld_survivors = get_set_bonus( "underworld_survivors", "underworld_survivors_/arkanian_survivors_", "" );                   // MrRobot ItemSetID = 38
+  set_bonus.underworld_force_masters = get_set_bonus( "underworld_force_masters", "kell_dragon_force_masters_/underworld_force_masters_/arkanian_force_masters_", "" );   // MrRobot ItemSetID = 52
+  set_bonus.underworld_force_mystics = get_set_bonus( "underworld_force_mystics", "kell_dragon_force_mystics_/underworld_force_mystics_/arkanian_force_mystics_", "" );   // MrRobot ItemSetID = 30
+  set_bonus.underworld_stalkers = get_set_bonus( "underworld_stalkers", "kell_dragon_stalkers_/underworld_stalkers_/arkanian_stalkers_", "" );                       // MrRobot ItemSetID = 35
+  set_bonus.underworld_survivors = get_set_bonus( "underworld_survivors", "kell_dragon_survivors_/underworld_survivors_/arkanian_survivors_", "" );                   // MrRobot ItemSetID = 38
   set_bonus.rakata_force_masters = get_set_bonus( "rakata_force_masters", "tionese_force_masters_/columi_force_masters_/rakata_force_masters_/campaign_force_masters_/dread_guard_force_masters_", "" ); // MrRobot ItemSetID = 24
   set_bonus.rakata_force_mystics = get_set_bonus( "rakata_force_mystics", "tionese_force_mystics_/columi_force_mystics_/rakata_force_mystics_/campaign_force_mystics_/dread_guard_force_mystics_", "" ); // MrRobot ItemSetID = 2
   set_bonus.rakata_stalkers = get_set_bonus( "rakata_stalkers", "tionese_stalkers_/columi_stalkers_/rakata_stalkers_/campaign_stalkers_/dread_guard_stalkers_", "" );                                    // MrRobot ItemSetID = 7
@@ -421,9 +421,9 @@ player_t::player_t( sim_t*             s,
 
   // agent/smuggler
   // ==== PvE sets
-  set_bonus.underworld_enforcers = get_set_bonus( "underworld_enforcers", "underworld_enforcers_/arkanian_enforcers_", "" );                   // MrRobot ItemSetID = 42
-  set_bonus.underworld_field_medics = get_set_bonus( "underworld_field_medics", "underworld_field_medics_/arkanian_field_medics_", "" );       // MrRobot ItemSetID = 32
-  set_bonus.underworld_field_techs = get_set_bonus( "underworld_field_techs", "underworld_field_techs_/arkanian_field_techs_/underworld_professionals_/arkanian_professionals_", "" ); // MrRobot ItemSetID = 45 (same as professionals)
+  set_bonus.underworld_enforcers = get_set_bonus( "underworld_enforcers", "kell_dragon_enforcers_/underworld_enforcers_/arkanian_enforcers_", "" );                   // MrRobot ItemSetID = 42
+  set_bonus.underworld_field_medics = get_set_bonus( "underworld_field_medics", "kell_dragon_field_medics_/underworld_field_medics_/arkanian_field_medics_", "" );       // MrRobot ItemSetID = 32
+  set_bonus.underworld_field_techs = get_set_bonus( "underworld_field_techs", "kell_dragon_field_techs_/underworld_field_techs_/arkanian_field_techs_/kell_dragon_professionals_/underworld_professionals_/arkanian_professionals_", "" ); // MrRobot ItemSetID = 45 (same as professionals)
   set_bonus.rakata_enforcers = get_set_bonus( "rakata_enforcers", "tionese_enforcers_/columi_enforcers_/rakata_enforcers_/campaign_enforcers_/dread_guard_enforcers_", "" );                      // MrRobot ItemSetID = 14
   set_bonus.rakata_field_medics = get_set_bonus( "rakata_field_medics", "tionese_field_medics_/columi_field_medics_/rakata_field_medics_/campaign_field_medics_/dread_guard_field_medics_", "" ); // MrRobot ItemSetID = 4
   set_bonus.rakata_field_techs = get_set_bonus( "rakata_field_techs", "tionese_field_techs_/columi_field_techs_/rakata_field_techs_/campaign_field_techs_/dread_guard_field_techs_", "" );        // MrRobot ItemSetID = 17
@@ -438,10 +438,10 @@ player_t::player_t( sim_t*             s,
 
   // bountyhunter/trooper
   // ==== PvE sets
-  set_bonus.underworld_eliminators = get_set_bonus( "underworld_eliminators", "underworld_eliminators_/arkanian_eliminators_", "" );           // MrRobot ItemSetID = 50
-  set_bonus.underworld_combat_medics = get_set_bonus( "underworld_combat_medics", "underworld_combat_medics_/arkanian_combat_medics_", "" );   // MrRobot ItemSetID = 46
-  set_bonus.underworld_combat_techs = get_set_bonus( "underworld_combat_techs", "underworld_combat_techs_/arkanian_combat_techs_", "" );       // MrRobot ItemSetID = 47
-  set_bonus.underworld_supercomandos = get_set_bonus( "underworld_supercomandos", "underworld_supercomandos_/arkanian_supercomandos_", "" );   // MrRobot ItemSetID = 44
+  set_bonus.underworld_eliminators = get_set_bonus( "underworld_eliminators", "kell_dragon_eliminators_/underworld_eliminators_/arkanian_eliminators_", "" );           // MrRobot ItemSetID = 50
+  set_bonus.underworld_combat_medics = get_set_bonus( "underworld_combat_medics", "kell_dragon_combat_medics_/underworld_combat_medics_/arkanian_combat_medics_", "" );   // MrRobot ItemSetID = 46
+  set_bonus.underworld_combat_techs = get_set_bonus( "underworld_combat_techs", "kell_dragon_combat_techs_/underworld_combat_techs_/arkanian_combat_techs_", "" );       // MrRobot ItemSetID = 47
+  set_bonus.underworld_supercomandos = get_set_bonus( "underworld_supercomandos", "kell_dragon_supercomandos_/underworld_supercomandos_/arkanian_supercomandos_", "" );   // MrRobot ItemSetID = 44
   set_bonus.rakata_eliminators = get_set_bonus( "rakata_eliminators", "tionese_eliminators_/columi_eliminators_/rakata_eliminators_/campaign_eliminators_/dread_guard_eliminators_", "" );                              // MrRobot ItemSetID = 22
   set_bonus.rakata_combat_medics = get_set_bonus( "unimplemented_rakata_combat_medics", "tionese_combat_medics_/columi_combat_medics_/rakata_combat_medics_/campaign_combat_medics_/dread_guard_combat_medics_", ""  ); // MrRobot ItemSetID = 18
   set_bonus.rakata_combat_techs = get_set_bonus( "unimplemented_rakata_combat_techs", "tionese_combat_techs_/columi_combat_techs_/rakata_combat_techs_/campaign_combat_techs_/dread_guard_combat_techs_", ""  );        // MrRobot ItemSetID = 19
@@ -459,9 +459,9 @@ player_t::player_t( sim_t*             s,
 
   // warrior/knight
   // ==== PvE sets
-  set_bonus.underworld_weaponmasters = get_set_bonus( "underworld_weaponmasters", "underworld_weaponmasters_/arkanian_weaponmasters_/underworld_challengers_/arkanian_challengers_", "" );  // MrRobot ItemSetID = 33  (Same as challengers)
-  set_bonus.underworld_vindicators = get_set_bonus( "underworld_vindicators", "underworld_vindicators_/arkanian_vindicators_", "" );          // MrRobot ItemSetID = 43
-  set_bonus.underworld_war_leaders = get_set_bonus( "underworld_war_leaders", "underworld_war_leaders_/arkanian_war_leaders_", "" );          // MrRobot ItemSetID = 41
+  set_bonus.underworld_weaponmasters = get_set_bonus( "underworld_weaponmasters", "kell_dragon_weaponmasters_/underworld_weaponmasters_/arkanian_weaponmasters_/kell_dragon_challengers_/underworld_challengers_/arkanian_challengers_", "" );  // MrRobot ItemSetID = 33  (Same as challengers)
+  set_bonus.underworld_vindicators = get_set_bonus( "underworld_vindicators", "kell_dragon_vindicators_/underworld_vindicators_/arkanian_vindicators_", "" );          // MrRobot ItemSetID = 43
+  set_bonus.underworld_war_leaders = get_set_bonus( "underworld_war_leaders", "kell_dragon_war_leaders_/underworld_war_leaders_/arkanian_war_leaders_", "" );          // MrRobot ItemSetID = 41
   set_bonus.rakata_weaponmasters = get_set_bonus( "unimplemented_rakata_weaponmasterss", "tionese_weaponmasters_/columi_weaponmasters_/rakata_weaponmasters_/campaign_weaponmasters_/dread_guard_weaponmasters_", "" ); // MrRobot ItemSetID = 5
   set_bonus.rakata_vindicators = get_set_bonus( "unimplemented_rakata_vindicators", "tionese_vindicators_/columi_vindicators_/rakata_vindicators_/campaign_vindicators_/dread_guard_vindicators_", "" );                // MrRobot ItemSetID = 15
   set_bonus.rakata_war_leaders = get_set_bonus( "unimplemented_rakata_war_leaders", "tionese_war_leaders_/columi_war_leaders_/rakata_war_leaders_/campaign_war_leaders_/dread_guard_war_leaders_", "" );                // MrRobot ItemSetID = 13
@@ -4223,7 +4223,7 @@ struct base_use_item_t : public action_t
       else if ( e.school )
       {
         trigger = unique_gear_t::register_discharge_proc( e.trigger_type, e.trigger_mask, use_name, player,
-                                                          e.max_stacks, e.school, e.discharge_amount, e.discharge_scaling,
+                                                          e.max_stacks, e.school, e.policy, e.discharge_amount, e.discharge_scaling,
                                                           e.proc_chance, timespan_t::zero()/*cd*/, e.no_crit, e.no_player_benefits, e.no_debuffs );
       }
 

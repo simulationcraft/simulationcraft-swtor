@@ -2242,6 +2242,7 @@ struct item_t
     int64_t trigger_mask;
     stat_type stat;
     school_type school;
+    attack_policy_t policy;
     int max_stacks;
     double stat_amount, discharge_amount, discharge_scaling;
     double proc_chance;
@@ -2254,7 +2255,7 @@ struct item_t
     bool chance_to_discharge;
     bool reverse;
     special_effect_t() :
-      trigger_type( 0 ), trigger_mask( 0 ), stat( STAT_NONE ), school( SCHOOL_NONE ),
+      trigger_type( 0 ), trigger_mask( 0 ), stat( STAT_NONE ), school( SCHOOL_NONE ), policy( NULL ),
       max_stacks( 0 ), stat_amount( 0 ), discharge_amount( 0 ), discharge_scaling( 0 ),
       proc_chance( 0 ), duration( timespan_t::zero() ), cooldown( timespan_t::zero() ),
       tick( timespan_t::zero() ), cost_reduction( false ), no_crit( false ),
@@ -3779,18 +3780,18 @@ struct unique_gear_t
                                                           bool refreshes=false, bool reverse=false, rng_type=RNG_DEFAULT );
 
   static action_callback_t* register_discharge_proc( int type, int64_t mask, const std::string& name, player_t*,
-                                                     int max_stacks, school_type school, double amount, double scaling,
+                                                     int max_stacks, school_type school, attack_policy_t policy, double amount, double scaling,
                                                      double proc_chance, timespan_t cooldown, bool no_crits, bool no_buffs, bool no_debuffs,
                                                      rng_type=RNG_DEFAULT );
 
   static action_callback_t* register_chance_discharge_proc( int type, int64_t mask, const std::string& name, player_t*,
-                                                            int max_stacks, school_type school, double amount, double scaling,
+                                                            int max_stacks, school_type school, attack_policy_t policy, double amount, double scaling,
                                                             double proc_chance, timespan_t cooldown, bool no_crits, bool no_buffs, bool no_debuffs,
                                                             rng_type=RNG_DEFAULT );
 
   static action_callback_t* register_stat_discharge_proc( int type, int64_t mask, const std::string& name, player_t*,
                                                           stat_type stat, int max_stacks, double stat_amount,
-                                                          school_type school, double discharge_amount, double discharge_scaling,
+                                                          school_type school, attack_policy_t policy, double discharge_amount, double discharge_scaling,
                                                           double proc_chance, timespan_t duration, timespan_t cooldown, bool no_crits, bool no_buffs,
                                                           bool no_debuffs );
 

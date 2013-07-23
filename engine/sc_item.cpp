@@ -652,6 +652,22 @@ bool item_t::decode_special( special_effect_t& effect,
       effect.stat = s;
       effect.stat_amount = t.value;
     }
+    else if ( t.name == "tech" )
+    {
+      effect.policy = action_t::tech_policy;
+    }
+    else if ( t.name == "force" )
+    {
+      effect.policy = action_t::force_policy;
+    }
+    else if ( t.name == "range" )
+    {
+      effect.policy = action_t::range_policy;
+    }
+    else if ( t.name == "melee" )
+    {
+      effect.policy = action_t::melee_policy;
+    }
     else if ( t.name == "stacks" || t.name == "stack" )
     {
       effect.max_stacks = ( int ) t.value;
