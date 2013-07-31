@@ -906,7 +906,7 @@ bool unique_gear_t::get_equip_encoding( std::string&       encoding,
   else if ( name == "energy_surge_device"                           ) e = "ondamage_224Energy_30%_4.5cd";
   else if ( name == "dark_energy_surge"                             ) e = "ondamage_168Internal_30%_4.5cd";
   else if ( name == "lightning_pillar"                              ) e = "ondamage_208Energy_30%_4.5cd";
-  else if ( name == "gravity_wave"                                  ) e = "Ondamage_208Kinetic_30%_4.5cd";
+  else if ( name == "gravity_wave"                                  ) e = "ondamage_208Kinetic_30%_4.5cd";
   else if ( name == "corrosive_injection_kit"                       ) e = "ondamage_156Internal_30%_4.5cd";
   else if ( name == "burning_force_relic"                           ) e = "ondamage_156Elemental_30%_4.5cd";
   else if ( name == "relic_of_kinetic_force"                        ) e = "ondamage_170Kinetic_30%_4.5cd";
