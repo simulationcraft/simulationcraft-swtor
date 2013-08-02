@@ -57,7 +57,7 @@ public:
   {
     player_t::init_base();
 
-    distance = default_distance = 20;
+    distance = default_distance = 10;   // Changed from 20 to 10 because of Flame Thrower
 
     resource_base[ RESOURCE_HEAT ] += 100;
   }

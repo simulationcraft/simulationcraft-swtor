@@ -22,6 +22,7 @@ actions+=/heatseeker_missiles,if=heat<40-cost|cooldown.vent_heat.remains<10
 actions+=/electro_net,if=heat<40-cost|cooldown.vent_heat.remains<10
 actions+=/rail_shot,if=buff.tracer_lock.stack>4&heat<40-cost|cooldown.vent_heat.remains<10
 actions+=/unload,if=heat<40-cost|cooldown.vent_heat.remains<10
+actions+=/death_from_above,if=heat<40-cost|cooldown.vent_heat.remains<10
 actions+=/tracer_missile,if=heat<21|cooldown.vent_heat.remains<10|(heat<31&cooldown.heatseeker_missiles.remains>cast_time&cooldown.unload.remains)
 actions+=/rapid_shots
 head=underworld_eliminators_helmet,ilevel=72,quality=artifact,setbonus=underworld_eliminators,stats=1030armor_192endurance_157aim_109power_111accuracy

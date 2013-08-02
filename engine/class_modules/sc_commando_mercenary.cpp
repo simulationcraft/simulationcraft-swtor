@@ -12,12 +12,16 @@ class class_t;
 struct targetdata_t : public bount_troop::targetdata_t
 {
 
+  dot_t dot_death_from_above;
   dot_t dot_electro_net;
+  dot_t dot_flame_thrower;
   dot_t dot_radiation_burns;
   dot_t dot_rapid_shots;
   dot_t dot_rapid_shots_offhand;
   dot_t dot_unload;
   dot_t dot_unload_offhand;
+  dot_t dot_sweeping_blasters;
+  dot_t dot_sweeping_blasters_offhand;
   dot_t dot_vent_heat;
 
   buff_t* debuff_electro_net;
@@ -228,22 +232,30 @@ struct class_t : public bount_troop::class_t
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   bount_troop::targetdata_t ( source                , target  ),
+  dot_death_from_above      ( "death_from_above"    , &source ),
   dot_electro_net           ( "electro_net"         , &source ),
+  dot_flame_thrower         ( "flame_thrower"       , &source ),
   dot_radiation_burns       ( "radiation_burns"     , &source ),
   dot_rapid_shots           ( "rapid_shots"         , &source ),
   dot_rapid_shots_offhand   ( "rapid_shots_offhand" , &source ),
   dot_unload                ( "unload"              , &source ),
   dot_unload_offhand        ( "unload_offhand"      , &source ),
+  dot_sweeping_blasters     ( "sweeping_blasters"   , &source ),
+  dot_sweeping_blasters_offhand ( "sweeping_blasters_offhand" , &source ),
   dot_vent_heat             ( "vent_heat"           , &source ),
   debuff_electro_net    ( new buff_t( this, "electro_net",    5, from_seconds( 10 ) ) ),
   debuff_heat_signature ( new buff_t( this, "heat_signature", 1, from_seconds( 45 ) ) )
 {
+  add ( dot_death_from_above    );
   add ( dot_electro_net         );
+  add ( dot_flame_thrower       );
   add ( dot_radiation_burns     );
   add ( dot_rapid_shots         );
   add ( dot_rapid_shots_offhand );
   add ( dot_unload              );
   add ( dot_unload_offhand      );
+  add ( dot_sweeping_blasters   );
+  add ( dot_sweeping_blasters_offhand );
   add ( dot_vent_heat           );
   add ( *debuff_electro_net     );
   add ( *debuff_heat_signature  );
@@ -392,6 +404,31 @@ struct electro_net_t : public attack_t
   }
 };
 
+// class_t::flame_thrower ================================================================
+struct flame_thrower_t : public attack_t
+{
+  flame_thrower_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    attack_t( n, p, tech_policy, SCHOOL_ELEMENTAL )
+  {
+    // rank_level_list = { 55 };
+
+    parse_options( options_str );
+
+    base_cost                   = 25;
+    range                       = 10.0;
+    channeled                   = true;
+    num_ticks                   = 4;
+    tick_zero                   = true;
+    base_tick_time              = from_seconds( 1 );
+    cooldown -> duration        = from_seconds( 18 );
+    aoe                         = 99;
+
+    td.standardhealthpercentmin =
+    td.standardhealthpercentmax = 0.072;
+    td.power_mod                = 0.72;
+  }
+};
+
 // class_t::fusion_missile ================================================================
 struct fusion_missile_t : public missile_attack_t
 {
@@ -400,6 +437,8 @@ struct fusion_missile_t : public missile_attack_t
     radiation_burns_t( class_t* p, const std::string& n ) :
       attack_t( n, p, tech_policy, SCHOOL_ELEMENTAL )
     {
+      rank_level_list = { 54 };  // Tested in game
+
       // TODO: Check valuse as the tool-tip values are around 1% off assuming (Without Mand Iron Warheads).
       td.power_mod                = 0.28;
       td.standardhealthpercentmin = td.standardhealthpercentmax = 0.028;
@@ -417,6 +456,7 @@ struct fusion_missile_t : public missile_attack_t
     missile_attack_t( p, n ),
     radiation_burns( new radiation_burns_t( p, "radiation_burns" ) )
   {
+    rank_level_list = { 54 };  // Tested in game
 
     parse_options( options_str );
 
@@ -583,6 +623,58 @@ struct power_shot_t : public attack_t
 // class_t::rapid_scan ====================================================================
 // class_t::supercharged_gas ==============================================================
 // class_t::sweeping_blasters =============================================================
+struct sweeping_blasters_t : public attack_t
+{
+  sweeping_blasters_t* offhand_attack;
+
+  sweeping_blasters_t( class_t* p, const std::string& n, const std::string& options_str,
+      bool is_offhand = false ) :
+    attack_t( n, p, range_policy, SCHOOL_ENERGY ), offhand_attack( 0 )
+  {
+    // rank_level_list = { 55 };
+
+    parse_options( options_str );
+
+    base_cost                   = 33;
+    range                       = 30.0;
+    channeled                   = true;
+    num_ticks                   = 3;
+    base_tick_time              = from_seconds( 1 );
+    aoe                         = 5;
+
+    td.weapon                   = &( player -> main_hand_weapon );
+    td.standardhealthpercentmin =
+    td.standardhealthpercentmax = -0.0673;  // Calculated to match in-game values for 3 power data points since it is not listed in Torhead.
+    td.power_mod                = 0.8126;  // Calculated to match in-game values for 3 power data points since it is not listed in Torhead.
+    td.weapon_multiplier        = -0.468;  // This value is in Torhead.
+
+    if ( is_offhand )
+    {
+      background                = true;
+      dual                      = true;
+//      channeled                 = false;  // See Unload for why this is commendte out.
+      base_cost                 = 0;
+      trigger_gcd               = timespan_t::zero();
+      td.weapon                 = &( player -> off_hand_weapon );
+      td.power_mod              = 0;
+      rank_level_list           = { 0 };
+    }
+    else
+    {
+      offhand_attack            = new sweeping_blasters_t( p, n+"_offhand", options_str, true );
+      add_child( offhand_attack );
+    }
+  }
+
+  virtual void execute()
+  {
+    attack_t::execute();
+
+    if ( offhand_attack )
+      offhand_attack->schedule_execute();
+  }
+};
+
 // class_t::tracer_missile ================================================================
 struct tracer_missile_t : public missile_attack_t
 {
@@ -643,6 +735,39 @@ struct tracer_missile_t : public missile_attack_t
 
 // class_t::combustible_gas_cylinder ======================================================
 // class_t::death_from_above ==============================================================
+struct death_from_above_t : public missile_attack_t
+{
+  death_from_above_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    missile_attack_t( p, n )
+  {
+    // rank_level_list = { 55 };
+
+    parse_options( options_str );
+
+    base_cost                   = 25;
+    range                       = 30.0;
+    cooldown -> duration        = from_seconds( 60 );
+//    travel_speed                = 6 * 9;
+    channeled                   = true;
+    num_ticks                   = 6;
+    base_tick_time              = from_seconds( 0.5 );
+    aoe                         = -1;  // Unlimited I think.
+
+    td.standardhealthpercentmin = 0.064;
+    td.standardhealthpercentmax = 0.094;
+    td.power_mod                = 0.79;
+
+    if ( p -> bugs ) // Death from above benefist from the 6% missile dammage bonus on the coefficient (power_mod) only. Tested by steve.mellross in 2.2.3.
+    {
+      // Revert overall bonus
+      base_multiplier -= 0.03 * p -> talents.mandalorian_iron_warheads -> rank();
+      // Add bonus directly to coefficient.
+      td.power_mod *= 1 + 0.03 * p -> talents.mandalorian_iron_warheads -> rank();
+    }
+
+  }
+};
+
 // class_t::determination =================================================================
 // class_t::electro_dart ==================================================================
 // class_t::energy_shield =================================================================
@@ -923,7 +1048,9 @@ struct vent_heat_t : public action_t
 {
     if ( type == BH_MERCENARY )
     {
+      if ( name == "death_from_above"           ) return new death_from_above_t           ( this, name, options_str );
       if ( name == "electro_net"                ) return new electro_net_t                ( this, name, options_str );
+      if ( name == "flame_thrower"              ) return new flame_thrower_t              ( this, name, options_str );
       if ( name == "fusion_missile"             ) return new fusion_missile_t             ( this, name, options_str );
       if ( name == "heatseeker_missiles"        ) return new heatseeker_missiles_t        ( this, name, options_str );
       if ( name == "high_velocity_gas_cylinder" ) return new high_velocity_gas_cylinder_t ( this, name, options_str );
@@ -934,6 +1061,7 @@ struct vent_heat_t : public action_t
       if ( name == "tracer_missile"             ) return new tracer_missile_t             ( this, name, options_str );
       if ( name == "vent_heat"                  ) return new vent_heat_t                  ( this, name, options_str );
       if ( name == "unload"                     ) return new unload_t                     ( this, name, options_str );
+      if ( name == "sweeping_blasters"          ) return new sweeping_blasters_t          ( this, name, options_str );
     }
     else if ( type == T_COMMANDO )
     {
@@ -957,7 +1085,7 @@ double class_t::alacrity() const
 
 double class_t::armor_penetration() const
 {
-  return buffs.high_velocity_gas_cylinder -> up() ? base_t::armor_penetration() - 0.35 : base_t::armor_penetration();
+  return base_t::armor_penetration() - (buffs.high_velocity_gas_cylinder -> up() ? 0.35 : 0);
 }
 
 // class_t::init_talents ==================================================================
@@ -1069,7 +1197,7 @@ void class_t::init_base()
 {
   base_t::init_base();
 
-  default_distance = 20;
+  default_distance = 10;   // Changed from 20 to 10 because of Flame Thrower
   distance = default_distance;
 
   attribute_multiplier_initial[ ATTR_AIM ] += 0.03 * talents.ironsights          -> rank();
@@ -1191,6 +1319,7 @@ void class_t::init_actions()
       if ( !set_bonus.rakata_eliminators -> four_pc() )
         action_list_str += "/rail_shot,if=buff.tracer_lock.stack>4&heat<40-cost|cooldown.vent_heat.remains<10";
       action_list_str += "/unload,if=heat<40-cost|cooldown.vent_heat.remains<10";
+      action_list_str += "/death_from_above,if=heat<40-cost|cooldown.vent_heat.remains<10";
       if ( talents.tracer_missile )
         action_list_str += "/tracer_missile,if=heat<21|cooldown.vent_heat.remains<10|(heat<31" + heatseeker_condition + "&cooldown.unload.remains)";
       else
