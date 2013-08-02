@@ -439,7 +439,6 @@ struct fusion_missile_t : public missile_attack_t
     {
       rank_level_list = { 54 };  // Tested in game
 
-      // TODO: Check valuse as the tool-tip values are around 1% off assuming (Without Mand Iron Warheads).
       td.power_mod                = 0.28;
       td.standardhealthpercentmin = td.standardhealthpercentmax = 0.028;
 
