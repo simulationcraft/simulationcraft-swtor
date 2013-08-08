@@ -13,6 +13,7 @@ struct targetdata_t : public bount_troop::targetdata_t
 {
 
   dot_t dot_death_from_above;
+  dot_t dot_explosive_dart;
   dot_t dot_electro_net;
   dot_t dot_flame_thrower;
   dot_t dot_radiation_burns;
@@ -233,6 +234,7 @@ struct class_t : public bount_troop::class_t
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   bount_troop::targetdata_t ( source                , target  ),
   dot_death_from_above      ( "death_from_above"    , &source ),
+  dot_explosive_dart        ( "explosive_dart"      , &source ),
   dot_electro_net           ( "electro_net"         , &source ),
   dot_flame_thrower         ( "flame_thrower"       , &source ),
   dot_radiation_burns       ( "radiation_burns"     , &source ),
@@ -247,6 +249,7 @@ targetdata_t::targetdata_t( class_t& source, player_t& target ) :
   debuff_heat_signature ( new buff_t( this, "heat_signature", 1, from_seconds( 45 ) ) )
 {
   add ( dot_death_from_above    );
+  add ( dot_explosive_dart      );
   add ( dot_electro_net         );
   add ( dot_flame_thrower       );
   add ( dot_radiation_burns     );
@@ -771,6 +774,30 @@ struct death_from_above_t : public missile_attack_t
 // class_t::electro_dart ==================================================================
 // class_t::energy_shield =================================================================
 // class_t::explosive_dart ================================================================
+struct explosive_dart_t : public attack_t
+{
+  explosive_dart_t( class_t* p, const std::string& n, const std::string& options_str) :
+    attack_t( n, p, tech_policy, SCHOOL_KINETIC )
+  {
+    rank_level_list = { 54 };
+
+    parse_options( options_str );
+
+    base_cost                    = 16;
+    range                        = 30.0;
+    num_ticks                    = 1;
+    base_tick_time               = from_seconds( 3.4 );
+    cooldown -> duration         = from_seconds( 15 );
+    travel_speed                 = 3 * 9;
+
+    aoe                          = 3;
+
+    td.power_mod                 = 1.61;
+    td.standardhealthpercentmin  = 0.141;
+    td.standardhealthpercentmax  = 0.181;
+  }
+};
+
 // class_t::flame_thrower =================================================================
 // class_t::heroic_moment =================================================================
 // class_t::kolto_overload ================================================================
@@ -889,7 +916,25 @@ struct rapid_shots_t : public attack_t
 };
 
 // class_t::rocket_punch ==================================================================
-// class_t::shoulder_slam =================================================================
+struct rocket_punch_t : public attack_t
+{
+  rocket_punch_t( class_t* p, const std::string& n, const std::string& options_str) :
+    attack_t( n, p, tech_policy, SCHOOL_KINETIC )
+  {
+    // rank_level_list = { ... 55 };
+
+    parse_options( options_str );
+
+    base_cost                    = 16;
+    range                        = 4;
+    cooldown -> duration         = from_seconds( 9 );
+
+    dd.power_mod                 =  1.82;
+    dd.standardhealthpercentmin  =  0.17;
+    dd.standardhealthpercentmax  =  0.194;
+  }
+};
+
 // class_t::stealth_scan ==================================================================
 
 // class_t::thermal_sensor_override =======================================================
@@ -1048,6 +1093,7 @@ struct vent_heat_t : public action_t
     if ( type == BH_MERCENARY )
     {
       if ( name == "death_from_above"           ) return new death_from_above_t           ( this, name, options_str );
+      if ( name == "explosive_dart"             ) return new explosive_dart_t             ( this, name, options_str );
       if ( name == "electro_net"                ) return new electro_net_t                ( this, name, options_str );
       if ( name == "flame_thrower"              ) return new flame_thrower_t              ( this, name, options_str );
       if ( name == "fusion_missile"             ) return new fusion_missile_t             ( this, name, options_str );
@@ -1056,6 +1102,7 @@ struct vent_heat_t : public action_t
       if ( name == "power_shot"                 ) return new power_shot_t                 ( this, name, options_str );
       if ( name == "rail_shot"                  ) return new rail_shot_t                  ( this, name, options_str );
       if ( name == "rapid_shots"                ) return new rapid_shots_t                ( this, name, options_str );
+      if ( name == "rocket_punch"               ) return new rocket_punch_t               ( this, name, options_str );
       if ( name == "thermal_sensor_override"    ) return new thermal_sensor_override_t    ( this, name, options_str );
       if ( name == "tracer_missile"             ) return new tracer_missile_t             ( this, name, options_str );
       if ( name == "vent_heat"                  ) return new vent_heat_t                  ( this, name, options_str );
