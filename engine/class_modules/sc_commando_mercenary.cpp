@@ -417,7 +417,7 @@ struct flame_thrower_t : public attack_t
 
     parse_options( options_str );
 
-    base_cost                   = 25;
+    base_cost                   = 24;   // 25
     range                       = 10.0;
     channeled                   = true;
     num_ticks                   = 4;
@@ -427,8 +427,8 @@ struct flame_thrower_t : public attack_t
     aoe                         = 99;
 
     td.standardhealthpercentmin =
-    td.standardhealthpercentmax = 0.072;
-    td.power_mod                = 0.72;
+    td.standardhealthpercentmax = 0.07075; // 0.072
+    td.power_mod                = 0.71;  // 0.72
   }
 };
 
@@ -815,11 +815,11 @@ struct rail_shot_t : public attack_t
     base_cost                    =  16 - ( p -> set_bonus.rakata_eliminators -> four_pc() ? 8 : 0 );
     cooldown -> duration         =  from_seconds( 15 );
     range                        =  30.0;
-    dd.power_mod                 =  1.9;
+    dd.power_mod                 =  2.02;   // 1.9
     dd.standardhealthpercentmin  =  
-    dd.standardhealthpercentmax  =  0.19;
+    dd.standardhealthpercentmax  =  0.202;  // 0.19
     weapon                       =  &( player -> main_hand_weapon );
-    weapon_multiplier            =  0.27;
+    weapon_multiplier            =  0.35;   // 0.27
 
     base_multiplier             += 0.02 * p -> talents.power_launcher -> rank();
   }
