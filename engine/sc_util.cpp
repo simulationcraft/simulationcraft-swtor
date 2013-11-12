@@ -434,6 +434,22 @@ const char* util_t::attribute_type_string( attribute_type type )
   }
 }
 
+// util_t::stat_from_attribute ============================================
+
+stat_type util_t::stat_from_attribute( attribute_type type )
+{
+  switch ( type )
+  {
+  case ATTR_STRENGTH:  return STAT_STRENGTH;
+  case ATTR_AIM:       return STAT_AIM;
+  case ATTR_CUNNING:   return STAT_CUNNING;
+  case ATTR_WILLPOWER: return STAT_WILLPOWER;
+  case ATTR_ENDURANCE: return STAT_ENDURANCE;
+  case ATTR_PRESENCE:  return STAT_PRESENCE;
+  default:             return STAT_NONE;
+  }
+}
+
 // util_t::parse_attribute_type =============================================
 
 attribute_type util_t::parse_attribute_type( const std::string& name )

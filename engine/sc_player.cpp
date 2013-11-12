@@ -397,81 +397,85 @@ player_t::player_t( sim_t*             s,
 
   if ( reaction_stddev == timespan_t::zero() ) reaction_stddev = reaction_mean * 0.25;
 
+  std::string underworld_set_shells    = "underworld/dread_forged/kell_dragon/arkanian";
+  std::string rakata_set_shells        = "rakata/tionese/columi/campaign/dread_guard";
+  std::string partisan_set_shells      = "partisan/obroan/conqueror";
+  std::string battlemaster_set_shells  = "battlemaster/centurion/champion/warhero/elite_warhero";
 
   // inquisitors
   // ==== PvE sets
-  set_bonus.underworld_force_masters = get_set_bonus( "underworld_force_masters", "kell_dragon_force_masters_/underworld_force_masters_/arkanian_force_masters_", "" );   // MrRobot ItemSetID = 52
-  set_bonus.underworld_force_mystics = get_set_bonus( "underworld_force_mystics", "kell_dragon_force_mystics_/underworld_force_mystics_/arkanian_force_mystics_", "" );   // MrRobot ItemSetID = 30
-  set_bonus.underworld_stalkers = get_set_bonus( "underworld_stalkers", "kell_dragon_stalkers_/underworld_stalkers_/arkanian_stalkers_", "" );                       // MrRobot ItemSetID = 35
-  set_bonus.underworld_survivors = get_set_bonus( "underworld_survivors", "kell_dragon_survivors_/underworld_survivors_/arkanian_survivors_", "" );                   // MrRobot ItemSetID = 38
-  set_bonus.rakata_force_masters = get_set_bonus( "rakata_force_masters", "tionese_force_masters_/columi_force_masters_/rakata_force_masters_/campaign_force_masters_/dread_guard_force_masters_", "" ); // MrRobot ItemSetID = 24
-  set_bonus.rakata_force_mystics = get_set_bonus( "rakata_force_mystics", "tionese_force_mystics_/columi_force_mystics_/rakata_force_mystics_/campaign_force_mystics_/dread_guard_force_mystics_", "" ); // MrRobot ItemSetID = 2
-  set_bonus.rakata_stalkers = get_set_bonus( "rakata_stalkers", "tionese_stalkers_/columi_stalkers_/rakata_stalkers_/campaign_stalkers_/dread_guard_stalkers_", "" );                                    // MrRobot ItemSetID = 7
-  set_bonus.rakata_survivors = get_set_bonus( "unimplemented_rakata_survivors", "tionese_survivors_/columi_survivors_/rakata_survivors_/campaign_survivors_/dread_guard_survivors_", "" );               // MrRobot ItemSetID = 10
+  set_bonus.underworld_force_masters   = generate_set_bonus( underworld_set_shells,   "force_masters" );   // MrRobot ItemSetID = 52
+  set_bonus.underworld_force_mystics   = generate_set_bonus( underworld_set_shells,   "force_mystics" );   // MrRobot ItemSetID = 30
+  set_bonus.underworld_stalkers        = generate_set_bonus( underworld_set_shells,   "stalkers"      );   // MrRobot ItemSetID = 35
+  set_bonus.underworld_survivors       = generate_set_bonus( underworld_set_shells,   "survivors"     );   // MrRobot ItemSetID = 38
+  set_bonus.rakata_force_masters       = generate_set_bonus( rakata_set_shells,       "force_masters" );   // MrRobot ItemSetID = 24
+  set_bonus.rakata_force_mystics       = generate_set_bonus( rakata_set_shells,       "force_mystics" );   // MrRobot ItemSetID =  2
+  set_bonus.rakata_stalkers            = generate_set_bonus( rakata_set_shells,       "stalkers"      );   // MrRobot ItemSetID =  7
+  set_bonus.rakata_survivors           = generate_set_bonus( rakata_set_shells,       "survivors"     );   // MrRobot ItemSetID = 10   UnImp
   // ==== PvP sets
-  set_bonus.partisan_force_masters = get_set_bonus( "unimplemented_partisan_force_masters", "partisan_force_masters_/conqueror_force_masters_", "" );  // MrRobot ItemSetID = 31
-  set_bonus.partisan_force_mystics = get_set_bonus( "unimplemented_partisan_force_mystics", "partisan_force_mystics_/conqueror_force_mystics_", "" );  // MrRobot ItemSetID = 48
-  set_bonus.partisan_stalkers = get_set_bonus( "unimplemented_partisan_stalkers", "partisan_stalkers_/conqueror_stalkers", "" );                       // MrRobot ItemSetID = 49
-  set_bonus.partisan_survivors = get_set_bonus( "unimplemented_partisan_survivors", "partisan_survivors_/conqueror_survivors", "" );                   // MrRobot ItemSetID = 29
-  set_bonus.battlemaster_force_masters = get_set_bonus( "battlemaster_force_masters", "centurion_force_masters_/champion_force_masters_/battlemaster_force_masters_/warhero_force_masters_/elite_warhero_force_masters_", "" );               // MrRobot ItemSetID = 3
-  set_bonus.battlemaster_force_mystics = get_set_bonus( "unimplemented_battlemaster_force_mystics", "centurion_force_mystics_/champion_force_mystics_/battlemaster_force_mystics_/warhero_force_mystics_/elite_warhero_force_mystics_", "" ); // MrRobot ItemSetID = 20
-  set_bonus.battlemaster_stalkers = get_set_bonus( "battlemaster_stalkers", "centurion_stalkers_/champion_stalkers_/battlemaster_stalkers_/warhero_stalkers_/elite_warhero_stalkers_", "" );                                                  // MrRobot ItemSetID = 21
-  set_bonus.battlemaster_survivors = get_set_bonus( "unimplemented_battlemaster_survivors", "centurion_survivors_/champion_survivors_/battlemaster_survivors_/warhero_survivors_/elite_warhero_survivors_", "" );                             // MrRobot ItemSetID = 1
+  set_bonus.partisan_force_masters     = generate_set_bonus( partisan_set_shells,     "force_masters" );   // MrRobot ItemSetID = 31   UnImp
+  set_bonus.partisan_force_mystics     = generate_set_bonus( partisan_set_shells,     "force_mystics" );   // MrRobot ItemSetID = 48   UnImp
+  set_bonus.partisan_stalkers          = generate_set_bonus( partisan_set_shells,     "stalkers"      );   // MrRobot ItemSetID = 49   UnImp
+  set_bonus.partisan_survivors         = generate_set_bonus( partisan_set_shells,     "survivors"     );   // MrRobot ItemSetID = 29   UnImp
+  set_bonus.battlemaster_force_masters = generate_set_bonus( battlemaster_set_shells, "force_masters" );   // MrRobot ItemSetID =  3
+  set_bonus.battlemaster_force_mystics = generate_set_bonus( battlemaster_set_shells, "force_mystics" );   // MrRobot ItemSetID = 20   UnImp
+  set_bonus.battlemaster_stalkers      = generate_set_bonus( battlemaster_set_shells, "stalkers"      );   // MrRobot ItemSetID = 21
+  set_bonus.battlemaster_survivors     = generate_set_bonus( battlemaster_set_shells, "survivors"     );   // MrRobot ItemSetID =  1   UnImp
 
 
   // agent/smuggler
   // ==== PvE sets
-  set_bonus.underworld_enforcers = get_set_bonus( "underworld_enforcers", "kell_dragon_enforcers_/underworld_enforcers_/arkanian_enforcers_", "" );                   // MrRobot ItemSetID = 42
-  set_bonus.underworld_field_medics = get_set_bonus( "underworld_field_medics", "kell_dragon_field_medics_/underworld_field_medics_/arkanian_field_medics_", "" );       // MrRobot ItemSetID = 32
-  set_bonus.underworld_field_techs = get_set_bonus( "underworld_field_techs", "kell_dragon_field_techs_/underworld_field_techs_/arkanian_field_techs_/kell_dragon_professionals_/underworld_professionals_/arkanian_professionals_", "" ); // MrRobot ItemSetID = 45 (same as professionals)
-  set_bonus.rakata_enforcers = get_set_bonus( "rakata_enforcers", "tionese_enforcers_/columi_enforcers_/rakata_enforcers_/campaign_enforcers_/dread_guard_enforcers_", "" );                      // MrRobot ItemSetID = 14
-  set_bonus.rakata_field_medics = get_set_bonus( "rakata_field_medics", "tionese_field_medics_/columi_field_medics_/rakata_field_medics_/campaign_field_medics_/dread_guard_field_medics_", "" ); // MrRobot ItemSetID = 4
-  set_bonus.rakata_field_techs = get_set_bonus( "rakata_field_techs", "tionese_field_techs_/columi_field_techs_/rakata_field_techs_/campaign_field_techs_/dread_guard_field_techs_", "" );        // MrRobot ItemSetID = 17
+  set_bonus.underworld_enforcers       = generate_set_bonus( underworld_set_shells,   "enforcers"                 );   // MrRobot ItemSetID = 42
+  set_bonus.underworld_field_medics    = generate_set_bonus( underworld_set_shells,   "field_medics"              );   // MrRobot ItemSetID = 32
+  set_bonus.underworld_field_techs     = generate_set_bonus( underworld_set_shells,   "field_techs/professionals" );   // MrRobot ItemSetID = 45 (same ID for both)
+  set_bonus.rakata_enforcers           = generate_set_bonus( rakata_set_shells,       "enforcers"                 );   // MrRobot ItemSetID = 14
+  set_bonus.rakata_field_medics        = generate_set_bonus( rakata_set_shells,       "field_medics"              );   // MrRobot ItemSetID =  4
+  set_bonus.rakata_field_techs         = generate_set_bonus( rakata_set_shells,       "field_techs"               );   // MrRobot ItemSetID = 17
   // ==== PvP sets
-  set_bonus.partisan_enforcers = get_set_bonus( "unimplemented_partisan_enforcers", "partisan_enforcers_/conqueror_enforcers_", "" );               // MrRobot ItemSetID = 36
-  set_bonus.partisan_field_medics = get_set_bonus( "unimplemented_partisan_field_medics", "partisan_field_medics_/conqueror_field_medics_", "" );   // MrRobot ItemSetID = 53
-  set_bonus.partisan_field_techs = get_set_bonus( "unimplemented_partisan_field_techs", "partisan_field_techs_/conqueror_field_techs/partisan_professionals_/conqueror_professionals", "" );  // MrRobot ItemSetID = 40
-  set_bonus.battlemaster_enforcers = get_set_bonus( "battlemaster_enforcers", "centurion_enforcers_/champion_enforcers_/battlemaster_enforcers_/warhero_enforcers_/elite_warhero_enforcers_", "" );                                    // MrRobot ItemSetID = 8
-  set_bonus.battlemaster_field_medics = get_set_bonus( "unimplemented_battlemaster_field_medics", "centurion_field_medics_/champion_field_medics_/battlemaster_field_medics_/warhero_field_medics_/elite_warhero_field_medics_", "" ); // MrRobot ItemSetID = 25
-  set_bonus.battlemaster_field_techs = get_set_bonus( "battlemaster_field_techs", "centurion_field_techs_/champion_field_techs_/battlemaster_field_techs_/warhero_field_techs_/elite_warhero_field_techs_", "" );                      // MrRobot ItemSetID = 12
+  set_bonus.partisan_enforcers         = generate_set_bonus( partisan_set_shells,     "enforcers"                 );   // MrRobot ItemSetID = 36    UnImp
+  set_bonus.partisan_field_medics      = generate_set_bonus( partisan_set_shells,     "field_medics"              );   // MrRobot ItemSetID = 53    UnImp
+  set_bonus.partisan_field_techs       = generate_set_bonus( partisan_set_shells,     "field_techs/professionals" );   // MrRobot ItemSetID = 40    UnImp (same ID for both)
+  set_bonus.battlemaster_enforcers     = generate_set_bonus( battlemaster_set_shells, "enforcers"                 );   // MrRobot ItemSetID =  8
+  set_bonus.battlemaster_field_medics  = generate_set_bonus( battlemaster_set_shells, "field_medics"              );   // MrRobot ItemSetID = 25    UnImp
+  set_bonus.battlemaster_field_techs   = generate_set_bonus( battlemaster_set_shells, "field_techs"               );   // MrRobot ItemSetID = 12
 
 
   // bountyhunter/trooper
   // ==== PvE sets
-  set_bonus.underworld_eliminators = get_set_bonus( "underworld_eliminators", "kell_dragon_eliminators_/underworld_eliminators_/arkanian_eliminators_", "" );           // MrRobot ItemSetID = 50
-  set_bonus.underworld_combat_medics = get_set_bonus( "underworld_combat_medics", "kell_dragon_combat_medics_/underworld_combat_medics_/arkanian_combat_medics_", "" );   // MrRobot ItemSetID = 46
-  set_bonus.underworld_combat_techs = get_set_bonus( "underworld_combat_techs", "kell_dragon_combat_techs_/underworld_combat_techs_/arkanian_combat_techs_", "" );       // MrRobot ItemSetID = 47
-  set_bonus.underworld_supercomandos = get_set_bonus( "underworld_supercomandos", "kell_dragon_supercomandos_/underworld_supercomandos_/arkanian_supercomandos_", "" );   // MrRobot ItemSetID = 44
-  set_bonus.rakata_eliminators = get_set_bonus( "rakata_eliminators", "tionese_eliminators_/columi_eliminators_/rakata_eliminators_/campaign_eliminators_/dread_guard_eliminators_", "" );                              // MrRobot ItemSetID = 22
-  set_bonus.rakata_combat_medics = get_set_bonus( "unimplemented_rakata_combat_medics", "tionese_combat_medics_/columi_combat_medics_/rakata_combat_medics_/campaign_combat_medics_/dread_guard_combat_medics_", ""  ); // MrRobot ItemSetID = 18
-  set_bonus.rakata_combat_techs = get_set_bonus( "unimplemented_rakata_combat_techs", "tionese_combat_techs_/columi_combat_techs_/rakata_combat_techs_/campaign_combat_techs_/dread_guard_combat_techs_", ""  );        // MrRobot ItemSetID = 19
-  set_bonus.rakata_supercomandos = get_set_bonus( "unimplemented_rakata_supercomandos", "tionese_supercomandos_/columi_supercomandos_/rakata_supercomandos_/campaign_supercomandos_/dread_guard_supercomandos_", ""  ); // MrRobot ItemSetID = 16
+  set_bonus.underworld_eliminators     = generate_set_bonus( underworld_set_shells,   "eliminators"   );    // MrRobot ItemSetID = 50
+  set_bonus.underworld_combat_medics   = generate_set_bonus( underworld_set_shells,   "combat_medics" );    // MrRobot ItemSetID = 46    UnImp
+  set_bonus.underworld_combat_techs    = generate_set_bonus( underworld_set_shells,   "combat_techs"  );    // MrRobot ItemSetID = 47
+  set_bonus.underworld_supercomandos   = generate_set_bonus( underworld_set_shells,   "supercomandos" );    // MrRobot ItemSetID = 44    UnImp
+  set_bonus.rakata_eliminators         = generate_set_bonus( rakata_set_shells,       "eliminators"   );    // MrRobot ItemSetID = 22
+  set_bonus.rakata_combat_medics       = generate_set_bonus( rakata_set_shells,       "medics"        );    // MrRobot ItemSetID = 18    UnImp
+  set_bonus.rakata_combat_techs        = generate_set_bonus( rakata_set_shells,       "combat_techs"  );    // MrRobot ItemSetID = 19    UnImp
+  set_bonus.rakata_supercomandos       = generate_set_bonus( rakata_set_shells,       "supercomandos" );    // MrRobot ItemSetID = 16    UnImp
   // ==== PvP sets
-  set_bonus.partisan_eliminators = get_set_bonus( "unimplemented_partisan_eliminators", "partisan_eliminators_/conqueror_eliminators_", "" );          // MrRobot ItemSetID = 56
-  set_bonus.partisan_combat_medics = get_set_bonus( "unimplemented_partisan_combat_medics", "partisan_combat_medics_/conqueror_combat_medics_", "" );  // MrRobot ItemSetID = 37
-  set_bonus.partisan_combat_techs = get_set_bonus( "unimplemented_partisan_combat_techs", "partisan_combat_techs_/conqueror_combat_techs", "" );       // MrRobot ItemSetID = 39
-  set_bonus.partisan_supercomandos = get_set_bonus( "unimplemented_partisan_supercomandos", "partisan_supercomandos_/conqueror_supercomandos", "" );   // MrRobot ItemSetID = 55
-  set_bonus.battlemaster_eliminators = get_set_bonus( "battlemaster_eliminators", "centurion_eliminators_/champion_eliminators_/battlemaster_eliminators_/warhero_eliminators_/elite_warhero_eliminators_", "" );                             // MrRobot ItemSetID = 28
-  set_bonus.battlemaster_combat_medics = get_set_bonus( "unimplemented_battlemaster_combat_medics", "centurion_combat_medics_/champion_combat_medics_/battlemaster_combat_medics_/warhero_combat_medics_/elite_warhero_combat_medics_", "" ); // MrRobot ItemSetID = 9
-  set_bonus.battlemaster_combat_techs = get_set_bonus( "unimplemented_battlemaster_combat_techs", "centurion_combat_techs_/champion_combat_techs_/battlemaster_combat_techs_/warhero_combat_techs_/elite_warhero_combat_techs_", "" );        // MrRobot ItemSetID = 11
-  set_bonus.battlemaster_supercomandos = get_set_bonus( "unimplemented_battlemaster_supercomandos", "centurion_supercomandos_/champion_supercomandos_/battlemaster_supercomandos_/warhero_supercomandos_/elite_warhero_supercomandos_", "" ); // MrRobot ItemSetID = 27
+  set_bonus.partisan_eliminators       = generate_set_bonus( partisan_set_shells,     "eliminators"   );    // MrRobot ItemSetID = 56    UnImp
+  set_bonus.partisan_combat_medics     = generate_set_bonus( partisan_set_shells,     "combat_medics" );    // MrRobot ItemSetID = 37    UnImp
+  set_bonus.partisan_combat_techs      = generate_set_bonus( partisan_set_shells,     "combat_techs"  );    // MrRobot ItemSetID = 39    UnImp
+  set_bonus.partisan_supercomandos     = generate_set_bonus( partisan_set_shells,     "supercomandos" );    // MrRobot ItemSetID = 55    UnImp
+  set_bonus.battlemaster_eliminators   = generate_set_bonus( battlemaster_set_shells, "eliminators"   );    // MrRobot ItemSetID = 28
+  set_bonus.battlemaster_combat_medics = generate_set_bonus( battlemaster_set_shells, "combat_medics" );    // MrRobot ItemSetID =  9    UnImp
+  set_bonus.battlemaster_combat_techs  = generate_set_bonus( battlemaster_set_shells, "combat_techs"  );    // MrRobot ItemSetID = 11    UnImp
+  set_bonus.battlemaster_supercomandos = generate_set_bonus( battlemaster_set_shells, "supercomandos" );    // MrRobot ItemSetID = 27    UnImp
 
 
   // warrior/knight
   // ==== PvE sets
-  set_bonus.underworld_weaponmasters = get_set_bonus( "underworld_weaponmasters", "kell_dragon_weaponmasters_/underworld_weaponmasters_/arkanian_weaponmasters_/kell_dragon_challengers_/underworld_challengers_/arkanian_challengers_", "" );  // MrRobot ItemSetID = 33  (Same as challengers)
-  set_bonus.underworld_vindicators = get_set_bonus( "underworld_vindicators", "kell_dragon_vindicators_/underworld_vindicators_/arkanian_vindicators_", "" );          // MrRobot ItemSetID = 43
-  set_bonus.underworld_war_leaders = get_set_bonus( "underworld_war_leaders", "kell_dragon_war_leaders_/underworld_war_leaders_/arkanian_war_leaders_", "" );          // MrRobot ItemSetID = 41
-  set_bonus.rakata_weaponmasters = get_set_bonus( "unimplemented_rakata_weaponmasterss", "tionese_weaponmasters_/columi_weaponmasters_/rakata_weaponmasters_/campaign_weaponmasters_/dread_guard_weaponmasters_", "" ); // MrRobot ItemSetID = 5
-  set_bonus.rakata_vindicators = get_set_bonus( "unimplemented_rakata_vindicators", "tionese_vindicators_/columi_vindicators_/rakata_vindicators_/campaign_vindicators_/dread_guard_vindicators_", "" );                // MrRobot ItemSetID = 15
-  set_bonus.rakata_war_leaders = get_set_bonus( "unimplemented_rakata_war_leaders", "tionese_war_leaders_/columi_war_leaders_/rakata_war_leaders_/campaign_war_leaders_/dread_guard_war_leaders_", "" );                // MrRobot ItemSetID = 13
+  set_bonus.underworld_weaponmasters   = generate_set_bonus( underworld_set_shells,   "weaponmasters/challengers" );    // MrRobot ItemSetID = 33 (same ID for both)
+  set_bonus.underworld_vindicators     = generate_set_bonus( underworld_set_shells,   "vindicators"               );    // MrRobot ItemSetID = 43
+  set_bonus.underworld_war_leaders     = generate_set_bonus( underworld_set_shells,   "war_leaders"               );    // MrRobot ItemSetID = 41
+  set_bonus.rakata_weaponmasters       = generate_set_bonus( rakata_set_shells,       "weaponmasters"             );    // MrRobot ItemSetID =  5    UnImp
+  set_bonus.rakata_vindicators         = generate_set_bonus( rakata_set_shells,       "vindicators"               );    // MrRobot ItemSetID = 15    UnImp
+  set_bonus.rakata_war_leaders         = generate_set_bonus( rakata_set_shells,       "war_leaders"               );    // MrRobot ItemSetID = 13    UnImp
   // ==== PvP sets
-  set_bonus.partisan_weaponmasters = get_set_bonus( "unimplemented_partisan_weaponmasters", "partisan_weaponmasters_/conqueror_weaponmasters_/partisan_challengers_/conqueror_challengers_", "" ); // MrRobot ItemSetID = 34
-  set_bonus.partisan_vindicators = get_set_bonus( "unimplemented_partisan_vindicators", "partisan_vindicators_/conqueror_vindicators_", "" );         // MrRobot ItemSetID = 54
-  set_bonus.partisan_war_leaders = get_set_bonus( "unimplemented_partisan_war_leaders", "partisan_war_leaders_/conqueror_war_leaders", "" );          // MrRobot ItemSetID = 51
-  set_bonus.battlemaster_weaponmasters = get_set_bonus( "unimplemented_battlemaster_weaponmasters", "centurion_weaponmasters_/champion_weaponmasters_/battlemaster_weaponmasters_/warhero_weaponmasters_/elite_warhero_weaponmasters_", "" ); // MrRobot ItemSetID = 6
-  set_bonus.battlemaster_vindicators = get_set_bonus( "unimplemented_battlemaster_vindicators", "centurion_vindicators_/champion_vindicators_/battlemaster_vindicators_/warhero_vindicators_/elite_warhero_vindicators_", "" );               // MrRobot ItemSetID = 26
-  set_bonus.battlemaster_war_leaders = get_set_bonus( "unimplemented_battlemaster_war_leaders", "centurion_war_leaders_/champion_war_leaders_/battlemaster_war_leaders_/warhero_war_leaders_/elite_warhero_war_leaders_", "" );               // MrRobot ItemSetID = 23
+  set_bonus.partisan_weaponmasters     = generate_set_bonus( partisan_set_shells,     "weaponmasters/challengers" );    // MrRobot ItemSetID = 34    UnImp (same ID for both)
+  set_bonus.partisan_vindicators       = generate_set_bonus( partisan_set_shells,     "vindicators"               );    // MrRobot ItemSetID = 54    UnImp
+  set_bonus.partisan_war_leaders       = generate_set_bonus( partisan_set_shells,     "war_leaders"               );    // MrRobot ItemSetID = 51    UnImp
+  set_bonus.battlemaster_weaponmasters = generate_set_bonus( battlemaster_set_shells, "weaponmasters"             );    // MrRobot ItemSetID =  6    UnImp
+  set_bonus.battlemaster_vindicators   = generate_set_bonus( battlemaster_set_shells, "vindicators"               );    // MrRobot ItemSetID = 26    UnImp
+  set_bonus.battlemaster_war_leaders   = generate_set_bonus( battlemaster_set_shells, "war_leaders"               );    // MrRobot ItemSetID = 23    UnImp
 }
 
 // player_t::~player_t ======================================================
@@ -1514,6 +1518,11 @@ item_t* player_t::find_item( const std::string& str )
 
   return 0;
 }
+
+// player_t::get_primary_stat() ================================================
+
+stat_type player_t::get_primary_stat() const
+{ return util_t::stat_from_attribute(primary_attribute); }
 
 // player_t::get_attribute() ================================================
 
@@ -3660,6 +3669,51 @@ rng_t* player_t::get_rng( const std::string& n, rng_type type )
   rng -> next = rng_list;
   rng_list = rng;
   return rng;
+}
+
+// player_t::get_set_bonus =======================================================
+
+// A wrapper function for get_set_bonus that simplified the arguements.
+//
+// It takes a "/" seperated list gear prefixes and a "/" seperated list of set name
+// suffixes and generates a string containing all combinations of the two. it also
+// accepts an optional "implemented" arguement that will add the prefix "unimplemented"
+// to the set name if set to false.
+//
+// The set name is created by combimimg the first entry of the gear prefix and set
+// name suffix arguements.
+
+set_bonus_t* player_t::generate_set_bonus(std::string shell_rank, std::string shell_bonus, bool implemented)
+{
+  std::string bonus_name;
+  std::stringstream result_list;
+  std::string space = "_";
+
+  if (!implemented)
+    bonus_name = "unimplemented_";
+
+  std::vector<std::string> rank_splits;
+  std::vector<std::string> bonus_splits;
+
+  util_t::string_split(rank_splits, shell_rank, "/");
+  util_t::string_split(bonus_splits, shell_bonus, "/");
+
+  bool first = true;
+
+  for (std::string bonus : bonus_splits)
+    for (std::string rank : rank_splits)
+    {
+      if (!first)
+        result_list << "/";
+      else
+        bonus_name += rank + space + bonus;
+
+      result_list << rank << space << bonus << space;
+
+      first = false;
+    }
+
+  return get_set_bonus(bonus_name, result_list.str(), "");
 }
 
 // player_t::get_set_bonus =======================================================

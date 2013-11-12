@@ -1074,6 +1074,8 @@ public:
   static const char* talent_tree_string       ( talent_tree_type tree, bool armory_format = true );
   static const char* weapon_type_string       ( weapon_type type );
 
+  static stat_type stat_from_attribute        ( attribute_type type );
+
   static attribute_type parse_attribute_type  ( const std::string& name );
   static dmg_type parse_dmg_type              ( const std::string& name );
   static stim_type parse_stim_type            ( const std::string& name );
@@ -2911,6 +2913,7 @@ public:
 
   virtual double armor_penetration() const;
 
+  stat_type get_primary_stat() const;
   double get_attribute( attribute_type a ) const;
   double strength() const { return get_attribute( ATTR_STRENGTH ); }
   double aim() const { return get_attribute( ATTR_AIM ); }
@@ -3144,6 +3147,7 @@ public:
   benefit_t*  get_benefit ( const std::string& name );
   uptime_t*   get_uptime  ( const std::string& name );
   rng_t*      get_rng     ( const std::string& name, rng_type type=RNG_DEFAULT );
+  set_bonus_t* generate_set_bonus( std::string shell_rank, std::string shell_bonus, bool implemented=true );
   set_bonus_t* get_set_bonus( const std::string& name, std::string shell_filter,
                               std::string armoring_filter,
                               slot_mask_t slot_filter=DEFAULT_SET_BONUS_SLOT_MASK );

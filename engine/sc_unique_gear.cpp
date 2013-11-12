@@ -962,6 +962,10 @@ bool unique_gear_t::get_equip_encoding( std::string&       encoding,
   else if ( name == "kell_dragon_relic_of_the_cerulean_nova"        ) e = "ondamage_382energy_tech_30%_4.5cd";     // Only Tech relic...
   else if ( name == "kell_dragon_relic_of_the_kinetic_tempest"      ) e = "ondamage_382kinetic_force_30%_4.5cd";
 
+  else if ( name == "dread_forged_relic_of__focused_retribution"    ) e = "ondamage_225Primary_30%_40cd_12dur";  // Main Stat
+  else if ( name == "dread_forged_relic_of__serendipitous_assault"  ) e = "ondamage_625Power_30%_20cd_6dur";
+  else if ( name == "dread_forged_relic_of_devastating_vengeance"   ) e = "ondamage_425Crit_30%_20cd_6dur";  // Main Stat
+
   else if ( name == "partisan_relic_of__serendipitous_assault"      ) e = "ondamage_410Power_30%_20cd_6dur";
   else if ( name == "partisan_relic_of_dark_radiance"               ) e = "ondamage_190internal_force_30%_4.5cd";
   else if ( name == "partisan_relic_of_elemental_transcendence"     ) e = "ondamage_190elemental_tech_30%_4.5cd";
@@ -973,6 +977,10 @@ bool unique_gear_t::get_equip_encoding( std::string&       encoding,
   else if ( name == "conqueror_relic_of_elemental_transcendence"    ) e = "ondamage_202elemental_tech_30%_4.5cd";
   else if ( name == "conqueror_relic_of_the_cerulean_nova"          ) e = "ondamage_269energy_tech_30%_4.5cd";
   else if ( name == "conqueror_relic_of_the_kinetic_tempest"        ) e = "ondamage_269kinetic_force_30%_4.5cd";
+
+  else if ( name == "obroan_relic_of__serendipitous_assault"        ) e = "ondamage_625Power_30%_20cd_6dur";
+  else if ( name == "obroan_relic_of_devastating_vengeance"         ) e = "ondamage_425Crit_30%_20cd_6dur";
+  else if ( name == "obroan_relic_of_focused_retribution"           ) e = "ondamage_225Primary_30%_40cd_12dur";
 
   if ( ! e ) return false;
 
@@ -1009,16 +1017,23 @@ bool unique_gear_t::get_use_encoding( std::string&       encoding,
   else if ( name == "campaign_relic_of_imperiling_serenity"        ) e = "315Defense_120cd_30dur";
   else if ( name == "campaign_relic_of_the_primeval_fatesealer"    ) e = "315Alacrity_120cd_30dur";
   else if ( name == "campaign_relic_of_the_shrouded_crusader"      ) e = "190shield_190abs_120cd_30dur";
+
   else if ( name == "dread_guard_relic_of_boundless_ages"          ) e = "350Power_120cd_30dur";
   else if ( name == "dread_guard_relic_of_imperiling_serenity"     ) e = "350Defense_120cd_30dur";
   else if ( name == "dread_guard_relic_of_the_primeval_fatesealer" ) e = "350Alacrity_120cd_30dur";
   else if ( name == "dread_guard_relic_of_the_shrouded_crusader"   ) e = "215shield_215abs_120cd_30dur";
+
   else if ( name == "arkanian_relic_of_boundless_ages"             ) e = "395Power_120cd_30dur";
   else if ( name == "arkanian_relic_of_the_primeval_fatesealer"    ) e = "395Alacrity_120cd_30dur";
+
   else if ( name == "underworld_relic_of_boundless_ages"           ) e = "425Power_120cd_30dur";
   else if ( name == "underworld_relic_of_the_primeval_fatesealer"  ) e = "425Alacrity_120cd_30dur";
+
   else if ( name == "kell_dragon_relic_of_boundless_ages"          ) e = "460Power_120cd_30dur";
   else if ( name == "kell_dragon_relic_of_the_primeval_fatesealer" ) e = "460Alacrity_120cd_30dur";
+
+  else if ( name == "dread_forged_relic_of_boundless_ages"         ) e = "490Power_120cd_30dur";
+  else if ( name == "dread_forged_relic_of_the_primeval_fatesealer") e = "490Alacrity_120cd_30dur";
 
   if ( ! e ) return false;
 

@@ -652,6 +652,11 @@ bool item_t::decode_special( special_effect_t& effect,
       effect.stat = s;
       effect.stat_amount = t.value;
     }
+    else if ( t.name == "primary" )
+    {
+      effect.stat = player->get_primary_stat();
+      effect.stat_amount = t.value;
+    }
     else if ( t.name == "tech" )
     {
       effect.policy = action_t::tech_policy;
