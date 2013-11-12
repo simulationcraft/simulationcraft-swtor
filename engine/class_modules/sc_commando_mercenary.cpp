@@ -12,23 +12,28 @@ class class_t;
 struct targetdata_t : public bount_troop::targetdata_t
 {
 
+  dot_t dot_combustible_gas_burn;
   dot_t dot_death_from_above;
   dot_t dot_explosive_dart;
   dot_t dot_electro_net;
   dot_t dot_flame_thrower;
+  dot_t dot_incendiary_missile_burn;
   dot_t dot_radiation_burns;
   dot_t dot_rapid_shots;
   dot_t dot_rapid_shots_offhand;
-  dot_t dot_unload;
-  dot_t dot_unload_offhand;
   dot_t dot_sweeping_blasters;
   dot_t dot_sweeping_blasters_offhand;
+  dot_t dot_thermal_detonator;
+  dot_t dot_thermal_detonator_burn;
+  dot_t dot_unload;
+  dot_t dot_unload_offhand;
   dot_t dot_vent_heat;
 
   buff_t* debuff_electro_net;
   buff_t* debuff_heat_signature;
 
   targetdata_t( class_t& source, player_t& target );
+  bool burning();
 };
 
 // ==========================================================================
@@ -43,12 +48,14 @@ struct class_t : public bount_troop::class_t
     struct buffs_t
     {
       buff_t* barrage;
+      buff_t* combustible_gas_cylinder;
       buff_t* critical_reaction;
       buff_t* high_velocity_gas_cylinder;
 //      buff_t* power_barrier;
+      buff_t* improved_vents;
+      buff_t* prototype_particle_accelerator;
       buff_t* thermal_sensor_override;
       buff_t* tracer_lock;
-      buff_t* improved_vents;
 
     } buffs;
 
@@ -56,6 +63,7 @@ struct class_t : public bount_troop::class_t
     struct gains_t
     {
       gain_t* improved_vents;
+      gain_t* superheated_rail;
       gain_t* terminal_velocity;
       gain_t* vent_heat;
 
@@ -70,7 +78,8 @@ struct class_t : public bount_troop::class_t
     // RNGs
     struct rngs_t
     {
-
+      rng_t* combustible_gas_burn;
+      rng_t* superheated_rail;
     } rngs;
 
     // Benefits
@@ -83,6 +92,7 @@ struct class_t : public bount_troop::class_t
     struct cooldowns_t
     {
       cooldown_t* unload;
+      cooldown_t* rail_shot;
     } cooldowns;
 
     // Talents
@@ -222,47 +232,68 @@ struct class_t : public bount_troop::class_t
     virtual void      init_buffs();
     virtual void      init_gains();
     virtual void      init_procs();
+    virtual void      init_rng();
     virtual void      init_cooldowns();
     virtual void      init_actions();
     virtual role_type primary_role() const;
     virtual void      regen( timespan_t periodicity );
     virtual double    alacrity() const;
+    virtual double    range_crit_chance() const;
+    virtual double    tech_crit_chance() const;
     virtual double    armor_penetration() const;
     virtual void      reset();
 };
 
 targetdata_t::targetdata_t( class_t& source, player_t& target ) :
-  bount_troop::targetdata_t ( source                , target  ),
-  dot_death_from_above      ( "death_from_above"    , &source ),
-  dot_explosive_dart        ( "explosive_dart"      , &source ),
-  dot_electro_net           ( "electro_net"         , &source ),
-  dot_flame_thrower         ( "flame_thrower"       , &source ),
-  dot_radiation_burns       ( "radiation_burns"     , &source ),
-  dot_rapid_shots           ( "rapid_shots"         , &source ),
-  dot_rapid_shots_offhand   ( "rapid_shots_offhand" , &source ),
-  dot_unload                ( "unload"              , &source ),
-  dot_unload_offhand        ( "unload_offhand"      , &source ),
-  dot_sweeping_blasters     ( "sweeping_blasters"   , &source ),
-  dot_sweeping_blasters_offhand ( "sweeping_blasters_offhand" , &source ),
-  dot_vent_heat             ( "vent_heat"           , &source ),
+  bount_troop::targetdata_t     ( source                     , target  ),
+  dot_combustible_gas_burn      ( "combustible_gas_burn"     , &source ),
+  dot_death_from_above          ( "death_from_above"         , &source ),
+  dot_explosive_dart            ( "explosive_dart"           , &source ),
+  dot_electro_net               ( "electro_net"              , &source ),
+  dot_flame_thrower             ( "flame_thrower"            , &source ),
+  dot_incendiary_missile_burn   ( "incendiary_missile_burn"  , &source ),
+  dot_radiation_burns           ( "radiation_burns"          , &source ),
+  dot_rapid_shots               ( "rapid_shots"              , &source ),
+  dot_rapid_shots_offhand       ( "rapid_shots_offhand"      , &source ),
+  dot_sweeping_blasters         ( "sweeping_blasters"        , &source ),
+  dot_sweeping_blasters_offhand ( "sweeping_blasters_offhand", &source ),
+  dot_thermal_detonator         ( "thermal_detonator"        , &source ),
+  dot_thermal_detonator_burn    ( "thermal_detonator_burn"   , &source ),
+  dot_unload                    ( "unload"                   , &source ),
+  dot_unload_offhand            ( "unload_offhand"           , &source ),
+  dot_vent_heat                 ( "vent_heat"                , &source ),
   debuff_electro_net    ( new buff_t( this, "electro_net",    5, from_seconds( 10 ) ) ),
   debuff_heat_signature ( new buff_t( this, "heat_signature", 1, from_seconds( 45 ) ) )
 {
-  add ( dot_death_from_above    );
-  add ( dot_explosive_dart      );
-  add ( dot_electro_net         );
-  add ( dot_flame_thrower       );
-  add ( dot_radiation_burns     );
-  add ( dot_rapid_shots         );
-  add ( dot_rapid_shots_offhand );
-  add ( dot_unload              );
-  add ( dot_unload_offhand      );
-  add ( dot_sweeping_blasters   );
+  add ( dot_combustible_gas_burn      );
+  add ( dot_death_from_above          );
+  add ( dot_explosive_dart            );
+  add ( dot_electro_net               );
+  add ( dot_flame_thrower             );
+  add ( dot_incendiary_missile_burn   );
+  add ( dot_radiation_burns           );
+  add ( dot_rapid_shots               );
+  add ( dot_rapid_shots_offhand       );
+  add ( dot_sweeping_blasters         );
   add ( dot_sweeping_blasters_offhand );
-  add ( dot_vent_heat           );
-  add ( *debuff_electro_net     );
-  add ( *debuff_heat_signature  );
+  add ( dot_thermal_detonator         );
+  add ( dot_thermal_detonator_burn    );
+  add ( dot_unload                    );
+  add ( dot_unload_offhand            );
+  add ( dot_vent_heat                 );
+  add ( *debuff_electro_net           );
+  add ( *debuff_heat_signature        );
 }
+
+bool targetdata_t::burning()
+{
+  return ( dot_combustible_gas_burn.ticking
+        || dot_incendiary_missile_burn.ticking
+        || dot_thermal_detonator_burn.ticking
+        || dot_radiation_burns.ticking
+        || dot_flame_thrower.ticking );
+}
+
 
 class action_t : public ::action_t
 {
@@ -358,9 +389,110 @@ struct missile_attack_t : public attack_t
   }
 };
 
+class action_callback_t : public ::action_callback_t
+{
+public:
+  action_callback_t( class_t* player ) :
+    ::action_callback_t( player )
+  {}
+
+  class_t* p() const { return static_cast<class_t*>( listener ); }
+  class_t* cast() const { return p(); }
+};
+
 // MERC ABILITIES
 // class_t::chaff_flare ===================================================================
 // class_t::combat_support_cylinder =======================================================
+// class_t::combustible_gas_cylinder ======================================================
+struct combustible_gas_cylinder_t : public action_t
+{
+  combustible_gas_cylinder_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    action_t( n, p, default_policy, RESOURCE_ENERGY, SCHOOL_NONE )
+  {
+    parse_options( options_str );
+    base_execute_time = from_seconds( 1.5 );
+  }
+
+  virtual void execute()
+  {
+    action_t::execute();
+    class_t* p = cast();
+
+    p -> buffs.combustible_gas_cylinder -> trigger();
+    p -> buffs.high_velocity_gas_cylinder -> expire();
+    // TODO if implemented p -> buffs.combat_support_cylinder -> expire();
+  }
+};
+
+struct combustible_gas_burn_callback_t : public action_callback_t
+{
+  struct combustible_gas_burn_t : public attack_t
+  {
+    combustible_gas_burn_t( class_t* p, const std::string& n ) :
+      attack_t( n, p, tech_policy, SCHOOL_ELEMENTAL )
+    {
+  //    rank_level_list = { ... 55 };
+
+      td.power_mod                = 0.1715;
+      td.standardhealthpercentmin =
+      td.standardhealthpercentmax = 0.01715;
+
+      num_ticks                   = 2;
+      tick_zero                   = true;
+      base_tick_time              = from_seconds( 3 );
+      background                  = true;
+
+      crit_bonus                 += 0.15 * p -> talents.firebug -> rank();
+      base_multiplier            += 0.10 * p -> talents.superheated_gas -> rank();
+
+      // TODO: Does alacrity affect this??
+    }
+
+    virtual void execute()
+    {
+      class_t* p = cast();
+
+      if ( ! p -> buffs.combustible_gas_cylinder -> up() )   // TODO: Change to Check()?
+        return;
+
+      action_t::execute();
+    }
+
+    virtual double proc_chance()
+    {
+      class_t* p = cast();
+      return 0.25 + 0.03 * p -> talents.superheated_gas -> rank();
+    }
+
+    virtual bool procced()
+    {
+      class_t* p = cast();
+      return p -> rngs.combustible_gas_burn -> roll( proc_chance() );
+    }
+  };
+
+  combustible_gas_burn_t* combustible_gas_burn;
+
+  combustible_gas_burn_callback_t( class_t* p ) :
+    action_callback_t( p ),
+    combustible_gas_burn( new combustible_gas_burn_t( p, "combustible_gas_burn" ) )
+  {}
+
+  virtual void trigger (::action_t* a, void* /* call_data */)
+  {
+    class_t* pl = p();
+    targetdata_t* td = static_cast<targetdata_t*> ( a -> targetdata() );
+    if ( ( a -> weapon || a -> td.weapon )
+        && a -> result_is_hit()
+        && pl -> buffs.combustible_gas_cylinder -> up()
+        && td -> dot_combustible_gas_burn.ticking == false
+        && combustible_gas_burn -> procced() )
+    {
+      combustible_gas_burn -> execute();
+    }
+  }
+};
+
 // class_t::concussion_missile ============================================================
 // class_t::cure ==========================================================================
 // class_t::disabling_shot ================================================================
@@ -380,12 +512,12 @@ struct electro_net_t : public attack_t
     td.power_mod                 = 0.29;
     td.standardhealthpercentmin  = 0.029;
     td.standardhealthpercentmax  = 0.029;
-    num_ticks                    = 10;
+    num_ticks                    = 9;
     tick_zero                    = true;
     base_tick_time               = from_seconds( 1 );
     cooldown -> duration         = from_seconds( 90 );
 
-    base_multiplier += 0.02 * p -> talents.power_launcher -> rank();
+    base_multiplier             += 0.02 * p -> talents.power_launcher -> rank();
   }
 
   virtual void execute()
@@ -420,7 +552,7 @@ struct flame_thrower_t : public attack_t
     base_cost                   = 24;   // 25
     range                       = 10.0;
     channeled                   = true;
-    num_ticks                   = 4;
+    num_ticks                   = 3;
     tick_zero                   = true;
     base_tick_time              = from_seconds( 1 );
     cooldown -> duration        = from_seconds( 18 );
@@ -448,7 +580,6 @@ struct fusion_missile_t : public missile_attack_t
       num_ticks                   = 6;
       base_tick_time              = from_seconds( 1 );
       background                  = true;
-//      base_accuracy               = 999;  // Not required???
     }
   };
 
@@ -468,7 +599,6 @@ struct fusion_missile_t : public missile_attack_t
     range                        = 30.0;
     travel_speed                 = 2 * 9;
 
-    // TODO: Check valuse as the tool-tip values are around 1% off assuming Mand Iron Warheads is NOT affecting the values as suggested by the bug line below. All other missile tool-tips are spot on.
     dd.power_mod                 = 1.4;
     dd.standardhealthpercentmin  = 0.1;
     dd.standardhealthpercentmax  = 0.16;
@@ -486,7 +616,7 @@ struct fusion_missile_t : public missile_attack_t
   {
     missile_attack_t::impact( t, impact_result, travel_dmg );
     if ( result_is_hit( impact_result ) )
-      radiation_burns -> execute();
+      radiation_burns -> schedule_execute();
   }
 };
 
@@ -510,9 +640,9 @@ struct heatseeker_missiles_t : public missile_attack_t
     range                        = 30.0;
     travel_speed                 = 2 * 9;
 
-    dd.power_mod                 = 2.77;  // No longer set in execute - Looks like it's now just a standard 25% damage increase from the effect details.
-    dd.standardhealthpercentmin  = 0.257; // No longer set in execute - See above
-    dd.standardhealthpercentmax  = 0.297; // No longer set in execute - See above
+    dd.power_mod                 = 2.2;  //2.77;  // No longer set in execute - Looks like it's now just a standard 25% damage increase from the effect details.
+    dd.standardhealthpercentmin  = 0.18; //0.257; // No longer set in execute - See above
+    dd.standardhealthpercentmax  = 0.24; //0.297; // No longer set in execute - See above
 
     crit_bonus                  += 0.15 * p -> talents.target_tracking -> rank();
     base_multiplier             += 0.02 * p -> talents.power_launcher -> rank();
@@ -529,8 +659,16 @@ struct heatseeker_missiles_t : public missile_attack_t
     // 2: damage on impact, so player changes during travel time will be included
     // 3: player stats on cast, target damage on impact
     // 3 would be the purest, but for simplicity going with 1. Unsure which the game does.
+    dd.power_mod                 = 2.2;  //2.77;  // No longer set in execute - Looks like it's now just a standard 25% damage increase from the effect details.
+    dd.standardhealthpercentmin  = 0.18; //0.257; // No longer set in execute - See above
+    dd.standardhealthpercentmax  = 0.24; //0.297; // No longer set in execute - See above
+
     if ( targetdata() -> debuff_heat_signature -> check() )
-      player_multiplier += 0.25;
+        dd.power_mod                 = 2.77;  // No longer set in execute - Looks like it's now just a standard 25% damage increase from the effect details.
+        dd.standardhealthpercentmin  = 0.257; // No longer set in execute - See above
+        dd.standardhealthpercentmax  = 0.297; // No longer set in execute - See above
+
+//      player_multiplier += 0.25;
   }
 };
 
@@ -550,11 +688,64 @@ struct high_velocity_gas_cylinder_t : public action_t
     class_t* p = cast();
 
     p -> buffs.high_velocity_gas_cylinder -> trigger();
-    // TODO when implemented p -> buffs.combustible_gas_cylinder -> expire();
+    p -> buffs.combustible_gas_cylinder -> expire();
+    // TODO when implemented p -> buffs.combat_support_cylinder -> expire();
   }
 };
 
 // class_t::incendiary_missile ============================================================
+struct incendiary_missile_t : public missile_attack_t
+{
+  struct incendiary_missile_burn_t : public attack_t
+  {
+    incendiary_missile_burn_t( class_t* p, const std::string& n ) :
+      attack_t( n, p, tech_policy, SCHOOL_ELEMENTAL )
+    {
+      td.power_mod                = 0.28;
+      td.standardhealthpercentmin =
+      td.standardhealthpercentmax = 0.028;
+
+      num_ticks                   = 6;
+      base_tick_time              = from_seconds( 3 );
+      background                  = true;
+
+      crit_bonus                 += 0.15 * p -> talents.firebug -> rank();
+    }
+  };
+
+  incendiary_missile_burn_t* incendiary_missile_burn;
+
+  incendiary_missile_t( class_t* p, const std::string& n, const std::string& options_str ) :
+    missile_attack_t( p, n ),
+    incendiary_missile_burn( new incendiary_missile_burn_t( p, "incendiary_missile_burn" ) )
+  {
+    check_talent( p -> talents.incendiary_missile -> rank() );
+
+    parse_options( options_str );
+
+    school                       = SCHOOL_ELEMENTAL;
+
+    base_cost                    = 16;
+    range                        = 30.0;
+    travel_speed                 = 2 * 9;
+
+    dd.power_mod                 = 0.53;
+    dd.standardhealthpercentmin  = 0.033;
+    dd.standardhealthpercentmax  = 0.073;
+
+    crit_bonus                  += 0.15 * p -> talents.firebug -> rank();
+
+    add_child( incendiary_missile_burn );
+  }
+
+  virtual void impact( player_t* t, result_type impact_result, double travel_dmg )
+  {
+    missile_attack_t::impact( t, impact_result, travel_dmg );
+    if ( result_is_hit( impact_result ) ) //&& ( !targetdata() -> dot_incendiary_missile_burn.ticking ) )
+      incendiary_missile_burn -> schedule_execute();  // Resets when re-applied. If chain cast it won't tick.
+  }
+};
+
 // class_t::jet_boost =====================================================================
 // class_t::kolto_missile =================================================================
 // class_t::kolto_shell ===================================================================
@@ -574,7 +765,7 @@ struct power_shot_t : public attack_t
 
     parse_options( options_str );
 
-    base_cost                    = 19;
+    base_cost                    = 19 - 3 * p -> talents.power_barrels -> rank();
     range                        = 30.0;
     base_execute_time            = from_seconds( 1.5 );
     weapon_multiplier            = 0.12;
@@ -584,7 +775,8 @@ struct power_shot_t : public attack_t
     dd.standardhealthpercentmax  = 0.167; // As above (was 0.171). Tooltip max value was off by 1.5%, now spot on.
 
     base_crit                   += (( p -> set_bonus.rakata_eliminators -> two_pc() || p -> set_bonus.underworld_eliminators -> two_pc() ) ? 0.15 : 0 );
-    base_multiplier             += 0.03 * p -> talents.mandalorian_iron_warheads -> rank();   // No need for this to be in player_buff()
+    crit_bonus                  += 0.15 * p -> talents.firebug -> rank();
+    base_multiplier             += 0.03 * p -> talents.mandalorian_iron_warheads -> rank() + 0.06 * p -> talents.power_barrels -> rank();   // No need for this to be in player_buff()
 
     if ( is_offhand )
     {
@@ -604,18 +796,32 @@ struct power_shot_t : public attack_t
     }
   }
 
+  virtual void player_buff()
+  {
+    attack_t::player_buff();
+    class_t* p = cast();
+    targetdata_t* td = targetdata();
+
+    if ( unsigned rank = p -> talents.rain_of_fire -> rank() && td -> burning() )
+      player_multiplier += 0.03 * rank;
+  }
+
   virtual void execute()
   {
     attack_t::execute();
-    class_t& p = *cast();
+    class_t* p = cast();
 
     if ( offhand_attack )
-    {
       offhand_attack -> schedule_execute();
 
-      if ( p.talents.barrage -> rank() && p.buffs.barrage -> trigger() )
-        p.cooldowns.unload -> reset( sim->reaction_time ); // p.total_reaction_time() seems to have way too much variance
-    }
+    if ( p -> talents.barrage -> rank() && p -> buffs.barrage -> trigger() )
+      p -> cooldowns.unload -> reset( sim -> reaction_time ); // p.total_reaction_time() seems to have way too much variance
+
+    if ( p -> buffs.combustible_gas_cylinder -> up()
+         && p -> talents.prototype_particle_accelerator -> rank()
+         && p -> buffs.prototype_particle_accelerator -> trigger( 1, 0, 0.45 ) )
+        p -> cooldowns.rail_shot -> reset(); // This can be queued after a powershot incase of a proc without worring about hitting Power Shot again straight after interrupting it like Unload/Barrage.
+//      p -> cooldowns.rail_shot -> reset( sim -> reaction_time ); // p.total_reaction_time() seems to have way too much variance
   }
 };
 
@@ -646,8 +852,8 @@ struct sweeping_blasters_t : public attack_t
 
     td.weapon                   = &( player -> main_hand_weapon );
     td.standardhealthpercentmin =
-    td.standardhealthpercentmax = -0.0673;  // Calculated to match in-game values for 3 power data points since it is not listed in Torhead.
-    td.power_mod                = 0.8126;  // Calculated to match in-game values for 3 power data points since it is not listed in Torhead.
+    td.standardhealthpercentmax = 0.0817;  // Calculated to match in-game values for 3 power data points since it is not listed in Torhead.
+    td.power_mod                = 0.813;   // Calculated to match in-game values for 3 power data points since it is not listed in Torhead.
     td.weapon_multiplier        = -0.468;  // This value is in Torhead.
 
     if ( is_offhand )
@@ -668,12 +874,77 @@ struct sweeping_blasters_t : public attack_t
     }
   }
 
+  virtual void player_buff()
+  {
+    attack_t::player_buff();
+    class_t* p = cast();
+    targetdata_t* td = targetdata();
+
+    if ( unsigned rank = p -> talents.rain_of_fire -> rank() && td -> burning() )
+      player_multiplier += 0.03 * rank;
+  }
+
   virtual void execute()
   {
     attack_t::execute();
 
     if ( offhand_attack )
       offhand_attack->schedule_execute();
+  }
+};
+
+// class_t::thermal_detonator ================================================================
+struct thermal_detonator_t : public attack_t
+{
+  struct thermal_detonator_burn_t : public attack_t
+  {
+    thermal_detonator_burn_t( class_t* p, const std::string& n ) :
+      attack_t( n, p, tech_policy, SCHOOL_ELEMENTAL )
+    {
+      td.power_mod                = 0.3;
+      td.standardhealthpercentmin =
+      td.standardhealthpercentmax = 0.03;
+
+      num_ticks                   = 4;
+      base_tick_time              = from_seconds( 3 );
+      background                  = true;
+
+      crit_bonus                 += 0.15 * p -> talents.firebug -> rank();
+      base_multiplier            += 0.06 * p -> talents.power_barrels -> rank();   // TODO: Test this
+    }
+  };
+
+  thermal_detonator_burn_t* thermal_detonator_burn;
+
+  thermal_detonator_t( class_t* p, const std::string& n, const std::string& options_str) :
+    attack_t( n, p, tech_policy, SCHOOL_KINETIC ),
+    thermal_detonator_burn( new thermal_detonator_burn_t( p, "thermal_detonator_burn" ) )
+  {
+    check_talent( p -> talents.thermal_detonator -> rank() );
+
+    parse_options( options_str );
+
+    base_cost                    = 16;
+    range                        = 30.0;
+    num_ticks                    = 1;
+    base_tick_time               = from_seconds( 3.4 );
+    cooldown -> duration         = from_seconds( 15 );
+    travel_speed                 = 3 * 9;
+
+    td.power_mod                 = 2.06;
+    td.standardhealthpercentmin  = 0.186;
+    td.standardhealthpercentmax  = 0.226;
+
+    crit_bonus                  += 0.15 * p -> talents.firebug -> rank();
+    base_multiplier             += 0.06 * p -> talents.power_barrels -> rank();
+
+    add_child( thermal_detonator_burn );
+  }
+
+  virtual void tick( dot_t* d )
+  {
+    attack_t::tick( d );
+    thermal_detonator_burn -> schedule_execute();
   }
 };
 
@@ -805,8 +1076,11 @@ struct explosive_dart_t : public attack_t
 // class_t::rail_shot =====================================================================
 struct rail_shot_t : public attack_t
 {
-  rail_shot_t( class_t* p, const std::string& n, const std::string& options_str) :
-    attack_t( n, p, range_policy, SCHOOL_ENERGY )
+  rail_shot_t* offhand_attack;
+  int tracer_lock_stacks;
+
+  rail_shot_t( class_t* p, const std::string& n, const std::string& options_str, bool is_offhand = false ) :
+      attack_t( n, p, range_policy, SCHOOL_ENERGY ), offhand_attack( 0 ), tracer_lock_stacks( 0 )
   {
     rank_level_list = { 9, 12, 15, 20, 31, 42, 50, 55 };
 
@@ -821,26 +1095,41 @@ struct rail_shot_t : public attack_t
     weapon                       =  &( player -> main_hand_weapon );
     weapon_multiplier            =  0.35;   // 0.27
 
-    base_multiplier             += 0.02 * p -> talents.power_launcher -> rank();
+    crit_bonus                  += 0.15 * p -> talents.firebug -> rank();
+    base_crit                   += (p -> set_bonus.battlemaster_eliminators -> four_pc() ? 0.15 : 0 );
+    base_multiplier             += (p -> set_bonus.underworld_eliminators   -> four_pc() ? 0.08 : 0 );
+    base_multiplier             += 0.02 * p -> talents.power_launcher -> rank()      + 0.06 * p -> talents.power_barrels -> rank();
+    base_armor_penetration      -= 0.10 * p -> talents.advanced_targeting -> rank()  + 0.15 * p -> talents.superheated_rail -> rank();
+
+    if ( is_offhand )
+    {
+      base_cost                  = 0;
+      background                 = true;
+      dual                       = true;
+      base_execute_time          = timespan_t::zero();
+      trigger_gcd                = timespan_t::zero();
+      weapon                     = &( player -> off_hand_weapon );
+      rank_level_list            = { 0 };
+      dd.power_mod               = 0;
+    }
+    else
+    {
+      offhand_attack             = new rail_shot_t( p, n+"_offhand", options_str, true );
+      add_child( offhand_attack );
+    }
   }
 
   virtual void player_buff()
   {
     attack_t::player_buff();
     class_t* p = cast();
+    targetdata_t* td = targetdata();
 
     if ( p -> talents.tracer_lock -> rank() )
-      player_multiplier += 0.06 * p -> buffs.tracer_lock -> stack();
+      player_multiplier += 0.06 * tracer_lock_stacks;
 
-    if ( unsigned rank = p -> talents.advanced_targeting -> rank () )
-      player_armor_penetration -= 0.1 * rank;
-
-    if ( p -> set_bonus.battlemaster_eliminators -> four_pc() )
-      player_crit += 0.15;
-
-    if ( p -> set_bonus.underworld_eliminators -> four_pc() )
-      player_multiplier += 0.08;
-
+    if ( unsigned rank = p -> talents.rain_of_fire -> rank() && td -> burning() )
+      player_multiplier += 0.03 * rank;
   }
 
   virtual double cost() const
@@ -856,8 +1145,31 @@ struct rail_shot_t : public attack_t
 
   virtual void execute()
   {
+    class_t* p = cast();
+    targetdata_t* td = targetdata();
+
+    if ( offhand_attack )
+    {
+      tracer_lock_stacks = p -> buffs.tracer_lock -> stack();
+      offhand_attack -> tracer_lock_stacks = tracer_lock_stacks;
+      p -> buffs.tracer_lock -> expire();
+    }
+
     attack_t::execute();
-    p() -> buffs.tracer_lock -> expire();
+
+    if ( offhand_attack )
+    {
+      offhand_attack -> schedule_execute();
+
+      if ( unsigned rank = p -> talents.superheated_rail -> rank() )
+      {
+        if ( td -> burning() && p -> rngs.superheated_rail -> roll( 0.5 * rank ) )
+        {
+          p -> resource_loss( RESOURCE_HEAT, 8, p -> gains.superheated_rail );
+          td -> dot_combustible_gas_burn.refresh_duration();  // Will do nothing if not active
+        }
+      }
+    }
   }
 
 //  bool ignore_thermal_sensor_override()
@@ -907,6 +1219,16 @@ struct rapid_shots_t : public attack_t
     }
   }
 
+  virtual void player_buff()
+  {
+    attack_t::player_buff();
+    class_t* p = cast();
+    targetdata_t* td = targetdata();
+
+    if ( unsigned rank = p -> talents.rain_of_fire -> rank() && td -> burning() )
+      player_multiplier += 0.03 * rank;
+  }
+
   virtual void execute()
   {
     attack_t::execute();
@@ -945,7 +1267,7 @@ struct thermal_sensor_override_t : public action_t
   {
     parse_options( options_str );
 
-    cooldown -> duration = from_seconds( 120 );
+    cooldown -> duration = from_seconds( 120 - 15 * p -> talents.rapid_venting -> rank() );
     trigger_gcd = timespan_t::zero();
   }
 
@@ -973,7 +1295,7 @@ struct unload_t : public attack_t
 
     base_cost                   = 16;
     range                       = 30.0;
-    cooldown -> duration        = from_seconds( 15.0 );
+    cooldown -> duration        = from_seconds( 15.0 - 3 * p -> talents.power_barrels -> rank() );
     channeled                   = true;
     num_ticks                   = 3;
     base_tick_time              = from_seconds( 1 );
@@ -983,8 +1305,9 @@ struct unload_t : public attack_t
     td.power_mod                = 1.1;
     td.weapon_multiplier        = -0.3;
 
-    base_multiplier            += 0.33 * p -> talents.riddle -> rank();
     crit_bonus                 += 0.15 * p -> talents.target_tracking -> rank();
+    base_multiplier            += 0.33 * p -> talents.riddle -> rank() + 0.06 * p -> talents.power_barrels -> rank();
+    base_armor_penetration     -= 0.10 * p -> talents.advanced_targeting -> rank ();
 
     if ( is_offhand )
     {
@@ -995,7 +1318,7 @@ struct unload_t : public attack_t
       // Low player skill interrupts on MH and OH will not be in synch and I doubt other cancel/interrupt mechanics will affect OH.
       // TODO: Modify dot_event to allow cancelling a dot to cancel related dots via action object.
       // Add a vitrual empty func to action/attack called on interrupting a dot that can be overridden here to cancel offhand dots? If not overidden functionality remains unchanged.
-//      channeled                 = false;
+      channeled                 = false;
       base_cost                 = 0;
       trigger_gcd               = timespan_t::zero();
       td.weapon                 = &( player -> off_hand_weapon );
@@ -1013,13 +1336,13 @@ struct unload_t : public attack_t
   {
     attack_t::player_buff();
     class_t* p = cast();
+    targetdata_t* td = targetdata();
 
     if ( p -> buffs.barrage -> up() )
       player_multiplier += 0.25;
 
-    if ( unsigned rank = p -> talents.advanced_targeting -> rank () )
-      player_armor_penetration -= 0.1 * rank;
-
+    if ( unsigned rank = p -> talents.rain_of_fire -> rank() && td -> burning() )
+      player_multiplier += 0.03 * rank;
   }
 
   virtual void last_tick(dot_t* d)
@@ -1031,12 +1354,20 @@ struct unload_t : public attack_t
 
   virtual void execute()
   {
-    benefit_from_barrage = p() -> buffs.barrage -> check();   // Up used in player buff
+    class_t* p = cast();
+
+    benefit_from_barrage = p -> buffs.barrage -> check();   // Up used in player buff
 
     attack_t::execute();
 
     if ( offhand_attack )
-      offhand_attack->schedule_execute();
+      offhand_attack -> schedule_execute();
+
+    if ( p -> buffs.combustible_gas_cylinder -> up()
+         && p -> talents.prototype_particle_accelerator -> rank()
+         && p -> buffs.prototype_particle_accelerator -> trigger( 1, 0, 0.75 ) )
+      p -> cooldowns.rail_shot -> reset(); // This can be queued after a powershot incase of a proc without worring about hitting Power Shot again straight after interrupting it like Unload/Barrage.
+//      p -> cooldowns.rail_shot -> reset( sim -> reaction_time ); // p.total_reaction_time() seems to have way too much variance
   }
 
 };
@@ -1050,7 +1381,7 @@ struct vent_heat_t : public action_t
 
     parse_options( options_str );
 
-    cooldown -> duration = from_seconds( 120.0 );
+    cooldown -> duration = from_seconds( 120.0 - 15 * p -> talents.rapid_venting -> rank() );
     num_ticks            = 2;
     base_tick_time       = from_seconds( 1.5 );
     trigger_gcd          = timespan_t::zero();
@@ -1092,22 +1423,25 @@ struct vent_heat_t : public action_t
 {
     if ( type == BH_MERCENARY )
     {
+      if ( name == "combustible_gas_cylinder"   ) return new combustible_gas_cylinder_t   ( this, name, options_str );
       if ( name == "death_from_above"           ) return new death_from_above_t           ( this, name, options_str );
-      if ( name == "explosive_dart"             ) return new explosive_dart_t             ( this, name, options_str );
       if ( name == "electro_net"                ) return new electro_net_t                ( this, name, options_str );
+      if ( name == "explosive_dart"             ) return new explosive_dart_t             ( this, name, options_str );
       if ( name == "flame_thrower"              ) return new flame_thrower_t              ( this, name, options_str );
       if ( name == "fusion_missile"             ) return new fusion_missile_t             ( this, name, options_str );
       if ( name == "heatseeker_missiles"        ) return new heatseeker_missiles_t        ( this, name, options_str );
       if ( name == "high_velocity_gas_cylinder" ) return new high_velocity_gas_cylinder_t ( this, name, options_str );
+      if ( name == "incendiary_missile"         ) return new incendiary_missile_t         ( this, name, options_str );
       if ( name == "power_shot"                 ) return new power_shot_t                 ( this, name, options_str );
       if ( name == "rail_shot"                  ) return new rail_shot_t                  ( this, name, options_str );
       if ( name == "rapid_shots"                ) return new rapid_shots_t                ( this, name, options_str );
       if ( name == "rocket_punch"               ) return new rocket_punch_t               ( this, name, options_str );
+      if ( name == "sweeping_blasters"          ) return new sweeping_blasters_t          ( this, name, options_str );
+      if ( name == "thermal_detonator"          ) return new thermal_detonator_t          ( this, name, options_str );
       if ( name == "thermal_sensor_override"    ) return new thermal_sensor_override_t    ( this, name, options_str );
       if ( name == "tracer_missile"             ) return new tracer_missile_t             ( this, name, options_str );
-      if ( name == "vent_heat"                  ) return new vent_heat_t                  ( this, name, options_str );
       if ( name == "unload"                     ) return new unload_t                     ( this, name, options_str );
-      if ( name == "sweeping_blasters"          ) return new sweeping_blasters_t          ( this, name, options_str );
+      if ( name == "vent_heat"                  ) return new vent_heat_t                  ( this, name, options_str );
     }
     else if ( type == T_COMMANDO )
     {
@@ -1124,7 +1458,23 @@ double class_t::alacrity() const
   return  base_t::alacrity()
           + (buffs.high_velocity_gas_cylinder -> up() ? 0.03 : 0)
           + (buffs.critical_reaction -> up()          ? 0.03 : 0)
-          + (buffs.improved_vents -> up()             ? 0.1  : 0);
+          + (buffs.improved_vents -> up()             ? 0.1  : 0)
+          + talents.rapid_venting -> rank() * 0.01;
+}
+
+// class_t::range_crit_chance ================================================================
+
+double class_t::range_crit_chance() const
+{
+  return base_t::range_crit_chance()
+         + ( buffs.combustible_gas_cylinder -> up()   ? 0.02 * talents.upgraded_arsenal -> rank() : 0 );
+}
+
+// class_t::tech_crit_chance ================================================================
+
+double class_t::tech_crit_chance() const
+{
+  return base_t::range_crit_chance() + 0.01 * talents.burnout -> rank();
 }
 
 // class_t::armor_penetration ================================================================
@@ -1269,13 +1619,15 @@ void class_t::init_buffs()
   // buff_t( player, name, max_stack, duration, cd=-1, chance=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   // buff_t( player, id, name, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
   // buff_t( player, name, spellname, chance=-1, cd=-1, quiet=false, reverse=false, rng_type=RNG_CYCLIC, activated=true )
-  buffs.barrage                    = new buff_t( this, "barrage",                    1, from_seconds( 15 ), from_seconds( 6 ), (talents.barrage -> rank() * 0.15) );
-  buffs.critical_reaction          = new buff_t( this, "critical_reaction",          1, from_seconds( 6 ),  from_seconds( 0 ), (talents.critical_reaction -> rank() * 0.5) );
-  buffs.tracer_lock                = new buff_t( this, "tracer_lock",                5, from_seconds( 15 ) );
-  buffs.thermal_sensor_override    = new buff_t( this, "thermal_sensor_override",    1, from_seconds( 15 ) );
-  buffs.high_velocity_gas_cylinder = new buff_t( this, "high_velocity_gas_cylinder", 1 );
-  buffs.improved_vents             = new buff_t( this, "improved_vents",             1, from_seconds( 6 ) );
-
+  buffs.barrage                        = new buff_t( this, "barrage",                        1, from_seconds( 15 ), from_seconds( 6 ), (talents.barrage -> rank() * 0.15) );
+  buffs.combustible_gas_cylinder       = new buff_t( this, "combustible_gas_cylinder",       1 );
+  buffs.critical_reaction              = new buff_t( this, "critical_reaction",              1, from_seconds( 6 ),  from_seconds( 0 ), (talents.critical_reaction -> rank() * 0.5) );
+  buffs.high_velocity_gas_cylinder     = new buff_t( this, "high_velocity_gas_cylinder",     1 );
+  buffs.improved_vents                 = new buff_t( this, "improved_vents",                 1, from_seconds( 6 ) );
+  buffs.prototype_particle_accelerator = new buff_t( this, "prototype_particle_accelerator", 1, from_seconds( 10 ), from_seconds( 6 ), (1) );
+  buffs.thermal_sensor_override        = new buff_t( this, "thermal_sensor_override",        1, from_seconds( 15 ) );
+  buffs.tracer_lock                    = new buff_t( this, "tracer_lock",                    5, from_seconds( 15 ) );
+//
 }
 
 // class_t::init_gains ====================================================================
@@ -1285,10 +1637,12 @@ void class_t::init_gains()
   base_t::init_gains();
   bool is_bh = ( type == BH_MERCENARY );
   const char* improved_vents    = is_bh ? "improved_vents"    : "cell_capacitor"  ;
+  const char* superheated_rail  = is_bh ? "superheated_rail"  : "high_friction_bolts";
   const char* terminal_velocity = is_bh ? "terminal_velocity" : "penetrate_armor" ;
   const char* vent_heat         = is_bh ? "vent_heat"         : "recharge_cells"  ;
 
   gains.improved_vents    = get_gain( improved_vents    );
+  gains.superheated_rail  = get_gain( superheated_rail  );
   gains.terminal_velocity = get_gain( terminal_velocity );
   gains.vent_heat         = get_gain( vent_heat         );
 }
@@ -1304,6 +1658,14 @@ void class_t::init_procs()
   procs.terminal_velocity = get_proc( terminal_velocity );
 }
 
+// class_t::init_rng ============================================
+
+void class_t::init_rng()
+{
+  base_t::init_rng();
+  rngs.combustible_gas_burn = get_rng( "combustible_gas_burn" );
+  rngs.superheated_rail = get_rng( "superheated_rail" );
+}
 // class_t::init_cooldowns ================================================================
 
 void class_t::init_cooldowns()
@@ -1311,9 +1673,12 @@ void class_t::init_cooldowns()
   base_t::init_cooldowns();
 
   bool is_bh = ( type == BH_MERCENARY );
-  const char* unload = is_bh ? "unload"    : "???" ;
-  cooldowns.unload = get_cooldown( unload );
 
+  const char* unload = is_bh ? "unload"    : "???" ;
+  const char* rail_shot = is_bh ? "rail_shot"    : "???" ;
+
+  cooldowns.unload = get_cooldown( unload );
+  cooldowns.rail_shot = get_cooldown( rail_shot );
 }
 
 // class_t::init_actions ==================================================================
@@ -1382,6 +1747,9 @@ void class_t::init_actions()
       action_list_default = 1;
     }
   }
+
+  register_direct_damage_callback( SCHOOL_ALL_MASK, new combustible_gas_burn_callback_t( this ) );
+  register_tick_damage_callback( SCHOOL_ALL_MASK, new combustible_gas_burn_callback_t( this ) );
 
   base_t::init_actions();
 }
