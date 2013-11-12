@@ -382,10 +382,28 @@ struct attack_t : public action_t
 
 struct missile_attack_t : public attack_t
 {
-    missile_attack_t( class_t* p, const std::string& n ) :
-      attack_t( n, p, tech_policy, SCHOOL_KINETIC)
+  missile_attack_t( class_t* p, const std::string& n ) :
+    attack_t( n, p, tech_policy, SCHOOL_KINETIC)
   {
     base_multiplier += 0.03 * p -> talents.mandalorian_iron_warheads -> rank();
+  }
+};
+
+struct elemental_burn_attack_t : public attack_t
+{
+  elemental_burn_attack_t( class_t* p, const std::string& n ) :
+    attack_t( n, p, tech_policy, SCHOOL_ELEMENTAL)
+  {
+  }
+
+  virtual void target_debuff( player_t* t, dmg_type dmg_type )
+  {
+    attack_t::target_debuff( t, dmg_type );
+    class_t* p = cast();
+
+    int rank;
+    if (( rank = p -> talents.burnout -> rank() > 0 ) && ( t -> health_percentage() < 30 ))
+      player_multiplier += 0.1 * rank ;
   }
 };
 
@@ -426,10 +444,10 @@ struct combustible_gas_cylinder_t : public action_t
 
 struct combustible_gas_burn_callback_t : public action_callback_t
 {
-  struct combustible_gas_burn_t : public attack_t
+  struct combustible_gas_burn_t : public elemental_burn_attack_t
   {
     combustible_gas_burn_t( class_t* p, const std::string& n ) :
-      attack_t( n, p, tech_policy, SCHOOL_ELEMENTAL )
+      elemental_burn_attack_t( p, n )
     {
   //    rank_level_list = { ... 55 };
 
@@ -455,7 +473,7 @@ struct combustible_gas_burn_callback_t : public action_callback_t
       if ( ! p -> buffs.combustible_gas_cylinder -> up() )   // TODO: Change to Check()?
         return;
 
-      action_t::execute();
+      elemental_burn_attack_t::execute();
     }
 
     virtual double proc_chance()
@@ -540,10 +558,10 @@ struct electro_net_t : public attack_t
 };
 
 // class_t::flame_thrower ================================================================
-struct flame_thrower_t : public attack_t
+struct flame_thrower_t : public elemental_burn_attack_t        // Is it considered an elemental burn for the Burnout talent?
 {
   flame_thrower_t( class_t* p, const std::string& n, const std::string& options_str ) :
-    attack_t( n, p, tech_policy, SCHOOL_ELEMENTAL )
+    elemental_burn_attack_t( p, n )
   {
     // rank_level_list = { 55 };
 
@@ -567,10 +585,10 @@ struct flame_thrower_t : public attack_t
 // class_t::fusion_missile ================================================================
 struct fusion_missile_t : public missile_attack_t
 {
-  struct radiation_burns_t : public attack_t
+  struct radiation_burns_t : public elemental_burn_attack_t
   {
     radiation_burns_t( class_t* p, const std::string& n ) :
-      attack_t( n, p, tech_policy, SCHOOL_ELEMENTAL )
+      elemental_burn_attack_t( p, n )
     {
       rank_level_list = { 54 };  // Tested in game
 
@@ -696,10 +714,10 @@ struct high_velocity_gas_cylinder_t : public action_t
 // class_t::incendiary_missile ============================================================
 struct incendiary_missile_t : public missile_attack_t
 {
-  struct incendiary_missile_burn_t : public attack_t
+  struct incendiary_missile_burn_t : public elemental_burn_attack_t
   {
     incendiary_missile_burn_t( class_t* p, const std::string& n ) :
-      attack_t( n, p, tech_policy, SCHOOL_ELEMENTAL )
+      elemental_burn_attack_t( p, n )
     {
       td.power_mod                = 0.28;
       td.standardhealthpercentmin =
@@ -896,10 +914,10 @@ struct sweeping_blasters_t : public attack_t
 // class_t::thermal_detonator ================================================================
 struct thermal_detonator_t : public attack_t
 {
-  struct thermal_detonator_burn_t : public attack_t
+  struct thermal_detonator_burn_t : public elemental_burn_attack_t
   {
     thermal_detonator_burn_t( class_t* p, const std::string& n ) :
-      attack_t( n, p, tech_policy, SCHOOL_ELEMENTAL )
+      elemental_burn_attack_t( p, n )
     {
       td.power_mod                = 0.3;
       td.standardhealthpercentmin =

@@ -3037,15 +3037,9 @@ double player_t::assess_damage( double      amount,
 
     if ( ! sleeping )
     {
-      if ( ! sleeping )
-      {
-        deaths.add( to_seconds( sim -> current_time ) );
-      }
-      if ( sim -> log ) log_t::output( sim, "%s has died.", name() );
-      demise();
+      deaths.add( to_seconds( sim -> current_time ) );
     }
     if ( sim -> log ) log_t::output( sim, "%s has died.", name() );
-
     demise();
   }
 

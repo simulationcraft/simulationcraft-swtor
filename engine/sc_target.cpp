@@ -54,7 +54,7 @@ struct enemy_t : public player_t
   { return ROLE_TANK; }
 
   virtual resource_type primary_resource() const
-  { return RESOURCE_NONE; }
+  { return RESOURCE_HEALTH; }
 
   virtual action_t* create_action( const std::string& name, const std::string& options_str );
   virtual void init();
@@ -351,6 +351,7 @@ void enemy_t::init_base()
   }
   player_t::base_armor = initial_armor;
 
+  fixed_health = sim -> target_health;
   initial_health = fixed_health;
 
   if ( ( initial_health_percentage < 1   ) ||
@@ -438,7 +439,7 @@ void enemy_t::create_options()
 {
   option_t target_options[] =
   {
-    { "target_health",                    OPT_FLT,    &( fixed_health                      ) },
+//    { "target_health",                    OPT_FLT,    &( fixed_health                      ) },
     { "target_initial_health_percentage", OPT_FLT,    &( initial_health_percentage         ) },
     { "target_fixed_health_percentage",   OPT_FLT,    &( fixed_health_percentage           ) },
     { "target_tank",                      OPT_STRING, &( target_str                        ) },

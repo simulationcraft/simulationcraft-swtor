@@ -1749,6 +1749,7 @@ struct sim_t : private thread_t
 
   // Target options
   double      target_death_pct;
+  double      target_health;
   int         target_level;
   std::string target_race;
   int         target_adds;

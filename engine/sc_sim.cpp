@@ -612,7 +612,7 @@ sim_t::sim_t( sim_t* p, int index ) :
   save_prefix_str( "save_" ),
   save_talent_str( 0 ),
   input_is_utf8( false ), ptr( false ),
-  target_death_pct( 0 ), target_level( -1 ), target_adds( 0 ),
+  target_death_pct( 0 ), target_health( 0 ), target_level( -1 ), target_adds( 0 ),
   default_rng_( 0 ), rng_list( 0 ), deterministic_roll( false ),
   rng(), deterministic_rng(), smooth_rng( false ), average_range( true ), average_gauss( false ),
   timing_wheel( 0 ), wheel_seconds( 0 ), wheel_size( 0 ), wheel_mask( 0 ), timing_slice( 0 ), wheel_granularity( 0.0 ),
@@ -1968,6 +1968,7 @@ void sim_t::create_options()
     { "debug_exp",                        OPT_INT,    &( debug_exp                                ) },
     { "main_target",                      OPT_STRING, &( main_target_str                          ) },
     { "target_death_pct",                 OPT_FLT,    &( target_death_pct                         ) },
+    { "target_health",                    OPT_FLT,    &( target_health                            ) },
     { "target_level",                     OPT_INT,    &( target_level                             ) },
     { "target_race",                      OPT_STRING, &( target_race                              ) },
     // Character Creation
