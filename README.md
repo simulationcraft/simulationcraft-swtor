@@ -8,8 +8,6 @@ The goal of this simulator is to close the accuracy gap while maintaining a perf
 
 SimulationCraft allows raid/party creation of arbitrary size, generating detailed charts and reports for both individual and raid performance.
 
-Sample reports can be found at http://www.simulationcraft.org
-
 # How Can I Contribute?
 
 The SimulationCraft team is comprised of volunteer developers from all over the world. We are always looking for new contributors. While C++ expertise is certainly helpful, we have several key members with limited coding experience. Maintaining optimal talent, gear, and default action priority lists is a huge task and requires virtually zero C++ knowledge.
@@ -21,6 +19,8 @@ If you are interested in joining the team, send an email to philoptik@gmail.com 
 
 IRC: irc.stratics.com (#simulationcraft)
 
+https://groups.google.com/forum/#!forum/simulationcraft-swtor
+
 # Important Notice
 
-!SimulationCraft is different from [http://www.simcraft.com SimCraft]. Please use the full name !SimulationCraft (or SimC) to refer to this project. Visit [http://www.simcraft.com SimCraft] if you are looking for full-motion simulators for !SimRacing and !FlightSim.
+SimulationCraft is different from [http://www.simcraft.com SimCraft]. Please use the full name SimulationCraft (or SimC) to refer to this project. Visit [http://www.simcraft.com SimCraft] if you are looking for full-motion simulators for SimRacing and FlightSim.
