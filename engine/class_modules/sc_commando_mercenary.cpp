@@ -820,8 +820,9 @@ struct power_shot_t : public attack_t
     class_t* p = cast();
     targetdata_t* td = targetdata();
 
-    if ( unsigned rank = p -> talents.rain_of_fire -> rank() && td -> burning() )
-      player_multiplier += 0.03 * rank;
+    unsigned rof_rank = p -> talents.rain_of_fire -> rank();
+    if ( rof_rank && td -> burning() )
+      player_multiplier += 0.03 * rof_rank;
   }
 
   virtual void execute()
@@ -898,8 +899,9 @@ struct sweeping_blasters_t : public attack_t
     class_t* p = cast();
     targetdata_t* td = targetdata();
 
-    if ( unsigned rank = p -> talents.rain_of_fire -> rank() && td -> burning() )
-      player_multiplier += 0.03 * rank;
+    unsigned rof_rank = p -> talents.rain_of_fire -> rank();
+    if ( rof_rank && td -> burning() )
+      player_multiplier += 0.03 * rof_rank;
   }
 
   virtual void execute()
@@ -1146,8 +1148,9 @@ struct rail_shot_t : public attack_t
     if ( p -> talents.tracer_lock -> rank() )
       player_multiplier += 0.06 * tracer_lock_stacks;
 
-    if ( unsigned rank = p -> talents.rain_of_fire -> rank() && td -> burning() )
-      player_multiplier += 0.03 * rank;
+    unsigned rof_rank = p -> talents.rain_of_fire -> rank();
+    if ( rof_rank && td -> burning() )
+      player_multiplier += 0.03 * rof_rank;
   }
 
   virtual double cost() const
@@ -1179,9 +1182,10 @@ struct rail_shot_t : public attack_t
     {
       offhand_attack -> schedule_execute();
 
-      if ( unsigned rank = p -> talents.superheated_rail -> rank() )
+      unsigned rof_rank = p -> talents.rain_of_fire -> rank();
+      if ( rof_rank && td -> burning() )
       {
-        if ( td -> burning() && p -> rngs.superheated_rail -> roll( 0.5 * rank ) )
+        if ( td -> burning() && p -> rngs.superheated_rail -> roll( 0.5 * rof_rank ) )
         {
           p -> resource_loss( RESOURCE_HEAT, 8, p -> gains.superheated_rail );
           td -> dot_combustible_gas_burn.refresh_duration();  // Will do nothing if not active
@@ -1243,8 +1247,9 @@ struct rapid_shots_t : public attack_t
     class_t* p = cast();
     targetdata_t* td = targetdata();
 
-    if ( unsigned rank = p -> talents.rain_of_fire -> rank() && td -> burning() )
-      player_multiplier += 0.03 * rank;
+    unsigned rof_rank = p -> talents.rain_of_fire -> rank();
+    if ( rof_rank && td -> burning() )
+      player_multiplier += 0.03 * rof_rank;
   }
 
   virtual void execute()
@@ -1359,8 +1364,9 @@ struct unload_t : public attack_t
     if ( p -> buffs.barrage -> up() )
       player_multiplier += 0.25;
 
-    if ( unsigned rank = p -> talents.rain_of_fire -> rank() && td -> burning() )
-      player_multiplier += 0.03 * rank;
+    unsigned rof_rank = p -> talents.rain_of_fire -> rank();
+    if ( rof_rank && td -> burning() )
+      player_multiplier += 0.03 * rof_rank;
   }
 
   virtual void last_tick(dot_t* d)
@@ -1411,10 +1417,10 @@ struct vent_heat_t : public action_t
     class_t* p = cast();
 
     p -> resource_loss( RESOURCE_HEAT, 34, p -> gains.vent_heat );
-    if ( unsigned rank = p -> talents.improved_vents -> rank() )
+    if ( unsigned iv_rank = p -> talents.improved_vents -> rank() )
     {
       p -> buffs.improved_vents -> trigger();
-      p -> resource_loss( RESOURCE_HEAT, 8 * rank, p -> gains.improved_vents );
+      p -> resource_loss( RESOURCE_HEAT, 8 * iv_rank, p -> gains.improved_vents );
     }
   }
 
@@ -1802,14 +1808,14 @@ role_type class_t::primary_role() const
 void class_t::regen( timespan_t periodicity )
 {
   base_t::regen( periodicity );
-  unsigned rank = talents.terminal_velocity -> rank();
 
-  if (( rank ) && ( buffs.high_velocity_gas_cylinder -> check() ))
+  unsigned tv_rank = talents.terminal_velocity -> rank();
+  if ( tv_rank && buffs.high_velocity_gas_cylinder -> check() )
   {
     if ( next_terminal_velocity < sim -> current_time )
     {
       next_terminal_velocity += from_seconds( 6 );
-      resource_loss( RESOURCE_HEAT, 4 * rank, gains.terminal_velocity );
+      resource_loss( RESOURCE_HEAT, 4 * tv_rank, gains.terminal_velocity );
       procs.terminal_velocity -> occur();
     }
   }
